@@ -6540,6 +6540,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return isPolicyMappingDeploymentExists;
     }
 
+    @Override
+    public boolean hasExistingDeployments(String tenantDomain, String gatewayLabel) throws APIManagementException {
+        return !StringUtils.isBlank(
+                apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(tenantDomain, gatewayLabel));
+    }
+
+    @Override
+    public boolean isPolicyMetadataExists(String gatewayPolicyMappingId)
+            throws APIManagementException {
+        GatewayPolicyData metadata = apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(
+                gatewayPolicyMappingId);
+        return metadata != null && Objects.equals(metadata.getPolicyMappingId(), gatewayPolicyMappingId);
+    }
+
     /**
      * To get the hashmap of what mappingId is deployed or undeployed in which gateway
      */

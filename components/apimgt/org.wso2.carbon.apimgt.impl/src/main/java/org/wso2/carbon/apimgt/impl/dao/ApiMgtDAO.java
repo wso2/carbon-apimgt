@@ -19940,7 +19940,7 @@ public class ApiMgtDAO {
                     statement.setString(1, gatewayLabel);
                     statement.setString(2, mappingUUID);
                     statement.setString(3, orgId);
-                    statement.execute();
+                    statement.executeUpdate();
                 }
                 connection.commit();
             } catch (SQLException e) {
@@ -20139,6 +20139,8 @@ public class ApiMgtDAO {
      * Delete a gateway policy mapping by providing the policy mapping UUID
      *
      * @param gatewayPolicyMappingId UUID of the policy mapping to be deleted
+     * @param shouldRemoveMetaData   Whether to remove the metadata of the policy mapping when deleting and
+     *                               not delete metadata while updating
      * @return True if deleted successfully
      * @throws APIManagementException
      */
@@ -20151,7 +20153,7 @@ public class ApiMgtDAO {
                     String dbQuery = SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_MAPPING_BY_ID;
                     try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
                         statement.setString(1, gatewayPolicyMappingId);
-                        statement.execute();
+                        statement.executeUpdate();
                     }
                     if (shouldRemoveMetaData) {
                         deleteGatewayPolicyMetaData(connection, gatewayPolicyMappingId);
@@ -20307,7 +20309,7 @@ public class ApiMgtDAO {
             preparedStatement.setString(2, description);
             preparedStatement.setString(3, orgId);
             preparedStatement.setString(4, mappingUUID);
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
         }
     }
 
