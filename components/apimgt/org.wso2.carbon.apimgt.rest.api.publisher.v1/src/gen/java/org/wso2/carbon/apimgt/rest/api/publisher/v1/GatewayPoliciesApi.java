@@ -46,7 +46,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Engage gateway policies to the request, response, fault flows", notes = "This operation can be used to apply gateway policies to the request, response, fault flows. ", response = GatewayPolicyMappingInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
@@ -64,7 +64,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a gateway policy mapping", notes = "This operation can be used to delete an existing gateway policy mapping by providing the Id of the policy mapping. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
@@ -82,7 +82,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Engage gateway policy mapping to the gateways", notes = "This operation can be used to engage gateway policy mapping to the gateway/s. ", response = GatewayPolicyDeploymentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
@@ -100,7 +100,8 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all gateway policies mapping information ", notes = "This operation provides you a list of all gateway policies mapping information. ", response = GatewayPolicyMappingDataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:gateway_policy_view", description = "View gateway policies"),
+            @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
@@ -117,7 +118,8 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve information of a selected gateway policy mapping", notes = "This operation can be used to retrieve information of a selected gateway policy mapping. ", response = GatewayPolicyMappingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:gateway_policy_view", description = "View gateway policies"),
+            @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
@@ -134,7 +136,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update gateway policies added to the request, response, fault flows", notes = "This operation can be used to update already added gateway policies to the request, response, fault flows. ", response = GatewayPolicyMappingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies")
         })
     }, tags={ "Gateway Policies" })
     @ApiResponses(value = { 

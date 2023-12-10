@@ -1834,4 +1834,24 @@ public interface APIProvider extends APIManager {
      */
     boolean isPolicyMappingDeploymentExists(String gatewayPolicyMappingId, String tenantDomain)
             throws APIManagementException;
+
+    /**
+     * Checks whether a policy mapping deployment exists for a given gateway label.
+     *
+     * @param gatewayLabel           Gateway label
+     * @param tenantDomain           Tenant domain
+     * @return true if a policy mapping deployment exists for a given policy mapping ID and gateway label
+     * @throws APIManagementException
+     */
+    boolean hasExistingDeployments(String tenantDomain, String gatewayLabel) throws APIManagementException;
+
+    /**
+     * Checks whether a policy mapping metadata exists for a given policy mapping ID.
+     *
+     * @param gatewayPolicyMappingId Policy mapping UUID
+     * @return true if a policy mapping metadata exists for a given policy mapping ID
+     * @throws APIManagementException
+     */
+    boolean isPolicyMetadataExists(String gatewayPolicyMappingId)
+            throws APIManagementException;
 }

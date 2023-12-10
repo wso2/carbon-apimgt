@@ -8205,7 +8205,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:admin
+            - apim:gateway_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8257,7 +8257,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:admin
+            - apim:gateway_policy_view
+            - apim:gateway_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8294,7 +8295,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:admin
+            - apim:gateway_policy_view
+            - apim:gateway_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8323,7 +8325,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:admin
+            - apim:gateway_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8368,7 +8370,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:admin
+            - apim:gateway_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8416,7 +8418,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:admin
+            - apim:gateway_policy_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -12968,6 +12970,8 @@ components:
             apim:mediation_policy_manage: Update and delete mediation policies
             apim:common_operation_policy_view: View common operation policies
             apim:common_operation_policy_manage: Add, Update and Delete common operation policies
+            apim:gateway_policy_view: View gateway policies
+            apim:gateway_policy_manage: Add, Update and Delete gateway policies
             apim:client_certificates_view: View client certificates
             apim:client_certificates_add: Add client certificates
             apim:client_certificates_update: Update and delete client certificates

@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyMappingsDTO
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -89,7 +90,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
             URI createdGatewayPolicyMappingUri = new URI(RestApiConstants.REST_API_PUBLISHER_VERSION
                     + "/" + RestApiConstants.RESOURCE_PATH_GATEWAY_POLICIES + "/" + policyMappingUUID);
             return Response.created(createdGatewayPolicyMappingUri).entity(gatewayPolicyMappingInfoDTO).build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 String errorMessage = "One or more policy IDs in the policy mapping are invalid. " + e.getMessage();
                 RestApiUtil.handleResourceNotFoundError(errorMessage, e, log);
@@ -97,9 +98,6 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                 String errorMessage = "Error while adding a gateway policy mapping. " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while adding gateway policy mapping. ",
-                    e, log);
         }
         return null;
     }
@@ -118,20 +116,27 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
 
         if (StringUtils.isBlank(gatewayPolicyMappingId)) {
             RestApiUtil.handleBadRequest("Gateway policy mapping ID is empty", log);
-        } else if (gatewayPolicyDeploymentDTOList == null) {
+        } else if (gatewayPolicyDeploymentDTOList.isEmpty()) {
             RestApiUtil.handleBadRequest("Gateway policy deployment list is empty", log);
         }
-        String organization = RestApiUtil.getOrganization(messageContext);
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
         validateGatewayLabels(gatewayPolicyDeploymentDTOList, organization);
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            // checks whether the gateway policy mapping exists in the particular gateway
+            for (GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTO : gatewayPolicyDeploymentDTOList) {
+                String gwName = gatewayPolicyDeploymentDTO.getGatewayLabel();
+                if (apiProvider.hasExistingDeployments(organization, gwName)) {
+                    RestApiUtil.handleBadRequest("Gateway policy mapping is already deployed in the gateway: " + gwName,
+                            log);
+                }
+            }
             List<OperationPolicyData> operationPolicyDataList = apiProvider.getGatewayPolicyDataListByPolicyId(
                     gatewayPolicyMappingId, false);
             if (!operationPolicyDataList.isEmpty()) {
                 Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap = GatewayPolicyMappingUtil.fromDTOToGatewayPolicyDeploymentMap(
                         gatewayPolicyMappingId, gatewayPolicyDeploymentDTOList);
-                apiProvider.engageGatewayGlobalPolicies(gatewayPolicyDeploymentMap, tenantDomain, gatewayPolicyMappingId);
+                apiProvider.engageGatewayGlobalPolicies(gatewayPolicyDeploymentMap, organization, gatewayPolicyMappingId);
                 for (GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTO : gatewayPolicyDeploymentDTOList) {
                     gatewayPolicyDeploymentDTO.setMappingUUID(gatewayPolicyMappingId);
                 }
@@ -146,9 +151,6 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
         } catch (APIManagementException e) {
             String errorMessage = "Error while deploying gateway policy mapping. " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while deploying gateway policy mapping. ",
-                    e, log);
         }
         return null;
     }
@@ -202,9 +204,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            List<OperationPolicyData> operationPolicyDataList = apiProvider.getGatewayPolicyDataListByPolicyId(
-                    gatewayPolicyMappingId, false);
-            if (!operationPolicyDataList.isEmpty()) {
+            if (apiProvider.isPolicyMetadataExists(gatewayPolicyMappingId)) {
                 if (apiProvider.isPolicyMappingDeploymentExists(gatewayPolicyMappingId, tenantDomain)) {
                     String errorMessage = "Gateway policy mapping ID: " + gatewayPolicyMappingId
                             + " has active deployments.";
@@ -220,9 +220,6 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting the gateway policy mapping. " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("An Error has occurred while deleting the gateway policy mapping. ",
-                    e, log);
         }
         return null;
     }
