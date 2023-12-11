@@ -17,21 +17,21 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApiResultDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class APIInfoMappingUtil {
 
-    private static final String EMPTY_STRING = "";
     /**
      * Converts a APIIdentifier object into APIInfoDTO
      *
@@ -73,56 +73,13 @@ public class APIInfoMappingUtil {
         return apiInfoListDTO;
     }
 
-    public static APIListDTO fromAPIListToInfoDTO(List<API> apiList) throws APIManagementException {
-        APIListDTO apiListDTO = new APIListDTO();
-        List<APIInfomationDTO> apiInfoDTOs = apiListDTO.getList();
-        for (API api : apiList) {
-            apiInfoDTOs.add(fromAPIToInfoDTO(api));
-        }
-        apiListDTO.setCount(apiInfoDTOs.size());
-        return apiListDTO;
-    }
-
-    private static APIInfomationDTO fromAPIToInfoDTO(API api) {
-        APIInfomationDTO apiInfoDTO = new APIInfomationDTO();
+    public static ApiResultDTO fromAPIToAPIResultDTO(API api) {
+        ApiResultDTO apiResultDTO = new ApiResultDTO();
+        apiResultDTO.setId(api.getUuid());
         APIIdentifier apiId = api.getId();
-        apiInfoDTO.setName(apiId.getName());
-        apiInfoDTO.setVersion(apiId.getVersion());
-        apiInfoDTO.setProvider(apiId.getProviderName());
-        apiInfoDTO.setId(api.getUuid());
-        return apiInfoDTO;
-    }
-
-    public static void setPaginationParams(Object apiListDTO, String query, int offset, int limit, int size) {
-
-        //acquiring pagination parameters and setting pagination urls
-        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
-        String paginatedPrevious = EMPTY_STRING;
-        String paginatedNext = EMPTY_STRING;
-
-        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiCommonUtil
-                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
-        }
-
-        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiCommonUtil
-                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
-        }
-
-        PaginationApisDTO paginationDTO = getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
-        ((APIListDTO) apiListDTO).setPagination(paginationDTO);
-    }
-
-    private static PaginationApisDTO getPaginationDTO(int limit, int offset, int total, String next, String previous) {
-        PaginationApisDTO paginationDTO = new PaginationApisDTO();
-        paginationDTO.setLimit(limit);
-        paginationDTO.setOffset(offset);
-        paginationDTO.setTotal(total);
-        paginationDTO.setNext(next);
-        paginationDTO.setPrevious(previous);
-        return paginationDTO;
+        apiResultDTO.setName(apiId.getApiName());
+        apiResultDTO.setVersion(apiId.getVersion());
+        apiResultDTO.setProvider(apiId.getProviderName());
+        return apiResultDTO;
     }
 }

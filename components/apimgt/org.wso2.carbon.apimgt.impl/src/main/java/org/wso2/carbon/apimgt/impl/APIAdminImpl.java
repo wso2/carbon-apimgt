@@ -27,6 +27,7 @@ import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
@@ -39,10 +40,16 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
@@ -59,11 +66,30 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.dto.AdminApiInfo;
+import org.wso2.carbon.apimgt.persistence.dto.AdminApiSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.AdminContentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
@@ -90,9 +116,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -1284,6 +1314,59 @@ public class APIAdminImpl implements APIAdmin {
             }
         } else {
             throw new APIManagementException("tenant-config validation failure", ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    public void updateApiProvider(String apiId, String provider, String organisation) throws APIManagementException {
+        APIPersistence apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
+        try {
+            ApiMgtDAO.getInstance().updateApiProvider(apiId, provider);
+            apiPersistenceInstance.changeApiProvider(provider, apiId, organisation);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while changing the API provider", e);
+        }
+    }
+
+    public Map<String, Object> searchPaginatedApis(String searchQuery, String organization, int start, int end)
+            throws APIManagementException {
+        ArrayList<Object> compoundResult = new ArrayList<Object>();
+        Map<Documentation, API> docMap = new HashMap<Documentation, API>();
+        Map<String, Object> result = new HashMap<String, Object>();
+        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        String modifiedSearchQuery = buildSearchQuery(searchQuery);
+        try {
+            APIPersistence apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
+            AdminContentSearchResult results = apiPersistenceInstance.searchContentForAdmin(organization,
+                    modifiedSearchQuery, start, end, Integer.MAX_VALUE);
+            if (results != null) {
+                List<SearchContent> resultList = results.getApis();
+                for (SearchContent item : resultList) {
+                    if ("API".equals(item.getType())) {
+                        AdminApiSearchContent adminSearchApi = (AdminApiSearchContent) item;
+                        API api = new API(new APIIdentifier(adminSearchApi.getProvider(), adminSearchApi.getName(),
+                                adminSearchApi.getVersion()));
+                        api.setUuid(adminSearchApi.getId());
+                        apiSet.add(api);
+                    }
+                }
+                compoundResult.addAll(apiSet);
+                compoundResult.addAll(docMap.entrySet());
+                compoundResult.sort(new ContentSearchResultNameComparator());
+            } else {
+                result.put("length", compoundResult.size());
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching apis ", e);
+        }
+        result.put("apis", compoundResult);
+        return result;
+    }
+
+    private String buildSearchQuery(String searchQuery) {
+        if (searchQuery.equals(APIConstants.CHAR_ASTERIX)) {
+            return String.format(APIConstants.ADMIN_PORTAL_GET_APIS_QUERY, APIConstants.CHAR_ASTERIX);
+        } else {
+            return String.format(APIConstants.ADMIN_PORTAL_GET_APIS_QUERY, searchQuery);
         }
     }
 

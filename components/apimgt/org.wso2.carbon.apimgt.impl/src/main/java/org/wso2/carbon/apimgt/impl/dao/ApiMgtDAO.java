@@ -18066,15 +18066,23 @@ public class ApiMgtDAO {
         }
     }
 
-    public void updateApiProvider(String apiUuid, String providerName)
+    public void updateApiProvider(String apiUUID, String providerName)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_PROVIDER_SQL);
-            statement.setString(1, providerName);
-            statement.setString(2, apiUuid);
-            statement.executeUpdate();
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_PROVIDER_SQL)) {
+                statement.setString(1, providerName);
+                statement.setString(2, apiUUID);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while updating the API provider of " + apiUUID, e);
+            } finally {
+                connection.setAutoCommit(true);
+            }
         } catch (SQLException e) {
-            handleException("Error while updating the change API provider of " + apiUuid, e);
+            handleException("Error while updating the API provider of " + apiUUID, e);
         }
     }
 

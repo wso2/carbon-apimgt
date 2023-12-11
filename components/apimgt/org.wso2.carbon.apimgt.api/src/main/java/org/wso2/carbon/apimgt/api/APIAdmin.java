@@ -465,4 +465,27 @@ public interface APIAdmin  {
     Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
 
     Policy getPolicyByNameAndType(int tenantId, String level, String name) throws APIManagementException;
+
+    /**
+     * Update the Api Provider of a given Api Id
+     *
+     * @param apiId Api ID
+     * @param provider ProviderName/Owner of the Api
+     * @param organisation Organisation
+     * @throws APIManagementException
+     */
+    void updateApiProvider(String apiId, String provider, String organisation) throws APIManagementException;
+
+    /**
+     * Get/Search All Apis in admin portal
+     *
+     * @param searchQuery Api name search query
+     * @param organization organisation
+     * @param start
+     * @param end
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedApis(String searchQuery, String organization, int start, int end)
+            throws APIManagementException;
 }

@@ -3746,7 +3746,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void changeApiProvider(String providerName, String apiId, String org)
             throws APIPersistenceException {
-
         boolean isTenantFlowStarted = false;
         boolean transactionCommitted = false;
         RegistryHolder holder = getRegistry(org);
@@ -3785,4 +3784,101 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     }
+
+    @Override
+    public AdminContentSearchResult searchContentForAdmin(String org, String searchQuery, int start, int count,
+                                                          int limit) throws APIPersistenceException {
+        log.debug("Requested query for admin key Manager usages API search: " + searchQuery);
+
+        boolean isTenantFlowStarted = false;
+        AdminContentSearchResult result = null;
+        try {
+            RegistryHolder holder = getRegistry(org);
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            String tenantAwareUsername = getTenantAwareUsername(RegistryPersistenceUtil.getTenantAdminUserName(org));
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
+            PaginationContext.init(start, Integer.MAX_VALUE, "ASC", APIConstants.API_OVERVIEW_NAME, limit);
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            int tenantId = holder.getTenantId();
+            if (tenantId == -1) {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            }
+
+            UserRegistry systemUserRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
+            ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
+
+            SearchResultsBean resultsBean = contentBasedSearchService
+                    .searchContent(searchQuery, systemUserRegistry);
+            String errorMsg = resultsBean.getErrorMessage();
+            if (errorMsg != null) {
+                throw new APIPersistenceException("Error while searching " + errorMsg);
+            }
+            ResourceData[] resourceDataList = resultsBean.getResourceDataList();
+            int totalLength = PaginationContext.getInstance().getLength();
+
+            if (resourceDataList != null) {
+                result = new AdminContentSearchResult();
+                List<SearchContent> contentData = new ArrayList<>();
+                if (log.isDebugEnabled()) {
+                    log.debug("Number of records Found: " + resourceDataList.length);
+                }
+
+                for (ResourceData data : resourceDataList) {
+                    String resourcePath = data.getResourcePath();
+                    if (resourcePath.contains(APIConstants.APIMGT_REGISTRY_LOCATION)) {
+                        int index = resourcePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
+                        resourcePath = resourcePath.substring(index);
+                        Resource resource = registry.get(resourcePath);
+                        String apiArtifactId = resource.getUUID();
+
+                        String type;
+                        if (apiArtifactId != null) {
+                            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                            if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
+                                    equals(APIConstants.API_PRODUCT)) {
+                                type = APIConstants.API_PRODUCT;
+                            } else {
+                                type = APIConstants.API;
+                            }
+                            PublisherAPI pubAPI = RegistryPersistenceUtil.getAPIForSearch(apiArtifact);
+                            AdminApiSearchContent content = new AdminApiSearchContent();
+                            content.setContext(pubAPI.getContext());
+                            content.setDescription(pubAPI.getDescription());
+                            content.setId(pubAPI.getId());
+                            content.setName(pubAPI.getApiName());
+                            content.setProvider(RegistryPersistenceUtil.replaceEmailDomainBack(pubAPI
+                                    .getProviderName()));
+                            content.setType(type);
+                            content.setVersion(pubAPI.getVersion());
+                            content.setStatus(pubAPI.getStatus());
+                            content.setAdvertiseOnly(pubAPI.isAdvertiseOnly());
+                            content.setThumbnailUri(pubAPI.getThumbnail());
+                            if (apiArtifact.getAttribute("overview_keyManagers") != null) {
+                                content.setKeyManagerEntry(apiArtifact.getAttribute("overview_keyManagers")
+                                        .replace("[\"","").replace("\"]","")
+                                        .replace("\",\""," , "));
+                            }
+                            contentData.add(content);
+                        } else {
+                            throw new GovernanceException("artifact id is null for " + resourcePath);
+                        }
+                    }
+                }
+                result.setApiCount(contentData.size());
+                result.setApis(contentData);
+            }
+        } catch (RegistryException | IndexerException | APIManagementException e) {
+            throw new APIPersistenceException("Error while searching for content ", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return result;
+    }
+
 }

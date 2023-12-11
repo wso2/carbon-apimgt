@@ -3203,19 +3203,82 @@ paths:
           -F "type=WSO2-IS" "https://127.0.0.1:9443/api/am/admin/v4/key-managers/discover"'
 
   ######################################################
-  # API Provider Resource
+  # The "API Collection" resource APIs
   ######################################################
-  /apis/{apiId}/provider/{providerName}:
-    put:
+  /apis:
+    get:
+      tags:
+        - APIs
+      summary: |
+        Retrieve/Search APIs
+      description: |
+        This operation provides you a list of available APIs qualifying under a given search condition.
+        Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          description: |
+            **Search and get all apis in admin portal**.
+
+            You can search by proving a keyword.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying APIs is returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResultList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:api_provider_change
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis"'
+      operationId: getAllAPIs
+  ######################################################
+  # Change Api Provider
+  ######################################################
+  /apis/{apiId}/change-provider:
+    post:
       tags:
         - Api Provider Change
       summary: Update the api provider
       description: |
         Update the api provider
+      operationId: providerNamePost
       parameters:
-        - $ref: '#/components/parameters/providerName'
+        - name: provider
+          in: query
+          required: true
+          schema:
+            type: string
         - $ref: '#/components/parameters/apiId'
-      operationId: providerProviderNameApisApiIdPut
       responses:
         200:
           description: |
@@ -3238,88 +3301,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" "https://127.0.0.1:9443/api/am/admin/v4/provider/admin/apis/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
-  ######################################################
-  # The "API Collection" resource APIs
-  ######################################################
-  /apis:
-    get:
-      tags:
-        - APIs
-      summary: |
-        Retrieve/Search APIs
-      description: |
-        This operation provides you a list of available APIs qualifying under a given search condition.
-        Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
-      parameters:
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/sortBy'
-        - $ref: '#/components/parameters/sortOrder'
-        - $ref: '#/components/parameters/requestedTenant'
-        - name: query
-          in: query
-          description: |
-            **Search condition**.
-
-            You can search in attributes by using an **"<attribute>:"** modifier.
-
-            Eg.
-            "provider:wso2" will match an API if the provider of the API contains "wso2".
-            "provider:"wso2"" will match an API if the provider of the API is exactly "wso2".
-            "status:PUBLISHED" will match an API if the API is in PUBLISHED state.
-
-            Also you can use combined modifiers
-            Eg.
-            name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
-
-            Supported attribute modifiers are [**version, context, name, status,
-            description, provider, api-category, tags, doc, contexttemplate,
-            lcstate, content, type, label, enablestore, thirdparty**]
-            
-            If no advanced attribute modifier has been specified,  the API names containing
-            the search term will be returned as a result.
-
-            Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl)
-          schema:
-            type: string
-        - $ref: '#/components/parameters/If-None-Match'
-        - $ref: '#/components/parameters/Accept'
-      responses:
-        200:
-          description: |
-            OK.
-            List of qualifying APIs is returned.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/APIList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:api_provider_change
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/apis"'
-      operationId: getAllAPIs
+              -H "Content-Type: application/json" "https://127.0.0.1:9443/api/am/admin/v4/provider/admin/apis/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
 components:
   schemas:
     Error:
@@ -5015,122 +4997,6 @@ components:
             Link to the previous subset of resources qualified.
             Empty if current subset is the first subset returned.
             example: ""
-    APIList:
-      title: API List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of APIs returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/APIInfomation'
-        pagination:
-          $ref: '#/components/schemas/PaginationApis'
-    APIInfomation:
-      title: API Info object with basic API details.
-      type: object
-      properties:
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-        name:
-          type: string
-          example: CalculatorAPI
-        description:
-          type: string
-          example: A calculator API that supports basic operations
-        context:
-          type: string
-          example: CalculatorAPI
-        additionalProperties:
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-              value:
-                type: string
-              display:
-                type: boolean
-          description: Map of custom properties of API
-        additionalPropertiesMap:
-          type: object
-          additionalProperties:
-            type: object
-            properties:
-              name:
-                type: string
-              value:
-                type: string
-              display:
-                type: boolean
-                default: false
-        version:
-          type: string
-          example: 1.0.0
-        provider:
-          type: string
-          description: |
-            If the provider value is not given, the user invoking the API will be used as the provider.
-          example: admin
-        type:
-          type: string
-          example: HTTP
-        audience:
-          type: string
-          description: The audience of the API. Accepted values are PUBLIC, SINGLE
-          example: PUBLIC
-          enum:
-            - PUBLIC
-            - SINGLE
-        lifeCycleStatus:
-          type: string
-          example: CREATED
-        workflowStatus:
-          type: string
-          example: APPROVED
-        hasThumbnail:
-          type: boolean
-          example: true
-        securityScheme:
-          type: array
-          items:
-            type: string
-        createdTime:
-          type: string
-          example: 2021-02-11 09:57:25
-        updatedTime:
-          type: string
-          example: 2021-02-11 09:57:25
-        updatedBy:
-          type: string
-          example: wso2.system.user
-        gatewayVendor:
-          type: string
-          example: wso2
-        advertiseOnly:
-          type: boolean
-          example: true
-        monetizedInfo:
-          type: boolean
-          example: true
-        businessOwner:
-          type: string
-          example: Business Owner
-        businessOwnerEmail:
-          type: string
-          example: businessowner@abc.com
-        TechnicalOwner:
-          type: string
-          example: Technical Owner
-        TechnicalOwnerEmail:
-          type: string
-          example: technicalowner@abc.com
     PaginationApis:
       title: Pagination
       type: object
@@ -5154,6 +5020,32 @@ components:
           description: |
             Link to the previous subset of resources qualified.
             Empty if current subset is the first subset returned.
+    SearchResultList:
+      title: Unified Search Result List
+      type: object
+      properties:
+        apis:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiResult'
+        count:
+          type: integer
+          description: |
+            Number of results returned.
+          example: 1
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    ApiResult:
+      type: object
+      properties:
+        provider:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        id:
+          type: string
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -5450,14 +5342,6 @@ components:
         The Base 64 URL encoded role name with domain. If the given role is in PRIMARY user-store, role ID should be
         derived as Base64URLEncode(role-name). If the given role is in secondary user-store, role ID should be
         derived as Base64URLEncode({user-store-name}/{role-name}).
-      required: true
-      schema:
-        type: string
-    providerName:
-      name: providerName
-      in: path
-      description: |
-        Provider Name
       required: true
       schema:
         type: string
