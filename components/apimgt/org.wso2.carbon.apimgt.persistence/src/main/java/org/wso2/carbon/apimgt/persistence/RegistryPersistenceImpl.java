@@ -796,7 +796,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.delete(artifact.getPath());
                 }
             }
-
             String artifactId = getAPIArtifact(apiId, registry).getId();
             String apiPath = getAPIArtifact(apiId, registry).getPath();
             artifactManager.removeGenericArtifact(artifactId);
@@ -817,17 +816,17 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (registry.resourceExists(wsdlArchivePath)) {
                 registry.delete(wsdlArchivePath);
             }
-
+            String providerName = RegistryPersistenceUtil.extractProvider(apiPath);
             /*Remove API Definition Resource - swagger*/
             String apiDefinitionFilePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getApiName() + '-' + identifier.getVersion() + '-' + identifier.getProviderName();
+                    identifier.getApiName() + '-' + identifier.getVersion() + '-' + providerName;
             if (registry.resourceExists(apiDefinitionFilePath)) {
                 registry.delete(apiDefinitionFilePath);
             }
 
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
+                    providerName + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
             if (registry.resourceExists(apiCollectionPath)) {
                 Resource apiCollection = registry.get(apiCollectionPath);
                 CollectionImpl collection = (CollectionImpl) apiCollection;
@@ -841,7 +840,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
 
             String apiProviderPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName();
+                    providerName;
 
             if (registry.resourceExists(apiProviderPath)) {
                 Resource providerCollection = registry.get(apiProviderPath);
@@ -849,7 +848,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 //if there is no api for given provider delete the provider directory
                 if (collection.getChildCount() == 0) {
                     if (log.isDebugEnabled()) {
-                        log.debug("No more APIs from the provider " + identifier.getProviderName() + " found. " +
+                        log.debug("No more APIs from the provider " + providerName + " found. " +
                                 "Removing provider collection from registry");
                     }
                     registry.delete(apiProviderPath);

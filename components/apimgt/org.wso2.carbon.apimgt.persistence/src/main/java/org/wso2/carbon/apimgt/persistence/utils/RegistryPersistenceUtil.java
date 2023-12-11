@@ -1826,6 +1826,21 @@ public class RegistryPersistenceUtil {
         }
     }
 
+    public static String extractProvider(String apiPath) {
+        String[] parts = apiPath.split("/");
+        Integer index = null;
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].equals("provider")) {
+                index = i;
+            }
+        }
+        if (index != -1 && index < parts.length - 1) {
+            return parts[index + 1];
+        } else {
+            return null;
+        }
+    }
+
     private static RegistryService getRegistryService() {
         return ServiceReferenceHolder.getInstance().getRegistryService();
     }
