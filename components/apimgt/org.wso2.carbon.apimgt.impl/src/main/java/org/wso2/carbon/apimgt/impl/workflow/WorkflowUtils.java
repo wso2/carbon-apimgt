@@ -202,7 +202,7 @@ public class WorkflowUtils {
     }
 
     /**
-     * Read the user provided lifecycle states for the approval task. These are provided in the workflow-extension.xml
+     * Read the user provided lifecycle states for the approval task. These are provided in the workflow config
      */
     protected static Map<String, List<String>> getSelectedStatesToApprove(String stateList) {
         Map<String, List<String>> stateAction = new HashMap<String, List<String>>();

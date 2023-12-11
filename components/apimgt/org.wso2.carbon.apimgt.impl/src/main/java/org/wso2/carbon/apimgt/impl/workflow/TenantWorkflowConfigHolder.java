@@ -18,31 +18,23 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNode;
-import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.commons.io.IOUtils;
+import com.google.gson.JsonElement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 public class TenantWorkflowConfigHolder implements Serializable {
 
@@ -75,231 +67,236 @@ public class TenantWorkflowConfigHolder implements Serializable {
         return workflowExecutorMap.get(workflowExecutorType);
     }
 
-    public void load() throws WorkflowException, RegistryException {
-
+    public void load() throws WorkflowException {
         workflowExecutorMap = new ConcurrentHashMap<>();
-        InputStream in = null;
 
         try {
-            String workFlowConfig =
+            Object configObject =
                     ServiceReferenceHolder.getInstance().getApimConfigService().getWorkFlowConfig(tenantDomain);
-            if (StringUtils.isNotEmpty(workFlowConfig)){
-                in = new ByteArrayInputStream(workFlowConfig.getBytes());
+            if (configObject instanceof WorkflowConfigDTO) {
+                WorkflowConfigDTO workflowConfigDTO = (WorkflowConfigDTO) configObject;
 
-                StAXOMBuilder builder = new StAXOMBuilder(in);
-
-                secretResolver = SecretResolverFactory.create(builder.getDocumentElement(), true);
-
-                OMElement workflowExtensionsElem = builder.getDocument().getFirstChildWithName(
-                        new QName(WorkflowConstants.WORKFLOW_EXTENSIONS));
-
-                OMElement workflowElem = workflowExtensionsElem.getFirstChildWithName(
-                        new QName(WorkflowConstants.APPLICATION_CREATION));
-                String executorClass;
+                WorkflowConfigDTO.WorkflowConfig workflowConfig;
+                String executorClassName;
                 Class clazz;
                 WorkflowExecutor workFlowExecutor;
-                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+
+                // Application Creation
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.APPLICATION_CREATION);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.APPLICATION_CREATION_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.APPLICATION_CREATION_APPROVAL_FLOW_CLASS);
+
                 try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
+                    loadProperties(workflowConfig, workFlowExecutor);
                 } catch (ClassNotFoundException e1) {
                     workFlowExecutor = new ApplicationCreationSimpleWorkflowExecutor();
                 }
-
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION, workFlowExecutor);
 
-                workflowElem = workflowExtensionsElem.getFirstChildWithName(
-                        new QName(WorkflowConstants.PRODUCTION_APPLICATION_REGISTRATION));
-                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+                // Production Application Registration
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.PRODUCTION_APPLICATION_REGISTRATION);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.APPLICATION_REGISTRATION_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.APPLICATION_REGISTRATION_APPROVAL_FLOW_CLASS);
+
                 try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
+                    loadProperties(workflowConfig, workFlowExecutor);
                 } catch (ClassNotFoundException e1) {
                     workFlowExecutor = new ApplicationRegistrationSimpleWorkflowExecutor();
                 }
+                workflowExecutorMap.put(
+                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION, workFlowExecutor);
 
-                workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION, workFlowExecutor);
+                // Sandbox Application Registration
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.SANDBOX_APPLICATION_REGISTRATION);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.APPLICATION_REGISTRATION_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.APPLICATION_REGISTRATION_APPROVAL_FLOW_CLASS);
 
-                workflowElem = workflowExtensionsElem.getFirstChildWithName(
-                        new QName(WorkflowConstants.SANDBOX_APPLICATION_REGISTRATION));
-                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
+                    loadProperties(workflowConfig, workFlowExecutor);
                 } catch (ClassNotFoundException e1) {
                     workFlowExecutor = new ApplicationRegistrationSimpleWorkflowExecutor();
                 }
+                workflowExecutorMap.put(
+                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX, workFlowExecutor);
 
-                workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX, workFlowExecutor);
+                // User Signup
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.USER_SIGN_UP);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.USER_SIGNUP_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.USER_SIGNUP_APPROVAL_FLOW_CLASS);
 
-                workflowElem = workflowExtensionsElem.getFirstChildWithName(
-                        new QName(WorkflowConstants.USER_SIGN_UP));
-                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
-                } catch (ClassNotFoundException e) {
+                    loadProperties(workflowConfig, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
                     workFlowExecutor = new UserSignUpSimpleWorkflowExecutor();
                 }
-
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP, workFlowExecutor);
 
-                workflowElem = workflowExtensionsElem.getFirstChildWithName(
-                        new QName(WorkflowConstants.SUBSCRIPTION_CREATION));
-                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+                // Subscription Creation
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.SUBSCRIPTION_CREATION);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.SUBSCRIPTION_CREATION_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.SUBSCRIPTION_CREATION_APPROVAL_FLOW_CLASS);
+
                 try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
-                } catch (ClassNotFoundException e) {
+                    loadProperties(workflowConfig, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
                     workFlowExecutor = new SubscriptionCreationSimpleWorkflowExecutor();
                 }
-
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workFlowExecutor);
 
-                workflowElem = workflowExtensionsElem.getFirstChildWithName(
-                        new QName(WorkflowConstants.SUBSCRIPTION_UPDATE));
-                if (workflowElem != null) {
-                    executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
-                    try {
-                        clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-                        workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                        loadProperties(workflowElem, workFlowExecutor);
-                    } catch (ClassNotFoundException e) {
-                        workFlowExecutor = new SubscriptionUpdateSimpleWorkflowExecutor();
-                    }
+                // Subscription Update
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.SUBSCRIPTION_UPDATE);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.SUBSCRIPTION_UPDATE_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.SUBSCRIPTION_UPDATE_APPROVAL_FLOW_CLASS);
 
-                    workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE, workFlowExecutor);
-                } else {
-                    workFlowExecutor = new SubscriptionUpdateSimpleWorkflowExecutor();
-                    workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE, workFlowExecutor);
-                }
-
-                workflowElem = workflowExtensionsElem.getFirstChildWithName(
-                        new QName(WorkflowConstants.SUBSCRIPTION_DELETION));
-                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
                 try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
-                } catch (ClassNotFoundException e) {
+                    loadProperties(workflowConfig, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
+                    workFlowExecutor = new SubscriptionUpdateSimpleWorkflowExecutor();
+                }
+                workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE, workFlowExecutor);
+
+                // Subscription Deletion
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.SUBSCRIPTION_DELETION);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.SUBSCRIPTION_DELETION_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.SUBSCRIPTION_DELETION_APPROVAL_FLOW_CLASS);
+
+                try {
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
+                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                    loadProperties(workflowConfig, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
                     workFlowExecutor = new SubscriptionDeletionSimpleWorkflowExecutor();
                 }
-
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, workFlowExecutor);
 
-                workflowElem = workflowExtensionsElem.getFirstChildWithName(
-                        new QName(WorkflowConstants.APPLICATION_DELETION));
-                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+                // Application Deletion
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.APPLICATION_DELETION);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.APPLICATION_DELETION_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.APPLICATION_DELETION_APPROVAL_FLOW_CLASS);
+
                 try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
-                } catch (ClassNotFoundException e) {
+                    loadProperties(workflowConfig, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
                     workFlowExecutor = new ApplicationDeletionSimpleWorkflowExecutor();
                 }
-
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);
 
-                workflowElem = workflowExtensionsElem.getFirstChildWithName(new QName(WorkflowConstants.API_STATE_CHANGE));
-                if (workflowElem == null) {
-                    // TO handle migrated environment, create the default simple workflow executor
-                    workflowElem = OMAbstractFactory.getOMFactory()
-                            .createOMElement(new QName(WorkflowConstants.API_STATE_CHANGE));
-                    executorClass = WorkflowConstants.DEFAULT_EXECUTOR_API_STATE_CHANGE;
-                    workflowElem.addAttribute(WorkflowConstants.EXECUTOR, executorClass, null);
-                } else {
-                    executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
-                }
+                // API State Change
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.API_STATE_CHANGE);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.API_STATE_CHANGE_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.API_STATE_CHANGE_APPROVAL_FLOW_CLASS);
+
                 try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
-                } catch (ClassNotFoundException e) {
+                    loadProperties(workflowConfig, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
                     workFlowExecutor = new APIStateChangeSimpleWorkflowExecutor();
                 }
-
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_API_STATE, workFlowExecutor);
 
-                workflowElem =
-                        workflowExtensionsElem.getFirstChildWithName(new QName(WorkflowConstants
-                                .API_PRODUCT_STATE_CHANGE));
-                if (workflowElem == null) {
-                    // To handle migration, create the default simple workflow executor
-                    workflowElem =
-                            OMAbstractFactory.getOMFactory().createOMElement(new QName(WorkflowConstants
-                                    .API_PRODUCT_STATE_CHANGE));
-                    executorClass = WorkflowConstants.DEFAULT_EXECUTOR_API_PRODUCT_STATE_CHANGE;
-                    workflowElem.addAttribute(WorkflowConstants.EXECUTOR, executorClass, null);
-                } else {
-                    executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
-                }
+                // API Product State Change
+                workflowConfig = workflowConfigDTO.
+                        getWorkflowConfigMap().get(WorkflowConstants.API_PRODUCT_STATE_CHANGE);
+                executorClassName = getWorkflowExecutorClassName(workflowConfig,
+                        WorkflowConstants.WorkflowClasses.API_PRODUCT_STATE_CHANGE_SIMPLE_FLOW_CLASS,
+                        WorkflowConstants.WorkflowClasses.API_PRODUCT_STATE_CHANGE_APPROVAL_FLOW_CLASS);
+
                 try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClassName);
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
-                } catch (ClassNotFoundException e) {
+                    loadProperties(workflowConfig, workFlowExecutor);
+                } catch (ClassNotFoundException e1) {
                     workFlowExecutor = new APIProductStateChangeSimpleWorkflowExecutor();
                 }
-
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE, workFlowExecutor);
             }
-        } catch (XMLStreamException e) {
-            log.error("Error building xml", e);
-            handleException("Error building xml", e);
         } catch (InstantiationException e) {
             log.error("Unable to instantiate class", e);
             handleException("Unable to instantiate class", e);
         } catch (IllegalAccessException e) {
             log.error("Illegal attempt to invoke class methods", e);
             handleException("Illegal attempt to invoke class methods", e);
-        } catch (WorkflowException e) {
-            log.error("Unable to load workflow executor class", e);
-            handleException("Unable to load workflow executor class", e);
         } catch (APIManagementException e) {
             log.error("Unable to retrieve workflow configurations", e);
             handleException("Unable to retrieve workflow configurations", e);
-        } finally {
-            IOUtils.closeQuietly(in);
         }
     }
 
-    private void loadProperties(OMElement executorElem, Object workflowClass) throws WorkflowException {
+    private void loadProperties(WorkflowConfigDTO.WorkflowConfig workflowConfig,
+                                Object workflowExecutorClass) throws WorkflowException {
 
-        for (Iterator it = executorElem.getChildrenWithName(PROP_Q); it.hasNext(); ) {
-            OMElement propertyElem = (OMElement) it.next();
-            OMAttribute attribute = propertyElem.getAttribute(ATT_NAME);
-            if (attribute == null) {
-                handleException("An Executor class property must specify the name attribute");
-            } else {
-                String propName = attribute.getAttributeValue();
-                OMNode omElt = propertyElem.getFirstElement();
-                if (omElt != null) {
-                    setInstanceProperty(propName, omElt, workflowClass);
-                } else if (propertyElem.getText() != null) {
-                    String value = MiscellaneousUtil.resolve(propertyElem, secretResolver);
-                    setInstanceProperty(propName, value, workflowClass);
-                } else {
-                    handleException("An Executor class property must specify " +
-                            "name and text value, or a name and a child XML fragment");
-                }
+        if (workflowConfig == null || workflowConfig.getProperties() == null) {
+            return; // Early exit if there are no properties to process
+        }
+
+        // Create and populate Properties object
+        Properties properties = new Properties();
+
+        for (java.util.Map.Entry<String, JsonElement> entry : workflowConfig.getProperties().entrySet()) {
+            String propertyName = entry.getKey();
+
+            if (StringUtils.isEmpty(propertyName)) {
+                handleException("An Executor class property must specify a name.");
+                return;
             }
+            JsonElement propertyValJsonElem = entry.getValue();
+            if (!propertyValJsonElem.isJsonPrimitive()) {
+                handleException("Property values can only be string, number or boolean.");
+                return;
+            }
+            String propertyValue = propertyValJsonElem.getAsJsonPrimitive().getAsString();
+            properties.setProperty(propertyName, propertyValue);
+        }
+        secretResolver = SecretResolverFactory.create(properties);
+
+        for (String propertyName : properties.stringPropertyNames()) {
+            String resolvedValue = MiscellaneousUtil.resolve(properties.getProperty(propertyName), secretResolver);
+            setInstanceProperty(propertyName, resolvedValue, workflowExecutorClass);
         }
     }
 
     /**
      * Find and invoke the setter method with the name of form setXXX passing in the value given
-     * on the POJO object
+     * on the POJO object.
      *
-     * @param name name of the setter field
-     * @param val  value to be set
-     * @param obj  POJO instance
+     * @param name  name of the setter field
+     * @param value value to be set
+     * @param obj   POJO instance
      */
-    public void setInstanceProperty(String name, Object val, Object obj) throws WorkflowException {
+    public void setInstanceProperty(String name, String value, Object obj) throws WorkflowException {
 
         String mName = "set" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
         Method method;
@@ -315,8 +312,7 @@ public class TenantWorkflowConfigHolder implements Serializable {
                         handleException("Did not find a setter method named : " + mName +
                                 "() that takes a single String, int, long, float, double ," +
                                 "OMElement or boolean parameter");
-                    } else if (val instanceof String) {
-                        String value = (String) val;
+                    } else {
                         if (String.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, String.class);
                             method.invoke(obj, new String[]{value});
@@ -341,11 +337,6 @@ public class TenantWorkflowConfigHolder implements Serializable {
                         } else {
                             continue;
                         }
-                    } else if (val instanceof OMElement && OMElement.class.equals(params[0])) {
-                        method = obj.getClass().getMethod(mName, OMElement.class);
-                        method.invoke(obj, new OMElement[]{(OMElement) val});
-                    } else {
-                        continue;
                     }
                     invoked = true;
                     break;
@@ -373,5 +364,29 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
         log.error(msg, e);
         throw new WorkflowException(msg, e);
+    }
+
+    /**
+     * Return either the simple workflow, approval flow or custom flow class name based on the config.
+     *
+     * @param workflowConfig        the workflow config element
+     * @param simpleFlowClassName   simple flow class name
+     * @param approvalFlowClassName approval flow class name
+     * @return class name
+     */
+    private String getWorkflowExecutorClassName(WorkflowConfigDTO.WorkflowConfig workflowConfig,
+                                                String simpleFlowClassName, String approvalFlowClassName) {
+
+
+        if (workflowConfig != null && !workflowConfig.getClassName().isEmpty()) {
+            // If a config element is present and a class is specified
+            return workflowConfig.getClassName();
+        } else if (workflowConfig != null && workflowConfig.getClassName().isEmpty()) {
+            // If a config element is present and a class is not specified its approval flow
+            return approvalFlowClassName;
+        } else {
+            // else its simple flow
+            return simpleFlowClassName;
+        }
     }
 }

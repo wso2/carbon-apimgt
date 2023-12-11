@@ -2925,31 +2925,6 @@ public final class APIUtil {
         }
     }
 
-    public static void loadTenantWorkFlowExtensions(String organization)
-            throws APIManagementException {
-
-        try {
-            String workflowExtensionLocation =
-                    CarbonUtils.getCarbonHome() + File.separator + APIConstants.WORKFLOW_EXTENSION_LOCATION;
-
-            File wfExtension = new File(workflowExtensionLocation);
-            if (log.isDebugEnabled()) {
-                log.debug("Adding External Stores configuration to the tenant's registry");
-            }
-
-            InputStream inputStream;
-            if (wfExtension.exists()) {
-                inputStream = new FileInputStream(workflowExtensionLocation);
-            } else {
-                inputStream = APIManagerComponent.class
-                        .getResourceAsStream("/workflowextensions/default-workflow-extensions.xml");
-            }
-            ServiceReferenceHolder.getInstance().getApimConfigService().addWorkflowConfig(organization, IOUtils.toString(inputStream));
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading Workflow configuration file content", e);
-        }
-    }
-
     /**
      * Load tenant self sign up configurations.
      *

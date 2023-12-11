@@ -308,5 +308,17 @@
     "SignUpRoles": [
       "Internal/subscriber"
     ]
+  },
+  "Workflows": {
+    "ApplicationCreation": {},
+    "ApplicationDeletion": {},
+    "UserSignUp": {
+      "Class": "org.wso2.example.UserSignUpCustomFlowExecutor"
+    },
+    "APIStateChange": {
+      "Properties": {
+        "StateList": "Created:Publish,Published:Block"
+      }
+    }
   }
 }

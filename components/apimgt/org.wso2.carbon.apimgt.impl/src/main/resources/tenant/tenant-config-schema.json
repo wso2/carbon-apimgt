@@ -1337,10 +1337,44 @@
           }
         }
       },
-      "required": ["States"]
+      "required": [
+        "States"
+      ]
+    },
+    "Workflows": {
+      "type": "object",
+      "default": {},
+      "title": "Configure different workflows using this configuration",
+      "patternProperties": {
+        "^(ApplicationCreation|ApplicationDeletion|ProductionApplicationRegistration|SandboxApplicationRegistration|SubscriptionCreation|SubscriptionUpdate|SubscriptionDeletion|UserSignUp|APIStateChange|APIProductStateChange)$": {
+          "type": "object",
+          "title": "Define the corresponding workflow configuration",
+          "properties": {
+            "Class": {
+              "type": "string",
+              "title": "For a custom flow, define the full class path here"
+            },
+            "Properties": {
+              "type": "object",
+              "title": "Define any class-specific properties here",
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     },
     "LinterCustomRules": {
-      "required": ["rules"]
+      "required": [
+        "rules"
+      ]
     }
   },
   "additionalProperties": true

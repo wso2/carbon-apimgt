@@ -95,21 +95,6 @@ public class WorkflowExecutorFactoryTest {
     }
 
     @Test
-    public void testRegistryExceptionWhileInitialisingWorkflowConfigCache() throws Exception {
-        String errorMessage = "Error occurred while creating workflow configurations for tenant " + tenantDomain;
-        Mockito.when(cache.get(Mockito.anyString())).thenReturn(null);
-        PowerMockito.whenNew(TenantWorkflowConfigHolder.class).withAnyArguments().thenReturn
-                (tenantWorkflowConfigHolder);
-        PowerMockito.doThrow(new RegistryException(errorMessage)).when(tenantWorkflowConfigHolder).load();
-        try {
-            workflowExecutorFactory.getWorkflowConfigurations();
-            Assert.fail("Expected WorkflowException has not occurred while retrieving workflow configuration");
-        } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), errorMessage);
-        }
-    }
-
-    @Test
     public void testWorkflowExceptionWhileInitialisingWorkflowConfigCache() throws Exception {
         String errorMessage = "Error occurred while creating workflow configurations for tenant " + tenantDomain;
         Mockito.when(cache.get(Mockito.anyString())).thenReturn(null);

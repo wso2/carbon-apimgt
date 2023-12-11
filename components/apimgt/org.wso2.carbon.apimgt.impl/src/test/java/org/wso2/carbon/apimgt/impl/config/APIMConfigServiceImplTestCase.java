@@ -14,6 +14,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.SystemConfigurationsDAO;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowConfigDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtilTest;
 import java.io.File;
 import java.io.IOException;
@@ -84,5 +85,64 @@ public class APIMConfigServiceImplTestCase {
         APIMConfigServiceImpl configServiceImpl = new APIMConfigServiceImpl();
         UserRegistrationConfigDTO userRegistrationConfigDTO = configServiceImpl.getSelfSighupConfig("coltrain.com");
         Assert.assertNull(userRegistrationConfigDTO);
+    }
+
+    /**
+     * Test the population proper WorkflowConfigDTO when config json is given as input
+     *
+     * @throws IOException
+     * @throws APIManagementException
+     */
+    @Test
+    public void testGetWorkflowConfigWhenConfigured() throws IOException, APIManagementException {
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        PowerMockito.mockStatic(SystemConfigurationsDAO.class);
+        SystemConfigurationsDAO systemConfigurationsDAO = Mockito.mock(SystemConfigurationsDAO.class);
+        PowerMockito.when(SystemConfigurationsDAO.getInstance()).thenReturn(systemConfigurationsDAO);
+
+        File siteConfFile = new File(
+                Thread.currentThread().getContextClassLoader().getResource("tenant-conf.json").getFile());
+        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+        JsonObject tenantConfig = JsonParser.parseString(tenantConfValue).getAsJsonObject();
+        Mockito.when(systemConfigurationsDAO.getSystemConfig(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(String.valueOf(tenantConfig));
+
+        APIMConfigServiceImpl configServiceImpl = new APIMConfigServiceImpl();
+        WorkflowConfigDTO workflowConfigDTO = configServiceImpl.getWorkFlowConfig("carbon.super");
+        Assert.assertEquals(4, workflowConfigDTO.getWorkflowConfigMap().size());
+        Assert.assertNotNull(workflowConfigDTO.getWorkflowConfigMap().get("ApplicationCreation"));
+        Assert.assertNotNull(workflowConfigDTO.getWorkflowConfigMap().get("ApplicationDeletion").getClassName());
+        Assert.assertEquals("org.wso2.example.UserSignUpCustomFlowExecutor",
+                workflowConfigDTO.getWorkflowConfigMap().get("UserSignUp").getClassName());
+
+        JsonObject properties = workflowConfigDTO.getWorkflowConfigMap().get("APIStateChange").getProperties();
+        Assert.assertEquals("Created:Publish,Published:Block", properties.get("StateList").getAsString());
+    }
+
+    /**
+     * Test the population proper WorkflowConfigDTO when no explicit workflow JSON config is given
+     *
+     * @throws IOException
+     * @throws APIManagementException
+     */
+    @Test
+    public void testGetWorkflowConfigWhenNotConfigured() throws IOException, APIManagementException {
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        PowerMockito.mockStatic(SystemConfigurationsDAO.class);
+        SystemConfigurationsDAO systemConfigurationsDAO = Mockito.mock(SystemConfigurationsDAO.class);
+        PowerMockito.when(SystemConfigurationsDAO.getInstance()).thenReturn(systemConfigurationsDAO);
+
+        File siteConfFile = new File(
+                Thread.currentThread().getContextClassLoader().getResource("tenant-conf.json").getFile());
+        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+        JsonObject tenantConfig = JsonParser.parseString(tenantConfValue).getAsJsonObject();
+        tenantConfig.remove("Workflows");
+
+        Mockito.when(systemConfigurationsDAO.getSystemConfig(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(String.valueOf(tenantConfig));
+
+        APIMConfigServiceImpl configServiceImpl = new APIMConfigServiceImpl();
+        WorkflowConfigDTO workflowConfigDTO = configServiceImpl.getWorkFlowConfig("carbon.super");
+        Assert.assertEquals(0, workflowConfigDTO.getWorkflowConfigMap().size());
     }
 }

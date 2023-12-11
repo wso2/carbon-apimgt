@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
@@ -65,8 +64,6 @@ public class WorkflowExecutorFactory {
                 workflowCache.put(cacheName, configHolder);
                 return configHolder;
             } catch (WorkflowException e) {
-                handleException("Error occurred while creating workflow configurations for tenant " + tenantDomain, e);
-            } catch (RegistryException e) {
                 handleException("Error occurred while creating workflow configurations for tenant " + tenantDomain, e);
             }
         }

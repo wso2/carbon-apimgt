@@ -377,7 +377,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
      */
     private String getBasicAuthHeader() {
 
-        // if credentials are not defined in the workflow-extension.xml file, then get the global credentials from the
+        // if credentials are not defined in the workflow config, then get the global credentials from the
         // api-manager.xml configuration
         if (username == null || password == null) {
             WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance()
@@ -472,7 +472,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
      * set information that are needed to invoke callback service
      */
     private void setOAuthApplicationInfo(APIStateWorkflowDTO apiStateWorkFlowDTO) throws WorkflowException {
-        // if credentials are not defined in the workflow-extension.xml file call dcr endpoint and generate a
+        // if credentials are not defined in the workflow config call dcr endpoint and generate a
         // oauth application and pass the client id and secret
         WorkflowProperties workflowProperties = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getWorkflowProperties();
@@ -546,7 +546,7 @@ public class APIStateChangeWSWorkflowExecutor extends WorkflowExecutor {
     }
 
     /**
-     * Read the user provided lifecycle states for the approval task. These are provided in the workflow-extension.xml
+     * Read the user provided lifecycle states for the approval task. These are provided in the workflow config
      */
     private Map<String, List<String>> getSelectedStatesToApprove() {
         Map<String, List<String>> stateAction = new HashMap<String, List<String>>();
