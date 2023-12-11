@@ -356,6 +356,10 @@
       {
         "Name": "apim:admin_tier_view",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:api_provider_change",
+        "Roles": "admin"
       }
     ]
   },
