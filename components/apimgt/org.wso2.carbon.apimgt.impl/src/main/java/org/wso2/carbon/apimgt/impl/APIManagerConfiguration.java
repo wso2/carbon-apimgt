@@ -1668,6 +1668,14 @@ public class APIManagerConfiguration {
                             configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
                     if (claimRetrievalElement != null) {
                         jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
+                        OMElement isBindFederatedUserClaims =
+                                omElement.getFirstChildWithName(new QName(APIConstants.BINDING_FEDERATED_USER_CLAIMS));
+                        if (isBindFederatedUserClaims != null) {
+                            jwtConfigurationDto.setBindFederatedUserClaims(
+                                    Boolean.parseBoolean(isBindFederatedUserClaims.getText()));
+                        } else {
+                            jwtConfigurationDto.setBindFederatedUserClaims(true);
+                        }
                     }
                 }
             }
