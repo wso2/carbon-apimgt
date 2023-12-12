@@ -90,6 +90,10 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private String tenantsRootPath = CarbonBaseUtils.getCarbonHome() + File.separator + "repository" + File.separator
             + "tenants" + File.separator;
     private String synapseDeploymentPath = "synapse-configs" + File.separator + "default";
+    private long retryDuration = gatewayArtifactSynchronizerProperties.getRetryDuartion();
+    private int maxRetryCount = gatewayArtifactSynchronizerProperties.getMaxRetryCount();
+    private double reconnectionProgressionFactor = gatewayArtifactSynchronizerProperties.getRetryProgressionFactor();
+    private long maxReconnectDuration = 1000 * 60 * 60; // 1 hour
 
     public GatewayStartupListener() {
 
@@ -139,16 +143,26 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
         boolean flag = false;
-        boolean globalPolicyDeploymentFlag = false;
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-            GatewayPolicyDeployer gatewayPolicyDeployer = new GatewayPolicyDeployer();
             flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(
                         gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
+        }
+        return flag;
+    }
+
+    private boolean deployGatewayPolicyArtifactsAtStartup(String tenantDomain) throws ArtifactSynchronizerException {
+
+        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+        boolean globalPolicyDeploymentFlag = false;
+        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
+            GatewayPolicyDeployer gatewayPolicyDeployer = new GatewayPolicyDeployer();
             globalPolicyDeploymentFlag = gatewayPolicyDeployer.deployGlobalPoliciesAtGatewayStartup(
                     gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
         }
-        return flag;
+        return globalPolicyDeploymentFlag;
     }
 
     private void cleanDeployment(String artifactRepositoryPath) {
@@ -303,10 +317,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             log.debug("Deploying Artifacts in asynchronous mode");
         }
 
-        long retryDuration = gatewayArtifactSynchronizerProperties.getRetryDuartion();
-        int maxRetryCount = gatewayArtifactSynchronizerProperties.getMaxRetryCount();
-        double reconnectionProgressionFactor = gatewayArtifactSynchronizerProperties.getRetryProgressionFactor();
-        long maxReconnectDuration = 1000 * 60 * 60; // 1 hour
         int retryCount = 0;
         boolean retry = true;
         while (retry) {
@@ -336,6 +346,50 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                         }
                     } else {
                         log.error("Unable to deploy synapse artifacts at gateway. Maximum retry count exceeded.");
+                        throw e;
+                    }
+                } else {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    private void deployGatewayPolicyArtifactsInGateway(String tenantDomain) throws ArtifactSynchronizerException {
+
+        if (debugEnabled) {
+            log.debug("Deploying gateway policy artifacts in asynchronous mode");
+        }
+
+        int retryCount = 0;
+        boolean retry = true;
+        while (retry) {
+            try {
+                boolean isArtifactsDeployed = deployGatewayPolicyArtifactsAtStartup(tenantDomain);
+                DataHolder.getInstance().setAllApisDeployed(isArtifactsDeployed);
+                if (isArtifactsDeployed) {
+                    log.info("Gateway policy artifacts deployed Successfully in the Gateway");
+                    retry = false;
+                } else {
+                    throw new ArtifactSynchronizerException("Unable to deploy gateway policy artifacts at gateway");
+                }
+            } catch (ArtifactSynchronizerException e) {
+                if (!ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED.equals(e.getErrorHandler())) {
+                    retryCount++;
+                    if (retryCount <= maxRetryCount) {
+                        log.error("Unable to deploy gateway policy artifacts at gateway. Retry Attempt " + retryCount
+                                + " in " + (retryDuration / 1000) + " seconds");
+                        try {
+                            Thread.sleep(retryDuration);
+                            retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
+                            if (retryDuration > maxReconnectDuration) {
+                                retryDuration = maxReconnectDuration;
+                            }
+                        } catch (InterruptedException ignore) {
+                            // Ignore
+                        }
+                    } else {
+                        log.error("Unable to deploy gateway policy artifacts at gateway. Maximum retry count exceeded.");
                         throw e;
                     }
                 } else {
@@ -432,6 +486,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
             try {
                 deployArtifactsInGateway(tenantDomain);
+                deployGatewayPolicyArtifactsInGateway(tenantDomain);
             } catch (ArtifactSynchronizerException e) {
                 log.error("Error in Deploying APIs to gateway", e);
             }
