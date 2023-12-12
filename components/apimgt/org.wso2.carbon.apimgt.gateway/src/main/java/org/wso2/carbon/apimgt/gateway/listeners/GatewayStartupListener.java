@@ -81,7 +81,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private ThrottleProperties throttleProperties;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
     private boolean isAPIsDeployedInSyncMode = false;
+    private boolean isGatewayPoliciesDeployedInSyncMode = false;
     private int syncModeDeploymentCount = 0;
+    private int syncModeGatewayPolicyDeploymentCount = 0;
     private int retryCount = 10;
     private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
     private String webHookServerHTTPS = "SecureWebhookServer";
@@ -265,8 +267,15 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 } catch (ArtifactSynchronizerException e) {
                     log.error("Error in Deploying APIs to gateway", e);
                 }
+                // Logic becomes too complex and less readable if we consolidated, better to keep the blocks separate, especially since it enhances code clarity and maintainability
+                try {
+                    deployGatewayPoliciesInSyncMode(tenantDomain);
+                } catch (ArtifactSynchronizerException e) {
+                    log.error("Error in Deploying gateway policies to gateway", e);
+                }
             } else {
                 deployAPIsInAsyncMode(tenantDomain);
+                deployGatewayPoliciesInAsyncMode(tenantDomain);
             }
         }
     }
@@ -291,6 +300,26 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         }
     }
 
+    private void deployGatewayPoliciesInSyncMode(String tenantDomain) throws ArtifactSynchronizerException {
+
+        if (debugEnabled) {
+            log.debug("Deploying gateway policy artifacts in synchronous mode");
+        }
+        syncModeGatewayPolicyDeploymentCount++;
+        isGatewayPoliciesDeployedInSyncMode = deployGatewayPolicyArtifactsAtStartup(tenantDomain);
+        DataHolder.getInstance().setAllGatewayPoliciesDeployed(isGatewayPoliciesDeployedInSyncMode);
+        if (!isGatewayPoliciesDeployedInSyncMode) {
+            log.error("Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount + " was unsuccessful");
+            if (!(syncModeGatewayPolicyDeploymentCount > retryCount)) {
+                deployGatewayPoliciesInSyncMode(tenantDomain);
+            } else {
+                log.error("Maximum retry limit exceeded. Server is starting without deploying all gateway policy artifacts");
+            }
+        } else {
+            log.info("Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount + " was successful");
+        }
+    }
+
     @Override
     public void invoke() {
 
@@ -309,6 +338,11 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     public void deployAPIsInAsyncMode(String tenantDomain) {
 
         new Thread(new AsyncAPIDeployment(tenantDomain)).start();
+    }
+
+    public void deployGatewayPoliciesInAsyncMode(String tenantDomain) {
+
+        new Thread(new AsyncGatewayPolicyDeployment(tenantDomain)).start();
     }
 
     private void deployArtifactsInGateway(String tenantDomain) throws ArtifactSynchronizerException {
@@ -486,9 +520,28 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
             try {
                 deployArtifactsInGateway(tenantDomain);
-                deployGatewayPolicyArtifactsInGateway(tenantDomain);
             } catch (ArtifactSynchronizerException e) {
                 log.error("Error in Deploying APIs to gateway", e);
+            }
+        }
+    }
+
+    class AsyncGatewayPolicyDeployment implements Runnable {
+
+        private String tenantDomain;
+
+        public AsyncGatewayPolicyDeployment(String tenantDomain) {
+
+            this.tenantDomain = tenantDomain;
+        }
+
+        @Override
+        public void run() {
+
+            try {
+                deployGatewayPolicyArtifactsInGateway(tenantDomain);
+            } catch (ArtifactSynchronizerException e) {
+                log.error("Error in deploying gateway policies to gateway", e);
             }
         }
     }
