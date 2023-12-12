@@ -1330,7 +1330,6 @@ public class APIAdminImpl implements APIAdmin {
     public Map<String, Object> searchPaginatedApis(String searchQuery, String organization, int start, int end)
             throws APIManagementException {
         ArrayList<Object> compoundResult = new ArrayList<Object>();
-        Map<Documentation, API> docMap = new HashMap<Documentation, API>();
         Map<String, Object> result = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         String modifiedSearchQuery = buildSearchQuery(searchQuery);
@@ -1341,7 +1340,7 @@ public class APIAdminImpl implements APIAdmin {
             if (results != null) {
                 List<SearchContent> resultList = results.getApis();
                 for (SearchContent item : resultList) {
-                    if ("API".equals(item.getType())) {
+                    if (APIConstants.API_IDENTIFIER_TYPE.equals(item.getType())) {
                         AdminApiSearchContent adminSearchApi = (AdminApiSearchContent) item;
                         API api = new API(new APIIdentifier(adminSearchApi.getProvider(), adminSearchApi.getName(),
                                 adminSearchApi.getVersion()));
@@ -1350,15 +1349,15 @@ public class APIAdminImpl implements APIAdmin {
                     }
                 }
                 compoundResult.addAll(apiSet);
-                compoundResult.addAll(docMap.entrySet());
                 compoundResult.sort(new ContentSearchResultNameComparator());
+                result.put(APIConstants.API_DATA_LENGTH, compoundResult.size());
             } else {
-                result.put("length", compoundResult.size());
+                result.put(APIConstants.API_DATA_LENGTH, compoundResult.size());
             }
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching apis ", e);
         }
-        result.put("apis", compoundResult);
+        result.put(APIConstants.API_DATA_APIS, compoundResult);
         return result;
     }
 
