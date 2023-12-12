@@ -766,8 +766,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
 
         Subscriber subscriber = new Subscriber(username);
-        Set<String> scopeKeySet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
-        return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, organization).values());
+        Set<Pair<String, String>> scopeKeySet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId,
+                organization);
+        Map<String, Scope> scopeToKeyMap = new HashMap<>();
+        for (Pair<String, String> scopeEntry : scopeKeySet) {
+            Scope scope = APIUtil.getScopeByName(scopeEntry.getRight(), scopeEntry.getLeft());
+            scopeToKeyMap.put(scopeEntry.getRight(), scope);
+        }
+        return new LinkedHashSet<>(scopeToKeyMap.values());
     }
 
     public Integer getSubscriptionCount(Subscriber subscriber, String applicationName, String groupingId)
@@ -2938,8 +2944,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             String applicationName = application.getName();
             if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName, organization)) {
                 for (APIKey apiKey : application.getKeys()) {
-                    KeyManager keyManager =
-                            KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
+                    KeyManager keyManager = KeyManagerHolder.getTenantKeyManagerInstance(
+                            APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN, apiKey.getKeyManager());
+                    if (keyManager != null) {
+                        // Prevent updating the OAuth app owner in the case of Global Key Manager.
+                        continue;
+                    } else {
+                        keyManager =
+                                KeyManagerHolder.getTenantKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
+                    }
                     /* retrieving OAuth application information for specific consumer key */
                     consumerKey = apiKey.getConsumerKey();
                     OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);

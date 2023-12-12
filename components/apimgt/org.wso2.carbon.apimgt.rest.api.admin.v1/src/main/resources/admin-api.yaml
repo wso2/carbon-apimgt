@@ -3174,6 +3174,173 @@ paths:
           description: |
             OK.
             Key Manager successfully deleted.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v2/global-key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
+
+  ######################################################
+  # The "Global Key Manager Collection" resource API
+  ######################################################
+  /global-key-managers:
+    get:
+      tags:
+        - Global Key Manager (Collection)
+      summary: Get all Global Key managers
+      description: |
+        Get all Global Key managers
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManagers returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManagerList'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v2/global-key-managers"'
+
+    post:
+      tags:
+        - Global Key Manager (Collection)
+      summary: Add a new Global Key Manager
+      description: |
+        Add a new Global Key Manager
+      requestBody:
+        description: |
+          Key Manager object that should to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyManager'
+        required: true
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManager'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json 
+          "https://127.0.0.1:9443/api/am/admin/v2/global-key-managers"'
+
+  ######################################################
+  # The "Global Individual KeyManager" resource APIs
+  ######################################################
+  /global-key-managers/{keyManagerId}:
+    get:
+      tags:
+        - Global Key Manager (Individual)
+      summary: Get a Global Key Manager Configuration
+      description: |
+        Retrieve a single Global Key Manager Configuration. We should provide the Id of the KeyManager as a path 
+        parameter.
+      parameters:
+        - $ref: '#/components/parameters/keyManagerId'
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManager Configuration returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManager'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
+
+    put:
+      tags:
+        - Global Key Manager (Individual)
+      summary: Update a Global Key Manager
+      description: |
+        Update a Global Key Manager by keyManager id
+      parameters:
+        - $ref: '#/components/parameters/keyManagerId'
+      requestBody:
+        description: |
+          Key Manager object with updated information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyManager'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Label updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManager'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
+
+    delete:
+      tags:
+        - Global Key Manager (Individual)
+      summary: Delete a Global Key Manager
+      description: |
+        Delete a Global Key Manager by keyManager id
+      parameters:
+        - $ref: '#/components/parameters/keyManagerId'
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager successfully deleted.
           content: {}
         404:
           $ref: '#/components/responses/NotFound'
@@ -4640,6 +4807,9 @@ components:
         enabled:
           type: boolean
           example: true
+        global:
+          type: boolean
+          example: true
         additionalProperties:
           type: object
           properties: {}
@@ -4707,6 +4877,9 @@ components:
           type: string
           example: This is a key manager for Developers
         enabled:
+          type: boolean
+          example: true
+        isGlobal:
           type: boolean
           example: true
         tokenType:
