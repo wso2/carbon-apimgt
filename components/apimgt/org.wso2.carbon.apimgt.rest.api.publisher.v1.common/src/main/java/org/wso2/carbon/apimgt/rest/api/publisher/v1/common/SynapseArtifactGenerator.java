@@ -166,7 +166,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
     }
 
     /**
-     * This method used to generate gateway policy artifact.
+     * Generate gateway policy artifact.
      *
      * @param gatewayPolicyArtifactDtoList list of gateway policy artifacts
      * @return RuntimeArtifactDto runtime artifact

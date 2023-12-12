@@ -245,7 +245,7 @@ public class SynapsePolicyAggregator {
     }
 
     /**
-     * This method will render the gateway level policy mapping
+     * Render the gateway level policy mapping
      *
      * @param gatewayPolicyDataList List of gateway policy data
      * @param gatewayPolicies       List of gateway policies
