@@ -6712,7 +6712,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description,
             String name, String orgId, String policyMappingId) throws APIManagementException {
         List<OperationPolicy> policyList = apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingId);
-        String mappingID = null;
         if (policyList.isEmpty()) {
             String message = "Cannot update the gateway policy mapping. The policy mapping ID: " + policyMappingId
                     + " does not exist.";
@@ -6723,17 +6722,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<String> activeGatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(policyMappingId,
                 orgId);
         apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(policyMappingId, false);
-        mappingID = apiMgtDAO.updateGatewayGlobalPolicy(gatewayGlobalPolicyList, description, name, orgId, policyMappingId);
+        String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(gatewayGlobalPolicyList, description, name, orgId, policyMappingId);
         // Redeploy the updated policy mappings to the gateways.
         if (activeGatewayLabels.size() > 0) {
-            List<GatewayPolicyDeployment> gatewayPolicyDeploymentList = new ArrayList<>();
-            for (String gatewayLabel : activeGatewayLabels) {
-                GatewayPolicyDeployment gatewayPolicyDeployment = new GatewayPolicyDeployment();
-                gatewayPolicyDeployment.setMappingUuid(policyMappingId);
-                gatewayPolicyDeployment.setGatewayLabel(gatewayLabel);
-                gatewayPolicyDeploymentList.add(gatewayPolicyDeployment);
-            }
-            apiMgtDAO.addGatewayPolicyDeployment(gatewayPolicyDeploymentList, orgId);
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             gatewayManager.deployPolicyToGateway(policyMappingId, orgId, activeGatewayLabels);
         }
