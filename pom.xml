@@ -300,7 +300,7 @@
                         <xmlOutput>true</xmlOutput>
                         <spotbugsXmlOutputDirectory>${project.build.directory}/spotbugs</spotbugsXmlOutputDirectory>
                         <!--Exclude sources-->
-                        <!--<excludeFilterFile>${maven.spotbugsplugin.exclude.file}</excludeFilterFile>-->
+                        <excludeFilterFile>${maven.spotbugsplugin.exclude.file}</excludeFilterFile>
                     </configuration>
                     <executions>
                         <execution>
@@ -2217,7 +2217,7 @@
         <okio.wso2.version>3.5.0.wso2v1</okio.wso2.version>
 
         <openfeign.version>11.0</openfeign.version>
-        <maven.spotbugsplugin.version>4.1.4</maven.spotbugsplugin.version>
+        <maven.spotbugsplugin.version>4.8.2.0</maven.spotbugsplugin.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
@@ -2225,7 +2225,7 @@
         <analytics.event.publisher.client.version>1.2.3</analytics.event.publisher.client.version>
         <analytics.event.publisher.client.version.range>[1.0.0,2.0.0)</analytics.event.publisher.client.version.range>
         <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
-        <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
+        <maven.spotbugsplugin.exclude.file>${project.parent.basedir}/../../spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
         <skip.aspectj>false</skip.aspectj>
         <javax.jms.version>2.0.1</javax.jms.version>
         <com.damnhandy.version>2.1.6</com.damnhandy.version>
