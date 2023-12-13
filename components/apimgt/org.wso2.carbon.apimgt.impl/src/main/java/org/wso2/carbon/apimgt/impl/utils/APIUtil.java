@@ -505,6 +505,8 @@ public final class APIUtil {
                     throw new DataLoadingException("Error while retrieving "
                             + path + ". Received response with status code "
                             + httpResponse.getStatusLine().getStatusCode());
+                } else if (retryCount > 0) {
+                    log.info("Successfully retrieved " + path);
                 }
                 retry = false;
             } catch (IOException | DataLoadingException ex) {
