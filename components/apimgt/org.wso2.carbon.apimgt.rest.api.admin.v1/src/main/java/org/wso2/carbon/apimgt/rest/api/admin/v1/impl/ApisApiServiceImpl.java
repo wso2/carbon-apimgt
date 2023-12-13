@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApiResultDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIInfoMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -43,6 +44,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             List<ApiResultDTO> allMatchedResults = getAllMatchedResults(apis);
             resultListDTO.setApis(allMatchedResults);
             resultListDTO.setCount(allMatchedResults.size());
+            APIInfoMappingUtil.setPaginationParams(resultListDTO, limit, offset, (Integer) result
+                    .get(APIConstants.ADMIN_API_LIST_RESPONSE_PARAMS_TOTAL));
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
         }

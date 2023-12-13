@@ -1336,7 +1336,7 @@ public class APIAdminImpl implements APIAdmin {
         try {
             APIPersistence apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
             AdminContentSearchResult results = apiPersistenceInstance.searchContentForAdmin(organization,
-                    modifiedSearchQuery, start, end, Integer.MAX_VALUE);
+                    modifiedSearchQuery, start, end, end);
             if (results != null) {
                 List<SearchContent> resultList = results.getApis();
                 for (SearchContent item : resultList) {
@@ -1351,6 +1351,7 @@ public class APIAdminImpl implements APIAdmin {
                 compoundResult.addAll(apiSet);
                 compoundResult.sort(new ContentSearchResultNameComparator());
                 result.put(APIConstants.API_DATA_LENGTH, compoundResult.size());
+                result.put(APIConstants.ADMIN_API_LIST_RESPONSE_PARAMS_TOTAL, results.getApiTotal());
             } else {
                 result.put(APIConstants.API_DATA_LENGTH, compoundResult.size());
             }

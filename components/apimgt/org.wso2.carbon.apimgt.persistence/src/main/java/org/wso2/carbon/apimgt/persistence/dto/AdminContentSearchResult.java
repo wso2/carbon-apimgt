@@ -25,6 +25,12 @@ import java.util.List;
 
 public class AdminContentSearchResult {
     int apiCount;
+
+    public int getApiTotal() { return apiTotal; }
+
+    public void setApiTotal(int apiTotal) { this.apiTotal = apiTotal; }
+
+    int apiTotal;
     int applicationCount;
     List<SearchContent> apis = new ArrayList<SearchContent>();
 

@@ -3795,7 +3795,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             isTenantFlowStarted = holder.isTenantFlowStarted();
             String tenantAwareUsername = getTenantAwareUsername(RegistryPersistenceUtil.getTenantAdminUserName(org));
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
-            PaginationContext.init(start, Integer.MAX_VALUE, "ASC", APIConstants.API_OVERVIEW_NAME, limit);
+            PaginationContext.init(start, count, "ASC", APIConstants.API_OVERVIEW_NAME, limit);
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
 
@@ -3867,6 +3867,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 result.setApiCount(contentData.size());
                 result.setApis(contentData);
+                result.setApiTotal(totalLength);
             }
         } catch (RegistryException | IndexerException | APIManagementException e) {
             throw new APIPersistenceException("Error while searching for content ", e);
