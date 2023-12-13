@@ -70,6 +70,8 @@ public class GatewayPolicyDeployer {
                 MessageContext.setCurrentMessageContext(
                         org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
                 apiGatewayAdmin.deployGatewayPolicy(gatewayPolicyDTO);
+            } else {
+                log.error("Gateway policy artifact is not found for the policy mapping: " + gatewayPolicyMappingUuid);
             }
         } catch (AxisFault e) {
             throw new RuntimeException(e);

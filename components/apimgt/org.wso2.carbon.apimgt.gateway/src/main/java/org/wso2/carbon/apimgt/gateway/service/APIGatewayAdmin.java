@@ -928,6 +928,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                     sequenceAdminServiceProxy.addSequence(element);
                 }
             }
+        } else {
+            log.error("No gateway policy sequences found to be deployed");
         }
     }
 
