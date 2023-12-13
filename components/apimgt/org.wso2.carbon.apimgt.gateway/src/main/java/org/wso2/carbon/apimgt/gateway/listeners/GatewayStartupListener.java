@@ -92,10 +92,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private String tenantsRootPath = CarbonBaseUtils.getCarbonHome() + File.separator + "repository" + File.separator
             + "tenants" + File.separator;
     private String synapseDeploymentPath = "synapse-configs" + File.separator + "default";
-    private long retryDuration = gatewayArtifactSynchronizerProperties.getRetryDuartion();
-    private int maxRetryCount = gatewayArtifactSynchronizerProperties.getMaxRetryCount();
-    private double reconnectionProgressionFactor = gatewayArtifactSynchronizerProperties.getRetryProgressionFactor();
-    private long maxReconnectDuration = 1000 * 60 * 60; // 1 hour
 
     public GatewayStartupListener() {
 
@@ -351,6 +347,10 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             log.debug("Deploying Artifacts in asynchronous mode");
         }
 
+        long retryDuration = gatewayArtifactSynchronizerProperties.getRetryDuartion();
+        int maxRetryCount = gatewayArtifactSynchronizerProperties.getMaxRetryCount();
+        double reconnectionProgressionFactor = gatewayArtifactSynchronizerProperties.getRetryProgressionFactor();
+        long maxReconnectDuration = 1000 * 60 * 60; // 1 hour
         int retryCount = 0;
         boolean retry = true;
         while (retry) {
@@ -395,6 +395,10 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             log.debug("Deploying gateway policy artifacts in asynchronous mode");
         }
 
+        long retryDuration = gatewayArtifactSynchronizerProperties.getRetryDuartion();
+        int maxRetryCount = gatewayArtifactSynchronizerProperties.getMaxRetryCount();
+        double reconnectionProgressionFactor = gatewayArtifactSynchronizerProperties.getRetryProgressionFactor();
+        long maxReconnectDuration = 1000 * 60 * 60; // 1 hour
         int retryCount = 0;
         boolean retry = true;
         while (retry) {
