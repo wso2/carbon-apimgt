@@ -730,7 +730,9 @@ public class OASParserUtil {
                 addToReferenceObjectMap(ref, context);
             } else if (!references.isEmpty() && references.size() != 0) {
                 for (String reference : references) {
-                    addToReferenceObjectMap(reference, context);
+                    if (reference != null) {
+                        addToReferenceObjectMap(reference, context);
+                    }
                 }
             }
 
