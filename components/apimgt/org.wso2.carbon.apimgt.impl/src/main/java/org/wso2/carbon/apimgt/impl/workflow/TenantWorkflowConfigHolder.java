@@ -137,16 +137,21 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
                 workflowElem = workflowExtensionsElem.getFirstChildWithName(
                         new QName(WorkflowConstants.API_REVISION_DEPLOYMENT));
-                executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
-                try {
-                    clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
-                    workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
-                    loadProperties(workflowElem, workFlowExecutor);
-                } catch (ClassNotFoundException e1) {
-                    workFlowExecutor = new APIRevisionDeploymentSimpleWorkflowExecutor();
-                }
+                if (workflowElem != null) {
+                    executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+                    try {
+                        clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                        workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                        loadProperties(workflowElem, workFlowExecutor);
+                    } catch (ClassNotFoundException e) {
+                        workFlowExecutor = new APIRevisionDeploymentSimpleWorkflowExecutor();
+                    }
 
-                workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT, workFlowExecutor);
+                    workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT, workFlowExecutor);
+                } else {
+                    workFlowExecutor = new APIRevisionDeploymentSimpleWorkflowExecutor();
+                    workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT, workFlowExecutor);
+                }
 
                 workflowElem = workflowExtensionsElem.getFirstChildWithName(
                         new QName(WorkflowConstants.USER_SIGN_UP));
