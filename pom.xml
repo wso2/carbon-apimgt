@@ -1955,6 +1955,11 @@
                 <artifactId>transaction-count-handler</artifactId>
                 <version>${integration.transaction.counter.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-annotations</artifactId>
+                <version>${spotbugs.annotations.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2218,6 +2223,7 @@
 
         <openfeign.version>11.0</openfeign.version>
         <maven.spotbugsplugin.version>4.8.2.0</maven.spotbugsplugin.version>
+        <spotbugs.annotations.version>4.8.2</spotbugs.annotations.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>

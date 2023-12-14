@@ -66,6 +66,7 @@ public class RequestContextDTO {
     }
 
     @Deprecated
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
     public X509Certificate[] getClientCerts() {
         X509Certificate[] x509Certificates = new X509Certificate[clientCerts.length];
         for (int i = 0; i < clientCerts.length; i++) {
