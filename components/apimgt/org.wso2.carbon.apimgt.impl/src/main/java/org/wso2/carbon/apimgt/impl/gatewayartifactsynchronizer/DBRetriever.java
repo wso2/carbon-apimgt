@@ -57,7 +57,6 @@ public class DBRetriever implements ArtifactRetriever {
     protected GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
             ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                     .getGatewayArtifactSynchronizerProperties();
-    String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
     private String baseURL = eventHubConfigurationDto.getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
 
     @Override
@@ -69,6 +68,7 @@ public class DBRetriever implements ArtifactRetriever {
     public String retrieveArtifact(String apiId, String gatewayLabel)
             throws ArtifactSynchronizerException {
 
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (gatewayArtifactSynchronizerProperties.hasEventWaitingTime()) {
             try {
                 Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
@@ -238,6 +238,8 @@ public class DBRetriever implements ArtifactRetriever {
 
     @Override
     public String retrieveGatewayPolicyArtifacts(String mappingUUID) throws ArtifactSynchronizerException {
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (gatewayArtifactSynchronizerProperties.hasEventWaitingTime()) {
             try {
                 Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
