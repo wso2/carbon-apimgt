@@ -6,26 +6,7 @@
     <Match>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
-
-        
-        <Match>
-        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
-    </Match>
     <Match>
-        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
-    </Match>
-    
-        <Match>
-        <Bug pattern="PA_PUBLIC_PRIMITIVE_ATTRIBUTE"/>
-    </Match>
-    <Match>
-        <Bug pattern="URF_UNREAD_FIELD"/>
-    </Match>
-        <Match>
         <Bug pattern="MS_EXPOSE_REP"/>
-    </Match>
-
-        <Match>
-        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
     </Match>
 </FindBugsFilter>
