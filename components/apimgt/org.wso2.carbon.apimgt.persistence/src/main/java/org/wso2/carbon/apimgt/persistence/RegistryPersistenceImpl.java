@@ -816,7 +816,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (registry.resourceExists(wsdlArchivePath)) {
                 registry.delete(wsdlArchivePath);
             }
-            String providerName = RegistryPersistenceUtil.extractProvider(apiPath);
+            String providerName = RegistryPersistenceUtil.extractProvider(apiPath,
+                    apiArtifact.getQName().getLocalPart());
             /*Remove API Definition Resource - swagger*/
             String apiDefinitionFilePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
                     identifier.getApiName() + '-' + identifier.getVersion() + '-' + providerName;
@@ -2165,7 +2166,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
-            String apiProviderName = RegistryPersistenceUtil.extractProvider(apiArtifact.getPath());
+            String apiProviderName = RegistryPersistenceUtil.extractProvider(apiArtifact.getPath(),
+                    apiArtifact.getQName().getLocalPart());
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
@@ -2418,7 +2420,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
-            String apiProviderName = RegistryPersistenceUtil.extractProvider(apiArtifact.getPath());
+            String apiProviderName = RegistryPersistenceUtil.extractProvider(apiArtifact.getPath(),
+                    apiArtifact.getQName().getLocalPart());
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
