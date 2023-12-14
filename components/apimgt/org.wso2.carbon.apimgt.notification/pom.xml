@@ -116,6 +116,10 @@
         <artifactId>powermock-module-junit4</artifactId>
         <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-annotations</artifactId>
+    </dependency>
 </dependencies>
 
 </project>
