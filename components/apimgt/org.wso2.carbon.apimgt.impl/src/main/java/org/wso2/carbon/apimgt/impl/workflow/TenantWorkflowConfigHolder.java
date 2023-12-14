@@ -143,7 +143,7 @@ public class TenantWorkflowConfigHolder implements Serializable {
                     workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
                     loadProperties(workflowElem, workFlowExecutor);
                 } catch (ClassNotFoundException e1) {
-                    workFlowExecutor = new ApplicationRegistrationSimpleWorkflowExecutor();
+                    workFlowExecutor = new APIRevisionDeploymentSimpleWorkflowExecutor();
                 }
 
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT, workFlowExecutor);
