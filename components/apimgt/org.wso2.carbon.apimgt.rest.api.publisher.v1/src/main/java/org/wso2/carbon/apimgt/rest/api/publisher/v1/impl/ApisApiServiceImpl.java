@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.*;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -61,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiService
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -3713,6 +3715,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                                       List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        if (revisionId.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Revision Id is not provided").build();
+        }
 
         //validate if api exists
         APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
@@ -3841,15 +3846,49 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Validate AsyncAPI Specification and retrieve as the response
+     * Delete a pending task for API revision deployment
      *
-     * @param url URL of the AsyncAPI Specification
-     * @param fileInputStream InputStream for the provided file
-     * @param fileDetail File meta-data
-     * @param returnContent Whether to return the definition content
+     * @param apiId          Id of the API
+     * @param revisionId     Id of the revision
+     * @param envName        Name of the gateway
      * @param messageContext CXF message context
-     * @return AsyncAPI Specification Validation response
+     * @return 200 response if deleted successfully
      */
+    @Override public Response deleteAPIRevisionDeploymentPendingTask(String apiId, String revisionId, String envName,
+            MessageContext messageContext) {
+        try {
+            String environment = "environment";
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+            }
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+
+            List<WorkflowDTO> workflowDTOList = apiMgtDAO.retrieveAllWorkflowFromInternalReference(revisionId,
+                    WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+            String externalRef = null;
+            for (WorkflowDTO workflowDTO : workflowDTOList) {
+                if (envName.equals(workflowDTO.getMetadata(environment))) {
+                    externalRef = workflowDTO.getExternalWorkflowReference();
+                }
+            }
+
+            if (externalRef == null) {
+                throw new APIMgtResourceNotFoundException(
+                        "Couldn't retrieve existing API Revision with Revision Id: " + revisionId,
+                        ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionId));
+            }
+            apiProvider.cleanupAPIRevisionDeploymentWorkflows(apiId, externalRef);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting task ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
     @Override
     public Response validateAsyncAPISpecification(Boolean returnContent, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException {
         //validate and retrieve the AsyncAPI specification
