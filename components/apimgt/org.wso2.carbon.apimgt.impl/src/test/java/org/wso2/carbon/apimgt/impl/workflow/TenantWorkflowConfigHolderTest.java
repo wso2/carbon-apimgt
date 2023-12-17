@@ -75,6 +75,7 @@ public class TenantWorkflowConfigHolderTest {
         Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(IOUtils.toString(defaultWFConfigContent));
         try {
             tenantWorkflowConfigHolder.load();
+            Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_REVISION_DEPLOYMENT"));
             Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_APPLICATION_CREATION"));
             Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor
                     ("AM_APPLICATION_REGISTRATION_PRODUCTION"));
@@ -100,6 +101,7 @@ public class TenantWorkflowConfigHolderTest {
         Mockito.when(apimConfigService.getWorkFlowConfig(tenantDomain)).thenReturn(IOUtils.toString(defaultWFConfigContent));
         try {
             tenantWorkflowConfigHolder.load();
+            Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_REVISION_DEPLOYMENT"));
             Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor("AM_APPLICATION_CREATION"));
             Assert.assertNotNull(tenantWorkflowConfigHolder.getWorkflowExecutor
                     ("AM_APPLICATION_REGISTRATION_PRODUCTION"));
@@ -131,6 +133,7 @@ public class TenantWorkflowConfigHolderTest {
     public void testFailureToLoadTenantWFConfigWhenWFExecutorClassNotFound() throws Exception {
         //For signup workflow we set TestUserSignUpSimpleWorkflowExecutor. since it is not there, default signup executor should be used.
         String invalidWFExecutor = "<WorkFlowExtensions>\n"
+                + "    <APIRevisionDeployment executor=\"org.wso2.carbon.apimgt.impl.workflow.APIRevisionDeploymentSimpleWorkflowExecutor\"/>\n"
                 + "    <ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow.ApplicationCreationSimpleWorkflowExecutor\"/>\n"
                 + "    <ProductionApplicationRegistration executor=\"org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor\"/>\n"
                 + "    <SandboxApplicationRegistration executor=\"org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor\"/>\n"
@@ -278,6 +281,8 @@ public class TenantWorkflowConfigHolderTest {
         //Workflow executor class setter methods are available for different parameter types
         String invalidWFExecutor =
                 "<WorkFlowExtensions>\n" +
+                        "    <APIRevisionDeployment executor=\"org.wso2.carbon.apimgt.impl.workflow." +
+                        "APIRevisionDeploymentSimpleWorkflowExecutor\"/>\n" +
                         "     <ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
                         ".WorkflowExecutorWithMultipleParamTypes\">\n" +
                         "         <Property name=\"stringParam\">admin</Property>\n" +

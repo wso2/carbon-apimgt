@@ -3172,6 +3172,12 @@ public class APIMappingUtil {
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
         apiRevisionDeploymentDTO.setName(model.getDeployment());
         apiRevisionDeploymentDTO.setVhost(model.getVhost());
+        if (model.getStatus() != null) {
+            apiRevisionDeploymentDTO.setStatus(
+                    APIRevisionDeploymentDTO.StatusEnum.valueOf(model.getStatus().toString()));
+        } else {
+            apiRevisionDeploymentDTO.setStatus(null);
+        }
         if (model.getRevisionUUID() != null) {
             apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
         }

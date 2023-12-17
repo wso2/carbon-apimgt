@@ -1694,4 +1694,26 @@ public interface APIProvider extends APIManager {
      */
     boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
             appliedPolicy, String apiType) throws APIManagementException;
+
+    /**
+     * Resume API revision deployment process
+     *
+     * @param apiId        API Id using for the revision deployment
+     * @param organization organization identifier
+     * @param revisionUUID revision UUID
+     * @param revisionId   revision number
+     * @param environment  environment the deployment is happening
+     */
+    void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
+            String environment);
+
+    /***
+     * Cleanup pending or rejected revision workflows
+     *
+     * @param apiId Id of the API
+     * @param externalRef external Id of the revision
+     * @throws APIManagementException if an exception occurs while cleaning up revision deployment
+     */
+    void cleanupAPIRevisionDeploymentWorkflows(String apiId, String externalRef) throws APIManagementException;
+
 }
