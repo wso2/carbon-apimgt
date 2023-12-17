@@ -1327,11 +1327,21 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
+    /**
+     * get/search paginated APIs in admin portal
+     *
+     * @param searchQuery API name search query
+     * @param organization organization
+     * @param start start index of the pagination
+     * @param end end index of the pagination
+     * @return APIs result object
+     * @throws APIManagementException if an error occurs when searching/getting the APIs
+     */
     public Map<String, Object> searchPaginatedApis(String searchQuery, String organization, int start, int end)
             throws APIManagementException {
-        ArrayList<Object> compoundResult = new ArrayList<Object>();
-        Map<String, Object> result = new HashMap<String, Object>();
-        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        ArrayList<Object> compoundResult = new ArrayList<>();
+        Map<String, Object> result = new HashMap<>();
+        SortedSet<API> apiSet = new TreeSet<>(new APINameComparator());
         String modifiedSearchQuery = buildSearchQuery(searchQuery);
         try {
             APIPersistence apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
@@ -1362,6 +1372,12 @@ public class APIAdminImpl implements APIAdmin {
         return result;
     }
 
+    /**
+     * If the user provided a search query then it will use that, otherwise it will use the asterix(*) symbol.
+     *
+     * @param searchQuery searchQuery that the user provided
+     * @return modified searchQuery
+     */
     private String buildSearchQuery(String searchQuery) {
         if (searchQuery.equals(APIConstants.CHAR_ASTERIX)) {
             return String.format(APIConstants.ADMIN_PORTAL_GET_APIS_QUERY, APIConstants.CHAR_ASTERIX);

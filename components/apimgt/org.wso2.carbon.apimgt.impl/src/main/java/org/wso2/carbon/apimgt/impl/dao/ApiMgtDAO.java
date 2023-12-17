@@ -18178,6 +18178,13 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     *  Update the API provider of a given API
+     *
+     * @param apiUUID API id of the API that needs to update the provider
+     * @param providerName New API provider
+     * @throws APIManagementException if an error occurs when changing the API provider
+     */
     public void updateApiProvider(String apiUUID, String providerName)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -18189,9 +18196,7 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Error while updating the API provider of " + apiUUID, e);
-            } finally {
-                connection.setAutoCommit(true);
+                throw e;
             }
         } catch (SQLException e) {
             handleException("Error while updating the API provider of " + apiUUID, e);

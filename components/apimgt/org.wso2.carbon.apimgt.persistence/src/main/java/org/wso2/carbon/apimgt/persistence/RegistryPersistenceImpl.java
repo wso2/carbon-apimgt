@@ -3788,7 +3788,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public AdminContentSearchResult searchContentForAdmin(String org, String searchQuery, int start, int count,
                                                           int limit) throws APIPersistenceException {
-        log.debug("Requested query for admin key Manager usages API search: " + searchQuery);
 
         boolean isTenantFlowStarted = false;
         AdminContentSearchResult result = null;

@@ -470,7 +470,7 @@ public interface APIAdmin  {
      * Update the Api Provider of a given Api Id
      *
      * @param apiId Api ID
-     * @param provider ProviderName/Owner of the Api
+     * @param provider New ProviderName/Owner of the Api
      * @param organisation Organisation
      * @throws APIManagementException
      */
@@ -480,7 +480,7 @@ public interface APIAdmin  {
      * Get/Search All Apis in admin portal
      *
      * @param searchQuery Api name search query
-     * @param organization organisation
+     * @param organization organization
      * @param start
      * @param end
      * @return
