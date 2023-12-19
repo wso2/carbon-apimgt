@@ -172,6 +172,7 @@ public class ApiMgtDAO {
     private final Object scopeMutex = new Object();
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
+    private String KeyManagerAccessPublic = "PUBLIC";
     String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
     private ApiMgtDAO() {
@@ -9293,7 +9294,7 @@ public class ApiMgtDAO {
                 preparedStatement.setString(10, keyManagerConfigurationDTO.getExternalReferenceId());
                 preparedStatement.executeUpdate();
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && permissionDTO.getPermissionType() != "PUBLIC") {
+                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
                     try (PreparedStatement addPermissionStatement = conn
                             .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
                         for (String role : keyManagerConfigurationDTO.getPermissions().getRoles()) {
@@ -9373,7 +9374,7 @@ public class ApiMgtDAO {
                     deletePermissionsStatement.executeUpdate();
                 }
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && permissionDTO.getPermissionType() != "PUBLIC") {
+                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
                     try (PreparedStatement addPermissionStatement = conn.prepareStatement(SQLConstants
                             .KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
                         for (String role : permissionDTO.getRoles()) {
@@ -9438,7 +9439,7 @@ public class ApiMgtDAO {
                 ps.setString(1, keyManagerUUID);
                 ResultSet resultSet = ps.executeQuery();
                 ArrayList<String> roles = new ArrayList<>();
-                keyManagerPermissions.setPermissionType("PUBLIC");
+                keyManagerPermissions.setPermissionType(KeyManagerAccessPublic);
                 while (resultSet.next()) {
                     roles.add(resultSet.getString("ROLE"));
                     keyManagerPermissions.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
