@@ -4240,6 +4240,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * This method is used to retrieve key manager configurations for tenant
      * @param organization organization of the key manager
+     * @param username username of the logged-in user
      * @return KeyManagerConfigurationDTO list
      * @throws APIManagementException if error occurred
      */
@@ -4311,13 +4312,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     public static boolean hasIntersection(String[] arr1, String[] arr2) {
+        Set<String> set = new HashSet<>();
+
         for (String element : arr1) {
-            for (String element2 : arr2) {
-                if (element.equals(element2)) {
-                    return true;
-                }
+            set.add(element);
+        }
+
+        for (String element : arr2) {
+            if (set.contains(element)) {
+                return true;
             }
         }
+
         return false;
     }
 }

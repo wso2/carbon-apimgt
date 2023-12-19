@@ -36,7 +36,7 @@ public class KeyManagerPermissionConfigurationDTO implements Serializable {
 
     public void setRoles(List<String> roles) {
         if (roles == null) {
-            roles = new ArrayList<String>();
+            return;
         }
         this.roles = roles;
     }
