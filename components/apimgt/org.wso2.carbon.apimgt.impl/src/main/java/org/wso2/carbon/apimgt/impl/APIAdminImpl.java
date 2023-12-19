@@ -1366,7 +1366,8 @@ public class APIAdminImpl implements APIAdmin {
                 result.put(APIConstants.API_DATA_LENGTH, compoundResult.size());
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching apis ", e);
+            throw new APIManagementException("Error while searching apis ",
+                    ExceptionCodes.GET_SEARCH_APIS_IN_ADMIN_FAILED);
         }
         result.put(APIConstants.API_DATA_APIS, compoundResult);
         return result;
