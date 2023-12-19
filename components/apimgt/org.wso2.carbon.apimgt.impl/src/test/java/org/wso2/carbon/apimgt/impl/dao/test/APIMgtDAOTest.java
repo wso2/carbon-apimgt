@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
@@ -1740,6 +1741,62 @@ public class APIMgtDAOTest {
         OperationPolicyData policyDataAfterDelete = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyUUID,
                 api.getUuid(), org, false);
         Assert.assertNull("API specific policy should delete with the API delete", policyDataAfterDelete);
+    }
+
+    /**
+     * Test for retrieveAllWorkflowFromInternalReference method
+     * Checks whether all the API revision deployment mapping details are retrieved correctly
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    @Test public void testRetrieveAllWorkflowFromInternalReference() throws Exception {
+        WorkflowStatus workflowStatus = WorkflowStatus.CREATED;
+        String revisionUUID = "821b9664-eeca-4173-9f56-3dc6d46bd6eb";
+        String wfType = "AM_REVISION_DEPLOYMENT";
+        List<WorkflowDTO> workflowList = apiMgtDAO.retrieveAllWorkflowFromInternalReference(
+                revisionUUID, wfType);
+        Assert.assertNotNull(workflowList);
+        WorkflowDTO workFlow = workflowList.get(0);
+        Assert.assertNotNull(workFlow);
+        Assert.assertEquals(workFlow.getWorkflowReference(), revisionUUID);
+        Assert.assertEquals(workFlow.getWorkflowType(), wfType);
+        Assert.assertEquals(workFlow.getStatus(),workflowStatus);
+    }
+
+    /**
+     * Test for getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID method
+     * Checks whether the API revision deployment mapping details are retrieved correctly
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    @Test public void testGetAPIRevisionDeploymentsByWorkflowStatusAndApiUUID() throws Exception {
+        String workflowStatus = "CREATED";
+        String apiUUID = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2";
+        String revisionUUID = "821b9664-eeca-4173-9f56-3dc6d46bd6eb";
+        String deployment = "default";
+        List<APIRevisionDeployment> apiRevisionDeployments = apiMgtDAO.getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(
+                apiUUID, workflowStatus);
+        Assert.assertNotNull(apiRevisionDeployments);
+        APIRevisionDeployment apiRevisionDeployment = apiRevisionDeployments.get(0);
+        Assert.assertNotNull(apiRevisionDeployment);
+        Assert.assertEquals(apiRevisionDeployment.getDeployment(), deployment);
+        Assert.assertEquals(apiRevisionDeployment.getRevisionUUID(), revisionUUID);
+    }
+
+    /**
+     * Test for updateAPIRevisionDeploymentStatus method
+     * Checks whether the API revision deployment status is updated correctly
+     * @throws APIManagementException if an error occurs while updating revision deployment status
+     */
+    @Test public void testUpdateAPIRevisionDeploymentStatus() throws Exception {
+        String workflowStatus = "APPROVED";
+        String revisionUUID = "821b9664-eeca-4173-9f56-3dc6d46bd6eb";
+        String apiId = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2";
+        String deployment = "default";
+        apiMgtDAO.updateAPIRevisionDeploymentStatus(revisionUUID, workflowStatus, deployment);
+        List<APIRevisionDeployment> apiRevisionDeployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
+        Assert.assertNotNull(apiRevisionDeployments);
+        APIRevisionDeployment apiRevisionDeployment = apiRevisionDeployments.get(0);
+        Assert.assertNotNull(apiRevisionDeployment);
+        Assert.assertEquals(org.wso2.carbon.apimgt.api.WorkflowStatus.APPROVED,apiRevisionDeployment.getStatus());
     }
 
     private OperationPolicyData getOperationPolicyDataObject(String org, String apiUUID, String policyName) throws APIManagementException {

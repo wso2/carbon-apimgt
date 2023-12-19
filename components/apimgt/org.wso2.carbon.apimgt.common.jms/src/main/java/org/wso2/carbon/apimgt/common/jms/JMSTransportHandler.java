@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.jms.factory.JMSConnectionFactory;
 import org.wso2.carbon.apimgt.common.jms.factory.JMSTaskManagerFactory;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +51,17 @@ public class JMSTransportHandler {
     private boolean stopIssued = false;
     private static final Object lock = new Object();
 
-    public JMSTransportHandler(Properties jmsConnectionProperties) {
+    /**
+     * Constructs a JMSTransportHandler with specified JMS connection properties and JMS task manager properties.
+     *
+     * @param jmsConnectionProperties  The JMS connection properties to utilize.
+     *                                 If empty, default properties will be loaded.
+     * @param jmsTaskManagerProperties The properties for JMS task management.
+     *                                 If null, default values will be applied.
+     */
+    public JMSTransportHandler(Properties jmsConnectionProperties,
+                               ThrottleProperties.JMSConnectionProperties
+                                       .JMSTaskManagerProperties jmsTaskManagerProperties) {
 
         Properties properties;
         Hashtable<String, String> parameters = new Hashtable<>();
@@ -71,6 +82,47 @@ public class JMSTransportHandler {
             parameters.put(name, properties.getProperty(name));
         }
         jmsConnectionFactory = new JMSConnectionFactory(parameters, ListenerConstants.CONNECTION_FACTORY_NAME);
+        if (jmsTaskManagerProperties != null) {
+            extractTaskManagerProperties(jmsTaskManagerProperties);
+        }
+    }
+
+    /**
+     * Extracts task manager properties from the provided JMSTaskManagerProperties object.
+     *
+     * @param jmsTaskManagerProperties The JMSTaskManagerProperties object containing task manager configuration.
+     */
+    private void extractTaskManagerProperties(
+            ThrottleProperties.JMSConnectionProperties.JMSTaskManagerProperties jmsTaskManagerProperties) {
+
+        int retrievedMinThreadPoolSize = jmsTaskManagerProperties.getMinThreadPoolSize();
+        if (retrievedMinThreadPoolSize > 0) {
+            minThreadPoolSize = retrievedMinThreadPoolSize;
+        } else {
+            log.warn("Invalid min_thread_pool_size detected. Default value " + minThreadPoolSize + " will be used.");
+        }
+
+        int retrievedMaxThreadPoolSize = jmsTaskManagerProperties.getMaxThreadPoolSize();
+        if (retrievedMaxThreadPoolSize > 0) {
+            maxThreadPoolSize = retrievedMaxThreadPoolSize;
+        } else {
+            log.warn("Invalid max_thread_pool_size detected. Default value " + maxThreadPoolSize + " will be used.");
+        }
+
+        int retrievedKeepAliveTimeInMillis = jmsTaskManagerProperties.getKeepAliveTimeInMillis();
+        if (retrievedKeepAliveTimeInMillis > 0) {
+            keepAliveTimeInMillis = retrievedKeepAliveTimeInMillis;
+        } else {
+            log.warn("Invalid keep_alive_time_in_millis detected. Default value " + keepAliveTimeInMillis
+                             + " will be used.");
+        }
+
+        int retrievedJobQueueSize = jmsTaskManagerProperties.getJobQueueSize();
+        if (retrievedJobQueueSize > 0) {
+            jobQueueSize = retrievedJobQueueSize;
+        } else {
+            log.warn("Invalid job_queue_size detected. Default value " + jobQueueSize + " will be used.");
+        }
     }
 
     /**

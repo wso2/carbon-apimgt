@@ -705,6 +705,11 @@ public class APIMappingUtil {
             apiInfoDTO.setAdditionalPropertiesMap(additionalPropertiesMap);
             apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         }
+        apiInfoDTO.setMonetizedInfo(api.isMonetizationEnabled());
+        apiInfoDTO.setBusinessOwner(api.getBusinessOwner());
+        apiInfoDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
+        apiInfoDTO.setTechnicalOwner(api.getTechnicalOwner());
+        apiInfoDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         return apiInfoDTO;
     }
 
@@ -2274,6 +2279,11 @@ public class APIMappingUtil {
             if (apiProduct.getApiSecurity() != null) {
                 productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
             }
+            productDto.setBusinessOwner(apiProduct.getBusinessOwner());
+            productDto.setBusinessOwnerEmail(apiProduct.getBusinessOwnerEmail());
+            productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
+            productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
+            productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
 
             list.add(productDto);
         }
@@ -3162,6 +3172,12 @@ public class APIMappingUtil {
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
         apiRevisionDeploymentDTO.setName(model.getDeployment());
         apiRevisionDeploymentDTO.setVhost(model.getVhost());
+        if (model.getStatus() != null) {
+            apiRevisionDeploymentDTO.setStatus(
+                    APIRevisionDeploymentDTO.StatusEnum.valueOf(model.getStatus().toString()));
+        } else {
+            apiRevisionDeploymentDTO.setStatus(null);
+        }
         if (model.getRevisionUUID() != null) {
             apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
         }

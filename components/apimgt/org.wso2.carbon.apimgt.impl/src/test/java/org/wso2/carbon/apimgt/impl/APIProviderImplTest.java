@@ -157,7 +157,7 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
         Caching.class, PaginationContext.class, MultitenantUtils.class, AbstractAPIManager.class, OASParserUtil.class,
         KeyManagerHolder.class, CertificateManagerImpl.class , PublisherAPI.class, Organization.class,
         APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class})
-@PowerMockIgnore("org.mockito.*")
+
 public class APIProviderImplTest {
 
     private ApiMgtDAO apimgtDAO;

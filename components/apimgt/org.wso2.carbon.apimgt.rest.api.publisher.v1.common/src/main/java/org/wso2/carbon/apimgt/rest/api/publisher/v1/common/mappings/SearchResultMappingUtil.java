@@ -75,6 +75,11 @@ public class SearchResultMappingUtil {
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
         apiResultDTO.setAdvertiseOnly(api.isAdvertiseOnly());
         apiResultDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
+        apiResultDTO.setBusinessOwner(api.getBusinessOwner());
+        apiResultDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
+        apiResultDTO.setTechnicalOwner(api.getTechnicalOwner());
+        apiResultDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
+        apiResultDTO.setMonetizedInfo(api.isMonetizationEnabled());
         return apiResultDTO;
     }
 
@@ -102,6 +107,11 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setStatus(apiProduct.getState());
         apiProductResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
         apiProductResultDTO.setHasThumbnail(!StringUtils.isBlank(apiProduct.getThumbnailUrl()));
+        apiProductResultDTO.setBusinessOwner(apiProduct.getBusinessOwner());
+        apiProductResultDTO.setBusinessOwnerEmail(apiProduct.getBusinessOwnerEmail());
+        apiProductResultDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
+        apiProductResultDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
+        apiProductResultDTO.setMonetizedInfo(apiProduct.isMonetizationEnabled());
         return apiProductResultDTO;
     }
 

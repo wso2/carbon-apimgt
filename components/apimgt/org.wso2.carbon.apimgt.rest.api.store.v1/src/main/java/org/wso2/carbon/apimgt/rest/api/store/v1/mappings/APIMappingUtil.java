@@ -888,6 +888,7 @@ public class APIMappingUtil {
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
+        apiInfoDTO.setMonetizedInfo(api.isMonetizationEnabled());
 
         return apiInfoDTO;
     }

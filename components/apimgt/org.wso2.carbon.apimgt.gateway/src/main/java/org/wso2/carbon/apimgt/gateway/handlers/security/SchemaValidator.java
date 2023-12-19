@@ -67,6 +67,7 @@ public class SchemaValidator extends AbstractHandler {
             OpenAPIRequest request = new OpenAPIRequest(messageContext);
 
             ValidationReport validationReport = validator.validateRequest(request);
+            messageContext.setProperty(APIMgtGatewayConstants.SCHEMA_VALIDATION_REPORT, validationReport);
             if (validationReport.hasErrors()) {
                 StringBuilder finalMessage = new StringBuilder();
                 for (ValidationReport.Message message : validationReport.getMessages()) {

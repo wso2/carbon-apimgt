@@ -456,6 +456,24 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @DELETE
+    @Path("/{apiId}/cancel-revision-workflow/{revisionId}/{envName}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete Pending Revision Deployment Workflow Tasks", notes = "This operation can be used to remove pending revision deployment requests that are in pending state ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Revisions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Revision deployment pending task removed successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response deleteAPIRevisionDeploymentPendingTask(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("revisionId") String revisionId, @ApiParam(value = "Environment name of an Revision ",required=true) @PathParam("envName") String envName) throws APIManagementException{
+        return delegate.deleteAPIRevisionDeploymentPendingTask(apiId, revisionId, envName, securityContext);
+    }
+
+    @DELETE
     @Path("/{apiId}/operation-policies/{operationPolicyId}")
     
     @Produces({ "application/json" })

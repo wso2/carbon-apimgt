@@ -28,6 +28,11 @@ public class PublisherSearchContent implements SearchContent {
     String status;
     String thumbnailUri;
     Boolean advertiseOnly;
+    String businessOwner;
+    String businessOwnerEmail;
+    String technicalOwner;
+    String technicalOwnerEmail;
+    Boolean isMonetizationEnabled;
 
     @Override
     public String getId() {
@@ -117,5 +122,45 @@ public class PublisherSearchContent implements SearchContent {
 
     public void setAdvertiseOnly(Boolean advertiseOnly) {
         this.advertiseOnly = advertiseOnly;
+    }
+
+    public String getBusinessOwner() {
+        return businessOwner;
+    }
+
+    public void setBusinessOwner(String businessOwner) {
+        this.businessOwner = businessOwner;
+    }
+
+    public String getBusinessOwnerEmail() {
+        return businessOwnerEmail;
+    }
+
+    public void setBusinessOwnerEmail(String businessOwnerEmail) {
+        this.businessOwnerEmail = businessOwnerEmail;
+    }
+
+    public String getTechnicalOwner() {
+        return technicalOwner;
+    }
+
+    public void setTechnicalOwner(String technicalOwner) {
+        this.technicalOwner = technicalOwner;
+    }
+
+    public String getTechnicalOwnerEmail() {
+        return technicalOwnerEmail;
+    }
+
+    public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
+        this.technicalOwnerEmail = technicalOwnerEmail;
+    }
+
+    public Boolean getMonetizationStatus() {
+        return isMonetizationEnabled;
+    }
+
+    public void setMonetizationStatus(Boolean isMonetizationEnabled) {
+        this.isMonetizationEnabled = isMonetizationEnabled;
     }
 }

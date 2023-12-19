@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
+import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -245,11 +246,30 @@ public final class APIMgtDBUtil {
             String revisionUuid = rs.getString("REVISION_UUID");
             String uniqueKey = (environmentName != null ? environmentName : "") +
                     (vhost != null ? vhost : "") + (revisionUuid != null ? revisionUuid : "");
+            String revisionStatus = rs.getString("REVISION_STATUS");
+            WorkflowStatus status = null;
+            if (revisionStatus != null) {
+                switch (revisionStatus) {
+                case "CREATED":
+                    status = WorkflowStatus.CREATED;
+                    break;
+                case "APPROVED":
+                    status = WorkflowStatus.APPROVED;
+                    break;
+                case "REJECTED":
+                    status = WorkflowStatus.REJECTED;
+                    break;
+                default:
+                    // Handle the case where revisionStatus is not one of the expected values
+                    break;
+                }
+            }
             if (!uniqueSet.containsKey(uniqueKey)) {
                 apiRevisionDeployment = new APIRevisionDeployment();
                 apiRevisionDeployment.setDeployment(environmentName);
                 apiRevisionDeployment.setVhost(vhost);
                 apiRevisionDeployment.setRevisionUUID(revisionUuid);
+                apiRevisionDeployment.setStatus(status);
                 apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                 apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
                 apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));

@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.28.180-SNAPSHOT</version>
+        <version>9.28.203-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -359,6 +359,21 @@
                     <argLine>
                         --add-opens=java.xml/jdk.xml.internal=ALL-UNNAMED
                         --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED
+                        --add-opens java.base/java.lang=ALL-UNNAMED 
+                        --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED 
+                        --add-opens java.base/java.util=ALL-UNNAMED 
+                        --add-opens java.base/java.io=ALL-UNNAMED 
+                        --add-opens java.base/java.net=ALL-UNNAMED
+                        --add-opens java.base/sun.security.x509=ALL-UNNAMED
+                        --add-opens java.base/java.security.cert=ALL-UNNAMED
+                        --add-exports java.base/sun.security.x509=ALL-UNNAMED     
+                        --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+                        --add-opens java.base/java.nio.charset=ALL-UNNAMED
+                        --add-opens java.base/java.security=ALL-UNNAMED  
+                        --add-opens java.base/java.math=ALL-UNNAMED
+                        --add-opens java.base/sun.nio.cs=ALL-UNNAMED
+                        --add-opens java.base/java.nio=ALL-UNNAMED
+                        --add-exports java.base/sun.nio.cs=ALL-UNNAMED                 
                     </argLine>
                     <classpathDependencyExcludes>
                         <classpathDependencyExclude>org.ops4j.pax.logging:pax-logging-api</classpathDependencyExclude>

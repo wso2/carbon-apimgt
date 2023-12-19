@@ -83,6 +83,7 @@ public interface ApisApiService {
       public Response deleteAPIDocument(String apiId, String documentId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPILifecycleStatePendingTasks(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIRevision(String apiId, String revisionId, MessageContext messageContext) throws APIManagementException;
+      public Response deleteAPIRevisionDeploymentPendingTask(String apiId, String revisionId, String envName, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPISpecificOperationPolicyByPolicyId(String apiId, String operationPolicyId, MessageContext messageContext) throws APIManagementException;
       public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
