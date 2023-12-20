@@ -64,6 +64,8 @@ public class TelemetryConstants {
      */
     static final String OTLP_CONFIG_URL = "OpenTelemetry.RemoteTracer.Url";
     static final String OPENTELEMETRY_PROPERTIES_PREFIX = "OpenTelemetry.RemoteTracer.Properties.";
+    static final String OTEL_RESOURCE_ATTRIBUTE_CONFIG_KEYS_PREFIX = "OpenTelemetry.ResourceAttributes.";
+    static final String OTEL_RESOURCE_ATTRIBUTES_ENVIRONMENT_VARIABLE_NAME = "OTEL_RESOURCE_ATTRIBUTES";
 
     private TelemetryConstants() {
     }

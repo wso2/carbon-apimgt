@@ -323,6 +323,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.END_USER_NAME)) {
             return (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
         }
+        if (messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.USER_ID)) {
+            return (String) messageContext.getProperty(APIMgtGatewayConstants.USER_ID);
+        }
         return null;
     }
 
