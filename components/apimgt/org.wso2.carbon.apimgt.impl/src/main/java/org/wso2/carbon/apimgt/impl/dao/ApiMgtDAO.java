@@ -5658,6 +5658,55 @@ public class ApiMgtDAO {
         return workflowDTO;
     }
 
+    /**
+     * Returns a workflow object for a given internal workflow reference and the workflow type.
+     *
+     * @param workflowReference Internal workflow reference
+     * @param workflowType      Workflow type
+     * @return List<WorkflowDTO> List of workflow objects
+     * @throws APIManagementException if failed to retrieve workflow details
+     */
+    public List<WorkflowDTO> retrieveAllWorkflowFromInternalReference(String workflowReference, String workflowType)
+            throws APIManagementException {
+
+        List<WorkflowDTO> workflowDTOList = new ArrayList<>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL)) {
+            statement.setString(1, workflowReference);
+            statement.setString(2, workflowType);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    WorkflowDTO workflowDTO = WorkflowExecutorFactory.getInstance()
+                            .createWorkflowDTO(rs.getString("WF_TYPE"));
+                    workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
+                    workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+                    workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                    workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
+                    workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                    workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
+                    workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+                    workflowDTOList.add(workflowDTO);
+                    InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
+
+                    if (metadataBlob != null) {
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
+                        Gson metadataGson = new Gson();
+                        JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
+                        workflowDTO.setMetadata(metadataJson);
+                    } else {
+                        JSONObject metadataJson = new JSONObject();
+                        workflowDTO.setMetadata(metadataJson);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving workflow details for " + workflowReference, e);
+        }
+        return workflowDTOList;
+    }
+
     private void setPublishedDefVersion(APIIdentifier apiId, Connection connection, String value)
             throws APIManagementException {
 
@@ -16742,6 +16791,37 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Update the status of the Revision deployment process
+     *
+     * @param revisionUUID UUID of the Revision
+     * @param status       Status of the Revision deployment
+     * @param environment  Environment of the Revision deployment
+     * @throws APIManagementException if an error occurs when updating the status of the Revision deployment
+     */
+    public void updateAPIRevisionDeploymentStatus(String revisionUUID, String status, String environment)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection
+                    .prepareStatement(SQLConstants.APIRevisionSqlConstants.UPDATE_API_REVISION_STATUS_SQL)) {
+                statement.setString(1, status);
+                statement.setString(2, revisionUUID);
+                statement.setString(3, environment);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException(
+                        "Failed to update API Revision deployment mapping details for revision: " + revisionUUID, e);
+            }
+        } catch (SQLException e) {
+            handleException("Could not open database connection", e);
+        }
+
+    }
+
+    /**
      * Get APIRevisionDeployment details by providing deployment name and revision uuid
      *
      * @return APIRevisionDeployment object
@@ -16803,6 +16883,38 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to get API Revision deployment mapping details for revision uuid: " +
                     revisionUUID, e);
+        }
+        return apiRevisionDeploymentList;
+    }
+
+    /**
+     * Get APIRevisionDeployment details
+     *
+     * @param apiUUID        API UUID
+     * @param workflowStatus Workflow status
+     * @return List<APIRevisionDeployment> APIRevisionDeployment list
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(String apiUUID,
+            String workflowStatus) throws APIManagementException {
+
+        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(
+                        SQLConstants.APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_REVISION_STATUS_AND_API_UUID)) {
+            statement.setString(1, workflowStatus);
+            statement.setString(2, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    String environmentName = rs.getString("NAME");
+                    apiRevisionDeployment.setDeployment(environmentName);
+                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevisionDeploymentList.add(apiRevisionDeployment);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API Revision deployment mapping details", e);
         }
         return apiRevisionDeploymentList;
     }
@@ -18507,7 +18619,7 @@ public class ApiMgtDAO {
 
         OperationPolicySpecification policySpecification = policyData.getSpecification();
         String dbQuery = SQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY;
-        String policyUUID = policyData.getPolicyId();;
+        String policyUUID = policyData.getPolicyId();
         if (policyUUID == null) {
             policyUUID = UUID.randomUUID().toString();
         }
@@ -19919,7 +20031,7 @@ public class ApiMgtDAO {
             List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException {
 
         if (!updatedPoliciesMap.keySet().contains(policy.getPolicyId())) {
-            //Check whether API Specific policies available
+            //Check whether API specific policies available
             OperationPolicyData existingPolicy =
                     getAPISpecificOperationPolicyByPolicyID(connection, policy.getPolicyId(), apiUUID, tenantDomain,
                             false);
