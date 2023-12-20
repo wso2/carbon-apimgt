@@ -18619,7 +18619,7 @@ public class ApiMgtDAO {
 
         OperationPolicySpecification policySpecification = policyData.getSpecification();
         String dbQuery = SQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY;
-        String policyUUID = policyData.getPolicyId();;
+        String policyUUID = policyData.getPolicyId();
         if (policyUUID == null) {
             policyUUID = UUID.randomUUID().toString();
         }
@@ -20031,7 +20031,7 @@ public class ApiMgtDAO {
             List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException {
 
         if (!updatedPoliciesMap.keySet().contains(policy.getPolicyId())) {
-            //Check whether API Specific policies available
+            //Check whether API specific policies available
             OperationPolicyData existingPolicy =
                     getAPISpecificOperationPolicyByPolicyID(connection, policy.getPolicyId(), apiUUID, tenantDomain,
                             false);
