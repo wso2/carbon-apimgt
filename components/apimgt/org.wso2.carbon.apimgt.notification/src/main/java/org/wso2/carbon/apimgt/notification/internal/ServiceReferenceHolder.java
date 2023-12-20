@@ -39,6 +39,7 @@ public class ServiceReferenceHolder {
 
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("MS_EXPOSE_REP")
     public static ServiceReferenceHolder getInstance() {
 
         return instance;

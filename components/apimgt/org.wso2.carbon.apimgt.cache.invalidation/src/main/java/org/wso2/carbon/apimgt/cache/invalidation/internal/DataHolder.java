@@ -38,6 +38,7 @@ public class DataHolder {
 
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("MS_EXPOSE_REP")
     public static DataHolder getInstance() {
 
         return instance;

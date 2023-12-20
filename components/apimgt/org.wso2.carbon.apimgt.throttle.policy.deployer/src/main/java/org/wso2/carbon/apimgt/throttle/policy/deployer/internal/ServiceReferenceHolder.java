@@ -35,6 +35,7 @@ public class ServiceReferenceHolder {
     private APIManagerConfiguration apimConfiguration;
     private EventProcessorService eventProcessorService;
 
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("MS_EXPOSE_REP")
     public static ServiceReferenceHolder getInstance() {
         return instance;
     }
