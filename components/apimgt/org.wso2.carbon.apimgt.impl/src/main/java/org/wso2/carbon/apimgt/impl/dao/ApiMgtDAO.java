@@ -20451,7 +20451,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                updateGatewayGlobalPolicyMetadata(connection, mappingUUID, orgId, name, description);
+                updateGatewayGlobalPolicyMetadata(connection, description, name, orgId, mappingUUID);
                 addGatewayPolicyMapping(connection, gatewayGlobalPolicyList, mappingUUID, orgId);
                 connection.commit();
                 return mappingUUID;
