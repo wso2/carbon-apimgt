@@ -363,7 +363,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                         tenantFlowStarted = true;
                         new GatewayPolicyDeployer(
                                 gatewayPolicyEvent.getGatewayPolicyMappingUuid()).deployGatewayPolicyMapping();
-                    } catch (ArtifactSynchronizerException e) {
+                    } catch (ArtifactSynchronizerException | APIManagementException e) {
                         log.error("Error in deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
                                 + "in the Gateway");
                     } finally {
@@ -380,7 +380,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                         tenantFlowStarted = true;
                         new GatewayPolicyDeployer(
                                 gatewayPolicyEvent.getGatewayPolicyMappingUuid()).undeployGatewayPolicyMapping();
-                    } catch (ArtifactSynchronizerException e) {
+                    } catch (ArtifactSynchronizerException | APIManagementException e) {
                         log.error("Error while un-deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
                                 + "from the Gateway");
                     } finally {

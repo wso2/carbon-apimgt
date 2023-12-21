@@ -23,6 +23,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.GatewayPolicyDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
@@ -60,9 +62,10 @@ public class GatewayPolicyDeployer {
     /**
      * Deploy gateway policy in the gateway using the deployGatewayPolicy method in gateway admin.
      *
-     * @throws ArtifactSynchronizerException
+     * @throws ArtifactSynchronizerException - If an error occurs while retrieving the gateway policy artifact.
+     * @throws APIManagementException        - If an error occurs while deploying the gateway policy artifact.
      */
-    public void deployGatewayPolicyMapping() throws ArtifactSynchronizerException {
+    public void deployGatewayPolicyMapping() throws ArtifactSynchronizerException, APIManagementException {
         try {
             GatewayPolicyDTO gatewayPolicyDTO = retrieveGatewayPolicyArtifact(gatewayPolicyMappingUuid);
             if (gatewayPolicyDTO != null) {
@@ -74,16 +77,17 @@ public class GatewayPolicyDeployer {
                 log.error("Gateway policy artifact is not found for the policy mapping: " + gatewayPolicyMappingUuid);
             }
         } catch (AxisFault e) {
-            throw new RuntimeException(e);
+            throw new APIManagementException("Error encountered while deploying gateway policy mapping.", e);
         }
     }
 
     /**
      * Undeploy gateway policy in the gateway using the unDeployGatewayPolicy method in gateway admin.
      *
-     * @throws ArtifactSynchronizerException
+     * @throws ArtifactSynchronizerException - If an error occurs while retrieving the gateway policy artifact.
+     * @throws APIManagementException        - If an error occurs while un-deploying the gateway policy artifact.
      */
-    public void undeployGatewayPolicyMapping() throws ArtifactSynchronizerException {
+    public void undeployGatewayPolicyMapping() throws ArtifactSynchronizerException, APIManagementException {
         try {
             GatewayPolicyDTO gatewayPolicyDTO = retrieveGatewayPolicyArtifact(gatewayPolicyMappingUuid);
             if (gatewayPolicyDTO != null) {
@@ -93,7 +97,7 @@ public class GatewayPolicyDeployer {
                 apiGatewayAdmin.unDeployGatewayPolicy(gatewayPolicyDTO);
             }
         } catch (AxisFault e) {
-            throw new RuntimeException(e);
+            throw new APIManagementException("Error encountered while undeploying gateway policy mapping.", e);
         }
     }
 
