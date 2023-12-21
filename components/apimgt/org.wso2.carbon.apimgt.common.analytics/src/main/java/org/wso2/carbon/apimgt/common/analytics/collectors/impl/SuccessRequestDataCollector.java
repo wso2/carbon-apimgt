@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.common.analytics.collectors.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.analytics.Constants;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.RequestDataCollector;
@@ -40,8 +39,6 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
     private static final Log log = LogFactory.getLog(SuccessRequestDataCollector.class);
     private RequestDataPublisher processor;
     private AnalyticsDataProvider provider;
-    private Boolean isResponseSizeRequested = false;
-
     public SuccessRequestDataCollector(AnalyticsDataProvider provider, RequestDataPublisher processor) {
         super(provider);
         this.processor = processor;
