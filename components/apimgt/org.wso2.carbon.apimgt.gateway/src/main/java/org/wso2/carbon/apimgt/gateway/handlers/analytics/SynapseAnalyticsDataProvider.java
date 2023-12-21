@@ -68,7 +68,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
-import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.HTTP_METHOD;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
@@ -175,9 +174,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                 org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate uriTemplateObj
                         = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate();
                 if (uriTemplate.getHttpMethod() != null && uriTemplate.getHttpMethod()
-                        .equals(messageContext.getProperty(HTTP_METHOD)) && uriTemplate.getUrlPattern() != null
-                        && uriTemplate.getUrlPattern().equals(messageContext.getProperty("API_ELECTED_RESOURCE"))) {
-
+                        .equals(messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD))
+                        && uriTemplate.getUrlPattern() != null && uriTemplate.getUrlPattern()
+                        .equals(messageContext.getProperty("API_ELECTED_RESOURCE"))) {
                     uriTemplateObj.setResourceURI(uriTemplate.getUrlPattern());
                     uriTemplateObj.setHttpVerb(uriTemplate.getHttpMethod());
                     uriTemplateObj.setAuthScheme(uriTemplate.getAuthScheme());
@@ -234,7 +233,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public Operation getOperation() throws DataNotFoundException {
 
-        String httpMethod = (String) messageContext.getProperty(HTTP_METHOD);
+        String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
         String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
         Operation operation = new Operation();
         operation.setApiMethod(httpMethod);
