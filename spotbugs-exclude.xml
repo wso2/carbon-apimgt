@@ -1,9 +1,72 @@
 <FindBugsFilter>
     <!-- false-positive. See details at https://github.com/spotbugs/spotbugs/issues/1601 -->
+    
     <Match>
+        <Class name="org.wso2.carbon.apimgt.cache.invalidation.internal.DataHolder"/>
+        <Bug pattern="MS_EXPOSE_REP, EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder"/>
+        <Bug pattern="MS_EXPOSE_REP, EI_EXPOSE_REP2, EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO"/>
+        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
     <Match>
-        <Bug pattern="EI_EXPOSE_REP"/>
+        <Class name="org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.common.analytics.publishers.dto.Event"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2, MS_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.common.analytics.publishers.impl.AnalyticsDataPublisher"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match> 
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.notification.internal.ServiceReferenceHolder"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2, MS_EXPOSE_REP"/>
+    </Match> 
+     <Match>
+        <Class name="org.wso2.carbon.apimgt.notification.event.Event"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>    
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.notification.TokenRevocationNotifierImpl"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match> 
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2, MS_EXPOSE_REP"/>
+    </Match> 
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.cache.invalidation.APIMgtCacheInvalidationListener"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match> 
+        <Match>
+        <Class name="org.wso2.carbon.apimgt.cache.invalidation.APIMgtCacheInvalidationRequestSender"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match> 
+    <Match>
+        <Package name="org.wso2.carbon.apimgt.common.gateway.dto.*"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Package name="org.wso2.carbon.apimgt.throttle.policy.deployer.dto.*"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
 </FindBugsFilter>

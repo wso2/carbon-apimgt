@@ -32,7 +32,6 @@ public class AnalyticsServiceReferenceHolder {
 
     }
 
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("MS_EXPOSE_REP")
     public static AnalyticsServiceReferenceHolder getInstance() {
         return instance;
     }
