@@ -103,7 +103,7 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
                 List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
-                for(OperationPolicy operationPolicy: urlMapping.getOperationPolicies()) {
+                for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
                     OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
                     operationPolicyDTO.setPolicyId(operationPolicy.getPolicyId());
                     operationPolicyDTO.setPolicyName(operationPolicy.getPolicyName());
@@ -117,7 +117,7 @@ public class SubscriptionValidationDataUtil {
                 urlMappingsDTO.add(urlMappingDTO);
             }
             List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
-            for(OperationPolicy apiPolicy: model.getApiPolicies()) {
+            for (OperationPolicy apiPolicy : model.getApiPolicies()) {
                 OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
                 operationPolicyDTO.setPolicyId(apiPolicy.getPolicyId());
                 operationPolicyDTO.setPolicyName(apiPolicy.getPolicyName());
@@ -159,7 +159,7 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
                 List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
-                for(OperationPolicy operationPolicy: urlMapping.getOperationPolicies()) {
+                for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
                     OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
                     operationPolicyDTO.setPolicyId(operationPolicy.getPolicyId());
                     operationPolicyDTO.setPolicyName(operationPolicy.getPolicyName());
@@ -173,7 +173,7 @@ public class SubscriptionValidationDataUtil {
                 urlMappingsDTO.add(urlMappingDTO);
             }
             List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
-            for(OperationPolicy apiPolicy: model.getApiPolicies()) {
+            for (OperationPolicy apiPolicy : model.getApiPolicies()) {
                 OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
                 operationPolicyDTO.setPolicyId(apiPolicy.getPolicyId());
                 operationPolicyDTO.setPolicyName(apiPolicy.getPolicyName());
