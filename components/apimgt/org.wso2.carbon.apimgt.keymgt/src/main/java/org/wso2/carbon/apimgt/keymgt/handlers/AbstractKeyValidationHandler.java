@@ -411,11 +411,11 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             if (subPolicy.getRateLimitTimeUnit() != null) {
                 spikeArrestUnit = subPolicy.getRateLimitTimeUnit();
             }
-            if (appPolicy.getRateLimitCount() > 0) {
-                applicationSpikeArrest = appPolicy.getRateLimitCount();
+            if (appPolicy.getBurstLimit().getRateLimitCount() > 0) {
+                applicationSpikeArrest = appPolicy.getBurstLimit().getRateLimitCount();
             }
-            if (appPolicy.getRateLimitTimeUnit() != null) {
-                applicationSpikeArrestUnit = appPolicy.getRateLimitTimeUnit();
+            if (appPolicy.getBurstLimit().getRateLimitTimeUnit() != null) {
+                applicationSpikeArrestUnit = appPolicy.getBurstLimit().getRateLimitTimeUnit();
             }
             stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
             if (subPolicy.getGraphQLMaxDepth() > 0) {
@@ -537,11 +537,11 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             if (subPolicy.getRateLimitTimeUnit() != null) {
                 spikeArrestUnit = subPolicy.getRateLimitTimeUnit();
             }
-            if(appPolicy.getRateLimitCount() > 0) {
-                applicationSpikeArrest = appPolicy.getRateLimitCount();
+            if (appPolicy.getBurstLimit().getRateLimitCount() > 0) {
+                applicationSpikeArrest = appPolicy.getBurstLimit().getRateLimitCount();
             }
-            if(appPolicy.getRateLimitTimeUnit() != null) {
-                applicationSpikeArrestUnit = appPolicy.getRateLimitTimeUnit();
+            if (appPolicy.getBurstLimit().getRateLimitTimeUnit() != null) {
+                applicationSpikeArrestUnit = appPolicy.getBurstLimit().getRateLimitTimeUnit();
             }
             stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
             if (subPolicy.getGraphQLMaxDepth() > 0) {

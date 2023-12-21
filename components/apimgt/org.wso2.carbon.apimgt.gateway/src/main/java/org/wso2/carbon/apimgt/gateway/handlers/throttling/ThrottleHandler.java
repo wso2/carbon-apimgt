@@ -384,8 +384,10 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     isThrottled(applicationLevelThrottleKey);
                             //if application level not throttled means it does not throttled at any level.
                             if (!isApplicationLevelThrottled) {
-                                isApplicationLevelSpikeThrottled = isApplicationLevelSpike(synCtx,
-                                        applicationLevelThrottleKey);
+                                if (authenticationContext.getApplicationSpikesArrestLimit() > 0) {
+                                    isApplicationLevelSpikeThrottled = isApplicationLevelSpike(synCtx,
+                                            applicationLevelThrottleKey);
+                                }
                                 if (!isApplicationLevelSpikeThrottled) {
                                     for (VerbInfoDTO verbInfo : verbInfoDTOList) {
                                         resourceLevelThrottleKey = verbInfo.getRequestKey();
