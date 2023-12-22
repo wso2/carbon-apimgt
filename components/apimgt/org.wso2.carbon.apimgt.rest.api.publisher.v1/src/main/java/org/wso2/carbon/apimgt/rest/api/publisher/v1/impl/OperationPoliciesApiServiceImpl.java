@@ -173,8 +173,8 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
             int policyUsageInGatewayPolicyMappings = apiProvider.getPolicyUsageByPolicyUUIDInGatewayPolicies(
                     operationPolicyId);
             if (policyUsageInGatewayPolicyMappings > 0) {
-                RestApiUtil.handleConflict("Common operation policy: " + operationPolicyId +
-                        " is already used in gateway policies. Cannot delete the policy", log);
+                RestApiUtil.handleConflict("Common operation policy: " + operationPolicyId
+                        + " is already used in gateway policies. Cannot delete the policy", log);
             } else if (existingPolicy != null) {
                 apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
                 if (log.isDebugEnabled()) {

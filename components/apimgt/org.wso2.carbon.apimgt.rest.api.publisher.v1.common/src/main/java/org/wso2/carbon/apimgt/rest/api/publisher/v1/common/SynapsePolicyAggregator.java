@@ -245,7 +245,7 @@ public class SynapsePolicyAggregator {
     }
 
     /**
-     * Render the gateway level policy mapping
+     * Render the gateway level policy mapping.
      *
      * @param gatewayPolicyDataList List of gateway policy data
      * @param gatewayPolicies       List of gateway policies
@@ -301,10 +301,8 @@ public class SynapsePolicyAggregator {
                                     try {
                                         sanitizedPolicy = sanitizeOMElementWithSuperParentNode(renderedTemplate);
                                     } catch (Exception e) {
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("Cannot wrap the policy " + policy.getPolicyName()
-                                                    + " with a super parent. Trying without wrapping.");
-                                        }
+                                        log.debug("Cannot wrap the policy " + policy.getPolicyName()
+                                                + " with a super parent. Trying without wrapping.");
                                         // As we can't wrap the policy definition with a super parent, trying the build
                                         // OM element with the provided policy definition. This will select first child
                                         // node and drop the other child nodes if a parent node is not configured.

@@ -149,6 +149,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         return flag;
     }
 
+    /**
+     * Deploy gateway policy artifacts at server startup.
+     *
+     * @param tenantDomain tenant domain
+     * @return true if deployment is successful
+     * @throws ArtifactSynchronizerException if an error occurs while deploying gateway policy artifacts
+     */
     private boolean deployGatewayPolicyArtifactsAtStartup(String tenantDomain) throws ArtifactSynchronizerException {
 
         GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
@@ -263,7 +270,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 } catch (ArtifactSynchronizerException e) {
                     log.error("Error in Deploying APIs to gateway", e);
                 }
-                // Logic becomes too complex and less readable if we consolidated, better to keep the blocks separate, especially since it enhances code clarity and maintainability
+                // Logic becomes too complex and less readable if we consolidated, better to keep the blocks separate,
+                // especially since it enhances code clarity and maintainability
                 try {
                     deployGatewayPoliciesInSyncMode(tenantDomain);
                 } catch (ArtifactSynchronizerException e) {
@@ -296,11 +304,16 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         }
     }
 
+    /**
+     * Deploy all gateway policy artifacts in synchronous mode
+     *
+     * @param tenantDomain tenant domain
+     * @throws ArtifactSynchronizerException if an error occurs while deploying gateway policy artifacts
+     */
     private void deployGatewayPoliciesInSyncMode(String tenantDomain) throws ArtifactSynchronizerException {
 
-        if (debugEnabled) {
-            log.debug("Deploying gateway policy artifacts in synchronous mode");
-        }
+        log.debug("Deploying gateway policy artifacts in synchronous mode");
+
         syncModeGatewayPolicyDeploymentCount++;
         isGatewayPoliciesDeployedInSyncMode = deployGatewayPolicyArtifactsAtStartup(tenantDomain);
         DataHolder.getInstance().setAllGatewayPoliciesDeployed(isGatewayPoliciesDeployedInSyncMode);
@@ -391,9 +404,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
     private void deployGatewayPolicyArtifactsInGateway(String tenantDomain) throws ArtifactSynchronizerException {
 
-        if (debugEnabled) {
-            log.debug("Deploying gateway policy artifacts in asynchronous mode");
-        }
+        log.debug("Deploying gateway policy artifacts in asynchronous mode");
 
         long retryDuration = gatewayArtifactSynchronizerProperties.getRetryDuartion();
         int maxRetryCount = gatewayArtifactSynchronizerProperties.getMaxRetryCount();

@@ -72,7 +72,7 @@ public interface APIAdmin  {
     void deleteEnvironment(String tenantDomain, String uuid) throws APIManagementException;
 
     /**
-     * Checks whether the given environment has active gateway policy deployments
+     * Checks whether the given environment has active gateway policy deployments.
      *
      * @param tenantDomain tenant domain
      * @param uuid         Environment identifier

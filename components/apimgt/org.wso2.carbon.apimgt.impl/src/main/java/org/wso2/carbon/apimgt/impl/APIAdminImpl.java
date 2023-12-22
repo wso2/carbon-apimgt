@@ -175,6 +175,7 @@ public class APIAdminImpl implements APIAdmin {
         }
         apiMgtDAO.deleteEnvironment(uuid);
     }
+
     @Override
     public boolean hasExistingDeployments(String tenantDomain, String uuid) throws APIManagementException {
         Environment existingEnv = getEnvironment(tenantDomain, uuid);
@@ -213,6 +214,14 @@ public class APIAdminImpl implements APIAdmin {
         return updatedEnvironment;
     }
 
+    /**
+     * Update the gateway label name for the gateway policies if the environment name is changed.
+     *
+     * @param oldLabel     Old gateway label name
+     * @param newLabel     New gateway label name
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException If failed to update the gateway label name
+     */
     private void updateGatewayLabelNameForGatewayPolicies(String oldLabel, String newLabel, String tenantDomain)
             throws APIManagementException {
         if (StringUtils.isNotEmpty(apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(oldLabel, tenantDomain))) {

@@ -3984,9 +3984,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         rolesQuery.append(")");
-        if(log.isDebugEnabled()) {
-            log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
-        }
+        log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
         return APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString();
     }
 
@@ -6674,7 +6672,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Retrieve gateway policies mapping UUID attached to the gateway
+     * Retrieve gateway policies mapping UUID attached to the gateway.
      *
      * @param gatewayLabels List of gateway labels
      * @param orgId         Organization ID
@@ -6700,7 +6698,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Update globally added policies to the flows
+     * Update globally added policies to the flows.
      *
      * @param gatewayGlobalPolicyList List of Gateway Policy objects to be updated
      * @param orgId                   Organization ID
@@ -6819,7 +6817,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
         GatewayPolicyData metadata = apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(
                 gatewayPolicyMappingId);
-        return metadata != null && Objects.equals(metadata.getPolicyMappingId(), gatewayPolicyMappingId);
+        return metadata != null && metadata.getPolicyMappingId().equals(gatewayPolicyMappingId);
     }
 
     @Override
@@ -6829,7 +6827,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * To get the hashmap of what mappingId is deployed or undeployed in which gateway
+     * To get the hashmap of what mappingId is deployed or undeployed in which gateway.
      */
     private Map<String, Set<String>> getGatewayPolicyDeploymentMap(List<GatewayPolicyDeployment>
             gatewayPolicyDeploymentList) {

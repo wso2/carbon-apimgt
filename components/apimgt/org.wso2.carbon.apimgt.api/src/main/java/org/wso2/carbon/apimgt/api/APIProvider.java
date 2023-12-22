@@ -1718,7 +1718,7 @@ public interface APIProvider extends APIManager {
 
 
     /**
-     * Apply globally added policies to the flows
+     * Apply globally added policies to the flows.
      *
      * @param gatewayGlobalPolicyList   List of Gateway Policy objects
      * @param orgId                     Organization ID
@@ -1729,7 +1729,7 @@ public interface APIProvider extends APIManager {
             String orgId) throws APIManagementException;
 
     /**
-     * Engage globally added policies to the gateways
+     * Engage globally added policies to the gateways.
      *
      * @param gatewayPolicyDeploymentMap Policy mapping deployment metadata map
      * @param orgId                      Organization ID
@@ -1751,7 +1751,7 @@ public interface APIProvider extends APIManager {
             boolean isWithPolicyDefinition) throws APIManagementException;
 
     /**
-     * Get gateway policies attached to the policy mapping
+     * Get gateway policies attached to the policy mapping.
      *
      * @param policyMappingUUID Policy mapping UUID
      * @return List of gateway Policies
@@ -1760,7 +1760,7 @@ public interface APIProvider extends APIManager {
     List<OperationPolicy> getOperationPoliciesOfPolicyMapping(String policyMappingUUID) throws APIManagementException;
 
     /**
-     * Get gateway policies mapping UUID attached to the gateway
+     * Get gateway policies mapping UUID attached to the gateway.
      *
      * @param gatewayLabel Gateway label
      * @param orgId        Organization ID
@@ -1780,7 +1780,7 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
-     * Update globally added policies to the flows
+     * Update globally added policies to the flows.
      *
      * @param gatewayGlobalPolicyList List of Gateway Policy objects to be updated
      * @param orgId                   Organization ID
@@ -1857,6 +1857,7 @@ public interface APIProvider extends APIManager {
 
     /**
      * Checks whether a common policy exists based on the provided common policy UUID within gateway policy mappings.
+     *
      * @param commonPolicyUUID Common policy UUID
      * @return count of the common policy usage
      * @throws APIManagementException

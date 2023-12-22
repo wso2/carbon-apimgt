@@ -80,7 +80,7 @@ public interface ArtifactRetriever {
     String getName();
 
     /**
-     * This method is used to retrieve gateway policy data from the storage
+     * Retrieve gateway policy data from the storage.
      *
      * @param mappingUUID - UUID of the Gateway Policy Mapping
      * @return A String contains all the information about the gateway policy artifacts
@@ -89,7 +89,7 @@ public interface ArtifactRetriever {
     String retrieveGatewayPolicyArtifacts(String mappingUUID) throws ArtifactSynchronizerException;
 
     /**
-     * This method is used to retrieve gateway policy data from the storage
+     * Retrieve gateway policy data from the storage.
      *
      * @param gatewayLabel - Label subscribed by the gateway
      * @param tenantDomain - Tenant Domain

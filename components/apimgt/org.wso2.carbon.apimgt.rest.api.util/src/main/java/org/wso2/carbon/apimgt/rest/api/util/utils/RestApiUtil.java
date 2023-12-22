@@ -467,7 +467,7 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns a new PreconditionFailedException
+     * Returns a new PreconditionFailedException.
      *
      * @param message summary of the error
      * @param description description of the exception
@@ -971,7 +971,7 @@ public class RestApiUtil {
     }
 
     /**
-     * Logs the error, builds a PreconditionFailedException with specified details and throws it
+     * Logs the error, builds a PreconditionFailedException with specified details and throws it.
      *
      * @param description description of the error
      * @param log Log instance

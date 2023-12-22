@@ -20404,7 +20404,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add new gateway global policy mappings to the database
+     * Add new gateway global policy mappings to the database.
      *
      * @param gatewayGlobalPolicyList      List of applied policies for each direction in the gateways
      * @param orgId                        organization ID
@@ -20435,7 +20435,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Update gateway global policy mappings in the database
+     * Update gateway global policy mappings in the database.
      *
      * @param gatewayGlobalPolicyList      Updated list of applied policies for each direction in the gateways
      * @param orgId                        organization ID
@@ -20466,7 +20466,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add gateway policy deployment mapping records to the database
+     * Add gateway policy deployment mapping records to the database.
      *
      * @param gatewayPolicyDeploymentList       content of the policy deployment mapping objects
      * @throws APIManagementException           if an error occurs when adding a new gateway policy deployment mapping
@@ -20488,7 +20488,6 @@ public class ApiMgtDAO {
                 }
                 statement.executeBatch();
                 connection.commit();
-
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to add Gateway Policy Deployment Mapping", e);
@@ -20499,7 +20498,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Remove gateway policy deployment mapping records from the database
+     * Remove gateway policy deployment mapping records from the database.
      *
      * @param gatewayPolicyUnDeploymentList     content of the policy un-deployment mapping objects
      * @throws APIManagementException           if an error occurs when adding a new gateway policy deployment mapping
@@ -20521,7 +20520,6 @@ public class ApiMgtDAO {
                 }
                 statement.executeBatch();
                 connection.commit();
-
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to remove Gateway Policy Deployment Mapping", e);
@@ -20532,7 +20530,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Remove gateway policy deployment mapping records corresponding to a mapping UUID from the database
+     * Remove gateway policy deployment mapping records corresponding to a mapping UUID from the database.
      *
      * @param mappingUUID               UUID of the policy mapping
      * @throws APIManagementException   if an error occurs when adding a new gateway policy deployment mapping
@@ -20590,7 +20588,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get gateway policies attached to the policy mapping
+     * Get gateway policies attached to the policy mapping.
      *
      * @param policyMappingUUID Policy mapping UUID
      * @return List of gateway policies
@@ -20617,7 +20615,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get gateway policies mapping UUID attached to the gateway
+     * Get gateway policies mapping UUID attached to the gateway.
      *
      * @param gatewayLabels Array of gateway labels
      * @return Policy mapping UUID
@@ -20651,7 +20649,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get gateway policies mapping UUID attached to the gateway
+     * Get gateway policies mapping UUID attached to the gateway.
      *
      * @param gatewayLabel Gateway label
      * @param orgId        Organization Id
@@ -20715,7 +20713,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get the gateway labels attached to the gateway policy mapping
+     * Get the gateway labels attached to the gateway policy mapping.
      *
      * @param policyMappingUUID Policy mapping UUID
      * @return Set of gateway labels
@@ -20744,7 +20742,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Delete a gateway policy mapping by providing the policy mapping UUID
+     * Delete a gateway policy mapping by providing the policy mapping UUID.
      *
      * @param gatewayPolicyMappingId UUID of the policy mapping to be deleted
      * @param shouldRemoveMetaData   Whether to remove the metadata of the policy mapping when deleting and
@@ -20783,7 +20781,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Retrieve gateway policy mapping metadata for a organization
+     * Retrieve gateway policy mapping metadata for a organization.
      *
      * @param organization Organization
      * @return List of gateway policy metadata
@@ -20800,7 +20798,6 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     GatewayPolicyData gatewayPolicyData = populateGatewayPolicyDataWithRS(rs);
-
                     gatewayPolicyMetaDataList.add(gatewayPolicyData);
                 }
             }
@@ -20812,7 +20809,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Retrieve gateway policy mapping metadata by gateway policy mapping UUID
+     * Retrieve gateway policy mapping metadata by gateway policy mapping UUID.
      *
      * @param policyMappingUUID Policy mapping UUID
      * @return Gateway policy metadata
@@ -20859,7 +20856,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Retrieve gateway policy mapping metadata by gateway label
+     * Retrieve gateway policy mapping metadata by gateway label.
      *
      * @param gatewayLabel Gateway label
      * @param organization Organization

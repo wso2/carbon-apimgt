@@ -903,7 +903,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     /**
-     * Deploy gateway policy sequences to gateway
+     * Deploy gateway policy sequences to gateway.
      *
      * @param gatewayPolicyDTO Policy sequences data object
      * @throws AxisFault
@@ -934,7 +934,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
     /**
-     * Undeploy gateway policy sequences from gateway
+     * Undeploy gateway policy sequences from gateway.
      *
      * @param gatewayPolicyDTO Policy sequences data object
      * @throws AxisFault

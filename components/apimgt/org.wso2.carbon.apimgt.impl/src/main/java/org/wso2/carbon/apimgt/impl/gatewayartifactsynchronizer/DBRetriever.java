@@ -281,7 +281,6 @@ public class DBRetriever implements ArtifactRetriever {
                         gatewayPolicyArtifactsArray.add(jsonArray.getString(i));
                     }
                 }
-
             }
             return gatewayPolicyArtifactsArray;
         } catch (IOException e) {

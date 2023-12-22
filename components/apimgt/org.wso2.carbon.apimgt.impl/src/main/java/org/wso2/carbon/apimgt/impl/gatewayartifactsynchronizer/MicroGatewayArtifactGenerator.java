@@ -117,7 +117,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
     }
 
     /**
-     * This method is not used in Microgateway
+     * This method is not used in Microgateway.
      */
     @Override
     public RuntimeArtifactDto generateGatewayPolicyArtifact(

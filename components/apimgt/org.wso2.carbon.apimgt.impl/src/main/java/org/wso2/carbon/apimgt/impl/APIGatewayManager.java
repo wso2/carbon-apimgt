@@ -119,28 +119,38 @@ public class APIGatewayManager {
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
     }
 
+    /**
+     * Send an event to gateway to deploy the policy mapping.
+     *
+     * @param mappingUuid       UUID of the policy mapping
+     * @param tenantDomain      tenant domain of the policy mapping
+     * @param publishedGateways set of gateways to which the policy mapping is published
+     */
     private void sendGatewayPolicyDeploymentEvent(String mappingUuid, String tenantDomain, Set<String> publishedGateways) {
 
         GatewayPolicyEvent deployGatewayPolicyEvent = new GatewayPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.DEPLOY_POLICY_MAPPING_IN_GATEWAY.name(), tenantDomain, mappingUuid,
                 publishedGateways);
         APIUtil.sendNotification(deployGatewayPolicyEvent, APIConstants.NotifierType.GATEWAY_POLICY.name());
-        if (debugEnabled) {
-            log.debug("Event sent to Gateway with eventID " + deployGatewayPolicyEvent.getEventId() + " for policy mapping "
-                    + "with UUID " + mappingUuid + " at " + deployGatewayPolicyEvent.getTimeStamp());
-        }
+        log.debug("Event sent to Gateway with eventID " + deployGatewayPolicyEvent.getEventId() + " for policy mapping "
+                + "with UUID " + mappingUuid + " at " + deployGatewayPolicyEvent.getTimeStamp());
     }
 
+    /**
+     * Send an event to gateway to undeploy the policy mapping.
+     *
+     * @param mappingUuid         UUID of the policy mapping
+     * @param tenantDomain        tenant domain of the policy mapping
+     * @param unPublishedGateways set of gateways to which the policy mapping is unpublished
+     */
     private void sendGatewayPolicyUndeploymentEvent(String mappingUuid, String tenantDomain, Set<String> unPublishedGateways) {
 
         GatewayPolicyEvent undeployGatewayPolicyEvent = new GatewayPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.name(), tenantDomain, mappingUuid,
                 unPublishedGateways);
         APIUtil.sendNotification(undeployGatewayPolicyEvent, APIConstants.NotifierType.GATEWAY_POLICY.name());
-        if (debugEnabled) {
-            log.debug("Event sent to Gateway with eventID " + undeployGatewayPolicyEvent.getEventId() + " for policy mapping "
-                    + "with UUID " + mappingUuid + " at " + undeployGatewayPolicyEvent.getTimeStamp());
-        }
+            log.debug("Event sent to Gateway with eventID " + undeployGatewayPolicyEvent.getEventId()
+                    + " for policy mapping " + "with UUID " + mappingUuid + " at " + undeployGatewayPolicyEvent.getTimeStamp());
     }
 
     public void deployToGateway(API api, String tenantDomain, Set<String> gatewaysToPublish) {
@@ -190,16 +200,12 @@ public class APIGatewayManager {
     }
 
     public void deployPolicyToGateway(String mappingUuid, String tenantDomain, Set<String> gatewaysToPublish) {
-        if (debugEnabled) {
-            log.debug("Status of policy mapping: " + mappingUuid + " has been updated to DB");
-        }
+        log.debug("Status of policy mapping: " + mappingUuid + " has been updated to DB");
         sendGatewayPolicyDeploymentEvent(mappingUuid, tenantDomain, gatewaysToPublish);
     }
 
     public void undeployPolicyFromGateway(String mappingUuid, String tenantDomain, Set<String> gatewaysToUnPublish) {
-        if (debugEnabled) {
-            log.debug("Status of policy mapping: " + mappingUuid + " has been updated to DB");
-        }
+        log.debug("Status of policy mapping: " + mappingUuid + " has been updated to DB");
         sendGatewayPolicyUndeploymentEvent(mappingUuid, tenantDomain, gatewaysToUnPublish);
     }
 
