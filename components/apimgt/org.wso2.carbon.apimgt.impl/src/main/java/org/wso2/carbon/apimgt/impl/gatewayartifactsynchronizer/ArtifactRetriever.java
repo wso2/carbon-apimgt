@@ -82,7 +82,7 @@ public interface ArtifactRetriever {
     /**
      * Retrieve gateway policy data from the storage.
      *
-     * @param mappingUUID - UUID of the Gateway Policy Mapping
+     * @param mappingUUID  UUID of the Gateway Policy Mapping
      * @return A String contains all the information about the gateway policy artifacts
      * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
      */
@@ -91,8 +91,8 @@ public interface ArtifactRetriever {
     /**
      * Retrieve gateway policy data from the storage.
      *
-     * @param gatewayLabel - Label subscribed by the gateway
-     * @param tenantDomain - Tenant Domain
+     * @param gatewayLabel  Label subscribed by the gateway
+     * @param tenantDomain  Tenant Domain
      * @return A List of String contains all the information about the gateway policy artifacts
      * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
      */

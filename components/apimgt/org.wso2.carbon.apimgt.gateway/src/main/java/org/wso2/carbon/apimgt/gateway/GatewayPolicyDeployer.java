@@ -65,8 +65,8 @@ public class GatewayPolicyDeployer {
     /**
      * Deploy gateway policy in the gateway using the deployGatewayPolicy method in gateway admin.
      *
-     * @throws ArtifactSynchronizerException - If an error occurs while retrieving the gateway policy artifact.
-     * @throws APIManagementException        - If an error occurs while deploying the gateway policy artifact.
+     * @throws ArtifactSynchronizerException  If an error occurs while retrieving the gateway policy artifact.
+     * @throws APIManagementException         If an error occurs while deploying the gateway policy artifact.
      */
     public void deployGatewayPolicyMapping() throws ArtifactSynchronizerException, APIManagementException {
         try {
@@ -87,8 +87,8 @@ public class GatewayPolicyDeployer {
     /**
      * Undeploy gateway policy in the gateway using the unDeployGatewayPolicy method in gateway admin.
      *
-     * @throws ArtifactSynchronizerException - If an error occurs while retrieving the gateway policy artifact.
-     * @throws APIManagementException        - If an error occurs while un-deploying the gateway policy artifact.
+     * @throws ArtifactSynchronizerException  If an error occurs while retrieving the gateway policy artifact.
+     * @throws APIManagementException         If an error occurs while un-deploying the gateway policy artifact.
      */
     public void undeployGatewayPolicyMapping() throws ArtifactSynchronizerException, APIManagementException {
         try {
@@ -107,7 +107,7 @@ public class GatewayPolicyDeployer {
     /**
      * Deploy gateway policy in the gateway using the deployGatewayPolicy method in gateway admin.
      *
-     * @param assignedGatewayLabels - The labels which the gateway subscribed to
+     * @param assignedGatewayLabels  The labels which the gateway subscribed to
      * @param tenantDomain          tenantDomain of API.
      * @return True if all gateway policy artifacts retrieved from the storage and successfully deployed without
      * any error. else false.
