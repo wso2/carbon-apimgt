@@ -77,6 +77,22 @@ public class ApiTypeWrapper {
         }
     }
 
+    public void setAsDefaultVersion(boolean value) {
+        if (isAPIProduct) {
+            apiProduct.setDefaultVersion(value);
+        } else {
+            api.setDefaultVersion(value);
+        }
+    }
+
+    public void setAsPublishedDefaultVersion(boolean value) {
+        if (isAPIProduct) {
+            apiProduct.setAsPublishedDefaultVersion(value);
+        } else {
+            api.setAsPublishedDefaultVersion(value);
+        }
+    }
+
     public String getContext() {
         return isAPIProduct ? apiProduct.getContext() : api.getContext();
     }
@@ -160,10 +176,24 @@ public class ApiTypeWrapper {
         return api.getAccessControlRoles();
     }
 
-    public String geType() {
+    public String getType() {
         if (isAPIProduct){
             return apiProduct.getType();
         }
         return api.getType();
+    }
+
+    public boolean getPublishedDefaultVersion() {
+        if (isAPIProduct){
+            return apiProduct.isPublishedDefaultVersion();
+        }
+        return api.isPublishedDefaultVersion();
+    }
+
+    public boolean getDefaultVersion() {
+        if (isAPIProduct){
+            return apiProduct.isDefaultVersion();
+        }
+        return api.isDefaultVersion();
     }
 }

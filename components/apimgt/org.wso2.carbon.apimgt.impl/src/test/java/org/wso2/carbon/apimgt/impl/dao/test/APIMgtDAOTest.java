@@ -365,7 +365,7 @@ public class APIMgtDAOTest {
 
     }
     @Test
-    public void testKeyForwardCompatibility() throws Exception {
+    public void testKeyForwardCompatibilityWhenNewAPIVersion() throws Exception {
         List<API> oldApiVersionList = new ArrayList<>();
         API apiOld = new API(new APIIdentifier("SUMEDHA", "API1", "V1.0.0"));
         oldApiVersionList.add(apiOld);
@@ -377,7 +377,25 @@ public class APIMgtDAOTest {
         api.setUUID(UUID.randomUUID().toString());
         api.getId().setId(apiMgtDAO.addAPI(api, -1234, "testOrg"));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, oldApiVersionList);
+        apiMgtDAO.makeKeysForwardCompatibleForNewAPIVersion(apiTypeWrapper, oldApiVersionList);
+    }
+
+    @Test
+    public void testKeyForwardCompatibilityWhenNewAPIProductVersion() throws Exception {
+        List<APIProduct> oldApiProductVersionList = new ArrayList<>();
+        APIProduct apiProductOld = new APIProduct(new APIProductIdentifier("SUMEDHA",
+                "APIPRODUCT1", "V1.0.0"));
+        oldApiProductVersionList.add(apiProductOld);
+
+        APIProduct apiProduct = new APIProduct(new APIProductIdentifier("SUMEDHA",
+                "APIPRODUCT1", "V2.0.0"));
+        apiProduct.setContext("/context1");
+        apiProduct.setContextTemplate("/context1/{version}");
+        apiProduct.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        apiProduct.setUuid(UUID.randomUUID().toString());
+        apiMgtDAO.addAPIProduct(apiProduct, "testOrg");
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiProduct);
+        apiMgtDAO.makeKeysForwardCompatibleForNewAPIProductVersion(apiTypeWrapper, oldApiProductVersionList);
     }
 
     @Test
@@ -419,8 +437,10 @@ public class APIMgtDAOTest {
         // once API v2.0.0 is added, v1.0.0 becomes an older version hence add it to oldApiVersionList
         oldApiVersionList.add(api);
 
+        List<APIProduct> oldApiProductVersionList = new ArrayList<>();
+
         ApiTypeWrapper apiTypeWrapper2 = new ApiTypeWrapper(api2);
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper2, oldApiVersionList);
+        apiMgtDAO.makeKeysForwardCompatibleForNewAPIVersion(apiTypeWrapper2, oldApiVersionList);
 
         List<SubscribedAPI> subscriptionsOfAPI2 =
                 apiMgtDAO.getSubscriptionsOfAPI(apiId2.getApiName(), "V2.0.0", apiId2.getProviderName());
@@ -433,7 +453,8 @@ public class APIMgtDAOTest {
                 "testOrg");
 
         // Add the third version of the API
-        APIIdentifier apiId3 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V3.0.0");
+        APIIdentifier apiId3 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI",
+                "V3.0.0");
         API api3 = new API(apiId3);
         api3.setContext("/context1");
         api3.setContextTemplate("/context1/{version}");
@@ -443,8 +464,7 @@ public class APIMgtDAOTest {
         oldApiVersionList.add(api2);
         ApiTypeWrapper apiTypeWrapper3 = new ApiTypeWrapper(api3);
 
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper3, oldApiVersionList);
-
+        apiMgtDAO.makeKeysForwardCompatibleForNewAPIVersion(apiTypeWrapper3, oldApiVersionList);
         List<SubscribedAPI> subscriptionsOfAPI3 =
                 apiMgtDAO.getSubscriptionsOfAPI(apiId1.getApiName(), "V3.0.0", apiId1.getProviderName());
         assertEquals(1, subscriptionsOfAPI3.size());

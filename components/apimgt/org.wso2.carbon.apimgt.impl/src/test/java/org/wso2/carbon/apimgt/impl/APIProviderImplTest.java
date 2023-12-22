@@ -734,7 +734,7 @@ public class APIProviderImplTest {
     private APIProduct createMockAPIProduct(String provider) {
 
         APIProductIdentifier productIdentifier = new APIProductIdentifier(provider, APIConstants.API_PRODUCT,
-                APIConstants.API_PRODUCT_VERSION);
+                APIConstants.API_PRODUCT_VERSION_1_0_0);
         APIProduct apiProduct = new APIProduct(productIdentifier);
         apiProduct.setContext("/test");
         apiProduct.setState(APIConstants.CREATED);
