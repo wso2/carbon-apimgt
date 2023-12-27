@@ -5595,7 +5595,12 @@ public class ApiMgtDAO {
     public String getDefaultVersion(Identifier apiId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            return getDefaultVersion(connection, (APIIdentifier) apiId);
+            if (apiId instanceof APIIdentifier) {
+                return getDefaultVersion(connection, (APIIdentifier) apiId);
+            } else if (apiId instanceof APIProductIdentifier) {
+                return getDefaultVersion(connection, (APIProductIdentifier) apiId);
+            }
+            return null;
         } catch (SQLException e) {
             handleException("Error while getting default version for " + apiId.getName(), e);
         }
