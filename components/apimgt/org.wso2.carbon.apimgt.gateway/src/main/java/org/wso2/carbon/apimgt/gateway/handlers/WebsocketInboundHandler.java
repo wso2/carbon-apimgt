@@ -269,6 +269,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (APIUtil.isAnalyticsEnabled()) {
                     WebSocketUtils.setApiPropertyToChannel(ctx, Constants.REQUEST_END_TIME_PROPERTY,
                             System.currentTimeMillis());
+                    if (msg instanceof TextWebSocketFrame) {
+                        WebSocketUtils.setApiPropertyToChannel(ctx, Constants.RESPONSE_SIZE,
+                                ((TextWebSocketFrame) msg).text().length());
+                    }
                 }
                 publishPublishEvent(ctx);
             }

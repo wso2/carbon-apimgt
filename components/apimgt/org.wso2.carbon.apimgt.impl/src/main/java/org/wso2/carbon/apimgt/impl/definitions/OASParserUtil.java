@@ -730,7 +730,9 @@ public class OASParserUtil {
                 addToReferenceObjectMap(ref, context);
             } else if (!references.isEmpty() && references.size() != 0) {
                 for (String reference : references) {
-                    addToReferenceObjectMap(reference, context);
+                    if (reference != null) {
+                        addToReferenceObjectMap(reference, context);
+                    }
                 }
             }
 
@@ -1241,7 +1243,8 @@ public class OASParserUtil {
      * @param isProduction is production endpoints
      * @return JsonNode
      */
-    public static JsonNode generateOASConfigForEndpoints(API api, boolean isProduction) {
+    public static JsonNode generateOASConfigForEndpoints(API api, boolean isProduction)
+            throws APIManagementException {
         if (api.getEndpointConfig() == null || api.getEndpointConfig().trim().isEmpty()) {
             return null;
         }
@@ -1297,7 +1300,8 @@ public class OASParserUtil {
      * @param endpointConfig endpoint configuration json string
      * @param isProd         endpoint type
      */
-    private static ObjectNode populateFailoverConfig(JSONObject endpointConfig, boolean isProd) {
+    private static ObjectNode populateFailoverConfig(JSONObject endpointConfig, boolean isProd)
+            throws APIManagementException {
         JSONArray endpointsURLs = null;
         JSONObject primaryEndpoints = null;
         if (isProd) {
@@ -1332,7 +1336,7 @@ public class OASParserUtil {
         ObjectNode endpointResult = objectMapper.createObjectNode();
         endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
         endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, APIConstants.ENDPOINT_TYPE_FAILOVER);
-        return endpointResult;
+        return updateEndpointResult(primaryEndpoints, endpointResult);
     }
 
     /**
@@ -1341,7 +1345,8 @@ public class OASParserUtil {
      * @param endpointConfig endpoint configuration json string
      * @param isProd         endpoint type
      */
-    private static ObjectNode populateLoadBalanceConfig(JSONObject endpointConfig, boolean isProd) {
+    private static ObjectNode populateLoadBalanceConfig(JSONObject endpointConfig, boolean isProd)
+            throws APIManagementException {
         JSONArray primaryProdEndpoints = new JSONArray();
         if (isProd) {
             if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) && endpointConfig
@@ -1368,6 +1373,15 @@ public class OASParserUtil {
         ObjectNode endpointResult = objectMapper.createObjectNode();
         endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
         endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, APIConstants.ENDPOINT_TYPE_LOADBALANCE);
+
+        if (primaryProdEndpoints != null) {
+            for (int i = 0; i < primaryProdEndpoints.length(); i++) {
+                if (primaryProdEndpoints.getJSONObject(i).has(APIConstants.ADVANCE_ENDPOINT_CONFIG)) {
+                    return updateEndpointResult(primaryProdEndpoints.getJSONObject(i), endpointResult);
+                }
+            }
+        }
+
         return endpointResult;
     }
 
@@ -1378,7 +1392,8 @@ public class OASParserUtil {
      * @param isProd         endpoint type
      * @param type           endpoint type
      */
-    private static ObjectNode setPrimaryConfig(JSONObject endpointConfig, boolean isProd, String type) {
+    private static ObjectNode setPrimaryConfig(JSONObject endpointConfig, boolean isProd, String type)
+            throws APIManagementException {
         JSONObject primaryEndpoints = new JSONObject();
         if (isProd) {
             if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
@@ -1395,20 +1410,32 @@ public class OASParserUtil {
             ObjectNode endpointResult = objectMapper.createObjectNode();
             endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
             endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, type);
-            if (primaryEndpoints.has(APIConstants.ADVANCE_ENDPOINT_CONFIG)
-                    && primaryEndpoints.get(APIConstants.ADVANCE_ENDPOINT_CONFIG) != JSONObject.NULL) {
-                JSONObject advanceEndpointConfig = primaryEndpoints.getJSONObject(APIConstants.ADVANCE_ENDPOINT_CONFIG);
-                ObjectNode advanceEndpointsObject = objectMapper.createObjectNode();
-                if (advanceEndpointConfig.has(APIConstants.TIMEOUT_IN_MILLIS)
-                        && advanceEndpointConfig.get(APIConstants.TIMEOUT_IN_MILLIS) != JSONObject.NULL) {
-                    advanceEndpointsObject.put(APIConstants.TIMEOUT_IN_MILLIS,
-                            advanceEndpointConfig.getInt(APIConstants.TIMEOUT_IN_MILLIS));
-                    endpointResult.set(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceEndpointsObject);
-                }
-            }
-            return endpointResult;
+            return updateEndpointResult(primaryEndpoints, endpointResult);
         }
         return null;
+    }
+
+    /**
+     * Add advance configuration to the endpointResult object
+     *
+     * @param primaryEndpoints production and sandbox endpoint configuration Json object
+     * @param endpointResult         endpoint result ObjectNode
+     */
+    private static ObjectNode updateEndpointResult(JSONObject primaryEndpoints, ObjectNode endpointResult)
+            throws APIManagementException {
+        if (primaryEndpoints.has(APIConstants.ADVANCE_ENDPOINT_CONFIG)) {
+            try {
+                endpointResult.put(APIConstants.ADVANCE_ENDPOINT_CONFIG, objectMapper
+                        .readTree(primaryEndpoints.get(APIConstants.ADVANCE_ENDPOINT_CONFIG).toString()));
+            } catch (JsonProcessingException e) {
+                throw new APIManagementException(
+                        "Error while setting the advance endpoint configs ", e);
+            }
+        } else {
+            //When user removes existing advancedConfigurations section.Returns null if key was not an existing
+            endpointResult.remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+        }
+        return endpointResult;
     }
 
     /**

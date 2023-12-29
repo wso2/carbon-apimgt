@@ -31,6 +31,8 @@ public class WorkflowConstants {
     public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";
 
     public static final String WF_TYPE_AM_APPLICATION_DELETION = "AM_APPLICATION_DELETION";
+
+    public static final String WF_TYPE_AM_REVISION_DEPLOYMENT = "AM_REVISION_DEPLOYMENT";
     
     public static final String WF_TYPE_AM_API_STATE = "AM_API_STATE";
 
@@ -52,6 +54,8 @@ public class WorkflowConstants {
     public static final String PASSWORD = "Password";
 
     public static final String PASSWORD_ = "password";
+
+    public static final String API_REVISION_DEPLOYMENT = "APIRevisionDeployment";
 
     public static final String APPLICATION_CREATION = "ApplicationCreation";
 

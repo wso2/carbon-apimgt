@@ -57,30 +57,27 @@ public class LifeCycleUtils {
             Boolean> checklist) throws  APIPersistenceException, APIManagementException {
         String targetStatus;
         String apiName = apiTypeWrapper.getName();
-        String apiType = apiTypeWrapper.geType();
+        String apiType = apiTypeWrapper.getType();
         String apiContext = apiTypeWrapper.getContext();
         String uuid = apiTypeWrapper.getUuid();
         String currentStatus = apiTypeWrapper.getStatus();
         targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
-        apiPersistence.changeAPILifeCycle(new Organization(orgId), apiTypeWrapper.getUuid(), targetStatus);
-        if (!apiTypeWrapper.isAPIProduct()) {
-            API api = apiTypeWrapper.getApi();
-            api.setOrganization(orgId);
-            changeLifeCycle(apiProvider, api, currentStatus, targetStatus, checklist, orgId);
-            //Sending Notifications to existing subscribers
-            if (APIConstants.PUBLISHED.equals(targetStatus)) {
-                sendEmailNotification(api, orgId);
-            }
-        } else {
-            APIProduct apiProduct = apiTypeWrapper.getApiProduct();
-            apiProduct.setOrganization(orgId);
-            changeLifecycle(apiProvider, apiProduct, currentStatus, targetStatus);
+
+        // Update lifecycle state in the registry
+        updateLifeCycleState(apiProvider, orgId, apiTypeWrapper, checklist, targetStatus, currentStatus);
+
+        //Sending Notifications to existing subscribers
+        if (APIConstants.PUBLISHED.equals(targetStatus)) {
+            sendEmailNotification(apiTypeWrapper, orgId);
         }
+
+        // Change the lifecycle state in the database
         addLCStateChangeInDatabase(user, apiTypeWrapper, currentStatus, targetStatus, uuid);
-        // Event need to be sent after database status update.
+
+        // Add LC state change event to the event queue
         sendLCStateChangeNotification(apiName, apiType, apiContext, apiTypeWrapper.getId().getVersion(), targetStatus,
-                apiTypeWrapper.getId().getProviderName(), apiTypeWrapper.getId().getId(), uuid, orgId,
-                apiTypeWrapper.getApi() != null ? apiTypeWrapper.getApi().getApiSecurity() : null);
+                apiTypeWrapper.getId().getProviderName(),
+                apiTypeWrapper.getId().getId(), uuid, orgId);
 
         // Remove revisions and subscriptions after API retire
         if (!apiTypeWrapper.isAPIProduct()) {
@@ -103,6 +100,19 @@ public class LifeCycleUtils {
         }
     }
 
+    private static void updateLifeCycleState(APIProvider apiProvider, String orgId, ApiTypeWrapper apiTypeWrapper,
+            Map<String, Boolean> checklist, String targetStatus, String currentStatus) throws APIManagementException {
+        if (!apiTypeWrapper.isAPIProduct()) {
+            API api = apiTypeWrapper.getApi();
+            api.setOrganization(orgId);
+            changeAPILifeCycle(apiProvider, api, currentStatus, targetStatus, checklist);
+        } else {
+            APIProduct apiProduct = apiTypeWrapper.getApiProduct();
+            apiProduct.setOrganization(orgId);
+            changeAPIProductLifecycle(apiProvider, apiProduct, currentStatus, targetStatus, checklist);
+        }
+    }
+
     /**
      * Update the lifecycle of API Product in registry
      *
@@ -111,7 +121,8 @@ public class LifeCycleUtils {
      * @param targetState  Target state of the API Product
      * @throws APIManagementException Exception when updating the lc state of API Product
      */
-    private static void changeLifecycle(APIProvider apiProvider, APIProduct apiProduct, String currentState, String targetState)
+    private static void changeAPIProductLifecycle(APIProvider apiProvider, APIProduct apiProduct, String currentState,
+            String targetState, Map<String, Boolean> checklist)
             throws APIManagementException {
 
         if (targetState != null) {
@@ -127,10 +138,13 @@ public class LifeCycleUtils {
         } else {
             throw new APIManagementException("Invalid Lifecycle status provided for default APIExecutor");
         }
+
+        // If the API Product status is CREATED/PROTOTYPED ,check for check list items of lifecycle
+        executeLifeCycleChecklist(apiProvider, new ApiTypeWrapper(apiProduct), currentState, targetState, checklist);
     }
 
-    private static void changeLifeCycle(APIProvider apiProvider, API api, String currentState, String targetState,
-                                        Map<String, Boolean> checklist, String organization)
+    private static void changeAPILifeCycle(APIProvider apiProvider, API api, String currentState, String targetState,
+                                        Map<String, Boolean> checklist)
             throws APIManagementException {
 
         String oldStatus = currentState.toUpperCase();
@@ -177,8 +191,8 @@ public class LifeCycleUtils {
                                 api.getOrganization());
                         API otherApi = apiProvider.getLightweightAPIByUUID(uuid, api.getOrganization());
                         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.API_UPDATE.name(), APIUtil.getInternalOrganizationId(organization),
-                                organization,
+                                APIConstants.EventType.API_UPDATE.name(),
+                                APIUtil.getInternalOrganizationId(api.getOrganization()), api.getOrganization(),
                                 otherApi.getId().getApiName(), otherApi.getId().getId(), otherApi.getUuid(), version,
                                 api.getType(), otherApi.getContext(), otherApi.getId().getProviderName(),
                                 otherApi.getStatus(), api.getApiSecurity());
@@ -198,7 +212,6 @@ public class LifeCycleUtils {
             // update api related information for state change
             updateAPIforStateChange(LifeCycleUtils.apiPersistence, api, currentState, newStatus);
 
-
             if (log.isDebugEnabled()) {
                 String logMessage = "API related information successfully updated. API Name: "
                         + api.getId().getApiName() + ", API Version " + api.getId().getVersion() + ", API Context: "
@@ -209,6 +222,21 @@ public class LifeCycleUtils {
             throw new APIManagementException("Invalid Lifecycle status for default APIExecutor :" + targetState);
         }
 
+        // If the API status is CREATED/PROTOTYPED ,check for check list items of lifecycle
+        executeLifeCycleChecklist(apiProvider, new ApiTypeWrapper(api), currentState, targetState, checklist);
+    }
+
+
+    private static void executeLifeCycleChecklist(APIProvider apiProvider, ApiTypeWrapper apiTypeWrapper,
+            String currentState, String targetState, Map<String, Boolean> checklist) throws APIManagementException {
+
+        String oldStatus = currentState.toUpperCase();
+        String newStatus = (null != targetState) ? targetState.toUpperCase() : null;
+
+        boolean isCurrentCreatedOrPrototyped = APIConstants.CREATED.equals(oldStatus)
+                || APIConstants.PROTOTYPED.equals(oldStatus);
+        boolean isStateTransitionToPublished = isCurrentCreatedOrPrototyped && APIConstants.PUBLISHED.equals(newStatus);
+
         boolean deprecateOldVersions = false;
         boolean makeKeysForwardCompatible = true;
         // If the API status is CREATED/PROTOTYPED ,check for check list items of lifecycle
@@ -216,32 +244,79 @@ public class LifeCycleUtils {
             if (checklist != null) {
                 if (checklist.containsKey(APIConstants.DEPRECATE_CHECK_LIST_ITEM)) {
                     deprecateOldVersions = checklist.get(APIConstants.DEPRECATE_CHECK_LIST_ITEM);
+                } else if (checklist.containsKey(APIConstants.DEPRECATE_CHECK_LIST_ITEM_API_PRODUCT)) {
+                    deprecateOldVersions = checklist.get(APIConstants.DEPRECATE_CHECK_LIST_ITEM_API_PRODUCT);
                 }
+
                 if (checklist.containsKey(APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM)) {
                     makeKeysForwardCompatible = !checklist.get(APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM);
+                } else if (checklist.containsKey(APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM_API_PRODUCT)) {
+                    makeKeysForwardCompatible = !checklist.get(APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM_API_PRODUCT);
                 }
             }
         }
 
         if (isStateTransitionToPublished) {
             if (makeKeysForwardCompatible) {
-                makeAPIKeysForwardCompatible(apiProvider, api);
+                makeAPIKeysForwardCompatible(apiProvider, apiTypeWrapper);
             }
             if (deprecateOldVersions) {
-                String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
-                String apiName = api.getId().getName();
-                List<API> apiList = getAPIVersionsByProviderAndName(provider, apiName, api.getOrganization());
-                APIVersionComparator versionComparator = new APIVersionComparator();
-                for (API oldAPI : apiList) {
-                    if (oldAPI.getId().getApiName().equals(api.getId().getApiName())
-                            && versionComparator.compare(oldAPI, api) < 0
-                            && (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
-                        apiProvider.changeLifeCycleStatus(organization, new ApiTypeWrapper(
-                                        apiProvider.getAPIbyUUID(oldAPI.getUuid(), organization)),
-                                APIConstants.API_LC_ACTION_DEPRECATE, null);
+                deprecateOldVersions(apiProvider, apiTypeWrapper);
+            }
+        }
+    }
 
-                    }
-                }
+    private static void deprecateOldVersions(APIProvider apiProvider, ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
+
+        String provider = APIUtil.replaceEmailDomain(apiTypeWrapper.getId().getProviderName());
+        if (apiTypeWrapper.isAPIProduct()) {
+            deprecateOldAPIProductVersions(apiProvider, apiTypeWrapper.getApiProduct(), provider);
+        } else {
+            deprecateOldAPIVersions(apiProvider, apiTypeWrapper.getApi(), provider);
+        }
+    }
+
+    private static void deprecateOldAPIVersions(APIProvider apiProvider, API api, String provider)
+            throws APIManagementException {
+        String apiName = api.getId().getName();
+        if (log.isDebugEnabled()) {
+            log.debug("Deprecating old versions of API " + apiName + " of provider " + provider);
+        }
+
+        List<API> apiList = getAPIVersionsByProviderAndName(provider, apiName);
+        APIVersionComparator versionComparator = new APIVersionComparator();
+        for (API oldAPI : apiList) {
+            if (oldAPI.getId().getApiName().equals(api.getId().getName())
+                    && versionComparator.compare(oldAPI, api) < 0
+                    && (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
+                apiProvider.changeLifeCycleStatus(api.getOrganization(), new ApiTypeWrapper(
+                                apiProvider.getAPIbyUUID(oldAPI.getUuid(), api.getOrganization())),
+                        APIConstants.API_LC_ACTION_DEPRECATE, null);
+
+            }
+        }
+    }
+
+    private static void deprecateOldAPIProductVersions(APIProvider apiProvider, APIProduct apiProduct, String provider)
+            throws APIManagementException {
+        String apiProductName = apiProduct.getId().getName();
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Deprecating old versions of APIProduct " + apiProductName + " of provider " + provider);
+        }
+
+        List<APIProduct> apiProductList = getAPIProductVersionsByProviderAndName(provider, apiProductName);
+        APIProductVersionComparator versionComparator = new APIProductVersionComparator();
+        for (APIProduct oldAPIProduct : apiProductList) {
+            if (oldAPIProduct.getId().getName()
+                    .equals(apiProduct.getId().getName()) && versionComparator.compare(oldAPIProduct, apiProduct) < 0
+                    && (APIConstants.PUBLISHED.equals(
+                    oldAPIProduct.getState()))) {
+                apiProvider.changeLifeCycleStatus(apiProduct.getOrganization(), new ApiTypeWrapper(
+                                apiProvider.getAPIbyUUID(oldAPIProduct.getUuid(),
+                                        apiProduct.getOrganization())), APIConstants.API_LC_ACTION_DEPRECATE, null);
+
             }
         }
     }
@@ -249,10 +324,11 @@ public class LifeCycleUtils {
     /**
      * This method used to send notifications to the previous subscribers of older versions of a given API
      *
-     * @param api API object.
+     * @param apiTypeWrapper apiTypeWrapper object.
      * @throws APIManagementException
      */
-    private static void sendEmailNotification(API api, String organization) throws APIManagementException {
+    private static void sendEmailNotification(ApiTypeWrapper apiTypeWrapper, String organization)
+            throws APIManagementException {
 
         try {
             JSONObject tenantConfig = APIUtil.getTenantConfig(organization);
@@ -265,16 +341,16 @@ public class LifeCycleUtils {
 
             if (JavaUtils.isTrueExplicitly(isNotificationEnabled)) {
                 Map<Integer, Integer> subscriberMap = new HashMap<>();
-                List<APIIdentifier> apiIdentifiers = getOldPublishedAPIList(api);
-                for (APIIdentifier oldAPI : apiIdentifiers) {
-                    Properties prop = new Properties();
-                    prop.put(NotifierConstants.API_KEY, oldAPI);
-                    prop.put(NotifierConstants.NEW_API_KEY, api.getId());
+                List<Identifier> identifiers = getOldPublishedAPIOrAPIProductList(apiTypeWrapper);
 
-                    Set<Subscriber> subscribersOfAPI = apiMgtDAO.getSubscribersOfAPIWithoutDuplicates(oldAPI,
+                for (Identifier identifier : identifiers) {
+                    Properties prop = new Properties();
+                    prop.put(NotifierConstants.API_KEY, identifier);
+                    prop.put(NotifierConstants.NEW_API_KEY, apiTypeWrapper.getId());
+
+                    Set<Subscriber> subscribersOfAPI = apiMgtDAO.getSubscribersOfAPIWithoutDuplicates(identifier,
                             subscriberMap);
                     prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscribersOfAPI);
-
                     NotificationDTO notificationDTO = new NotificationDTO(prop,
                             NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION);
                     notificationDTO.setTenantID(tenantId);
@@ -342,52 +418,102 @@ public class LifeCycleUtils {
     /**
      * This method returns a list of previous versions of a given API
      *
-     * @param api
+     * @param apiTypeWrapper apiTypeWrapper object.
      * @return oldPublishedAPIList
      * @throws APIManagementException
      */
-    private static List<APIIdentifier> getOldPublishedAPIList(API api) throws APIManagementException {
-        List<APIIdentifier> oldPublishedAPIList = new ArrayList<APIIdentifier>();
-        List<API> apiList = getAPIVersionsByProviderAndName(api.getId().getProviderName(), api.getId().getName(),
-                api.getOrganization());
+    private static List<Identifier> getOldPublishedAPIOrAPIProductList(ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
+        List<Identifier> oldPublishedAPIList = new ArrayList<Identifier>();
         APIVersionComparator versionComparator = new APIVersionComparator();
-        for (API oldAPI : apiList) {
-            if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
-                    versionComparator.compare(oldAPI, api) < 0 &&
-                    (oldAPI.getStatus().equals(APIConstants.PUBLISHED))) {
-                oldPublishedAPIList.add(oldAPI.getId());
+        APIProductVersionComparator apiProductVersionComparator = new APIProductVersionComparator();
+
+        if (!apiTypeWrapper.isAPIProduct()) {
+            List<API> apiList;
+            apiList = getAPIVersionsByProviderAndName(apiTypeWrapper.getId().getProviderName(),
+                    apiTypeWrapper.getId().getName());
+            for (API oldAPI : apiList) {
+                if (oldAPI.getId().getApiName().equals(apiTypeWrapper.getId().getName()) && versionComparator.compare(
+                        oldAPI, apiTypeWrapper.getApi()) < 0 && (oldAPI.getStatus().equals(APIConstants.PUBLISHED))) {
+                    oldPublishedAPIList.add(oldAPI.getId());
+                }
+            }
+        } else {
+            List<APIProduct> apiProductList = getAPIProductVersionsByProviderAndName(
+                    apiTypeWrapper.getId().getProviderName(), apiTypeWrapper.getId().getName());
+
+            for (APIProduct oldAPIProduct : apiProductList) {
+                if (oldAPIProduct.getId().getName()
+                        .equals(apiTypeWrapper.getId().getName()) && apiProductVersionComparator.compare(oldAPIProduct,
+                        apiTypeWrapper.getApiProduct()) < 0 && (oldAPIProduct.getState()
+                        .equals(APIConstants.PUBLISHED))) {
+                    oldPublishedAPIList.add(oldAPIProduct.getId());
+                }
             }
         }
-
         return oldPublishedAPIList;
     }
 
-    private static List<API> getAPIVersionsByProviderAndName(String provider, String apiName, String organization)
+    private static List<API> getAPIVersionsByProviderAndName(String provider, String apiName)
             throws APIManagementException {
         return apiMgtDAO.getAllAPIVersions(apiName, provider);
     }
 
-    private static void makeAPIKeysForwardCompatible(APIProvider apiProvider, API api) throws APIManagementException {
-        String provider = api.getId().getProviderName();
-        String apiName = api.getId().getApiName();
-        Set<String> versions = apiProvider.getAPIVersions(provider, apiName, api.getOrganization());
-        APIVersionComparator comparator = new APIVersionComparator();
+    private static List<APIProduct> getAPIProductVersionsByProviderAndName(String provider, String apiProductName)
+            throws APIManagementException {
+        return apiMgtDAO.getAllAPIProductVersions(apiProductName, provider);
+    }
+
+    private static void makeAPIKeysForwardCompatible(APIProvider apiProvider, ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
+
+        String provider = apiTypeWrapper.getId().getProviderName();
+        String apiName = apiTypeWrapper.getId().getName();
+        Set<String> versions = apiProvider.getAPIVersions(provider, apiName, apiTypeWrapper.getOrganization());
+        APIVersionComparator apiComparator = new APIVersionComparator();
+        APIProductVersionComparator apiProductComparator = new APIProductVersionComparator();
+
         List<API> sortedAPIs = new ArrayList<API>();
+        List<APIProduct> sortedAPIProducts = new ArrayList<APIProduct>();
         for (String version : versions) {
-            if (version.equals(api.getId().getVersion())) {
+            if (version.equals(apiTypeWrapper.getId().getVersion())) {
                 continue;
             }
-            API otherApi = new API(new APIIdentifier(provider, apiName, version));//getAPI(new APIIdentifier(provider, apiName, version));
-            if (comparator.compare(otherApi, api) < 0 && !APIConstants.RETIRED.equals(otherApi.getStatus())) {
-                sortedAPIs.add(otherApi);
+            if (!apiTypeWrapper.isAPIProduct()) {
+                API otherApi = new API(new APIIdentifier(provider, apiName, version));
+                if (apiComparator.compare(otherApi, apiTypeWrapper.getApi()) < 0 &&
+                        !APIConstants.RETIRED.equals(otherApi.getStatus())) {
+                    sortedAPIs.add(otherApi);
+                }
+            } else {
+                APIProduct otherAPIProduct = new APIProduct(new APIProductIdentifier(provider, apiName, version));
+                if (apiProductComparator.compare(otherAPIProduct, apiTypeWrapper.getApiProduct()) < 0 &&
+                        !APIConstants.RETIRED.equals(otherAPIProduct.getState())) {
+                    sortedAPIProducts.add(otherAPIProduct);
+                }
             }
         }
 
-        // Get the subscriptions from the latest api version first
-        Collections.sort(sortedAPIs, comparator);
-        List<SubscribedAPI> subscribedAPIS = apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), sortedAPIs);
-        for (SubscribedAPI subscribedAPI : subscribedAPIS) {
-            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), subscribedAPI, APIUtil.getInternalOrganizationId(api.getOrganization()), api.getOrganization());
+        if (apiTypeWrapper.isAPIProduct()) {
+            // Get the subscriptions from the latest api product version first
+            Collections.sort(sortedAPIProducts, apiProductComparator);
+            SendNotification(apiMgtDAO.makeKeysForwardCompatibleForNewAPIProductVersion(apiTypeWrapper, sortedAPIProducts),
+                    apiTypeWrapper.getOrganization());
+
+        } else {
+            // Get the subscriptions from the latest api version first
+            Collections.sort(sortedAPIs, apiComparator);
+            SendNotification(apiMgtDAO.makeKeysForwardCompatibleForNewAPIVersion(apiTypeWrapper, sortedAPIs),
+                    apiTypeWrapper.getOrganization());
+        }
+    }
+
+    private static void SendNotification(List<SubscribedAPI> subscribedAPIs, String organization)
+            throws APIManagementException {
+        for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(
+                    APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), subscribedAPI,
+                    APIUtil.getInternalOrganizationId(organization), organization);
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         }
     }

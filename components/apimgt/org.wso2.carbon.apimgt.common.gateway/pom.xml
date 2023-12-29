@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.28.199-SNAPSHOT</version>
+        <version>9.28.208-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -114,7 +114,7 @@
                             com.google.gson.annotations.*,
                             org.apache.commons.logging.*,
                             org.wso2.am.analytics.publisher.*;version="${analytics.event.publisher.client.version.range}",
-                            graphql.*; version="${graphql.java.version}",
+                            graphql.*; version="${graphql.java.version.range}",
                             org.json.simple.*,
                             org.apache.commons.*,
                             org.apache.http.*,

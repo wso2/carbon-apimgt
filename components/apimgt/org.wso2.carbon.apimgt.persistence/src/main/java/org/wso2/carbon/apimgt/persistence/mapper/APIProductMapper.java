@@ -56,6 +56,7 @@ public interface APIProductMapper {
     //@Mapping(source = "id.apiProductName", target = "apiProductName")
     //@Mapping(source = "id.version", target = "version")
     @Mapping(source = "id.providerName", target = "providerName")
+    @Mapping(source = "id.version", target = "version")
     @Mapping(source = "thumbnailUrl", target = "thumbnail")
     @Mapping(source = "availableTiers", target = "availableTierNames")
     @Mapping(source = "uuid", target = "id")

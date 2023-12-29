@@ -3363,7 +3363,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
                 PublisherAPIProductInfo info = new PublisherAPIProductInfo();
                 info.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
-                info.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+                info.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
                 info.setId(artifact.getId());
                 info.setApiProductName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
                 info.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
@@ -3549,9 +3549,17 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiProductCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
                     + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
             if (registry.resourceExists(apiProductCollectionPath)) {
-                // at the moment product versioning is not supported so we are directly deleting this collection as
-                // this is known to be empty
-                registry.delete(apiProductCollectionPath);
+                Resource apiCollection = registry.get(apiProductCollectionPath);
+                CollectionImpl collection = (CollectionImpl) apiCollection;
+                //if there is no other versions of apis delete the directory of the api
+                if (collection.getChildCount() == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(
+                                "No more versions of the APIProduct found, removing API Product collection " +
+                                        "from registry");
+                    }
+                    registry.delete(apiProductCollectionPath);
+                }
             }
 
             String productProviderPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR

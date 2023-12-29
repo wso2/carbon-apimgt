@@ -34,6 +34,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_VERSION_ALREADY_EXISTS(900252, "The API version already exists.", 409, "An API with version '%s' already exists for API '%s'"),
 
     API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, "An API Product with context '%s' already exists"),
+    API_PRODUCT_VERSION_ALREADY_EXISTS(900276, "The API Product version already exists.", 409, "An API Product with version '%s' already exists for API Product '%s'"),
 
     API_CONTEXT_MALFORMED_EXCEPTION(900253, "The API context is malformed.", 400, "'%s'"),
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, "The API already exists"),

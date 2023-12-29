@@ -329,6 +329,19 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
+     * Create a new version of the <code>apiProduct</code>, with version <code>newVersion</code>
+     *
+     * @param apiProductId The id of the API Product to be copied
+     * @param newVersion The version of the new API Product
+     * @param defaultVersion whether this version is default or not
+     * @param organization Identifier of an organization
+     * @return apiProduct created apiProduct
+     * @throws APIManagementException If an error occurs while trying to create
+     *      *                                the new version of the API Product
+     */
+    APIProduct createNewAPIProductVersion(String apiProductId, String newVersion, Boolean defaultVersion,
+            String organization) throws APIManagementException;
+    /**
      * Retrieve the Key of the Service used in the API
      * @param apiId Unique Identifier of the API
      * @param tenantId Logged-in tenant domain
@@ -1704,4 +1717,26 @@ public interface APIProvider extends APIManager {
      */
     boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
             appliedPolicy, String apiType) throws APIManagementException;
+
+    /**
+     * Resume API revision deployment process
+     *
+     * @param apiId        API Id using for the revision deployment
+     * @param organization organization identifier
+     * @param revisionUUID revision UUID
+     * @param revisionId   revision number
+     * @param environment  environment the deployment is happening
+     */
+    void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
+            String environment);
+
+    /***
+     * Cleanup pending or rejected revision workflows
+     *
+     * @param apiId Id of the API
+     * @param externalRef external Id of the revision
+     * @throws APIManagementException if an exception occurs while cleaning up revision deployment
+     */
+    void cleanupAPIRevisionDeploymentWorkflows(String apiId, String externalRef) throws APIManagementException;
+
 }

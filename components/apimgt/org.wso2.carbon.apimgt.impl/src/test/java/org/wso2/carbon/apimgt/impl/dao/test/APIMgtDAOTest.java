@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
@@ -364,7 +365,7 @@ public class APIMgtDAOTest {
 
     }
     @Test
-    public void testKeyForwardCompatibility() throws Exception {
+    public void testKeyForwardCompatibilityWhenNewAPIVersion() throws Exception {
         List<API> oldApiVersionList = new ArrayList<>();
         API apiOld = new API(new APIIdentifier("SUMEDHA", "API1", "V1.0.0"));
         oldApiVersionList.add(apiOld);
@@ -376,7 +377,25 @@ public class APIMgtDAOTest {
         api.setUUID(UUID.randomUUID().toString());
         api.getId().setId(apiMgtDAO.addAPI(api, -1234, "testOrg"));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, oldApiVersionList);
+        apiMgtDAO.makeKeysForwardCompatibleForNewAPIVersion(apiTypeWrapper, oldApiVersionList);
+    }
+
+    @Test
+    public void testKeyForwardCompatibilityWhenNewAPIProductVersion() throws Exception {
+        List<APIProduct> oldApiProductVersionList = new ArrayList<>();
+        APIProduct apiProductOld = new APIProduct(new APIProductIdentifier("SUMEDHA",
+                "APIPRODUCT1", "V1.0.0"));
+        oldApiProductVersionList.add(apiProductOld);
+
+        APIProduct apiProduct = new APIProduct(new APIProductIdentifier("SUMEDHA",
+                "APIPRODUCT1", "V2.0.0"));
+        apiProduct.setContext("/context1");
+        apiProduct.setContextTemplate("/context1/{version}");
+        apiProduct.setVersionTimestamp(String.valueOf(System.currentTimeMillis()));
+        apiProduct.setUuid(UUID.randomUUID().toString());
+        apiMgtDAO.addAPIProduct(apiProduct, "testOrg");
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiProduct);
+        apiMgtDAO.makeKeysForwardCompatibleForNewAPIProductVersion(apiTypeWrapper, oldApiProductVersionList);
     }
 
     @Test
@@ -418,8 +437,10 @@ public class APIMgtDAOTest {
         // once API v2.0.0 is added, v1.0.0 becomes an older version hence add it to oldApiVersionList
         oldApiVersionList.add(api);
 
+        List<APIProduct> oldApiProductVersionList = new ArrayList<>();
+
         ApiTypeWrapper apiTypeWrapper2 = new ApiTypeWrapper(api2);
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper2, oldApiVersionList);
+        apiMgtDAO.makeKeysForwardCompatibleForNewAPIVersion(apiTypeWrapper2, oldApiVersionList);
 
         List<SubscribedAPI> subscriptionsOfAPI2 =
                 apiMgtDAO.getSubscriptionsOfAPI(apiId2.getApiName(), "V2.0.0", apiId2.getProviderName());
@@ -432,7 +453,8 @@ public class APIMgtDAOTest {
                 "testOrg");
 
         // Add the third version of the API
-        APIIdentifier apiId3 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V3.0.0");
+        APIIdentifier apiId3 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI",
+                "V3.0.0");
         API api3 = new API(apiId3);
         api3.setContext("/context1");
         api3.setContextTemplate("/context1/{version}");
@@ -442,8 +464,7 @@ public class APIMgtDAOTest {
         oldApiVersionList.add(api2);
         ApiTypeWrapper apiTypeWrapper3 = new ApiTypeWrapper(api3);
 
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper3, oldApiVersionList);
-
+        apiMgtDAO.makeKeysForwardCompatibleForNewAPIVersion(apiTypeWrapper3, oldApiVersionList);
         List<SubscribedAPI> subscriptionsOfAPI3 =
                 apiMgtDAO.getSubscriptionsOfAPI(apiId1.getApiName(), "V3.0.0", apiId1.getProviderName());
         assertEquals(1, subscriptionsOfAPI3.size());
@@ -1740,6 +1761,62 @@ public class APIMgtDAOTest {
         OperationPolicyData policyDataAfterDelete = apiMgtDAO.getAPISpecificOperationPolicyByPolicyID(policyUUID,
                 api.getUuid(), org, false);
         Assert.assertNull("API specific policy should delete with the API delete", policyDataAfterDelete);
+    }
+
+    /**
+     * Test for retrieveAllWorkflowFromInternalReference method
+     * Checks whether all the API revision deployment mapping details are retrieved correctly
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    @Test public void testRetrieveAllWorkflowFromInternalReference() throws Exception {
+        WorkflowStatus workflowStatus = WorkflowStatus.CREATED;
+        String revisionUUID = "821b9664-eeca-4173-9f56-3dc6d46bd6eb";
+        String wfType = "AM_REVISION_DEPLOYMENT";
+        List<WorkflowDTO> workflowList = apiMgtDAO.retrieveAllWorkflowFromInternalReference(
+                revisionUUID, wfType);
+        Assert.assertNotNull(workflowList);
+        WorkflowDTO workFlow = workflowList.get(0);
+        Assert.assertNotNull(workFlow);
+        Assert.assertEquals(workFlow.getWorkflowReference(), revisionUUID);
+        Assert.assertEquals(workFlow.getWorkflowType(), wfType);
+        Assert.assertEquals(workFlow.getStatus(),workflowStatus);
+    }
+
+    /**
+     * Test for getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID method
+     * Checks whether the API revision deployment mapping details are retrieved correctly
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    @Test public void testGetAPIRevisionDeploymentsByWorkflowStatusAndApiUUID() throws Exception {
+        String workflowStatus = "CREATED";
+        String apiUUID = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2";
+        String revisionUUID = "821b9664-eeca-4173-9f56-3dc6d46bd6eb";
+        String deployment = "default";
+        List<APIRevisionDeployment> apiRevisionDeployments = apiMgtDAO.getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(
+                apiUUID, workflowStatus);
+        Assert.assertNotNull(apiRevisionDeployments);
+        APIRevisionDeployment apiRevisionDeployment = apiRevisionDeployments.get(0);
+        Assert.assertNotNull(apiRevisionDeployment);
+        Assert.assertEquals(apiRevisionDeployment.getDeployment(), deployment);
+        Assert.assertEquals(apiRevisionDeployment.getRevisionUUID(), revisionUUID);
+    }
+
+    /**
+     * Test for updateAPIRevisionDeploymentStatus method
+     * Checks whether the API revision deployment status is updated correctly
+     * @throws APIManagementException if an error occurs while updating revision deployment status
+     */
+    @Test public void testUpdateAPIRevisionDeploymentStatus() throws Exception {
+        String workflowStatus = "APPROVED";
+        String revisionUUID = "821b9664-eeca-4173-9f56-3dc6d46bd6eb";
+        String apiId = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2";
+        String deployment = "default";
+        apiMgtDAO.updateAPIRevisionDeploymentStatus(revisionUUID, workflowStatus, deployment);
+        List<APIRevisionDeployment> apiRevisionDeployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiId);
+        Assert.assertNotNull(apiRevisionDeployments);
+        APIRevisionDeployment apiRevisionDeployment = apiRevisionDeployments.get(0);
+        Assert.assertNotNull(apiRevisionDeployment);
+        Assert.assertEquals(org.wso2.carbon.apimgt.api.WorkflowStatus.APPROVED,apiRevisionDeployment.getStatus());
     }
 
     private OperationPolicyData getOperationPolicyDataObject(String org, String apiUUID, String policyName) throws APIManagementException {

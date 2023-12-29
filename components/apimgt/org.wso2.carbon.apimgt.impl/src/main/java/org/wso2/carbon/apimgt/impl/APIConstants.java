@@ -1239,6 +1239,14 @@ public final class APIConstants {
         public static final String DELETE_PENDING = "DELETE_PENDING";
     }
 
+    public static class APIRevisionStatus {
+
+        public static final String API_REVISION_CREATED = "CREATED";
+        public static final String API_REVISION_APPROVED = "APPROVED";
+        public static final String API_REVISION_REJECTED = "REJECTED";
+        public static final String API_REVISION_DELETE_PENDING = "DELETE_PENDING";
+    }
+
     public static class AppRegistrationStatus {
 
         public static final String REGISTRATION_CREATED = "CREATED";
@@ -1732,7 +1740,9 @@ public final class APIConstants {
 
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
     public static final String DEPRECATE_CHECK_LIST_ITEM = "Deprecate old versions after publishing the API";
+    public static final String DEPRECATE_CHECK_LIST_ITEM_API_PRODUCT = "Deprecate old versions after publishing the API Product";
     public static final String RESUBSCRIBE_CHECK_LIST_ITEM = "Requires re-subscription when publishing the API";
+    public static final String RESUBSCRIBE_CHECK_LIST_ITEM_API_PRODUCT = "Requires re-subscription when publishing the API Product";
     public static final String PUBLISH_IN_PRIVATE_JET_MODE = "Publish In Private-Jet Mode";
 
     public static final String METRICS_PREFIX = "org.wso2.am";
@@ -1905,7 +1915,7 @@ public final class APIConstants {
     public static final String ENABLE_STORE = "enableStore";
 
     //api-product related constants
-    public static final String API_PRODUCT_VERSION = "1.0.0";
+    public static final String API_PRODUCT_VERSION_1_0_0 = "1.0.0";
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
