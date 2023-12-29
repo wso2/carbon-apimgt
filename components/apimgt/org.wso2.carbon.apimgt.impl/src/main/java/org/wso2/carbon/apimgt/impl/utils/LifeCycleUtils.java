@@ -76,8 +76,8 @@ public class LifeCycleUtils {
 
         // Add LC state change event to the event queue
         sendLCStateChangeNotification(apiName, apiType, apiContext, apiTypeWrapper.getId().getVersion(), targetStatus,
-                apiTypeWrapper.getId().getProviderName(),
-                apiTypeWrapper.getId().getId(), uuid, orgId);
+                apiTypeWrapper.getId().getProviderName(), apiTypeWrapper.getId().getId(), uuid, orgId,
+                apiTypeWrapper.getApi() != null ? apiTypeWrapper.getApi().getApiSecurity() : null);
 
         // Remove revisions and subscriptions after API retire
         if (!apiTypeWrapper.isAPIProduct()) {

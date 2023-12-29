@@ -4431,7 +4431,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(),
                             productId, product.getUuid(), product.getId().getVersion(), product.getType(), product.getContext(),
-                            APIUtil.replaceEmailDomainBack(product.getId().getProviderName()), product.getState(), action);
+                            APIUtil.replaceEmailDomainBack(product.getId().getProviderName()), product.getState(), action,
+                            product.getApiSecurity());
             APIUtil.sendNotification(apiEventToNotifyDefaultVersionAPIProduct, APIConstants.NotifierType.API.name());
         }
 
