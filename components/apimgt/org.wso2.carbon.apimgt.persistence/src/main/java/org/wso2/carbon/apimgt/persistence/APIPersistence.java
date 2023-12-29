@@ -119,7 +119,7 @@ public interface APIPersistence {
      * @param org   Organization the API is owned by
      * @param apiId API ID
      * @return A String contains the security scheme of the API
-     * @throws APIPersistenceException
+     * @throws APIPersistenceException if failed to get the security scheme of the API
      */
     String getSecuritySchemeOfAPI(Organization org, String apiId) throws APIPersistenceException;
 

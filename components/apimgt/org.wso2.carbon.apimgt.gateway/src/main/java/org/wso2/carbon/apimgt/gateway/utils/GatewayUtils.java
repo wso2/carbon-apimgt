@@ -1152,10 +1152,10 @@ public class GatewayUtils {
     /**
      * This method is used to generate JWTInfoDto
      *
-     * @param subscribedAPI The subscribed API
+     * @param subscribedAPI     The subscribed API
      * @param jwtValidationInfo The JWT validation info
-     * @param apiContext API context
-     * @param apiVersion API version
+     * @param apiContext        API context
+     * @param apiVersion        API version
      * @return JWTInfoDto object with JWT validation info and API related info
      */
     public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,

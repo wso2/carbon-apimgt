@@ -538,6 +538,13 @@ public class InboundWebsocketProcessorUtil {
         return responseDTO;
     }
 
+    /**
+     * Checks if the authenticator is enabled for the given authentication type.
+     *
+     * @param authenticationType The String containing the Authentication type (eg: api_key, oauth2)
+     * @param inboundMessageContext  The InboundMessageContext object containing the request details
+     * @return true if the authenticator is enabled for the given authentication type
+     */
     public static boolean isAuthenticatorEnabled(String authenticationType, InboundMessageContext inboundMessageContext) {
         if (!Utils.getSecuritySchemeOfWebSocketAPI(inboundMessageContext.getApiContext(), inboundMessageContext.
                 getVersion(), inboundMessageContext.getTenantDomain()).contains(authenticationType)) {

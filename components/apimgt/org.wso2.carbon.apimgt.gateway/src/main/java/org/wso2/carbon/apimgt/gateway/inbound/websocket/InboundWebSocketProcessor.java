@@ -244,7 +244,7 @@ public class InboundWebSocketProcessor {
      *
      * @param req                   Handshake request
      * @param inboundMessageContext InboundMessageContext
-     * @return if validation success
+     * @return true if validation success
      * @throws APISecurityException if an error occurs
      */
     private boolean isAPIKeyAuthentication(FullHttpRequest req, InboundMessageContext inboundMessageContext)

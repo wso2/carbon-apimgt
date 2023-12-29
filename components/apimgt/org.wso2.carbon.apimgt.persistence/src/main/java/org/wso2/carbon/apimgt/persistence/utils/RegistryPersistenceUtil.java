@@ -549,7 +549,7 @@ public class RegistryPersistenceUtil {
      *
      * @param artifact
      * @return String containing the security scheme of the API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException if failed to get security scheme of API
      */
     public static String getSecuritySchemeOfAPI(GovernanceArtifact artifact) throws APIManagementException {
         try {
