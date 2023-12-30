@@ -95,10 +95,12 @@ public class ApplicationThrottlePolicyMappingUtil {
         if (dto.getDefaultLimit() != null) {
             appPolicy.setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
         }
-        BurstLimitDTO burstLimitDTO = dto.getBurstLimit();
-        if(burstLimitDTO.getRateLimitCount() > 0 && burstLimitDTO.getRateLimitTimeUnit() != null) {
-            appPolicy.setRateLimitCount(burstLimitDTO.getRateLimitCount());
-            appPolicy.setRateLimitTimeUnit(burstLimitDTO.getRateLimitTimeUnit());
+        if (dto.getBurstLimit() != null) {
+            BurstLimitDTO burstLimitDTO = dto.getBurstLimit();
+            if (burstLimitDTO.getRateLimitCount() > 0 && burstLimitDTO.getRateLimitTimeUnit() != null) {
+                appPolicy.setRateLimitCount(burstLimitDTO.getRateLimitCount());
+                appPolicy.setRateLimitTimeUnit(burstLimitDTO.getRateLimitTimeUnit());
+            }
         }
         return appPolicy;
     }
