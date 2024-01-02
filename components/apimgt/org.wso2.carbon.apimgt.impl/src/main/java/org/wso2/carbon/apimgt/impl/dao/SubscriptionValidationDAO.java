@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
@@ -63,6 +64,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.POLICY_ENABLED_FOR_ANALYTICS;
+
 /**
  * This Class used to handle DAO access for subscription Validation.
  */
@@ -70,6 +73,7 @@ public class SubscriptionValidationDAO {
 
     private static Log log = LogFactory.getLog(SubscriptionValidationDAO.class);
     private static String OPERATION_POLICY_ENABLE_WITH_ANALYTICS_EVENT = "operationPolicyEnableWithAnalyticsEvent";
+    private static Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
 
     /*
      * This method can be used to retrieve all the Subscriptions in the database
@@ -1174,8 +1178,11 @@ public class SubscriptionValidationDAO {
             }
         }
 
-        if (Boolean.parseBoolean(System.getProperty(OPERATION_POLICY_ENABLE_WITH_ANALYTICS_EVENT))) {
-            attachPolicies(connection, revisionId, api);
+        if(configs.containsKey(POLICY_ENABLED_FOR_ANALYTICS)) {
+            boolean isPolicyEnabled = Boolean.parseBoolean(configs.get(POLICY_ENABLED_FOR_ANALYTICS));
+            if (isPolicyEnabled) {
+                attachPolicies(connection, revisionId, api);
+            }
         }
     }
 
@@ -1267,9 +1274,11 @@ public class SubscriptionValidationDAO {
             }
         }
 
-        if (Boolean.parseBoolean(System.getProperty(OPERATION_POLICY_ENABLE_WITH_ANALYTICS_EVENT))) {
-            // Attach the relevant operation policies and api to the resources and to the API.
-            attachPolicies(connection, revisionId, api);
+        if(configs.containsKey(POLICY_ENABLED_FOR_ANALYTICS)) {
+            boolean isPolicyEnabled = Boolean.parseBoolean(configs.get(POLICY_ENABLED_FOR_ANALYTICS));
+            if (isPolicyEnabled) {
+                attachPolicies(connection, revisionId, api);
+            }
         }
     }
 

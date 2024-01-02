@@ -1108,6 +1108,12 @@
           "example" : false,
           "description" : "Whether this is the default version of the API."
         },
+        "apiPolicies" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OperationPolicy"
+          }
+        },
         "urlMappings" : {
           "type" : "array",
           "items" : {
@@ -1703,8 +1709,41 @@
           "items" : {
             "type" : "string"
           }
+        },
+        "operationPolicies" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OperationPolicy"
+          }
         }
       }
+    },
+    "OperationPolicy" : {
+      "properties" : {
+        "policyName" : {
+          "type" : "string"
+        },
+        "policyVersion" : {
+          "type" : "string"
+        },
+        "direction" : {
+          "type" : "string"
+        },
+        "policyId" : {
+          "type" : "string"
+        },
+        "order" : {
+          "type" : "integer"
+        },
+        "parameters" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      },
+      "title" : "Operation Policy"
     },
     "Pagination" : {
       "properties" : {

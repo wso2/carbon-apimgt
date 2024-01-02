@@ -169,7 +169,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             api.setApiCreator(apiObj.getApiProvider());
             api.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(api.getApiCreator()));
             List<URITemplate> uriTemplates = new ArrayList<>();
-
             for (URLMapping uriTemplate : apiObj.getUrlMappings()) {
                 org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate uriTemplateObj
                         = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate();
