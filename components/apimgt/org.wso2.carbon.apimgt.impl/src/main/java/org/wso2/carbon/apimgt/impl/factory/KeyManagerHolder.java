@@ -126,7 +126,7 @@ public class KeyManagerHolder {
                 globalKMMap.putKeyManagerDto(keyManagerDto);
                 globalJWTValidatorMap.put(issuer, keyManagerDto);
             } else {
-                tenantWiseMap.put(organization, tenantKeyManagerDto);
+                organizationWiseMap.put(organization, tenantKeyManagerDto);
             }
         }
     }
@@ -290,7 +290,7 @@ public class KeyManagerHolder {
         if (APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN.equals(tenantDomain)) {
             return globalKMMap;
         }
-        return tenantWiseMap.get(tenantDomain);
+        return organizationWiseMap.get(tenantDomain);
     }
     public static void addGlobalJWTValidators(TokenIssuerDto tokenIssuerDto) {
 

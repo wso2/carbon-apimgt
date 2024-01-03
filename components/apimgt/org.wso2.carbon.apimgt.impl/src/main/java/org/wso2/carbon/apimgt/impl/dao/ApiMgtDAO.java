@@ -9327,7 +9327,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                    keyManagerConfigurationDTO.setOrganization(resultSet.getString("ORGANIZATION"));
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {

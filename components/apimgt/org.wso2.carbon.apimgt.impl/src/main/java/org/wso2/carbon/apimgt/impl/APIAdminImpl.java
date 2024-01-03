@@ -1697,7 +1697,7 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public List<KeyManagerConfigurationDTO> getGlobalKeyManagerConfigurations() throws APIManagementException {
-        List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getKeyManagerConfigurationsByTenant(
+        List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getKeyManagerConfigurationsByOrganization(
                 APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN);
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurations) {
             decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
