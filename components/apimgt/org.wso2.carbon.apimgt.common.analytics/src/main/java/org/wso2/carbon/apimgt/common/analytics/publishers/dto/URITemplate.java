@@ -34,11 +34,11 @@ public class URITemplate {
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
 
     public void setOperationPolicies(List<OperationPolicy> operationPolicies) {
-        this.operationPolicies = operationPolicies;
+        this.operationPolicies = new ArrayList(operationPolicies);
     }
 
     public List<OperationPolicy> getOperationPolicies() {
-        return operationPolicies;
+        return new ArrayList(operationPolicies);
     }
 
     public void setHttpVerb(String httpVerb) {

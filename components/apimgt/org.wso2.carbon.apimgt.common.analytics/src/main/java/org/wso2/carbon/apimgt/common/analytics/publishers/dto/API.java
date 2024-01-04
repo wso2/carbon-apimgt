@@ -82,18 +82,18 @@ public class API {
     }
 
     public List<URITemplate> getUriTemplates() {
-        return uriTemplates;
+        return new ArrayList(uriTemplates);
     }
 
     public void setUriTemplates(List<URITemplate> uriTemplates) {
-        this.uriTemplates = uriTemplates;
+        this.uriTemplates = new ArrayList(uriTemplates);
     }
 
     public void setApiPolicies(List<OperationPolicy> apiPolicies) {
-        this.apiPolicies = apiPolicies;
+        this.apiPolicies = new ArrayList(apiPolicies);
     }
 
     public List<OperationPolicy> getApiPolicies() {
-        return apiPolicies;
+        return new ArrayList(apiPolicies);
     }
 }
