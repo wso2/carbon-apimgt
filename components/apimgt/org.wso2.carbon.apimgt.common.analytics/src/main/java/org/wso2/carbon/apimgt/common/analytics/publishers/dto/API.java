@@ -31,6 +31,7 @@ public class API {
     private String apiCreator;
     private String apiCreatorTenantDomain;
     private List<URITemplate> uriTemplates = new ArrayList<>();
+    private List<OperationPolicy> apiPolicies = new ArrayList<>();
 
     public String getApiId() {
         return apiId;
@@ -86,5 +87,13 @@ public class API {
 
     public void setUriTemplates(List<URITemplate> uriTemplates) {
         this.uriTemplates = uriTemplates;
+    }
+
+    public void setApiPolicies(List<OperationPolicy> apiPolicies) {
+        this.apiPolicies = apiPolicies;
+    }
+
+    public List<OperationPolicy> getApiPolicies() {
+        return apiPolicies;
     }
 }

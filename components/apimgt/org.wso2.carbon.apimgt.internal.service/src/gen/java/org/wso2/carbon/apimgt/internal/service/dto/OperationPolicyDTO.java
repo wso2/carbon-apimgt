@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.*;
 
 
@@ -21,6 +24,7 @@ public class OperationPolicyDTO   {
     private String direction = null;
     private String policyId = null;
     private Integer order = null;
+    private Map<String, Object> parameters = new HashMap<>();
 
   /**
    **/
@@ -107,6 +111,23 @@ public class OperationPolicyDTO   {
     this.order = order;
   }
 
+  /**
+   **/
+  public OperationPolicyDTO parameters(Map<String, Object> parameters) {
+    this.parameters = parameters;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("parameters")
+  public Map<String, Object> getParameters() {
+    return parameters;
+  }
+  public void setParameters(Map<String, Object> parameters) {
+    this.parameters = parameters;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -121,12 +142,13 @@ public class OperationPolicyDTO   {
         Objects.equals(policyVersion, operationPolicy.policyVersion) &&
         Objects.equals(direction, operationPolicy.direction) &&
         Objects.equals(policyId, operationPolicy.policyId) &&
-        Objects.equals(order, operationPolicy.order);
+        Objects.equals(order, operationPolicy.order) &&
+        Objects.equals(parameters, operationPolicy.parameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyName, policyVersion, direction, policyId, order);
+    return Objects.hash(policyName, policyVersion, direction, policyId, order, parameters);
   }
 
   @Override
@@ -139,6 +161,7 @@ public class OperationPolicyDTO   {
     sb.append("    direction: ").append(toIndentedString(direction)).append("\n");
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    order: ").append(toIndentedString(order)).append("\n");
+    sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -65,10 +65,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
@@ -173,16 +171,20 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             api.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(api.getApiCreator()));
             List<URITemplate> uriTemplates = new ArrayList<>();
             for (URLMapping uriTemplate : apiObj.getUrlMappings()) {
-                org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate uriTemplateObj = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate();
+                org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate uriTemplateObj
+                        = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate();
                 if (uriTemplate.getHttpMethod() != null && uriTemplate.getHttpMethod()
-                        .equals(messageContext.getProperty("api.ut.HTTP_METHOD")) && uriTemplate.getUrlPattern() != null
-                        && uriTemplate.getUrlPattern().equals(messageContext.getProperty("api.ut.resource"))) {
+                        .equals(messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD))
+                        && uriTemplate.getUrlPattern() != null && uriTemplate.getUrlPattern()
+                        .equals(messageContext.getProperty("API_ELECTED_RESOURCE"))) {
                     uriTemplateObj.setResourceURI(uriTemplate.getUrlPattern());
                     uriTemplateObj.setHttpVerb(uriTemplate.getHttpMethod());
                     uriTemplateObj.setAuthScheme(uriTemplate.getAuthScheme());
-                    List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> operationPolicies = new ArrayList<>();
+                    List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> operationPolicies
+                            = new ArrayList<>();
                     for (OperationPolicy operationPolicy : uriTemplate.getOperationPolicies()) {
-                        org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
+                        org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj
+                                = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
                         operationPolicyObj.setPolicyVersion(operationPolicy.getPolicyVersion());
                         operationPolicyObj.setPolicyName(operationPolicy.getPolicyName());
                         operationPolicyObj.setPolicyId(operationPolicy.getPolicyId());
@@ -192,9 +194,23 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     }
                     uriTemplateObj.setOperationPolicies(operationPolicies);
                     uriTemplates.add(uriTemplateObj);
+                    break;
                 }
             }
+            List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> apiPolicyList =
+                    new ArrayList<>();
+            for (OperationPolicy apiPolicy : apiObj.getApiPolicies()) {
+                org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj
+                        = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
+                operationPolicyObj.setPolicyVersion(apiPolicy.getPolicyVersion());
+                operationPolicyObj.setPolicyName(apiPolicy.getPolicyName());
+                operationPolicyObj.setPolicyId(apiPolicy.getPolicyId());
+                operationPolicyObj.setDirection(apiPolicy.getDirection());
+                operationPolicyObj.setOrder(apiPolicy.getOrder());
+                apiPolicyList.add(operationPolicyObj);
+            }
             api.setUriTemplates(uriTemplates);
+            api.setApiPolicies(apiPolicyList);
         }
         return api;
     }

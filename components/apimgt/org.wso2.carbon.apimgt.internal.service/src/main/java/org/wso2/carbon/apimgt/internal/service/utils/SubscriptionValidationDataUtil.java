@@ -107,18 +107,31 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
                 List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
-                for(OperationPolicy operationPolicy: urlMapping.getOperationPolicies()) {
+                for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
                     OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
                     operationPolicyDTO.setPolicyId(operationPolicy.getPolicyId());
                     operationPolicyDTO.setPolicyName(operationPolicy.getPolicyName());
                     operationPolicyDTO.setPolicyVersion(operationPolicy.getPolicyVersion());
                     operationPolicyDTO.setDirection(operationPolicy.getDirection());
+                    operationPolicyDTO.setParameters(operationPolicy.getParameters());
                     operationPolicyDTO.setOrder(operationPolicy.getOrder());
                     operationPolicyDTOList.add(operationPolicyDTO);
                 }
                 urlMappingDTO.setOperationPolicies(operationPolicyDTOList);
                 urlMappingsDTO.add(urlMappingDTO);
             }
+            List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
+            for (OperationPolicy apiPolicy : model.getApiPolicies()) {
+                OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                operationPolicyDTO.setPolicyId(apiPolicy.getPolicyId());
+                operationPolicyDTO.setPolicyName(apiPolicy.getPolicyName());
+                operationPolicyDTO.setPolicyVersion(apiPolicy.getPolicyVersion());
+                operationPolicyDTO.setDirection(apiPolicy.getDirection());
+                operationPolicyDTO.setOrder(apiPolicy.getOrder());
+                operationPolicyDTO.setParameters(apiPolicy.getParameters());
+                apiPolicies.add(operationPolicyDTO);
+            }
+            apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
         }
         return apidto;
@@ -152,18 +165,31 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
                 List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
-                for(OperationPolicy operationPolicy: urlMapping.getOperationPolicies()) {
+                for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
                     OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
                     operationPolicyDTO.setPolicyId(operationPolicy.getPolicyId());
                     operationPolicyDTO.setPolicyName(operationPolicy.getPolicyName());
                     operationPolicyDTO.setPolicyVersion(operationPolicy.getPolicyVersion());
                     operationPolicyDTO.setDirection(operationPolicy.getDirection());
                     operationPolicyDTO.setOrder(operationPolicy.getOrder());
+                    operationPolicyDTO.setParameters(operationPolicy.getParameters());
                     operationPolicyDTOList.add(operationPolicyDTO);
                 }
                 urlMappingDTO.setOperationPolicies(operationPolicyDTOList);
                 urlMappingsDTO.add(urlMappingDTO);
             }
+            List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
+            for (OperationPolicy apiPolicy : model.getApiPolicies()) {
+                OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                operationPolicyDTO.setPolicyId(apiPolicy.getPolicyId());
+                operationPolicyDTO.setPolicyName(apiPolicy.getPolicyName());
+                operationPolicyDTO.setPolicyVersion(apiPolicy.getPolicyVersion());
+                operationPolicyDTO.setDirection(apiPolicy.getDirection());
+                operationPolicyDTO.setParameters(apiPolicy.getParameters());
+                operationPolicyDTO.setOrder(apiPolicy.getOrder());
+                apiPolicies.add(operationPolicyDTO);
+            }
+            apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
             apiListdto.setCount(1);
             apiListdto.getList().add(apidto);
