@@ -92,6 +92,7 @@ public class InMemoryAPIDeployer {
 
         String apiId = gatewayEvent.getUuid();
         Set<String> gatewayLabels = gatewayEvent.getGatewayLabels();
+        gatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
         try {
             GatewayAPIDTO gatewayAPIDTO = retrieveArtifact(apiId, gatewayLabels);
             if (gatewayAPIDTO != null) {
