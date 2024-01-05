@@ -674,6 +674,10 @@ public class SubscriptionValidationDAO {
                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(applicationPolicyDTO.getTenantId());
                 applicationPolicyDTO.setTenantDomain(tenantDomain);
                 setCommonProperties(applicationPolicyDTO, resultSet);
+                applicationPolicyDTO.setRateLimitCount(resultSet.getInt(
+                        ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                applicationPolicyDTO.setRateLimitTimeUnit(resultSet.getString(
+                        ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 applicationPolicies.add(applicationPolicyDTO);
             }
         }
@@ -874,7 +878,10 @@ public class SubscriptionValidationDAO {
                     applicationPolicy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                     applicationPolicy.setTenantDomain(tenantDomain);
                     setCommonProperties(applicationPolicy, resultSet);
-
+                    applicationPolicy.setRateLimitCount(resultSet.getInt(
+                            ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                    applicationPolicy.setRateLimitTimeUnit(resultSet.getString(
+                            ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                     return applicationPolicy;
                 }
             }

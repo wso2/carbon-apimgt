@@ -1259,6 +1259,8 @@ definitions:
     properties:
       defaultLimit:
         $ref: '#/definitions/ThrottleLimit'
+      burstLimit:
+        $ref: '#/definitions/BurstLimit'
   #-----------------------------------------------------
   # The Api Policy List resource
   #-----------------------------------------------------
@@ -1433,6 +1435,18 @@ definitions:
       eventCount:
         $ref: '#/definitions/EventCountLimit'
 
+  BurstLimit:
+    title: Burst Limit object
+    type: object
+    properties:
+      rateLimitCount:
+        type: integer
+        description: Burst control request count
+        example: 10
+      rateLimitTimeUnit:
+        type: string
+        description: Burst control time unit
+        example: min
   #-----------------------------------------------------
   # The Throttling Bandwidth Limit resource
   #-----------------------------------------------------

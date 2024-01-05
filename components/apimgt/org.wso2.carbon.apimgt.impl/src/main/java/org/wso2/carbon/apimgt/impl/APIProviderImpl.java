@@ -3162,7 +3162,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
                     appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
-                    appPolicy.getDefaultQuotaPolicy().getType());
+                    appPolicy.getDefaultQuotaPolicy().getType(), appPolicy.getRateLimitCount(), appPolicy.getRateLimitTimeUnit());
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof SubscriptionPolicy) {
             SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
@@ -3376,7 +3376,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
                     appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
-                    appPolicy.getDefaultQuotaPolicy().getType());
+                    appPolicy.getDefaultQuotaPolicy().getType(), appPolicy.getRateLimitCount(), appPolicy.getRateLimitTimeUnit());
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof SubscriptionPolicy) {
             SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
@@ -3463,7 +3463,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
                     appPolicy.getTenantDomain(), appPolicy.getPolicyId(), appPolicy.getPolicyName(),
-                    appPolicy.getDefaultQuotaPolicy().getType());
+                    appPolicy.getDefaultQuotaPolicy().getType(), appPolicy.getRateLimitCount(),
+                    appPolicy.getRateLimitTimeUnit());
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
             SubscriptionPolicy subscriptionPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantID);

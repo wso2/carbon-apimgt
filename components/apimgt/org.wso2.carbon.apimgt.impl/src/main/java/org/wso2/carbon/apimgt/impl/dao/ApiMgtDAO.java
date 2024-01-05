@@ -11245,8 +11245,10 @@ public class ApiMgtDAO {
             }
             policyStatement = conn.prepareStatement(addQuery);
             setCommonParametersForPolicy(policyStatement, policy);
+            policyStatement.setInt(12, policy.getRateLimitCount());
+            policyStatement.setString(13, policy.getRateLimitTimeUnit());
             if (hasCustomAttrib) {
-                policyStatement.setBlob(12, new ByteArrayInputStream(policy.getCustomAttributes()));
+                policyStatement.setBlob(14, new ByteArrayInputStream(policy.getCustomAttributes()));
             }
             policyStatement.executeUpdate();
 
@@ -11997,6 +11999,8 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 ApplicationPolicy appPolicy = new ApplicationPolicy(rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                appPolicy.setRateLimitCount(rs.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                appPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 setCommonPolicyDetails(appPolicy, rs);
                 policies.add(appPolicy);
             }
@@ -12393,6 +12397,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(policy, resultSet);
+                setRateLimitDetails(policy, resultSet);
             }
         } catch (SQLException e) {
             handleException("Failed to get application policy: " + policyName + '-' + tenantId, e);
@@ -12431,6 +12436,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 policy = new ApplicationPolicy(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
                 setCommonPolicyDetails(policy, resultSet);
+                setRateLimitDetails(policy, resultSet);
             }
         } catch (SQLException e) {
             handleException("Failed to get application policy: " + uuid, e);
@@ -12858,21 +12864,23 @@ public class ApiMgtDAO {
             }
             updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            updateStatement.setInt(8, policy.getRateLimitCount());
+            updateStatement.setString(9, policy.getRateLimitTimeUnit());
 
             if (hasCustomAttrib) {
-                updateStatement.setBlob(8, new ByteArrayInputStream(policy.getCustomAttributes()));
+                updateStatement.setBlob(10, new ByteArrayInputStream(policy.getCustomAttributes()));
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(9, policy.getPolicyName());
-                    updateStatement.setInt(10, policy.getTenantId());
+                    updateStatement.setString(11, policy.getPolicyName());
+                    updateStatement.setInt(12, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(9, policy.getUUID());
+                    updateStatement.setString(11, policy.getUUID());
                 }
             } else {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(8, policy.getPolicyName());
-                    updateStatement.setInt(9, policy.getTenantId());
+                    updateStatement.setString(10, policy.getPolicyName());
+                    updateStatement.setInt(11, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(8, policy.getUUID());
+                    updateStatement.setString(10, policy.getUUID());
                 }
             }
             updateStatement.executeUpdate();
@@ -13242,8 +13250,15 @@ public class ApiMgtDAO {
         } else {
             policyStatement.setString(11, UUID.randomUUID().toString());
         }
+
     }
 
+    private void setRateLimitDetails(ApplicationPolicy policy, ResultSet resultSet) throws SQLException {
+        if (resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT) > 0) {
+            policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+            policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+        }
+    }
     /**
      * Populated common attributes of policy type objects to <code>policy</code>
      * from <code>resultSet</code>

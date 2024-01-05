@@ -2308,13 +2308,13 @@ public class SQLConstants {
 
     public static final String INSERT_APPLICATION_POLICY_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,CUSTOM_ATTRIBUTES) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT,CUSTOM_ATTRIBUTES) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
@@ -2480,7 +2480,9 @@ public class SQLConstants {
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
-                    "TIME_UNIT = ? " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
@@ -2493,7 +2495,9 @@ public class SQLConstants {
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
-                    " CUSTOM_ATTRIBUTES = ? "+
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
+                    "CUSTOM_ATTRIBUTES = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_BY_UUID_SQL =
@@ -2505,7 +2509,9 @@ public class SQLConstants {
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
-                    "TIME_UNIT = ? " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ? " +
                     "WHERE UUID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_BY_UUID_SQL =
@@ -2518,6 +2524,8 @@ public class SQLConstants {
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
                     "CUSTOM_ATTRIBUTES = ? "+
                     "WHERE UUID = ?";
 

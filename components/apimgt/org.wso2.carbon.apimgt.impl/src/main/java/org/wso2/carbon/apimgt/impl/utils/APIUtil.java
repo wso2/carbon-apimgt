@@ -6018,7 +6018,8 @@ public final class APIUtil {
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
                         retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                         retrievedPolicy.getPolicyName(),
-                        retrievedPolicy.getDefaultQuotaPolicy().getType());
+                        retrievedPolicy.getDefaultQuotaPolicy().getType(), retrievedPolicy.getRateLimitCount(),
+                        retrievedPolicy.getRateLimitTimeUnit());
                 APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
             }
         }

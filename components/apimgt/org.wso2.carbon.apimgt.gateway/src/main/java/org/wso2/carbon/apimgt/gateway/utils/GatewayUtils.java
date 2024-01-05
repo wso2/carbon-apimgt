@@ -578,6 +578,8 @@ public class GatewayUtils {
             authContext.setStopOnQuotaReach(apiKeyValidationInfoDTO.isStopOnQuotaReach());
             authContext.setSpikeArrestLimit(apiKeyValidationInfoDTO.getSpikeArrestLimit());
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
+            authContext.setApplicationSpikesArrestLimit(apiKeyValidationInfoDTO.getApplicationSpikeArrestLimit());
+            authContext.setApplicationSpikesArrestUnit(apiKeyValidationInfoDTO.getApplicationSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
             authContext.setGraphQLMaxDepth(apiKeyValidationInfoDTO.getGraphQLMaxDepth());
