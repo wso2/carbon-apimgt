@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.MethodNotAllowedException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.PreconditionFailedException;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -463,6 +464,18 @@ public class RestApiUtil {
     public static ConflictException buildConflictException(String message, String description) {
         ErrorDTO errorDTO = getErrorDTO(message, 409l, description);
         return new ConflictException(errorDTO);
+    }
+
+    /**
+     * Returns a new PreconditionFailedException.
+     *
+     * @param message summary of the error
+     * @param description description of the exception
+     * @return a new ConflictException with the specified details as a response DTO
+     */
+    public static PreconditionFailedException buildPreconditionFailedException(String message, String description) {
+        ErrorDTO errorDTO = getErrorDTO(message, 412l, description);
+        return new PreconditionFailedException(errorDTO);
     }
 
     /**
@@ -955,6 +968,21 @@ public class RestApiUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * Logs the error, builds a PreconditionFailedException with specified details and throws it.
+     *
+     * @param description description of the error
+     * @param log Log instance
+     * @throws ConflictException
+     */
+    public static void handlePreconditionFailedError(String description, Log log)
+            throws PreconditionFailedException {
+        PreconditionFailedException preconditionFailedException = buildPreconditionFailedException(
+                RestApiConstants.STATUS_PRECONDITION_FAILED_MESSAGE_DEFAULT, description);
+        log.error(description);
+        throw preconditionFailedException;
     }
 
     public static OAuthApplicationInfo registerOAuthApplication(OAuthAppRequest appRequest) {

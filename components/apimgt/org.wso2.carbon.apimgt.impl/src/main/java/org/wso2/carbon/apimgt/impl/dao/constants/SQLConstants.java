@@ -4159,6 +4159,67 @@ public class SQLConstants {
     }
 
     /**
+     * Static class to hold database queries related to gateway policies tables
+     */
+    public static class GatewayPolicyConstants {
+        // Global policy mapping
+        public static final String ADD_GATEWAY_POLICY_METADATA =
+                "INSERT INTO AM_GATEWAY_POLICY_METADATA " +
+                        " (GLOBAL_POLICY_MAPPING_UUID, ORGANIZATION, DISPLAY_NAME, DESCRIPTION) " +
+                        " VALUES (?,?,?,?)";
+        public static final String ADD_GATEWAY_POLICY_MAPPING =
+                "INSERT INTO AM_GATEWAY_POLICY_MAPPING " +
+                        " (GLOBAL_POLICY_MAPPING_UUID, POLICY_UUID, POLICY_ORDER, DIRECTION, PARAMETERS) " +
+                        " VALUES (?,?,?,?,?)";
+        // Global policy deployment state
+        public static final String SET_GATEWAY_POLICY_DEPLOYMENT_STATUS = "INSERT INTO AM_GATEWAY_POLICY_DEPLOYMENT "
+                + " (GLOBAL_POLICY_MAPPING_UUID, GATEWAY_LABEL, ORGANIZATION) VALUES (?,?,?)";
+        // Remove global policy deployment
+        public static final String DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS =
+                "DELETE FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GATEWAY_LABEL = ? AND GLOBAL_POLICY_MAPPING_UUID = ? "
+                        + "AND ORGANIZATION = ?";
+        public static final String GET_MAPPED_POLICY_UUIDS_BY_POLICY_MAPPING_UUID =
+                "SELECT POLICY_UUID FROM AM_GATEWAY_POLICY_MAPPING WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_COMMON_POLICY_USAGE_COUNT_BY_POLICY_UUID =
+                "SELECT COUNT(*) AS count_occurrences FROM AM_GATEWAY_POLICY_MAPPING WHERE POLICY_UUID = ?;";
+        public static final String GET_GATEWAY_POLICIES_BY_POLICY_MAPPING_UUID =
+                "SELECT OP.POLICY_NAME, OP.POLICY_VERSION, GPM.DIRECTION, GPM.PARAMETERS, GPM.POLICY_ORDER, " +
+                         "GPM.POLICY_UUID FROM AM_GATEWAY_POLICY_MAPPING GPM " +
+                         "INNER JOIN AM_OPERATION_POLICY OP ON GPM.POLICY_UUID = OP.POLICY_UUID " +
+                         "WHERE GPM.GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GLOBAL_POLICY_MAPPING_UUID_BY_GATEWAY_LABEL =
+                "SELECT GLOBAL_POLICY_MAPPING_UUID FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE "
+                        + "ORGANIZATION = ? AND GATEWAY_LABEL IN (_GATEWAY_LABELS_)";
+        public static final String DELETE_GATEWAY_POLICY_MAPPING_BY_ID =
+                "DELETE FROM AM_GATEWAY_POLICY_MAPPING WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GATEWAY_POLICY_DEPLOYMENT_BY_MAPPING_UUID =
+                "SELECT GATEWAY_LABEL FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GLOBAL_POLICY_MAPPING_UUID = ? "
+                        + "AND ORGANIZATION = ?";
+        public static final String GET_POLICY_DEPLOYMENT_BY_GATEWAY =
+                "SELECT GLOBAL_POLICY_MAPPING_UUID FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GATEWAY_LABEL = ? "
+                        + "AND ORGANIZATION = ?";
+        public static final String UPDATE_GATEWAY_POLICY_METADATA = "UPDATE AM_GATEWAY_POLICY_METADATA "
+                + "SET DISPLAY_NAME = ?, DESCRIPTION = ?, ORGANIZATION = ? WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String DELETE_GATEWAY_POLICY_METADATA = "DELETE FROM AM_GATEWAY_POLICY_METADATA WHERE "
+                + "GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String UPDATE_GATEWAY_POLICY_DEPLOYMENT_BY_GATEWAY_LABEL = "UPDATE AM_GATEWAY_POLICY_DEPLOYMENT "
+                + "SET GATEWAY_LABEL = ? WHERE GATEWAY_LABEL = ? AND ORGANIZATION = ?";
+        public static final String GET_ALL_GATEWAY_POLICY_METADATA_FOR_ORGANIZATION =
+                "SELECT * FROM AM_GATEWAY_POLICY_METADATA WHERE ORGANIZATION = ?";
+        public static final String GET_GATEWAY_POLICY_METADATA_BY_POLICY_MAPPING_UUID =
+                "SELECT * FROM AM_GATEWAY_POLICY_METADATA WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GATEWAY_POLICY_METADATA_BY_GATEWAY_LABEL =
+                "SELECT meta.GLOBAL_POLICY_MAPPING_UUID, " +
+                        "meta.DISPLAY_NAME AS METADATA_DISPLAY_NAME, " +
+                        "meta.DESCRIPTION AS METADATA_DESCRIPTION, " +
+                        "meta.ORGANIZATION AS METADATA_ORGANIZATION " +
+                        "FROM AM_GATEWAY_POLICY_METADATA meta JOIN AM_GATEWAY_POLICY_DEPLOYMENT deploy ON " +
+                        "meta.GLOBAL_POLICY_MAPPING_UUID = deploy.GLOBAL_POLICY_MAPPING_UUID WHERE " +
+                        "deploy.GATEWAY_LABEL = ? AND meta.ORGANIZATION = ?";
+
+    }
+
+    /**
      * Static class to hold database queries related to AM_SYSTEM_CONFIGS table
      */
     public static class SystemConfigsConstants {

@@ -356,6 +356,14 @@
       {
         "Name": "apim:admin_tier_view",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:gateway_policy_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:gateway_policy_view",
+        "Roles": "admin,Internal/creator,Internal/publisher,Internal/observer"
       }
     ]
   },

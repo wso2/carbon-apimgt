@@ -1551,6 +1551,10 @@ public class GatewayUtils {
         return DataHolder.getInstance().isAllApisDeployed();
     }
 
+    public static boolean isAllGatewayPoliciesDeployed () {
+        return DataHolder.getInstance().isAllGatewayPoliciesDeployed();
+    }
+
     public static List<String> getKeyManagers(org.apache.synapse.MessageContext messageContext) {
 
         API api = getAPI(messageContext);

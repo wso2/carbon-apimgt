@@ -2645,7 +2645,8 @@ public final class APIConstants {
         CERTIFICATE,
         GA_CONFIG,
         KEY_TEMPLATE,
-        CORRELATION_CONFIG
+        CORRELATION_CONFIG,
+        GATEWAY_POLICY
     }
 
     // Supported Event Types
@@ -2678,7 +2679,9 @@ public final class APIConstants {
         CUSTOM_POLICY_ADD,
         CUSTOM_POLICY_DELETE,
         CUSTOM_POLICY_UPDATE,
-        UPDATE_CORRELATION_CONFIGS
+        UPDATE_CORRELATION_CONFIGS,
+        DEPLOY_POLICY_MAPPING_IN_GATEWAY,
+        REMOVE_POLICY_MAPPING_FROM_GATEWAY
     }
 
     public enum EventAction {
@@ -2705,6 +2708,7 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_ANY = "ANY";
         public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
         public static final String GATEAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
+        public static final String GATEWAY_POLICY_SYNAPSE_ARTIFACTS = "/gateway-policy-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
         public static final String DATA_RETRIEVAL_MODE = "DataRetrievalMode";
         public static final String GATEWAY_STARTUP_SYNC = "sync";
