@@ -806,7 +806,8 @@ public interface APIConsumer extends APIManager {
      * @return KeyManagerConfigurationDTO list
      * @throws APIManagementException if error occurred
      */
-    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization, String username) throws APIManagementException;
+    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization, String username)
+            throws APIManagementException;
 
     /**
      * This method used to check if key manager configuration is allowed for user
@@ -825,6 +826,7 @@ public interface APIConsumer extends APIManager {
      * @return boolean
      * @throws APIManagementException if error occurred
      */
-    boolean isKeyManagerByNameAllowedForUser(String keyManagerName, String organization, String username) throws APIManagementException;
+    boolean isKeyManagerByNameAllowedForUser(String keyManagerName, String organization, String username)
+            throws APIManagementException;
 
 }
