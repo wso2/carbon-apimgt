@@ -190,6 +190,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_NAME = "apiName";
     public static final String API_VERSION = "apiVersion";
     public static final String API_PROVIDER = "apiProvider";
+    private static final String PERMISSION_ALLOW = "ALLOW";
+    private static final String PERMISSION_DENY = "DENY";
+    private static final String PERMISSION_NOT_RESTRICTED = "PUBLIC";
     private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
 
     private static final String GET_SUB_WORKFLOW_REF_FAILED = "Failed to get external workflow reference for subscription ";
@@ -4275,14 +4278,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIAdmin apiAdmin = new APIAdminImpl();
         KeyManagerPermissionConfigurationDTO permissions = apiAdmin.getKeyManagerPermissions(keyManagerId);
         String permissionType = permissions.getPermissionType();
-        if (permissions != null && !permissionType.equals("PUBLIC")) {
+        if (permissions != null && !permissionType.equals(PERMISSION_NOT_RESTRICTED)) {
             String[] permissionRoles = permissions.getRoles()
                     .stream()
                     .toArray(String[]::new);
             String[] userRoles = APIUtil.getListOfRoles(username);
             boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
-            if (("ALLOW".equals(permissionType) && !roleIsRestricted)
-                    || ("DENY".equals(permissionType) && roleIsRestricted)) {
+            if ((PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
+                    || (PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
                 return false;
             }
         }
@@ -4307,7 +4310,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         KeyManagerPermissionConfigurationDTO permissions = keyManagerConfiguration.getPermissions();
         String permissionType = permissions.getPermissionType();
         //Checks if the keymanager is permission restricted and if the user is in the restricted list
-        if (permissions != null && !permissionType.equals("PUBLIC")) {
+        if (permissions != null && !permissionType.equals(PERMISSION_NOT_RESTRICTED)) {
             String[] permissionRoles = permissions.getRoles()
                     .stream()
                     .toArray(String[]::new);
@@ -4315,8 +4318,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             //list of common roles the user has and the restricted list
             boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
             //Checks if the user is allowed to access the key manager
-            if (("ALLOW".equals(permissionType) && !roleIsRestricted)
-                    || ("DENY".equals(permissionType) && roleIsRestricted)) {
+            if ((PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
+                    || (PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
                 return false;
             }
         }

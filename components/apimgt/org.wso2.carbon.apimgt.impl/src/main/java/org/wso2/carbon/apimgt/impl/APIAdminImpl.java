@@ -753,7 +753,7 @@ public class APIAdminImpl implements APIAdmin {
         try {
             keyManagerPermissionConfigurationDTO = apiMgtDAO.getKeyManagerPermissions(id);
         } catch (APIManagementException e) {
-            throw new APIManagementException("Key Manager Permissions retrieval failed for Key Manager id " + id);
+            throw new APIManagementException("Key Manager Permissions retrieval failed for Key Manager id " + id, e);
         }
         return keyManagerPermissionConfigurationDTO;
     }

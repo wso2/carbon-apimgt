@@ -9296,7 +9296,8 @@ public class ApiMgtDAO {
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
                 if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
                     try (PreparedStatement addPermissionStatement = conn
-                            .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
+                            .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants
+                                    .ADD_KEY_MANAGER_PERMISSION_SQL)) {
                         for (String role : keyManagerConfigurationDTO.getPermissions().getRoles()) {
                             addPermissionStatement.setString(1, keyManagerConfigurationDTO.getUuid());
                             addPermissionStatement.setString(2, permissionDTO.getPermissionType());
@@ -9425,7 +9426,8 @@ public class ApiMgtDAO {
 
     }
 
-    public KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String keyManagerUUID) throws APIManagementException {
+    public KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String keyManagerUUID)
+            throws APIManagementException {
 
         KeyManagerPermissionConfigurationDTO keyManagerPermissions =
                 new KeyManagerPermissionConfigurationDTO();
@@ -9433,7 +9435,8 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             keyManagerPermissions = new KeyManagerPermissionConfigurationDTO();
             try {
-                String getKeyManagerPermissionQuery = SQLConstants.KeyManagerPermissionsSqlConstants.GET_KEY_MANAGER_PERMISSIONS_SQL;
+                String getKeyManagerPermissionQuery = SQLConstants
+                        .KeyManagerPermissionsSqlConstants.GET_KEY_MANAGER_PERMISSIONS_SQL;
                 conn.setAutoCommit(false);
                 PreparedStatement ps = conn.prepareStatement(getKeyManagerPermissionQuery);
                 ps.setString(1, keyManagerUUID);

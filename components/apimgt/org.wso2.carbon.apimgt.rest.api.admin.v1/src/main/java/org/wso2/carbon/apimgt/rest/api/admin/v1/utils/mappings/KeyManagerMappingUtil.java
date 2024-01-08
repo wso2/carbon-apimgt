@@ -221,7 +221,7 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setTokenType(keyManagerDTO.getTokenType().toString());
         keyManagerConfigurationDTO.setAlias(keyManagerDTO.getAlias());
         KeyManagerPermissionsDTO permissions = keyManagerDTO.getPermissions();
-        if(permissions != null && permissions.getPermissionType() != null) {
+        if (permissions != null && permissions.getPermissionType() != null) {
             KeyManagerPermissionConfigurationDTO permissionsConfiguration = new KeyManagerPermissionConfigurationDTO();
             permissionsConfiguration.setPermissionType(permissions.getPermissionType().toString());
             permissionsConfiguration.setRoles(permissions.getRoles());

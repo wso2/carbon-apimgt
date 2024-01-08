@@ -176,8 +176,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         }
     }
 
-    public void validatePermissions (KeyManagerPermissionConfigurationDTO permissionDTO)
-            throws IllegalArgumentException, APIManagementException{
+    public void validatePermissions(KeyManagerPermissionConfigurationDTO permissionDTO)
+            throws IllegalArgumentException, APIManagementException {
+
         if (permissionDTO != null && permissionDTO.getRoles() != null) {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String[] allowedPermissionTypes = {"PUBLIC", "ALLOW", "DENY"};
