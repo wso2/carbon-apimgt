@@ -80,6 +80,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private static final Log log = LogFactory.getLog(RegistrationServiceImpl.class);
     private static final String APP_DISPLAY_NAME = "DisplayName";
+    private static final String OPAQUE = "opaque";
 
     @Context
     MessageContext securityContext;
@@ -144,10 +145,15 @@ public class RegistrationServiceImpl implements RegistrationService {
                     }
                 }
 
-                String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
+                String tokenType = APIConstants.TOKEN_TYPE_JWT;
                 String profileTokenType = profile.getTokenType();
                 if (StringUtils.isNotEmpty(profileTokenType)) {
-                    tokenType = profileTokenType;
+                    // Since default is JWT, we will use different param to get the opaque token
+                    if (OPAQUE.equalsIgnoreCase(profileTokenType)) {
+                        tokenType = APIConstants.TOKEN_TYPE_DEFAULT;
+                    } else {
+                        tokenType = profileTokenType;
+                    }
                 }
                 oauthApplicationInfo.addParameter(OAUTH_CLIENT_USERNAME, owner);
                 oauthApplicationInfo.setClientId("");

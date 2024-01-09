@@ -230,9 +230,6 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             //validate Issuer
             List<String> tokenAudiences = signedJWTInfo.getJwtClaimsSet().getAudience();
             if (tokenIssuers != null && tokenIssuers.containsKey(issuer)) {
-                //validate audience
-                if (audiencesMap != null && audiencesMap.get(basePath.getPath()) != null &&
-                        tokenAudiences.stream().anyMatch(audiencesMap.get(basePath.getPath())::contains)) {
                     if (isRESTApiTokenCacheEnabled) {
                         JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) getRESTAPITokenCache().get(jti);
                         if (tempJWTValidationInfo != null) {
@@ -279,21 +276,6 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                                 "Make sure you have provided the correct security credentials in the token :"
                                 + maskedToken);
                     }
-                } else {
-                    if (audiencesMap == null) {
-                        log.error("JWT token audience validation failed. Reason: No audiences registered " +
-                                "in the server");
-                    } else if (audiencesMap.get(basePath.getPath()) == null) {
-                        log.error("JWT token audience validation failed. Reason: No audiences registered " +
-                                "in the server for the base path (" + basePath.getPath() + ")");
-                    } else {
-                        log.error("JWT token audience validation failed. Reason: None of the aud present "
-                                + "in the JWT (" + tokenAudiences.toString() +
-                                ") matches the intended audience (" + audiencesMap.get(basePath.getPath())
-                                .toString() + ") for base path ( " + basePath.getPath() +  " ).");
-                    }
-                    return null;
-                }
             } else {
                 //invalid issuer. invalid token
                 log.error("JWT token issuer validation failed. Reason: Issuer present in the JWT (" + issuer
