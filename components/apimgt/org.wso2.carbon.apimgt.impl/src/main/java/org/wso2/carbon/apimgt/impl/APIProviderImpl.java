@@ -6979,7 +6979,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean hasExistingDeployments(String tenantDomain, String gatewayLabel) throws APIManagementException {
         return !StringUtils.isBlank(
-                apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(tenantDomain, gatewayLabel));
+                apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(gatewayLabel, tenantDomain));
     }
 
     @Override
