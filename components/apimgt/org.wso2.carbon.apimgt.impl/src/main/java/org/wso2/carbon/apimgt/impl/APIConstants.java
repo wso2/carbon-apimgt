@@ -2598,6 +2598,9 @@ public final class APIConstants {
         public static final String PKCE_MANDATORY = "pkceMandatory";
         public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
         public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
+        public static final String PERMISSIONS = "permissions";
+        public static final String ROLES = "roles";
+        public static final String PERMISSION_TYPE = "permissionType";
 
         public static class KeyManagerEvent {
 

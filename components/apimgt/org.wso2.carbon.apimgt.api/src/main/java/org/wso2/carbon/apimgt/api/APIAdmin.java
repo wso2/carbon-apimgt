@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -341,6 +342,14 @@ public interface APIAdmin  {
      */
     KeyManagerConfigurationDTO updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException;
+
+    /**
+     * This method used to get key manager permissions with key manager id and role
+     * @param id uuid of key manager
+     * @return key manager permissions
+     * @throws APIManagementException
+     */
+    KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String id) throws APIManagementException;
 
     /**
      * hTis method used to delete IDP mapped with key manager

@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -173,6 +174,7 @@ public class ApiMgtDAO {
     private final Object scopeMutex = new Object();
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
+    private String KeyManagerAccessPublic = "PUBLIC";
     String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
     private ApiMgtDAO() {
@@ -9368,6 +9370,7 @@ public class ApiMgtDAO {
                     } catch (IOException e) {
                         log.error("Error while converting configurations in " + uuid, e);
                     }
+                    keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(keyManagerConfigurationDTO.getUuid()));
                     keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
                 }
             }
@@ -9405,6 +9408,7 @@ public class ApiMgtDAO {
                         Map map = new Gson().fromJson(configurationContent, Map.class);
                         keyManagerConfigurationDTO.setAdditionalProperties(map);
                     }
+                    keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(keyManagerConfigurationDTO.getUuid()));
                     return keyManagerConfigurationDTO;
                 }
             }
@@ -9451,7 +9455,7 @@ public class ApiMgtDAO {
 
     private KeyManagerConfigurationDTO getKeyManagerConfigurationByName(Connection connection, String organization,
                                                                         String name)
-            throws SQLException, IOException {
+            throws SQLException, IOException, APIManagementException {
 
         final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -9475,6 +9479,7 @@ public class ApiMgtDAO {
                         Map map = new Gson().fromJson(configurationContent, Map.class);
                         keyManagerConfigurationDTO.setAdditionalProperties(map);
                     }
+                    keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(uuid));
                     return keyManagerConfigurationDTO;
                 }
             }
@@ -9494,7 +9499,7 @@ public class ApiMgtDAO {
     }
 
     private KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(Connection connection, String uuid)
-            throws SQLException, IOException {
+            throws SQLException, IOException, APIManagementException {
 
         final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -9516,6 +9521,7 @@ public class ApiMgtDAO {
                         Map map = new Gson().fromJson(configurationContent, Map.class);
                         keyManagerConfigurationDTO.setAdditionalProperties(map);
                     }
+                    keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(uuid));
                     return keyManagerConfigurationDTO;
                 }
             }
@@ -9542,6 +9548,20 @@ public class ApiMgtDAO {
                 preparedStatement.setString(9, keyManagerConfigurationDTO.getTokenType());
                 preparedStatement.setString(10, keyManagerConfigurationDTO.getExternalReferenceId());
                 preparedStatement.executeUpdate();
+                KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
+                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
+                    try (PreparedStatement addPermissionStatement = conn
+                            .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants
+                                    .ADD_KEY_MANAGER_PERMISSION_SQL)) {
+                        for (String role : keyManagerConfigurationDTO.getPermissions().getRoles()) {
+                            addPermissionStatement.setString(1, keyManagerConfigurationDTO.getUuid());
+                            addPermissionStatement.setString(2, permissionDTO.getPermissionType());
+                            addPermissionStatement.setString(3, role);
+                            addPermissionStatement.addBatch();
+                        }
+                        addPermissionStatement.executeBatch();
+                    }
+                }
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -9604,6 +9624,24 @@ public class ApiMgtDAO {
                 preparedStatement.setString(9, keyManagerConfigurationDTO.getExternalReferenceId());
                 preparedStatement.setString(10, keyManagerConfigurationDTO.getUuid());
                 preparedStatement.executeUpdate();
+                try (PreparedStatement deletePermissionsStatement = conn.prepareStatement(SQLConstants
+                        .KeyManagerPermissionsSqlConstants.DELETE_ALL_KEY_MANAGER_PERMISSION_SQL)) {
+                    deletePermissionsStatement.setString(1, keyManagerConfigurationDTO.getUuid());
+                    deletePermissionsStatement.executeUpdate();
+                }
+                KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
+                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
+                    try (PreparedStatement addPermissionStatement = conn.prepareStatement(SQLConstants
+                            .KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
+                        for (String role : permissionDTO.getRoles()) {
+                            addPermissionStatement.setString(1, keyManagerConfigurationDTO.getUuid());
+                            addPermissionStatement.setString(2, permissionDTO.getPermissionType());
+                            addPermissionStatement.setString(3, role);
+                            addPermissionStatement.addBatch();
+                        }
+                        addPermissionStatement.executeBatch();
+                    }
+                }
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -9625,6 +9663,11 @@ public class ApiMgtDAO {
                 preparedStatement.setString(1, id);
                 preparedStatement.setString(2, organization);
                 preparedStatement.execute();
+                try (PreparedStatement deletePermissionsStatement = conn
+                        .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants.DELETE_ALL_KEY_MANAGER_PERMISSION_SQL)) {
+                    deletePermissionsStatement.setString(1, id);
+                    deletePermissionsStatement.executeUpdate();
+                }
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -9638,6 +9681,39 @@ public class ApiMgtDAO {
 
     }
 
+    public KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String keyManagerUUID)
+            throws APIManagementException {
+
+        KeyManagerPermissionConfigurationDTO keyManagerPermissions =
+                new KeyManagerPermissionConfigurationDTO();
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            keyManagerPermissions = new KeyManagerPermissionConfigurationDTO();
+            try {
+                String getKeyManagerPermissionQuery = SQLConstants
+                        .KeyManagerPermissionsSqlConstants.GET_KEY_MANAGER_PERMISSIONS_SQL;
+                conn.setAutoCommit(false);
+                PreparedStatement ps = conn.prepareStatement(getKeyManagerPermissionQuery);
+                ps.setString(1, keyManagerUUID);
+                ResultSet resultSet = ps.executeQuery();
+                ArrayList<String> roles = new ArrayList<>();
+                keyManagerPermissions.setPermissionType(KeyManagerAccessPublic);
+                while (resultSet.next()) {
+                    roles.add(resultSet.getString("ROLE"));
+                    keyManagerPermissions.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
+                }
+                keyManagerPermissions.setRoles(roles);
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Failed to get Key Manager permission information for Key Manager " + keyManagerUUID, e);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager permissions with id " + keyManagerUUID, e);
+        }
+        return keyManagerPermissions;
+    }
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurations() throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
@@ -9664,6 +9740,7 @@ public class ApiMgtDAO {
                     } catch (IOException e) {
                         log.error("Error while converting configurations in " + uuid, e);
                     }
+                    keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(uuid));
                     keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
                 }
             }
