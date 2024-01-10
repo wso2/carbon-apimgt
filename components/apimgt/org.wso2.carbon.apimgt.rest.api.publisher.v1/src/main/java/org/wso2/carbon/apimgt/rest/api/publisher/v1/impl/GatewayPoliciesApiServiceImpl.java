@@ -128,8 +128,12 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
             // checks whether the gateway policy mapping exists in the particular gateway
             for (GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTO : gatewayPolicyDeploymentDTOList) {
                 String gwName = gatewayPolicyDeploymentDTO.getGatewayLabel();
-                if (apiProvider.hasExistingDeployments(organization, gwName)) {
+                boolean isDeployment = gatewayPolicyDeploymentDTO.isGatewayDeployment();
+                if (isDeployment && apiProvider.hasExistingDeployments(organization, gwName)) {
                     RestApiUtil.handleBadRequest("Gateway policy mapping is already deployed in the gateway: " + gwName,
+                            log);
+                } else if (!isDeployment && !apiProvider.hasExistingDeployments(organization, gwName)) {
+                    RestApiUtil.handleBadRequest("Gateway policy mapping is not deployed in the gateway: " + gwName,
                             log);
                 }
             }
