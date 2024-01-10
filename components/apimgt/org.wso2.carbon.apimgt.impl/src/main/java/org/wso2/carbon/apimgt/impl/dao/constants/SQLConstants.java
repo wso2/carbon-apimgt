@@ -2169,6 +2169,20 @@ public class SQLConstants {
                     "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                     "WHERE AUM.REVISION_UUID IS NULL AND AUM.API_ID IN (";
 
+    public static final String GET_SCOPE_BY_SUBSCRIBED_ID_SQL =
+            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+                    "FROM AM_SUBSCRIBER SUB " +
+                    "INNER JOIN AM_APPLICATION APP ON SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    "INNER JOIN AM_SUBSCRIPTION SUBS ON APP.APPLICATION_ID = SUBS.APPLICATION_ID " +
+                    "INNER JOIN AM_API API ON API.API_ID = SUBS.API_ID " +
+                    "LEFT JOIN AM_API_PRODUCT_MAPPING APM ON APM.API_ID = API.API_ID " +
+                    "INNER JOIN AM_API_URL_MAPPING AUM " +
+                    "ON AUM.URL_MAPPING_ID = APM.URL_MAPPING_ID " +
+                    "OR AUM.API_ID = API.API_ID " +
+                    "INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "WHERE SUB.TENANT_ID = ?  AND APP.APPLICATION_ID = ? " +
+                    "AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
     public static final String GET_RESOURCE_TO_SCOPE_MAPPING_SQL =
             "SELECT AUM.URL_MAPPING_ID, ARSM.SCOPE_NAME FROM AM_API_URL_MAPPING AUM " +
                     "LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
