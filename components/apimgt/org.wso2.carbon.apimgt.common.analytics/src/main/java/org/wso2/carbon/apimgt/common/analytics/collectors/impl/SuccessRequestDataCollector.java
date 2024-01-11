@@ -39,7 +39,6 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
     private static final Log log = LogFactory.getLog(SuccessRequestDataCollector.class);
     private RequestDataPublisher processor;
     private AnalyticsDataProvider provider;
-
     public SuccessRequestDataCollector(AnalyticsDataProvider provider, RequestDataPublisher processor) {
         super(provider);
         this.processor = processor;

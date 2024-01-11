@@ -28,6 +28,12 @@ public class APISearchResultAllOfDTO   {
     private String status = null;
     private String thumbnailUri = null;
     private Boolean advertiseOnly = null;
+    private Boolean hasThumbnail = null;
+    private Boolean monetizedInfo = null;
+    private String businessOwner = null;
+    private String businessOwnerEmail = null;
+    private String technicalOwner = null;
+    private String technicalOwnerEmail = null;
 
   /**
    * A brief description about the API
@@ -171,6 +177,108 @@ public class APISearchResultAllOfDTO   {
     this.advertiseOnly = advertiseOnly;
   }
 
+  /**
+   **/
+  public APISearchResultAllOfDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
+  }
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+  }
+
+  /**
+   **/
+  public APISearchResultAllOfDTO monetizedInfo(Boolean monetizedInfo) {
+    this.monetizedInfo = monetizedInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("monetizedInfo")
+  public Boolean isMonetizedInfo() {
+    return monetizedInfo;
+  }
+  public void setMonetizedInfo(Boolean monetizedInfo) {
+    this.monetizedInfo = monetizedInfo;
+  }
+
+  /**
+   **/
+  public APISearchResultAllOfDTO businessOwner(String businessOwner) {
+    this.businessOwner = businessOwner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Business Owner", value = "")
+  @JsonProperty("businessOwner")
+  public String getBusinessOwner() {
+    return businessOwner;
+  }
+  public void setBusinessOwner(String businessOwner) {
+    this.businessOwner = businessOwner;
+  }
+
+  /**
+   **/
+  public APISearchResultAllOfDTO businessOwnerEmail(String businessOwnerEmail) {
+    this.businessOwnerEmail = businessOwnerEmail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "businessowner@abc.com", value = "")
+  @JsonProperty("businessOwnerEmail")
+  public String getBusinessOwnerEmail() {
+    return businessOwnerEmail;
+  }
+  public void setBusinessOwnerEmail(String businessOwnerEmail) {
+    this.businessOwnerEmail = businessOwnerEmail;
+  }
+
+  /**
+   **/
+  public APISearchResultAllOfDTO technicalOwner(String technicalOwner) {
+    this.technicalOwner = technicalOwner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Technical Owner", value = "")
+  @JsonProperty("TechnicalOwner")
+  public String getTechnicalOwner() {
+    return technicalOwner;
+  }
+  public void setTechnicalOwner(String technicalOwner) {
+    this.technicalOwner = technicalOwner;
+  }
+
+  /**
+   **/
+  public APISearchResultAllOfDTO technicalOwnerEmail(String technicalOwnerEmail) {
+    this.technicalOwnerEmail = technicalOwnerEmail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "technicalowner@abc.com", value = "")
+  @JsonProperty("TechnicalOwnerEmail")
+  public String getTechnicalOwnerEmail() {
+    return technicalOwnerEmail;
+  }
+  public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
+    this.technicalOwnerEmail = technicalOwnerEmail;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -188,12 +296,18 @@ public class APISearchResultAllOfDTO   {
         Objects.equals(provider, apISearchResultAllOf.provider) &&
         Objects.equals(status, apISearchResultAllOf.status) &&
         Objects.equals(thumbnailUri, apISearchResultAllOf.thumbnailUri) &&
-        Objects.equals(advertiseOnly, apISearchResultAllOf.advertiseOnly);
+        Objects.equals(advertiseOnly, apISearchResultAllOf.advertiseOnly) &&
+        Objects.equals(hasThumbnail, apISearchResultAllOf.hasThumbnail) &&
+        Objects.equals(monetizedInfo, apISearchResultAllOf.monetizedInfo) &&
+        Objects.equals(businessOwner, apISearchResultAllOf.businessOwner) &&
+        Objects.equals(businessOwnerEmail, apISearchResultAllOf.businessOwnerEmail) &&
+        Objects.equals(technicalOwner, apISearchResultAllOf.technicalOwner) &&
+        Objects.equals(technicalOwnerEmail, apISearchResultAllOf.technicalOwnerEmail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly);
+    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
   }
 
   @Override
@@ -209,6 +323,12 @@ public class APISearchResultAllOfDTO   {
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
     sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
+    sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");
+    sb.append("    businessOwner: ").append(toIndentedString(businessOwner)).append("\n");
+    sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
+    sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
+    sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
     sb.append("}");
     return sb.toString();
   }

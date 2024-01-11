@@ -232,6 +232,20 @@ public class GatewayUtilsTestCase {
     }
 
     @Test
+    public void testGetAPIWithNullContext() {
+        API api = new API();
+        api.setApiName("api1");
+        api.setApiVersion("1.0.0");
+        api.setApiProvider("admin");
+        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
+        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
+        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
+        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore("carbon.super")).thenReturn(
+                subscriptionDataStore);
+        Mockito.when(subscriptionDataStore.getApiByContextAndVersion(null, "1.0.0")).thenReturn(null);
+    }
+
+    @Test
     public void testGetAPIasNullWhenTenantSubscriptionStoreNull() {
         MessageContext messageContext = Mockito.mock(MessageContext.class);
         SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);

@@ -1,0 +1,65 @@
+{
+  "swagger": "2.0",
+  "paths": {
+    "/test": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited",
+        "x-scope": "PetLocalScope"
+      },
+      "post": {
+        "parameters": [
+          {
+            "name": "Payload",
+            "description": "Request Body",
+            "required": false,
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "payload": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited",
+        "x-scope": "GlobalScope"
+      }
+    }
+  },
+  "info": {
+    "title": "OldAPI",
+    "version": "1.0.0"
+  },
+  "x-wso2-security": {
+    "apim": {
+      "x-wso2-scopes": [
+        {
+          "name": "PetLocalScope",
+          "description": "",
+          "key": "PetLocalScope",
+          "roles": "admin"
+        },
+        {
+          "name": "GlobalScope",
+          "description": "desc",
+          "key": "GlobalScope",
+          "roles": ""
+        }
+      ]
+    }
+  }
+}

@@ -34,6 +34,7 @@ public class JWTConfigurationDto {
     private String jwtHeader = "X-JWT-Assertion";
     private String consumerDialectUri = "http://wso2.org/claims";
     private String signatureAlgorithm = "SHA256withRSA";
+    private String jwtDecoding = "base64";
     private boolean enableUserClaims;
     private String gatewayJWTGeneratorImpl;
     private Map<String, TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
@@ -58,6 +59,7 @@ public class JWTConfigurationDto {
         this.jwtHeader = jwtConfigurationDto.jwtHeader;
         this.consumerDialectUri = jwtConfigurationDto.consumerDialectUri;
         this.signatureAlgorithm = jwtConfigurationDto.signatureAlgorithm;
+        this.jwtDecoding = jwtConfigurationDto.jwtDecoding;
         this.enableUserClaims = jwtConfigurationDto.enableUserClaims;
         this.gatewayJWTGeneratorImpl = jwtConfigurationDto.gatewayJWTGeneratorImpl;
         this.tokenIssuerDtoMap = jwtConfigurationDto.tokenIssuerDtoMap;
@@ -138,6 +140,14 @@ public class JWTConfigurationDto {
     public void setJwtExcludedClaims(Set<String> jwtClaims) {
 
         this.jwtExcludedClaims = jwtClaims;
+    }
+
+    public String getJwtDecoding() {
+        return jwtDecoding;
+    }
+
+    public void setJwtDecoding(String jwtDecoding) {
+        this.jwtDecoding = jwtDecoding;
     }
 
     public boolean isEnableUserClaims() {

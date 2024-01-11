@@ -40,6 +40,8 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
 import java.io.File;
@@ -177,6 +179,12 @@ public class APIControllerUtil {
         if (policies != null && !policies.isJsonNull()) {
             handleSubscriptionPolicies(policies, importedApiDto, null);
         }
+
+        // handle available additional properties
+        JsonElement additionalProperties = envParams.get(ImportExportConstants.ADDITIONAL_PROPERTIES_FIELD);
+        if (additionalProperties != null && !additionalProperties.isJsonNull()) {
+            handleAdditionalProperties(additionalProperties, importedApiDto, null);
+        }
         return importedApiDto;
     }
 
@@ -270,6 +278,12 @@ public class APIControllerUtil {
         JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
         if (policies != null && !policies.isJsonNull()) {
             handleSubscriptionPolicies(policies, null, importedApiProductDto);
+        }
+
+        // handle available additional properties
+        JsonElement additionalProperties = envParams.get(ImportExportConstants.ADDITIONAL_PROPERTIES_FIELD);
+        if (additionalProperties != null && !additionalProperties.isJsonNull()) {
+            handleAdditionalProperties(additionalProperties, null, importedApiProductDto);
         }
         return importedApiProductDto;
     }
@@ -641,6 +655,7 @@ public class APIControllerUtil {
 
             //get load balanced configs from params
             JsonElement loadBalancedConfigElement = envParams.get(ImportExportConstants.LOAD_BALANCE_ENDPOINTS_FIELD);
+            JsonElement failOverConfigElement = envParams.get(ImportExportConstants.FAILOVER_TYPE_ENDPOINT);
             JsonObject loadBalancedConfigs;
             if (loadBalancedConfigElement == null) {
                 throw new APIManagementException(
@@ -648,6 +663,10 @@ public class APIControllerUtil {
                         ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else {
                 loadBalancedConfigs = loadBalancedConfigElement.getAsJsonObject();
+            }
+            if (failOverConfigElement != null) {
+                updatedRESTEndpointParams.addProperty(ImportExportConstants.FAILOVER_TYPE_ENDPOINT,
+                        failOverConfigElement.getAsBoolean());
             }
             updatedRESTEndpointParams.addProperty(ImportExportConstants.ENDPOINT_TYPE_PROPERTY,
                     ImportExportConstants.LOAD_BALANCE_TYPE_ENDPOINT);
@@ -1085,6 +1104,56 @@ public class APIControllerUtil {
                     ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, updatedCertsArray);
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
+        }
+    }
+
+    /**
+     * This method will add the defined available additional properties in an environment to the particular imported
+     * API.
+     *
+     * @param importedApiDto        API DTO object to be updated
+     * @param importedApiProductDto API Product DTO object to be updated
+     * @param additionalProperties  properties with the values
+     */
+    private static void handleAdditionalProperties(JsonElement additionalProperties, APIDTO importedApiDto,
+            APIProductDTO importedApiProductDto) {
+
+        JsonArray definedAdditionalProperties = additionalProperties.getAsJsonArray();
+        List<APIInfoAdditionalPropertiesDTO> propertiesListToAdd = new ArrayList<>();
+        Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<>();
+        for (JsonElement definedAdditionalProperty : definedAdditionalProperties) {
+            if (!definedAdditionalProperty.isJsonNull()) {
+                JsonElement propertyName = (((JsonObject) definedAdditionalProperty).get("name"));
+                JsonElement propertyValue = (((JsonObject) definedAdditionalProperty).get("value"));
+                JsonElement propertyDisplay = (((JsonObject) definedAdditionalProperty).get("display"));
+                if (propertyName != null && propertyValue != null && propertyDisplay != null
+                        && !propertyName.isJsonNull() && !propertyValue.isJsonNull() && !propertyDisplay.isJsonNull()) {
+                    APIInfoAdditionalPropertiesMapDTO apiInfoAdditionalPropertiesMapDTO =
+                            new APIInfoAdditionalPropertiesMapDTO();
+                    apiInfoAdditionalPropertiesMapDTO.setName(propertyName.getAsString());
+                    apiInfoAdditionalPropertiesMapDTO.setValue(propertyValue.getAsString());
+                    apiInfoAdditionalPropertiesMapDTO.setDisplay(propertyDisplay.getAsBoolean());
+                    additionalPropertiesMap.put(propertyName.getAsString(), apiInfoAdditionalPropertiesMapDTO);
+
+                    APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
+                    additionalPropertiesDTO.setName(propertyName.getAsString());
+                    additionalPropertiesDTO.setValue(propertyValue.getAsString());
+                    additionalPropertiesDTO.setDisplay(propertyDisplay.getAsBoolean());
+                    propertiesListToAdd.add(additionalPropertiesDTO);
+                }
+            }
+        }
+        // If the properties are not defined in params file, the values in the api.yaml should be considered.
+        // Hence, this if statement will prevent setting the properties in api.yaml to an empty array if the properties
+        // are not properly defined in the params file
+        if (propertiesListToAdd.size() > 0 && additionalPropertiesMap.size() > 0) {
+            if (importedApiDto != null) {
+                importedApiDto.setAdditionalProperties(propertiesListToAdd);
+                importedApiDto.setAdditionalPropertiesMap(additionalPropertiesMap);
+            } else {
+                importedApiProductDto.setAdditionalProperties(propertiesListToAdd);
+                importedApiProductDto.setAdditionalPropertiesMap(additionalPropertiesMap);
+            }
         }
     }
 }

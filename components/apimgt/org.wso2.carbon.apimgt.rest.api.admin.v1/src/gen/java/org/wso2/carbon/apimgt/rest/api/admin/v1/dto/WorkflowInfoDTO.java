@@ -33,7 +33,8 @@ public class WorkflowInfoDTO   {
         API_STATE("API_STATE"),
         API_PRODUCT_STATE("API_PRODUCT_STATE"),
         SUBSCRIPTION_DELETION("SUBSCRIPTION_DELETION"),
-        SUBSCRIPTION_UPDATE("SUBSCRIPTION_UPDATE");
+        SUBSCRIPTION_UPDATE("SUBSCRIPTION_UPDATE"),
+        REVISION_DEPLOYMENT("REVISION_DEPLOYMENT");
         private String value;
 
         WorkflowTypeEnum (String v) {

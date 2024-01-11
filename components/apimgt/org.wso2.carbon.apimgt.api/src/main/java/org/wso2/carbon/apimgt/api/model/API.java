@@ -152,6 +152,7 @@ public class API implements Serializable {
 
     //Custom authorization header specific to the API
     private String authorizationHeader;
+    private String apiKeyHeader;
     private Set<Scope> scopes;
 
     private boolean isDefaultVersion = false;
@@ -1175,6 +1176,12 @@ public class API implements Serializable {
         this.authorizationHeader = authorizationHeader;
     }
 
+    public String getApiKeyHeader() { return apiKeyHeader; }
+
+    public void setApiKeyHeader(String apiKeyHeader) {
+        this.apiKeyHeader = apiKeyHeader;
+    }
+
     /**
      * Check the status of the Json schema validation property.
      *
@@ -1462,5 +1469,15 @@ public class API implements Serializable {
 
     public void setAsyncTransportProtocols(String asyncTransportProtocols) {
         this.asyncTransportProtocols = asyncTransportProtocols;
+    }
+
+    public List<OperationPolicy> apiPolicies;
+
+    public List<OperationPolicy> getApiPolicies() {
+        return apiPolicies;
+    }
+
+    public void setApiPolicies(List<OperationPolicy> apiPolicies) {
+        this.apiPolicies = apiPolicies;
     }
 }

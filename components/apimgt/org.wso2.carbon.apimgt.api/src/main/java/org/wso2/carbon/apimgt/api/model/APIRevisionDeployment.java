@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.WorkflowStatus;
+
 import java.io.Serializable;
 
 public class APIRevisionDeployment implements Serializable {
@@ -26,6 +28,7 @@ public class APIRevisionDeployment implements Serializable {
     private String revisionUUID;
     private String deployment;
     private String vhost;
+    private WorkflowStatus status;
     private boolean isDisplayOnDevportal;
     private String deployedTime;
     private String successDeployedTime;
@@ -84,5 +87,13 @@ public class APIRevisionDeployment implements Serializable {
 
     public void setSuccessDeployedTime(String successDeployedTime) {
         this.successDeployedTime = successDeployedTime;
+    }
+
+    public WorkflowStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(WorkflowStatus status) {
+        this.status = status;
     }
 }

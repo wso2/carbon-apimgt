@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.common;
+package org.wso2.carbon.apimgt.rest.api.devops;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;

@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayPolicyArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 
 import java.util.List;
@@ -25,6 +26,9 @@ import java.util.List;
 public interface GatewayArtifactGenerator {
 
     RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
+            throws APIManagementException;
+
+    RuntimeArtifactDto generateGatewayPolicyArtifact(List<GatewayPolicyArtifactDto> gatewayPolicyArtifactDtoList)
             throws APIManagementException;
 
     String getType();

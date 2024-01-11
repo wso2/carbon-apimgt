@@ -41,7 +41,9 @@ public class VHostUtils {
         defaultVhost.setHttpsPort(APIConstants.HTTPS_PROTOCOL_PORT);
         defaultVhost.setHttpPort(APIConstants.HTTP_PROTOCOL_PORT);
         defaultVhost.setWsPort(APIConstants.WS_PROTOCOL_PORT);
+        defaultVhost.setWsHost(host);
         defaultVhost.setWssPort(APIConstants.WSS_PROTOCOL_PORT);
+        defaultVhost.setWssHost(host);
 
         if (host == null && environment.getVhosts().size() > 0) {
             // VHost is NULL set first Vhost (set in deployment toml)

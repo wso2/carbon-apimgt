@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
@@ -29,11 +31,12 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import io.swagger.v3.parser.ObjectMapperFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -78,6 +81,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
@@ -111,6 +115,36 @@ public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
     public static final String SESSION_TIMEOUT_CONFIG_KEY = "sessionTimeOut";
+
+    /**
+     * Update API and API definition.
+     *
+     * @param originalAPI       existing API
+     * @param apiDtoToUpdate    DTO object with updated API data
+     * @param apiProvider       API Provider
+     * @param tokenScopes       token scopes
+     * @param response          response of the API definition validation
+     * @return                  updated API
+     * @throws APIManagementException   If an error occurs while updating the API and API definition
+     * @throws ParseException           If an error occurs while parsing the endpoint configuration
+     * @throws CryptoException          If an error occurs while encrypting the secret key of API
+     * @throws FaultGatewaysException   If an error occurs while updating manage of an existing API
+     */
+    public static API updateApiAndDefinition(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider,
+                                             String[] tokenScopes, APIDefinitionValidationResponse response)
+            throws APIManagementException, ParseException, CryptoException, FaultGatewaysException {
+
+        API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (!PublisherCommonUtils.isStreamingAPI(apiDtoToUpdate) && !APIConstants.APITransportType.GRAPHQL.toString()
+                .equalsIgnoreCase(apiDtoToUpdate.getType().toString())) {
+            prepareForUpdateSwagger(originalAPI.getUuid(), response, false, apiProvider, organization,
+                    response.getParser(), apiToUpdate);
+        }
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+    }
+
     /**
      * Update an API.
      *
@@ -125,6 +159,28 @@ public class PublisherCommonUtils {
      */
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
+
+        API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
+
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+        // TODO use returend api
+    }
+
+    /**
+     * Prepare for API object before updating the API.
+     *
+     * @param originalAPI    Existing API
+     * @param apiDtoToUpdate New API DTO to update
+     * @param apiProvider    API Provider
+     * @param tokenScopes    Scopes of the token
+     * @throws ParseException         If an error occurs while parsing the endpoint configuration
+     * @throws CryptoException        If an error occurs while encrypting the secret key of API
+     * @throws APIManagementException If an error occurs while updating the API
+     */
+    private static API prepareForUpdateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider,
+                                           String[] tokenScopes)
+            throws APIManagementException, ParseException, CryptoException {
 
         APIIdentifier apiIdentifier = originalAPI.getId();
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
@@ -358,10 +414,7 @@ public class PublisherCommonUtils {
         }
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
-        apiProvider.updateAPI(apiToUpdate, originalAPI);
-
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
-        // TODO use returend api
+        return apiToUpdate;
     }
 
     /**
@@ -805,6 +858,14 @@ public class PublisherCommonUtils {
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
+        // validate context before proceeding
+        try {
+            APIUtil.validateAPIContext(apiDto.getContext(), apiDto.getName());
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while importing API: " + e.getMessage(),
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
+        }
+
         // validate web socket api endpoint configurations
         if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(apiDto)) {
             throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
@@ -1005,7 +1066,7 @@ public class PublisherCommonUtils {
             if (endpointObj != null) {
                 endpoints.add(endpointConfigObj.getJSONObject(endpointType).getString(APIConstants.API_DATA_URL));
             } else {
-                JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
+                org.json.JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
                 for (int i = 0; i < endpointArray.length(); i++) {
                     endpoints.add((String) endpointArray.getJSONObject(i).get(APIConstants.API_DATA_URL));
                 }
@@ -1141,6 +1202,9 @@ public class PublisherCommonUtils {
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
+        if (body.getApiKeyHeader() == null) {
+            body.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        }
 
         if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
             throw new APIManagementException(
@@ -1185,9 +1249,10 @@ public class PublisherCommonUtils {
             }
         }
 
-        if (!apiProvider.isValidContext(body.getProvider(), body.getName(),
-                                        body.getContext() + "/" + APIConstants.VERSION_PLACEHOLDER, username,
-                                        organization)) {
+        String contextTemplate = body.getContext().contains(APIConstants.VERSION_PLACEHOLDER) ?
+                body.getContext() :
+                body.getContext() + "/" + APIConstants.VERSION_PLACEHOLDER;
+        if (!apiProvider.isValidContext(body.getProvider(), body.getName(), contextTemplate, username, organization)) {
             throw new APIManagementException(
                     ExceptionCodes.from(ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT));
         }
@@ -1330,6 +1395,36 @@ public class PublisherCommonUtils {
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         APIDefinition oasParser = response.getParser();
+        prepareForUpdateSwagger(apiId, response, isServiceAPI, apiProvider, organization, oasParser, existingAPI);
+
+        //Update API is called to update URITemplates and scopes of the API
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
+        existingAPI.setStatus(unModifiedAPI.getStatus());
+        apiProvider.updateAPI(existingAPI, unModifiedAPI);
+
+        //retrieves the updated swagger definition
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
+        // instead of passing same
+        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
+    }
+
+    /**
+     * Prepare the API object before updating swagger.
+     *
+     * @param apiId         API Id
+     * @param response      response of a swagger definition validation call
+     * @param isServiceAPI  whether the API is a service API or not
+     * @param apiProvider   API Provider
+     * @param organization  tenant domain
+     * @param oasParser     OASParser for the API definition
+     * @param existingAPI   existing API
+     * @throws APIManagementException when error occurred updating swagger
+     */
+    private static void prepareForUpdateSwagger(String apiId, APIDefinitionValidationResponse response,
+                                                boolean isServiceAPI, APIProvider apiProvider, String organization,
+                                                APIDefinition oasParser, API existingAPI)
+            throws APIManagementException {
+
         String apiDefinition = response.getJsonContent();
         if (isServiceAPI) {
             apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
@@ -1375,22 +1470,111 @@ public class PublisherCommonUtils {
 
         existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
+        try {
+            ObjectMapper mapper = ObjectMapperFactory.createJson();
+            JsonNode newProductionEndpointJson = mapper.readTree(apiDefinition)
+                    .get(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+            JsonNode newSandboxEndpointJson = mapper.readTree(apiDefinition)
+                    .get(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
+            String existingEndpointConfigString = existingAPI.getEndpointConfig();
+
+            if (StringUtils.isNotEmpty(existingEndpointConfigString)) { //check if endpoints are configured
+                JSONObject existingEndpointConfigJson = (JSONObject) new JSONParser()
+                        .parse(existingEndpointConfigString);
+                if (newProductionEndpointJson != null) {
+                    if (existingEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null) {
+                        //put as a value under the ENDPOINT_PRODUCTION_ENDPOINTS key
+                        //if loadbalance endpoints, get relevant jsonobject from array
+                        if (existingEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                                .equals(APIConstants.ENDPOINT_TYPE_LOADBALANCE)) {
+                            JSONArray productionConfigsJson = (JSONArray) existingEndpointConfigJson
+                                    .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+                            for (int i = 0; i < productionConfigsJson.size(); i++) {
+                                if (!(((JSONObject) productionConfigsJson.get(i)).containsKey(APIConstants
+                                        .API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                                    if (newProductionEndpointJson.has(APIConstants
+                                            .ADVANCE_ENDPOINT_CONFIG)) {
+                                        JsonNode advanceConfig = newProductionEndpointJson
+                                                .get(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                        ((JSONObject) productionConfigsJson.get(i))
+                                                .put(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceConfig);
+                                    } else {
+                                        ((JSONObject) productionConfigsJson.get(i))
+                                                .remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                    }
+                                    break;
+                                }
+                            }
+                            existingEndpointConfigJson.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                                    productionConfigsJson);
+                        } else {
+                            JSONObject productionConfigsJson = (JSONObject) existingEndpointConfigJson
+                                    .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+                            if (newProductionEndpointJson.has(APIConstants.ADVANCE_ENDPOINT_CONFIG)) {
+                                JsonNode advanceConfig = newProductionEndpointJson
+                                        .get(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                productionConfigsJson.put(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceConfig);
+                            } else {
+                                productionConfigsJson.remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                            }
+                            existingEndpointConfigJson.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                                    productionConfigsJson);
+                        }
+                    }
+                }
+                if (newSandboxEndpointJson != null) {
+                    if (existingEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null) {
+                        //put as a value under the ENDPOINT_SANDBOX_ENDPOINTS key
+                        //if loadbalance endpoints, get relevant jsonobject from array
+                        if (existingEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                                .equals(APIConstants.ENDPOINT_TYPE_LOADBALANCE)) {
+                            JSONArray sandboxConfigsJson = (JSONArray) existingEndpointConfigJson
+                                    .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+                            for (int i = 0; i < sandboxConfigsJson.size(); i++) {
+                                if (!(((JSONObject) sandboxConfigsJson.get(i)).containsKey(APIConstants
+                                        .API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                                    if (newSandboxEndpointJson.has(APIConstants
+                                            .ADVANCE_ENDPOINT_CONFIG)) {
+                                        JsonNode advanceConfig = newSandboxEndpointJson
+                                                .get(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                        ((JSONObject) sandboxConfigsJson.get(i))
+                                                .put(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceConfig);
+                                    } else {
+                                        ((JSONObject) sandboxConfigsJson.get(i))
+                                                .remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                    }
+                                    break;
+                                }
+                            }
+                            existingEndpointConfigJson.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                                    sandboxConfigsJson);
+                        } else {
+                            JSONObject sandboxConfigsJson = (JSONObject) existingEndpointConfigJson
+                                    .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+                            if (newSandboxEndpointJson.has(APIConstants.ADVANCE_ENDPOINT_CONFIG)) {
+                                JsonNode advanceConfig = newSandboxEndpointJson
+                                        .get(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                                sandboxConfigsJson.put(APIConstants.ADVANCE_ENDPOINT_CONFIG, advanceConfig);
+                            } else {
+                                sandboxConfigsJson.remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+                            }
+                            existingEndpointConfigJson.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                                    sandboxConfigsJson);
+                        }
+                    }
+                }
+                existingAPI.setEndpointConfig(existingEndpointConfigJson.toString());
+            }
+        } catch (ParseException | JsonProcessingException e) {
+            throw new APIManagementException("Error when parsing endpoint configurations ", e);
+        }
+
         PublisherCommonUtils.validateScopes(existingAPI);
 
-        //Update API is called to update URITemplates and scopes of the API
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
-        existingAPI.setStatus(unModifiedAPI.getStatus());
-        apiProvider.updateAPI(existingAPI, unModifiedAPI);
         SwaggerData swaggerData = new SwaggerData(existingAPI);
-
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, organization);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-
-        //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
-        // instead of passing same
-        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
     /**
@@ -1708,6 +1892,10 @@ public class PublisherCommonUtils {
         // if not add product
         String provider = apiProductDTO.getProvider();
         String context = apiProductDTO.getContext();
+
+        // Validate the API context
+        APIUtil.validateAPIContext(context, apiProductDTO.getName());
+
         if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
             if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
                 if (log.isDebugEnabled()) {
@@ -1751,18 +1939,13 @@ public class PublisherCommonUtils {
             apiProductDTO.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
-        //Remove the /{version} from the context.
-        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        if (apiProductDTO.getApiKeyHeader() == null) {
+            apiProductDTO.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }
-        //Make sure context starts with "/". ex: /pizzaProduct
-        context = context.startsWith("/") ? context : ("/" + context);
-        //Check whether the context already exists
-        if (apiProvider.isContextExist(context, organization)) {
-            throw new APIManagementException(
-                    "Error occurred while adding API Product. API Product with the context " + context + " already " +
-                            "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
-        }
+
+        //isDefaultVersion is true for a new API Product.
+        apiProductDTO.setIsDefaultVersion(true);
+        checkDuplicateContext(apiProvider, apiProductDTO, username, organization);
 
         // Set default gatewayVendor
         if (apiProductDTO.getGatewayVendor() == null) {
@@ -1784,6 +1967,71 @@ public class PublisherCommonUtils {
 
         createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
+    }
+
+    private static void checkDuplicateContext(APIProvider apiProvider, APIProductDTO apiProductDTO, String username,
+            String organization)
+            throws APIManagementException {
+
+        String context = apiProductDTO.getContext();
+        //Remove the /{version} from the context.
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+
+        //Make sure context starts with "/". ex: /pizzaProduct
+        context = context.startsWith("/") ? context : ("/" + context);
+
+        //Create tenant aware context for API
+        if (context.startsWith("/t/" + organization)) {
+            context = context.replace("/t/" + organization, "");
+        }
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(organization) &&
+                !context.contains("/t/" + organization)) {
+            context = "/t/" + organization + context;
+        }
+
+        // Check whether the context already exists for migrated API products which were created with
+        // version appended context
+        String contextWithVersion = context;
+        if (contextWithVersion.contains("/" + RestApiConstants.API_VERSION_PARAM)) {
+            contextWithVersion = contextWithVersion.replace(RestApiConstants.API_VERSION_PARAM,
+                    apiProductDTO.getVersion());
+        } else {
+            contextWithVersion = contextWithVersion + "/" + apiProductDTO.getVersion();
+        }
+
+        //Get all existing versions of  api product been adding
+        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(apiProductDTO.getName(),
+                username, organization);
+        if (!apiVersions.isEmpty()) {
+            //If any previous version exists
+            for (String version : apiVersions) {
+                if (version.equalsIgnoreCase(apiProductDTO.getVersion())) {
+                    //If version already exists
+                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
+                        throw new APIManagementException(
+                                "Error occurred while adding the API Product. A duplicate API context already exists "
+                                        + "for " + context + " in the organization : " + organization,
+                                ExceptionCodes.API_ALREADY_EXISTS);
+                    } else {
+                        throw new APIManagementException(
+                                "Error occurred while adding API Product. API Product with name "
+                                        + apiProductDTO.getName() + " already exists with different context " + context
+                                        + " in the organization" + " : " + organization,
+                                ExceptionCodes.API_ALREADY_EXISTS);
+                    }
+                }
+            }
+        } else {
+            //If no any previous version exists
+            if (apiProvider.isContextExistForAPIProducts(context, contextWithVersion, organization)) {
+                throw new APIManagementException(
+                        "Error occurred while adding the API Product. A duplicate API context already exists for "
+                                + context + " in the organization" + " : " + organization, ExceptionCodes
+                        .from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, context));
+            }
+        }
     }
 
     public static boolean isStreamingAPI(APIDTO apidto) {
@@ -1907,15 +2155,16 @@ public class PublisherCommonUtils {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(identifier.getUUID(), organization);
+        String apiType;
+        if (identifier instanceof APIProductIdentifier) {
+            apiType = APIConstants.API_PRODUCT;
+        } else {
+            apiType = APIConstants.API_IDENTIFIER_TYPE;
+        }
+
         if (apiLCData == null) {
-            String type;
-            if (identifier instanceof APIProductIdentifier) {
-                type = APIConstants.API_PRODUCT;
-            } else {
-                type = APIConstants.API_IDENTIFIER_TYPE;
-            }
-            throw new APIManagementException("Error while getting lifecycle state for " + type + " with ID "
-                    + identifier, ExceptionCodes.from(ExceptionCodes.LIFECYCLE_STATE_INFORMATION_NOT_FOUND, type,
+            throw new APIManagementException("Error while getting lifecycle state for " + apiType + " with ID "
+                    + identifier, ExceptionCodes.from(ExceptionCodes.LIFECYCLE_STATE_INFORMATION_NOT_FOUND, apiType,
                     identifier.getUUID()));
         } else {
             boolean apiOlderVersionExist = false;
@@ -1931,7 +2180,7 @@ public class PublisherCommonUtils {
                     break;
                 }
             }
-            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist);
+            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist, apiType);
         }
     }
 
@@ -1978,5 +2227,38 @@ public class PublisherCommonUtils {
 
         apiProvider.addAPI(apiToAdd);
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
+    }
+
+    public static boolean validateMandatoryProperties(org.json.simple.JSONArray customProperties, APIDTO apiDto) {
+
+        Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = apiDto.getAdditionalPropertiesMap();
+
+        for (int i = 0; i < customProperties.size(); i++) {
+            JSONObject property = (JSONObject) customProperties.get(i);
+            String propertyName = (String) property.get(APIConstants.CustomPropertyAttributes.NAME);
+            boolean isRequired = (boolean) property.get(APIConstants.CustomPropertyAttributes.REQUIRED);
+
+            if (isRequired) {
+                APIInfoAdditionalPropertiesMapDTO mapPropertyDisplay =
+                        additionalPropertiesMap.get(propertyName + "__display");
+                APIInfoAdditionalPropertiesMapDTO mapProperty = additionalPropertiesMap.get(propertyName);
+                if (mapProperty == null && mapPropertyDisplay == null) {
+                    return false;
+                }
+                String propertyValue = "";
+                String propertyValueDisplay = "";
+                if (mapProperty != null) {
+                    propertyValue = mapProperty.getValue();
+                }
+                if (mapPropertyDisplay != null) {
+                    propertyValueDisplay = mapPropertyDisplay.getValue();
+                }
+                if ((propertyValue == null || propertyValue.isEmpty()) &&
+                        (propertyValueDisplay == null || propertyValueDisplay.isEmpty())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

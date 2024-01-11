@@ -34,11 +34,13 @@ public class APIProductDTO   {
     private String id = null;
     private String name = null;
     private String context = null;
+    private String version = null;
     private String description = null;
     private String provider = null;
     private Boolean hasThumbnail = null;
     private String state = "CREATED";
     private Boolean enableSchemaValidation = null;
+    private Boolean isDefaultVersion = null;
     private Boolean isRevision = null;
     private String revisionedApiProductId = null;
     private Integer revisionId = null;
@@ -149,6 +151,7 @@ return null;
     private List<String> policies = new ArrayList<String>();
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
+    private String apiKeyHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
 
     @XmlType(name="SubscriptionAvailabilityEnum")
@@ -193,6 +196,7 @@ return null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
+    private String lastUpdatedTimestamp = null;
     private String gatewayVendor = null;
     private List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
@@ -251,6 +255,23 @@ return null;
   }
   public void setContext(String context) {
     this.context = context;
+  }
+
+  /**
+   **/
+  public APIProductDTO version(String version) {
+    this.version = version;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1.0.0", value = "")
+  @JsonProperty("version")
+ @Pattern(regexp="^[^~!@#;:%^*()+={}|\\\\<>\"',&/$\\[\\]\\s+/]+$") @Size(min=1,max=30)  public String getVersion() {
+    return version;
+  }
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   /**
@@ -339,6 +360,23 @@ return null;
   }
   public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
     this.enableSchemaValidation = enableSchemaValidation;
+  }
+
+  /**
+   **/
+  public APIProductDTO isDefaultVersion(Boolean isDefaultVersion) {
+    this.isDefaultVersion = isDefaultVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isDefaultVersion")
+  public Boolean isIsDefaultVersion() {
+    return isDefaultVersion;
+  }
+  public void setIsDefaultVersion(Boolean isDefaultVersion) {
+    this.isDefaultVersion = isDefaultVersion;
   }
 
   /**
@@ -623,6 +661,24 @@ return null;
   }
 
   /**
+   * Name of the API key header used for invoking the API. If it is not set, default value &#x60;apiKey&#x60; will be used. 
+   **/
+  public APIProductDTO apiKeyHeader(String apiKeyHeader) {
+    this.apiKeyHeader = apiKeyHeader;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "ApiKey", value = "Name of the API key header used for invoking the API. If it is not set, default value `apiKey` will be used. ")
+  @JsonProperty("apiKeyHeader")
+  public String getApiKeyHeader() {
+    return apiKeyHeader;
+  }
+  public void setApiKeyHeader(String apiKeyHeader) {
+    this.apiKeyHeader = apiKeyHeader;
+  }
+
+  /**
    * Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. 
    **/
   public APIProductDTO securityScheme(List<String> securityScheme) {
@@ -802,6 +858,23 @@ return null;
 
   /**
    **/
+  public APIProductDTO lastUpdatedTimestamp(String lastUpdatedTimestamp) {
+    this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("lastUpdatedTimestamp")
+  public String getLastUpdatedTimestamp() {
+    return lastUpdatedTimestamp;
+  }
+  public void setLastUpdatedTimestamp(String lastUpdatedTimestamp) {
+    this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+  }
+
+  /**
+   **/
   public APIProductDTO gatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
     return this;
@@ -902,11 +975,13 @@ return null;
     return Objects.equals(id, apIProduct.id) &&
         Objects.equals(name, apIProduct.name) &&
         Objects.equals(context, apIProduct.context) &&
+        Objects.equals(version, apIProduct.version) &&
         Objects.equals(description, apIProduct.description) &&
         Objects.equals(provider, apIProduct.provider) &&
         Objects.equals(hasThumbnail, apIProduct.hasThumbnail) &&
         Objects.equals(state, apIProduct.state) &&
         Objects.equals(enableSchemaValidation, apIProduct.enableSchemaValidation) &&
+        Objects.equals(isDefaultVersion, apIProduct.isDefaultVersion) &&
         Objects.equals(isRevision, apIProduct.isRevision) &&
         Objects.equals(revisionedApiProductId, apIProduct.revisionedApiProductId) &&
         Objects.equals(revisionId, apIProduct.revisionId) &&
@@ -923,6 +998,7 @@ return null;
         Objects.equals(policies, apIProduct.policies) &&
         Objects.equals(apiThrottlingPolicy, apIProduct.apiThrottlingPolicy) &&
         Objects.equals(authorizationHeader, apIProduct.authorizationHeader) &&
+        Objects.equals(apiKeyHeader, apIProduct.apiKeyHeader) &&
         Objects.equals(securityScheme, apIProduct.securityScheme) &&
         Objects.equals(subscriptionAvailability, apIProduct.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, apIProduct.subscriptionAvailableTenants) &&
@@ -933,6 +1009,7 @@ return null;
         Objects.equals(corsConfiguration, apIProduct.corsConfiguration) &&
         Objects.equals(createdTime, apIProduct.createdTime) &&
         Objects.equals(lastUpdatedTime, apIProduct.lastUpdatedTime) &&
+        Objects.equals(lastUpdatedTimestamp, apIProduct.lastUpdatedTimestamp) &&
         Objects.equals(gatewayVendor, apIProduct.gatewayVendor) &&
         Objects.equals(apis, apIProduct.apis) &&
         Objects.equals(scopes, apIProduct.scopes) &&
@@ -942,7 +1019,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, gatewayVendor, apis, scopes, categories, workflowStatus);
+    return Objects.hash(id, name, context, version, description, provider, hasThumbnail, state, enableSchemaValidation, isDefaultVersion, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus);
   }
 
   @Override
@@ -953,11 +1030,13 @@ return null;
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
+    sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
     sb.append("    revisionedApiProductId: ").append(toIndentedString(revisionedApiProductId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
@@ -974,6 +1053,7 @@ return null;
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    apiThrottlingPolicy: ").append(toIndentedString(apiThrottlingPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
+    sb.append("    apiKeyHeader: ").append(toIndentedString(apiKeyHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
@@ -984,6 +1064,7 @@ return null;
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    lastUpdatedTimestamp: ").append(toIndentedString(lastUpdatedTimestamp)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");

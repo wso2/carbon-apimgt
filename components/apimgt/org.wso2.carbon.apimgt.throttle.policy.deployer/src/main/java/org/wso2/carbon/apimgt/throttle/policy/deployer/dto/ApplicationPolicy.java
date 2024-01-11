@@ -22,6 +22,25 @@ package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
  */
 public class ApplicationPolicy extends Policy {
 
+    private int rateLimitCount;
+    private String rateLimitTimeUnit;
+
+    public String getRateLimitTimeUnit() {
+        return rateLimitTimeUnit;
+    }
+
+    public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+        this.rateLimitTimeUnit = rateLimitTimeUnit;
+    }
+
+    public int getRateLimitCount() {
+        return rateLimitCount;
+    }
+
+    public void setRateLimitCount(int rateLimitCount) {
+        this.rateLimitCount = rateLimitCount;
+    }
+
     public ApplicationPolicy() {
         setType(PolicyType.APPLICATION);
     }

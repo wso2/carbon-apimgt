@@ -30,6 +30,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -140,7 +141,11 @@ public class DBRetriever implements ArtifactRetriever {
         } catch (IOException e) {
             String msg = "Error while executing the http client";
             log.error(msg, e);
-            throw new ArtifactSynchronizerException(msg, e);
+            throw new ArtifactSynchronizerException(msg, e, ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED);
+        } catch (ArtifactSynchronizerException e) {
+            String msg = "Error while retrieving artifacts";
+            log.error(msg, e);
+            throw new ArtifactSynchronizerException(msg, e, ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED);
         }
     }
 
@@ -214,7 +219,7 @@ public class DBRetriever implements ArtifactRetriever {
 
         HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
         try {
-            return APIUtil.executeHTTPRequest(method, httpClient);
+            return APIUtil.executeHTTPRequestWithRetries(method, httpClient);
         } catch (APIManagementException e) {
             throw new ArtifactSynchronizerException(e);
         }
@@ -229,5 +234,59 @@ public class DBRetriever implements ArtifactRetriever {
     public String getName() {
 
         return APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME;
+    }
+
+    @Override
+    public String retrieveGatewayPolicyArtifacts(String mappingUUID) throws ArtifactSynchronizerException {
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        if (gatewayArtifactSynchronizerProperties.hasEventWaitingTime()) {
+            try {
+                Thread.sleep(gatewayArtifactSynchronizerProperties.getEventWaitingTime());
+            } catch (InterruptedException e) {
+                log.error("Error occurred while waiting to retrieve artifacts from event hub");
+            }
+        }
+        try {
+            String path = APIConstants.GatewayArtifactSynchronizer.GATEWAY_POLICY_SYNAPSE_ARTIFACTS +
+                    "?policyMappingUuid=" + mappingUUID + "&type=Synapse";
+            String endpoint = baseURL + path;
+            try (CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain)) {
+                JSONArray jsonArray = retrieveArtifact(httpResponse);
+                if (jsonArray != null && jsonArray.length() > 0) {
+                    return jsonArray.getString(0);
+                }
+            }
+        } catch (IOException e) {
+            String msg = "Error while executing the http client";
+            log.error(msg, e);
+            throw new ArtifactSynchronizerException(msg, e);
+        }
+        return null;
+    }
+
+    @Override
+    public List<String> retrieveGatewayPolicyArtifacts(String gatewayLabel, String tenantDomain)
+            throws ArtifactSynchronizerException {
+        List<String> gatewayPolicyArtifactsArray = new ArrayList<>();
+        try {
+            String encodedGatewayLabel = URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
+            String path = APIConstants.GatewayArtifactSynchronizer.GATEWAY_POLICY_SYNAPSE_ARTIFACTS
+                    + "?gatewayLabel=" + encodedGatewayLabel + "&type=Synapse";
+            String endpoint = baseURL + path;
+            try (CloseableHttpResponse httpResponse = invokeService(endpoint,tenantDomain)) {
+                JSONArray jsonArray = retrieveArtifact(httpResponse);
+                if (jsonArray != null) {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        gatewayPolicyArtifactsArray.add(jsonArray.getString(i));
+                    }
+                }
+            }
+            return gatewayPolicyArtifactsArray;
+        } catch (IOException e) {
+            String msg = "Error while executing the http client";
+            log.error(msg, e);
+            throw new ArtifactSynchronizerException(msg, e);
+        }
     }
 }

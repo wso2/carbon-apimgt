@@ -17,6 +17,10 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
+import org.apache.batik.transcoder.TranscoderException;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -25,6 +29,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -48,6 +55,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 public class RestApiPublisherUtils {
@@ -92,14 +101,16 @@ public class RestApiPublisherUtils {
             //APIIdentifier apiIdentifier = APIMappingUtil
             //        .getAPIIdentifierFromUUID(apiId, tenantDomain);
 
-            RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
-            docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
+            Path resolvedPath = resolveFilePath(docFile.getAbsolutePath(), filename);
+
+            RestApiUtil.transferFile(inputStream, resolvedPath.getFileName().toString(), resolvedPath.getParent().toString());
+            docInputStream = new FileInputStream(resolvedPath.toString());
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
             PublisherCommonUtils
                     .addDocumentationContentForFile(docInputStream, mediaType, filename, apiProvider, apiId,
                             documentId, organization);
-            docFile.deleteOnExit();
+            docFile.delete();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
         } finally {
@@ -179,14 +190,16 @@ public class RestApiPublisherUtils {
             //APIProductIdentifier productIdentifier = APIMappingUtil
             //        .getAPIProductIdentifierFromUUID(productId, tenantDomain);
 
-            RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
-            docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
+            Path resolvedPath = resolveFilePath(docFile.getAbsolutePath(), filename);
+
+            RestApiUtil.transferFile(inputStream, resolvedPath.getFileName().toString(), resolvedPath.getParent().toString());
+            docInputStream = new FileInputStream(resolvedPath.toString());
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
             PublisherCommonUtils
                     .addDocumentationContentForFile(docInputStream, mediaType, filename, apiProvider, productId,
                             documentId, organization);
-            docFile.deleteOnExit();
+            docFile.delete();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
         } finally {
@@ -302,5 +315,143 @@ public class RestApiPublisherUtils {
         } catch (APIImportExportException | IOException e) {
             throw new APIManagementException("Error while exporting operation policy", e);
         }
+    }
+
+    /**
+     * This method will detect the Media Type of the given input stream
+     *
+     * @param inputStream stream containing the data of which the Media Type has to be detected
+     * @return Media Type of the given input stream
+     */
+    public static String detectMediaType(InputStream inputStream) {
+        try {
+            TikaConfig tikaConfig = TikaConfig.getDefaultConfig();
+            Metadata metadata = new Metadata();
+            return tikaConfig.getDetector().detect(TikaInputStream.get(inputStream), metadata).toString();
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError("Unable to read the input stream", e, log);
+        }
+        return null;
+    }
+
+    /**
+     * This method will validate the given input stream for the allowed Media Types
+     *
+     * @param fileInputStream stream containing the thumbnail data of which the content has to be validated
+     * @return input stream containing the thumbnail data
+     * @throws APIManagementException if error occurs while validating the thumbnail content
+     */
+    public static InputStream validateThumbnailContent(InputStream fileInputStream) throws APIManagementException {
+        ByteArrayOutputStream outputStream = null;
+        ByteArrayInputStream inputStream;
+        try {
+            // Convert the InputStream to a bytes array to be able to re-use it.
+            outputStream = new ByteArrayOutputStream();
+            IOUtils.copy(fileInputStream, outputStream);
+            byte[] inputStreamBytes = outputStream.toByteArray();
+
+            // Detect Media Type and validate.
+            inputStream = new ByteArrayInputStream(inputStreamBytes);
+            if (inputStream.available() > 0) {
+                log.debug("Validating thumbnail content");
+                String fileMediaType = RestApiPublisherUtils.detectMediaType(inputStream);
+                if (log.isDebugEnabled()) {
+                    log.debug("Detected Media Type during thumbnail content validation : " + fileMediaType);
+                }
+                if (StringUtils.isBlank(fileMediaType) || !RestApiConstants.ALLOWED_THUMBNAIL_MEDIA_TYPES
+                        .contains(fileMediaType.toLowerCase())) {
+                    RestApiUtil.handleBadRequest(
+                            "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
+                                    + "image/png, image/gif and image/svg+xml", log);
+                }
+
+                // Convert svg images to png. This is done to prevent scripts within svg images from executing.
+                if (RestApiConstants.SVG_MEDIA_TYPE.equals(fileMediaType)) {
+                    log.debug("Converting svg image to png format");
+                    outputStream = new ByteArrayOutputStream();
+                    TranscoderInput input_svg_image = new TranscoderInput(inputStream);
+                    TranscoderOutput output_png_image = new TranscoderOutput(outputStream);
+                    PNGTranscoder my_converter = new PNGTranscoder();
+                    my_converter.transcode(input_svg_image, output_png_image);
+                    inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+                }
+            }
+        } catch (TranscoderException | IOException e) {
+            throw new APIManagementException("Error while validating thumbnail content", e);
+        } finally {
+            IOUtils.closeQuietly(outputStream);
+        }
+        return inputStream;
+    }
+
+    /**
+     * This method will retrieve the Media Type of the processed input stream
+     *
+     * @param inputStream stream data which has been processed
+     * @param fileDetail object containing meta data of the file
+     * @return Media Type of the processed input stream
+     */
+    public static String getMediaType(InputStream inputStream, Attachment fileDetail) throws IOException {
+        String fileMediaType;
+        if (inputStream.available() > 0) {
+            // Since the inputStream contains data, this will be a thumbnail uploading scenario.
+            fileMediaType = RestApiPublisherUtils.detectMediaType(inputStream);
+        } else {
+            // Since the inputStream does not have data, this will be a thumbnail removing scenario.
+            // Apache Tika would detect the media type of the empty stream as application/octet-stream. Hence,
+            // retrieving the media type from the fileDetail object.
+            fileMediaType = fileDetail.getContentType().toString();
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Media Type of thumbnail to be uploaded : " + fileMediaType);
+        }
+        if (StringUtils.isBlank(fileMediaType)) {
+            RestApiUtil.handleBadRequest(
+                    "Media Type of provided thumbnail is not supported. Supported Media Types are image/jpeg, "
+                            + "image/png, image/gif and image/svg+xml", log);
+        }
+        return fileMediaType;
+    }
+
+    /**
+     * Resolves an untrusted user-specified path against the base directory.
+     * Paths that try to escape the base directory are rejected.
+     * @param baseDirPathString the absolute path of the base directory that all
+     *                     user-specified paths should be within
+     * @param userPathString  the untrusted path provided by the user
+     * @return Resolved Path
+     * @throws APIManagementException if resolution fails.
+     */
+    private static Path resolveFilePath(final String baseDirPathString, final String userPathString) throws APIManagementException {
+        Path baseDirPath = Paths.get(baseDirPathString);
+        Path userPath = Paths.get(userPathString);
+        if (!baseDirPath.isAbsolute()) {
+            throw new APIManagementException("Invalid base path provided." +
+                    " Base path must be absolute. Base Path: " + baseDirPath);
+        }
+
+        if (userPath.isAbsolute()){
+            throw new APIManagementException("Invalid user path provided." +
+                    " User path should not be absolute. User Path: " + userPath);
+        }
+
+        /*
+         * Combines the absolute base directory path and the user-specified relative path.
+         * Then, normalizes the path to handle any ".." elements in the userPath.
+         * For example, if the baseDirPath is "/foo/bar/baz" and userPath is "../attack",
+         * the resulting resolvedPath will be "/foo/bar/attack".
+         */
+        final Path resolvedPath = baseDirPath.resolve(userPath).normalize();
+
+        /*
+         * Verifies that the resolved path is still within the expected base directory.
+         * If the resolved path does not start with the base directory path,
+         * it indicates an attempt to escape the intended directory structure.
+         */
+        if (!resolvedPath.startsWith(baseDirPath)) {
+            throw new APIManagementException("Error resolving path. The user path attempts to escape the base directory.");
+        }
+
+        return resolvedPath;
     }
 }

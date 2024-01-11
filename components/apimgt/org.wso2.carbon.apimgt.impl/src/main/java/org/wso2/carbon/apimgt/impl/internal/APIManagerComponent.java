@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.ssl.SSLContexts;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -81,6 +82,7 @@ import org.wso2.carbon.apimgt.impl.notifier.CorrelationConfigNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
@@ -213,6 +215,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIMgtDBUtil.initialize();
@@ -1024,9 +1027,7 @@ public class APIManagerComponent {
             int proxyPort = Integer.parseInt(configuration.getFirstProperty(APIConstants.PROXY_PORT));
             String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
             String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
-            String nonProxyHostsString = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
-            String[] nonProxyHosts = configuration.getFirstProperty(nonProxyHostsString) != null ?
-                    nonProxyHostsString.split("\\|") : null;
+            String[] nonProxyHosts = getNonProxyHostsListByNonProxyHostsStringConfiguration(configuration);
             String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
             builder = builder.withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol,
                     nonProxyHosts);
@@ -1059,7 +1060,8 @@ public class APIManagerComponent {
                     final String[] localhosts = { "::1", "127.0.0.1", "localhost", "localhost.localdomain" };
                     @Override
                     public boolean verify(String urlHostName, SSLSession session) {
-                        return Arrays.asList(localhosts).contains(urlHostName);
+                        return SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER.verify(urlHostName, session)
+                                || Arrays.asList(localhosts).contains(urlHostName);
                     }
                 };
                 break;
@@ -1069,6 +1071,18 @@ public class APIManagerComponent {
         configuration.setHttpClientConfiguration(builder.withConnectionParams(maxTotal, defaultMaxPerRoute)
                 .withSSLContext(sslContext, hostnameVerifier).build());
     }
+
+    /**
+     * Populate list of NonProxyHosts for given nonProxyHostsString through APIManagerConfiguration
+     *
+     * @param config APIManagerConfiguration
+     * @return String array of proxy list
+     */
+    String[] getNonProxyHostsListByNonProxyHostsStringConfiguration(APIManagerConfiguration config) {
+        String nonProxyHostsString = config.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
+        return nonProxyHostsString != null ? nonProxyHostsString.split("\\|") : null;
+    }
+
     @Reference(
             name = "apim.workflow.task.service",
             service = org.wso2.carbon.apimgt.api.model.WorkflowTaskService.class,

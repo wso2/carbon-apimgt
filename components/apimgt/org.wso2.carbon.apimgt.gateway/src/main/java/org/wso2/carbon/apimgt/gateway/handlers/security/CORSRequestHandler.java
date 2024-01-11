@@ -69,6 +69,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     private List<String> allowedMethodList;
     private boolean allowCredentialsEnabled;
     private String authorizationHeader;
+    private String apiKeyHeader;
 
     public void init(SynapseEnvironment synapseEnvironment) {
         if (log.isDebugEnabled()) {
@@ -94,6 +95,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         }
         if (authorizationHeader != null) {
             allowHeaders += APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT + authorizationHeader;
+        }
+        if (apiKeyHeader != null) {
+            allowHeaders += APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT + apiKeyHeader;
         }
         if (allowedOrigins == null) {
             String allowedOriginsList = APIUtil.getAllowedOrigins();
@@ -227,9 +231,11 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 if (corsSequence != null) {
                     corsSequence.mediate(messageContext);
                 }
-                if (messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC) != null) {
-                    Utils.send(messageContext, Integer.parseInt(
-                            messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC).toString()));
+                if (Boolean.parseBoolean(
+                        System.getProperty(APIMgtGatewayConstants.CORS_SET_STATUS_CODE_FROM_MSG_CONTEXT))
+                        && messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC) != null) {
+                    Utils.send(messageContext,
+                               Integer.parseInt(messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC).toString()));
                 } else {
                     Utils.send(messageContext, HttpStatus.SC_OK);
                 }
@@ -334,7 +340,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
         messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
         //If the request origin is not allowed, set the HTTP status code to 403
-        if (allowedOrigin == null) {
+        if (Boolean.parseBoolean(System.getProperty(APIMgtGatewayConstants.CORS_FORBID_BLOCKED_REQUESTS))
+                && allowedOrigin == null) {
             messageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_FORBIDDEN);
         }
         String allowedMethods;
@@ -443,5 +450,13 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    public String getApiKeyHeader() {
+        return apiKeyHeader;
+    }
+
+    public void setApiKeyHeader(String apiKeyHeader) {
+        this.apiKeyHeader = apiKeyHeader;
     }
 }

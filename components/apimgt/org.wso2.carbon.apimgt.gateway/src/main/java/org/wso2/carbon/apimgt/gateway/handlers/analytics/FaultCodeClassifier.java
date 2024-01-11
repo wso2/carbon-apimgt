@@ -109,6 +109,8 @@ public class FaultCodeClassifier {
             return FaultSubCategories.Throttling.CUSTOM_POLICY_LIMIT_EXCEEDED;
         case APIThrottleConstants.SUBSCRIPTION_BURST_THROTTLE_OUT_ERROR_CODE:
             return FaultSubCategories.Throttling.BURST_CONTROL_LIMIT_EXCEEDED;
+        case APIThrottleConstants.APPLICATION_BURST_THROTTLE_OUT_ERROR_CODE:
+            return FaultSubCategories.Throttling.APPLICATION_BURST_CONTROL_LIMIT_EXCEEDED;
         case APIThrottleConstants.GRAPHQL_QUERY_TOO_DEEP:
         case WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP:
             return FaultSubCategories.Throttling.QUERY_TOO_DEEP;

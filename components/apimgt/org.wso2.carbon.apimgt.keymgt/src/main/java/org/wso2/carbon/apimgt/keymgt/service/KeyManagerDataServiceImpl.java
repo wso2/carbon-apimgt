@@ -414,6 +414,8 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         policy.setQuotaType(event.getQuotaType());
         policy.setTenantId(event.getTenantId());
         policy.setTierName(event.getPolicyName());
+        policy.setRateLimitCount(event.getRateLimitCount());
+        policy.setRateLimitTimeUnit(event.getRateLimitTimeUnit());
         if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + policy.toString());

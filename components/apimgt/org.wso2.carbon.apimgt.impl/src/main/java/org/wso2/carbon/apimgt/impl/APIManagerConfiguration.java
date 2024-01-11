@@ -175,6 +175,8 @@ public class APIManagerConfiguration {
 
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
 
+    private JSONArray customProperties = new JSONArray();
+
     /**
      * Returns the configuration of the Identity Provider.
      *
@@ -383,15 +385,39 @@ public class APIManagerConfiguration {
                 OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_CONNECTION_TIMEOUT));
                 OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_IS_SSL_ENABLED));
                 OMElement propertiesElement = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_PROPERTIES));
+                OMElement gatewayId = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_GATEWAY_ID));
+                OMElement minGatewayCount = element.getFirstChildWithName(
+                        new QName(APIConstants.CONFIG_REDIS_MIN_GATEWAY_COUNT));
+                OMElement keyLockRetrievalTimeout = element.getFirstChildWithName(
+                        new QName(APIConstants.CONFIG_REDIS_KEY_LOCK_RETRIEVAL_TIMEOUT));
                 redisConfig.setRedisEnabled(true);
                 redisConfig.setHost(redisHost.getText());
                 redisConfig.setPort(Integer.parseInt(redisPort.getText()));
-                if (redisUser != null && redisPassword != null && redisDatabaseId != null
-                        && redisConnectionTimeout != null && redisIsSslEnabled != null) {
+                if (gatewayId != null) {
+                    redisConfig.setGatewayId(gatewayId.getText());
+                } else {
+                    log.error("gateway_id is not configured in deployment.toml. Please add the gateway ID" +
+                            " configuration under [apim.redis_config] section in deployment.toml");
+                }
+                if (minGatewayCount != null) {
+                    redisConfig.setMinGatewayCount(Integer.parseInt(minGatewayCount.getText()));
+                }
+                if (keyLockRetrievalTimeout != null) {
+                    redisConfig.setKeyLockRetrievalTimeout(Integer.parseInt(keyLockRetrievalTimeout.getText()));
+                }
+                if (redisUser != null) {
                     redisConfig.setUser(redisUser.getText());
+                }
+                if (redisPassword != null) {
                     redisConfig.setPassword(MiscellaneousUtil.resolve(redisPassword, secretResolver).toCharArray());
+                }
+                if (redisDatabaseId != null) {
                     redisConfig.setDatabaseId(Integer.parseInt(redisDatabaseId.getText()));
+                }
+                if (redisConnectionTimeout != null) {
                     redisConfig.setConnectionTimeout(Integer.parseInt(redisConnectionTimeout.getText()));
+                }
+                if (redisIsSslEnabled != null) {
                     redisConfig.setSslEnabled(Boolean.parseBoolean(redisIsSslEnabled.getText()));
                 }
                 if (propertiesElement !=null){
@@ -564,6 +590,35 @@ public class APIManagerConfiguration {
                 setExtensionListenerConfigurations(element);
             } else if (APIConstants.JWT_AUDIENCES.equals(localName)){
                 setRestApiJWTAuthAudiences(element);
+            } else if (APIConstants.CustomPropertyAttributes.CUSTOM_PROPERTIES.equals(localName)) {
+                Iterator iterator = element.getChildrenWithLocalName(APIConstants.CustomPropertyAttributes.PROPERTY);
+                while (iterator.hasNext()) {
+                    OMElement omElement = (OMElement) iterator.next();
+                    Iterator attributes = omElement.getChildElements();
+                    JSONObject jsonObject = new JSONObject();
+                    boolean isHidden = Boolean.parseBoolean(
+                            omElement.getAttributeValue(new QName(APIConstants.CustomPropertyAttributes.HIDDEN)));
+                    boolean isRequired =
+                            Boolean.parseBoolean(omElement
+                                    .getAttributeValue(new QName(APIConstants.CustomPropertyAttributes.REQUIRED)));
+                    jsonObject.put(APIConstants.CustomPropertyAttributes.HIDDEN, isHidden);
+                    while (attributes.hasNext()) {
+                        OMElement attribute = (OMElement) attributes.next();
+                        if (attribute.getLocalName().equals(APIConstants.CustomPropertyAttributes.NAME)) {
+                            jsonObject.put(APIConstants.CustomPropertyAttributes.NAME, attribute.getText());
+                        } else if (attribute.getLocalName().equals(APIConstants.CustomPropertyAttributes.DESCRIPTION)) {
+                            jsonObject.put(APIConstants.CustomPropertyAttributes.DESCRIPTION, attribute.getText());
+                        } else if (attribute.getLocalName().equals(APIConstants.CustomPropertyAttributes.DEFAULT) &&
+                                isRequired) {
+                            jsonObject.put(APIConstants.CustomPropertyAttributes.DEFAULT, attribute.getText());
+                        }
+                    }
+                    if (isHidden && isRequired && !jsonObject.containsKey(APIConstants.CustomPropertyAttributes.DEFAULT)) {
+                        log.error("A default value needs to be given for required, hidden custom property attributes.");
+                    }
+                    jsonObject.put(APIConstants.CustomPropertyAttributes.REQUIRED, isRequired);
+                    customProperties.add(jsonObject);
+                }
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -687,8 +742,8 @@ public class APIManagerConfiguration {
 
             //Prefix websub endpoints with 'websub_' so that the endpoint URL
             // would begin with: 'websub_http://', since API type is identified by the URL protocol below.
-            webSubHttpEp = "websub_" + webSubHttpEp;
-            webSubHttpsEp = "websub_" + webSubHttpsEp;
+            webSubHttpEp = StringUtils.isNotBlank(webSubHttpEp) ? "websub_" + webSubHttpEp : webSubHttpEp;
+            webSubHttpsEp = StringUtils.isNotBlank(webSubHttpsEp) ? "websub_" + webSubHttpsEp : webSubHttpsEp;
 
             VHost vhost = VHost.fromEndpointUrls(new String[]{
                     httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
@@ -850,6 +905,11 @@ public class APIManagerConfiguration {
     public JSONArray getApplicationAttributes() {
 
         return applicationAttributes;
+    }
+
+    public JSONArray getCustomProperties() {
+
+        return customProperties;
     }
 
     /**
@@ -1322,7 +1382,7 @@ public class APIManagerConfiguration {
                         OMElement jobQueueSizeElement = jmsTaskManagerElement
                                 .getFirstChildWithName(new QName
                                         (APIConstants.AdvancedThrottleConstants.JOB_QUEUE_SIZE));
-                        if (keepAliveTimeInMillisElement != null) {
+                        if (jobQueueSizeElement != null) {
                             jmsTaskManagerProperties.setJobQueueSize(Integer.parseInt(jobQueueSizeElement.getText()));
                         }
                     }
@@ -1555,10 +1615,20 @@ public class APIManagerConfiguration {
             if (claimRetrieverImplElement != null) {
                 jwtConfigurationDto.setClaimRetrieverImplClass(claimRetrieverImplElement.getText());
             }
+            OMElement useKidElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.USE_KID));
+            if (useKidElement != null) {
+                jwtConfigurationDto.setUseKid(Boolean.parseBoolean(useKidElement.getText()));
+            }
             OMElement jwtHeaderElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.JWT_HEADER));
             if (jwtHeaderElement != null) {
                 jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
+            }
+            OMElement jwtDecoding =
+                    omElement.getFirstChildWithName(new QName(APIConstants.JWT_DECODING));
+            if (jwtDecoding != null) {
+                jwtConfigurationDto.setJwtDecoding(jwtDecoding.getText());
             }
             OMElement jwtUserClaimsElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
@@ -1598,6 +1668,14 @@ public class APIManagerConfiguration {
                             configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
                     if (claimRetrievalElement != null) {
                         jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
+                        OMElement isBindFederatedUserClaims =
+                                omElement.getFirstChildWithName(new QName(APIConstants.BINDING_FEDERATED_USER_CLAIMS));
+                        if (isBindFederatedUserClaims != null) {
+                            jwtConfigurationDto.setBindFederatedUserClaims(
+                                    Boolean.parseBoolean(isBindFederatedUserClaims.getText()));
+                        } else {
+                            jwtConfigurationDto.setBindFederatedUserClaims(true);
+                        }
                     }
                 }
             }
@@ -2063,7 +2141,25 @@ public class APIManagerConfiguration {
             long retryDuration = Long.valueOf(retryDurationElement.getText());
             gatewayArtifactSynchronizerProperties.setRetryDuartion(retryDuration);
         } else {
-            log.debug("Retry Duration Element is not set. Set to default duaration");
+            log.debug("Retry Duration Element is not set. Set to default duration");
+        }
+
+        OMElement maxRetryCountElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.MAX_RETRY_COUNT));
+        if (maxRetryCountElement != null) {
+            int retryCount = Integer.parseInt(maxRetryCountElement.getText());
+            gatewayArtifactSynchronizerProperties.setMaxRetryCount(retryCount);
+        } else {
+            log.debug("Max Retry Count Element is not set. Set to default count");
+        }
+
+        OMElement retryProgressionFactorElement = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayArtifactSynchronizer.RETRY_PROGRESSION_FACTOR));
+        if (retryProgressionFactorElement != null) {
+            double retryProgressionFactor = Double.parseDouble(retryProgressionFactorElement.getText());
+            gatewayArtifactSynchronizerProperties.setRetryProgressionFactor(retryProgressionFactor);
+        } else {
+            log.debug("Retry Progression Factor Element is not set. Set to default value");
         }
 
         OMElement dataRetrievalModeElement = omElement.getFirstChildWithName(

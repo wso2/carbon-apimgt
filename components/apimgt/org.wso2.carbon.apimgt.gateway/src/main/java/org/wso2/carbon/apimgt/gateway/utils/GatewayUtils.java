@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
+import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -577,6 +578,8 @@ public class GatewayUtils {
             authContext.setStopOnQuotaReach(apiKeyValidationInfoDTO.isStopOnQuotaReach());
             authContext.setSpikeArrestLimit(apiKeyValidationInfoDTO.getSpikeArrestLimit());
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
+            authContext.setApplicationSpikesArrestLimit(apiKeyValidationInfoDTO.getApplicationSpikeArrestLimit());
+            authContext.setApplicationSpikesArrestUnit(apiKeyValidationInfoDTO.getApplicationSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
             authContext.setGraphQLMaxDepth(apiKeyValidationInfoDTO.getGraphQLMaxDepth());
@@ -1365,7 +1368,12 @@ public class GatewayUtils {
         try {
             MessageContext.setCurrentMessageContext(createAxis2MessageContext());
             RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
-            String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
+            String qualifiedName;
+            if (version != null) {
+                qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
+            } else {
+                qualifiedName = apiName;
+            }
             OMElement api = restapiAdminServiceProxy.getApiContent(qualifiedName);
             if (api != null) {
                 return api.toString();
@@ -1535,8 +1543,16 @@ public class GatewayUtils {
         return ServiceReferenceHolder.getInstance().getTracer();
     }
 
+    public static TelemetryTracer getTelemetryTracer() {
+        return ServiceReferenceHolder.getInstance().getTelemetryTracer();
+    }
+
     public static boolean isAllApisDeployed () {
         return DataHolder.getInstance().isAllApisDeployed();
+    }
+
+    public static boolean isAllGatewayPoliciesDeployed () {
+        return DataHolder.getInstance().isAllGatewayPoliciesDeployed();
     }
 
     public static List<String> getKeyManagers(org.apache.synapse.MessageContext messageContext) {

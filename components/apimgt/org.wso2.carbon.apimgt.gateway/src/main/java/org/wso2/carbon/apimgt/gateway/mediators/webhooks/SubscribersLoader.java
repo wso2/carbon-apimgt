@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.apimgt.gateway.exception.DataNotFoundException;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -48,7 +49,7 @@ public class SubscribersLoader extends AbstractMediator {
             } else {
                 messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBERS_COUNT_PROPERTY, 0);
             }
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | DataNotFoundException e) {
             handleException("Error while getting subscribers count", e, messageContext);
         }
         return true;

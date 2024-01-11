@@ -31,6 +31,7 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.exception.DataNotFoundException;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -88,7 +89,7 @@ public class SubscribersPersistMediator extends AbstractMediator {
             HttpResponse httpResponse = WebhooksUtils.persistData(jsonString, subscriptionDataPersisRetries,
                     APIConstants.Webhooks.SUBSCRIPTION_EVENT_TYPE);
             handleResponse(httpResponse, messageContext);
-        } catch (InterruptedException | IOException e) {
+        } catch (InterruptedException | IOException | DataNotFoundException e) {
             messageContext.setProperty(SynapseConstants.ERROR_CODE, HttpStatus.SC_INTERNAL_SERVER_ERROR);
             messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Error while persisting request");
             messageContext.setProperty(SynapseConstants.ERROR_DETAIL, "Error while persisting request");
