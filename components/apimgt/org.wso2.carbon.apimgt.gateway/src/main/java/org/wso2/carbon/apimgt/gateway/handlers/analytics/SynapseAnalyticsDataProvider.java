@@ -22,6 +22,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.CorrelationConstants;
@@ -204,6 +205,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         Target target = new Target();
 
         String endpointAddress = (String) messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        if (endpointAddress == null) {
+            endpointAddress = APIMgtGatewayConstants.DUMMY_ENDPOINT_ADDRESS;
+        }
         int targetResponseCode = getTargetResponseCode();
         target.setResponseCacheHit(isCacheHit());
         target.setDestination(endpointAddress);
@@ -268,6 +272,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
         Object clientResponseCodeObj = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(SynapseConstants.HTTP_SC);
+        if (clientResponseCodeObj == null) {
+            return HttpStatus.SC_OK;
+        }
         int proxyResponseCode;
         if (clientResponseCodeObj instanceof Integer) {
             proxyResponseCode = (int) clientResponseCodeObj;
@@ -405,9 +412,15 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (isCacheHit()) {
             return 0L;
         }
-        long backendStartTime = (long) messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
-        long backendEndTime = (long) messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
-        return backendEndTime - backendStartTime;
+        Object backendStartTimeObj = messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
+        long backendStartTime = backendStartTimeObj == null ? 0L : (long) backendStartTimeObj;
+        Object backendEndTimeObj = messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
+        long backendEndTime = backendEndTimeObj == null ? 0L : (long) backendEndTimeObj;
+        if (backendStartTime == 0L || backendEndTime == 0L) {
+            return 0L;
+        } else {
+            return backendEndTime - backendStartTime;
+        }
     }
 
     public long getResponseLatency() {
@@ -422,8 +435,13 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (isCacheHit()) {
             return System.currentTimeMillis() - requestInTime;
         }
-        long backendStartTime = (long) messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
-        return backendStartTime - requestInTime;
+        Object backendStartTimeObj = messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
+        long backendStartTime = backendStartTimeObj == null ? 0L : (long) backendStartTimeObj;
+        if (backendStartTime == 0L) {
+            return System.currentTimeMillis() - requestInTime;
+        } else {
+            return backendStartTime - requestInTime;
+        }
     }
 
     public long getResponseMediationLatency() {
@@ -431,8 +449,13 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (isCacheHit()) {
             return 0;
         }
-        long backendEndTime = (long) messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
-        return System.currentTimeMillis() - backendEndTime;
+        Object backendEndTimeObj = messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
+        long backendEndTime = backendEndTimeObj == null ? 0L : (long) backendEndTimeObj;
+        if (backendEndTime == 0L) {
+            return 0L;
+        } else {
+            return System.currentTimeMillis() - backendEndTime;
+        }
     }
 
     public int getResponseSize() {
