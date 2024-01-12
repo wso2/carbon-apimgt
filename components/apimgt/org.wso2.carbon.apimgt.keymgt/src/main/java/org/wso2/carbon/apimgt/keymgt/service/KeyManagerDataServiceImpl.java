@@ -346,6 +346,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
     }
 
     private Application getApplicationFromApplicationEvent(ApplicationEvent event) {
+
         Application application = new Application();
         application.setId(event.getApplicationId());
         application.setName(event.getApplicationName());
@@ -353,7 +354,6 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         application.setTokenType(event.getTokenType());
         application.setUUID(event.getUuid());
         application.setOrganization(event.getTenantDomain());
-
         event.getAttributes().forEach(application::addAttribute);
         application.setSubName(event.getSubscriber());
         //add group ids list to application
