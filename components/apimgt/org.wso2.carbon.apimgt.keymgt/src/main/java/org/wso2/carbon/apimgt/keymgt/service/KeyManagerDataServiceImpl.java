@@ -346,6 +346,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
     }
 
     private Application getApplicationFromApplicationEvent(ApplicationEvent event) {
+
         Application application = new Application();
         application.setId(event.getApplicationId());
         application.setName(event.getApplicationName());
