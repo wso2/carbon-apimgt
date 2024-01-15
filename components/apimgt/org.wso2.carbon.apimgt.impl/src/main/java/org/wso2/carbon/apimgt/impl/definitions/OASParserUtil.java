@@ -259,6 +259,7 @@ public class OASParserUtil {
     public static String updateAPIProductSwaggerOperations(Map<API, List<APIProductResource>> apiToProductResourceMapping,
                                                            String destinationSwagger)
             throws APIManagementException {
+
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(destinationSwagger);
         OpenAPI destOpenAPI;
 
@@ -430,7 +431,7 @@ public class OASParserUtil {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Parameter parameter = parameters.get(refKey);
                             //Extract the parameter reference only if it exists in the source definition
-                            if(parameter != null) {
+                            if (parameter != null) {
                                 Content content = parameter.getContent();
                                 if (content != null) {
                                     extractReferenceFromContent(content, context);
@@ -452,7 +453,7 @@ public class OASParserUtil {
                         for (String refKey : refCategoryEntry.getValue()) {
                             ApiResponse response = responses.get(refKey);
                             //Extract the response reference only if it exists in the source definition
-                            if(response != null) {
+                            if (response != null) {
                                 Content content = response.getContent();
                                 extractReferenceFromContent(content, context);
                             }
@@ -826,7 +827,7 @@ public class OASParserUtil {
      * @throws APIManagementException if error occurred while parsing definition
      */
     public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
-            boolean returnContent) throws APIManagementException {
+                                                                                   boolean returnContent) throws APIManagementException {
         String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator +
                 APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
         String archivePath = path + File.separator + APIConstants.OPENAPI_ARCHIVE_ZIP_FILE;
@@ -838,7 +839,7 @@ public class OASParserUtil {
             if (listOfFiles.length > 1) {
                 throw new APIManagementException("Swagger Definitions should be placed under one root folder.");
             }
-            for (File file: listOfFiles) {
+            for (File file : listOfFiles) {
                 if (file.isDirectory()) {
                     archiveDirectory = file.getAbsoluteFile();
                     break;
@@ -927,7 +928,7 @@ public class OASParserUtil {
      * Add error item with the thrown error message to the provided validation response object
      *
      * @param validationResponse APIDefinitionValidationResponse object
-     * @param e         error object
+     * @param e                  error object
      * @return added ErrorItem object
      */
     public static ErrorItem addErrorToValidationResponse(APIDefinitionValidationResponse validationResponse,
@@ -946,12 +947,12 @@ public class OASParserUtil {
      * Try to validate a give openAPI definition using OpenAPI 3 parser
      *
      * @param apiDefinition     definition
-     * @param url OpenAPI definition url
+     * @param url               OpenAPI definition url
      * @param returnJsonContent whether to return definition as a json content
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
      */
-    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url ,
+    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url,
                                                                         boolean returnJsonContent)
             throws APIManagementException {
         String apiDefinitionProcessed = apiDefinition;
@@ -978,6 +979,7 @@ public class OASParserUtil {
         }
         return validationResponse;
     }
+
     /**
      * Try to validate a give openAPI definition using swagger parser
      *
@@ -1216,9 +1218,9 @@ public class OASParserUtil {
     /**
      * Sets the scopes to the URL template object using the given list of scopes
      *
-     * @param template URL template
-     * @param resourceScopes   list of scopes of the resource
-     * @param apiScopes set of scopes defined for the API
+     * @param template       URL template
+     * @param resourceScopes list of scopes of the resource
+     * @param apiScopes      set of scopes defined for the API
      * @return URL template after setting the scopes
      */
     public static URITemplate setScopesToTemplate(URITemplate template, List<String> resourceScopes,
@@ -1419,7 +1421,7 @@ public class OASParserUtil {
      * Add advance configuration to the endpointResult object
      *
      * @param primaryEndpoints production and sandbox endpoint configuration Json object
-     * @param endpointResult         endpoint result ObjectNode
+     * @param endpointResult   endpoint result ObjectNode
      */
     private static ObjectNode updateEndpointResult(JSONObject primaryEndpoints, ObjectNode endpointResult)
             throws APIManagementException {
@@ -1813,10 +1815,10 @@ public class OASParserUtil {
         boolean definitionUpdated = false;
         if (jsonObject.has(OPENAPI_RESOURCE_KEY)) {
             JSONObject paths = jsonObject.optJSONObject(OPENAPI_RESOURCE_KEY);
-            if (paths != null ) {
+            if (paths != null) {
                 for (String unsupportedBlockKey : UNSUPPORTED_RESOURCE_BLOCKS) {
                     boolean result = removeBlocksRecursivelyFromJsonObject(unsupportedBlockKey, paths, false);
-                    definitionUpdated = definitionUpdated  || result;
+                    definitionUpdated = definitionUpdated || result;
                 }
             }
         }
@@ -1839,7 +1841,7 @@ public class OASParserUtil {
      * This method removes provided key from the json object recursively.
      *
      * @param keyToBeRemoved, Key to remove from open api spec.
-     * @param jsonObject, Open api spec as json object.
+     * @param jsonObject,     Open api spec as json object.
      */
     private static boolean removeBlocksRecursivelyFromJsonObject(String keyToBeRemoved, JSONObject jsonObject, boolean definitionUpdated) {
         if (jsonObject == null) {
