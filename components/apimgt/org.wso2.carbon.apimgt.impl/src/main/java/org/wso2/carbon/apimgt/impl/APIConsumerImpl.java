@@ -4293,40 +4293,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return true;
     }
 
-
-    /**
-     * This method is used to check if key manager configuration is allowed for user
-     * @param keyManagerName name of the key manager
-     * @param organization organization of the logged in user
-     * @param username username of the logged in user
-     * @return boolean returns if the key manager is allowed for the logged in user
-     * @throws APIManagementException if error occurred
-     */
-    @Override
-    public boolean isKeyManagerByNameAllowedForUser(String keyManagerName, String organization, String username)
-            throws APIManagementException {
-        APIAdmin apiAdmin = new APIAdminImpl();
-        KeyManagerConfigurationDTO keyManagerConfiguration = apiAdmin
-                .getKeyManagerConfigurationByName(organization, keyManagerName);
-        KeyManagerPermissionConfigurationDTO permissions = keyManagerConfiguration.getPermissions();
-        String permissionType = permissions.getPermissionType();
-        //Checks if the keymanager is permission restricted and if the user is in the restricted list
-        if (permissions != null && !permissionType.equals(PERMISSION_NOT_RESTRICTED)) {
-            String[] permissionRoles = permissions.getRoles()
-                    .stream()
-                    .toArray(String[]::new);
-            String[] userRoles = APIUtil.getListOfRoles(username);
-            //list of common roles the user has and the restricted list
-            boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
-            //Checks if the user is allowed to access the key manager
-            if ((PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
-                    || (PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static boolean hasIntersection(String[] arr1, String[] arr2) {
         Set<String> set = new HashSet<>();
 
