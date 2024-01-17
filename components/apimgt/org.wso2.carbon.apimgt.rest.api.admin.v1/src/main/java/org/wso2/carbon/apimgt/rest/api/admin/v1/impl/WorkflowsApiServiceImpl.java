@@ -187,6 +187,11 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                 workflowDTO.setAttributes(body.getAttributes());
             }
 
+            if(body.getComments() != null) {
+                System.out.println(body.getComments());
+                workflowDTO.setComments(body.getComments());
+            }
+
             String workflowType = workflowDTO.getWorkflowType();
 
             if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType) &&
@@ -198,6 +203,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
 
             WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
             workflowExecutor.complete(workflowDTO);
+
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);
 

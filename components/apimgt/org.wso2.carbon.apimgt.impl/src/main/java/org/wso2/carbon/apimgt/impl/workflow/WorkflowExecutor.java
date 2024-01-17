@@ -23,10 +23,16 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationDAO;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationDTO;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationEndUserDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationMetaData;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationType;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -103,11 +109,114 @@ public abstract class WorkflowExecutor implements Serializable {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             apiMgtDAO.updateWorkflowStatus(workflowDTO);
+            sendPubDevNotification(workflowDTO);
+
+
         } catch (APIManagementException e) {
             throw new WorkflowException("Error while updating workflow", e);
         }
         return new GeneralWorkflowResponse();
     }
+
+    /** Implements the workflow related Notification logic. **/
+
+    private void sendPubDevNotification(WorkflowDTO workflowDTO) {
+        PortalNotificationDTO portalNotificationsDTO = new PortalNotificationDTO();
+
+        portalNotificationsDTO.setNotificationType(getNotificationType(workflowDTO.getWorkflowType()));
+        portalNotificationsDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));
+        portalNotificationsDTO.setNotificationMetadata(getNotificationMetaData(workflowDTO));
+        portalNotificationsDTO.setOrganization(workflowDTO.getTenantDomain());
+        portalNotificationsDTO.setEndUsers(getDestinationUser(workflowDTO));
+
+
+
+        boolean result = PortalNotificationDAO.getInstance().addNotification(portalNotificationsDTO);
+
+        if(!result){
+            System.out.println("Error while adding publisher developer notification - sedPubDevNotification()");
+        }
+    }
+
+    private PortalNotificationType getNotificationType(String workflowType) {
+        switch (workflowType) {
+        case WorkflowConstants.WF_TYPE_AM_API_STATE:
+            return PortalNotificationType.API_STATE_CHANGE;
+        case WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE:
+            return PortalNotificationType.API_PRODUCT_STATE_CHANGE;
+        case WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION:
+            return PortalNotificationType.APPLICATION_CREATION;
+        case WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT:
+            return PortalNotificationType.API_REVISION_DEPLOYMENT;
+        case WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION:
+            return PortalNotificationType.APPLICATION_REGISTRATION_PRODUCTION;
+        case WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX:
+            return PortalNotificationType.APPLICATION_REGISTRATION_SANDBOX;
+        case WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION:
+            return PortalNotificationType.SUBSCRIPTION_CREATION;
+        case WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE:
+            return PortalNotificationType.SUBSCRIPTION_UPDATE;
+        case WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION:
+            return PortalNotificationType.SUBSCRIPTION_DELETION;
+
+        }
+        return null;
+    }
+
+    private List<PortalNotificationEndUserDTO> getDestinationUser(WorkflowDTO workflowDTO) {
+        List<PortalNotificationEndUserDTO> destinationUserList = new ArrayList<>();
+        String destinationUser = null;
+
+        switch (workflowDTO.getWorkflowType()) {
+        case WorkflowConstants.WF_TYPE_AM_API_STATE:
+        case WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE:
+            destinationUser = workflowDTO.getMetadata("Invoker");
+            break;
+
+        case WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION:
+        case WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT:
+        case WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION:
+        case WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX:
+            destinationUser = workflowDTO.getProperties("userName");
+            break;
+
+        case WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION:
+        case WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE:
+        case WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION:
+            destinationUser = workflowDTO.getProperties("subscriber");
+            break;
+
+        case WorkflowConstants.WF_TYPE_AM_USER_SIGNUP:
+            destinationUser = workflowDTO.getMetadata("userName");
+            break;
+        }
+
+        if(destinationUser != null){
+            PortalNotificationEndUserDTO endUser = new PortalNotificationEndUserDTO();
+            endUser.setDestinationUser(destinationUser);
+            destinationUserList.add(endUser);
+        }
+
+        return destinationUserList;
+    }
+
+    private PortalNotificationMetaData getNotificationMetaData(WorkflowDTO workflowDTO) {
+        PortalNotificationMetaData portalNotificationMetaData = new PortalNotificationMetaData();
+
+        portalNotificationMetaData.setApi(workflowDTO.getProperties("apiName"));
+        portalNotificationMetaData.setApiVersion(workflowDTO.getProperties("apiVersion"));
+        portalNotificationMetaData.setApplicationName(workflowDTO.getProperties("applicationName"));
+        portalNotificationMetaData.setRequestedTier(workflowDTO.getProperties("requestedTier"));
+        portalNotificationMetaData.setRevisionId(workflowDTO.getProperties("revisionId"));
+        portalNotificationMetaData.setComment(workflowDTO.getComments());
+
+        if(WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowDTO.getWorkflowType()) || WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equals(workflowDTO.getWorkflowType())){
+            portalNotificationMetaData.setApiContext(workflowDTO.getMetadata("ApiContext"));
+        }
+
+        return portalNotificationMetaData;
+    }
+
 
     /**
      * Returns the information of the workflows whose status' match the workflowStatus

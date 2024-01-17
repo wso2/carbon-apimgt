@@ -57,6 +57,7 @@ return null;
     private StatusEnum status = null;
     private Map<String, String> attributes = new HashMap<String, String>();
     private String description = null;
+    private String comments = null;
 
   /**
    * This attribute declares whether this workflow task is approved or rejected. 
@@ -112,6 +113,23 @@ return null;
     this.description = description;
   }
 
+  /**
+   **/
+  public WorkflowDTO comments(String comments) {
+    this.comments = comments;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Request is rejected because of some reason.", value = "")
+  @JsonProperty("comments")
+  public String getComments() {
+    return comments;
+  }
+  public void setComments(String comments) {
+    this.comments = comments;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -124,12 +142,13 @@ return null;
     WorkflowDTO workflow = (WorkflowDTO) o;
     return Objects.equals(status, workflow.status) &&
         Objects.equals(attributes, workflow.attributes) &&
-        Objects.equals(description, workflow.description);
+        Objects.equals(description, workflow.description) &&
+        Objects.equals(comments, workflow.comments);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, attributes, description);
+    return Objects.hash(status, attributes, description, comments);
   }
 
   @Override
@@ -140,6 +159,7 @@ return null;
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    comments: ").append(toIndentedString(comments)).append("\n");
     sb.append("}");
     return sb.toString();
   }

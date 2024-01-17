@@ -3168,6 +3168,19 @@ public class SQLConstants {
                     "   AND API.ORGANIZATION = ?" +
                     "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'";
 
+
+
+    /** Pub/Dev Notifications related constants **/
+
+    public static class PortalNotifications {
+        public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION " +
+                "(NOTIFICATION_ID, NOTIFICATION_TYPE, CREATED_TIME, NOTIFICATION_METADATA, ORGANIZATION) VALUES (?, ?, ?, ?, ?)";
+
+        public static final String ADD_NOTIFICATION_END_USER = "INSERT INTO AM_NOTIFICATION_END_USERS " +
+                "(NOTIFICATION_ID, DESTINATION_USER) " + "VALUES (?, ?)";
+    }
+
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

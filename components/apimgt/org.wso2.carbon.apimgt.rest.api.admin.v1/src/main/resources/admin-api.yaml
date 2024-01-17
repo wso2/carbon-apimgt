@@ -4582,6 +4582,9 @@ components:
         description:
           type: string
           example: Approve workflow request.
+        comments:
+          type: string
+          example: Request is rejected because of some reason.
     TenantInfo:
       title: Tenant information
       type: object

@@ -62,13 +62,18 @@ public class WorkflowDTO implements Serializable {
 
     private JSONObject properties;
 
+    private String comments;
+
     public WorkflowDTO(){
         metadata = new JSONObject();
         properties = new JSONObject();
     }
 
     public String getProperties(String key) {
-        return properties.get(key).toString();
+        if (properties.get(key) != null) {
+            return properties.get(key).toString();
+        }
+        return null;
     }
 
     public void setProperties(String key, String value) {
@@ -202,6 +207,14 @@ public class WorkflowDTO implements Serializable {
         this.properties = properties;
     }
 
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
     @Override
     public String toString() {
         return "WorkflowDTO{" +
@@ -218,6 +231,7 @@ public class WorkflowDTO implements Serializable {
                 ", metadata=" + metadata +
                 ", properties=" + properties +
                 ", attributes=" + attributes +
+                ", comments='" + comments +
                 '}';
     }
 }
