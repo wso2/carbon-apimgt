@@ -481,6 +481,17 @@ public class CommonUtil {
         writeToYamlOrJson(filePath, exportFormat, jsonContent);
     }
 
+    public static void writeDtoToFile(String filePath, ExportFormat exportFormat, String type, Object dtoObject,
+                                      String version)
+            throws APIImportExportException, IOException {
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject jsonObject = addTypeAndVersionToFile(type, version,
+                gson.toJsonTree(dtoObject));
+        String jsonContent = gson.toJson(jsonObject);
+        writeToYamlOrJson(filePath, exportFormat, jsonContent);
+    }
+
     /**
      * Write the DTO an artifact based on the format.
      *
