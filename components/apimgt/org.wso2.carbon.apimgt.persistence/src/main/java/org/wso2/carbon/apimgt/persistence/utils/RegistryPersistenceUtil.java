@@ -1827,7 +1827,8 @@ public class RegistryPersistenceUtil {
     }
 
     public static String extractProvider(String apiPath, String apiName) {
-        int startIndex = apiPath.indexOf("provider/") + "provider/" .length();
+        int startIndex = apiPath.indexOf(APIConstants.API_PROVIDER_SUFFIX_SLASH) +
+                APIConstants.API_PROVIDER_SUFFIX_SLASH.length();
         int endIndex = apiPath.indexOf("/" + apiName + "/");
         return apiPath.substring(startIndex, endIndex);
     }
