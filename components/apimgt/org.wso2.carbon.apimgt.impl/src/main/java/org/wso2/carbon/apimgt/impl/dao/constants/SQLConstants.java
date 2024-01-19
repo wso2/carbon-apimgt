@@ -1355,9 +1355,10 @@ public class SQLConstants {
             "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ? ";
     public static final String GET_API_ID_SQL_BY_UUID =
             "SELECT API.API_ID FROM AM_API API WHERE API.API_UUID = ?";
+
     public static final String GET_LIGHT_WEIGHT_API_INFO_BY_API_IDENTIFIER = "SELECT API_ID,API_UUID,API_PROVIDER," +
-            "API_NAME,API_VERSION,CONTEXT,API_TYPE,STATUS FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND " +
-            "API_VERSION = ? AND ORGANIZATION = ?";
+            "API_NAME, API_VERSION, CONTEXT_TEMPLATE, CONTEXT, API_TYPE, STATUS FROM AM_API WHERE API_PROVIDER = ? " +
+            "AND API_NAME = ? AND API_VERSION = ? AND ORGANIZATION = ?";
 
     public static final String GET_API_PRODUCT_ID_SQL =
             "SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? "
@@ -1461,6 +1462,10 @@ public class SQLConstants {
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
 
+    public static final String GET_MIGRATED_API_PRODUCT_DEFAULT_VERSION_SQL =
+            "SELECT API_VERSION FROM AM_API WHERE API_NAME= ? AND API_PROVIDER= ? AND API_VERSION= ? " +
+                    "AND CONTEXT_TEMPLATE IS NULL";
+
     public static final String ADD_WORKFLOW_ENTRY_SQL =
             " INSERT INTO AM_WORKFLOWS (WF_REFERENCE,WF_TYPE,WF_STATUS,WF_CREATED_TIME,WF_STATUS_DESC,TENANT_ID," +
             "TENANT_DOMAIN,WF_EXTERNAL_REFERENCE,WF_METADATA,WF_PROPERTIES)" +
@@ -1520,6 +1525,10 @@ public class SQLConstants {
 
     public static final String GET_PUBLISHED_DEFAULT_VERSION_SQL =
             "SELECT PUBLISHED_DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
+
+    public static final String GET_MIGRATED_API_PRODUCT_PUBLISHED_DEFAULT_VERSION_SQL =
+            "SELECT API_VERSION FROM AM_API WHERE API_NAME= ? AND API_PROVIDER= ? AND API_VERSION= ? AND " +
+                    "CONTEXT_TEMPLATE IS NULL AND REVISIONS_CREATED != 0";
 
     public static final String ADD_API_DEFAULT_VERSION_SQL =
             " INSERT INTO " +
@@ -1937,6 +1946,9 @@ public class SQLConstants {
     public static final String GET_API_CONTEXT_SQL =
             "SELECT CONTEXT FROM AM_API WHERE CONTEXT= ? AND ORGANIZATION = ?";
 
+    public static final String GET_API_CONTEXT_SQL_FOR_API_PRODUCTS =
+            "SELECT CONTEXT FROM AM_API WHERE (CONTEXT= ? OR CONTEXT= ? OR CONTEXT_TEMPLATE= ?) AND ORGANIZATION = ?";
+
     public static final String GET_API_IDENTIFIER_BY_UUID_SQL =
             "SELECT API_PROVIDER, API_NAME, API_VERSION FROM AM_API WHERE API_UUID = ?";
     public static final String GET_API_OR_API_PRODUCT_IDENTIFIER_BY_UUID_SQL =
@@ -2159,6 +2171,20 @@ public class SQLConstants {
                     "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                     "WHERE AUM.REVISION_UUID IS NULL AND AUM.API_ID IN (";
 
+    public static final String GET_SCOPE_BY_SUBSCRIBED_ID_SQL =
+            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+                    "FROM AM_SUBSCRIBER SUB " +
+                    "INNER JOIN AM_APPLICATION APP ON SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    "INNER JOIN AM_SUBSCRIPTION SUBS ON APP.APPLICATION_ID = SUBS.APPLICATION_ID " +
+                    "INNER JOIN AM_API API ON API.API_ID = SUBS.API_ID " +
+                    "LEFT JOIN AM_API_PRODUCT_MAPPING APM ON APM.API_ID = API.API_ID " +
+                    "INNER JOIN AM_API_URL_MAPPING AUM " +
+                    "ON AUM.URL_MAPPING_ID = APM.URL_MAPPING_ID " +
+                    "OR AUM.API_ID = API.API_ID " +
+                    "INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "WHERE SUB.TENANT_ID = ?  AND APP.APPLICATION_ID = ? " +
+                    "AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
     public static final String GET_RESOURCE_TO_SCOPE_MAPPING_SQL =
             "SELECT AUM.URL_MAPPING_ID, ARSM.SCOPE_NAME FROM AM_API_URL_MAPPING AUM " +
                     "LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
@@ -2298,13 +2324,13 @@ public class SQLConstants {
 
     public static final String INSERT_APPLICATION_POLICY_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,CUSTOM_ATTRIBUTES) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT,CUSTOM_ATTRIBUTES) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
@@ -2470,7 +2496,9 @@ public class SQLConstants {
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
-                    "TIME_UNIT = ? " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
@@ -2483,7 +2511,9 @@ public class SQLConstants {
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
-                    " CUSTOM_ATTRIBUTES = ? "+
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
+                    "CUSTOM_ATTRIBUTES = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_BY_UUID_SQL =
@@ -2495,7 +2525,9 @@ public class SQLConstants {
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
-                    "TIME_UNIT = ? " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ? " +
                     "WHERE UUID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_BY_UUID_SQL =
@@ -2508,6 +2540,8 @@ public class SQLConstants {
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
                     "CUSTOM_ATTRIBUTES = ? "+
                     "WHERE UUID = ?";
 
@@ -2718,11 +2752,9 @@ public class SQLConstants {
             "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
                     + "WHERE API.API_ID = URL.API_ID AND API.API_UUID =? AND URL.REVISION_UUID IS NULL";
 
-    public static final String ADD_API_PRODUCT =
-            "INSERT INTO "
-            + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
-            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, ORGANIZATION, GATEWAY_VENDOR, VERSION_COMPARABLE) VALUES (?,?,?,?,?,?,?,?,?"
-                    + ",?,?,?,?)";
+    public static final String ADD_API_PRODUCT = "INSERT INTO " + "AM_API(API_PROVIDER, API_NAME, API_VERSION, " +
+            "CONTEXT, CONTEXT_TEMPLATE, API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, " +
+            "ORGANIZATION, GATEWAY_VENDOR, VERSION_COMPARABLE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
@@ -3005,6 +3037,17 @@ public class SQLConstants {
             " ORGANIZATION, REVISIONS_CREATED, STATUS FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
             "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
+
+    public static final String RETRIEVE_DEFAULT_VERSION_WITH_API_INFO = "SELECT AM_API.API_PROVIDER, AM_API.API_NAME, "
+            + "AM_API.API_VERSION, AM_API.CONTEXT_TEMPLATE, AM_API_DEFAULT_VERSION.PUBLISHED_DEFAULT_API_VERSION AS "
+            + "PUBLISHED_DEFAULT_API_VERSION, AM_API_DEFAULT_VERSION.DEFAULT_API_VERSION AS DEFAULT_API_VERSION "
+            + "FROM AM_API "
+            + "LEFT JOIN AM_API_DEFAULT_VERSION "
+            + "ON AM_API_DEFAULT_VERSION.API_NAME = AM_API.API_NAME AND "
+            + "AM_API_DEFAULT_VERSION.API_PROVIDER = AM_API.API_PROVIDER AND "
+            + "AM_API_DEFAULT_VERSION.ORGANIZATION = AM_API.ORGANIZATION "
+            + "WHERE AM_API.API_NAME = ? AND AM_API.API_PROVIDER = ? AND AM_API.API_VERSION = ?";
+
     public static final String UPDATE_REVISION_CREATED_BY_API_SQL = "UPDATE AM_API SET REVISIONS_CREATED = ? WHERE " +
             "API_UUID = ?";
     public static final String ADD_API_REVISION_METADATA = "INSERT INTO AM_API_REVISION_METADATA (API_UUID," +
@@ -3607,6 +3650,25 @@ public class SQLConstants {
     }
 
     /**
+     * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
+     */
+    public static class KeyManagerPermissionsSqlConstants {
+
+        public static final String ADD_KEY_MANAGER_PERMISSION_SQL =
+                " INSERT INTO" +
+                        " AM_KEY_MANAGER_PERMISSIONS (KEY_MANAGER_UUID, PERMISSIONS_TYPE, ROLE)" +
+                        " VALUES(?, ?, ?)";
+
+        public static final String DELETE_ALL_KEY_MANAGER_PERMISSION_SQL = "DELETE FROM AM_KEY_MANAGER_PERMISSIONS" +
+                " WHERE KEY_MANAGER_UUID = ?";
+
+        public static final String GET_KEY_MANAGER_PERMISSIONS_SQL =
+                "SELECT PERMISSIONS_TYPE, ROLE" +
+                        " FROM AM_KEY_MANAGER_PERMISSIONS " +
+                        " WHERE KEY_MANAGER_UUID = ?";
+    }
+
+    /**
      * Static class to hold database queries related to AM_TENANT_THEMES table
      */
     public static class TenantThemeConstants {
@@ -4129,6 +4191,67 @@ public class SQLConstants {
                         " AND " +
                         " APM.REVISION_UUID IS NULL " +
                         " ORDER BY APM.API_POLICY_MAPPING_ID ASC ";
+    }
+
+    /**
+     * Static class to hold database queries related to gateway policies tables
+     */
+    public static class GatewayPolicyConstants {
+        // Global policy mapping
+        public static final String ADD_GATEWAY_POLICY_METADATA =
+                "INSERT INTO AM_GATEWAY_POLICY_METADATA " +
+                        " (GLOBAL_POLICY_MAPPING_UUID, ORGANIZATION, DISPLAY_NAME, DESCRIPTION) " +
+                        " VALUES (?,?,?,?)";
+        public static final String ADD_GATEWAY_POLICY_MAPPING =
+                "INSERT INTO AM_GATEWAY_POLICY_MAPPING " +
+                        " (GLOBAL_POLICY_MAPPING_UUID, POLICY_UUID, POLICY_ORDER, DIRECTION, PARAMETERS) " +
+                        " VALUES (?,?,?,?,?)";
+        // Global policy deployment state
+        public static final String SET_GATEWAY_POLICY_DEPLOYMENT_STATUS = "INSERT INTO AM_GATEWAY_POLICY_DEPLOYMENT "
+                + " (GLOBAL_POLICY_MAPPING_UUID, GATEWAY_LABEL, ORGANIZATION) VALUES (?,?,?)";
+        // Remove global policy deployment
+        public static final String DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS =
+                "DELETE FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GATEWAY_LABEL = ? AND GLOBAL_POLICY_MAPPING_UUID = ? "
+                        + "AND ORGANIZATION = ?";
+        public static final String GET_MAPPED_POLICY_UUIDS_BY_POLICY_MAPPING_UUID =
+                "SELECT POLICY_UUID FROM AM_GATEWAY_POLICY_MAPPING WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_COMMON_POLICY_USAGE_COUNT_BY_POLICY_UUID =
+                "SELECT COUNT(*) AS count_occurrences FROM AM_GATEWAY_POLICY_MAPPING WHERE POLICY_UUID = ?;";
+        public static final String GET_GATEWAY_POLICIES_BY_POLICY_MAPPING_UUID =
+                "SELECT OP.POLICY_NAME, OP.POLICY_VERSION, GPM.DIRECTION, GPM.PARAMETERS, GPM.POLICY_ORDER, " +
+                         "GPM.POLICY_UUID FROM AM_GATEWAY_POLICY_MAPPING GPM " +
+                         "INNER JOIN AM_OPERATION_POLICY OP ON GPM.POLICY_UUID = OP.POLICY_UUID " +
+                         "WHERE GPM.GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GLOBAL_POLICY_MAPPING_UUID_BY_GATEWAY_LABEL =
+                "SELECT GLOBAL_POLICY_MAPPING_UUID FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE "
+                        + "ORGANIZATION = ? AND GATEWAY_LABEL IN (_GATEWAY_LABELS_)";
+        public static final String DELETE_GATEWAY_POLICY_MAPPING_BY_ID =
+                "DELETE FROM AM_GATEWAY_POLICY_MAPPING WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GATEWAY_POLICY_DEPLOYMENT_BY_MAPPING_UUID =
+                "SELECT GATEWAY_LABEL FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GLOBAL_POLICY_MAPPING_UUID = ? "
+                        + "AND ORGANIZATION = ?";
+        public static final String GET_POLICY_DEPLOYMENT_BY_GATEWAY =
+                "SELECT GLOBAL_POLICY_MAPPING_UUID FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GATEWAY_LABEL = ? "
+                        + "AND ORGANIZATION = ?";
+        public static final String UPDATE_GATEWAY_POLICY_METADATA = "UPDATE AM_GATEWAY_POLICY_METADATA "
+                + "SET DISPLAY_NAME = ?, DESCRIPTION = ?, ORGANIZATION = ? WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String DELETE_GATEWAY_POLICY_METADATA = "DELETE FROM AM_GATEWAY_POLICY_METADATA WHERE "
+                + "GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String UPDATE_GATEWAY_POLICY_DEPLOYMENT_BY_GATEWAY_LABEL = "UPDATE AM_GATEWAY_POLICY_DEPLOYMENT "
+                + "SET GATEWAY_LABEL = ? WHERE GATEWAY_LABEL = ? AND ORGANIZATION = ?";
+        public static final String GET_ALL_GATEWAY_POLICY_METADATA_FOR_ORGANIZATION =
+                "SELECT * FROM AM_GATEWAY_POLICY_METADATA WHERE ORGANIZATION = ?";
+        public static final String GET_GATEWAY_POLICY_METADATA_BY_POLICY_MAPPING_UUID =
+                "SELECT * FROM AM_GATEWAY_POLICY_METADATA WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GATEWAY_POLICY_METADATA_BY_GATEWAY_LABEL =
+                "SELECT meta.GLOBAL_POLICY_MAPPING_UUID, " +
+                        "meta.DISPLAY_NAME AS METADATA_DISPLAY_NAME, " +
+                        "meta.DESCRIPTION AS METADATA_DESCRIPTION, " +
+                        "meta.ORGANIZATION AS METADATA_ORGANIZATION " +
+                        "FROM AM_GATEWAY_POLICY_METADATA meta JOIN AM_GATEWAY_POLICY_DEPLOYMENT deploy ON " +
+                        "meta.GLOBAL_POLICY_MAPPING_UUID = deploy.GLOBAL_POLICY_MAPPING_UUID WHERE " +
+                        "deploy.GATEWAY_LABEL = ? AND meta.ORGANIZATION = ?";
+
     }
 
     /**

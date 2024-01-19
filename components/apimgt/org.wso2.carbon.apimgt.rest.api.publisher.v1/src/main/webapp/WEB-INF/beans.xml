@@ -35,6 +35,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.KeyManagersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.OperationPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.LinterCustomRulesApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

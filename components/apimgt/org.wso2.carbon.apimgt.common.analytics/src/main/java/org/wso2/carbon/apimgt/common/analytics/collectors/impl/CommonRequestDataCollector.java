@@ -31,7 +31,7 @@ import java.time.ZoneOffset;
  * Contain the common data collectors.
  */
 public abstract class CommonRequestDataCollector extends AbstractRequestDataCollector {
-    private static final Log log = LogFactory.getLog(SuccessRequestDataCollector.class);
+    private static final Log log = LogFactory.getLog(CommonRequestDataCollector.class);
 
     public CommonRequestDataCollector(AnalyticsDataProvider provider) {
         super(provider);

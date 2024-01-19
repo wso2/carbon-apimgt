@@ -50,12 +50,12 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     public static final String NONE = "NONE";
     public static final String SHA256_WITH_RSA = "SHA256withRSA";
     public static final String API_GATEWAY_ID = "wso2.org/products/am";
-    public JWTConfigurationDto jwtConfigurationDto;
+    protected JWTConfigurationDto jwtConfigurationDto;
 
     private static volatile long ttl = -1L;
-    public String dialectURI;
+    private String dialectURI;
 
-    public String signatureAlgorithm;
+    private String signatureAlgorithm;
 
     public AbstractAPIMgtGatewayJWTGenerator() {
     }
@@ -215,6 +215,10 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         return dialectURI;
     }
 
+    public String getSignatureAlgorithm() {
+        return signatureAlgorithm;
+    }
+    
     public abstract Map<String, Object> populateStandardClaims(JWTInfoDto jwtInfoDto);
 
     public abstract Map<String, Object> populateCustomClaims(JWTInfoDto jwtInfoDto);

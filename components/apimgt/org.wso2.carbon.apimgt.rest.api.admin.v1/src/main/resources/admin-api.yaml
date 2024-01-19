@@ -3533,6 +3533,8 @@ components:
           properties:
             defaultLimit:
               $ref: '#/components/schemas/ThrottleLimit'
+            burstLimit:
+              $ref: '#/components/schemas/BurstLimit'
     ApplicationThrottlePolicyList:
       title: Application Level Throttling Policy List
       type: object
@@ -3857,6 +3859,18 @@ components:
           $ref: '#/components/schemas/BandwidthLimit'
         eventCount:
           $ref: '#/components/schemas/EventCountLimit'
+    BurstLimit:
+      title: Burst Limit object
+      type: object
+      properties:
+        rateLimitCount:
+          type: integer
+          description: Burst control request count
+          example: 10
+        rateLimitTimeUnit:
+          type: string
+          description: Burst control time unit
+          example: min
     MonetizationInfo:
       title: API monetization details object
       required:
@@ -4625,6 +4639,22 @@ components:
             self_validate_jwt: true
             Username: admin
             Password: admin
+        permissions:
+          type: object
+          properties:
+            permissionType:
+              type: string
+              example: ALLOW
+              default: PUBLIC
+              enum:
+                - PUBLIC
+                - ALLOW
+                - DENY
+            roles:
+              type: array
+              items:
+                type: string
+                example: Internal/subscriber
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).

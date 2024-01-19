@@ -129,6 +129,10 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                 if (APIUtil.isAnalyticsEnabled()) {
                     WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_END_TIME_PROPERTY,
                             System.currentTimeMillis());
+                    if (msg instanceof TextWebSocketFrame) {
+                        WebSocketUtils.setApiPropertyToChannel(ctx, Constants.RESPONSE_SIZE,
+                                ((TextWebSocketFrame) msg).text().length());
+                    }
                 }
                 // publish analytics events if analytics is enabled
                 publishSubscribeEvent(ctx);

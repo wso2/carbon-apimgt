@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
+import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -48,6 +49,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GatewayPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
@@ -346,6 +348,48 @@ public class GatewayJMSMessageListener implements MessageListener {
                     .removeKeyTemplate(oldKey);
             ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
                     .addKeyTemplate(newKey, newTemplateValue);
+        } else if (EventType.DEPLOY_POLICY_MAPPING_IN_GATEWAY.toString().equals(eventType)
+                || EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.toString().equals(eventType)) {
+            GatewayPolicyEvent gatewayPolicyEvent = new Gson().fromJson(eventJson, GatewayPolicyEvent.class);
+            Set<String> systemConfiguredGatewayLabels = new HashSet(gatewayPolicyEvent.getGatewayLabels());
+            systemConfiguredGatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
+            if (!systemConfiguredGatewayLabels.isEmpty()) {
+                if (EventType.DEPLOY_POLICY_MAPPING_IN_GATEWAY.toString().equals(eventType)) {
+                    boolean tenantFlowStarted = false;
+                    try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .setTenantDomain(gatewayPolicyEvent.getTenantDomain(), true);
+                        tenantFlowStarted = true;
+                        new GatewayPolicyDeployer(
+                                gatewayPolicyEvent.getGatewayPolicyMappingUuid()).deployGatewayPolicyMapping();
+                    } catch (ArtifactSynchronizerException | APIManagementException e) {
+                        log.error("Error in deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
+                                + "in the Gateway");
+                    } finally {
+                        if (tenantFlowStarted) {
+                            PrivilegedCarbonContext.endTenantFlow();
+                        }
+                    }
+                } else if (EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.toString().equals(eventType)) {
+                    boolean tenantFlowStarted = false;
+                    try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .setTenantDomain(gatewayPolicyEvent.getTenantDomain(), true);
+                        tenantFlowStarted = true;
+                        new GatewayPolicyDeployer(
+                                gatewayPolicyEvent.getGatewayPolicyMappingUuid()).undeployGatewayPolicyMapping();
+                    } catch (ArtifactSynchronizerException | APIManagementException e) {
+                        log.error("Error while un-deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
+                                + "from the Gateway");
+                    } finally {
+                        if (tenantFlowStarted) {
+                            PrivilegedCarbonContext.endTenantFlow();
+                        }
+                    }
+                }
+            }
         }
     }
 

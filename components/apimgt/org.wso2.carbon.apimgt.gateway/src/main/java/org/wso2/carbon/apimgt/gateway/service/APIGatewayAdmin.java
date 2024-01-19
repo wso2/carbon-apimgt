@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.gateway.GatewayPolicyDTO;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
@@ -899,5 +900,55 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
                 endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
         return true;
+    }
+
+    /**
+     * Deploy gateway policy sequences to gateway.
+     *
+     * @param gatewayPolicyDTO Policy sequences data object
+     * @throws AxisFault
+     */
+    public void deployGatewayPolicy(GatewayPolicyDTO gatewayPolicyDTO) throws AxisFault {
+
+        SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                getSequenceAdminServiceClient(gatewayPolicyDTO.getTenantDomain());
+        if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded() != null) {
+            for (GatewayContentDTO sequence : gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded()) {
+                OMElement element;
+                try {
+                    element = AXIOMUtil.stringToOM(sequence.getContent());
+                } catch (XMLStreamException e) {
+                    log.error("Exception occurred while converting String to an OM.", e);
+                    throw new AxisFault(e.getMessage());
+                }
+                if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+                    sequenceAdminServiceProxy.deleteSequence(sequence.getName());
+                    sequenceAdminServiceProxy.addSequence(element);
+                } else {
+                    sequenceAdminServiceProxy.addSequence(element);
+                }
+            }
+        } else {
+            log.error("No gateway policy sequences found to be deployed");
+        }
+    }
+
+    /**
+     * Undeploy gateway policy sequences from gateway.
+     *
+     * @param gatewayPolicyDTO Policy sequences data object
+     * @throws AxisFault
+     */
+    public void unDeployGatewayPolicy(GatewayPolicyDTO gatewayPolicyDTO) throws AxisFault {
+
+        SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(
+                gatewayPolicyDTO.getTenantDomain());
+        if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded() != null) {
+            for (GatewayContentDTO sequence : gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded()) {
+                if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+                    sequenceAdminServiceProxy.deleteSequence(sequence.getName());
+                }
+            }
+        }
     }
 }

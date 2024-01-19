@@ -25,11 +25,11 @@ import java.util.Map;
  * Abstract Event that have common attributes.
  */
 public abstract class Event {
-    public String eventId;
-    public long timeStamp;
-    public String type;
-    public int tenantId;
-    public String tenantDomain;
+    protected String eventId;
+    protected long timeStamp;
+    protected String type;
+    protected int tenantId;
+    protected String tenantDomain;
     private Map<String, String> properties = new HashMap<String, String>();
 
     public String getEventId() {

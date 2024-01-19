@@ -34,6 +34,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_VERSION_ALREADY_EXISTS(900252, "The API version already exists.", 409, "An API with version '%s' already exists for API '%s'"),
 
     API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, "An API Product with context '%s' already exists"),
+    API_PRODUCT_VERSION_ALREADY_EXISTS(900276, "The API Product version already exists.", 409, "An API Product with version '%s' already exists for API Product '%s'"),
 
     API_CONTEXT_MALFORMED_EXCEPTION(900253, "The API context is malformed.", 400, "'%s'"),
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, "The API already exists"),
@@ -545,6 +546,11 @@ public enum ExceptionCodes implements ErrorHandler {
     // Admin portal get apis and api provider change related errors
     CHANGE_API_PROVIDER_FAILED(903011, "Error while changing the API provider", 500, "Error while changing the API provider in the registry or DB"),
     GET_SEARCH_APIS_IN_ADMIN_FAILED(903012, "Error while getting the apis", 500, "Error while getting/searching the apis from registry");
+    
+    KEY_MANAGER_RESTRICTED_FOR_USER(902013, "Unauthorized Access to Key Manager", 403, "Key Manager is Restricted for this user"),
+    ARTIFACT_SYNC_HTTP_REQUEST_FAILED(903009, "Error while retrieving from remote endpoint", 500, "Error while executing HTTP request to retrieve from remote endpoint");
+
+
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

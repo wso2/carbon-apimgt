@@ -17,13 +17,17 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
@@ -43,6 +47,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
@@ -50,15 +55,22 @@ import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
+import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     private static final Log log = LogFactory.getLog(SynapseAnalyticsDataProvider.class);
     private MessageContext messageContext;
     private AnalyticsCustomDataProvider analyticsCustomDataProvider;
+    private Boolean buildResponseMessage = null;
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
 
@@ -337,6 +349,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
+        customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
+        customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
         return customProperties;
     }
 
@@ -421,4 +435,49 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return System.currentTimeMillis() - backendEndTime;
     }
 
+    public int getResponseSize() {
+        int responseSize = 0;
+        if (buildResponseMessage == null) {
+            Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
+            if (configs.containsKey(Constants.BUILD_RESPONSE_MESSAGE_CONFIG)) {
+                buildResponseMessage = Boolean.parseBoolean(configs.get(Constants.BUILD_RESPONSE_MESSAGE_CONFIG));
+            } else {
+                buildResponseMessage = false;
+            }
+        }
+        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
+        if (headers != null  && headers.get(HttpHeaders.CONTENT_LENGTH) != null) {
+            responseSize = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH).toString());
+        }
+        if (responseSize == 0 && buildResponseMessage) {
+            try {
+                RelayUtils.buildMessage(((Axis2MessageContext) messageContext).getAxis2MessageContext());
+            } catch (IOException ex) {
+                //In case of an exception, it won't be propagated up,and set response size to 0
+                log.error("Error occurred while building the message to" +
+                        " calculate the response body size", ex);
+            } catch (XMLStreamException ex) {
+                log.error("Error occurred while building the message to calculate the response" +
+                        " body size", ex);
+            }
+
+            SOAPEnvelope env = messageContext.getEnvelope();
+            if (env != null) {
+                SOAPBody soapbody = env.getBody();
+                if (soapbody != null) {
+                    byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
+                    responseSize =  size.length;
+                }
+            }
+        }
+        return responseSize;
+    }
+
+    public String getResponseContentType() {
+        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
+        if (headers != null && headers.get(HttpHeaders.CONTENT_TYPE) != null) {
+            return headers.get(HttpHeaders.CONTENT_TYPE).toString();
+        }
+        return UNKNOWN_VALUE;
+    }
 }

@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.28.203-SNAPSHOT</version>
+        <version>9.28.220-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -486,7 +486,7 @@
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             org.wso2.carbon.apimgt.tracing.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.orbit.re2j.*; version="${re2j.version}",
-                            graphql.*; version="${graphql.java.version}",
+                            graphql.*; version="${graphql.java.version.range}",
                             com.amazonaws.*; version="${com.amazonaws.version}",
                             org.apache.servicemix.bundles.jedis.*; version="${servicemix.bundles.jedis.version}",
                             com.nimbusds.jwt.*,
