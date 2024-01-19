@@ -32,3 +32,4 @@ public interface RestAPIAuthenticator {
     int getPriority(HashMap<String, Object> message);
 
 }
+

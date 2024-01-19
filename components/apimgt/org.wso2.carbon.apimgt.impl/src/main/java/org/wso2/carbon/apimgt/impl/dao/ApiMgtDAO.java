@@ -9313,7 +9313,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE TENANT_DOMAIN IN (?)";
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE ORGANIZATION IN (?)";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
