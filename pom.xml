@@ -1979,7 +1979,7 @@
         <carbon.apimgt.version>9.28.222-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.3.5</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.3.6</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.8.1</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
@@ -2145,23 +2145,23 @@
         <event.processor.core.version>2.3.5</event.processor.core.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v2</swagger.inflector.oas3.version>
-        <swagger.parser.v3.version>2.1.10.wso2v1</swagger.parser.v3.version>
+        <swagger.parser.v3.version>2.1.18.wso2v1</swagger.parser.v3.version>
         <swagger.core.version>1.6.9</swagger.core.version>
         <swagger.models.version>1.6.9</swagger.models.version>
         <swagger.annotations.version>1.6.9</swagger.annotations.version>
         <servicemix.bundles.jedis.version>3.3.0_1</servicemix.bundles.jedis.version>
-        <google.guava.version>31.0.1-jre</google.guava.version>
+        <google.guava.version>33.0.0-jre</google.guava.version>
         <xercesImpl.version>2.12.2.wso2v1</xercesImpl.version>
         <commons.scxml.version>0.9.0.wso2v2</commons.scxml.version>
         <velocity.version>2.3</velocity.version>
-        <fasterxml.jackson.version>2.14.1</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.14.1</fasterxml.jackson.databind.version>
-        <fasterxml.jackson.core.version>2.14.1</fasterxml.jackson.core.version>
+        <fasterxml.jackson.version>2.16.1</fasterxml.jackson.version>
+        <fasterxml.jackson.databind.version>2.16.1</fasterxml.jackson.databind.version>
+        <fasterxml.jackson.core.version>2.16.1</fasterxml.jackson.core.version>
         <javax.validation-api>2.0.1.Final</javax.validation-api>
         <carbon.broker.version>3.3.27</carbon.broker.version>
         <andes.version>3.3.25</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
-        <version.snake.yaml>1.33</version.snake.yaml>
+        <version.snake.yaml>2.0</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
         <slf4j.test.version>1.7.29</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
