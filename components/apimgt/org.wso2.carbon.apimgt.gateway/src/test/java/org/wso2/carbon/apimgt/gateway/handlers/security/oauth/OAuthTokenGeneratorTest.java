@@ -163,7 +163,8 @@ public class OAuthTokenGeneratorTest {
         oAuthEndpoint.setGrantType("CLIENT_CREDENTIALS");
 
         Mockito.when(OAuthClient.generateToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.isNull(), Mockito.isNull(), Mockito.anyString(), Mockito.any(), Mockito.isNull()))
+                        Mockito.isNull(), Mockito.isNull(), Mockito.anyString(), Mockito.any(), Mockito.isNull(),
+                        Mockito.anyString()))
                 .thenReturn(mockTokenResponse);
         // First token generation operation. Token endpoint will be called and the token response will not be cached.
         TokenResponse tokenResponse = OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
@@ -195,7 +196,8 @@ public class OAuthTokenGeneratorTest {
         oAuthEndpoint.setGrantType("PASSWORD");
 
         Mockito.when(OAuthClient.generateToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.isNull()))
+                        Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.isNull(),
+                        Mockito.anyString()))
                 .thenReturn(mockTokenResponse);
         // First token generation operation. Token endpoint will be called and the token response will be cached.
         TokenResponse tokenResponse = OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
@@ -229,7 +231,8 @@ public class OAuthTokenGeneratorTest {
         oAuthEndpoint.setGrantType("PASSWORD");
 
         Mockito.when(OAuthClient.generateToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.isNull()))
+                        Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.isNull(),
+                        Mockito.anyString()))
                 .thenReturn(mockTokenResponse);
         // First token generation operation. Token endpoint will be called and the token response will be cached.
         TokenResponse tokenResponse = OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
@@ -243,7 +246,8 @@ public class OAuthTokenGeneratorTest {
         // token).
         mockTokenResponse.setRefreshToken("testRefreshToken");
         Mockito.when(OAuthClient.generateToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.anyString()))
+                        Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.anyString(),
+                        Mockito.anyString()))
                 .thenReturn(mockTokenResponse);
         tokenResponse = OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
         Assert.assertNotNull(tokenResponse);
@@ -267,7 +271,8 @@ public class OAuthTokenGeneratorTest {
         oAuthEndpoint.setGrantType("PASSWORD");
 
         Mockito.when(OAuthClient.generateToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.isNull()))
+                        Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.isNull(),
+                        Mockito.anyString()))
                 .thenReturn(mockTokenResponse);
         // First token generation operation. Token endpoint will be called and the token response will not be cached.
         TokenResponse tokenResponse = OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
