@@ -87,13 +87,13 @@ public class KeyManagerHolder {
             KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                     .getKeyManagerConnectorConfiguration(type);
             if (keyManagerConnectorConfiguration != null) {
-                if (StringUtils.isNotEmpty(defaultKeyManagerType) && defaultKeyManagerType.equals(type) &&
-                        APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
+                if (StringUtils.isNotEmpty(keyManagerConnectorConfiguration.getImplementation())) {
                     try {
                         keyManager = (KeyManager) Class.forName(keyManagerConnectorConfiguration.getImplementation())
                                 .getDeclaredConstructor().newInstance();
                         keyManager.setTenantDomain(organization);
-                        if (StringUtils.isNotEmpty(defaultKeyManagerType) && defaultKeyManagerType.equals(type)) {
+                        if (StringUtils.isNotEmpty(defaultKeyManagerType) && defaultKeyManagerType.equals(type) &&
+                                APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
                             keyManagerConfiguration.addParameter(APIConstants.KEY_MANAGER_USERNAME,
                                     apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
                             keyManagerConfiguration.addParameter(APIConstants.KEY_MANAGER_PASSWORD,
