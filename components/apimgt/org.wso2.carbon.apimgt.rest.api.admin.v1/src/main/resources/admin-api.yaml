@@ -4069,6 +4069,10 @@ components:
         provider:
           type: string
           example: wso2
+        gatewayType:
+          type: string
+          example: SYNAPSE
+          default: SYNAPSE
         description:
           maxLength: 1023
           type: string

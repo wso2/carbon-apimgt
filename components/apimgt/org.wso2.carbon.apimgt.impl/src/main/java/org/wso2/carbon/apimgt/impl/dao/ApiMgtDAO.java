@@ -14356,7 +14356,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(3, environment.getDisplayName());
                 prepStmt.setString(4, environment.getDescription());
                 prepStmt.setString(5, environment.getProvider());
-                prepStmt.setString(6, tenantDomain);
+                prepStmt.setString(6, environment.getGatewayType());
+                prepStmt.setString(7, tenantDomain);
                 prepStmt.executeUpdate();
 
                 ResultSet rs = prepStmt.getGeneratedKeys();

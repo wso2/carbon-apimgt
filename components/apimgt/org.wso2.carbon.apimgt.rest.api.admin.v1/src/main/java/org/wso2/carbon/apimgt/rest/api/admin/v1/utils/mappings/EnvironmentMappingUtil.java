@@ -130,6 +130,7 @@ public class EnvironmentMappingUtil {
         env.setDisplayName(envDTO.getDisplayName());
         env.setDescription(envDTO.getDescription());
         env.setProvider(envDTO.getProvider());
+        env.setGatewayType(envDTO.getGatewayType());
         env.setReadOnly(false);
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));
