@@ -93,12 +93,6 @@ public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnec
                 "Public client", "checkbox", "Allow authentication without the client secret."
                 , String.valueOf(false), false, false, Collections.EMPTY_LIST, false);
         applicationConfigurationsList.add(configurationDtoBypassClientCredentials);
-
-        applicationConfigurationsList
-                .add(new ConfigurationDto(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER,
-                        "Enable admin user as the owner of created OAuth applications", "checkbox",
-                        "Enable admin user as the owner of created OAuth applications", "", false, false,
-                        Collections.singletonList("Use as OAuth Application Owner"), false));
         return applicationConfigurationsList;
     }
 
