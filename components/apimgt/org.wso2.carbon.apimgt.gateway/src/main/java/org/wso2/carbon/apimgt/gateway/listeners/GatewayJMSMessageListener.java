@@ -27,8 +27,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
+import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -48,6 +50,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GatewayPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
@@ -55,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.KeyTemplateEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.HashSet;
@@ -67,16 +71,24 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
-public class GatewayJMSMessageListener implements MessageListener {
+public class GatewayJMSMessageListener implements MessageListener, JMSConnectionEventListener {
 
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
     private boolean debugEnabled = log.isDebugEnabled();
+    private boolean refreshOnReconnect = false;
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
     private EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfiguration().getEventHubConfigurationDto();
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
     ExecutorService executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "DeploymentThread"));
+
+    public GatewayJMSMessageListener() {
+    }
+
+    public GatewayJMSMessageListener(boolean refreshOnReconnect) {
+        this.refreshOnReconnect = refreshOnReconnect;
+    }
 
     public void onMessage(Message message) {
 
@@ -346,6 +358,48 @@ public class GatewayJMSMessageListener implements MessageListener {
                     .removeKeyTemplate(oldKey);
             ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
                     .addKeyTemplate(newKey, newTemplateValue);
+        } else if (EventType.DEPLOY_POLICY_MAPPING_IN_GATEWAY.toString().equals(eventType)
+                || EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.toString().equals(eventType)) {
+            GatewayPolicyEvent gatewayPolicyEvent = new Gson().fromJson(eventJson, GatewayPolicyEvent.class);
+            Set<String> systemConfiguredGatewayLabels = new HashSet(gatewayPolicyEvent.getGatewayLabels());
+            systemConfiguredGatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
+            if (!systemConfiguredGatewayLabels.isEmpty()) {
+                if (EventType.DEPLOY_POLICY_MAPPING_IN_GATEWAY.toString().equals(eventType)) {
+                    boolean tenantFlowStarted = false;
+                    try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .setTenantDomain(gatewayPolicyEvent.getTenantDomain(), true);
+                        tenantFlowStarted = true;
+                        new GatewayPolicyDeployer(
+                                gatewayPolicyEvent.getGatewayPolicyMappingUuid()).deployGatewayPolicyMapping();
+                    } catch (ArtifactSynchronizerException | APIManagementException e) {
+                        log.error("Error in deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
+                                + "in the Gateway");
+                    } finally {
+                        if (tenantFlowStarted) {
+                            PrivilegedCarbonContext.endTenantFlow();
+                        }
+                    }
+                } else if (EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.toString().equals(eventType)) {
+                    boolean tenantFlowStarted = false;
+                    try {
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .setTenantDomain(gatewayPolicyEvent.getTenantDomain(), true);
+                        tenantFlowStarted = true;
+                        new GatewayPolicyDeployer(
+                                gatewayPolicyEvent.getGatewayPolicyMappingUuid()).undeployGatewayPolicyMapping();
+                    } catch (ArtifactSynchronizerException | APIManagementException e) {
+                        log.error("Error while un-deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
+                                + "from the Gateway");
+                    } finally {
+                        if (tenantFlowStarted) {
+                            PrivilegedCarbonContext.endTenantFlow();
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -409,5 +463,44 @@ public class GatewayJMSMessageListener implements MessageListener {
         subscriber.setSecret(payloadData.get(APIConstants.Webhooks.SECRET).textValue());
         ServiceReferenceHolder.getInstance().getSubscriptionsDataService()
                 .removeSubscription(apiKey, topicName, tenantDomain, subscriber);
+    }
+
+    @Override
+    public void onReconnect() {
+        if (refreshOnReconnect) {
+            log.info("Refreshing gateway data stores and deployments.");
+            new Thread(() -> {
+                synchronized (this) {
+                    SubscriptionDataHolder.getInstance().refreshSubscriptionStore();
+                    redeployGatewayArtifacts();
+                }
+            }).start();
+        }
+    }
+
+    private void redeployGatewayArtifacts() {
+        Set<String> activeTenants = ServiceReferenceHolder.getInstance().getActiveTenants();
+        activeTenants.forEach(tenantDomain -> {
+            try {
+                new EndpointCertificateDeployer(tenantDomain).deployCertificatesAtStartup();
+                if (log.isDebugEnabled()) {
+                    log.debug("Redeploying artifacts for tenant: " + tenantDomain);
+                }
+                inMemoryApiDeployer.
+                        deployAllAPIs(gatewayArtifactSynchronizerProperties.getGatewayLabels(),
+                        tenantDomain, true);
+            } catch (ArtifactSynchronizerException e) {
+                log.error("Error while redeploying gateway artifacts for tenant: " + tenantDomain, e);
+            } catch (APIManagementException e) {
+                log.error("Error while redeploying endpoint certificates for tenant: " + tenantDomain, e);
+            }
+        });
+
+    }
+
+    @Override
+    public void onDisconnect() {
+        // We currently do not have any logic to execute for this scenario.
+        // Added in case we need to implement an operation in the future.
     }
 }

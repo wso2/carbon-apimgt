@@ -3162,7 +3162,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
                     appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
-                    appPolicy.getDefaultQuotaPolicy().getType());
+                    appPolicy.getDefaultQuotaPolicy().getType(), appPolicy.getRateLimitCount(), appPolicy.getRateLimitTimeUnit());
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof SubscriptionPolicy) {
             SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
@@ -3376,7 +3376,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,
                     appPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(), appPolicy.getPolicyName(),
-                    appPolicy.getDefaultQuotaPolicy().getType());
+                    appPolicy.getDefaultQuotaPolicy().getType(), appPolicy.getRateLimitCount(), appPolicy.getRateLimitTimeUnit());
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof SubscriptionPolicy) {
             SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
@@ -3463,7 +3463,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ApplicationPolicyEvent applicationPolicyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_DELETE.name(), tenantId,
                     appPolicy.getTenantDomain(), appPolicy.getPolicyId(), appPolicy.getPolicyName(),
-                    appPolicy.getDefaultQuotaPolicy().getType());
+                    appPolicy.getDefaultQuotaPolicy().getType(), appPolicy.getRateLimitCount(),
+                    appPolicy.getRateLimitTimeUnit());
             APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
             SubscriptionPolicy subscriptionPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantID);
@@ -4074,9 +4075,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         rolesQuery.append(")");
-        if(log.isDebugEnabled()) {
-        	log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
-        }
+        log.debug("User role list solr query " + APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString());
         return APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString();
     }
 
@@ -5354,6 +5353,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContext(publiserAPI.getContext());
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setStatus(publiserAPI.getStatus());
+                        api.setDescription(publiserAPI.getDescription());
+                        api.setType(publiserAPI.getTransportType());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         api.setBusinessOwner(publiserAPI.getBusinessOwner());
                         api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
@@ -5370,6 +5371,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setUuid(publiserAPI.getId());
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setState(publiserAPI.getStatus());
+                        api.setDescription(publiserAPI.getDescription());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         api.setBusinessOwner(publiserAPI.getBusinessOwner());
                         api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
@@ -6753,5 +6755,277 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
+    }
+
+    /**
+     * Add a new gateway policy mapping to the database.
+     *
+     * @param gatewayGlobalPoliciesList List of Gateway Policy objects
+     * @param description               Description of the policy mapping
+     * @param name                      Name of the policy mapping
+     * @param orgId                     Organization ID
+     * @return UUID of the added policy mapping
+     * @throws APIManagementException
+     */
+    public String applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPoliciesList, String description,
+            String name, String orgId) throws APIManagementException {
+        String policyMappingUUID = UUID.randomUUID().toString();
+        return apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, description, name, orgId, policyMappingUUID);
+    }
+
+    /**
+     * Add a new gateway policy mapping deployment to the database.
+     *
+     * @param gatewayPolicyDeploymentMap Policy deployment status to gateway labels map
+     * @param orgId                      Organization ID
+     * @param gatewayPolicyMappingId     UUID of the policy mapping
+     * @throws APIManagementException
+     */
+    public void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap,
+            String orgId, String gatewayPolicyMappingId) throws APIManagementException {
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        List<GatewayPolicyDeployment> gatewayPolicyDeploymentList = new ArrayList<>();
+        List<GatewayPolicyDeployment> gatewayPolicyUndeploymentList = new ArrayList<>();
+        Map<String, Set<String>> gatewaysToAdd = new HashMap<>();
+        Map<String, Set<String>> gatewaysToRemove = new HashMap<>();
+
+        for (boolean isDeployment : gatewayPolicyDeploymentMap.keySet()) {
+            // Check whether the gateway policy is to be deployed or undeployed
+            if (isDeployment) {
+                gatewayPolicyDeploymentList = gatewayPolicyDeploymentMap.get(true);
+                gatewaysToAdd = getGatewayPolicyDeploymentMap(gatewayPolicyDeploymentList);
+            } else {
+                gatewayPolicyUndeploymentList = gatewayPolicyDeploymentMap.get(false);
+                gatewaysToRemove = getGatewayPolicyDeploymentMap(gatewayPolicyUndeploymentList);
+            }
+        }
+        Set<String> activeGatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(
+                gatewayPolicyMappingId, orgId);
+        if (gatewaysToAdd.size() > 0) {
+            if (activeGatewayLabels.size() > 0) {
+                for (String mappingID : gatewaysToAdd.keySet()) {
+                    // Have to iterate through the value set because the active gateway labels set might differ from the gatewaysToAdd set.
+                    for (String gatewayLabel : gatewaysToAdd.get(mappingID)) {
+                        if (activeGatewayLabels.contains(gatewayLabel)) {
+                            apiMgtDAO.removeGatewayPolicyDeploymentByMappingUUIDAndGatewayLabel(gatewayLabel,
+                                    gatewayPolicyMappingId, orgId);
+                        }
+                    }
+                }
+            }
+            apiMgtDAO.addGatewayPolicyDeployment(gatewayPolicyDeploymentList, orgId);
+            for (String mappingID : gatewaysToAdd.keySet()) {
+                gatewayManager.deployPolicyToGateway(mappingID, orgId, gatewaysToAdd.get(mappingID));
+            }
+        }
+        if (gatewaysToRemove.size() > 0) {
+            apiMgtDAO.removeGatewayPolicyDeployment(gatewayPolicyUndeploymentList, orgId);
+            for (String mappingID : gatewaysToRemove.keySet()) {
+                gatewayManager.undeployPolicyFromGateway(mappingID, orgId, gatewaysToRemove.get(mappingID));
+            }
+        }
+    }
+
+    /**
+     * Retrieve the policies data added via the gateway policy mapping by mapping UUID.
+     *
+     * @param policyMappingUUID      Policy mapping UUID
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not, as policy definition
+     *                               is a bit bulky
+     * @return List of OperationPolicyData objects
+     * @throws APIManagementException
+     */
+    @Override
+    public List<OperationPolicyData> getGatewayPolicyDataListByPolicyId(String policyMappingUUID,
+            boolean isWithPolicyDefinition) throws APIManagementException {
+        return apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(policyMappingUUID, isWithPolicyDefinition);
+    }
+
+    /**
+     * Retrieve the policies added via the gateway policy mapping by mapping UUID.
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @return List of OperationPolicy objects
+     * @throws APIManagementException
+     */
+    @Override
+    public List<OperationPolicy> getOperationPoliciesOfPolicyMapping(String policyMappingUUID)
+            throws APIManagementException {
+        return apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingUUID);
+    }
+
+    /**
+     * Retrieve gateway policies mapping UUID attached to the gateway.
+     *
+     * @param gatewayLabels List of gateway labels
+     * @param orgId         Organization ID
+     * @return Policy mapping UUID list
+     * @throws APIManagementException
+     */
+    @Override
+    public List<String> getAllPolicyMappingUUIDsByGatewayLabels(String[] gatewayLabels, String orgId)
+            throws APIManagementException {
+        return apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(gatewayLabels, orgId);
+    }
+
+    /**
+     * Delete a gateway policy mapping.
+     *
+     * @param gatewayPolicyMappingId Gateway policy mapping UUID
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    @Override
+    public void deleteGatewayPolicyMappingByPolicyMappingId(String gatewayPolicyMappingId, String tenantDomain)
+            throws APIManagementException {
+        apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(gatewayPolicyMappingId, true);
+    }
+
+    /**
+     * Update globally added policies to the flows.
+     *
+     * @param gatewayGlobalPolicyList List of Gateway Policy objects to be updated
+     * @param orgId                   Organization ID
+     * @param policyMappingId         Policy mapping UUID
+     * @return Policy Mapping ID
+     * @throws APIManagementException
+     */
+    @Override
+    public String updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description,
+            String name, String orgId, String policyMappingId) throws APIManagementException {
+        List<OperationPolicy> policyList = apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingId);
+        if (policyList.isEmpty()) {
+            String message = "Cannot update the gateway policy mapping. The policy mapping ID: " + policyMappingId
+                    + " does not exist.";
+            log.error(message);
+            throw new APIManagementException(message);
+        }
+        // Keep the existing deployments and update the policy mapping.
+        Set<String> activeGatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(policyMappingId,
+                orgId);
+        apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(policyMappingId, false);
+        String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(gatewayGlobalPolicyList, description, name, orgId, policyMappingId);
+        // Redeploy the updated policy mappings to the gateways.
+        if (activeGatewayLabels.size() > 0) {
+            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+            gatewayManager.deployPolicyToGateway(policyMappingId, orgId, activeGatewayLabels);
+        }
+        return mappingID;
+    }
+
+    /**
+     * Get a lightweight version of all the gateway policies for the tenant domain.
+     * This will not include the policy definition as it is bulky.
+     *
+     * @param organization Organization name
+     * @return List of Gateway Policies
+     * @throws APIManagementException
+     */
+    @Override
+    public List<GatewayPolicyData> getAllLightweightGatewayPolicyMappings(String organization)
+            throws APIManagementException {
+        List<GatewayPolicyData> gatewayPolicyMappingMetadata = apiMgtDAO.getGatewayPolicyMappingMetadataForOrganization(
+                organization);
+        for (GatewayPolicyData gatewayPolicyData : gatewayPolicyMappingMetadata) {
+            gatewayPolicyData.setGatewayLabels(apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(
+                    gatewayPolicyData.getPolicyMappingId(), organization));
+        }
+        return gatewayPolicyMappingMetadata;
+    }
+
+    /**
+     * Get a lightweight version of deployment information for the gateway policy mapping associated with the provided
+     * gateway label within the tenant domain.
+     *
+     * @param organization Organization name
+     * @param gatewayLabel Gateway label
+     * @return List of Gateway Policies
+     * @throws APIManagementException
+     */
+    @Override
+    public GatewayPolicyData getLightweightGatewayPolicyMappings(String organization,
+            String gatewayLabel) throws APIManagementException {
+        return apiMgtDAO.getPolicyMappingUUIDByGatewayLabel(gatewayLabel, organization);
+    }
+
+    /**
+     * Get a lightweight policy mapping data for a particular mapping ID.
+     * This will not include the policy definition as it is bulky.
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @param tenantDomain      Tenant domain
+     * @return Gateway Policy Data
+     * @throws APIManagementException
+     */
+    @Override
+    public GatewayPolicyData getGatewayPolicyMappingDataByPolicyMappingId(String policyMappingUUID, String tenantDomain)
+            throws APIManagementException {
+        GatewayPolicyData gatewayPolicyData = apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(
+                policyMappingUUID);
+        if (gatewayPolicyData != null) {
+            gatewayPolicyData.setGatewayLabels(
+                    apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(policyMappingUUID, tenantDomain));
+            gatewayPolicyData.setGatewayPolicies(apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingUUID));
+        }
+        return gatewayPolicyData;
+    }
+
+    /**
+     * Check whether a policy mapping deployment exists for a given policy mapping UUID.
+     *
+     * @param gatewayPolicyMappingId Policy mapping UUID
+     * @param tenantDomain           Tenant domain
+     * @return True if a policy mapping deployment exists
+     * @throws APIManagementException
+     */
+    @Override
+    public boolean isPolicyMappingDeploymentExists(String gatewayPolicyMappingId, String tenantDomain)
+            throws APIManagementException {
+        boolean isPolicyMappingDeploymentExists = false;
+        Set<String> gatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(
+                gatewayPolicyMappingId, tenantDomain);
+        if (gatewayLabels.size() > 0) {
+            isPolicyMappingDeploymentExists = true;
+        }
+        return isPolicyMappingDeploymentExists;
+    }
+
+    @Override
+    public boolean hasExistingDeployments(String tenantDomain, String gatewayLabel) throws APIManagementException {
+        return !StringUtils.isBlank(
+                apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(gatewayLabel, tenantDomain));
+    }
+
+    @Override
+    public boolean isPolicyMetadataExists(String gatewayPolicyMappingId)
+            throws APIManagementException {
+        GatewayPolicyData metadata = apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(
+                gatewayPolicyMappingId);
+        return metadata != null && metadata.getPolicyMappingId().equals(gatewayPolicyMappingId);
+    }
+
+    @Override
+    public int getPolicyUsageByPolicyUUIDInGatewayPolicies(String commonPolicyUUID)
+            throws APIManagementException {
+        return apiMgtDAO.getPolicyUUIDCount(commonPolicyUUID);
+    }
+
+    /**
+     * To get the hashmap of what mappingId is deployed or undeployed in which gateway.
+     */
+    private Map<String, Set<String>> getGatewayPolicyDeploymentMap(List<GatewayPolicyDeployment>
+            gatewayPolicyDeploymentList) {
+        Map<String, Set<String>> gatewayPolicyDeploymentMapForResponse = new HashMap<>();
+        for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentList) {
+            if (gatewayPolicyDeploymentMapForResponse.containsKey(gatewayPolicyDeployment.getMappingUuid())) {
+                gatewayPolicyDeploymentMapForResponse.get(gatewayPolicyDeployment.getMappingUuid())
+                        .add(gatewayPolicyDeployment.getGatewayLabel());
+            } else {
+                Set<String> gatewayLabels = new HashSet<>();
+                gatewayLabels.add(gatewayPolicyDeployment.getGatewayLabel());
+                gatewayPolicyDeploymentMapForResponse.put(gatewayPolicyDeployment.getMappingUuid(), gatewayLabels);
+            }
+        }
+        return gatewayPolicyDeploymentMapForResponse;
     }
 }

@@ -915,7 +915,7 @@ public class TemplateBuilderUtil {
         }
     }
 
-    private static GatewayContentDTO[] addGatewayContentToList(GatewayContentDTO gatewayContentDTO,
+    public static GatewayContentDTO[] addGatewayContentToList(GatewayContentDTO gatewayContentDTO,
                                                                GatewayContentDTO[] gatewayContents) {
 
         if (gatewayContents == null) {

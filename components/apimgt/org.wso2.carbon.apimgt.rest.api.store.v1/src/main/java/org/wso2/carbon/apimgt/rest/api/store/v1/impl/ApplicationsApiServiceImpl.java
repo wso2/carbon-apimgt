@@ -746,6 +746,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            if (!(apiConsumer.isKeyManagerAllowedForUser(body.getKeyManager(), username))) {
+                throw new APIManagementException("Key Manager is permission restricted",
+                        ExceptionCodes.KEY_MANAGER_RESTRICTED_FOR_USER);
+            }
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
@@ -1284,6 +1288,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
+        if (!(apiConsumer.isKeyManagerAllowedForUser(body.getKeyManager(), username))) {
+            throw new APIManagementException("Key Manager is permission restricted",
+                    ExceptionCodes.KEY_MANAGER_RESTRICTED_FOR_USER);
+        }
             if (application != null) {
                 ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
                 if (RestAPIStoreUtils.isUserOwnerOfApplication(application) && appKey != null) {

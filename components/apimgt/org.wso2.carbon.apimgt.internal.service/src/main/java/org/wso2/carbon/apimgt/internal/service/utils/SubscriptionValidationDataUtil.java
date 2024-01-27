@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.BandwidthLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.BurstLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.EventCountLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
@@ -361,7 +362,10 @@ public class SubscriptionValidationDataUtil {
                 applicationPolicyDTO.setTenantId(applicationPolicyModel.getTenantId());
                 applicationPolicyDTO.setTenantDomain(applicationPolicyModel.getTenantDomain());
                 applicationPolicyDTO.setDefaultLimit(getThrottleLimitDTO(applicationPolicyModel));
-
+                BurstLimitDTO burstLimitDTO = new BurstLimitDTO();
+                burstLimitDTO.setRateLimitCount(applicationPolicyModel.getRateLimitCount());
+                burstLimitDTO.setRateLimitTimeUnit(applicationPolicyModel.getRateLimitTimeUnit());
+                applicationPolicyDTO.setBurstLimit(burstLimitDTO);
                 applicationPolicyListDTO.getList().add(applicationPolicyDTO);
 
             }

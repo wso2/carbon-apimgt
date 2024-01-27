@@ -42,6 +42,7 @@ public class API implements CacheableEntity<String> {
     private boolean deployed = false;
     private boolean isDefaultVersion = false;
     private String securityScheme;
+    private String revisionId;
 
     public API() {
     }
@@ -297,6 +298,13 @@ public class API implements CacheableEntity<String> {
     public void setDeployed(boolean deployed) {
         this.deployed = deployed;
     }
+
+    public String getRevisionId() {
+        return revisionId;
+    }
+
+    public void setRevisionId(String revisionId) {
+        this.revisionId = revisionId;
 
     public String getSecurityScheme() {
         return securityScheme;

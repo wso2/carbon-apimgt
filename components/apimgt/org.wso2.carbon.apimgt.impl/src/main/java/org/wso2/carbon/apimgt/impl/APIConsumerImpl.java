@@ -32,6 +32,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -39,6 +40,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -188,6 +190,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_NAME = "apiName";
     public static final String API_VERSION = "apiVersion";
     public static final String API_PROVIDER = "apiProvider";
+    private static final String PERMISSION_ALLOW = "ALLOW";
+    private static final String PERMISSION_DENY = "DENY";
+    private static final String PERMISSION_NOT_RESTRICTED = "PUBLIC";
     private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
 
     private static final String GET_SUB_WORKFLOW_REF_FAILED = "Failed to get external workflow reference for subscription ";
@@ -4234,5 +4239,107 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
                     apiTypeWrapper.getTier(), username));
         }
+    }
+
+    /**
+     * This method is used to retrieve key manager configurations for tenant
+     * @param organization organization of the key manager
+     * @param username username of the logged-in user
+     * @return KeyManagerConfigurationDTO list
+     * @throws APIManagementException if error occurred
+     */
+    @Override
+    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(
+            String organization, String username) throws APIManagementException {
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        List<KeyManagerConfigurationDTO> keyManagerConfigurations =
+                apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
+        List<KeyManagerConfigurationDTO> permittedKeyManagerConfigurations = new ArrayList<>();
+        if (keyManagerConfigurations.size() > 0) {
+            for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
+                if (isKeyManagerAllowedForUser(keyManagerConfiguration.getUuid(), username)) {
+                    permittedKeyManagerConfigurations.add(keyManagerConfiguration);
+                }
+            }
+        }
+        return permittedKeyManagerConfigurations;
+    }
+
+    /**
+     * This method is used to check if key manager configuration is allowed for user
+     * @param keyManagerId uuid of the key manager
+     * @param username username of the logged in user
+     * @return boolean returns if the key manager is allowed for the logged in user
+     * @throws APIManagementException if error occurred
+     */
+    @Override
+    public boolean isKeyManagerAllowedForUser(String keyManagerId, String username) throws APIManagementException {
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        KeyManagerPermissionConfigurationDTO permissions = apiAdmin.getKeyManagerPermissions(keyManagerId);
+        String permissionType = permissions.getPermissionType();
+        if (permissions != null && !permissionType.equals(PERMISSION_NOT_RESTRICTED)) {
+            String[] permissionRoles = permissions.getRoles()
+                    .stream()
+                    .toArray(String[]::new);
+            String[] userRoles = APIUtil.getListOfRoles(username);
+            boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
+            if ((PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
+                    || (PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    /**
+     * This method is used to check if key manager configuration is allowed for user
+     * @param keyManagerName name of the key manager
+     * @param organization organization of the logged in user
+     * @param username username of the logged in user
+     * @return boolean returns if the key manager is allowed for the logged in user
+     * @throws APIManagementException if error occurred
+     */
+    @Override
+    public boolean isKeyManagerByNameAllowedForUser(String keyManagerName, String organization, String username)
+            throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        KeyManagerConfigurationDTO keyManagerConfiguration = apiAdmin
+                .getKeyManagerConfigurationByName(organization, keyManagerName);
+        KeyManagerPermissionConfigurationDTO permissions = keyManagerConfiguration.getPermissions();
+        String permissionType = permissions.getPermissionType();
+        //Checks if the keymanager is permission restricted and if the user is in the restricted list
+        if (permissions != null && !permissionType.equals(PERMISSION_NOT_RESTRICTED)) {
+            String[] permissionRoles = permissions.getRoles()
+                    .stream()
+                    .toArray(String[]::new);
+            String[] userRoles = APIUtil.getListOfRoles(username);
+            //list of common roles the user has and the restricted list
+            boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
+            //Checks if the user is allowed to access the key manager
+            if ((PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
+                    || (PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean hasIntersection(String[] arr1, String[] arr2) {
+        Set<String> set = new HashSet<>();
+
+        for (String element : arr1) {
+            set.add(element);
+        }
+
+        for (String element : arr2) {
+            if (set.contains(element)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

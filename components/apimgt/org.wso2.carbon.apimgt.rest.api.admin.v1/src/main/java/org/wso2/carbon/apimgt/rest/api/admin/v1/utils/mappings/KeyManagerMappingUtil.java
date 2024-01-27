@@ -8,12 +8,14 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
@@ -65,6 +67,14 @@ public class KeyManagerMappingUtil {
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.valueOf(keyManagerConfigurationDTO.getTokenType()));
         keyManagerDTO.setAlias(keyManagerConfigurationDTO.getAlias());
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.fromValue(keyManagerConfigurationDTO.getTokenType()));
+        KeyManagerPermissionConfigurationDTO permissions = keyManagerConfigurationDTO.getPermissions();
+        if (permissions != null) {
+            KeyManagerPermissionsDTO keyManagerPermissionsDTO = new KeyManagerPermissionsDTO();
+            keyManagerPermissionsDTO.setPermissionType(KeyManagerPermissionsDTO.PermissionTypeEnum
+                    .fromValue(permissions.getPermissionType()));
+            keyManagerPermissionsDTO.setRoles(permissions.getRoles());
+            keyManagerDTO.setPermissions(keyManagerPermissionsDTO);
+        }
         JsonObject jsonObject = fromConfigurationMapToJson(keyManagerConfigurationDTO.getAdditionalProperties());
 
         JsonElement clientRegistrationElement = jsonObject.get(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
@@ -210,6 +220,15 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setOrganization(tenantDomain);
         keyManagerConfigurationDTO.setTokenType(keyManagerDTO.getTokenType().toString());
         keyManagerConfigurationDTO.setAlias(keyManagerDTO.getAlias());
+        KeyManagerPermissionsDTO permissions = keyManagerDTO.getPermissions();
+        if (permissions != null && permissions.getPermissionType() != null) {
+            KeyManagerPermissionConfigurationDTO permissionsConfiguration = new KeyManagerPermissionConfigurationDTO();
+            permissionsConfiguration.setPermissionType(permissions.getPermissionType().toString());
+            permissionsConfiguration.setRoles(permissions.getRoles());
+            keyManagerConfigurationDTO.setPermissions(permissionsConfiguration);
+        } else {
+            keyManagerConfigurationDTO.setPermissions(new KeyManagerPermissionConfigurationDTO());
+        }
         Map<String,Object> additionalProperties = new HashMap();
         if (keyManagerDTO.getAdditionalProperties() != null && keyManagerDTO.getAdditionalProperties() instanceof Map) {
             additionalProperties.putAll((Map) keyManagerDTO.getAdditionalProperties());
@@ -316,7 +335,6 @@ public class KeyManagerMappingUtil {
         keyManagerConfigurationDTO.setAdditionalProperties(additionalProperties);
         return keyManagerConfigurationDTO;
     }
-
 
     public static JsonObject fromConfigurationMapToJson(Map configuration) {
 

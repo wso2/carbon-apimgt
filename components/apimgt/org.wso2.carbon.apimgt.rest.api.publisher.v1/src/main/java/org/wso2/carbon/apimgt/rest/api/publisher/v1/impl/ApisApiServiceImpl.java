@@ -685,6 +685,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : " + apiId, e, log);
+            } else if (e.getErrorHandler().getErrorCode() == ExceptionCodes.USER_ROLES_CANNOT_BE_NULL.getErrorCode()) {
+                RestApiUtil.handleBadRequest("Bad Request while updating API : " + apiId, e, log);
             } else {
                 String errorMessage = "Error while updating the API : " + apiId + " - " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);

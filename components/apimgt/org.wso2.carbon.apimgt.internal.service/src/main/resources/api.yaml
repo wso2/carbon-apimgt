@@ -453,6 +453,40 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /gateway-policy-artifacts:
+    get:
+      summary: Get all the runtime artifacts for a given API UUID and gateway label
+      description: |
+        This will provide access to runtime artifacts in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: policyMappingUuid
+          in: query
+          description: |
+            **Search condition**.
+              Gateway policy mapping UUID
+          type: string
+        - name: type
+          in: query
+          description: |
+            **Search condition**.
+             type of gateway
+          type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the policy mapping
+          type: string
+      tags:
+        - Retrieving Runtime artifacts for gateway policies
+      responses:
+        200:
+          description: List of runtime Artifacts
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /endpoint-certificates:
     get:
       summary: Get all the endpoint certificates for given alias.
@@ -1263,6 +1297,8 @@ definitions:
     properties:
       defaultLimit:
         $ref: '#/definitions/ThrottleLimit'
+      burstLimit:
+        $ref: '#/definitions/BurstLimit'
   #-----------------------------------------------------
   # The Api Policy List resource
   #-----------------------------------------------------
@@ -1437,6 +1473,18 @@ definitions:
       eventCount:
         $ref: '#/definitions/EventCountLimit'
 
+  BurstLimit:
+    title: Burst Limit object
+    type: object
+    properties:
+      rateLimitCount:
+        type: integer
+        description: Burst control request count
+        example: 10
+      rateLimitTimeUnit:
+        type: string
+        description: Burst control time unit
+        example: min
   #-----------------------------------------------------
   # The Throttling Bandwidth Limit resource
   #-----------------------------------------------------
