@@ -4315,6 +4315,10 @@ components:
           type: array
           items:
             type: string
+        gatewayTypes:
+          type: array
+          items:
+            type: string
         keyManagerConfiguration:
           type: array
           items:

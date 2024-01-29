@@ -377,6 +377,7 @@ public final class APIUtil {
     private static long retrievalTimeout;
     private static final long maxRetrievalTimeout = 1000 * 60 * 60;
     private static double retryProgressionFactor;
+    private static String gatewayTypes;
     private static int maxRetryCount;
 
     //constants for getting masked token
@@ -404,6 +405,7 @@ public final class APIUtil {
         maxRetryCount = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties().getMaxRetryCount();
         retryProgressionFactor = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties()
                 .getRetryProgressionFactor();
+        gatewayTypes = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
         try {
             eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
             eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
@@ -3216,6 +3218,15 @@ public final class APIUtil {
     public static boolean isAnalyticsEnabled() {
 
         return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
+    }
+
+    public static List<String> getGatewayTypes () {
+        // Get the gateway types from the deployment.toml
+        List<String> gatewayTypesList = new ArrayList<>();
+        if (gatewayTypes != null && !gatewayTypes.isEmpty()) {
+            gatewayTypesList = Arrays.asList(gatewayTypes.split(","));
+        }
+        return gatewayTypesList;
     }
 
     /**
