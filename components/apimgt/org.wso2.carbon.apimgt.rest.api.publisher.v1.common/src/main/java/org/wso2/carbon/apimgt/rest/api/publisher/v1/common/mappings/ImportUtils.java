@@ -2314,7 +2314,7 @@ public class ImportUtils {
             throws APIManagementException {
         Map<String, String> lifeCycleActions = new LinkedHashMap<>();
         // No need to change the lifecycle if both the statuses are same
-        if (!StringUtils.equalsIgnoreCase(currentStatus, targetStatus)) {
+        if (!StringUtils.equalsIgnoreCase(currentStatus, targetStatus) && StringUtils.isNotEmpty(targetStatus)) {
             LCManager lcManager = LCManagerFactory.getInstance().getLCManager();
             if (StringUtils.equals(targetStatus, APIStatus.BLOCKED.toString()) || StringUtils.equals(targetStatus,
                     APIStatus.DEPRECATED.toString()) || StringUtils.equals(targetStatus,
