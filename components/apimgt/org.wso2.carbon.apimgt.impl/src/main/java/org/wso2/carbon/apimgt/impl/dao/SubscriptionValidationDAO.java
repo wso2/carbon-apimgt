@@ -21,7 +21,6 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.Nullable;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
@@ -490,6 +489,8 @@ public class SubscriptionValidationDAO {
                 subscription.setApiUUID(resultSet.getString("API_UUID"));
                 subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                 subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                subscription.setApiName(resultSet.getString("API_NAME"));
+                subscription.setApiVersion(resultSet.getString("API_VERSION"));
                 subscriptions.add(subscription);
             }
         }
@@ -781,6 +782,8 @@ public class SubscriptionValidationDAO {
                     subscription.setApiUUID(resultSet.getString("API_UUID"));
                     subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                    subscription.setApiName(resultSet.getString("API_NAME"));
+                    subscription.setApiVersion(resultSet.getString("API_VERSION"));
                     return subscription;
                 }
 
@@ -814,6 +817,8 @@ public class SubscriptionValidationDAO {
                     subscription.setApiUUID(resultSet.getString("API_UUID"));
                     subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                    subscription.setApiName(resultSet.getString("API_NAME"));
+                    subscription.setApiVersion(resultSet.getString("API_VERSION"));
                     return subscription;
                 }
 
