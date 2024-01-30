@@ -61,6 +61,7 @@ public class APIManagerConfigurationTest {
         String envConfig = "<Environment type=\"hybrid\" api-console=\"true\" isDefault=\"true\">\n" +
                 "                <Name>Default</Name>\n" +
                 "                <DisplayName></DisplayName>\n" +
+                "                <GatewayType>Regular</GatewayType>\n" +
                 "                <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>\n" +
                 "                <!-- Server URL of the API gateway -->\n" +
                 "                <ServerURL>https://localhost:9440/services/</ServerURL>\n" +
@@ -95,6 +96,7 @@ public class APIManagerConfigurationTest {
         String envConfig = "<Environment type=\"hybrid\" api-console=\"true\" isDefault=\"true\">\n" +
                 "                <Name>Default</Name>\n" +
                 "                <DisplayName></DisplayName>\n" +
+                "                <GatewayType>Regular</GatewayType>\n" +
                 "                <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>\n" +
                 "                <!-- Server URL of the API gateway -->\n" +
                 "                <ServerURL>https://localhost:9440/services/</ServerURL>\n" +

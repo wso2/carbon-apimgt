@@ -4071,8 +4071,8 @@ components:
           example: wso2
         gatewayType:
           type: string
-          example: SYNAPSE
-          default: SYNAPSE
+          example: Regular
+          default: Regular
         description:
           maxLength: 1023
           type: string

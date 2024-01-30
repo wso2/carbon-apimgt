@@ -14276,6 +14276,7 @@ public class ApiMgtDAO {
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
+                    String gatewayType = rs.getString("GATEWAY_TYPE");
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -14284,6 +14285,7 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setProvider(provider);
+                    env.setGatewayType(gatewayType);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     envList.add(env);
                 }
@@ -14395,8 +14397,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(3, vhost.getHttpContext());
                 prepStmt.setString(4, vhost.getHttpPort().toString());
                 prepStmt.setString(5, vhost.getHttpsPort().toString());
-                prepStmt.setString(6, vhost.getWsPort().toString());
-                prepStmt.setString(7, vhost.getWssPort().toString());
+                prepStmt.setString(6, (vhost.getWsPort() != null) ? vhost.getWsPort().toString() : "N/A");
+                prepStmt.setString(7, (vhost.getWssPort() != null) ? vhost.getWssPort().toString() : "N/A");
                 prepStmt.addBatch();
             }
             prepStmt.executeBatch();
@@ -14441,8 +14443,23 @@ public class ApiMgtDAO {
                     String httpContext = rs.getString("HTTP_CONTEXT");
                     Integer httpPort = rs.getInt("HTTP_PORT");
                     Integer httpsPort = rs.getInt("HTTPS_PORT");
-                    Integer wsPort = rs.getInt("WS_PORT");
-                    Integer wssPort = rs.getInt("WSS_PORT");
+                    Integer wsPort;
+                    String wsPortValue = rs.getString("WS_PORT");
+                    if ("N/A".equals(wsPortValue)) {
+                        // Handle the "N/A" case
+                        wsPort = null;
+                    } else {
+                        // Parse the integer value
+                        wsPort = Integer.parseInt(wsPortValue);
+                    }
+                    Integer wssPort;
+                    String wssPortValue = rs.getString("WSS_PORT");
+                    if ("N/A".equals(wssPortValue)) {
+                        // Handle the "N/A" case
+                        wssPort = null;
+                    } else {
+                        wssPort = Integer.parseInt(wssPortValue);
+                    }
 
                     VHost vhost = new VHost();
                     vhost.setHost(host);

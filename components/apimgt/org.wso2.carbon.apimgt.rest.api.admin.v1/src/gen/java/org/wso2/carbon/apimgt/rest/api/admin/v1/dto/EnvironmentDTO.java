@@ -29,7 +29,7 @@ public class EnvironmentDTO   {
     private String name = null;
     private String displayName = null;
     private String provider = null;
-    private String gatewayType = "SYNAPSE";
+    private String gatewayType = "Regular";
     private String description = null;
     private Boolean isReadOnly = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
@@ -113,7 +113,7 @@ public class EnvironmentDTO   {
   }
 
   
-  @ApiModelProperty(example = "SYNAPSE", value = "")
+  @ApiModelProperty(example = "Regular", value = "")
   @JsonProperty("gatewayType")
   public String getGatewayType() {
     return gatewayType;
