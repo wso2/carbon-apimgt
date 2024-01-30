@@ -2432,7 +2432,7 @@ public class ImportUtils {
             }
 
             APIProduct targetApiProduct = retrieveApiProductToOverwrite(importedApiProductDTO.getName(),
-                    currentTenantDomain, apiProvider, Boolean.TRUE, organization);
+                    importedApiProductDTO.getVersion(), currentTenantDomain, apiProvider, Boolean.TRUE, organization);
 
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwriteAPIProduct) && targetApiProduct != null) {
@@ -2809,19 +2809,22 @@ public class ImportUtils {
      * This method retrieves an API Product to overwrite in the current tenant domain.
      *
      * @param apiProductName      API Product Name
+     * @param apiProductVersion   API Product Version
      * @param currentTenantDomain Current tenant domain
      * @param apiProvider         API Provider
      * @param ignoreAndImport     This should be true if the exception should be ignored
      * @param organization        Identifier of the organization
      * @throws APIManagementException If an error occurs when retrieving the API to overwrite
      */
-    private static APIProduct retrieveApiProductToOverwrite(String apiProductName, String currentTenantDomain,
-            APIProvider apiProvider, Boolean ignoreAndImport, String organization) throws APIManagementException {
+    private static APIProduct retrieveApiProductToOverwrite(String apiProductName, String apiProductVersion,
+            String currentTenantDomain, APIProvider apiProvider, Boolean ignoreAndImport, String organization)
+            throws APIManagementException {
 
-        String provider = APIUtil.getAPIProviderFromAPINameVersionTenant(apiProductName,
-                ImportExportConstants.DEFAULT_API_PRODUCT_VERSION, currentTenantDomain);
+        String version = StringUtils.isNotEmpty(apiProductVersion) ? apiProductVersion
+                : ImportExportConstants.DEFAULT_API_PRODUCT_VERSION;
+        String provider = APIUtil.getAPIProviderFromAPINameVersionTenant(apiProductName, version, currentTenantDomain);
         APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider),
-                apiProductName, ImportExportConstants.DEFAULT_API_PRODUCT_VERSION);
+                apiProductName, version);
 
         // Checking whether the API exists
         if (!apiProvider.isAPIProductAvailable(apiProductIdentifier, organization)) {
@@ -2831,7 +2834,7 @@ public class ImportUtils {
             throw new APIMgtResourceNotFoundException(
                     "Error occurred while retrieving the API Product. API Product: " + apiProductName
                             + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
-                            + ImportExportConstants.DEFAULT_API_PRODUCT_VERSION + " not found");
+                            + version + " not found");
         }
         return apiProvider.getAPIProduct(apiProductIdentifier);
     }
