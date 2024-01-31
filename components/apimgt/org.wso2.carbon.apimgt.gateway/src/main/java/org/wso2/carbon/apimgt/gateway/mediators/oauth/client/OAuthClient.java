@@ -82,11 +82,13 @@ public class OAuthClient {
             // Set authorization header
             httpPost.setHeader(APIConstants.OAuthConstants.AUTHORIZATION_HEADER, "Basic " + credentials);
             httpPost.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.OAuthConstants.APPLICATION_X_WWW_FORM_URLENCODED);
-            if (refreshToken != null) {
+            if (APIConstants.OAuthConstants.CLIENT_CREDENTIALS.equals(grantType)) {
+                // As per the RFC 6749, a refresh token should not be included in token response for client credentials grant type.
+                refreshToken = null;
+                payload.append(APIConstants.OAuthConstants.CLIENT_CRED_GRANT_TYPE);
+            } else if (refreshToken != null) {
                 payload.append(APIConstants.OAuthConstants.REFRESH_TOKEN_GRANT_TYPE)
                         .append("&refresh_token=").append(refreshToken);
-            } else if (APIConstants.OAuthConstants.CLIENT_CREDENTIALS.equals(grantType)) {
-                payload.append(APIConstants.OAuthConstants.CLIENT_CRED_GRANT_TYPE);
             } else if (APIConstants.OAuthConstants.PASSWORD.equals(grantType)) {
                 payload.append(APIConstants.OAuthConstants.PASSWORD_GRANT_TYPE + "&username=")
                         .append(URLEncoder.encode(username, APIConstants.DigestAuthConstants.CHARSET)).append("&password=")

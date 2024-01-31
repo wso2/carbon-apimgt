@@ -146,6 +146,24 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         return delegate.createAPIProductRevision(apiProductId, apIRevisionDTO, securityContext);
     }
 
+    @POST
+    @Path("/copy-api-products")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Create a New API Product Version", notes = "This operation can be used to create a new version of an existing API Products. The new version is specified as `newVersion` query parameter. New API Product will be in `CREATED` state. ", response = APIProductDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Products",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created API Product as entity in the body. Location header contains URL of newly created API Product. ", response = APIProductDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response createNewAPIProductVersion( @NotNull @Size(max=30) @ApiParam(value = "Version of the new API Product.",required=true)  @QueryParam("newVersion") String newVersion,  @NotNull @ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. The combination of the provider, name and the version of the API Product is also accepted as a valid API Product ID. Should be formatted as **provider-name-version**. ",required=true)  @QueryParam("apiProductId") String apiProductId,  @ApiParam(value = "Specifies whether new API Product should be added as default version.", defaultValue="false") @DefaultValue("false") @QueryParam("defaultVersion") Boolean defaultVersion) throws APIManagementException{
+        return delegate.createNewAPIProductVersion(newVersion, apiProductId, defaultVersion, securityContext);
+    }
+
     @DELETE
     @Path("/{apiProductId}")
     

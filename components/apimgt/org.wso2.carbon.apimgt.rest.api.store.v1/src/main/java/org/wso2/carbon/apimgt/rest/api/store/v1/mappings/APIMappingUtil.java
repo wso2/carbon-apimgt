@@ -288,6 +288,7 @@ public class APIMappingUtil {
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUuid());
         dto.setContext(model.getContext());
+        dto.setIsDefaultVersion(model.isPublishedDefaultVersion());
         dto.setDescription(model.getDescription());
         dto.setLifeCycleStatus(model.getState());
         dto.setType(model.getType());
@@ -888,6 +889,7 @@ public class APIMappingUtil {
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
+        apiInfoDTO.setMonetizedInfo(api.isMonetizationEnabled());
 
         return apiInfoDTO;
     }

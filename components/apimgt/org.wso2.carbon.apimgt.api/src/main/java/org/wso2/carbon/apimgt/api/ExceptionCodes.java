@@ -34,6 +34,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_VERSION_ALREADY_EXISTS(900252, "The API version already exists.", 409, "An API with version '%s' already exists for API '%s'"),
 
     API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, "An API Product with context '%s' already exists"),
+    API_PRODUCT_VERSION_ALREADY_EXISTS(900276, "The API Product version already exists.", 409, "An API Product with version '%s' already exists for API Product '%s'"),
 
     API_CONTEXT_MALFORMED_EXCEPTION(900253, "The API context is malformed.", 400, "'%s'"),
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, "The API already exists"),
@@ -541,6 +542,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Revision deployment request conflicted with the current deployment state of the revision %s. Please try again later", false),
     INVALID_API_ID(902006, "Invalid API ID", 404, "The provided API ID is not found %s", false),
     INVALID_ENDPOINT_CONFIG(902012, "Endpoint config value(s) is(are) not valid", 400, "Endpoint config value(s) is(are) not valid"),
+    KEY_MANAGER_RESTRICTED_FOR_USER(902013, "Unauthorized Access to Key Manager", 403, "Key Manager is Restricted for this user"),
     ARTIFACT_SYNC_HTTP_REQUEST_FAILED(903009, "Error while retrieving from remote endpoint", 500, "Error while executing HTTP request to retrieve from remote endpoint");
 
     private final long errorCode;

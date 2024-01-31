@@ -37,6 +37,7 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.exception.DataNotFoundException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhooksAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
@@ -121,11 +122,15 @@ public class WebhooksUtils {
      * @param messageContext     the message context.
      * @return the generated API Key.
      */
-    public static String generateAPIKey(MessageContext messageContext, String tenantDomain) {
+    public static String generateAPIKey(MessageContext messageContext, String tenantDomain)
+            throws DataNotFoundException {
         String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         API api = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain).
                 getApiByContextAndVersion(context, apiVersion);
+        if (api == null) {
+            throw new DataNotFoundException("Error occurred when getting API information");
+        }
         return api.getUuid();
     }
 
@@ -136,7 +141,7 @@ public class WebhooksUtils {
      * @return the list of subscribers.
      */
     public static List<WebhooksDTO> getSubscribersListFromInMemoryMap(MessageContext messageContext)
-            throws URISyntaxException {
+            throws URISyntaxException, DataNotFoundException {
         String tenantDomain = (String) messageContext.getProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY);
         String apiKey = WebhooksUtils.generateAPIKey(messageContext, tenantDomain);
         String urlQueryParams = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().

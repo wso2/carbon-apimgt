@@ -32,6 +32,8 @@ public class DevPortalSearchContent implements SearchContent {
     String technicalOwner;
     String technicalOwnerEmail;
     String avgRating;
+    Boolean isMonetizationEnabled;
+    Boolean advertiseOnly;
 
     @Override
     public String getId() {
@@ -153,6 +155,22 @@ public class DevPortalSearchContent implements SearchContent {
 
     public void setAvgRating(String avgRating) {
         this.avgRating = avgRating;
+    }
+
+    public Boolean getAdvertiseOnly() {
+        return advertiseOnly;
+    }
+
+    public void setAdvertiseOnly(Boolean advertiseOnly) {
+        this.advertiseOnly = advertiseOnly;
+    }
+
+    public Boolean getMonetizationStatus() {
+        return isMonetizationEnabled;
+    }
+
+    public void setMonetizationStatus(Boolean isMonetizationEnabled) {
+        this.isMonetizationEnabled = isMonetizationEnabled;
     }
 
 }

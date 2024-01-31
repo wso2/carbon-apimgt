@@ -44,14 +44,14 @@ public class APIProductIdentifier implements Serializable, Identifier {
 
         this.apiProductName = apiProductName;
         this.providerName = providerName;
-        this.version = "1.0.0";
+        this.version =  version == null ? "1.0.0" : version;
     }
 
     public APIProductIdentifier(String providerName, String apiProductName, String version, String uuid) {
 
         this.apiProductName = apiProductName;
         this.providerName = providerName;
-        this.version = "1.0.0";
+        this.version = version == null ? "1.0.0" : version;
         this.uuid = uuid;
     }
 
@@ -122,7 +122,7 @@ public class APIProductIdentifier implements Serializable, Identifier {
     @Override
     public String toString() {
 
-        return this.getProviderName() + '-' + this.getName();
+        return this.getProviderName() + '-' + this.getName() + '-' + this.getVersion();
     }
 
     @Override

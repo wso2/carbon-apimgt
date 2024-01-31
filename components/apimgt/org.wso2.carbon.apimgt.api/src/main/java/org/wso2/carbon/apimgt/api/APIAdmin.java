@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -70,6 +71,16 @@ public interface APIAdmin  {
      * @throws APIManagementException If failed to delete environment
      */
     void deleteEnvironment(String tenantDomain, String uuid) throws APIManagementException;
+
+    /**
+     * Checks whether the given environment has active gateway policy deployments.
+     *
+     * @param tenantDomain tenant domain
+     * @param uuid         Environment identifier
+     * @return true if environment exists
+     * @throws APIManagementException If failed to check environment existence
+     */
+    boolean hasExistingDeployments(String tenantDomain, String uuid) throws APIManagementException;
 
     /**
      * Updates the details of the given Environment.
@@ -331,6 +342,14 @@ public interface APIAdmin  {
      */
     KeyManagerConfigurationDTO updateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException;
+
+    /**
+     * This method used to get key manager permissions with key manager id and role
+     * @param id uuid of key manager
+     * @return key manager permissions
+     * @throws APIManagementException
+     */
+    KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String id) throws APIManagementException;
 
     /**
      * hTis method used to delete IDP mapped with key manager

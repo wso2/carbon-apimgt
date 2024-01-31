@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.api.model.policy;
 
 public class ApplicationPolicy extends Policy {
+    private int rateLimitCount;
+    private String rateLimitTimeUnit;
     private int applicationId;
     
     private byte[] customAttributes;
@@ -43,10 +45,24 @@ public class ApplicationPolicy extends Policy {
 		this.customAttributes = customAttributes;
 	}
 
+    public String getRateLimitTimeUnit() {
+        return rateLimitTimeUnit;
+    }
+    public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+        this.rateLimitTimeUnit = rateLimitTimeUnit;
+    }
+    public int getRateLimitCount() {
+        return rateLimitCount;
+    }
+    public void setRateLimitCount(int rateLimitCount) {
+        this.rateLimitCount = rateLimitCount;
+    }
+
     @Override
     public String toString() {
         return "ApplicationPolicy [policyName=" + getPolicyName()
                 + ", applicationId =" + applicationId + ", description=" + getDescription() + ", defaultQuotaPolicy="
-                + getDefaultQuotaPolicy() + "]";
+                + getDefaultQuotaPolicy() + ", rateLimitCount=" + getRateLimitCount() + ", rateLimitTimeUnit="
+                + getRateLimitTimeUnit() + "]";
     }
 }

@@ -53,7 +53,7 @@ public class TracingServiceComponent {
 
     private static final Log log = LogFactory.getLog(TracingServiceComponent.class);
 
-    private ServiceRegistration registration;
+    private ServiceRegistration registration = null;
 
     @Activate
     protected void activate(ComponentContext componentContext) {

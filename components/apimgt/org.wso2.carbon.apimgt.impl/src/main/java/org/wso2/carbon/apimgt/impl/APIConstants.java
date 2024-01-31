@@ -1239,6 +1239,14 @@ public final class APIConstants {
         public static final String DELETE_PENDING = "DELETE_PENDING";
     }
 
+    public static class APIRevisionStatus {
+
+        public static final String API_REVISION_CREATED = "CREATED";
+        public static final String API_REVISION_APPROVED = "APPROVED";
+        public static final String API_REVISION_REJECTED = "REJECTED";
+        public static final String API_REVISION_DELETE_PENDING = "DELETE_PENDING";
+    }
+
     public static class AppRegistrationStatus {
 
         public static final String REGISTRATION_CREATED = "CREATED";
@@ -1732,7 +1740,9 @@ public final class APIConstants {
 
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
     public static final String DEPRECATE_CHECK_LIST_ITEM = "Deprecate old versions after publishing the API";
+    public static final String DEPRECATE_CHECK_LIST_ITEM_API_PRODUCT = "Deprecate old versions after publishing the API Product";
     public static final String RESUBSCRIBE_CHECK_LIST_ITEM = "Requires re-subscription when publishing the API";
+    public static final String RESUBSCRIBE_CHECK_LIST_ITEM_API_PRODUCT = "Requires re-subscription when publishing the API Product";
     public static final String PUBLISH_IN_PRIVATE_JET_MODE = "Publish In Private-Jet Mode";
 
     public static final String METRICS_PREFIX = "org.wso2.am";
@@ -1905,7 +1915,7 @@ public final class APIConstants {
     public static final String ENABLE_STORE = "enableStore";
 
     //api-product related constants
-    public static final String API_PRODUCT_VERSION = "1.0.0";
+    public static final String API_PRODUCT_VERSION_1_0_0 = "1.0.0";
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
@@ -2588,6 +2598,9 @@ public final class APIConstants {
         public static final String PKCE_MANDATORY = "pkceMandatory";
         public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
         public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
+        public static final String PERMISSIONS = "permissions";
+        public static final String ROLES = "roles";
+        public static final String PERMISSION_TYPE = "permissionType";
 
         public static class KeyManagerEvent {
 
@@ -2635,7 +2648,8 @@ public final class APIConstants {
         CERTIFICATE,
         GA_CONFIG,
         KEY_TEMPLATE,
-        CORRELATION_CONFIG
+        CORRELATION_CONFIG,
+        GATEWAY_POLICY
     }
 
     // Supported Event Types
@@ -2668,7 +2682,9 @@ public final class APIConstants {
         CUSTOM_POLICY_ADD,
         CUSTOM_POLICY_DELETE,
         CUSTOM_POLICY_UPDATE,
-        UPDATE_CORRELATION_CONFIGS
+        UPDATE_CORRELATION_CONFIGS,
+        DEPLOY_POLICY_MAPPING_IN_GATEWAY,
+        REMOVE_POLICY_MAPPING_FROM_GATEWAY
     }
 
     public enum EventAction {
@@ -2695,6 +2711,7 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_ANY = "ANY";
         public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
         public static final String GATEAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
+        public static final String GATEWAY_POLICY_SYNAPSE_ARTIFACTS = "/gateway-policy-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
         public static final String DATA_RETRIEVAL_MODE = "DataRetrievalMode";
         public static final String GATEWAY_STARTUP_SYNC = "sync";
@@ -3013,4 +3030,7 @@ public final class APIConstants {
 
     public static final String MIGRATE = "migrate";
     public static final String SWAGGER_RELAXED_VALIDATION = "swaggerRelaxedValidation";
+
+    //Property for enabling tenant aware sub claims when invoking APIs with API key
+    public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
 }

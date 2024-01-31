@@ -171,8 +171,10 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     protected void populateDefaultVersion(API api) throws APIManagementException {
-
         apiMgtDAO.setDefaultVersion(api);
+    }
+    protected void populateDefaultVersion(APIProduct apiProduct) throws APIManagementException {
+        apiMgtDAO.setDefaultVersion(apiProduct);
     }
 
     private boolean isTenantDomainNotMatching(String tenantDomain) {
@@ -502,6 +504,12 @@ public abstract class AbstractAPIManager implements APIManager {
             context = "/t/" + tenantDomain + context;
         }
         return apiMgtDAO.isContextExist(context, organization);
+    }
+
+    public boolean isContextExistForAPIProducts(String context, String contextWithVersion, String organization)
+            throws APIManagementException {
+
+        return apiMgtDAO.isContextExistForAPIProducts(context, contextWithVersion, organization);
     }
 
     protected String getTenantDomainFromUrl(String url) {

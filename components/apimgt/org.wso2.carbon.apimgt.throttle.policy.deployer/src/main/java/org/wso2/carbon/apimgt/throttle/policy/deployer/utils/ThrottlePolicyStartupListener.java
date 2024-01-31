@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.core.ServerShutdownHandler;
@@ -41,9 +42,12 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
         EventHubConfigurationDto.EventHubReceiverConfiguration eventHubReceiverConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIMConfiguration().getEventHubConfigurationDto()
                         .getEventHubReceiverConfiguration();
+        ThrottleProperties.JMSConnectionProperties.JMSTaskManagerProperties jmsTaskManagerProperties =
+                ServiceReferenceHolder.getInstance().getAPIMConfiguration().getThrottleProperties()
+                        .getJmsConnectionProperties().getJmsTaskManagerProperties();
         if (eventHubReceiverConfiguration != null) {
-            this.jmsTransportHandlerForEventHub =
-                    new JMSTransportHandler(eventHubReceiverConfiguration.getJmsConnectionParameters());
+            this.jmsTransportHandlerForEventHub = new JMSTransportHandler(
+                    eventHubReceiverConfiguration.getJmsConnectionParameters(), jmsTaskManagerProperties);
         }
     }
 

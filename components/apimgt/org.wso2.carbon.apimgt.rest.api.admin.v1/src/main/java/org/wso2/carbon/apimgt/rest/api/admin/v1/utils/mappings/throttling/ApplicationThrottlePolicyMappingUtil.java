@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BurstLimitDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +70,10 @@ public class ApplicationThrottlePolicyMappingUtil {
         if (appPolicy.getDefaultQuotaPolicy() != null) {
             policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(appPolicy.getDefaultQuotaPolicy()));
         }
+        BurstLimitDTO burstLimitDTO = new BurstLimitDTO();
+        burstLimitDTO.setRateLimitCount(appPolicy.getRateLimitCount());
+        burstLimitDTO.setRateLimitTimeUnit(appPolicy.getRateLimitTimeUnit());
+        policyDTO.setBurstLimit(burstLimitDTO);
         policyDTO.setType(APPLICATION_THROTTLING_POLICY_TYPE);
         return policyDTO;
     }
@@ -89,6 +94,13 @@ public class ApplicationThrottlePolicyMappingUtil {
         appPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, appPolicy);
         if (dto.getDefaultLimit() != null) {
             appPolicy.setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
+        }
+        if (dto.getBurstLimit() != null) {
+            BurstLimitDTO burstLimitDTO = dto.getBurstLimit();
+            if (burstLimitDTO.getRateLimitCount() > 0 && burstLimitDTO.getRateLimitTimeUnit() != null) {
+                appPolicy.setRateLimitCount(burstLimitDTO.getRateLimitCount());
+                appPolicy.setRateLimitTimeUnit(burstLimitDTO.getRateLimitTimeUnit());
+            }
         }
         return appPolicy;
     }
