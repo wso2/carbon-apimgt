@@ -1190,7 +1190,7 @@ public class SubscriptionValidationDAO {
             }
         }
 
-        if(configs.containsKey(POLICY_ENABLED_FOR_ANALYTICS)) {
+        if (configs.containsKey(POLICY_ENABLED_FOR_ANALYTICS)) {
             boolean isPolicyEnabled = Boolean.parseBoolean(configs.get(POLICY_ENABLED_FOR_ANALYTICS));
             if (isPolicyEnabled) {
                 attachPolicies(connection, revisionId, api);
@@ -1286,7 +1286,7 @@ public class SubscriptionValidationDAO {
             }
         }
 
-        if(configs.containsKey(POLICY_ENABLED_FOR_ANALYTICS)) {
+        if (configs.containsKey(POLICY_ENABLED_FOR_ANALYTICS)) {
             boolean isPolicyEnabled = Boolean.parseBoolean(configs.get(POLICY_ENABLED_FOR_ANALYTICS));
             if (isPolicyEnabled) {
                 attachPolicies(connection, revisionId, api);

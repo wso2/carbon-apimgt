@@ -975,7 +975,6 @@ public final class APIConstants {
 
     public static final String API_ANALYTICS = "Analytics.";
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
-    public static final String API_ANALYTICS_POLICY_ENABLED = API_ANALYTICS + "PolicyEnabled";
     public static final String API_ANALYTICS_REPORTER_CLASS = API_ANALYTICS + "ReporterClass";
     public static final String API_ANALYTICS_PROPERTIES = API_ANALYTICS + "Properties";
     public static final String API_ANALYTICS_RESPONSE_SCHEMA_NAME = API_ANALYTICS + "ResponseSchemaName";
