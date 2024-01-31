@@ -1927,7 +1927,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 jsonContent = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
 
                 String fileName = policySpecFileDetail.getDataHandler().getName();
-                String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+                String fileContentType = FilenameUtils.getExtension(fileName);
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                     fileContentType = policySpecFileDetail.getContentType().toString();
                 }
