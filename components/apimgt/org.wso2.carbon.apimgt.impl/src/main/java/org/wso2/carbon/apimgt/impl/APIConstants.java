@@ -2598,6 +2598,9 @@ public final class APIConstants {
         public static final String PKCE_MANDATORY = "pkceMandatory";
         public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
         public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
+        public static final String PERMISSIONS = "permissions";
+        public static final String ROLES = "roles";
+        public static final String PERMISSION_TYPE = "permissionType";
 
         public static class KeyManagerEvent {
 
@@ -2645,7 +2648,8 @@ public final class APIConstants {
         CERTIFICATE,
         GA_CONFIG,
         KEY_TEMPLATE,
-        CORRELATION_CONFIG
+        CORRELATION_CONFIG,
+        GATEWAY_POLICY
     }
 
     // Supported Event Types
@@ -2678,7 +2682,9 @@ public final class APIConstants {
         CUSTOM_POLICY_ADD,
         CUSTOM_POLICY_DELETE,
         CUSTOM_POLICY_UPDATE,
-        UPDATE_CORRELATION_CONFIGS
+        UPDATE_CORRELATION_CONFIGS,
+        DEPLOY_POLICY_MAPPING_IN_GATEWAY,
+        REMOVE_POLICY_MAPPING_FROM_GATEWAY
     }
 
     public enum EventAction {
@@ -2705,6 +2711,7 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_ANY = "ANY";
         public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
         public static final String GATEAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
+        public static final String GATEWAY_POLICY_SYNAPSE_ARTIFACTS = "/gateway-policy-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
         public static final String DATA_RETRIEVAL_MODE = "DataRetrievalMode";
         public static final String GATEWAY_STARTUP_SYNC = "sync";
@@ -3023,4 +3030,7 @@ public final class APIConstants {
 
     public static final String MIGRATE = "migrate";
     public static final String SWAGGER_RELAXED_VALIDATION = "swaggerRelaxedValidation";
+
+    //Property for enabling tenant aware sub claims when invoking APIs with API key
+    public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
 }

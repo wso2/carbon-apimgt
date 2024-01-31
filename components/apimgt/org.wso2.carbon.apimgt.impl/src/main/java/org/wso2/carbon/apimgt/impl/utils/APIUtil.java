@@ -2746,6 +2746,57 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to validate character length of crucial api params.
+     *
+     * @param apiName    Name of the API
+     * @param apiVersion Version of the API
+     * @param context    API Context of the API
+     * @param provider   Provider of the API
+     * @throws APIManagementException If the params length exceeds the allowed length
+     */
+    public static void validateCharacterLengthOfAPIParams(String apiName, String apiVersion, String context,
+                                                          String provider) throws APIManagementException {
+
+        validateCharacterLengthOfAPIParams(apiName, context, provider);
+        if (!hasValidLength(apiVersion, APIConstants.MAX_LENGTH_VERSION)) {
+            throw new APIManagementException("API version exceeds allowed character length",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
+    }
+
+    /**
+     * This method is used to validate character length of crucial api product params.
+     *
+     * @param apiName  Name of the API
+     * @param context  API Context of the API
+     * @param provider Provider of the API
+     * @throws APIManagementException If the params length exceeds the allowed length
+     */
+    public static void validateCharacterLengthOfAPIParams(String apiName, String context, String provider)
+            throws APIManagementException {
+
+        if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)) {
+            throw new APIManagementException("API name exceeds allowed character length",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
+        if (!hasValidLength(context, APIConstants.MAX_LENGTH_CONTEXT)) {
+            throw new APIManagementException("API context exceeds allowed character length",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
+        if (!hasValidLength(provider, APIConstants.MAX_LENGTH_PROVIDER)) {
+            throw new APIManagementException("API provider name exceeds allowed character length",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
+    }
+
+    /**
+     * This method is used to validate character length.
+     */
+    public static boolean hasValidLength(String value, int maxLength) {
+        return value != null && value.length() <= maxLength;
+    }
+
+    /**
      * When an input is having '-AT-',replace it with @ [This is required to persist API data between registry and database]
      *
      * @param input inputString
@@ -3988,9 +4039,9 @@ public final class APIUtil {
      *
      * @param inputStream
      * @return
-     * @throws Exception
+     * @throws APIManagementException
      */
-    public static OMElement buildOMElement(InputStream inputStream) throws Exception {
+    public static OMElement buildOMElement(InputStream inputStream) throws APIManagementException {
 
         XMLStreamReader parser;
         StAXOMBuilder builder;
@@ -4002,7 +4053,7 @@ public final class APIUtil {
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser.";
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new APIManagementException(msg, e);
         }
 
         return builder.getDocumentElement();
@@ -4012,9 +4063,9 @@ public final class APIUtil {
      * Build OMElement from input stream with securely configured parser.
      * @param inputStream Input Stream
      * @return  OMElement
-     * @throws Exception XMLStreamException while parsing the inputStream
+     * @throws APIManagementException XMLStreamException while parsing the inputStream
      */
-    public static OMElement buildSecuredOMElement(InputStream inputStream) throws Exception {
+    public static OMElement buildSecuredOMElement(InputStream inputStream) throws APIManagementException {
 
         XMLStreamReader parser;
         StAXOMBuilder builder;
@@ -4029,7 +4080,7 @@ public final class APIUtil {
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser.";
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return builder.getDocumentElement();
     }
@@ -6018,7 +6069,8 @@ public final class APIUtil {
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
                         retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                         retrievedPolicy.getPolicyName(),
-                        retrievedPolicy.getDefaultQuotaPolicy().getType());
+                        retrievedPolicy.getDefaultQuotaPolicy().getType(), retrievedPolicy.getRateLimitCount(),
+                        retrievedPolicy.getRateLimitTimeUnit());
                 APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
             }
         }

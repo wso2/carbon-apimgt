@@ -350,7 +350,7 @@ return null;
   @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\[\\]/]*$)") @Size(min=1,max=60)  public String getName() {
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\[\\]/]*$)") @Size(min=1)  public String getName() {
     return name;
   }
   public void setName(String name) {

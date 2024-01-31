@@ -17,12 +17,26 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class PreconditionFailedException extends WebApplicationException {
 
-    public PreconditionFailedException() {
-        super(Response.Status.PRECONDITION_FAILED);
+    private String message;
+
+    public PreconditionFailedException(ErrorDTO errorDTO){
+        super(Response.status(Response.Status.PRECONDITION_FAILED)
+                .entity(errorDTO)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
+        message = errorDTO.getDescription();
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
     }
 }

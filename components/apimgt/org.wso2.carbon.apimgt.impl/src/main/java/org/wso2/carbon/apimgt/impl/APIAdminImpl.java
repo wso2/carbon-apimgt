@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -177,6 +178,14 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
+    public boolean hasExistingDeployments(String tenantDomain, String uuid) throws APIManagementException {
+        Environment existingEnv = getEnvironment(tenantDomain, uuid);
+        // check if the policy mapping exists for the given environment
+        return StringUtils.isNotEmpty(
+                apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(existingEnv.getDisplayName(), tenantDomain));
+    }
+
+    @Override
     public Environment updateEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
         // check if the VHost exists in the tenant domain with given UUID, throw error if not found
         Environment existingEnv = getEnvironment(tenantDomain, environment.getUuid());
@@ -198,7 +207,27 @@ public class APIAdminImpl implements APIAdmin {
 
         validateForUniqueVhostNames(environment);
         environment.setId(existingEnv.getId());
-        return apiMgtDAO.updateEnvironment(environment);
+        Environment updatedEnvironment = apiMgtDAO.updateEnvironment(environment);
+        // If the update is successful without throwing an exception
+        // Perform a separate task of updating gateway label names
+        updateGatewayLabelNameForGatewayPolicies(existingEnv.getDisplayName(), updatedEnvironment.getDisplayName(),
+                tenantDomain);
+        return updatedEnvironment;
+    }
+
+    /**
+     * Update the gateway label name for the gateway policies if the environment name is changed.
+     *
+     * @param oldLabel     Old gateway label name
+     * @param newLabel     New gateway label name
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException If failed to update the gateway label name
+     */
+    private void updateGatewayLabelNameForGatewayPolicies(String oldLabel, String newLabel, String tenantDomain)
+            throws APIManagementException {
+        if (StringUtils.isNotEmpty(apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(oldLabel, tenantDomain))) {
+            apiMgtDAO.updateGatewayLabelName(oldLabel, newLabel, tenantDomain);
+        }
     }
 
     private void validateForUniqueVhostNames(Environment environment) throws APIManagementException {
@@ -744,6 +773,17 @@ public class APIAdminImpl implements APIAdmin {
         new KeyMgtNotificationSender()
                 .notify(decryptedKeyManagerConfiguration, APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE);
         return keyManagerConfigurationDTO;
+    }
+    @Override
+    public KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String id) throws APIManagementException {
+
+        KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO;
+        try {
+            keyManagerPermissionConfigurationDTO = apiMgtDAO.getKeyManagerPermissions(id);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Key Manager Permissions retrieval failed for Key Manager id " + id, e);
+        }
+        return keyManagerPermissionConfigurationDTO;
     }
 
     private IdentityProvider updatedIDP(IdentityProvider retrievedIDP,

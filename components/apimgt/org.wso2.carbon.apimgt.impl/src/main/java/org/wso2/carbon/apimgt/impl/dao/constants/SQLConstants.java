@@ -2169,6 +2169,20 @@ public class SQLConstants {
                     "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                     "WHERE AUM.REVISION_UUID IS NULL AND AUM.API_ID IN (";
 
+    public static final String GET_SCOPE_BY_SUBSCRIBED_ID_SQL =
+            "SELECT DISTINCT ARSM.SCOPE_NAME " +
+                    "FROM AM_SUBSCRIBER SUB " +
+                    "INNER JOIN AM_APPLICATION APP ON SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    "INNER JOIN AM_SUBSCRIPTION SUBS ON APP.APPLICATION_ID = SUBS.APPLICATION_ID " +
+                    "INNER JOIN AM_API API ON API.API_ID = SUBS.API_ID " +
+                    "LEFT JOIN AM_API_PRODUCT_MAPPING APM ON APM.API_ID = API.API_ID " +
+                    "INNER JOIN AM_API_URL_MAPPING AUM " +
+                    "ON AUM.URL_MAPPING_ID = APM.URL_MAPPING_ID " +
+                    "OR AUM.API_ID = API.API_ID " +
+                    "INNER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "WHERE SUB.TENANT_ID = ?  AND APP.APPLICATION_ID = ? " +
+                    "AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
     public static final String GET_RESOURCE_TO_SCOPE_MAPPING_SQL =
             "SELECT AUM.URL_MAPPING_ID, ARSM.SCOPE_NAME FROM AM_API_URL_MAPPING AUM " +
                     "LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
@@ -2308,13 +2322,13 @@ public class SQLConstants {
 
     public static final String INSERT_APPLICATION_POLICY_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_APPLICATION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_APPLICATION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
-                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,CUSTOM_ATTRIBUTES) \n" +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT,CUSTOM_ATTRIBUTES) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
@@ -2480,7 +2494,9 @@ public class SQLConstants {
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
-                    "TIME_UNIT = ? " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
@@ -2493,7 +2509,9 @@ public class SQLConstants {
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
-                    " CUSTOM_ATTRIBUTES = ? "+
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
+                    "CUSTOM_ATTRIBUTES = ? "+
             "WHERE NAME = ? AND TENANT_ID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_BY_UUID_SQL =
@@ -2505,7 +2523,9 @@ public class SQLConstants {
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
-                    "TIME_UNIT = ? " +
+                    "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ? " +
                     "WHERE UUID = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_WITH_CUSTOM_ATTRIBUTES_BY_UUID_SQL =
@@ -2518,6 +2538,8 @@ public class SQLConstants {
                     "QUOTA_UNIT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
+                    "RATE_LIMIT_COUNT = ?, " +
+                    "RATE_LIMIT_TIME_UNIT = ?, " +
                     "CUSTOM_ATTRIBUTES = ? "+
                     "WHERE UUID = ?";
 
@@ -3626,6 +3648,25 @@ public class SQLConstants {
     }
 
     /**
+     * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
+     */
+    public static class KeyManagerPermissionsSqlConstants {
+
+        public static final String ADD_KEY_MANAGER_PERMISSION_SQL =
+                " INSERT INTO" +
+                        " AM_KEY_MANAGER_PERMISSIONS (KEY_MANAGER_UUID, PERMISSIONS_TYPE, ROLE)" +
+                        " VALUES(?, ?, ?)";
+
+        public static final String DELETE_ALL_KEY_MANAGER_PERMISSION_SQL = "DELETE FROM AM_KEY_MANAGER_PERMISSIONS" +
+                " WHERE KEY_MANAGER_UUID = ?";
+
+        public static final String GET_KEY_MANAGER_PERMISSIONS_SQL =
+                "SELECT PERMISSIONS_TYPE, ROLE" +
+                        " FROM AM_KEY_MANAGER_PERMISSIONS " +
+                        " WHERE KEY_MANAGER_UUID = ?";
+    }
+
+    /**
      * Static class to hold database queries related to AM_TENANT_THEMES table
      */
     public static class TenantThemeConstants {
@@ -4148,6 +4189,67 @@ public class SQLConstants {
                         " AND " +
                         " APM.REVISION_UUID IS NULL " +
                         " ORDER BY APM.API_POLICY_MAPPING_ID ASC ";
+    }
+
+    /**
+     * Static class to hold database queries related to gateway policies tables
+     */
+    public static class GatewayPolicyConstants {
+        // Global policy mapping
+        public static final String ADD_GATEWAY_POLICY_METADATA =
+                "INSERT INTO AM_GATEWAY_POLICY_METADATA " +
+                        " (GLOBAL_POLICY_MAPPING_UUID, ORGANIZATION, DISPLAY_NAME, DESCRIPTION) " +
+                        " VALUES (?,?,?,?)";
+        public static final String ADD_GATEWAY_POLICY_MAPPING =
+                "INSERT INTO AM_GATEWAY_POLICY_MAPPING " +
+                        " (GLOBAL_POLICY_MAPPING_UUID, POLICY_UUID, POLICY_ORDER, DIRECTION, PARAMETERS) " +
+                        " VALUES (?,?,?,?,?)";
+        // Global policy deployment state
+        public static final String SET_GATEWAY_POLICY_DEPLOYMENT_STATUS = "INSERT INTO AM_GATEWAY_POLICY_DEPLOYMENT "
+                + " (GLOBAL_POLICY_MAPPING_UUID, GATEWAY_LABEL, ORGANIZATION) VALUES (?,?,?)";
+        // Remove global policy deployment
+        public static final String DELETE_GATEWAY_POLICY_DEPLOYMENT_STATUS =
+                "DELETE FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GATEWAY_LABEL = ? AND GLOBAL_POLICY_MAPPING_UUID = ? "
+                        + "AND ORGANIZATION = ?";
+        public static final String GET_MAPPED_POLICY_UUIDS_BY_POLICY_MAPPING_UUID =
+                "SELECT POLICY_UUID FROM AM_GATEWAY_POLICY_MAPPING WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_COMMON_POLICY_USAGE_COUNT_BY_POLICY_UUID =
+                "SELECT COUNT(*) AS count_occurrences FROM AM_GATEWAY_POLICY_MAPPING WHERE POLICY_UUID = ?;";
+        public static final String GET_GATEWAY_POLICIES_BY_POLICY_MAPPING_UUID =
+                "SELECT OP.POLICY_NAME, OP.POLICY_VERSION, GPM.DIRECTION, GPM.PARAMETERS, GPM.POLICY_ORDER, " +
+                         "GPM.POLICY_UUID FROM AM_GATEWAY_POLICY_MAPPING GPM " +
+                         "INNER JOIN AM_OPERATION_POLICY OP ON GPM.POLICY_UUID = OP.POLICY_UUID " +
+                         "WHERE GPM.GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GLOBAL_POLICY_MAPPING_UUID_BY_GATEWAY_LABEL =
+                "SELECT GLOBAL_POLICY_MAPPING_UUID FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE "
+                        + "ORGANIZATION = ? AND GATEWAY_LABEL IN (_GATEWAY_LABELS_)";
+        public static final String DELETE_GATEWAY_POLICY_MAPPING_BY_ID =
+                "DELETE FROM AM_GATEWAY_POLICY_MAPPING WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GATEWAY_POLICY_DEPLOYMENT_BY_MAPPING_UUID =
+                "SELECT GATEWAY_LABEL FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GLOBAL_POLICY_MAPPING_UUID = ? "
+                        + "AND ORGANIZATION = ?";
+        public static final String GET_POLICY_DEPLOYMENT_BY_GATEWAY =
+                "SELECT GLOBAL_POLICY_MAPPING_UUID FROM AM_GATEWAY_POLICY_DEPLOYMENT WHERE GATEWAY_LABEL = ? "
+                        + "AND ORGANIZATION = ?";
+        public static final String UPDATE_GATEWAY_POLICY_METADATA = "UPDATE AM_GATEWAY_POLICY_METADATA "
+                + "SET DISPLAY_NAME = ?, DESCRIPTION = ?, ORGANIZATION = ? WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String DELETE_GATEWAY_POLICY_METADATA = "DELETE FROM AM_GATEWAY_POLICY_METADATA WHERE "
+                + "GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String UPDATE_GATEWAY_POLICY_DEPLOYMENT_BY_GATEWAY_LABEL = "UPDATE AM_GATEWAY_POLICY_DEPLOYMENT "
+                + "SET GATEWAY_LABEL = ? WHERE GATEWAY_LABEL = ? AND ORGANIZATION = ?";
+        public static final String GET_ALL_GATEWAY_POLICY_METADATA_FOR_ORGANIZATION =
+                "SELECT * FROM AM_GATEWAY_POLICY_METADATA WHERE ORGANIZATION = ?";
+        public static final String GET_GATEWAY_POLICY_METADATA_BY_POLICY_MAPPING_UUID =
+                "SELECT * FROM AM_GATEWAY_POLICY_METADATA WHERE GLOBAL_POLICY_MAPPING_UUID = ?";
+        public static final String GET_GATEWAY_POLICY_METADATA_BY_GATEWAY_LABEL =
+                "SELECT meta.GLOBAL_POLICY_MAPPING_UUID, " +
+                        "meta.DISPLAY_NAME AS METADATA_DISPLAY_NAME, " +
+                        "meta.DESCRIPTION AS METADATA_DESCRIPTION, " +
+                        "meta.ORGANIZATION AS METADATA_ORGANIZATION " +
+                        "FROM AM_GATEWAY_POLICY_METADATA meta JOIN AM_GATEWAY_POLICY_DEPLOYMENT deploy ON " +
+                        "meta.GLOBAL_POLICY_MAPPING_UUID = deploy.GLOBAL_POLICY_MAPPING_UUID WHERE " +
+                        "deploy.GATEWAY_LABEL = ? AND meta.ORGANIZATION = ?";
+
     }
 
     /**

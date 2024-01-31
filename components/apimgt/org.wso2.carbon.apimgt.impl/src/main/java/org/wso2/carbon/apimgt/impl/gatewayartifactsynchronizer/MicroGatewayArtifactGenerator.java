@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayPolicyArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.ApiProjectDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.DeploymentDescriptorDto;
@@ -113,6 +114,15 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         } catch (APIImportExportException | IOException e) {
             throw new APIManagementException("Error while Generating API artifact", e);
         }
+    }
+
+    /**
+     * This method is not used in Microgateway.
+     */
+    @Override
+    public RuntimeArtifactDto generateGatewayPolicyArtifact(
+            List<GatewayPolicyArtifactDto> gatewayPolicyArtifactDtoList) {
+        return null;
     }
 
     private Map<String, Map<String, Environment>> getEnvironmentSpecificAPIProperties(

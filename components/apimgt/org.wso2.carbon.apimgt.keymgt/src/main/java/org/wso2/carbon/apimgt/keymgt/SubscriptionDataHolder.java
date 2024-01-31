@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.keymgt;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataStoreImpl;
 
@@ -30,6 +32,7 @@ public class SubscriptionDataHolder {
 
     protected Map<String, SubscriptionDataStore> subscriptionStore =
             new ConcurrentHashMap<>();
+    private static final Log log = LogFactory.getLog(SubscriptionDataHolder.class);
     private static SubscriptionDataHolder instance = new SubscriptionDataHolder();
 
     public static SubscriptionDataHolder getInstance() {
@@ -78,6 +81,17 @@ public class SubscriptionDataHolder {
             return subscriptionDataStore;
         }
         return null;
+    }
+
+    public void refreshSubscriptionStore() {
+        subscriptionStore.keySet().forEach(tenant -> {
+            // Cleaning the existing SubscriptionDataStore instance before re-population
+            subscriptionStore.put(tenant, new SubscriptionDataStoreImpl(tenant));
+            if (log.isDebugEnabled()) {
+                log.debug("Refreshing subscription data store for tenant: " + tenant);
+            }
+            initializeSubscriptionStore(tenant);
+        });
     }
 
 }

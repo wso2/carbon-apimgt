@@ -189,6 +189,11 @@ public class PublisherCommonUtils {
                     + " as the token information hasn't been correctly set internally",
                     ExceptionCodes.TOKEN_SCOPES_NOT_SET);
         }
+        if (apiDtoToUpdate.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && apiDtoToUpdate.getVisibleRoles()
+                .isEmpty()) {
+            throw new APIManagementException("Access control roles cannot be empty when visibility is restricted",
+                    ExceptionCodes.USER_ROLES_CANNOT_BE_NULL);
+        }
         boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
                 .equals(originalAPI.getType());
         boolean isAsyncAPI = originalAPI.getType() != null
@@ -1909,6 +1914,9 @@ public class PublisherCommonUtils {
             // Set username in case provider is null or empty
             provider = username;
         }
+        // validate character length
+        APIUtil.validateCharacterLengthOfAPIParams(apiProductDTO.getName(), apiProductDTO.getContext(),
+                provider);
 
         List<String> tiersFromDTO = apiProductDTO.getPolicies();
         Set<Tier> definedTiers = apiProvider.getTiers();
