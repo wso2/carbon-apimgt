@@ -147,7 +147,8 @@ public class QueryAnalyzer {
      */
     public QueryAnalyzerResponseDTO analyseQueryMutationComplexity(String payload, int maxQueryComplexity,
                                                                    String complexityInfoJson) throws ParseException {
-        FieldComplexityCalculator fieldComplexityCalculator = new FieldComplexityCalculatorImpl(complexityInfoJson);
+        FieldComplexityCalculatorImpl fieldComplexityCalculator = new FieldComplexityCalculatorImpl();
+        fieldComplexityCalculator.parseAccessControlPolicy(complexityInfoJson);
         return analyseQueryComplexity(maxQueryComplexity, payload, fieldComplexityCalculator);
     }
 

@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APISearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.Map;
@@ -78,6 +79,10 @@ public class SearchResultMappingUtil {
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
+        AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+        advertiseInfoDTO.setAdvertised(api.isAdvertiseOnly());
+        apiResultDTO.setAdvertiseInfo(advertiseInfoDTO);
+        apiResultDTO.setMonetizedInfo(api.isMonetizationEnabled());
         return apiResultDTO;
     }
 

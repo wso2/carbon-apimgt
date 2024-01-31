@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -29,6 +30,8 @@ public class APISearchResultAllOfDTO   {
     private String thumbnailUri = null;
     private APIBusinessInformationDTO businessInformation = null;
     private String avgRating = null;
+    private Boolean monetizedInfo = null;
+    private AdvertiseInfoDTO advertiseInfo = null;
 
   /**
    * A brief description about the API
@@ -173,6 +176,41 @@ public class APISearchResultAllOfDTO   {
     this.avgRating = avgRating;
   }
 
+  /**
+   **/
+  public APISearchResultAllOfDTO monetizedInfo(Boolean monetizedInfo) {
+    this.monetizedInfo = monetizedInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("monetizedInfo")
+  public Boolean isMonetizedInfo() {
+    return monetizedInfo;
+  }
+  public void setMonetizedInfo(Boolean monetizedInfo) {
+    this.monetizedInfo = monetizedInfo;
+  }
+
+  /**
+   **/
+  public APISearchResultAllOfDTO advertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("advertiseInfo")
+  public AdvertiseInfoDTO getAdvertiseInfo() {
+    return advertiseInfo;
+  }
+  public void setAdvertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -190,12 +228,14 @@ public class APISearchResultAllOfDTO   {
         Objects.equals(status, apISearchResultAllOf.status) &&
         Objects.equals(thumbnailUri, apISearchResultAllOf.thumbnailUri) &&
         Objects.equals(businessInformation, apISearchResultAllOf.businessInformation) &&
-        Objects.equals(avgRating, apISearchResultAllOf.avgRating);
+        Objects.equals(avgRating, apISearchResultAllOf.avgRating) &&
+        Objects.equals(monetizedInfo, apISearchResultAllOf.monetizedInfo) &&
+        Objects.equals(advertiseInfo, apISearchResultAllOf.advertiseInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri, businessInformation, avgRating);
+    return Objects.hash(description, context, version, provider, status, thumbnailUri, businessInformation, avgRating, monetizedInfo, advertiseInfo);
   }
 
   @Override
@@ -211,6 +251,8 @@ public class APISearchResultAllOfDTO   {
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
+    sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");
+    sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

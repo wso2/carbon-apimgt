@@ -395,6 +395,10 @@ public class ServiceReferenceHolder {
         return activeTenants.contains(tenantDomain);
     }
 
+    public Set<String> getActiveTenants() {
+        return activeTenants;
+    }
+
     public void setRedisCacheUtil(RedisCacheUtils redisCacheUtils) {
 
     }

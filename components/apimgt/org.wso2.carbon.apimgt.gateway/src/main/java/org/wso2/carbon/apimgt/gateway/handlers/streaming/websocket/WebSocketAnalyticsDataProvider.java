@@ -315,6 +315,8 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
+        customProperties.put(Constants.RESPONSE_SIZE,
+                WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx));
         return customProperties;
     }
     

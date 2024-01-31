@@ -187,7 +187,7 @@ public class PolicyUtilTest {
         ApplicationPolicyEvent policyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName(),
-                policy.getDefaultLimit().getQuotaType());
+                policy.getDefaultLimit().getQuotaType(), policy.getRateLimitCount(), policy.getRateLimitTimeUnit());
         PolicyUtil.deployPolicy(policy, policyEvent);
         Mockito.verify(eventProcessorService,
                 Mockito.times(1)).deployExecutionPlan(Mockito.anyString());
@@ -203,7 +203,7 @@ public class PolicyUtilTest {
         ApplicationPolicyEvent policyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName(),
-                policy.getDefaultLimit().getQuotaType());
+                policy.getDefaultLimit().getQuotaType(), policy.getRateLimitCount(), policy.getRateLimitTimeUnit());
         PolicyUtil.deployPolicy(policy, policyEvent);
         Mockito.verify(eventProcessorService,
                 Mockito.times(1)).editActiveExecutionPlan(Mockito.anyString(), Mockito.anyString());
@@ -215,7 +215,7 @@ public class PolicyUtilTest {
         ApplicationPolicyEvent policyEvent = new ApplicationPolicyEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), -1234,
                 policy.getTenantDomain(), policy.getId(), policy.getName(),
-                policy.getDefaultLimit().getQuotaType());
+                policy.getDefaultLimit().getQuotaType(), policy.getRateLimitCount(), policy.getRateLimitTimeUnit());
         Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
                 PolicyConstants.POLICY_LEVEL_APP +
                 "_" + policy.getName()))

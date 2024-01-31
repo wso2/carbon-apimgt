@@ -112,6 +112,29 @@ public class RestAPIStoreUtils {
     }
 
     /**
+     * check whether an application is shared with the current logged-in user
+     *
+     * @param application Application object
+     * @return true if the application is shared with the current logged-in user
+     */
+    public static boolean isApplicationSharedtoUser(Application application) {
+        boolean multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
+        if (multiGroupAppSharingEnabled) {
+            String groupId = application.getGroupId();
+            String userGroupId = RestApiUtil.getLoggedInUserGroupId();
+            if (groupId != null && userGroupId != null) {
+                String[] grpIdArray = groupId.split(",");
+                for (String id : grpIdArray) {
+                    if (id.equals(userGroupId)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Check whether the specified API exists and the current logged in user has access to it.
      * <p>
      * When it tries to retrieve the resource from the registry, it will fail with AuthorizationFailedException if user

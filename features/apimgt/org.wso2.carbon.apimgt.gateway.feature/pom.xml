@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.28.180-SNAPSHOT</version>
+        <version>9.29.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -266,7 +266,9 @@
                                 <importBundleDef>
                                     org.wso2.carbon.mediation:org.wso2.carbon.localentry.stub:${carbon.mediation.version}
                                 </importBundleDef>
-
+                                <bundleDef>
+                                    org.wso2.integration.transaction.counter:transaction-count-handler:${integration.transaction.counter.version}
+                                </bundleDef>
                                 <bundleDef>com.googlecode.json-simple:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
