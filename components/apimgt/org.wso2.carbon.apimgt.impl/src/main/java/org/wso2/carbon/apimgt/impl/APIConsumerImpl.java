@@ -1019,7 +1019,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         checkSubscriptionAllowed(apiTypeWrapper);
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
-        if (APIConstants.PUBLISHED.equals(state)) {
+        if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
             subscriptionId = apiMgtDAO.updateSubscription(apiTypeWrapper, inputSubscriptionId,
                     APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
 

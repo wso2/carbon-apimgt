@@ -2801,6 +2801,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO apiDTOFromProperties;
         try {
             apiDTOFromProperties = objectMapper.readValue(additionalProperties, APIDTO.class);
+            APIUtil.validateCharacterLengthOfAPIParams(apiDTOFromProperties.getName(),
+                    apiDTOFromProperties.getVersion(), apiDTOFromProperties.getContext(),
+                    RestApiCommonUtil.getLoggedInUsername());
             try {
                 APIUtil.validateAPIContext(apiDTOFromProperties.getContext(), apiDTOFromProperties.getName());
             } catch (APIManagementException e) {
@@ -2955,6 +2958,9 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Minimum requirement name, version, context and endpointConfig.
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            APIUtil.validateCharacterLengthOfAPIParams(additionalPropertiesAPI.getName(),
+                    additionalPropertiesAPI.getVersion(), additionalPropertiesAPI.getContext(),
+                    RestApiCommonUtil.getLoggedInUsername());
             try {
                 APIUtil.validateAPIContext(additionalPropertiesAPI.getContext(), additionalPropertiesAPI.getName());
             } catch (APIManagementException e) {
@@ -3345,6 +3351,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            APIUtil.validateCharacterLengthOfAPIParams(additionalPropertiesAPI.getName(),
+                    additionalPropertiesAPI.getVersion(), additionalPropertiesAPI.getContext(),
+                    RestApiCommonUtil.getLoggedInUsername());
             APIUtil.validateAPIContext(additionalPropertiesAPI.getContext(), additionalPropertiesAPI.getName());
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -3970,6 +3979,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (apiDTOFromProperties.getType() == null) {
                 RestApiUtil.handleBadRequest("Required property protocol is not specified for the Async API", log);
             }
+            APIUtil.validateCharacterLengthOfAPIParams(apiDTOFromProperties.getName(),
+                    apiDTOFromProperties.getVersion(), apiDTOFromProperties.getContext(),
+                    RestApiCommonUtil.getLoggedInUsername());
             try {
                 APIUtil.validateAPIContext(apiDTOFromProperties.getContext(), apiDTOFromProperties.getName());
             } catch (APIManagementException e) {

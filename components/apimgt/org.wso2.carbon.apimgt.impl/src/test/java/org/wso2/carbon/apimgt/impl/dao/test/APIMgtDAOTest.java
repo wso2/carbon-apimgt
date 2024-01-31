@@ -1848,7 +1848,7 @@ public class APIMgtDAOTest {
     }
 
     @Test
-    public void testAddGatewayGlobalPolicy() throws Exception {
+    public void testAddNewGatewayGlobalPolicy() throws Exception {
         String orgId = "org1";
         String name = "Test Policy";
         String description = "Test policy description";
@@ -1875,21 +1875,55 @@ public class APIMgtDAOTest {
         Assert.assertEquals("Returned policy UUID should match the UUID we provided.", policyUUID, mappingUUID);
         assertEquals("The size of gateway policies data for the provided mapping UUID should be one.", 1,
                 apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(mappingUUID, false).size());
+
+        // Delete the policy mapping
+        apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(mappingUUID, true);
+        assertEquals("The list of gateway policies data for the provided mapping UUID should be empty.", 0,
+                apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(mappingUUID, false).size());
+        assertNull("Policy Mapping ID retrieved should be null.",
+                apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(mappingUUID).getPolicyMappingId());
+
     }
 
     @Test
     public void testUpdateGatewayGlobalPolicy() throws Exception {
         String orgId = "org1";
         String name = "Test Policy";
-        String description = "New test policy description";
+        String description = "Test policy description";
+        String mappingUUID = UUID.randomUUID().toString();
+
+        OperationPolicyData headerCPolicyData = getOperationPolicyDataObject(orgId, null, "addHeader");
+        String headerCPolicyUUID = apiMgtDAO.addCommonOperationPolicy(headerCPolicyData);
+
+        List<OperationPolicy> policyList = new ArrayList<>();
+
+        OperationPolicy headerCPolicy = new OperationPolicy();
+        headerCPolicy.setPolicyName(headerCPolicyData.getSpecification().getName());
+        headerCPolicy.setPolicyVersion(headerCPolicyData.getSpecification().getVersion());
+        headerCPolicy.setPolicyId(headerCPolicyUUID);
+        headerCPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        headerCPolicy.setOrder(1);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("headerName", "Test Header");
+        parameters.put("headerValue", "Test Value");
+        headerCPolicy.setParameters(parameters);
+        policyList.add(headerCPolicy);
+
+        String policyUUID = apiMgtDAO.addGatewayGlobalPolicy(policyList, description, name, orgId, mappingUUID);
+        Assert.assertEquals("Returned policy UUID should match the UUID we provided.", policyUUID, mappingUUID);
+        assertEquals("The size of gateway policies data for the provided mapping UUID should be one.", 1,
+                apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(mappingUUID, false).size());
+
+        // Update the policy
+        String newDescription = "New test policy description";
         List<GatewayPolicyData> policyDataList = apiMgtDAO.getGatewayPolicyMappingMetadataForOrganization(orgId);
         assertTrue(policyDataList.size() > 0);
-        String mappingUUID = policyDataList.get(0).getPolicyMappingId();
+        String retrievedMappingUUID = policyDataList.get(0).getPolicyMappingId();
 
         OperationPolicyData logCPolicyData = getOperationPolicyDataObject(orgId, null, "logPolicy");
         String logCPolicyUUID = apiMgtDAO.addCommonOperationPolicy(logCPolicyData);
 
-        List<OperationPolicy> policyList = new ArrayList<>();
+        List<OperationPolicy> newPolicyList = new ArrayList<>();
 
         OperationPolicy logCPolicy = new OperationPolicy();
         logCPolicy.setPolicyName(logCPolicyData.getSpecification().getName());
@@ -1897,60 +1931,88 @@ public class APIMgtDAOTest {
         logCPolicy.setPolicyId(logCPolicyUUID);
         logCPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
         logCPolicy.setOrder(2);
-        policyList.add(logCPolicy);
+        newPolicyList.add(logCPolicy);
 
-        String policyUUID = apiMgtDAO.updateGatewayGlobalPolicy(policyList, description, name, orgId, mappingUUID);
-        Assert.assertEquals("Returned policy UUID should match the UUID we provided.", policyUUID, mappingUUID);
+        String policyID = apiMgtDAO.updateGatewayGlobalPolicy(newPolicyList, newDescription, name, orgId, retrievedMappingUUID);
+        Assert.assertEquals("Returned policy UUID should match the UUID we provided.", policyID, retrievedMappingUUID);
         assertEquals("The size of gateway policies data for the provided mapping UUID should be two.", 2,
-                apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(mappingUUID, false).size());
-        GatewayPolicyData gatewayPolicyData = apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(mappingUUID);
-        assertEquals("Description mismatch!", description, gatewayPolicyData.getPolicyMappingDescription());
+                apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(retrievedMappingUUID, false).size());
+        GatewayPolicyData gatewayPolicyData = apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(retrievedMappingUUID);
+        assertEquals("Description mismatch!", newDescription, gatewayPolicyData.getPolicyMappingDescription());
+
+        // Delete the policy mapping
+        apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(policyID, true);
+        assertEquals("The list of gateway policies data for the provided mapping UUID should be empty.", 0,
+                apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(policyID, false).size());
+        assertNull("Policy Mapping ID retrieved should be null.",
+                apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(policyID).getPolicyMappingId());
     }
 
     @Test
     public void testAddGatewayPolicyDeployment() throws Exception {
         String orgId = "org1";
+        String name = "Test Policy";
+        String description = "Test policy description";
+        String mappingUUID = UUID.randomUUID().toString();
+
+        OperationPolicyData headerCPolicyData = getOperationPolicyDataObject(orgId, null, "addHeader");
+        String headerCPolicyUUID = apiMgtDAO.addCommonOperationPolicy(headerCPolicyData);
+
+        List<OperationPolicy> policyList = new ArrayList<>();
+
+        OperationPolicy headerCPolicy = new OperationPolicy();
+        headerCPolicy.setPolicyName(headerCPolicyData.getSpecification().getName());
+        headerCPolicy.setPolicyVersion(headerCPolicyData.getSpecification().getVersion());
+        headerCPolicy.setPolicyId(headerCPolicyUUID);
+        headerCPolicy.setDirection(APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST);
+        headerCPolicy.setOrder(1);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("headerName", "Test Header");
+        parameters.put("headerValue", "Test Value");
+        headerCPolicy.setParameters(parameters);
+        policyList.add(headerCPolicy);
+
+        String policyUUID = apiMgtDAO.addGatewayGlobalPolicy(policyList, description, name, orgId, mappingUUID);
+        Assert.assertEquals("Returned policy UUID should match the UUID we provided.", policyUUID, mappingUUID);
+        assertEquals("The size of gateway policies data for the provided mapping UUID should be one.", 1,
+                apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(mappingUUID, false).size());
+
+        // Deploy policy mapping
         List<GatewayPolicyData> policyDataList = apiMgtDAO.getGatewayPolicyMappingMetadataForOrganization(orgId);
         assertTrue(policyDataList.size() > 0);
-        String mappingUUID = policyDataList.get(0).getPolicyMappingId();
+        String retrievedMappingUUID = policyDataList.get(0).getPolicyMappingId();
         List<GatewayPolicyDeployment> gatewayPolicyDeploymentList = new ArrayList<>();
 
-        gatewayPolicyDeploymentList.add(getGatewayPolicyDeployment(mappingUUID, "Gateway1"));
-        gatewayPolicyDeploymentList.add(getGatewayPolicyDeployment(mappingUUID, "Gateway2"));
+        gatewayPolicyDeploymentList.add(getGatewayPolicyDeployment(retrievedMappingUUID, "Gateway1"));
+        gatewayPolicyDeploymentList.add(getGatewayPolicyDeployment(retrievedMappingUUID, "Gateway2"));
 
         apiMgtDAO.addGatewayPolicyDeployment(gatewayPolicyDeploymentList, orgId);
         assertEquals("The number of gateway policy mapping deployments retrieved should equals to two", 2,
-                apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(mappingUUID, orgId).size());
-    }
+                apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(retrievedMappingUUID, orgId).size());
 
-    @Test
-    public void testRemoveGatewayPolicyDeployment() throws Exception {
-        String orgId = "org1";
-        List<GatewayPolicyData> policyDataList = apiMgtDAO.getGatewayPolicyMappingMetadataForOrganization(orgId);
-        assertTrue(policyDataList.size() > 0);
-        String mappingUUID = policyDataList.get(0).getPolicyMappingId();
-        List<GatewayPolicyDeployment> gatewayPolicyDeploymentList = new ArrayList<>();
+        // Un-deploy policy mapping
+        List<GatewayPolicyData> retrievedPolicyDataList = apiMgtDAO.getGatewayPolicyMappingMetadataForOrganization(orgId);
+        assertTrue(retrievedPolicyDataList.size() > 0);
+        String mappingID = retrievedPolicyDataList.get(0).getPolicyMappingId();
+        List<GatewayPolicyDeployment> gatewayPolicyUnDeploymentList = new ArrayList<>();
 
-        gatewayPolicyDeploymentList.add(getGatewayPolicyDeployment(mappingUUID, "Gateway1"));
-        gatewayPolicyDeploymentList.add(getGatewayPolicyDeployment(mappingUUID, "Gateway2"));
+        gatewayPolicyUnDeploymentList.add(getGatewayPolicyDeployment(mappingID, "Gateway1"));
+        gatewayPolicyUnDeploymentList.add(getGatewayPolicyDeployment(mappingID, "Gateway2"));
 
-        apiMgtDAO.removeGatewayPolicyDeployment(gatewayPolicyDeploymentList, orgId);
+        apiMgtDAO.removeGatewayPolicyDeployment(gatewayPolicyUnDeploymentList, orgId);
         assertEquals("The set of gateway policy mapping deployments retrieved should be empty", 0,
-                apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(mappingUUID, orgId).size());
-    }
+                apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(mappingID, orgId).size());
 
-    @Test
-    public void testDeleteGatewayPolicyMappingByPolicyId() throws Exception {
-        String orgId = "org1";
-        List<GatewayPolicyData> policyDataList = apiMgtDAO.getGatewayPolicyMappingMetadataForOrganization(orgId);
-        assertTrue(policyDataList.size() > 0);
-        String mappingUUID = policyDataList.get(0).getPolicyMappingId();
+        // Delete the policy mapping
+        List<GatewayPolicyData> policyDataListToDelete = apiMgtDAO.getGatewayPolicyMappingMetadataForOrganization(orgId);
+        assertTrue(policyDataListToDelete.size() > 0);
+        String mappingUUIDToDelete = policyDataListToDelete.get(0).getPolicyMappingId();
 
-        apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(mappingUUID, true);
+        apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(mappingUUIDToDelete, true);
         assertEquals("The list of gateway policies data for the provided mapping UUID should be empty.", 0,
-                apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(mappingUUID, false).size());
+                apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(mappingUUIDToDelete, false).size());
         assertNull("Policy Mapping ID retrieved should be null.",
-                apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(mappingUUID).getPolicyMappingId());
+                apiMgtDAO.getGatewayPolicyMappingMetadataByPolicyMappingUUID(mappingUUIDToDelete).getPolicyMappingId());
     }
 
     private OperationPolicyData getOperationPolicyDataObject(String org, String apiUUID, String policyName) throws APIManagementException {
