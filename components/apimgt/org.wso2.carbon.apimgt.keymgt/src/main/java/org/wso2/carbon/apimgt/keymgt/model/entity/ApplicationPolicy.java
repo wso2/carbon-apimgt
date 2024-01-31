@@ -25,6 +25,36 @@ public class ApplicationPolicy extends Policy {
 
     private static final String type = "APPLICATION";
 
+    BurstLimit burstLimit = new BurstLimit();
+    private Integer rateLimitCount = null;
+    private String rateLimitTimeUnit = null;
+
+    public BurstLimit getBurstLimit() {
+        return burstLimit;
+    }
+    public void setBurstLimit(BurstLimit burstLimit) {
+        this.burstLimit = burstLimit;
+    }
+    public int getRateLimitCount() {
+
+        return rateLimitCount;
+    }
+
+    public void setRateLimitCount(int rateLimitCount) {
+
+        this.rateLimitCount = rateLimitCount;
+    }
+
+    public String getRateLimitTimeUnit() {
+
+        return rateLimitTimeUnit;
+    }
+
+    public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+
+        this.rateLimitTimeUnit = rateLimitTimeUnit;
+    }
+
     @Override
     public String getCacheKey() {
 
@@ -34,6 +64,7 @@ public class ApplicationPolicy extends Policy {
     @Override
     public String toString() {
         return "ApplicationPolicy [getId()=" + getId() + ", getQuotaType()=" + getQuotaType() + ", isContentAware()="
-                + isContentAware() + ", getTenantId()=" + getTenantId() + ", getName()=" + getName() + "]";
+                + isContentAware() + ", getTenantId()=" + getTenantId() + ", getName()=" + getName() +
+                ", rateLimitCount=" + burstLimit.getRateLimitCount() + ", rateLimitTimeUnit=" + rateLimitTimeUnit + "]";
     }
 }

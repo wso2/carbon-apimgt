@@ -157,7 +157,7 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
         Caching.class, PaginationContext.class, MultitenantUtils.class, AbstractAPIManager.class, OASParserUtil.class,
         KeyManagerHolder.class, CertificateManagerImpl.class , PublisherAPI.class, Organization.class,
         APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class})
-@PowerMockIgnore("org.mockito.*")
+
 public class APIProviderImplTest {
 
     private ApiMgtDAO apimgtDAO;
@@ -734,7 +734,7 @@ public class APIProviderImplTest {
     private APIProduct createMockAPIProduct(String provider) {
 
         APIProductIdentifier productIdentifier = new APIProductIdentifier(provider, APIConstants.API_PRODUCT,
-                APIConstants.API_PRODUCT_VERSION);
+                APIConstants.API_PRODUCT_VERSION_1_0_0);
         APIProduct apiProduct = new APIProduct(productIdentifier);
         apiProduct.setContext("/test");
         apiProduct.setState(APIConstants.CREATED);

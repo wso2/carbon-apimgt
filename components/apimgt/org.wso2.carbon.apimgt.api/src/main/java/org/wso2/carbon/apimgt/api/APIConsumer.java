@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -797,4 +798,35 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to retrieve policy.
      */
     Tier getThrottlePolicyByName(String name, int policyType, String organization) throws APIManagementException;
+
+    /**
+     * This method used to retrieve key manager configurations for tenant
+     * @param organization organization of the key manager
+     * @param username username of the logged in user
+     * @return KeyManagerConfigurationDTO list
+     * @throws APIManagementException if error occurred
+     */
+    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization, String username)
+            throws APIManagementException;
+
+    /**
+     * This method used to check if key manager configuration is allowed for user
+     * @param keyManagerId uuid of the key manager
+     * @param username username of the logged in user
+     * @return boolean
+     * @throws APIManagementException if error occurred
+     */
+    boolean isKeyManagerAllowedForUser(String keyManagerId, String username) throws APIManagementException;
+
+    /**
+     * This method used to check if key manager configuration by name is allowed for user
+     * @param keyManagerName name of the key manager
+     * @param organization organization of the logged in user
+     * @param username username of the logged in user
+     * @return boolean
+     * @throws APIManagementException if error occurred
+     */
+    boolean isKeyManagerByNameAllowedForUser(String keyManagerName, String organization, String username)
+            throws APIManagementException;
+
 }

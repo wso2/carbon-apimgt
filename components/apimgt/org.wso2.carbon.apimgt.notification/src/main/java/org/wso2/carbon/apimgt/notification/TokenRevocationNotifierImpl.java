@@ -52,7 +52,6 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     private static final Log log = LogFactory.getLog(TokenRevocationNotifierImpl.class);
     protected static final String DEFAULT_TTL = "3600";
     protected Properties realTimeNotifierProperties;
-    protected Properties persistentNotifierProperties;
 
     /**
      * Method to publish the revoked token on to the realtime message broker
@@ -135,7 +134,6 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     public void init(Properties realTimeNotifierProperties, Properties persistentNotifierProperties) {
 
         this.realTimeNotifierProperties = realTimeNotifierProperties;
-        this.persistentNotifierProperties = persistentNotifierProperties;
     }
 
 }

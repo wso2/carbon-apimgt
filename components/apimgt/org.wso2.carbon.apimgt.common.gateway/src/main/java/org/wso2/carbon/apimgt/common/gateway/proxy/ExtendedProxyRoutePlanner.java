@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDT
 public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
     private static final Log log = LogFactory.getLog(ExtendedProxyRoutePlanner.class);
     private final HttpClientConfigurationDTO configuration;
-    String[] nonProxyHosts;
     String proxyHost;
     int proxyPort;
     String protocol;
@@ -41,7 +40,6 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
     public ExtendedProxyRoutePlanner(HttpHost host, HttpClientConfigurationDTO configuration) {
         super(host);
         this.configuration = configuration;
-        this.nonProxyHosts = configuration.getNonProxyHosts();
         this.proxyHost = configuration.getProxyHost();
         this.proxyPort = configuration.getProxyPort();
         this.protocol = configuration.getProxyProtocol();

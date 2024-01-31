@@ -121,6 +121,16 @@ public class TemplateBuilderUtil {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
 
+        String apiKeyHeader;
+        if (!StringUtils.isBlank(api.getApiKeyHeader())) {
+            apiKeyHeader = api.getApiKeyHeader();
+        } else {
+            apiKeyHeader = APIConstants.API_KEY_HEADER_DEFAULT;
+        }
+        if (!StringUtils.isBlank(apiKeyHeader)) {
+            corsProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
+        }
+
         if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
             if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
                 CORSConfiguration corsConfiguration = api.getCorsConfiguration();
@@ -183,6 +193,9 @@ public class TemplateBuilderUtil {
         Map<String, String> authProperties = new HashMap<>();
         if (!StringUtils.isBlank(authorizationHeader)) {
             authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+        if (!StringUtils.isBlank(apiKeyHeader)) {
+            authProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
         }
         String apiSecurity = api.getApiSecurity();
         String apiLevelPolicy = api.getApiLevelPolicy();
@@ -296,6 +309,16 @@ public class TemplateBuilderUtil {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
 
+        String apiKeyHeader;
+        if (!StringUtils.isBlank(apiProduct.getApiKeyHeader())) {
+            apiKeyHeader = apiProduct.getApiKeyHeader();
+        } else {
+            apiKeyHeader = APIConstants.API_KEY_HEADER_DEFAULT;
+        }
+        if (!StringUtils.isBlank(apiKeyHeader)) {
+            corsProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
+        }
+
         if (apiProduct.getCorsConfiguration() != null &&
                 apiProduct.getCorsConfiguration().isCorsConfigurationEnabled()) {
             CORSConfiguration corsConfiguration = apiProduct.getCorsConfiguration();
@@ -355,6 +378,9 @@ public class TemplateBuilderUtil {
         Map<String, String> authProperties = new HashMap<String, String>();
         if (!StringUtils.isBlank(authorizationHeader)) {
             authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+        if (!StringUtils.isBlank(apiKeyHeader)) {
+            authProperties.put(APIConstants.API_KEY_HEADER, apiKeyHeader);
         }
         String apiSecurity = apiProduct.getApiSecurity();
         String apiLevelPolicy = apiProduct.getProductLevelPolicy();
@@ -468,6 +494,7 @@ public class TemplateBuilderUtil {
                             template.setMediationScripts(uriTemplate.getHTTPVerb(), uriTemplate.getMediationScript());
                             template.setAmznResourceName(uriTemplate.getAmznResourceName());
                             template.setAmznResourceTimeout(uriTemplate.getAmznResourceTimeout());
+                            template.setAmznResourceContentEncoded(uriTemplate.getAmznResourceContentEncoded());
                             break;
                         }
                     }
@@ -888,7 +915,7 @@ public class TemplateBuilderUtil {
         }
     }
 
-    private static GatewayContentDTO[] addGatewayContentToList(GatewayContentDTO gatewayContentDTO,
+    public static GatewayContentDTO[] addGatewayContentToList(GatewayContentDTO gatewayContentDTO,
                                                                GatewayContentDTO[] gatewayContents) {
 
         if (gatewayContents == null) {

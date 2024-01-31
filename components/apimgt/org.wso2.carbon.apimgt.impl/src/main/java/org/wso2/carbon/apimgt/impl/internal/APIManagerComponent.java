@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.impl.notifier.CorrelationConfigNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
@@ -214,6 +215,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIMgtDBUtil.initialize();
@@ -1025,9 +1027,7 @@ public class APIManagerComponent {
             int proxyPort = Integer.parseInt(configuration.getFirstProperty(APIConstants.PROXY_PORT));
             String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
             String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
-            String nonProxyHostsString = configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
-            String[] nonProxyHosts = configuration.getFirstProperty(nonProxyHostsString) != null ?
-                    nonProxyHostsString.split("\\|") : null;
+            String[] nonProxyHosts = getNonProxyHostsListByNonProxyHostsStringConfiguration(configuration);
             String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
             builder = builder.withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol,
                     nonProxyHosts);
@@ -1071,6 +1071,18 @@ public class APIManagerComponent {
         configuration.setHttpClientConfiguration(builder.withConnectionParams(maxTotal, defaultMaxPerRoute)
                 .withSSLContext(sslContext, hostnameVerifier).build());
     }
+
+    /**
+     * Populate list of NonProxyHosts for given nonProxyHostsString through APIManagerConfiguration
+     *
+     * @param config APIManagerConfiguration
+     * @return String array of proxy list
+     */
+    String[] getNonProxyHostsListByNonProxyHostsStringConfiguration(APIManagerConfiguration config) {
+        String nonProxyHostsString = config.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
+        return nonProxyHostsString != null ? nonProxyHostsString.split("\\|") : null;
+    }
+
     @Reference(
             name = "apim.workflow.task.service",
             service = org.wso2.carbon.apimgt.api.model.WorkflowTaskService.class,

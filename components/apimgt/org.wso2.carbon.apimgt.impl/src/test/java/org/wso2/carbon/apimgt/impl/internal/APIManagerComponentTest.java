@@ -27,6 +27,7 @@ import org.osgi.service.component.ComponentContext;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -134,6 +135,22 @@ public class APIManagerComponentTest {
     }
 
     @Test
+    public void testShouldReturnNotNullValueForNotNullNonProxyHostsString() {
+
+        APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
+        Registry registry = Mockito.mock(Registry.class);
+        APIManagerComponent apiManagerComponent = new APIManagerComponentWrapper(registry);
+        Mockito.when(configuration.getFirstProperty(APIConstants.NON_PROXY_HOSTS)).thenReturn("localhost");
+
+        try {
+            Assert.assertNotNull(
+                    apiManagerComponent.getNonProxyHostsListByNonProxyHostsStringConfiguration(configuration));
+        } catch (Exception ex) {
+            Assert.fail("Unexpected exception was thrown");
+        }
+    }
+
+    @Test
     public void testShouldNotContinueWhenConfigurationUnAvailable() throws Exception {
         PowerMockito.mockStatic(APIUtil.class);
         ComponentContext componentContext = Mockito.mock(ComponentContext.class);
@@ -153,8 +170,6 @@ public class APIManagerComponentTest {
             Assert.fail("Should not throw an exception");
         }
     }
-
-
 
     @AfterClass
     public static void destroy() {

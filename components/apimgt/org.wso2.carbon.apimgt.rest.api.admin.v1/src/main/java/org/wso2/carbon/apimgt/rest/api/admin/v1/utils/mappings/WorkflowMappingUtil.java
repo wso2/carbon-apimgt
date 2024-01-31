@@ -80,6 +80,8 @@ public class WorkflowMappingUtil {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.API_STATE);
         } else if (workflow.getWorkflowType().equals("AM_API_PRODUCT_STATE")) {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.API_PRODUCT_STATE);
+        } else if (workflow.getWorkflowType().equals("AM_REVISION_DEPLOYMENT")) {
+            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.REVISION_DEPLOYMENT);
         }
         workflowInfoDTO.setWorkflowStatus(WorkflowInfoDTO.WorkflowStatusEnum.valueOf(workflow.getStatus().toString()));
         workflowInfoDTO.setCreatedTime(workflow.getCreatedTime());

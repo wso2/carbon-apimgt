@@ -31,12 +31,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.transport.dynamicconfigurations.DynamicProfileReloaderHolder;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
@@ -57,6 +61,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -182,6 +187,11 @@ public class InMemoryAPIDeployer {
         return result;
     }
 
+    public boolean deployAllAPIsAtGatewayStartup(Set<String> assignedGatewayLabels, String tenantDomain)
+            throws ArtifactSynchronizerException {
+        return deployAllAPIs(assignedGatewayLabels, tenantDomain, false);
+    }
+
     /**
      * Deploy an API in the gateway using the deployAPI method in gateway admin.
      *
@@ -190,38 +200,70 @@ public class InMemoryAPIDeployer {
      * @return True if all API artifacts retrieved from the storage and successfully deployed without any error. else
      * false
      */
-    public boolean deployAllAPIsAtGatewayStartup(Set<String> assignedGatewayLabels, String tenantDomain)
-            throws ArtifactSynchronizerException {
+    public boolean deployAllAPIs(Set<String> assignedGatewayLabels, String tenantDomain,
+                                                 boolean redeployChangedAPIs) throws ArtifactSynchronizerException {
 
         boolean result = false;
+        Map<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> apiMap = null;
 
+        if (!redeployChangedAPIs) {
+            try {
+                deployJWKSSynapseAPI(tenantDomain); // Deploy JWKS API
+            } catch (APIManagementException e) {
+                log.error("Error while deploying JWKS API for tenant domain :" + tenantDomain, e);
+            }
+        }
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             if (artifactRetriever != null) {
                 try {
                     int errorCount = 0;
                     String labelString = String.join("|", assignedGatewayLabels);
                     String encodedString = Base64.encodeBase64URLSafeString(labelString.getBytes());
+
                     APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
-                    MessageContext.setCurrentMessageContext(org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
+                    MessageContext.setCurrentMessageContext(
+                                    org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
                     PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                            .setTenantDomain(tenantDomain, true);
                     List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder.getInstance().getArtifactRetriever()
                             .retrieveAllArtifacts(encodedString, tenantDomain);
-                    if (gatewayRuntimeArtifacts.size() == 0) {
+                    if (gatewayRuntimeArtifacts.isEmpty()) {
                         return true;
+                    }
+                    if (redeployChangedAPIs) {
+                        DataHolder dataHolder = DataHolder.getInstance();
+                        apiMap = dataHolder.getTenantAPIMap().get(tenantDomain);
                     }
                     for (String runtimeArtifact : gatewayRuntimeArtifacts) {
                         GatewayAPIDTO gatewayAPIDTO = null;
                         try {
                             if (StringUtils.isNotEmpty(runtimeArtifact)) {
                                 gatewayAPIDTO = new Gson().fromJson(runtimeArtifact, GatewayAPIDTO.class);
-                                log.info("Deploying synapse artifacts of " + gatewayAPIDTO.getName());
-                                apiGatewayAdmin.deployAPI(gatewayAPIDTO);
-                                addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
-                                addDeployedGraphqlQLToAPI(gatewayAPIDTO);
-                                DataHolder.getInstance().addKeyManagerToAPIMapping(gatewayAPIDTO.getApiId(),
-                                        gatewayAPIDTO.getKeyManagers());
-                                DataHolder.getInstance().markAPIAsDeployed(gatewayAPIDTO);
+                                if (redeployChangedAPIs && apiMap != null) {
+                                    org.wso2.carbon.apimgt.keymgt.model.entity.API api =
+                                            apiMap.get(gatewayAPIDTO.getApiContext());
+                                    // Here, we redeploy APIs only if there is a new revision deployed in the
+                                    // Control Plane and not synced with the gateway due to connection issues.
+                                    if (api != null && api.getRevisionId() != null &&
+                                            (!api.getRevisionId().equalsIgnoreCase(gatewayAPIDTO.getRevision()))) {
+                                        DeployAPIInGatewayEvent deployAPIInGatewayEvent =
+                                                new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                                                        System.currentTimeMillis(),
+                                                        APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
+                                                        tenantDomain, api.getApiId(), api.getUuid(),
+                                                        assignedGatewayLabels, api.getName(), api.getVersion(),
+                                                        api.getApiProvider(), api.getApiType(), api.getContext());
+                                        unDeployAPI(deployAPIInGatewayEvent);
+                                        deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+                                    } else {
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("API " + gatewayAPIDTO.getName() + " is already deployed");
+                                        }
+                                    }
+                                } else {
+                                    deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+                                }
                             }
                         } catch (AxisFault axisFault) {
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
@@ -255,6 +297,18 @@ public class InMemoryAPIDeployer {
         }
         return result;
     }
+
+    private void deployAPIFromDTO(GatewayAPIDTO gatewayAPIDTO, APIGatewayAdmin apiGatewayAdmin) throws AxisFault {
+        log.info("Deploying synapse artifacts of API ID: " + gatewayAPIDTO.getApiId() +
+                " and Context: " + gatewayAPIDTO.getApiContext());
+        apiGatewayAdmin.deployAPI(gatewayAPIDTO);
+        addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
+        addDeployedGraphqlQLToAPI(gatewayAPIDTO);
+        DataHolder.getInstance().addKeyManagerToAPIMapping(gatewayAPIDTO.getApiId(),
+                gatewayAPIDTO.getKeyManagers());
+        DataHolder.getInstance().markAPIAsDeployed(gatewayAPIDTO);
+    }
+
 
     private void unDeployAPI(APIGatewayAdmin apiGatewayAdmin, DeployAPIInGatewayEvent gatewayEvent)
             throws AxisFault {
@@ -437,6 +491,58 @@ public class InMemoryAPIDeployer {
                                 retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
                                 retrievedAPI.getApiProvider(), retrievedAPI.getApiType(), retrievedAPI.getContext());
                 unDeployAPI(deployAPIInGatewayEvent);
+            }
+        }
+    }
+
+    /**
+     * Deploy Synapse API for JWKS endpoint
+     *
+     * @param tenantDomain tenant domain
+     */
+    public static void deployJWKSSynapseAPI(String tenantDomain) throws APIManagementException {
+        String api = org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.retrieveDeployedAPI(
+                JWTConstants.GATEWAY_JWKS_API_NAME, null, tenantDomain);
+        if (api == null) {
+            try {
+                // Deploy JWKS API for tenant
+                MessageContext.setCurrentMessageContext(
+                        org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                GatewayAPIDTO jwksAPIDto = new GatewayAPIDTO();
+                String jwksApiContext;
+                if (tenantDomain != null && !APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
+                    jwksApiContext = "/t/" + tenantDomain + JWTConstants.GATEWAY_JWKS_API_CONTEXT;
+                } else {
+                    jwksApiContext = JWTConstants.GATEWAY_JWKS_API_CONTEXT;
+                }
+                String jwksSynapseAPI = "<api xmlns=\"http://ws.apache.org/ns/synapse\" name=\"_JwksEndpoint_\" "
+                        + "context=\"" + jwksApiContext + "\">\n"
+                        + "    <resource methods=\"GET\" url-mapping=\"/*\" faultSequence=\"fault\">\n"
+                        + "        <inSequence>\n"
+                        + "            <respond/>\n"
+                        + "        </inSequence>\n"
+                        + "    </resource>\n"
+                        + "    <handlers>\n"
+                        + "        <handler class=\"org.wso2.carbon.apimgt.gateway.handlers.common.JwksHandler\"/>\n"
+                        + "    </handlers>\n"
+                        + "</api>\n";
+
+                jwksAPIDto.setName(JWTConstants.GATEWAY_JWKS_API_NAME);
+                jwksAPIDto.setTenantDomain(tenantDomain);
+                jwksAPIDto.setApiDefinition(jwksSynapseAPI);
+
+                log.info("Deploying synapse artifacts of " + jwksAPIDto.getName());
+                APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
+                apiGatewayAdmin.deployAPI(jwksAPIDto);
+                DataHolder.getInstance().markAPIAsDeployed(jwksAPIDto);
+            } catch (AxisFault axisFault) {
+                throw new APIManagementException("Error while retrieving JWKS API Artifact", axisFault,
+                        ExceptionCodes.INTERNAL_ERROR);
+            } finally {
+                MessageContext.destroyCurrentMessageContext();
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
     }

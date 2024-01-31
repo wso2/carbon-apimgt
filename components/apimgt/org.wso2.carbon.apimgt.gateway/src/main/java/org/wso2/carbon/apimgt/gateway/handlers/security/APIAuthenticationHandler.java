@@ -94,6 +94,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
+    private String apiKeyHeader;
     private String apiSecurity;
     private String apiLevelPolicy;
     private String certificateInformation;
@@ -199,6 +200,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      */
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    /**
+     * To get the Api Key Header.
+     *
+     * @return Relevant the Api Key Header of the API request
+     */
+    public String getApiKeyHeader() {
+        return apiKeyHeader;
+    }
+
+    /**
+     * To set the Api Key Header.
+     *
+     * @param apiKeyHeader the Api Key Header of the API request.
+     */
+    public void setApiKeyHeader(String apiKeyHeader) {
+        this.apiKeyHeader = apiKeyHeader;
     }
 
     /**
@@ -335,7 +354,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             authenticators.add(authenticator);
         }
         if (isApiKeyProtected) {
-            Authenticator authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiLevelPolicy, isOAuthBasicAuthMandatory);
+            Authenticator authenticator = new ApiKeyAuthenticator(apiKeyHeader, apiLevelPolicy, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
@@ -631,7 +650,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             errorDetail =
                     APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
                             + authorizationHeader + " : Bearer ACCESS_TOKEN' or '" + authorizationHeader +
-                            " : Basic ACCESS_TOKEN' or 'apikey: API_KEY'" ;
+                            " : Basic ACCESS_TOKEN' or '" + apiKeyHeader + " : API_KEY'";
         }
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
 

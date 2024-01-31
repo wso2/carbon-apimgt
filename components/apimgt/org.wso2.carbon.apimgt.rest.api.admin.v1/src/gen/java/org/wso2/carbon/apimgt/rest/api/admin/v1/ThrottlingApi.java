@@ -57,6 +57,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies"),
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Import Export",  })
@@ -76,6 +77,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies"),
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Import Export",  })
@@ -184,7 +186,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Get all Advanced Throttling Policies", notes = "Retrieves all existing advanced throttling policies. ", response = AdvancedThrottlePolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_view", description = "View throttling policies")
         })
     }, tags={ "Advanced Policy (Collection)",  })
     @ApiResponses(value = { 
@@ -202,6 +205,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies"),
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Advanced Policy (Individual)",  })
@@ -219,7 +223,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Get an Advanced Throttling Policy", notes = "Retrieves an advanced throttling policy. ", response = AdvancedThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_view", description = "View throttling policies")
         })
     }, tags={ "Advanced Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -237,7 +242,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Update an Advanced Throttling Policy", notes = "Updates an existing Advanced throttling policy. ", response = AdvancedThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies")
         })
     }, tags={ "Advanced Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -255,7 +261,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Add an Advanced Throttling Policy", notes = "Add a new advanced throttling policy. ", response = AdvancedThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies")
         })
     }, tags={ "Advanced Policy (Collection)",  })
     @ApiResponses(value = { 
@@ -273,7 +280,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Get all Application Throttling Policies", notes = "Retrieves all existing application throttling policies. ", response = ApplicationThrottlePolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_view", description = "View throttling policies")
         })
     }, tags={ "Application Policy (Collection)",  })
     @ApiResponses(value = { 
@@ -291,6 +299,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies"),
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Application Policy (Individual)",  })
@@ -308,7 +317,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Get an Application Throttling Policy", notes = "Retrieves an application throttling policy. ", response = ApplicationThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_view", description = "View throttling policies")
         })
     }, tags={ "Application Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -326,7 +336,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Update an Application Throttling policy", notes = "Updates an existing application level throttling policy. Upon a succesfull update, you will receive the updated application policy as the response. ", response = ApplicationThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies")
         })
     }, tags={ "Application Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -344,7 +355,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Add an Application Throttling Policy", notes = "This operation can be used to add a new application level throttling policy. ", response = ApplicationThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies")
         })
     }, tags={ "Application Policy (Collection)",  })
     @ApiResponses(value = { 
@@ -362,7 +374,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Get all Custom Rules", notes = "Retrieves all custom rules.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_view", description = "View throttling policies")
         })
     }, tags={ "Custom Rules (Collection)",  })
     @ApiResponses(value = { 
@@ -379,7 +392,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Add a Custom Rule", notes = "Adds a new custom rule.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies")
         })
     }, tags={ "Custom Rules (Collection)",  })
     @ApiResponses(value = { 
@@ -398,6 +412,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies"),
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Custom Rules (Individual)",  })
@@ -415,7 +430,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Get a Custom Rule", notes = "Retrieves a custom rule. We need to provide the policy Id as a path parameter.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_view", description = "View throttling policies")
         })
     }, tags={ "Custom Rules (Individual)",  })
     @ApiResponses(value = { 
@@ -433,7 +449,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Update a Custom Rule", notes = "Updates an existing custom rule.  **NOTE:** * Only super tenant users are allowed for this operation. ", response = CustomRuleDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies")
         })
     }, tags={ "Custom Rules (Individual)",  })
     @ApiResponses(value = { 
@@ -451,7 +468,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Get all Subscription Throttling Policies", notes = "This operation can be used to retrieve all Subscription level throttling policies. ", response = SubscriptionThrottlePolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_view", description = "View throttling policies")
         })
     }, tags={ "Subscription Policy (Collection)",  })
     @ApiResponses(value = { 
@@ -469,6 +487,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies"),
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Subscription Policy (Individual)",  })
@@ -486,7 +505,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Get a Subscription Policy", notes = "This operation can be used to retrieves subscription level throttling policy by specifying the Id of the policy as a path paramter ", response = SubscriptionThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies")
+            @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_view", description = "View throttling policies")
         })
     }, tags={ "Subscription Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -504,7 +524,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Update a Subscription Policy", notes = "Updates an existing subscription level throttling policy. ", response = SubscriptionThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies")
         })
     }, tags={ "Subscription Policy (Individual)",  })
     @ApiResponses(value = { 
@@ -522,7 +543,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiOperation(value = "Add a Subscription Throttling Policy", notes = "This operation can be used to add a Subscription level throttling policy specifying the details of the policy in the payload. ", response = SubscriptionThrottlePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies")
+            @AuthorizationScope(scope = "apim:tier_manage", description = "Update and delete throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_manage", description = "Update and delete throttling policies")
         })
     }, tags={ "Subscription Policy (Collection)",  })
     @ApiResponses(value = { 
@@ -541,6 +563,7 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
+            @AuthorizationScope(scope = "apim:admin_tier_view", description = "View throttling policies"),
             @AuthorizationScope(scope = "apim:policies_import_export", description = "Export and import policies related operations")
         })
     }, tags={ "Unified Search" })

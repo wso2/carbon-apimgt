@@ -85,6 +85,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -578,6 +579,8 @@ public class GatewayUtils {
             authContext.setStopOnQuotaReach(apiKeyValidationInfoDTO.isStopOnQuotaReach());
             authContext.setSpikeArrestLimit(apiKeyValidationInfoDTO.getSpikeArrestLimit());
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
+            authContext.setApplicationSpikesArrestLimit(apiKeyValidationInfoDTO.getApplicationSpikeArrestLimit());
+            authContext.setApplicationSpikesArrestUnit(apiKeyValidationInfoDTO.getApplicationSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
             authContext.setGraphQLMaxDepth(apiKeyValidationInfoDTO.getGraphQLMaxDepth());
@@ -1023,6 +1026,12 @@ public class GatewayUtils {
                 Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
                 if (claims.get(JWTConstants.SUB) != null) {
                     String sub = (String) jwtInfoDto.getJwtValidationInfo().getClaims().get(JWTConstants.SUB);
+
+                    // A system property is used to enable/disable getting the tenant aware username as sub claim.
+                    String tenantAwareSubClaim = System.getProperty(APIConstants.ENABLE_TENANT_AWARE_SUB_CLAIM);
+                    if (StringUtils.isNotEmpty(tenantAwareSubClaim) && Boolean.parseBoolean(tenantAwareSubClaim)) {
+                        sub = MultitenantUtils.getTenantAwareUsername(sub);
+                    }
                     jwtInfoDto.setSub(sub);
                 }
                 if (claims.get(JWTConstants.ORGANIZATIONS) != null) {
@@ -1366,7 +1375,12 @@ public class GatewayUtils {
         try {
             MessageContext.setCurrentMessageContext(createAxis2MessageContext());
             RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
-            String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
+            String qualifiedName;
+            if (version != null) {
+                qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
+            } else {
+                qualifiedName = apiName;
+            }
             OMElement api = restapiAdminServiceProxy.getApiContent(qualifiedName);
             if (api != null) {
                 return api.toString();
@@ -1542,6 +1556,10 @@ public class GatewayUtils {
 
     public static boolean isAllApisDeployed () {
         return DataHolder.getInstance().isAllApisDeployed();
+    }
+
+    public static boolean isAllGatewayPoliciesDeployed () {
+        return DataHolder.getInstance().isAllGatewayPoliciesDeployed();
     }
 
     public static List<String> getKeyManagers(org.apache.synapse.MessageContext messageContext) {

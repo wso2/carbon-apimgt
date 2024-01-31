@@ -1,0 +1,113 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "PizzaShackAPI",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "security" : [ {
+    "default" : [ ]
+  } ],
+  "paths" : {
+    "/test" : {
+      "put" : {
+        "requestBody" : {
+          "description" : "Request Body",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "payload" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : ""
+          }
+        },
+        "x-auth-type" : "Application & Application User",
+        "x-throttling-tier" : "Unlimited",
+        "x-scope" : "MenuScope",
+        "x-wso2-application-security" : {
+          "security-types" : [ "oauth2" ],
+          "optional" : false
+        }
+      },
+      "post" : {
+        "requestBody" : {
+          "description" : "Request Body",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "payload" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : ""
+          }
+        },
+        "x-auth-type" : "Application & Application User",
+        "x-throttling-tier" : "Unlimited",
+        "x-scope" : "OrderScope",
+        "x-wso2-application-security" : {
+          "security-types" : [ "oauth2" ],
+          "optional" : false
+        }
+      }
+    }
+  },
+  "components" : {
+    "securitySchemes" : {
+      "default" : {
+        "type" : "oauth2",
+        "flows" : {
+          "implicit" : {
+            "authorizationUrl" : "https://test.com",
+            "scopes" : { }
+          }
+        }
+      }
+    }
+  },
+  "x-wso2-security" : {
+    "apim" : {
+      "x-wso2-scopes" : [ {
+        "name" : "OrderScope",
+        "description" : "",
+        "key" : "OrderScope",
+        "roles" : "admin"
+      }, {
+        "name" : "MenuScope",
+        "description" : "description",
+        "key" : "MenuScope",
+        "roles" : ""
+      } ]
+    }
+  },
+  "x-wso2-application-security" : {
+    "security-types" : [ "oauth2" ],
+    "optional" : false
+  },
+  "x-wso2-response-cache" : {
+    "enabled" : false,
+    "cacheTimeoutInSeconds" : 0
+  }
+}

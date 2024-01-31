@@ -107,6 +107,7 @@ public class ServiceReferenceHolder {
         return throttleDataHolder;
     }
     private ArtifactRetriever artifactRetriever;
+    private int gatewayCount = 1;
 
     private ServiceReferenceHolder() {
 
@@ -394,6 +395,10 @@ public class ServiceReferenceHolder {
         return activeTenants.contains(tenantDomain);
     }
 
+    public Set<String> getActiveTenants() {
+        return activeTenants;
+    }
+
     public void setRedisCacheUtil(RedisCacheUtils redisCacheUtils) {
 
     }
@@ -448,4 +453,13 @@ public class ServiceReferenceHolder {
     public void setSynapseConfigurationService(SynapseConfigurationService synapseConfigurationService) {
         this.synapseConfigurationService = synapseConfigurationService;
     }
+
+    public int getGatewayCount() {
+        return gatewayCount;
+    }
+
+    public void setGatewayCount(int gatewayCount) {
+        this.gatewayCount = gatewayCount;
+    }
+
 }

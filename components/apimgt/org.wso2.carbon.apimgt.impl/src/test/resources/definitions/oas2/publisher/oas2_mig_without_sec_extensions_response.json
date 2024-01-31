@@ -1,0 +1,68 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "OldAPI"
+  },
+  "paths": {
+    "/test": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "x-auth-type": "Application \u0026 Application User",
+        "x-throttling-tier": "Unlimited",
+        "x-wso2-application-security": {
+          "security-types": [
+            "oauth2"
+          ],
+          "optional": false
+        }
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Payload",
+            "description": "Request Body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "payload": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "x-auth-type": "Application \u0026 Application User",
+        "x-throttling-tier": "Unlimited",
+        "x-wso2-application-security": {
+          "security-types": [
+            "oauth2"
+          ],
+          "optional": false
+        }
+      }
+    }
+  },
+  "x-wso2-application-security": {
+    "security-types": [
+      "oauth2"
+    ],
+    "optional": false
+  },
+  "x-wso2-response-cache": {
+    "enabled": false,
+    "cacheTimeoutInSeconds": 0
+  }
+}

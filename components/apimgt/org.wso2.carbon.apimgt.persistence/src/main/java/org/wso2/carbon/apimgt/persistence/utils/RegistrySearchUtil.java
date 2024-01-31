@@ -36,6 +36,9 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.registry.indexing.RegistryConfigLoader;
 import org.wso2.carbon.registry.indexing.indexer.Indexer;
 
+import static org.wso2.carbon.apimgt.persistence.APIConstants.API_GLOBAL_VISIBILITY;
+import static org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_VISIBILITY;
+
 public class RegistrySearchUtil {
 
     public static final String TAG_SEARCH_TYPE_PREFIX = "tag";
@@ -317,7 +320,23 @@ public class RegistrySearchUtil {
 
         return criteria;
     }
-    
+
+    private static String getDevPortalVisibilityWrappedQuery(String query, boolean isCrossTenant) {
+        if (!isCrossTenant) {
+            log.debug("Not a cross tenant scenario");
+            return query;
+        }
+        String criteria = API_OVERVIEW_VISIBILITY + "="
+                + API_GLOBAL_VISIBILITY;
+        if (query != null && !query.trim().isEmpty()) {
+            criteria = criteria + "&" + query;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Visibility wrapped query : " + criteria);
+        }
+        return criteria;
+    }
+
     private static String getDevPortalRolesWrappedQuery(String query, UserContext context) {
         if (PersistenceUtil.isAdminUser(context)) {
             log.debug("Admin user. no modifications to the query");
@@ -483,7 +502,7 @@ public class RegistrySearchUtil {
 
     
     public static Map<String, String> getDevPortalSearchAttributes(String searchQuery, UserContext ctx,
-            boolean displayMultipleStatus) throws APIPersistenceException {
+           boolean isCrossTenant, boolean displayMultipleStatus) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
 
         if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
@@ -502,6 +521,7 @@ public class RegistrySearchUtil {
                     APIConstants.LCSTATE_SEARCH_TYPE_KEY);
         }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
+        modifiedQuery = RegistrySearchUtil.getDevPortalVisibilityWrappedQuery(modifiedQuery, isCrossTenant);
         Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
         return attributes;
     }

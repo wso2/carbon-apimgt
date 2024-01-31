@@ -505,6 +505,8 @@ public final class APIUtil {
                     throw new DataLoadingException("Error while retrieving "
                             + path + ". Received response with status code "
                             + httpResponse.getStatusLine().getStatusCode());
+                } else if (retryCount > 0) {
+                    log.info("Successfully retrieved " + path);
                 }
                 retry = false;
             } catch (IOException | DataLoadingException ex) {
@@ -704,6 +706,7 @@ public final class APIUtil {
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            api.setApiKeyHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
 
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
@@ -914,6 +917,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, api.getAuthorizationHeader());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER, api.getApiKeyHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
                     Boolean.toString(api.isEnabledSchemaValidation()));
@@ -1089,6 +1093,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                     APIUtil.getCorsConfigurationJsonFromDto(apiProduct.getCorsConfiguration()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, apiProduct.getAuthorizationHeader());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER, apiProduct.getApiKeyHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, apiProduct.getApiSecurity());
 
             //Validate if the API has an unsupported context before setting it in the artifact
@@ -2741,6 +2746,57 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to validate character length of crucial api params.
+     *
+     * @param apiName    Name of the API
+     * @param apiVersion Version of the API
+     * @param context    API Context of the API
+     * @param provider   Provider of the API
+     * @throws APIManagementException If the params length exceeds the allowed length
+     */
+    public static void validateCharacterLengthOfAPIParams(String apiName, String apiVersion, String context,
+                                                          String provider) throws APIManagementException {
+
+        validateCharacterLengthOfAPIParams(apiName, context, provider);
+        if (!hasValidLength(apiVersion, APIConstants.MAX_LENGTH_VERSION)) {
+            throw new APIManagementException("API version exceeds allowed character length",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
+    }
+
+    /**
+     * This method is used to validate character length of crucial api product params.
+     *
+     * @param apiName  Name of the API
+     * @param context  API Context of the API
+     * @param provider Provider of the API
+     * @throws APIManagementException If the params length exceeds the allowed length
+     */
+    public static void validateCharacterLengthOfAPIParams(String apiName, String context, String provider)
+            throws APIManagementException {
+
+        if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)) {
+            throw new APIManagementException("API name exceeds allowed character length",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
+        if (!hasValidLength(context, APIConstants.MAX_LENGTH_CONTEXT)) {
+            throw new APIManagementException("API context exceeds allowed character length",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
+        if (!hasValidLength(provider, APIConstants.MAX_LENGTH_PROVIDER)) {
+            throw new APIManagementException("API provider name exceeds allowed character length",
+                    ExceptionCodes.LENGTH_EXCEEDS);
+        }
+    }
+
+    /**
+     * This method is used to validate character length.
+     */
+    public static boolean hasValidLength(String value, int maxLength) {
+        return value != null && value.length() <= maxLength;
+    }
+
+    /**
      * When an input is having '-AT-',replace it with @ [This is required to persist API data between registry and database]
      *
      * @param input inputString
@@ -3983,9 +4039,9 @@ public final class APIUtil {
      *
      * @param inputStream
      * @return
-     * @throws Exception
+     * @throws APIManagementException
      */
-    public static OMElement buildOMElement(InputStream inputStream) throws Exception {
+    public static OMElement buildOMElement(InputStream inputStream) throws APIManagementException {
 
         XMLStreamReader parser;
         StAXOMBuilder builder;
@@ -3997,7 +4053,7 @@ public final class APIUtil {
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser.";
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new APIManagementException(msg, e);
         }
 
         return builder.getDocumentElement();
@@ -4007,9 +4063,9 @@ public final class APIUtil {
      * Build OMElement from input stream with securely configured parser.
      * @param inputStream Input Stream
      * @return  OMElement
-     * @throws Exception XMLStreamException while parsing the inputStream
+     * @throws APIManagementException XMLStreamException while parsing the inputStream
      */
-    public static OMElement buildSecuredOMElement(InputStream inputStream) throws Exception {
+    public static OMElement buildSecuredOMElement(InputStream inputStream) throws APIManagementException {
 
         XMLStreamReader parser;
         StAXOMBuilder builder;
@@ -4024,7 +4080,7 @@ public final class APIUtil {
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser.";
             log.error(msg, e);
-            throw new Exception(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return builder.getDocumentElement();
     }
@@ -6013,7 +6069,8 @@ public final class APIUtil {
                         System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
                         retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                         retrievedPolicy.getPolicyName(),
-                        retrievedPolicy.getDefaultQuotaPolicy().getType());
+                        retrievedPolicy.getDefaultQuotaPolicy().getType(), retrievedPolicy.getRateLimitCount(),
+                        retrievedPolicy.getRateLimitTimeUnit());
                 APIUtil.sendNotification(applicationPolicyEvent, APIConstants.NotifierType.POLICY.name());
             }
         }
@@ -7959,47 +8016,6 @@ public final class APIUtil {
     }
 
     /**
-     * Utility method to generate JWT header with public certificate thumbprint for signature verification.
-     *
-     * @param publicCert         - The public certificate which needs to include in the header as thumbprint
-     * @param signatureAlgorithm signature algorithm which needs to include in the header
-     * @throws APIManagementException
-     */
-    public static String generateHeader(Certificate publicCert, String signatureAlgorithm) throws APIManagementException {
-
-        try {
-            //generate the SHA-1 thumbprint of the certificate
-            MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
-            byte[] der = publicCert.getEncoded();
-            digestValue.update(der);
-            byte[] digestInBytes = digestValue.digest();
-            String publicCertThumbprint = hexify(digestInBytes);
-            String base64UrlEncodedThumbPrint;
-            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                    .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
-            StringBuilder jwtHeader = new StringBuilder();
-            /*
-             * Sample header
-             * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
-             * "kid":"a_jhNus21KVuoFx65LmkW2O_l10_RS256"}
-             * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
-             * */
-            jwtHeader.append("{\"typ\":\"JWT\",");
-            jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            jwtHeader.append("\",");
-
-            jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64UrlEncodedThumbPrint);
-            jwtHeader.append("\"}");
-            return jwtHeader.toString();
-
-        } catch (Exception e) {
-            throw new APIManagementException("Error in generating public certificate thumbprint", e);
-        }
-    }
-
-    /**
      * Get the JWS compliant signature algorithm code of the algorithm used to sign the JWT.
      *
      * @param signatureAlgorithm - The algorithm used to sign the JWT. If signing is disabled, the value will be NONE.
@@ -9439,6 +9455,7 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
 
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            api.setApiKeyHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
 
         } catch (GovernanceException e) {
@@ -9621,9 +9638,10 @@ public final class APIUtil {
         UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
 
         for (String endpoint : endpoints) {
-            // If url is a JMS connection url or a Consul service discovery related url, validation is skipped.
-            // If not, validity is checked.
-            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !urlValidator.isValid(endpoint)) {
+            // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
+            // validation is skipped. If not, validity is checked.
+            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
+                    !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
                 try {
                     // If the url is not identified as valid from the above check,
                     // next step is determine the validity of the encoded url (done through the URI constructor).

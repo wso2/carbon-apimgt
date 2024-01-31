@@ -120,6 +120,21 @@ public interface APIManager {
      */
     boolean isContextExist(String context, String organization) throws APIManagementException;
 
+
+    /**
+     * Checks whether the given API Product context is already registered in the system for API products
+     *
+     * @param context A String representing an API product context
+     * @param contextWithVersion A String representing an API context appended with the version
+     * @param organization Organization
+     * @return true if the context already exists and false otherwise
+     * @throws APIManagementException if failed to check the context availability
+     */
+    boolean isContextExistForAPIProducts(String context, String contextWithVersion, String organization)
+            throws APIManagementException;
+
+    /**
+
     /**
      * Checks whether the given API name is already registered in the system
      *
@@ -453,6 +468,16 @@ public interface APIManager {
      */
     List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String username, String organization)
             throws APIManagementException;
+
+    /**
+     * Get the provider of a given API or set of API Revisions, given the API name and the organization
+     *
+     * @param name , name of the API
+     * @param organization
+     * @return String APIProvider
+     * @throws APIManagementException if failed to get set of API
+     */
+    String getAPIProviderByNameAndOrganization(String name, String organization) throws APIManagementException;
 
     /**
      * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be

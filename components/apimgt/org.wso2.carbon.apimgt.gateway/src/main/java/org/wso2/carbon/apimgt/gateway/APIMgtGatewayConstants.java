@@ -139,6 +139,7 @@ public class APIMgtGatewayConstants {
     public static final String CUSTOM_ANALYTICS_RESPONSE_PROPERTIES = "apim.analytics.response.properties";
     public static final String CUSTOM_ANALYTICS_PROPERTY_SEPARATOR = ",";
     public static final String API_UUID_PROPERTY = "API_UUID";
+    public static final String TENANT_DOMAIN = "tenant.info.domain";
 
     /**
      * Constants for swagger schema validator
@@ -148,6 +149,7 @@ public class APIMgtGatewayConstants {
     public static final String HTTP_REQUEST_METHOD = "HTTP_METHOD_OBJECT";
     public static final String REST_CONTENT_TYPE = "ContentType";
     public static final String REST_MESSAGE_TYPE = "messageType";
+    public static final String SCHEMA_VALIDATION_REPORT = "schema-validation-report";
 
 
     /**
