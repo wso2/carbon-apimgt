@@ -42,6 +42,7 @@ public class DataHolder {
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private boolean isAllApisDeployed = false;
+    private boolean isAllGatewayPoliciesDeployed = false;
 
     private DataHolder() {
 
@@ -125,6 +126,14 @@ public class DataHolder {
         return apiToKeyManagersMap.get(apiUUID);
     }
 
+    public boolean isAllGatewayPoliciesDeployed() {
+        return isAllGatewayPoliciesDeployed;
+    }
+
+    public void setAllGatewayPoliciesDeployed(boolean allGatewayPoliciesDeployed) {
+        isAllGatewayPoliciesDeployed = allGatewayPoliciesDeployed;
+    }
+
     public void addAPIMetaData(API api) {
         if (log.isDebugEnabled()) {
             log.debug("Adding meta data of API : " + api.getApiName());
@@ -164,6 +173,7 @@ public class DataHolder {
                 if (log.isDebugEnabled()) {
                     log.debug("API : " + api.getApiName() + "is deployed successfully");
                 }
+                api.setRevisionId(gatewayAPIDTO.getRevision());
             }
         }
     }

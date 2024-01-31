@@ -22,6 +22,39 @@ public class APIRevisionDeploymentDTO   {
   
     private String revisionUuid = null;
     private String name = null;
+
+    @XmlType(name="StatusEnum")
+    @XmlEnum(String.class)
+    public enum StatusEnum {
+        CREATED("CREATED"),
+        APPROVED("APPROVED"),
+        REJECTED("REJECTED");
+        private String value;
+
+        StatusEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StatusEnum fromValue(String v) {
+            for (StatusEnum b : StatusEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private StatusEnum status = StatusEnum.CREATED;
     private String vhost = null;
     private Boolean displayOnDevportal = null;
     private java.util.Date deployedTime = null;
@@ -59,6 +92,23 @@ public class APIRevisionDeploymentDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   **/
+  public APIRevisionDeploymentDTO status(StatusEnum status) {
+    this.status = status;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CREATED", value = "")
+  @JsonProperty("status")
+  public StatusEnum getStatus() {
+    return status;
+  }
+  public void setStatus(StatusEnum status) {
+    this.status = status;
   }
 
   /**
@@ -141,6 +191,7 @@ public class APIRevisionDeploymentDTO   {
     APIRevisionDeploymentDTO apIRevisionDeployment = (APIRevisionDeploymentDTO) o;
     return Objects.equals(revisionUuid, apIRevisionDeployment.revisionUuid) &&
         Objects.equals(name, apIRevisionDeployment.name) &&
+        Objects.equals(status, apIRevisionDeployment.status) &&
         Objects.equals(vhost, apIRevisionDeployment.vhost) &&
         Objects.equals(displayOnDevportal, apIRevisionDeployment.displayOnDevportal) &&
         Objects.equals(deployedTime, apIRevisionDeployment.deployedTime) &&
@@ -149,7 +200,7 @@ public class APIRevisionDeploymentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(revisionUuid, name, vhost, displayOnDevportal, deployedTime, successDeployedTime);
+    return Objects.hash(revisionUuid, name, status, vhost, displayOnDevportal, deployedTime, successDeployedTime);
   }
 
   @Override
@@ -159,6 +210,7 @@ public class APIRevisionDeploymentDTO   {
     
     sb.append("    revisionUuid: ").append(toIndentedString(revisionUuid)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
     sb.append("    displayOnDevportal: ").append(toIndentedString(displayOnDevportal)).append("\n");
     sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");

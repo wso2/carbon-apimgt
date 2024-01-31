@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -56,6 +57,9 @@ public class SynapsePolicyAggregator {
     private static final String POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
             + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
             + "operation_policy_template.j2";
+    private static final String GATEWAY_POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
+            + "repository" + File.separator + "resources" + File.separator + "templates" + File.separator
+            + "gateway_policy_template.j2";
 
     public static String generatePolicySequenceForUriTemplateSet(Set<URITemplate> uriTemplates, API api,
                                                                  String sequenceName, String flow,
@@ -240,4 +244,88 @@ public class SynapsePolicyAggregator {
         return sequenceExtension;
     }
 
+    /**
+     * Render the gateway level policy mapping.
+     *
+     * @param gatewayPolicyDataList List of gateway policy data
+     * @param gatewayPolicies       List of gateway policies
+     * @param flow                  Flow type
+     * @param sequenceName          Sequence name
+     * @return Rendered gateway policy mapping
+     * @throws IOException
+     */
+    public static String generateGatewayPolicySequenceForPolicyMapping(List<OperationPolicyData> gatewayPolicyDataList,
+            List<OperationPolicy> gatewayPolicies, String flow, String sequenceName) throws IOException {
+
+        List<String> gatewayLevelPolicyRenderedList = renderGatewayPolicyMapping(gatewayPolicyDataList, gatewayPolicies,
+                flow);
+        Map<String, Object> configMap = new HashMap<>();
+
+        String gatewayPolicyTemplate = FileUtil.readFileToString(GATEWAY_POLICY_SEQUENCE_TEMPLATE_LOCATION)
+                .replace("\\", ""); //Removing escape characters from the template
+        configMap.put("sequence_name", sequenceName);
+
+        if (!gatewayLevelPolicyRenderedList.isEmpty()) {
+            configMap.put("gateway_policies", gatewayLevelPolicyRenderedList);
+            return renderPolicyTemplate(gatewayPolicyTemplate, configMap);
+        } else {
+            return "";
+        }
+    }
+
+    private static List<String> renderGatewayPolicyMapping(List<OperationPolicyData> gatewayPolicyDataList,
+            List<OperationPolicy> gatewayPolicyList, String flow) {
+
+        List<String> renderedPolicyMappingList = new ArrayList<>();
+        Collections.sort(gatewayPolicyList, new OperationPolicyComparator());
+        for (OperationPolicy policy : gatewayPolicyList) {
+            if (flow.equals(policy.getDirection())) {
+                OperationPolicySpecification policySpecification = null;
+                OperationPolicyDefinition policyDefinition = null;
+                for (OperationPolicyData operationPolicyData : gatewayPolicyDataList) {
+                    if (policy.getPolicyId().equals(operationPolicyData.getPolicyId())) {
+                        policySpecification = operationPolicyData.getSpecification();
+                        policyDefinition = operationPolicyData.getSynapsePolicyDefinition();
+                    }
+                }
+                Map<String, Object> policyParameters = policy.getParameters();
+                if (policySpecification != null) {
+                    if (policySpecification.getSupportedGateways()
+                            .contains(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE)) {
+                        if (policyDefinition != null) {
+                            try {
+                                String renderedTemplate = renderPolicyTemplate(policyDefinition.getContent(),
+                                        policyParameters);
+                                if (renderedTemplate != null && !renderedTemplate.isEmpty()) {
+                                    String sanitizedPolicy;
+                                    try {
+                                        sanitizedPolicy = sanitizeOMElementWithSuperParentNode(renderedTemplate);
+                                    } catch (Exception e) {
+                                        log.debug("Cannot wrap the policy " + policy.getPolicyName()
+                                                + " with a super parent. Trying without wrapping.");
+                                        // As we can't wrap the policy definition with a super parent, trying the build
+                                        // OM element with the provided policy definition. This will select first child
+                                        // node and drop the other child nodes if a parent node is not configured.
+                                        sanitizedPolicy = APIUtil.buildSecuredOMElement(
+                                                new ByteArrayInputStream(renderedTemplate.getBytes())).toString();
+                                    }
+                                    renderedPolicyMappingList.add(sanitizedPolicy);
+                                }
+                            } catch (Exception e) {
+                                log.error("Error parsing the policy definition for " + policy.getPolicyName());
+                            }
+                        } else {
+                            log.error("Policy definition for " + policy.getPolicyName()
+                                    + " is not found in the artifact");
+                        }
+                    } else {
+                        log.error("Policy " + policy.getPolicyName() + " does not support Synapse gateway. "
+                                + "Hence skipped");
+                    }
+                } else {
+                    log.error("Policy Specification for " + policy.getPolicyName() + " is not found in the artifact");
+                }
+            }
+        } return renderedPolicyMappingList;
+    }
 }

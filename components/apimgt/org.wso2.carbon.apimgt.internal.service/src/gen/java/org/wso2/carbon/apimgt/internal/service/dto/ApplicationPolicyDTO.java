@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import org.wso2.carbon.apimgt.internal.service.dto.BurstLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.PolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
@@ -24,6 +25,7 @@ public class ApplicationPolicyDTO   {
     private String name = null;
     private String quotaType = null;
     private ThrottleLimitDTO defaultLimit = null;
+    private BurstLimitDTO burstLimit = null;
 
   /**
    **/
@@ -127,6 +129,23 @@ public class ApplicationPolicyDTO   {
     this.defaultLimit = defaultLimit;
   }
 
+  /**
+   **/
+  public ApplicationPolicyDTO burstLimit(BurstLimitDTO burstLimit) {
+    this.burstLimit = burstLimit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("burstLimit")
+  public BurstLimitDTO getBurstLimit() {
+    return burstLimit;
+  }
+  public void setBurstLimit(BurstLimitDTO burstLimit) {
+    this.burstLimit = burstLimit;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -142,12 +161,13 @@ public class ApplicationPolicyDTO   {
         Objects.equals(tenantDomain, applicationPolicy.tenantDomain) &&
         Objects.equals(name, applicationPolicy.name) &&
         Objects.equals(quotaType, applicationPolicy.quotaType) &&
-        Objects.equals(defaultLimit, applicationPolicy.defaultLimit);
+        Objects.equals(defaultLimit, applicationPolicy.defaultLimit) &&
+        Objects.equals(burstLimit, applicationPolicy.burstLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, defaultLimit);
+    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, defaultLimit, burstLimit);
   }
 
   @Override
@@ -161,6 +181,7 @@ public class ApplicationPolicyDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
+    sb.append("    burstLimit: ").append(toIndentedString(burstLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

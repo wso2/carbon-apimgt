@@ -47,14 +47,17 @@ import java.util.concurrent.TimeUnit;
  * A simple extension handler for the APIs deployed in the API gateway. This handler first
  * looks for a sequence named WSO2AM--Ext--[Dir], where [Dir] could be either In or Out
  * depending on the direction of the message. If such a sequence is found, it is invoked.
- * Following that a more API specific extension sequence is looked up by using the name
- * pattern provider--api--version--[Dir]. If such an API specific sequence is found, that
- * is also invoked. If no extension is found either at the global level or at the per API level
+ * Following that, it looks for a WSO2AMGW--Ext--[Dir] sequence. If found, it is invoked
+ * after the WSO2AM--Ext-- sequence and before the more API-specific extension sequence.
+ * Next, a more API-specific extension sequence is looked up by using the name pattern
+ * provider--api--version--[Dir]. If such an API-specific sequence is found, that is also
+ * invoked. If no extension is found either at the global level or at the per API level,
  * this mediator simply returns true.
  */
 public class APIManagerExtensionHandler extends AbstractHandler {
 
     private static final String EXT_SEQUENCE_PREFIX = "WSO2AM--Ext--";
+    private static final String GATEWAY_EXT_SEQUENCE_PREFIX = "WSO2AMGW--Ext--";
     private static final String DIRECTION_IN = "In";
     private static final String DIRECTION_OUT = "Out";
     private static final Log log = LogFactory.getLog(APIManagerExtensionHandler.class);
@@ -66,6 +69,14 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         Map localRegistry = messageContext.getConfiguration().getLocalRegistry();
 
         Object sequence = localRegistry.get(EXT_SEQUENCE_PREFIX + direction);
+        if (sequence instanceof Mediator) {
+            if (!((Mediator) sequence).mediate(messageContext)) {
+                return false;
+            }
+        }
+
+        // Execute gateway policy sequences after WSO2AM--Ext-- sequences
+        sequence = localRegistry.get(GATEWAY_EXT_SEQUENCE_PREFIX + direction);
         if (sequence instanceof Mediator) {
             if (!((Mediator) sequence).mediate(messageContext)) {
                 return false;

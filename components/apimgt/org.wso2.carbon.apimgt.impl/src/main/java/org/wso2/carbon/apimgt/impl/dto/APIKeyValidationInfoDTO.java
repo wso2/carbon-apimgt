@@ -57,8 +57,10 @@ public class APIKeyValidationInfoDTO implements Serializable {
     //should be its first element.
     private  List<String> throttlingDataList;
     private int spikeArrestLimit;
+    private int applicationSpikeArrestLimit;
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
+    private String applicationSpikeArrestUnit;
     private boolean stopOnQuotaReach;
     //keeps productId of product for which the key was validated, if key was validated for an api this will be null
     private String productName;
@@ -103,6 +105,20 @@ public class APIKeyValidationInfoDTO implements Serializable {
 
     private String apiPublisher;
 
+    public String getApplicationSpikeArrestUnit() {
+        return applicationSpikeArrestUnit;
+    }
+
+    public void setApplicationSpikeArrestUnit(String applicationSpikeArrestUnit) {
+        this.applicationSpikeArrestUnit = applicationSpikeArrestUnit;
+    }
+    public int getApplicationSpikeArrestLimit() {
+        return applicationSpikeArrestLimit;
+    }
+
+    public void setApplicationSpikeArrestLimit(int applicationSpikeArrestLimit) {
+        this.applicationSpikeArrestLimit = applicationSpikeArrestLimit;
+    }
     public boolean isAuthorized() {
         return authorized;
     }

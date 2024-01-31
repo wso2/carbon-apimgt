@@ -50,7 +50,8 @@ public class QueryAnalyzerTestCase {
         queryAnalyzer = new QueryAnalyzer(graphQLSchema);
         String complexityPolicy = "{\"complexity\":{\"Subscription\":{\"liftStatusChange\":3},"
                 + "\"Lift\":{\"night\":1,\"name\":1,\"elevationGain\":1,\"id\":1,\"capacity\":1}}}";
-        fieldComplexityCalculator = new FieldComplexityCalculatorImpl(complexityPolicy);
+        fieldComplexityCalculator = new FieldComplexityCalculatorImpl();
+        fieldComplexityCalculator.parseAccessControlPolicy(complexityPolicy);
     }
 
     @Test

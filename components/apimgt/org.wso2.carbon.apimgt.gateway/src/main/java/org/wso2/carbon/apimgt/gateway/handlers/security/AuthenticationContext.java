@@ -42,6 +42,7 @@ public class AuthenticationContext {
     private String subscriber;
     private List<String> throttlingDataList;
     private int spikeArrestLimit;
+    private int applicationSpikesArrestLimit;
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
@@ -178,6 +179,23 @@ public class AuthenticationContext {
 
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
+    }
+
+    public String getApplicationSpikesArrestUnit() {
+        return applicationSpikesArrestUnit;
+    }
+
+    public void setApplicationSpikesArrestUnit(String applicationSpikesArrestUnit) {
+        this.applicationSpikesArrestUnit = applicationSpikesArrestUnit;
+    }
+
+    private String applicationSpikesArrestUnit;
+
+    public int getApplicationSpikesArrestLimit(){
+        return applicationSpikesArrestLimit;
+    }
+    public void setApplicationSpikesArrestLimit(int applicationSpikesArrestLimit) {
+        this.applicationSpikesArrestLimit = applicationSpikesArrestLimit;
     }
 
     public int getSpikeArrestLimit() {

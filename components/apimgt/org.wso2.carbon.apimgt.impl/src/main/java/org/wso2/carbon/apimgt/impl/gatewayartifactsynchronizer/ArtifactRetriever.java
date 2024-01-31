@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -80,4 +79,22 @@ public interface ArtifactRetriever {
      */
     String getName();
 
+    /**
+     * Retrieve gateway policy data from the storage.
+     *
+     * @param mappingUUID  UUID of the Gateway Policy Mapping
+     * @return A String contains all the information about the gateway policy artifacts
+     * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
+     */
+    String retrieveGatewayPolicyArtifacts(String mappingUUID) throws ArtifactSynchronizerException;
+
+    /**
+     * Retrieve gateway policy data from the storage.
+     *
+     * @param gatewayLabel  Label subscribed by the gateway
+     * @param tenantDomain  Tenant Domain
+     * @return A List of String contains all the information about the gateway policy artifacts
+     * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
+     */
+    List<String> retrieveGatewayPolicyArtifacts(String gatewayLabel, String tenantDomain) throws ArtifactSynchronizerException;
 }

@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.core.Response;
 
@@ -83,7 +85,6 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
         if (keyManagerConfigurationDTO != null) {
             apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerConfigurationDTO);
-
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
                     new Gson().toJson(keyManagerConfigurationDTO), APIConstants.AuditLogConstants.DELETED,
                     RestApiCommonUtil.getLoggedInUsername());
@@ -115,6 +116,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
+            KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO =
+                    keyManagerConfigurationDTO.getPermissions();
+            this.validatePermissions(keyManagerPermissionConfigurationDTO);
             keyManagerConfigurationDTO.setUuid(keyManagerId);
             KeyManagerConfigurationDTO oldKeyManagerConfigurationDTO =
                     apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
@@ -134,9 +138,13 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             }
         } catch (APIManagementException e) {
             String error =
-                    "Error while Retrieving Key Manager configuration for " + keyManagerId + " in organization " +
+                    "Error while updating Key Manager configuration for " + keyManagerId + " in organization " +
                             organization;
             throw new APIManagementException(error, e, ExceptionCodes.INTERNAL_ERROR);
+        } catch (IllegalArgumentException e) {
+            String error = "Error while storing key manager permissions with name "
+                    + body.getName() + " in tenant " + organization;
+            throw new APIManagementException(error, e, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
     }
 
@@ -147,6 +155,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
+            KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO =
+                    keyManagerConfigurationDTO.getPermissions();
+            this.validatePermissions(keyManagerPermissionConfigurationDTO);
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
@@ -156,8 +167,31 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             return Response.created(location)
                     .entity(KeyManagerMappingUtil.toKeyManagerDTO(createdKeyManagerConfiguration)).build();
         } catch (URISyntaxException e) {
-            String error = "Error while Creating Key Manager configuration in organization " + organization;
+            String error = "Error while creating Key Manager configuration in organization " + organization;
             throw new APIManagementException(error, e, ExceptionCodes.INTERNAL_ERROR);
+        } catch (IllegalArgumentException e) {
+            String error = "Error while storing Key Manager permission roles with name "
+                    + body.getName() + " in tenant " + organization;
+            throw new APIManagementException(error, e, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
     }
+
+    public void validatePermissions(KeyManagerPermissionConfigurationDTO permissionDTO)
+            throws IllegalArgumentException, APIManagementException {
+
+        if (permissionDTO != null && permissionDTO.getRoles() != null) {
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String[] allowedPermissionTypes = {"PUBLIC", "ALLOW", "DENY"};
+            String permissionType = permissionDTO.getPermissionType();
+            if (!Arrays.stream(allowedPermissionTypes).anyMatch(permissionType::equals)) {
+                throw new APIManagementException("Invalid permission type");
+            }
+            for (String role : permissionDTO.getRoles()) {
+                if (!APIUtil.isRoleNameExist(username, role)) {
+                    throw new IllegalArgumentException("Invalid user roles found in visibleRoles list");
+                }
+            }
+        }
+    }
+
 }
