@@ -681,8 +681,11 @@ public class APIManagerConfiguration {
                 environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_NAME)).getText()));
         environment.setDisplayName(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
-        environment.setGatewayType(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
-                APIConstants.API_GATEWAY_TYPE)).getText()));
+        String gatewayType = APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_TYPE)).getText());
+        if (gatewayType == null || gatewayType.isEmpty()) {
+            gatewayType = APIConstants.API_GATEWAY_TYPE_REGULAR;
+        }
+        environment.setGatewayType(gatewayType);
         if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
         environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_SERVER_URL)).getText()));

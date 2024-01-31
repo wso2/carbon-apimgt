@@ -318,7 +318,7 @@ return null;
     private APIServiceInfoDTO serviceInfo = null;
     private AdvertiseInfoDTO advertiseInfo = null;
     private String gatewayVendor = null;
-    private String gatewayType = null;
+    private String gatewayType = "wso2/synapse";
     private List<String> asyncTransportProtocols = new ArrayList<String>();
 
   /**
@@ -1330,7 +1330,7 @@ return null;
   }
 
   /**
-   * The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/choreo-connect.
+   * The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/apk.
    **/
   public APIDTO gatewayType(String gatewayType) {
     this.gatewayType = gatewayType;
@@ -1338,7 +1338,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "wso2/synapse", value = "The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/choreo-connect.")
+  @ApiModelProperty(example = "wso2/synapse", value = "The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/apk.")
   @JsonProperty("gatewayType")
   public String getGatewayType() {
     return gatewayType;

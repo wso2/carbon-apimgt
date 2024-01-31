@@ -10109,8 +10109,8 @@ public final class APIUtil {
      * @return gateway vendor for the API
      */
     public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
-        if(gatewayType != null && APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayType)) {
-            gatewayVendorType =  APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        if(gatewayType != null && APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
+            gatewayVendorType =  APIConstants.WSO2_APK_GATEWAY;
         }
         return gatewayVendorType;
     }
@@ -10125,8 +10125,8 @@ public final class APIUtil {
         String gatewayType = null;
         if (APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
             gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
-        } else if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
-            gatewayType = APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        } else if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
+            gatewayType = APIConstants.WSO2_APK_GATEWAY;
         }
         return gatewayType;
     }
@@ -10138,7 +10138,7 @@ public final class APIUtil {
      * @return wso2 gateway vendor type
      */
     public static String handleGatewayVendorRetrieval(String gatewayVendor) {
-        if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
+        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
             gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
         }
         return  gatewayVendor;

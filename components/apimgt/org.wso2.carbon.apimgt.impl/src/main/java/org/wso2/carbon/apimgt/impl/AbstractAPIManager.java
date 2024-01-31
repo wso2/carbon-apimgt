@@ -1213,6 +1213,8 @@ public abstract class AbstractAPIManager implements APIManager {
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
+        String gatewayType = apiMgtDAO.getGatewayType(currentApiUuid);
+        api.setGatewayType(gatewayType);
         // api level tier
         String apiLevelTier;
         if (api.isRevision()) {

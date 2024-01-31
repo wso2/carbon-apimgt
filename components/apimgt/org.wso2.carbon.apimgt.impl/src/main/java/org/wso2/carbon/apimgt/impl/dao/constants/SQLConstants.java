@@ -1455,8 +1455,11 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-                    "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE)" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,GATEWAY_TYPE,VERSION_COMPARABLE)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String GET_GATEWAY_TYPE_SQL_BY_UUID =
+            "SELECT API.GATEWAY_TYPE FROM AM_API API WHERE API.API_UUID = ?";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";

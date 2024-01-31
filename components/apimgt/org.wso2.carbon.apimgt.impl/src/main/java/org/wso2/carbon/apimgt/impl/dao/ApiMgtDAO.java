@@ -5523,7 +5523,8 @@ public class ApiMgtDAO {
             prepStmt.setString(11, APIConstants.CREATED);
             prepStmt.setString(12, organization);
             prepStmt.setString(13, api.getGatewayVendor());
-            prepStmt.setString(14, api.getVersionTimestamp());
+            prepStmt.setString(14, api.getGatewayType());
+            prepStmt.setString(15, api.getVersionTimestamp());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -7104,6 +7105,32 @@ public class ApiMgtDAO {
             handleException("Error while locating API with UUID : " + uuid + " from the database", e);
         }
         return id;
+    }
+
+    public String getGatewayType(String uuid) throws APIManagementException {
+        String gatewayType = "";
+        try {
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                String getGatewayTypeQuery = SQLConstants.GET_GATEWAY_TYPE_SQL_BY_UUID;
+
+                try (PreparedStatement prepStmt = connection.prepareStatement(getGatewayTypeQuery)) {
+                    prepStmt.setString(1, uuid);
+                    try (ResultSet rs = prepStmt.executeQuery()) {
+                        if (rs.next()) {
+                            gatewayType = rs.getString("GATEWAY_TYPE");
+                        }
+                        if (gatewayType == null || gatewayType.isEmpty()) {
+                            String msg = "Unable to find the Gateway Type for API with UUID : " + uuid + " in the database";
+                            log.error(msg);
+                            throw new APIManagementException(msg);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while finding Gateway Type for API with UUID : " + uuid + " from the database", e);
+        }
+        return gatewayType;
     }
 
     public int getAPIID(String uuid, Connection connection) throws APIManagementException, SQLException {
