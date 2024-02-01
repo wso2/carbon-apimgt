@@ -10724,6 +10724,10 @@ components:
         type:
           type: string
           example: hybrid
+        gatewayType:
+          type: string
+          example: Regular
+          default: Regular
         serverUrl:
           type: string
           example: https://localhost:9443/services/

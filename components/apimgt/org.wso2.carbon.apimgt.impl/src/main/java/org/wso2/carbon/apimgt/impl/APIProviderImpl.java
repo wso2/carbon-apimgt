@@ -790,6 +790,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!existingAPI.getStatus().equals(api.getStatus())) {
             throw new APIManagementException("Invalid API update operation involving API status changes");
         }
+        if (existingAPI.getGatewayType() != null && api.getGatewayType() != null
+                && !existingAPI.getGatewayType().equals(api.getGatewayType())) {
+            throw new APIManagementException("Invalid API update operation involving API gateway type changes");
+        }
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         //Validate Transports
@@ -5010,7 +5014,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIIdentifier apiIdentifier = api.getId();
                 apiIdentifier.setUuid(uuid);
                 api.setId(apiIdentifier);
-                api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(publisherAPI.getGatewayVendor()));
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);

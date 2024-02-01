@@ -883,6 +883,15 @@ public class PublisherCommonUtils {
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
 
+        // validate gateway type before proceeding
+        String gatewayType = apiDto.getGatewayType();
+        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
+            if (!(APIDTO.TypeEnum.HTTP.equals(apiDto.getType()) || APIDTO.TypeEnum.GRAPHQL.equals(apiDto.getType()))) {
+                throw new APIManagementException("APIs of type " + apiDto.getType() + " are not supported with " +
+                        "WSO2 APK", ExceptionCodes.INVALID_GATEWAY_TYPE);
+            }
+        }
+
         Map endpointConfig = (Map) apiDto.getEndpointConfig();
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
 

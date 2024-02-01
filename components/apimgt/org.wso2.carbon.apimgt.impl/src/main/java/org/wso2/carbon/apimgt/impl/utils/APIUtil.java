@@ -10102,14 +10102,14 @@ public final class APIUtil {
     }
 
     /**
-     * Handles gateway vendor for Choreo Connect before insert DB operations.
+     * Handles gateway vendor for APK before insert DB operations.
      *
      * @param gatewayVendorType Gateway vendor
      * @param gatewayType       Gateway type
      * @return gateway vendor for the API
      */
     public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
-        if(gatewayType != null && APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
+        if (gatewayType != null && APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
             gatewayVendorType =  APIConstants.WSO2_APK_GATEWAY;
         }
         return gatewayVendorType;
@@ -10132,7 +10132,7 @@ public final class APIUtil {
     }
 
     /**
-     * Replaces wso2/choreo-connect gateway vendor type as wso2 after retrieving from db.
+     * Replaces wso2/apk gateway vendor type as wso2 after retrieving from db.
      *
      * @param gatewayVendor Gateway vendor type
      * @return wso2 gateway vendor type
