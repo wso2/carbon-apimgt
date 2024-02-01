@@ -2020,9 +2020,12 @@ public final class APIConstants {
         public static final String CREATED = "created";
         public static final String UPDATED = "updated";
         public static final String DELETED = "deleted";
+        public static final String DEPLOYED = "deployed";
+        public static final String UNDEPLOYED = "undeployed";
         public static final String LIFECYCLE_CHANGED = "lifecycle-changed";
 
         public static final String API = "API";
+        public static final String SYSTEM = "SYSTEM";
         public static final String ORGANIZATION = "Organization";
         public static final String API_PRODUCT = "APIProduct";
         public static final String APPLICATION = "Application";
@@ -2030,6 +2033,8 @@ public final class APIConstants {
         public static final String KEY_MANAGER = "KeyManager/IdP";
 
         public static final String NAME = "name";
+        public static final String SCOPE = "scope";
+        public static final String OPERATION_POLICY = "operation_policy";
         public static final String VERSION = "version";
         public static final String CONTEXT = "context";
         public static final String PROVIDER = "provider";
