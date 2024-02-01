@@ -54,21 +54,16 @@ public class HandshakeProcessor {
                     + inboundMessageContext.getApiContext());
         }
         InboundProcessorResponseDTO inboundProcessorResponseDTO = new InboundProcessorResponseDTO();
-        boolean isOAuthHeaderValid;
+        boolean isTokenValid;
         try {
-            isOAuthHeaderValid = InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
-        } catch (APIManagementException e) {
-            log.error(WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_GENERAL_MESSAGE, e);
-            return InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
-                    WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR,
-                    WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_GENERAL_MESSAGE);
+            isTokenValid = InboundWebsocketProcessorUtil.isAuthenticated(inboundMessageContext);
         } catch (APISecurityException e) {
             log.error(e);
             return InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
                     WebSocketApiConstants.HandshakeErrorConstants.API_AUTH_ERROR,
                     e.getMessage());
         }
-        if (isOAuthHeaderValid) {
+        if (isTokenValid) {
             if (log.isDebugEnabled()) {
                 log.debug("Handshake authentication success for inbound websocket context: "
                         + inboundMessageContext.getApiContext() + " Setting ResourceInfoDTOs of elected API "

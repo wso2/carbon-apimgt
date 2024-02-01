@@ -31,6 +31,7 @@ public class APIDTO   {
     private String organization = null;
     private Boolean isDefaultVersion = null;
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
+    private String securityScheme = null;
 
   /**
    * UUID of API
@@ -246,6 +247,24 @@ public class APIDTO   {
     this.urlMappings = urlMappings;
   }
 
+  /**
+   * Available authentication methods of the API.
+   **/
+  public APIDTO securityScheme(String securityScheme) {
+    this.securityScheme = securityScheme;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Oauth2,api_key", value = "Available authentication methods of the API.")
+  @JsonProperty("securityScheme")
+  public String getSecurityScheme() {
+    return securityScheme;
+  }
+  public void setSecurityScheme(String securityScheme) {
+    this.securityScheme = securityScheme;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -267,12 +286,13 @@ public class APIDTO   {
         Objects.equals(status, API.status) &&
         Objects.equals(organization, API.organization) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
-        Objects.equals(urlMappings, API.urlMappings);
+        Objects.equals(urlMappings, API.urlMappings) &&
+        Objects.equals(securityScheme, API.securityScheme);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, urlMappings);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, urlMappings, securityScheme);
   }
 
   @Override
@@ -292,6 +312,7 @@ public class APIDTO   {
     sb.append("    organization: ").append(toIndentedString(organization)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
+    sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("}");
     return sb.toString();
   }
