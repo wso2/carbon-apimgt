@@ -71,6 +71,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response deleteGatewayPolicyByPolicyId(@ApiParam(value = "Gateway policy mapping Id ",required=true) @PathParam("gatewayPolicyMappingId") String gatewayPolicyMappingId) throws APIManagementException{
         return delegate.deleteGatewayPolicyByPolicyId(gatewayPolicyMappingId, securityContext);
@@ -80,13 +81,13 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
     @Path("/{gatewayPolicyMappingId}/deploy")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Engage gateway policy mapping to the gateways", notes = "This operation can be used to engage gateway policy mapping to the gateway/s. ", response = GatewayPolicyDeploymentDTO.class, authorizations = {
+    @ApiOperation(value = "Engage gateway policy mapping to the gateways", notes = "This operation can be used to engage gateway policy mapping to the gateway/s. ", response = GatewayPolicyDeploymentDTO.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies")
         })
     }, tags={ "Gateway Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Gateway policy mapping engaged successfully. ", response = GatewayPolicyDeploymentDTO.class),
+        @ApiResponse(code = 200, message = "OK. Gateway policy mapping engaged successfully. ", response = GatewayPolicyDeploymentDTO.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })

@@ -1051,6 +1051,10 @@ definitions:
         type: integer
       subscriptionState:
         type: string
+      apiName:
+        type: string
+      apiVersion:
+        type: string
 
   #-----------------------------------------------------
   # The Synapse Artifacts  List resource

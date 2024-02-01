@@ -2187,7 +2187,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, orgId,
                 subscribedAPI.getSubscriptionId(), subscribedAPI.getUUID(), identifier.getId(), identifier.getUUID(),
                 subscribedAPI.getApplication().getId(), subscribedAPI.getApplication().getUUID(),
-                subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
+                subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus(), identifier.getName(),
+                identifier.getVersion());
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 
