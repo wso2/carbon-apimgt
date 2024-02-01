@@ -51,7 +51,7 @@ public class KeyManagerPermissionsDTO   {
                     return b;
                 }
             }
-            return null;
+return null;
         }
     }
     private PermissionTypeEnum permissionType = PermissionTypeEnum.PUBLIC;

@@ -1265,7 +1265,7 @@ public class APIAdminImpl implements APIAdmin {
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = iterator.next();
             for (String aRole : entry.getValue().split(",")) {
-                if (userRoleList.contains(aRole)) {
+                if (userRoleList.contains(aRole.trim())) {
                     authorizedScopes.add(entry.getKey());
                 }
             }

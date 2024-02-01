@@ -260,18 +260,23 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
             for (ScopeEvent scopeEvent : event.getScopes()) {
                 ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(scopeEvent);
             }
-        } else if (EventType.SCOPE_CREATE.toString().equals(eventType)) {
+        } else if (EventType.SCOPE_CREATE.toString().equals(eventType) ||
+                EventType.SCOPE_UPDATE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
-        } else if (EventType.SCOPE_UPDATE.toString().equals(eventType)) {
-            ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
-            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, event.getName() + ": " + eventType,
+                    APIConstants.AuditLogConstants.DEPLOYED,
+                    APIConstants.AuditLogConstants.SYSTEM + ": " + event.getTenantDomain());
         } else if (EventType.SCOPE_DELETE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().deleteScope(event);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, event.getName() + ": " + eventType,
+                    APIConstants.AuditLogConstants.DEPLOYED,
+                    APIConstants.AuditLogConstants.SYSTEM + ": " + event.getTenantDomain());
         } else if (EventType.POLICY_CREATE.toString().equals(eventType) ||
-                EventType.POLICY_DELETE.toString().equals(eventType) ||
-                EventType.POLICY_UPDATE.toString().equals(eventType)) {
+            EventType.POLICY_DELETE.toString().equals(eventType) ||
+            EventType.POLICY_UPDATE.toString().equals(eventType)) {
+            String policyName = null;
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
             boolean updatePolicy = false;
             boolean deletePolicy = false;
@@ -290,6 +295,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService()
                             .removeAPIPolicy(policyEvent);
                 }
+                policyName = policyEvent.getPolicyName();
             } else if (event.getPolicyType() == PolicyType.SUBSCRIPTION) {
                 SubscriptionPolicyEvent policyEvent = new Gson().fromJson(eventJson, SubscriptionPolicyEvent.class);
                 if (updatePolicy) {
@@ -299,6 +305,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService()
                             .removeSubscriptionPolicy(policyEvent);
                 }
+                policyName = policyEvent.getPolicyName();
             } else if (event.getPolicyType() == PolicyType.APPLICATION) {
                 ApplicationPolicyEvent policyEvent = new Gson().fromJson(eventJson, ApplicationPolicyEvent.class);
                 if (updatePolicy) {
@@ -308,7 +315,11 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService()
                             .removeApplicationPolicy(policyEvent);
                 }
+                policyName = policyEvent.getPolicyName();
             }
+            APIUtil.logAuditMessage(event.getPolicyType().toString(), policyName + ": " + eventType,
+                    APIConstants.AuditLogConstants.DEPLOYED,
+                    APIConstants.AuditLogConstants.SYSTEM + ": " + event.getTenantDomain());
         } else if (EventType.ENDPOINT_CERTIFICATE_ADD.toString().equals(eventType) ||
                 EventType.ENDPOINT_CERTIFICATE_REMOVE.toString().equals(eventType)) {
             CertificateEvent certificateEvent = new Gson().fromJson(eventJson, CertificateEvent.class);

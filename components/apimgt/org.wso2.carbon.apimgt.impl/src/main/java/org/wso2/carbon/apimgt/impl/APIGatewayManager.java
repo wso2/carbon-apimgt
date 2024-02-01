@@ -215,7 +215,7 @@ public class APIGatewayManager {
         for (API api : apiSet) {
             APIIdentifier id = api.getId();
             APIEvent apiEvent = new APIEvent(id.getUUID(), id.getApiName(), id.getVersion(), id.getProviderName(),
-                    api.getType(), api.getStatus());
+                    api.getType(), api.getStatus(), api.getApiSecurity());
             apiEvents.add(apiEvent);
         }
         return apiEvents;

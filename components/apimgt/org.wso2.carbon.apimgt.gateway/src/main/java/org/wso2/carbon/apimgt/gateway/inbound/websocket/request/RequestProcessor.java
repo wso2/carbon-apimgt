@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.inbound.websocket.request;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
@@ -42,7 +43,7 @@ public class RequestProcessor {
      * @return InboundProcessorResponseDTO
      */
     public InboundProcessorResponseDTO handleRequest(int msgSize, String msgText,
-                                                     InboundMessageContext inboundMessageContext) {
+                                                     InboundMessageContext inboundMessageContext) throws APISecurityException {
         InboundProcessorResponseDTO responseDTO;
         responseDTO = InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
         if (!responseDTO.isError()) {

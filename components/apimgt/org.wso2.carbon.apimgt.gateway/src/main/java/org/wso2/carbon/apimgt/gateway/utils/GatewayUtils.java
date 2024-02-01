@@ -60,6 +60,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
@@ -726,7 +727,7 @@ public class GatewayUtils {
                     authContext.setIsContentAware(true);
                     ;
                 }
-                if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+                if (synCtx != null && APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
                     Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_DEPTH);
                     Integer graphQLMaxComplexity =
                             (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_COMPLEXITY);
@@ -885,6 +886,84 @@ public class GatewayUtils {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
+        }
+        return api;
+    }
+
+    /**
+     * Validate whether the user is subscribed to the invoked API. If subscribed, return a JSON object containing
+     * the API information.
+     *
+     * @param apiContext API context
+     * @param apiVersion API version
+     * @param payload    The payload of the JWT token
+     * @param token      The token which was used to invoke the API
+     * @return an JSON object containing subscribed API information retrieved from token payload.
+     * If the subscription information is not found, return a null object.
+     * @throws APISecurityException if the user is not subscribed to the API
+     */
+    public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JWTClaimsSet payload,
+                                                     String token)
+            throws APISecurityException {
+
+        JSONObject api = null;
+        APIKeyValidator apiKeyValidator = new APIKeyValidator();
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
+        boolean apiKeySubValidationEnabled = isAPIKeySubscriptionValidationEnabled();
+        JSONObject application;
+        int appId = 0;
+        if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+            application = (JSONObject) payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION);
+            appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+        }
+        // validate subscription
+        // if the appId is equal to 0 then it's a internal key
+        if (apiKeySubValidationEnabled && appId != 0) {
+            apiKeyValidationInfoDTO =
+                    apiKeyValidator.validateSubscription(apiContext, apiVersion, appId, getTenantDomain());
+        }
+
+        if (payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS) != null) {
+            // Subscription validation
+            JSONArray subscribedAPIs =
+                    (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
+            for (Object subscribedAPI : subscribedAPIs) {
+                JSONObject subscribedAPIsJSONObject = (JSONObject) subscribedAPI;
+                if (apiContext
+                        .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
+                        apiVersion
+                                .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
+                                )) {
+                    // check whether the subscription is authorized
+                    if (apiKeySubValidationEnabled && appId != 0) {
+                        if (apiKeyValidationInfoDTO.isAuthorized()) {
+                            api = subscribedAPIsJSONObject;
+                            if (log.isDebugEnabled()) {
+                                log.debug("User is subscribed to the API: " + apiContext + ", " +
+                                        "version: " + apiVersion + ". Token: " + getMaskedToken(token));
+                            }
+                        }
+                    } else {
+                        api = subscribedAPIsJSONObject;
+                        if (log.isDebugEnabled()) {
+                            log.debug("User is subscribed to the API: " + apiContext + ", " +
+                                    "version: " + apiVersion + ". Token: " + getMaskedToken(token));
+                        }
+                    }
+                    break;
+                }
+            }
+            if (api == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User is not subscribed to access the API: " + apiContext +
+                            ", version: " + apiVersion + ". Token: " + getMaskedToken(token));
+                }
+                log.error("User is not subscribed to access the API.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+            }
+        } else {
+            log.debug("No subscription information found in the token.");
         }
         return api;
     }
@@ -1077,6 +1156,26 @@ public class GatewayUtils {
                 jwtInfoDto.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
             }
         }
+    }
+
+    /**
+     * This method is used to generate JWTInfoDto
+     *
+     * @param subscribedAPI     The subscribed API
+     * @param jwtValidationInfo The JWT validation info
+     * @param apiContext        API context
+     * @param apiVersion        API version
+     * @return JWTInfoDto object with JWT validation info and API related info
+     */
+    public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,
+                                                String apiContext, String apiVersion) {
+
+        JWTInfoDto jwtInfoDto = new JWTInfoDto();
+        jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
+        jwtInfoDto.setApiContext(apiContext);
+        jwtInfoDto.setVersion(apiVersion);
+        constructJWTContent(subscribedAPI, null, jwtInfoDto);
+        return jwtInfoDto;
     }
 
     public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,

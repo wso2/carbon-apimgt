@@ -27,6 +27,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
@@ -63,7 +64,7 @@ public class RequestProcessorTest {
     }
 
     @Test
-    public void testHandleRequest() {
+    public void testHandleRequest() throws APISecurityException {
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
                 .thenReturn(responseDTO);
@@ -75,7 +76,7 @@ public class RequestProcessorTest {
     }
 
     @Test
-    public void testHandleRequestAuthenticationTokenError() {
+    public void testHandleRequestAuthenticationTokenError() throws APISecurityException {
         InboundProcessorResponseDTO errorResponseDTO = new InboundProcessorResponseDTO();
         errorResponseDTO.setError(true);
         PowerMockito.when(InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext))
@@ -86,7 +87,7 @@ public class RequestProcessorTest {
     }
 
     @Test
-    public void testHandleRequestDoThrottleError() {
+    public void testHandleRequestDoThrottleError() throws APISecurityException {
         InboundProcessorResponseDTO responseDTO = new InboundProcessorResponseDTO();
         InboundProcessorResponseDTO errorResponseDTO = new InboundProcessorResponseDTO();
         errorResponseDTO.setError(true);

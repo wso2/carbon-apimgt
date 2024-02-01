@@ -169,7 +169,10 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
 
             //Check whether the subscription is belongs to an API deployed in Solace
             if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
-                SolaceNotifierUtils.unsubscribeAPIProductFromSolaceApplication(api, application);
+                // Application Deletion Event came before Subscription removal event.
+                if (application != null) {
+                    SolaceNotifierUtils.unsubscribeAPIProductFromSolaceApplication(api, application);
+                }
             }
         } catch (APIManagementException e) {
             throw new NotifierException("Error while removing application solace Broker " + e.getMessage());

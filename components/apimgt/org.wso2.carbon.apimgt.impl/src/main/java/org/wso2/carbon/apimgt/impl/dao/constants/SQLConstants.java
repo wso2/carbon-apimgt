@@ -545,6 +545,7 @@ public class SQLConstants {
                     "   API.API_UUID AS API_UUID, " +
                     "   API.API_NAME AS API_NAME, " +
                     "   API.API_TYPE AS TYPE, " +
+                    "   API.ORGANIZATION AS ORGANIZATION, "+
                     "   API.API_VERSION AS API_VERSION, " +
                     "   SUBS.TIER_ID AS TIER_ID, " +
                     "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
