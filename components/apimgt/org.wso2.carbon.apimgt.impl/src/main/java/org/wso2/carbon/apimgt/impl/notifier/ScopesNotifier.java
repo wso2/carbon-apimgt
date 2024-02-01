@@ -37,7 +37,7 @@ public class ScopesNotifier extends AbstractNotifier {
     @Override
     public String getType() {
 
-        return APIConstants.NotifierType.SCOPE.name();
+        return APIConstants.NotifierType.SCOPES.name();
     }
 
 }
