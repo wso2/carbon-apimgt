@@ -1807,6 +1807,40 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
+  /apis/{apiId}/cancel-revision-workflow/{revisionId}/{envName}:
+    #--------------------------------------------------------
+    # Cancel a pending revision deployment workflow task given revision id and environment name
+    #--------------------------------------------------------
+    delete:
+      tags:
+        - API Revisions
+      summary: Delete Pending Revision Deployment Workflow Tasks
+      description: |
+        This operation can be used to remove pending revision deployment requests that are in pending state
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/revisionId'
+        - $ref: '#/components/parameters/envName'
+      responses:
+        200:
+          description: |
+            OK.
+            Revision deployment pending task removed successfully.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/cancel-revision-workflow/e0824883-3e86-403a-aec1-22bbc454eb7c/Default"'
+      operationId: deleteAPIRevisionDeploymentPendingTask
+
   /apis/import-service:
     post:
       tags:
@@ -6540,6 +6574,60 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
+  /api-products/copy-api-products:
+    #--------------------------------------------------------
+    # Create new product version from the existing API Product
+    #--------------------------------------------------------
+    post:
+      tags:
+        - API Products
+      summary: Create a New API Product Version
+      description: |
+        This operation can be used to create a new version of an existing API Products. The new version is specified as `newVersion` query parameter. New API Product will be in `CREATED` state.
+      parameters:
+        - name: newVersion
+          in: query
+          description: Version of the new API Product.
+          required: true
+          schema:
+            maxLength: 30
+            type: string
+        - name: defaultVersion
+          in: query
+          description: Specifies whether new API Product should be added as default version.
+          schema:
+            type: boolean
+            default: false
+        - $ref: '#/components/parameters/apiProductId-Q'
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created API Product as entity in the body. Location header contains URL of newly created API Product.
+          headers:
+            Location:
+              description: |
+                The URL of the newly created API Product.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIProduct'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/api-products/copy-api-products?newVersion=2.0&defaultVersion=false&apiproductId=2fd14eb8-b828-4013-b448-0739d2e76bf7"'
+      operationId: createNewAPIProductVersion
+
   /api-products/export:
     get:
       tags:
@@ -8287,6 +8375,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -8375,7 +8465,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GatewayPolicyDeployment'
+                type: array
+                items:
+                  $ref: '#/components/schemas/GatewayPolicyDeployment'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -9421,6 +9513,14 @@ components:
           minLength: 1
           type: string
           example: Default
+        status:
+          type: string
+          example: CREATED
+          default: CREATED
+          enum:
+            - CREATED
+            - APPROVED
+            - REJECTED
         vhost:
           maxLength: 255
           minLength: 1
@@ -9503,6 +9603,9 @@ components:
           description: |
             If the provider value is not given, the user invoking the API will be used as the provider.
           example: admin
+        version:
+          type: string
+          example: 1.0.0
         hasThumbnail:
           type: boolean
           example: true
@@ -9560,6 +9663,12 @@ components:
           minLength: 1
           type: string
           example: pizzaproduct
+        version:
+          maxLength: 30
+          minLength: 1
+          type: string
+          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
+          example: 1.0.0
         description:
           type: string
           description: A brief description about the API
@@ -9580,6 +9689,9 @@ components:
             State of the API product. Only published API products are visible on the Developer Portal
           default: CREATED
         enableSchemaValidation:
+          type: boolean
+          example: false
+        isDefaultVersion:
           type: boolean
           example: false
         isRevision:
@@ -12647,6 +12759,17 @@ components:
       in: path
       description: |
         Revision ID of an API
+      required: true
+      schema:
+        type: string
+
+    # API Revision Environment
+    # Specified as part of the path expression
+    envName:
+      name: envName
+      in: path
+      description: |
+        Environment name of an Revision
       required: true
       schema:
         type: string

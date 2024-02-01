@@ -640,6 +640,32 @@ public class Utils {
 
         return selectedAPIMap;
     }
+
+    /**
+     * Get the security scheme of the given API
+     *
+     * @param context      API context
+     * @param version      API version
+     * @param tenantDomain Tenant domain
+     * @return List of security schemes
+     */
+    public static List<String> getSecuritySchemeOfWebSocketAPI(String context, String version, String tenantDomain) {
+
+        List<String> securitySchemeList = new ArrayList<>();
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            org.wso2.carbon.apimgt.keymgt.model.entity.API api = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+            if (api != null) {
+                String securityScheme = api.getSecurityScheme();
+                if (securityScheme != null) {
+                    securitySchemeList = Arrays.asList(securityScheme.split(","));
+                }
+            }
+        }
+        return securitySchemeList;
+    }
+
     private static class ContextLengthSorter implements Comparator<String> {
 
         @Override

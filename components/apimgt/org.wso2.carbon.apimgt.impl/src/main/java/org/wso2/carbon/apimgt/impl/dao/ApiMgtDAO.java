@@ -18719,6 +18719,7 @@ public class ApiMgtDAO {
                         identifier.setUuid(result.getString("API_UUID"));
                         SubscribedAPI subscribedAPI = new SubscribedAPI(application.getSubscriber(), identifier);
                         subscribedAPI.setApplication(application);
+                        subscribedAPI.setOrganization(result.getString("ORGANIZATION"));
                         initSubscribedAPI(subscribedAPI, result);
                         subscribedAPIs.add(subscribedAPI);
                     }

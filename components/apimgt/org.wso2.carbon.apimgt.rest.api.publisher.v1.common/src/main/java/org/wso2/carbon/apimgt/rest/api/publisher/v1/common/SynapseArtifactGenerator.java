@@ -146,6 +146,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                 }
                             }
                             if (gatewayAPIDTO != null) {
+                                gatewayAPIDTO.setRevision(runTimeArtifact.getRevision());
                                 String content = new Gson().toJson(gatewayAPIDTO);
                                 synapseArtifacts.add(content);
                             }

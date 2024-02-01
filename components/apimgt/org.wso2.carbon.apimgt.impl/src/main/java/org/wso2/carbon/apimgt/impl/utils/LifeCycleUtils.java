@@ -76,8 +76,8 @@ public class LifeCycleUtils {
 
         // Add LC state change event to the event queue
         sendLCStateChangeNotification(apiName, apiType, apiContext, apiTypeWrapper.getId().getVersion(), targetStatus,
-                apiTypeWrapper.getId().getProviderName(),
-                apiTypeWrapper.getId().getId(), uuid, orgId);
+                apiTypeWrapper.getId().getProviderName(), apiTypeWrapper.getId().getId(), uuid, orgId,
+                apiTypeWrapper.getApi() != null ? apiTypeWrapper.getApi().getApiSecurity() : null);
 
         // Remove revisions and subscriptions after API retire
         if (!apiTypeWrapper.isAPIProduct()) {
@@ -195,7 +195,7 @@ public class LifeCycleUtils {
                                 APIUtil.getInternalOrganizationId(api.getOrganization()), api.getOrganization(),
                                 otherApi.getId().getApiName(), otherApi.getId().getId(), otherApi.getUuid(), version,
                                 api.getType(), otherApi.getContext(), otherApi.getId().getProviderName(),
-                                otherApi.getStatus());
+                                otherApi.getStatus(), api.getApiSecurity());
                         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
                     }
                 }
@@ -393,11 +393,12 @@ public class LifeCycleUtils {
      */
     private static void sendLCStateChangeNotification(String apiName, String apiType, String apiContext, String apiVersion,
                                                       String targetStatus, String provider, int apiOrApiProductId,
-                                                      String uuid, String organization) throws APIManagementException {
+                                                      String uuid, String organization, String securityScheme) throws
+            APIManagementException {
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), APIUtil.getInternalOrganizationId(organization), organization, apiName, apiOrApiProductId,
-                uuid, apiVersion, apiType, apiContext, APIUtil.replaceEmailDomainBack(provider), targetStatus);
+                uuid, apiVersion, apiType, apiContext, APIUtil.replaceEmailDomainBack(provider), targetStatus, securityScheme);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 

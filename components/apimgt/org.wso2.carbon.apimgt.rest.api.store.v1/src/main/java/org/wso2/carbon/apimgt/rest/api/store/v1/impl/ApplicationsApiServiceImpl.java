@@ -1288,8 +1288,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-        if (!(apiConsumer.isKeyManagerByNameAllowedForUser(body.getKeyManager(),
-                MultitenantUtils.getTenantDomain(username), username))) {
+        if (!(apiConsumer.isKeyManagerAllowedForUser(body.getKeyManager(), username))) {
             throw new APIManagementException("Key Manager is permission restricted",
                     ExceptionCodes.KEY_MANAGER_RESTRICTED_FOR_USER);
         }

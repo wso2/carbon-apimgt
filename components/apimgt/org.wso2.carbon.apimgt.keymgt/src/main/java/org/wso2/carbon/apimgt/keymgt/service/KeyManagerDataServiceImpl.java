@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.entity.BurstLimit;
 import org.wso2.carbon.apimgt.keymgt.model.entity.GroupId;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
@@ -400,6 +401,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         api.setApiProvider(event.getApiProvider());
         api.setApiVersion(event.getApiVersion());
         api.setContext(event.getApiContext());
+        api.setSecurityScheme(event.getSecurityScheme());
         if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + api.toString());
@@ -414,8 +416,10 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         policy.setQuotaType(event.getQuotaType());
         policy.setTenantId(event.getTenantId());
         policy.setTierName(event.getPolicyName());
-        policy.setRateLimitCount(event.getRateLimitCount());
-        policy.setRateLimitTimeUnit(event.getRateLimitTimeUnit());
+        BurstLimit burstLimit = new BurstLimit();
+        burstLimit.setRateLimitCount(event.getRateLimitCount());
+        burstLimit.setRateLimitTimeUnit(event.getRateLimitTimeUnit());
+        policy.setBurstLimit(burstLimit);
         if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + policy.toString());
