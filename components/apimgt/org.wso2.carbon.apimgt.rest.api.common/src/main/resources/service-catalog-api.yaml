@@ -90,7 +90,7 @@ info:
     Navigate through the API descriptions to find the required API, obtain an access token as described above and invoke the API with the authentication header.
     If you use a different authentication mechanism, this process may change.
 
-  version: '1.1'
+  version: '1.2'
 servers:
   - url: 'https://apis.wso2.com/api/service-catalog/v1'
   - url: 'http://apis.wso2.com/api/service-catalog/v1'
@@ -100,7 +100,7 @@ paths:
   # The Service Catalog API operations
   ######################################################
   /services:
-  
+
     #-----------------------------------------------------
     # Retrieve/search services in the service catalog
     #-----------------------------------------------------
@@ -491,7 +491,7 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
               -F "file=@services.zip" "https://127.0.0.1:9443/api/am/service-catalog/v1/services/import?overwrite=true"'
-                
+
   #----------------------------------------------------------
   # Exporting a service as a zipped archive
   #----------------------------------------------------------
@@ -614,7 +614,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ServiceInfo'
-          
+
     ServiceListExpanded:
       title: Services List
       type: object
@@ -664,7 +664,7 @@ components:
         provider:
           type: string
           example: admin
-          
+
     #-----------------------------------------------------
     # The Service Catalog Entry resource
     #-----------------------------------------------------
@@ -805,7 +805,7 @@ components:
         md5:
           type: string
           example: 36583a6a249b410e7fc4f892029709cac09763ddb230e1a829d5f9134d1abd07
-          
+
     #-----------------------------------------------------
     # The Service Schema resource
     #-----------------------------------------------------
@@ -1011,7 +1011,7 @@ components:
       required: true
       schema:
         type: string
-        
+
     #-------------------------------------------------------
     # serviceKey - A key which represents a service in the service catalog
     #-------------------------------------------------------
