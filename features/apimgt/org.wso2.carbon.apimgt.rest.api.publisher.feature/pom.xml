@@ -104,7 +104,7 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-core</artifactId>
         </dependency>
         <dependency>
@@ -229,7 +229,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>io.swagger:swagger-core</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
                                 <bundleDef>commons-io.wso2:commons-io</bundleDef>
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>

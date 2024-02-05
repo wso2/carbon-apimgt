@@ -1080,6 +1080,12 @@
                 <groupId>org.wso2.carbon.governance</groupId>
                 <artifactId>org.wso2.carbon.governance.registry.extensions</artifactId>
                 <version>${carbon.governance.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -1090,6 +1096,10 @@
                     <exclusion>
                         <groupId>org.wso2.orbit.org.opensaml</groupId>
                         <artifactId>opensaml</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ua.parser.wso2</groupId>
+                        <artifactId>ua-parser</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1457,7 +1467,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${fasterxml.jackson.databind.version}</version>
+                <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -1505,7 +1515,7 @@
                 <version>${javax.validation-api}</version>
             </dependency>
             <dependency>
-                <groupId>io.swagger</groupId>
+                <groupId>org.wso2.orbit.io.swagger</groupId>
                 <artifactId>swagger-core</artifactId>
                 <version>${swagger.core.version}</version>
             </dependency>
@@ -1716,6 +1726,12 @@
                 <groupId>org.wso2.securevault</groupId>
                 <artifactId>org.wso2.securevault</artifactId>
                 <version>${wso2.securevault.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.org.openapitools</groupId>
@@ -1988,7 +2004,7 @@
         <carbon.commons.version>4.10.3</carbon.commons.version>
 
         <carbon.registry.version>4.8.13</carbon.registry.version>
-        <carbon.mediation.version>4.7.175</carbon.mediation.version>
+        <carbon.mediation.version>4.7.189</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
@@ -2008,7 +2024,7 @@
         <graphql.java.version.range>[19.0,20.0)</graphql.java.version.range>
 
         <carbon.governance.version>4.8.30</carbon.governance.version>
-        <carbon.deployment.version>4.11.7</carbon.deployment.version>
+        <carbon.deployment.version>4.11.11</carbon.deployment.version>
         <carbon.multitenancy.version>4.9.20</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
@@ -2068,8 +2084,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>4.0.0-wso2v52</synapse.version>
-
+        <synapse.version>4.0.0-wso2v77</synapse.version>
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
         <!-- orbit httpmime versions-->
@@ -2116,8 +2131,8 @@
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
         <junit.version>4.13.1</junit.version>
         <opensaml3.version>3.3.1</opensaml3.version>
-        <openapi.generator.version>4.3.1.wso2v4</openapi.generator.version>
-        <caffeine.version>2.8.1</caffeine.version>
+        <openapi.generator.version>6.6.0.wso2v1</openapi.generator.version>
+        <caffeine.version>2.9.3</caffeine.version>
         <cal10n.version>0.8.1</cal10n.version>
         <commons-lang.version>2.4</commons-lang.version>
         <commons-validator.version>1.7</commons-validator.version>
@@ -2135,33 +2150,29 @@
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 
         <!-- apache cxf version -->
-        <cxf.version>3.5.5</cxf.version>
-
-
+        <cxf.version>3.6.2</cxf.version>
         <carbon.metrics.version>1.3.12</carbon.metrics.version>
         <!-- apache pdfbox version -->
         <pdfbox.version>2.0.25</pdfbox.version>
-        <event.processor.stub.version>2.3.5</event.processor.stub.version>
-        <event.processor.core.version>2.3.5</event.processor.core.version>
+        <event.processor.stub.version>2.3.8</event.processor.stub.version>
+        <event.processor.core.version>2.3.8</event.processor.core.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v2</swagger.inflector.oas3.version>
         <swagger.parser.v3.version>2.1.18.wso2v1</swagger.parser.v3.version>
-        <swagger.core.version>1.6.9</swagger.core.version>
-        <swagger.models.version>1.6.9</swagger.models.version>
-        <swagger.annotations.version>1.6.9</swagger.annotations.version>
+        <swagger.core.version>1.6.11.wso2v1</swagger.core.version>
+        <swagger.models.version>1.6.11</swagger.models.version>
+        <swagger.annotations.version>1.6.11</swagger.annotations.version>
         <servicemix.bundles.jedis.version>3.3.0_1</servicemix.bundles.jedis.version>
         <google.guava.version>33.0.0-jre</google.guava.version>
         <xercesImpl.version>2.12.2.wso2v1</xercesImpl.version>
         <commons.scxml.version>0.9.0.wso2v2</commons.scxml.version>
         <velocity.version>2.3</velocity.version>
         <fasterxml.jackson.version>2.16.1</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.16.1</fasterxml.jackson.databind.version>
-        <fasterxml.jackson.core.version>2.16.1</fasterxml.jackson.core.version>
         <javax.validation-api>2.0.1.Final</javax.validation-api>
-        <carbon.broker.version>3.3.27</carbon.broker.version>
-        <andes.version>3.3.25</andes.version>
+        <carbon.broker.version>3.3.31</carbon.broker.version>
+        <andes.version>3.3.29</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
-        <version.snake.yaml>2.0</version.snake.yaml>
+        <version.snake.yaml>2.2</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
         <slf4j.test.version>1.7.29</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
@@ -2189,7 +2200,7 @@
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
         <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
         <swagger3-codegen-maven-plugin.version>3.0.19</swagger3-codegen-maven-plugin.version>
-        <swagger3.core.version>2.2.8</swagger3.core.version>
+        <swagger3.core.version>2.2.20</swagger3.core.version>
         <javax.enterprise.version>2.0</javax.enterprise.version>
         <jaeger.client.version>1.8.0.wso2v1</jaeger.client.version>
         <zipkin.sender.okhttp3.version>2.16.4</zipkin.sender.okhttp3.version>
@@ -2198,14 +2209,14 @@
         <brave.opentracing.version>0.32.0</brave.opentracing.version>
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
-        <opentelemetry.all.version>1.11.0.wso2v4</opentelemetry.all.version>
+        <opentelemetry.all.version>1.11.0.wso2v6</opentelemetry.all.version>
         <aspectj.version>1.9.5</aspectj.version>
         <everit.version>1.5.0.wso2.v2</everit.version>
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
         <aspectj.version>1.9.4</aspectj.version>
         <wso2.securevault.version>1.1.3</wso2.securevault.version>
         <com.jayway.jsonpath.version>2.6.0.wso2v2</com.jayway.jsonpath.version>
-        <org.wso2.orbit.commons-text.version>1.6.wso2v1</org.wso2.orbit.commons-text.version>
+        <org.wso2.orbit.commons-text.version>1.10.0.wso2v2</org.wso2.orbit.commons-text.version>
         <commons.lang.version>2.6.0.wso2v1</commons.lang.version>
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
         <apache.felix.version>1.0.0</apache.felix.version>
@@ -2213,7 +2224,8 @@
         <org.json.version.range>[3.0.0,4.0.0)</org.json.version.range>
         <pax.logging.api.version>1.11.2</pax.logging.api.version>
         <import.package.version.commons.logging>[1.2.0,2.0.0)</import.package.version.commons.logging>
-        <import.package.version.commons.io>[2.4.0,2.5.0)</import.package.version.commons.io>
+        <import.package.version.commons.io>[2.4.0,3.0.0)</import.package.version.commons.io>
+        <import.package.version.commons.codec>[1.14.0,3.0.0)</import.package.version.commons.codec>
 
         <com.amazonaws.version>1.11.1034</com.amazonaws.version>
         <software.amazon.ion.version>1.0.2</software.amazon.ion.version>
@@ -2230,7 +2242,7 @@
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
-        <analytics.event.publisher.client.version>1.2.3</analytics.event.publisher.client.version>
+        <analytics.event.publisher.client.version>1.2.16</analytics.event.publisher.client.version>
         <analytics.event.publisher.client.version.range>[1.0.0,2.0.0)</analytics.event.publisher.client.version.range>
         <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
         <maven.spotbugsplugin.exclude.file>${project.parent.basedir}/../../spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>

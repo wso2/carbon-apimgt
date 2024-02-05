@@ -220,7 +220,7 @@
                                 <bundleDef>javax.validation:validation-api</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
-                                <bundleDef>io.swagger:swagger-core</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
                                 <bundleDef>commons-io.wso2:commons-io</bundleDef>
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
