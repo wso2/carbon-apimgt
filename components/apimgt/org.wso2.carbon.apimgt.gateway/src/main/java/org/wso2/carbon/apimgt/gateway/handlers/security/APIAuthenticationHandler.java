@@ -615,6 +615,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         StringBuilder challengeString = new StringBuilder();
         if (authenticators != null) {
             for (Authenticator authenticator : authenticators) {
+                if (Boolean.parseBoolean(System.getProperty("removeInternalAPIKeyRealm")) && authenticator instanceof InternalAPIKeyAuthenticator) {
+                    continue;
+                }
                 challengeString.append(authenticator.getChallengeString()).append(", ");
             }
         }
