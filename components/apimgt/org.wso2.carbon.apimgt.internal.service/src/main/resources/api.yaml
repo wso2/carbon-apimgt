@@ -897,6 +897,10 @@ definitions:
         type: boolean
         description: Whether this is the default version of the API.
         example: false
+      apiPolicies:
+        type: array
+        items:
+          $ref: '#/definitions/OperationPolicy'
       urlMappings:
         type: array
         items:
@@ -1415,6 +1419,28 @@ definitions:
         type: array
         items:
           type: string
+      operationPolicies:
+        type: array
+        items:
+          $ref: '#/definitions/OperationPolicy'
+
+  OperationPolicy:
+    title: Operation Policy
+    properties:
+      policyName:
+        type: string
+      policyVersion:
+        type: string
+      direction:
+        type: string
+      policyId:
+        type: string
+      order:
+        type: integer
+      parameters:
+        type: object
+        additionalProperties:
+          type: object
   #-----------------------------------------------------
   # The pagination resource
   #-----------------------------------------------------

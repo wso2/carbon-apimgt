@@ -44,6 +44,8 @@ public final class APIConstants {
     //governance registry apimgt root location
     public static final String APIMGT_REGISTRY_LOCATION = "/apimgt";
 
+    public static final String POLICY_ENABLED_FOR_ANALYTICS = "policyEnabled";
+
     public static final String API_CONTEXT_ID = "api.context.id";
     //This is the resource name of API
     public static final String API_RESOURCE_NAME = "/api";
