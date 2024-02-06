@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -2285,5 +2286,17 @@ public class APIManagerConfiguration {
 
     public void setHttpClientConfiguration(HttpClientConfigurationDTO httpClientConfiguration) {
         this.httpClientConfiguration = httpClientConfiguration;
+    }
+
+    public String getResourceAccessValidationClaimName() {
+        APIManagerConfiguration configurations = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        return configurations.getFirstProperty(APIConstants.CLAIM_BASED_RESOURCE_ACCESS_VALIDATION_CLAIM_NAME);
+    }
+
+    public String getResourceAccessValidationClaimValueRegex() {
+        APIManagerConfiguration configurations = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        return configurations.getFirstProperty(APIConstants.CLAIM_BASED_RESOURCE_ACCESS_VALIDATION_CLAIM_VALUE_REGEX);
     }
 }
