@@ -60,6 +60,7 @@ public class SettingsMappingUtil {
             settingsDTO.setKeyManagerConfiguration(getSettingsKeyManagerConfigurationDTOList());
         }
         settingsDTO.setScopes(getScopeList());
+        settingsDTO.setGatewayTypes(APIUtil.getGatewayTypes());
         return settingsDTO;
     }
 

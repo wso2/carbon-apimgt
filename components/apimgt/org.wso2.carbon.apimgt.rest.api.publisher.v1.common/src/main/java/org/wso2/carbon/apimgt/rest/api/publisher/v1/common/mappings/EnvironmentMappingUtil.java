@@ -55,6 +55,7 @@ public class EnvironmentMappingUtil {
         environmentDTO.setName(environment.getName());
         environmentDTO.setDisplayName(environment.getDisplayName());
         environmentDTO.setType(environment.getType());
+        environmentDTO.setGatewayType(environment.getGatewayType());
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());
         environmentDTO.setProvider(environment.getProvider());

@@ -5509,7 +5509,7 @@ public class ApiMgtDAO {
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
 
-            // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
+            // For APK gateway, gateway vendor type in the DB will be "wso2/apk".
             // This value is determined considering the gateway type comes with the request.
             api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
                     api.getGatewayVendor(), api.getGatewayType()));
@@ -8372,7 +8372,6 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error occurred while fetching gateway vendor of the API with ID " + apiId, e);
         }
-        gatewayVendor = APIUtil.handleGatewayVendorRetrieval(gatewayVendor);
         return gatewayVendor;
     }
 
@@ -14276,6 +14275,7 @@ public class ApiMgtDAO {
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
+                    String gatewayType = rs.getString("GATEWAY_TYPE");
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -14284,6 +14284,7 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setProvider(provider);
+                    env.setGatewayType(gatewayType);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     envList.add(env);
                 }
@@ -14356,7 +14357,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(3, environment.getDisplayName());
                 prepStmt.setString(4, environment.getDescription());
                 prepStmt.setString(5, environment.getProvider());
-                prepStmt.setString(6, tenantDomain);
+                prepStmt.setString(6, environment.getGatewayType());
+                prepStmt.setString(7, tenantDomain);
                 prepStmt.executeUpdate();
 
                 ResultSet rs = prepStmt.getGeneratedKeys();
@@ -14394,8 +14396,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(3, vhost.getHttpContext());
                 prepStmt.setString(4, vhost.getHttpPort().toString());
                 prepStmt.setString(5, vhost.getHttpsPort().toString());
-                prepStmt.setString(6, vhost.getWsPort().toString());
-                prepStmt.setString(7, vhost.getWssPort().toString());
+                prepStmt.setString(6, (vhost.getWsPort() != null) ? vhost.getWsPort().toString() : "N/A");
+                prepStmt.setString(7, (vhost.getWssPort() != null) ? vhost.getWssPort().toString() : "N/A");
                 prepStmt.addBatch();
             }
             prepStmt.executeBatch();
@@ -14440,8 +14442,23 @@ public class ApiMgtDAO {
                     String httpContext = rs.getString("HTTP_CONTEXT");
                     Integer httpPort = rs.getInt("HTTP_PORT");
                     Integer httpsPort = rs.getInt("HTTPS_PORT");
-                    Integer wsPort = rs.getInt("WS_PORT");
-                    Integer wssPort = rs.getInt("WSS_PORT");
+                    Integer wsPort;
+                    String wsPortValue = rs.getString("WS_PORT");
+                    if ("N/A".equals(wsPortValue)) {
+                        // Handle the "N/A" case
+                        wsPort = null;
+                    } else {
+                        // Parse the integer value
+                        wsPort = Integer.parseInt(wsPortValue);
+                    }
+                    Integer wssPort;
+                    String wssPortValue = rs.getString("WSS_PORT");
+                    if ("N/A".equals(wssPortValue)) {
+                        // Handle the "N/A" case
+                        wssPort = null;
+                    } else {
+                        wssPort = Integer.parseInt(wssPortValue);
+                    }
 
                     VHost vhost = new VHost();
                     vhost.setHost(host);

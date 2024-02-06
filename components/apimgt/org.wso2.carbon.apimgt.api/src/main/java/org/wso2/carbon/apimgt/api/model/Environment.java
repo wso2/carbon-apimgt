@@ -52,6 +52,7 @@ public class Environment implements Serializable {
     private boolean isReadOnly;
     private List<VHost> vhosts = new ArrayList<>();
     private String provider;
+    private String gatewayType;
     private Map<String, String> additionalProperties = new HashMap<>();
 
     public boolean isDefault() {
@@ -214,6 +215,14 @@ public class Environment implements Serializable {
 
     public void setProvider(String provider) {
         this.provider = provider;
+    }
+
+    public String getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
     }
 
     public Map<String, String> getAdditionalProperties() {

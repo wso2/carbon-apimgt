@@ -705,6 +705,8 @@ public final class APIConstants {
     public static final String API_WEBSUB_GATEWAY_ENDPOINT = "GatewayWebSubEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String API_GATEWAY_TYPE_REGULAR = "Regular";
+    public static final String API_GATEWAY_TYPE_APK = "APK";
     public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
     public static final String API_GATEWAY_VIRTUAL_HOST = "VirtualHost";
     public static final String API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT = "HttpEndpoint";
@@ -2993,7 +2995,7 @@ public final class APIConstants {
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
-    public static final String WSO2_CHOREO_CONNECT_GATEWAY = "wso2/choreo-connect";
+    public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
 
     // Protocol variables
