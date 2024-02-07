@@ -2161,7 +2161,7 @@
         <carbon.broker.version>3.3.27</carbon.broker.version>
         <andes.version>3.3.25</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
-        <version.snake.yaml>2.0</version.snake.yaml>
+        <version.snake.yaml>1.33</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
         <slf4j.test.version>1.7.29</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
