@@ -847,11 +847,8 @@ public class PublisherCommonUtils {
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
                                                            String organization)
             throws APIManagementException, CryptoException {
-        if (APIUtil.isOnPremResolver()) {
-            String name = apiDto.getName();
-            //replace all white spaces in the API Name
-            apiDto.setName(name.replaceAll("\\s+", ""));
-        }
+        String name = apiDto.getName();
+        apiDto.setName(name.trim().replaceAll("\\s{2,}", " "));
         if (APIDTO.TypeEnum.ASYNC.equals(apiDto.getType())) {
             throw new APIManagementException("ASYNC API type does not support API creation from scratch",
                     ExceptionCodes.API_CREATION_NOT_SUPPORTED_FOR_ASYNC_TYPE_APIS);

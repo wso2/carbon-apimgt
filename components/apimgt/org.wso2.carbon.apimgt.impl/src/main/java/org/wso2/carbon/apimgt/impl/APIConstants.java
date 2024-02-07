@@ -147,6 +147,10 @@ public final class APIConstants {
 
     public static final String SSL_VERIFY_CLIENT_STATUS_REQUIRE = "require";
 
+    public static final String ADMIN_PORTAL_GET_APIS_QUERY = "name=\\*\"%s\"\\* AND" +
+            " mediaType:application\\/vnd.wso2\\-api\\+xml AND" +
+            " type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)";
+
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
     public static final String API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER = "<tenant-id>";
@@ -1657,6 +1661,7 @@ public final class APIConstants {
     public static final String API_DATA_DEFAULT_THUMB = "images/api-default.png";
     public static final String API_DATA_APIS = "apis";
     public static final String API_DATA_TOT_LENGTH = "totalLength";
+    public static final String ADMIN_API_LIST_RESPONSE_PARAMS_TOTAL = "totalLength";
     public static final String API_DATA_LENGTH = "length";
     public static final String API_DATA_ISMORE = "isMore";
     public static final String API_DATA_PRODUCTION_ENDPOINTS = "production_endpoints";
