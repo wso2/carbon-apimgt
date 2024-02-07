@@ -50,7 +50,8 @@ public class SearchApiServiceImpl implements SearchApiService {
     public Response search(Integer limit, Integer offset, String query, String ifNoneMatch,
                            MessageContext messageContext) throws APIManagementException {
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
-        if (query.startsWith("name:") || query.startsWith("description:")) {
+        if (!query.equals(RestApiConstants.PIZZASHACK_SEARCH_QUERY) && (query.startsWith("name:") |
+                query.startsWith("description:"))) {
             query = query.replaceAll(" ", "%20");
         }
 
