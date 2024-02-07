@@ -603,6 +603,7 @@
                             io.swagger.v3.core.*,
                             io.swagger.v3.oas.models.*,
                             io.swagger.v3.parser,
+                            com.nimbusds.jwt.*,
                             io.swagger.v3.parser.converter,
                             com.fasterxml.jackson.datatype.guava,
                             com.github.benmanes.caffeine.cache;version="${caffeine.version}",
