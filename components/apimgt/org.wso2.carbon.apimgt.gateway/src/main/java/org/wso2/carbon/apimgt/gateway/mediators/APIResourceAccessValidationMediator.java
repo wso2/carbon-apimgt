@@ -76,7 +76,7 @@ public class APIResourceAccessValidationMediator extends AbstractMediator {
                 .ACCESS_VERIFICATION_CLAIM_NAME);
         Pattern pattern = Pattern.compile(configuredClaimValueRegex);
 
-        String claimSentInToken = null;
+        String claimSentInToken;
         String authHeader = transportHeaders.get(HTTPConstants.HEADER_AUTHORIZATION);
 
         // authHeader cannot be empty or null at this point.
