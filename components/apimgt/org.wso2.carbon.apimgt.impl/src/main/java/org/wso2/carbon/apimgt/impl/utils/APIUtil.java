@@ -7428,11 +7428,23 @@ public final class APIUtil {
     public static KeyManagerConfiguration toKeyManagerConfiguration(String base64EncodedString)
             throws APIManagementException {
 
-        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
         String decodedString = new String(Base64.decodeBase64(base64EncodedString));
-        new Gson().fromJson(decodedString, Map.class);
-        Map configuration = new Gson().fromJson(decodedString, Map.class);
-        keyManagerConfiguration.setConfiguration(configuration);
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = new Gson().fromJson(decodedString,
+                KeyManagerConfigurationDTO.class);
+        return toKeyManagerConfiguration(keyManagerConfigurationDTO);
+    }
+
+    public static KeyManagerConfiguration toKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+    {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        keyManagerConfiguration.setName(keyManagerConfigurationDTO.getName());
+        keyManagerConfiguration.setConfiguration(keyManagerConfigurationDTO.getAdditionalProperties());
+        keyManagerConfiguration.setTenantDomain(keyManagerConfigurationDTO.getOrganization());
+        keyManagerConfiguration.setTokenType(KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO
+                .getTokenType().toUpperCase()));
+        keyManagerConfiguration.setEnabled(keyManagerConfigurationDTO.isEnabled());
+        keyManagerConfiguration.setType(keyManagerConfigurationDTO.getType());
         return keyManagerConfiguration;
     }
 

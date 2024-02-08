@@ -305,9 +305,9 @@ public class APIDTO   {
         Objects.equals(status, API.status) &&
         Objects.equals(organization, API.organization) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
-        Objects.equals(securityScheme, API.securityScheme) &&
         Objects.equals(apiPolicies, API.apiPolicies) &&
-        Objects.equals(urlMappings, API.urlMappings);
+        Objects.equals(urlMappings, API.urlMappings) &&
+        Objects.equals(securityScheme, API.securityScheme);
   }
 
   @Override

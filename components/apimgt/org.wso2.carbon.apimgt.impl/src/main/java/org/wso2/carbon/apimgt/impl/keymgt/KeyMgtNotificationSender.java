@@ -16,11 +16,9 @@ import java.util.Collections;
 public class KeyMgtNotificationSender {
 
     public void notify(KeyManagerConfigurationDTO keyManagerConfigurationDTO,String action) {
-        String encodedString = "";
-        if (keyManagerConfigurationDTO.getAdditionalProperties() != null){
-            String additionalProperties = new Gson().toJson(keyManagerConfigurationDTO.getAdditionalProperties());
-            encodedString = new String(Base64.encodeBase64(additionalProperties.getBytes()));
-        }
+
+        String keyManagerConfiguration = new Gson().toJson(keyManagerConfigurationDTO);
+        String encodedString = new String(Base64.encodeBase64(keyManagerConfiguration.getBytes()));
         Object[] objects = new Object[]{APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_CONFIGURATION, action,
                 keyManagerConfigurationDTO.getName(), keyManagerConfigurationDTO.getType(),
                 keyManagerConfigurationDTO.isEnabled(), encodedString,
