@@ -1,0 +1,28 @@
+{
+  "name": "org.wso2.apimgt.app.revocation.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "eventId",
+      "type": "STRING"
+    },
+    {
+      "name": "consumerKey",
+      "type": "STRING"
+    },
+    {
+      "name": "revocationTime",
+      "type": "LONG"
+    },
+    {
+      "name": "organization",
+      "type": "STRING"
+    },
+    {
+      "name": "type",
+      "type": "STRING"
+    }
+  ]
+}

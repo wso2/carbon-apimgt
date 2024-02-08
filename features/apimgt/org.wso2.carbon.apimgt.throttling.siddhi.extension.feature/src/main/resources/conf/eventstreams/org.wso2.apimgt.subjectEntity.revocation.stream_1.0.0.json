@@ -1,0 +1,33 @@
+
+{
+  "name": "org.wso2.apimgt.subjectEntity.revocation.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "eventId",
+      "type": "STRING"
+    },
+    {
+      "name": "entityId",
+      "type": "STRING"
+    },
+    {
+      "name": "entityType",
+      "type": "STRING"
+    },
+    {
+      "name": "revocationTime",
+      "type": "LONG"
+    },
+    {
+      "name": "organization",
+      "type": "STRING"
+    },
+    {
+      "name": "type",
+      "type": "STRING"
+    }
+  ]
+}
