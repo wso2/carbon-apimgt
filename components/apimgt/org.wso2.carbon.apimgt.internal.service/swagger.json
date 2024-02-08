@@ -85,7 +85,7 @@
     },
     "/revokedjwt" : {
       "get" : {
-        "summary" : "get JTIs of revoked jwt tokens and application and subject entity revocation event data",
+        "summary" : "JTIs of revoked jwt tokens and application and subject entity revocation event data",
         "description" : "This will provide access to JTIs of directly revoked JWT tokens in database, consumer application information of revoked JWTs due to application change events, subject entity information of revoked JWTs due to user change events\n",
         "parameters" : [ ],
         "responses" : {
