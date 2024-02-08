@@ -137,7 +137,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <artifactId>h2-engine</artifactId>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
