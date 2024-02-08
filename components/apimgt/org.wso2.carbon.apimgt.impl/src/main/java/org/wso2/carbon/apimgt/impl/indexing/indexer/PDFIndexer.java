@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.pdfbox.cos.COSDocument;
@@ -30,7 +30,7 @@ public class PDFIndexer implements Indexer {
 		try {
 			PDFParser parser = getPdfParser(fileData);
 			parser.parse();
-			cosDoc = parser.getDocument();
+			cosDoc = parser.parse().getDocument();
 
 			PDFTextStripper stripper = getPdfTextStripper();
 			String docText = stripper.getText(new PDDocument(cosDoc));
@@ -70,7 +70,7 @@ public class PDFIndexer implements Indexer {
 	}
 
 	protected PDFParser getPdfParser(File2Index fileData) throws IOException {
-		return new PDFParser(new RandomAccessBufferedFileInputStream(new ByteArrayInputStream(fileData.data)));
+		return new PDFParser(new RandomAccessReadBuffer(new ByteArrayInputStream(fileData.data)));
 	}
 
 }
