@@ -23,7 +23,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.cos.COSDocument;
@@ -182,9 +182,9 @@ public class DocumentIndexer extends RXTIndexer {
                 inputStream = contentResource.getContentStream();
                 switch (extension) {
                 case APIConstants.PDF_EXTENSION:
-                    PDFParser pdfParser = new PDFParser(new RandomAccessBufferedFileInputStream(inputStream));
+                    PDFParser pdfParser = new PDFParser(new RandomAccessReadBuffer(inputStream));
                     pdfParser.parse();
-                    COSDocument cosDocument = pdfParser.getDocument();
+                    COSDocument cosDocument = pdfParser.parse().getDocument();
                     PDFTextStripper stripper = new PDFTextStripper();
                     contentString = stripper.getText(new PDDocument(cosDocument));
                     break;
