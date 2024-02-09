@@ -78,6 +78,8 @@
       }
     }
   },
+  "x-wso2-cors" : null,
+  "x-wso2-basePath" : null,
   "x-wso2-application-security" : {
     "security-types" : [ "api_key", "basic_auth", "oauth2" ],
     "optional" : false
