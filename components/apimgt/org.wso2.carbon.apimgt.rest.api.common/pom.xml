@@ -157,6 +157,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
@@ -177,6 +178,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
@@ -197,6 +199,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
