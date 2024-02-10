@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.29.24-SNAPSHOT</version>
+        <version>9.29.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -157,6 +157,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
@@ -177,6 +178,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
@@ -197,6 +199,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
@@ -217,6 +220,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
