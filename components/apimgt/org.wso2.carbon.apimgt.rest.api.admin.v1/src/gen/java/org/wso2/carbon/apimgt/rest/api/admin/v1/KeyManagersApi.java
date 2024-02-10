@@ -79,8 +79,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     @ApiOperation(value = "Delete a Key Manager", notes = "Delete a Key Manager by keyManager id ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
-            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
         })
     }, tags={ "Key Manager (Individual)",  })
     @ApiResponses(value = { 

@@ -60,7 +60,8 @@ GlobalKeyManagersApiService delegate = new GlobalKeyManagersApiServiceImpl();
     @ApiOperation(value = "Delete a Global Key Manager", notes = "Delete a Global Key Manager by keyManager id ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Global Key Manager (Individual)",  })
     @ApiResponses(value = { 
