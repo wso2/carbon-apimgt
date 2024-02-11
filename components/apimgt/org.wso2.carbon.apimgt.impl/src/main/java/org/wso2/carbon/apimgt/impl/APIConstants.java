@@ -565,8 +565,7 @@ public final class APIConstants {
     public static final String IS_ENABLED = "is_enabled";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
-    public static final String SUBJECT_ENTITY_REV
-        OCATION_STREAM_ID =
+    public static final String SUBJECT_ENTITY_REVOCATION_STREAM_ID =
             "org.wso2.apimgt.subjectEntity.revocation.stream:1.0.0";
     public static final String APP_REVOCATION_EVENT_STREAM_ID = "org.wso2.apimgt.app.revocation.stream:1.0.0";
     public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
