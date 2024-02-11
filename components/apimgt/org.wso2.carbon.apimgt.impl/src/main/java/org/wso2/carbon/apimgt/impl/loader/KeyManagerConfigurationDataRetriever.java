@@ -10,6 +10,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -63,21 +64,22 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                             httpResponse = httpClient.execute(method);
                             if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                                 String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-                                KeyManagerConfiguration[] keyManagerConfigurations =
-                                        new Gson().fromJson(responseString, KeyManagerConfiguration[].class);
-                                for (KeyManagerConfiguration keyManagerConfiguration : keyManagerConfigurations) {
+                                KeyManagerConfigurationDTO[] keyManagerConfigurationDTOS =
+                                        new Gson().fromJson(responseString, KeyManagerConfigurationDTO[].class);
+                                for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurationDTOS) {
                                     if (keyManagerConfiguration.isEnabled()) {
+                                        KeyManagerConfiguration resolvedKeyManagerConfiguration = APIUtil.toKeyManagerConfiguration(keyManagerConfiguration);
                                         try {
                                             ServiceReferenceHolder.getInstance().getKeyManagerConfigurationService()
                                                     .addKeyManagerConfiguration(
-                                                            keyManagerConfiguration.getTenantDomain(),
-                                                            keyManagerConfiguration.getName(),
-                                                            keyManagerConfiguration.getType(),
-                                                            keyManagerConfiguration);
+                                                            resolvedKeyManagerConfiguration.getTenantDomain(),
+                                                            resolvedKeyManagerConfiguration.getName(),
+                                                            resolvedKeyManagerConfiguration.getType(),
+                                                            resolvedKeyManagerConfiguration);
                                         } catch (APIManagementException e) {
                                             log.error("Error while configuring Key Manager " +
                                                     keyManagerConfiguration.getName() +
-                                                    " in tenant " + keyManagerConfiguration.getTenantDomain(), e);
+                                                    " in tenant " + resolvedKeyManagerConfiguration.getTenantDomain(), e);
                                         }
                                     }
                                 }
