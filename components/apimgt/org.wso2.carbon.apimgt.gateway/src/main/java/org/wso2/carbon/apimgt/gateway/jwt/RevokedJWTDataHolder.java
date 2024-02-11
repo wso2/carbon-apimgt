@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.jwt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,6 +31,10 @@ public class RevokedJWTDataHolder {
 
     private static final Log log = LogFactory.getLog(RevokedJWTDataHolder.class);
     private static Map<String, Long> revokedJWTMap = new ConcurrentHashMap<>();
+    private static final Map<String, Long> revokedConsumerKeyMap = new ConcurrentHashMap<>();
+    private static final Map<String, Long> revokedSubjectEntityAppMap = new ConcurrentHashMap<>();
+    // User UUID (jwt claim) -> revoked timestamp
+    private static final Map<String, Long> revokedSubjectEntityUserMap = new ConcurrentHashMap<>();
     private static RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
 
     /**
@@ -71,5 +76,66 @@ public class RevokedJWTDataHolder {
      */
     public static RevokedJWTDataHolder getInstance() {
         return instance;
+    }
+
+    public void addRevokedConsumerKeyToMap(String consumerKey, Long revocationTime) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Adding internal revoked JWT client Id, revocation time pair to the " + "revoked map :"
+                    + consumerKey + " , revocationTime:" + revocationTime);
+        }
+        revokedConsumerKeyMap.put(consumerKey, revocationTime);
+    }
+
+    public boolean isRevokedConsumerKeyExists(String consumerKey, Long jwtGeneratedTimestamp) {
+
+        Long jwtRevokedTime = revokedConsumerKeyMap.get(consumerKey);
+
+        if (jwtRevokedTime != null) {
+            Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
+            jwtRevokedTimestamp.toLocalDateTime();
+            return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
+        }
+        return false;
+    }
+
+    public void addRevokedSubjectEntityConsumerAppToMap(String consumerKey, Long revocationTime) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Adding internal revoked JWT client Id, revocation time pair to the revoked app only map :"
+                    + consumerKey + " , revocationTime:" + revocationTime);
+        }
+        revokedSubjectEntityAppMap.put(consumerKey, revocationTime);
+    }
+
+    public boolean isRevokedSubjectEntityConsumerAppExists(String consumerKey, Long jwtGeneratedTimestamp) {
+
+        Long jwtRevokedTime = revokedSubjectEntityAppMap.get(consumerKey);
+
+        if (jwtRevokedTime != null) {
+            Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
+            return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
+        }
+
+        return false;
+    }
+
+    public void addRevokedSubjectEntityUserToMap(String userUUID, Long revocationTime) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Adding internal revoked JWT user id, revocation time value pair to the revoked map :"
+                    + userUUID + " , revocationTime: " + revocationTime);
+        }
+        revokedSubjectEntityUserMap.put(userUUID, revocationTime);
+    }
+
+    public boolean isRevokedSubjectEntityUserExists(String user, Long jwtGeneratedTimestamp) {
+
+        Long jwtRevokedTime = revokedSubjectEntityUserMap.get(user);
+        if (jwtRevokedTime != null) {
+            Timestamp jwtRevokedTimestamp = new Timestamp(jwtRevokedTime);
+            return jwtRevokedTimestamp.after(new Timestamp(jwtGeneratedTimestamp));
+        }
+        return false;
     }
 }

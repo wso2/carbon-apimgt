@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.jms.*;
@@ -56,6 +57,25 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                             handleRevokedTokenMessage(payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText(),
                                     payloadData.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME).asLong(),
                                     payloadData.get(APIConstants.REVOKED_TOKEN_TYPE).asText());
+                        }
+
+                        if (payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE) != null
+                                && payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText()
+                                .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT)) {
+                            handleInternallyRevokedConsumerKeyMessage(
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_CONSUMER_KEY).asText(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_TIME).asLong(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText());
+                        }
+
+                        if (payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE) != null
+                                && payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText()
+                                .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_SUBJECT_ENTITY_EVENT)) {
+                            handleInternallyRevokedUserEventMessage(
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_ENTITY_ID).asText(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_ENTITY_TYPE).asText(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_TIME).asLong(),
+                                    payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText());
                         }
                     }
                 } else {
@@ -89,6 +109,25 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         } else {
             ServiceReferenceHolder.getInstance().getRevokedTokenService()
                     .removeTokenFromGatewayCache(revokedToken, isJwtToken);
+        }
+    }
+
+    private void handleInternallyRevokedConsumerKeyMessage(String consumerKey, long revocationTime, String type) {
+        if (APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT.equals(type)) {
+            RevokedJWTDataHolder.getInstance().addRevokedConsumerKeyToMap(consumerKey, revocationTime);
+        }
+    }
+
+    private void handleInternallyRevokedUserEventMessage(String subjectId, String subjectIdType,
+                                                         long revocationTime, String type) {
+
+        if (APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_SUBJECT_ENTITY_EVENT.equals(type)) {
+            if ("USER_ID".equals(subjectIdType)) {
+                RevokedJWTDataHolder.getInstance().addRevokedSubjectEntityUserToMap(subjectId, revocationTime);
+            } else if ("CLIENT_ID".equals(subjectIdType)) {
+                RevokedJWTDataHolder.getInstance().addRevokedSubjectEntityConsumerAppToMap(subjectId,
+                        revocationTime);
+            }
         }
     }
 }

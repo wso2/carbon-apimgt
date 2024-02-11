@@ -74,11 +74,11 @@ paths:
           - subject entity information of revoked JWTs due to user change events
       responses:
         200:
-          description: An array of revoke JWTs, revoked subject entities, revoked consumer keys
+          description: An object of revoke JWTs, revoked subject entities, revoked consumer keys
           schema:
-            type: array
+            type: object
             items:
-              $ref: '#/definitions/RevokedEventList'
+              $ref: '#/definitions/RevokedEvents'
         default:
           description: Unexpected error
           schema:
@@ -747,7 +747,7 @@ definitions:
         type: array
         items:
           type: string
-  RevokedConditions:
+  RevokedEvents:
     properties:
       revokedJWTList:
         type: array
@@ -785,21 +785,21 @@ definitions:
       organization:
         type: string
         description: Organization of the revoked subject entity.
-    RevokedJWTConsumerKey:
-      properties:
-        consumer_key:
-          type: string
-          description: consumer key of the JWT.
-        revocation_time:
-          type: integer
-          format: int64
-          description: revocation timestamp.
-        type:
-          type: string
-          description: revoked consumer key type.
-        organization:
-          type: string
-          description: organization of the revoked consumer key
+  RevokedJWTConsumerKey:
+    properties:
+      consumer_key:
+        type: string
+        description: consumer key of the JWT.
+      revocation_time:
+        type: integer
+        format: int64
+        description: revocation timestamp.
+      type:
+        type: string
+        description: revoked consumer key type.
+      organization:
+        type: string
+        description: organization of the revoked consumer key
   RevokeAPIKey:
     properties:
       apiKey:

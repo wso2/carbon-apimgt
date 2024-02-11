@@ -422,6 +422,10 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEY_TEMPLATE));
             eventPublishers.putIfAbsent(EventPublisherType.KEYMGT_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEYMGT_EVENT));
+            eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOKE_BY_CONSUMER_KEY_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOKE_BY_CONSUMER_KEY_EVENT));
+            eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOKE_BY_SUBJECT_ENTITY_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOKE_BY_SUBJECT_ENTITY_EVENT));
         } catch (EventPublisherException e) {
             log.error("Could not initialize the event publishers. Events might not be published properly.");
             throw new APIManagementException(e);

@@ -64,9 +64,8 @@ public class RevocationRequestPublisher {
         return revocationRequestPublisher;
     }
 
-    public void publishRevocationEvents(String token, long expiryTime, Properties properties) {
+    public void publishRevocationEvents(String token, Properties properties) {
 
-        properties.setProperty("expiryTime", Long.toString(expiryTime));
         if (realtimeNotifierEnabled) {
             log.debug("Realtime message sending is enabled");
             tokenRevocationNotifier.sendMessageOnRealtime(token, properties);
