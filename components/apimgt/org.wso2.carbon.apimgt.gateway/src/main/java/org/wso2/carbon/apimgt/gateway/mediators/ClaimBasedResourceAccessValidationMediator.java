@@ -36,8 +36,7 @@ import java.util.Map;
  * JWT access token. This claim value is also configured in the policy which is uploaded to each API resource
  * in the API Manager publisher. For the mediator to return true, the claim name and the claim value sent in the JWT
  * access token must be identical to the configured claim name and the value. If one of those are not identical,
- * the mediator will return false and an error will be displayed to the client. The value sent in the token claim
- * must conform to a regex which is also configurable.
+ * the mediator will return false and an error will be displayed to the client.
  */
 public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator {
 
