@@ -44,7 +44,8 @@ GlobalKeyManagersApiService delegate = new GlobalKeyManagersApiServiceImpl();
     @ApiOperation(value = "Get all Global Key managers", notes = "Get all Global Key managers ", response = KeyManagerListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Global Key Manager (Collection)",  })
     @ApiResponses(value = { 
@@ -78,7 +79,8 @@ GlobalKeyManagersApiService delegate = new GlobalKeyManagersApiServiceImpl();
     @ApiOperation(value = "Get a Global Key Manager Configuration", notes = "Retrieve a single Global Key Manager Configuration. We should provide the Id of the KeyManager as a path  parameter. ", response = KeyManagerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Global Key Manager (Individual)",  })
     @ApiResponses(value = { 
@@ -96,7 +98,8 @@ GlobalKeyManagersApiService delegate = new GlobalKeyManagersApiServiceImpl();
     @ApiOperation(value = "Update a Global Key Manager", notes = "Update a Global Key Manager by keyManager id ", response = KeyManagerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Global Key Manager (Individual)",  })
     @ApiResponses(value = { 
@@ -114,7 +117,8 @@ GlobalKeyManagersApiService delegate = new GlobalKeyManagersApiServiceImpl();
     @ApiOperation(value = "Add a new Global Key Manager", notes = "Add a new Global Key Manager ", response = KeyManagerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations"),
+            @AuthorizationScope(scope = "apim:keymanagers_manage", description = "Manage Key Managers")
         })
     }, tags={ "Global Key Manager (Collection)" })
     @ApiResponses(value = { 

@@ -3209,6 +3209,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_manage
       x-code-samples:
         - lang: Shell
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3243,6 +3244,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_manage
       x-code-samples:
         - lang: Shell
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3285,6 +3287,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_manage
       x-code-samples:
         - lang: Shell
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3323,6 +3326,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:admin_operations
+            - apim:keymanagers_manage
       x-code-samples:
         - lang: Shell
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
