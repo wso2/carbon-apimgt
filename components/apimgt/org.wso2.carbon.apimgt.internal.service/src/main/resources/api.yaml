@@ -1000,15 +1000,17 @@ definitions:
 
   KeyManager:
     properties:
+      uuid:
+        type: string
       name:
         type: string
       type:
         type: string
       enabled:
         type: boolean
-      tenantDomain:
+      organization:
         type: string
-      configuration:
+      additionalProperties:
         type: object
       tokenType:
         type: string
