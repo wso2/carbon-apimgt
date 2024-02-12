@@ -2825,10 +2825,10 @@ public final class APIConstants {
 
         public static final String TOKEN_TYPE = "token_type";
         public static final String TOKEN_REVOCATION_EVENT = "token_revocation";
-        public static final String INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT
-                = "internal_token_revocation_consumer_key_event";
-        public static final String INTERNAL_TOKEN_REVOCATION_SUBJECT_ENTITY_EVENT
-                = "internal_token_revocation_subject_entity_event";
+        public static final String CONSUMER_APP_REVOCATION_EVENT
+                = "consumer_app_revocation_event";
+        public static final String SUBJECT_ENTITY_REVOCATION_EVENT
+                = "subject_entity_revocation_event";
         public static final String CONSUMER_KEY = "consumer_key";
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";

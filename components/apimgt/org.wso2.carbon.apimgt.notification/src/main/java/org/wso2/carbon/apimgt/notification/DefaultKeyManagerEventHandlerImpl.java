@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.notification.event.AppRevocationEvent;
+import org.wso2.carbon.apimgt.notification.event.ConsumerAppRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.SubjectEntityRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
@@ -38,10 +38,10 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
 
         if (StringUtils.isNotEmpty(event)
-                && event.contains(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT)) {
+                && event.contains(APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT)) {
             handleInternalTokenRevocationByConsumerAppEvent(event);
         } else if (StringUtils.isNotEmpty(event)
-                && event.contains(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_SUBJECT_ENTITY_EVENT)) {
+                && event.contains(APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT)) {
             handleInternalTokenRevocationBySubjectEntityEvent(event);
         } else if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.TOKEN_REVOCATION_EVENT)) {
@@ -65,8 +65,8 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
 
     private boolean handleInternalTokenRevocationByConsumerAppEvent(String event) throws APIManagementException {
 
-        AppRevocationEvent tokenRevocationEvent = new Gson().fromJson(event, AppRevocationEvent.class);
-        handleInternalTokenRevocationByConsumerAppEvent(tokenRevocationEvent);
+        ConsumerAppRevocationEvent tokenRevocationEvent = new Gson().fromJson(event, ConsumerAppRevocationEvent.class);
+        handleConsumerAppRevocationEvent(tokenRevocationEvent);
         return true;
     }
 
@@ -74,7 +74,7 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
 
         SubjectEntityRevocationEvent tokenRevocationEvent =
                 new Gson().fromJson(event, SubjectEntityRevocationEvent.class);
-        handleInternalTokenRevocationBySubjectEntityEvent(tokenRevocationEvent);
+        handleSubjectEntityRevocationEvent(tokenRevocationEvent);
         return true;
     }
 }

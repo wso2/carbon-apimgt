@@ -21,11 +21,10 @@ package org.wso2.carbon.apimgt.notification.event;
 /**
  * + Event to notify token revocation of an application by consumer key events.
  */
-public class AppRevocationEvent extends Event {
+public class ConsumerAppRevocationEvent extends Event {
 
     private String consumerKey;
     private long revocationTime;
-    private String organization;
 
     public String getConsumerKey() {
         return consumerKey;
@@ -43,11 +42,4 @@ public class AppRevocationEvent extends Event {
         this.revocationTime = revocationTime;
     }
 
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
-    }
 }

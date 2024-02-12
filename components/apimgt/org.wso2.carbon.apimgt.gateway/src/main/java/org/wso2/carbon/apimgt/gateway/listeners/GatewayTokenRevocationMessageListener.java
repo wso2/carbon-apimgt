@@ -61,7 +61,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
 
                         if (payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE) != null
                                 && payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText()
-                                .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT)) {
+                                .equals(APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT)) {
                             handleInternallyRevokedConsumerKeyMessage(
                                     payloadData.get(APIConstants.INTERNAL_REVOCATION_CONSUMER_KEY).asText(),
                                     payloadData.get(APIConstants.INTERNAL_REVOCATION_TIME).asLong(),
@@ -70,7 +70,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
 
                         if (payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE) != null
                                 && payloadData.get(APIConstants.INTERNAL_REVOCATION_EVENT_TYPE).asText()
-                                .equals(APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_SUBJECT_ENTITY_EVENT)) {
+                                .equals(APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT)) {
                             handleInternallyRevokedUserEventMessage(
                                     payloadData.get(APIConstants.INTERNAL_REVOCATION_ENTITY_ID).asText(),
                                     payloadData.get(APIConstants.INTERNAL_REVOCATION_ENTITY_TYPE).asText(),
@@ -113,7 +113,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
     }
 
     private void handleInternallyRevokedConsumerKeyMessage(String consumerKey, long revocationTime, String type) {
-        if (APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_CONSUMER_KEY_EVENT.equals(type)) {
+        if (APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT.equals(type)) {
             RevokedJWTDataHolder.getInstance().addRevokedConsumerKeyToMap(consumerKey, revocationTime);
         }
     }
@@ -121,7 +121,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
     private void handleInternallyRevokedUserEventMessage(String subjectId, String subjectIdType,
                                                          long revocationTime, String type) {
 
-        if (APIConstants.NotificationEvent.INTERNAL_TOKEN_REVOCATION_SUBJECT_ENTITY_EVENT.equals(type)) {
+        if (APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT.equals(type)) {
             if ("USER_ID".equals(subjectIdType)) {
                 RevokedJWTDataHolder.getInstance().addRevokedSubjectEntityUserToMap(subjectId, revocationTime);
             } else if ("CLIENT_ID".equals(subjectIdType)) {

@@ -25,8 +25,6 @@ public class SubjectEntityRevocationEvent extends Event {
 
     private String entityId;
     private long revocationTime;
-    private String organization;
-
     private String entityType;
 
     public String getEntityId() {
@@ -43,14 +41,6 @@ public class SubjectEntityRevocationEvent extends Event {
 
     public void setRevocationTime(long revocationTime) {
         this.revocationTime = revocationTime;
-    }
-
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
     }
 
     public String getEntityType() {

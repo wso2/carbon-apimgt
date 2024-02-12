@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.keymgt.ExpiredJWTCleaner;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
-import org.wso2.carbon.apimgt.notification.event.AppRevocationEvent;
+import org.wso2.carbon.apimgt.notification.event.ConsumerAppRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.SubjectEntityRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
@@ -77,12 +77,12 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         return true;
     }
 
-    public boolean handleInternalTokenRevocationByConsumerAppEvent(AppRevocationEvent consumerKeyEvent)
+    public boolean handleConsumerAppRevocationEvent(ConsumerAppRevocationEvent consumerKeyEvent)
             throws APIManagementException {
 
         // rule persistence
         ApiMgtDAO.getInstance().addRevokedConsumerKey(consumerKeyEvent.getConsumerKey(),
-                consumerKeyEvent.getRevocationTime(), consumerKeyEvent.getOrganization());
+                consumerKeyEvent.getRevocationTime(), consumerKeyEvent.getTenantDomain());
 
         // set properties
         Properties properties = new Properties();
@@ -90,7 +90,7 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         properties.setProperty(APIConstants.NotificationEvent.CONSUMER_KEY, consumerKeyEvent.getConsumerKey());
         properties.setProperty(APIConstants.NotificationEvent.REVOCATION_TIME,
                 Long.toString(consumerKeyEvent.getRevocationTime()));
-        properties.setProperty(APIConstants.NotificationEvent.ORGANIZATION, consumerKeyEvent.getOrganization());
+        properties.setProperty(APIConstants.NotificationEvent.ORGANIZATION, consumerKeyEvent.getTenantDomain());
         properties.setProperty(APIConstants.NotificationEvent.EVENT_TYPE, consumerKeyEvent.getType());
         properties.setProperty(APIConstants.NotificationEvent.STREAM_ID,
                 APIConstants.APP_REVOCATION_EVENT_STREAM_ID);
@@ -100,12 +100,12 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         return true;
     }
 
-    public void handleInternalTokenRevocationBySubjectEntityEvent(SubjectEntityRevocationEvent userEvent)
+    public void handleSubjectEntityRevocationEvent(SubjectEntityRevocationEvent userEvent)
             throws APIManagementException {
         // persistence
         ApiMgtDAO.getInstance().addRevokedSubjectEntity(userEvent.getEntityId(),
                 userEvent.getEntityType(), userEvent.getRevocationTime(),
-                userEvent.getOrganization());
+                userEvent.getTenantDomain());
 
         // set properties
         Properties properties = new Properties();
@@ -114,7 +114,7 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         properties.setProperty(APIConstants.NotificationEvent.ENTITY_TYPE, userEvent.getEntityType());
         properties.setProperty(APIConstants.NotificationEvent.REVOCATION_TIME,
                 Long.toString(userEvent.getRevocationTime()));
-        properties.setProperty(APIConstants.NotificationEvent.ORGANIZATION, userEvent.getOrganization());
+        properties.setProperty(APIConstants.NotificationEvent.ORGANIZATION, userEvent.getTenantDomain());
         properties.setProperty(APIConstants.NotificationEvent.EVENT_TYPE, userEvent.getType());
         properties.setProperty(APIConstants.NotificationEvent.STREAM_ID,
                 APIConstants.SUBJECT_ENTITY_REVOCATION_STREAM_ID);
