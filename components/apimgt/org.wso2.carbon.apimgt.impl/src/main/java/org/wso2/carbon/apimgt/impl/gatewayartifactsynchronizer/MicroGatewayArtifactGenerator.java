@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.environmentspecif
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,11 +81,13 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         apiProjectDto.setEnvironments(new HashSet<>());
                         apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
                     }
+                    Map<String, org.wso2.carbon.apimgt.api.model.Environment> environments = APIUtil.getEnvironments(apiRuntimeArtifactDto.getOrganization());
                     // environment is unique for a revision in a deployment
                     // create new environment
                     EnvironmentDto environment = new EnvironmentDto();
                     environment.setName(apiRuntimeArtifactDto.getLabel());
                     environment.setVhost(apiRuntimeArtifactDto.getVhost());
+                    environment.setType(environments.get(apiRuntimeArtifactDto.getLabel()).getType());
                     environment.setDeployedTimeStamp(apiRuntimeArtifactDto.getDeployedTimeStamp());
                     apiProjectDto.getEnvironments().add(environment); // ignored if the name of the environment is same
                 }
