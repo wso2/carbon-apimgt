@@ -329,6 +329,19 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
+     * Create a new version of the <code>apiProduct</code>, with version <code>newVersion</code>
+     *
+     * @param apiProductId The id of the API Product to be copied
+     * @param newVersion The version of the new API Product
+     * @param defaultVersion whether this version is default or not
+     * @param organization Identifier of an organization
+     * @return apiProduct created apiProduct
+     * @throws APIManagementException If an error occurs while trying to create
+     *      *                                the new version of the API Product
+     */
+    APIProduct createNewAPIProductVersion(String apiProductId, String newVersion, Boolean defaultVersion,
+            String organization) throws APIManagementException;
+    /**
      * Retrieve the Key of the Service used in the API
      * @param apiId Unique Identifier of the API
      * @param tenantId Logged-in tenant domain
@@ -1649,6 +1662,16 @@ public interface APIProvider extends APIManager {
             APIManagementException;
 
     /**
+     * Returns security scheme of an API
+     *
+     * @param uuid         UUID of the API's registry artifact
+     * @param organization Identifier of an organization
+     * @return A String containing security scheme of the API
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    String getSecuritySchemeOfAPI(String uuid, String organization) throws APIManagementException;
+
+    /**
      * Returns details of an API
      * @param uuid   UUID of the API's registry artifact
      * @param organization  Identifier of an organization
@@ -1694,4 +1717,173 @@ public interface APIProvider extends APIManager {
      */
     boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
             appliedPolicy, String apiType) throws APIManagementException;
+
+    /**
+     * Resume API revision deployment process
+     *
+     * @param apiId        API Id using for the revision deployment
+     * @param organization organization identifier
+     * @param revisionUUID revision UUID
+     * @param revisionId   revision number
+     * @param environment  environment the deployment is happening
+     */
+    void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
+            String environment);
+
+    /***
+     * Cleanup pending or rejected revision workflows
+     *
+     * @param apiId Id of the API
+     * @param externalRef external Id of the revision
+     * @throws APIManagementException if an exception occurs while cleaning up revision deployment
+     */
+    void cleanupAPIRevisionDeploymentWorkflows(String apiId, String externalRef) throws APIManagementException;
+
+
+    /**
+     * Apply globally added policies to the flows.
+     *
+     * @param gatewayGlobalPolicyList   List of Gateway Policy objects
+     * @param orgId                     Organization ID
+     * @return Policy Mapping ID
+     * @throws APIManagementException
+     */
+    String applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
+            String orgId) throws APIManagementException;
+
+    /**
+     * Engage globally added policies to the gateways.
+     *
+     * @param gatewayPolicyDeploymentMap Policy mapping deployment metadata map
+     * @param orgId                      Organization ID
+     * @throws APIManagementException
+     */
+    void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap,
+            String orgId, String gatewayPolicyMappingId) throws APIManagementException;
+
+    /**
+     * Get gateway policy list for a given Policy Mapping UUID.
+     *
+     * @param policyMappingUUID      Policy mapping UUID
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is a bit bulky
+     * @return Gateway Policy Data List
+     * @throws APIManagementException
+     */
+    List<OperationPolicyData> getGatewayPolicyDataListByPolicyId(String policyMappingUUID,
+            boolean isWithPolicyDefinition) throws APIManagementException;
+
+    /**
+     * Get gateway policies attached to the policy mapping.
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @return List of gateway Policies
+     * @throws APIManagementException
+     */
+    List<OperationPolicy> getOperationPoliciesOfPolicyMapping(String policyMappingUUID) throws APIManagementException;
+
+    /**
+     * Get gateway policies mapping UUID attached to the gateway.
+     *
+     * @param gatewayLabel Gateway label
+     * @param orgId        Organization ID
+     * @return Policy mapping UUID list
+     * @throws APIManagementException
+     */
+    List<String> getAllPolicyMappingUUIDsByGatewayLabels(String[] gatewayLabel, String orgId)
+            throws APIManagementException;
+
+    /**
+     * This method is to delete a gateway policy mapping.
+     *
+     * @param gatewayPolicyMappingId Gateway policy mapping UUID
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    void deleteGatewayPolicyMappingByPolicyMappingId(String gatewayPolicyMappingId, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Update globally added policies to the flows.
+     *
+     * @param gatewayGlobalPolicyList List of Gateway Policy objects to be updated
+     * @param orgId                   Organization ID
+     * @param policyMappingId         Policy mapping UUID
+     * @return Policy Mapping ID
+     * @throws APIManagementException
+     */
+    String updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
+            String orgId, String policyMappingId) throws APIManagementException;
+
+    /**
+     * Get a lightweight version of all the gateway policies for the tenant domain. This will not include the policy
+     * definition as it is bulky.
+     *
+     * @param organization Organization name
+     * @return List of Gateway Policies
+     * @throws APIManagementException
+     */
+    List<GatewayPolicyData> getAllLightweightGatewayPolicyMappings(String organization) throws APIManagementException;
+
+    /**
+     * Get a lightweight version of deployment information for the gateway policy mapping associated with the provided
+     * gateway label within the tenant domain. This will not include the policy definition as it is bulky.
+     *
+     * @param organization Organization name
+     * @param gatewayLabel Gateway label
+     * @return List of Gateway Policies
+     * @throws APIManagementException
+     */
+    GatewayPolicyData getLightweightGatewayPolicyMappings(String organization, String gatewayLabel) throws APIManagementException;
+
+    /**
+     * Get a lightweight policy mapping data for a particular mapping ID. This will not include the policy
+     * definition as it is bulky.
+     *
+     * @param policyMappingUUID Policy mapping UUID
+     * @param tenantDomain      Tenant domain
+     * @return Gateway Policy Data
+     * @throws APIManagementException
+     */
+    GatewayPolicyData getGatewayPolicyMappingDataByPolicyMappingId(String policyMappingUUID, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Checks whether a policy mapping deployment exists for a given policy mapping ID.
+     *
+     * @param gatewayPolicyMappingId Policy mapping UUID
+     * @param tenantDomain           Tenant domain
+     * @return true if a policy mapping deployment exists for a given policy mapping ID
+     * @throws APIManagementException
+     */
+    boolean isPolicyMappingDeploymentExists(String gatewayPolicyMappingId, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Checks whether a policy mapping deployment exists for a given gateway label.
+     *
+     * @param gatewayLabel           Gateway label
+     * @param tenantDomain           Tenant domain
+     * @return true if a policy mapping deployment exists for a given policy mapping ID and gateway label
+     * @throws APIManagementException
+     */
+    boolean hasExistingDeployments(String tenantDomain, String gatewayLabel) throws APIManagementException;
+
+    /**
+     * Checks whether a policy mapping metadata exists for a given policy mapping ID.
+     *
+     * @param gatewayPolicyMappingId Policy mapping UUID
+     * @return true if a policy mapping metadata exists for a given policy mapping ID
+     * @throws APIManagementException
+     */
+    boolean isPolicyMetadataExists(String gatewayPolicyMappingId)
+            throws APIManagementException;
+
+    /**
+     * Checks whether a common policy exists based on the provided common policy UUID within gateway policy mappings.
+     *
+     * @param commonPolicyUUID Common policy UUID
+     * @return count of the common policy usage
+     * @throws APIManagementException
+     */
+    int getPolicyUsageByPolicyUUIDInGatewayPolicies(String commonPolicyUUID) throws APIManagementException;
 }

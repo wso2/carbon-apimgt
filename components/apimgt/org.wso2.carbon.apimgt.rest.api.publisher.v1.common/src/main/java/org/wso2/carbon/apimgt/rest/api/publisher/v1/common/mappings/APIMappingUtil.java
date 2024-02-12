@@ -440,6 +440,10 @@ public class APIMappingUtil {
             model.setGatewayVendor(dto.getGatewayVendor());
         }
 
+        if (dto.getGatewayType() != null) {
+            model.setGatewayType(dto.getGatewayType());
+        }
+
         if (dto.getAsyncTransportProtocols() != null) {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
@@ -1570,7 +1574,7 @@ public class APIMappingUtil {
      * @return REST API DTO representation of API Lifecycle state information
      */
     public static LifecycleStateDTO fromLifecycleModelToDTO(Map<String, Object> apiLCData,
-                                                            boolean apiOlderVersionExist) {
+                                                            boolean apiOlderVersionExist, String apiType) {
 
         LifecycleStateDTO lifecycleStateDTO = new LifecycleStateDTO();
 
@@ -1601,7 +1605,12 @@ public class APIMappingUtil {
                 }
 
                 LifecycleStateCheckItemsDTO checkItemsDTO = new LifecycleStateCheckItemsDTO();
-                checkItemsDTO.setName(checkListItem.getName());
+                if (APIConstants.API_PRODUCT.equals(apiType)) {
+                    checkItemsDTO.setName(checkListItem.getName().replace(APIConstants.API_IDENTIFIER_TYPE,
+                            APIConstants.API_PRODUCT_IDENTIFIER_TYPE));
+                } else {
+                    checkItemsDTO.setName(checkListItem.getName());
+                }
                 checkItemsDTO.setValue(Boolean.getBoolean(checkListItem.getValue()));
                 //todo: Set targets properly
                 checkItemsDTO.setRequiredStates(new ArrayList<>());
@@ -2271,9 +2280,14 @@ public class APIMappingUtil {
             APIProductInfoDTO productDto = new APIProductInfoDTO();
             productDto.setName(apiProduct.getId().getName());
             productDto.setProvider(APIUtil.replaceEmailDomainBack(apiProduct.getId().getProviderName()));
-            productDto.setContext(apiProduct.getContext());
+            String context = apiProduct.getContextTemplate();
+            if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
+                context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
+            }
+            productDto.setContext(context);
             productDto.setDescription(apiProduct.getDescription());
             productDto.setState(apiProduct.getState());
+            productDto.setVersion(apiProduct.getId().getVersion());
             productDto.setId(apiProduct.getUuid());
             productDto.setHasThumbnail(!StringUtils.isBlank(apiProduct.getThumbnailUrl()));
             if (apiProduct.getApiSecurity() != null) {
@@ -2300,12 +2314,18 @@ public class APIMappingUtil {
         productDto.setName(product.getId().getName());
         productDto.setProvider(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
         productDto.setId(product.getUuid());
-        productDto.setContext(product.getContext());
+        productDto.setVersion(product.getId().getVersion());
         productDto.setDescription(product.getDescription());
         productDto.setApiType(APIProductDTO.ApiTypeEnum.fromValue(APIConstants.AuditLogConstants.API_PRODUCT));
         productDto.setAuthorizationHeader(product.getAuthorizationHeader());
         productDto.setApiKeyHeader(product.getApiKeyHeader());
         productDto.setState(product.getState());
+        String context = product.getContextTemplate();
+        if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
+        }
+        productDto.setContext(context);
+        productDto.setIsDefaultVersion(product.isDefaultVersion());
         if (product.getGatewayVendor() == null) {
             productDto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
         } else {
@@ -2526,12 +2546,13 @@ public class APIMappingUtil {
 
         APIProduct product = new APIProduct();
         APIProductIdentifier id = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), dto.getName(),
-                APIConstants.API_PRODUCT_VERSION); //todo: replace this with dto.getVersion
+                dto.getVersion());
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
 
         String context = dto.getContext();
+        final String originalContext = context;
 
         if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
             context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
@@ -2539,16 +2560,24 @@ public class APIMappingUtil {
 
         context = context.startsWith(FORWARD_SLASH) ? context : (FORWARD_SLASH + context);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) &&
-                dto.getId() == null) {
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain) && dto.getId() == null
+                && !context.contains("/t/" + providerDomain)) {
             //Create tenant aware context for API
             context = "/t/" + providerDomain + context;
         }
 
-        product.setType(APIConstants.API_PRODUCT_IDENTIFIER_TYPE.replaceAll("\\s", EMPTY_STRING));
-        product.setContext(context);
+        // This is to support the pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
         context = checkAndSetVersionParam(context);
         product.setContextTemplate(context);
+
+        context = updateContextWithVersion(dto.getVersion(), originalContext, context);
+        product.setContext(context);
+
+        product.setType(APIConstants.API_PRODUCT_IDENTIFIER_TYPE.replaceAll("\\s", EMPTY_STRING));
+        if (dto.isIsDefaultVersion() != null) {
+            product.setDefaultVersion(dto.isIsDefaultVersion());
+        }
 
         List<String> apiProductTags = dto.getTags();
         Set<String> tagsToReturn = new HashSet<>(apiProductTags);
@@ -3172,6 +3201,12 @@ public class APIMappingUtil {
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
         apiRevisionDeploymentDTO.setName(model.getDeployment());
         apiRevisionDeploymentDTO.setVhost(model.getVhost());
+        if (model.getStatus() != null) {
+            apiRevisionDeploymentDTO.setStatus(
+                    APIRevisionDeploymentDTO.StatusEnum.valueOf(model.getStatus().toString()));
+        } else {
+            apiRevisionDeploymentDTO.setStatus(null);
+        }
         if (model.getRevisionUUID() != null) {
             apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
         }

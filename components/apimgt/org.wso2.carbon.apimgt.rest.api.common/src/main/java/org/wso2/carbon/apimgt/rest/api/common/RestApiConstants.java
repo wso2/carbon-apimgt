@@ -203,6 +203,7 @@ public final class RestApiConstants {
     public static final String ORG_ID = "ORG_ID";
 
     public static final int PAGINATION_LIMIT_DEFAULT = 25;
+    public static final String PIZZASHACK_SEARCH_QUERY = "name:PizzaShackAPI version:1.0 context:pizzashack";
     public static final int PAGINATION_OFFSET_DEFAULT = 0;
     public static final String PAGINATION_NEXT_OFFSET = "next_offset";
     public static final String PAGINATION_NEXT_LIMIT = "next_limit";
@@ -275,6 +276,7 @@ public final class RestApiConstants {
     public static final String STATUS_BAD_REQUEST_MESSAGE_DEFAULT = "Bad Request";
     public static final String STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS = "Resource Already Exists";
     public static final String STATUS_CONFLICT_MESSAGE_DEFAULT = "Conflict";
+    public static final String STATUS_PRECONDITION_FAILED_MESSAGE_DEFAULT = "Precondition Failed";
 
     public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered "
             + "an internal error. Please contact administrator.";
@@ -342,6 +344,8 @@ public final class RestApiConstants {
     public static final int TAG_OFFSET_DEFAULT = 0;
 
     public static final String RESOURCE_PATH_OPERATION_POLICIES = "operation-policies";
+
+    public static final String RESOURCE_PATH_GATEWAY_POLICIES = "gateway-policies";
 
     public static final String AUTH_TOKEN_INFO = "AUTH_TOKEN_INFO";
 }

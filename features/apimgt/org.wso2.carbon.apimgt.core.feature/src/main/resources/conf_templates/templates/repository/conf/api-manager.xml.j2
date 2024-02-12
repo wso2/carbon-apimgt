@@ -123,6 +123,7 @@
             <Environment type="{{environment_name.type}}" api-console="{{environment_name.display_in_api_console}}" isDefault="{{environment_name.show_as_token_endpoint_url}}">
                 <Name>{{environment_name.name}}</Name>
                 <DisplayName>{{environment_name.display_name}}</DisplayName>
+                <GatewayType>{{environment_name.gateway_type}}</GatewayType>
                 <Description>{{environment_name.description}}</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>{{environment_name.service_url}}</ServerURL>
@@ -185,6 +186,50 @@
             </Environment>
             {% endfor %}
         </Environments>
+        <TransactionCounter>
+            {% if integration.transaction_counter.enable is defined %}
+            <Enabled>{{integration.transaction_counter.enable}}</Enabled>
+            {% endif %}
+            {% if integration.transaction_counter.server_id is defined %}
+            <ServerID>{{integration.transaction_counter.server_id}}</ServerID>
+            {% endif %}
+            {% if integration.transaction_counter.store_impl is defined %}
+            <StoreClass>{{integration.transaction_counter.store_impl}}</StoreClass>
+            {% endif %}
+            {% if integration.transaction_counter.record_queue_size is defined %}
+            <QueueSize>{{integration.transaction_counter.record_queue_size}}</QueueSize>
+            {% endif %}
+            {% if integration.transaction_counter.producer_counting_thread_pool_size is defined %}
+            <ProducerThreadPoolSize>{{integration.transaction_counter.producer_counting_thread_pool_size}}</ProducerThreadPoolSize>
+            {% endif %}
+            {% if integration.transaction_counter.producer_scheduled_interval is defined %}
+            <ProducerScheduledInterval>{{integration.transaction_counter.producer_scheduled_interval}}</ProducerScheduledInterval>
+            {% endif %}
+            {% if integration.transaction_counter.max_transaction_count_per_record is defined %}
+            <MaxTransactionCount>{{integration.transaction_counter.max_transaction_count_per_record}}</MaxTransactionCount>
+            {% endif %}
+            {% if integration.transaction_counter.min_transaction_count_per_record is defined %}
+            <MinTransactionCount>{{integration.transaction_counter.min_transaction_count_per_record}}</MinTransactionCount>
+            {% endif %}
+            {% if integration.transaction_counter.publisher_scheduled_interval is defined %}
+            <PublisherScheduledInterval>{{integration.transaction_counter.publisher_scheduled_interval}}</PublisherScheduledInterval>
+            {% endif %}
+            {% if integration.transaction_counter.publisher_max_batch_size is defined %}
+            <MaxBatchSize>{{integration.transaction_counter.publisher_max_batch_size}}</MaxBatchSize>
+            {% endif %}
+            {% if integration.transaction_counter.publisher_max_retries is defined %}
+            <MaxRetryCount>{{integration.transaction_counter.publisher_max_retries}}</MaxRetryCount>
+            {% endif %}
+            {% if integration.transaction_counter.service_url is defined %}
+            <ServiceURL>{{integration.transaction_counter.service_url}}</ServiceURL>
+            {% endif %}
+            {% if integration.transaction_counter.service_username is defined %}
+            <ServiceUsername>{{integration.transaction_counter.service_username}}</ServiceUsername>
+            {% endif %}
+            {% if integration.transaction_counter.service_password is defined %}
+            <ServicePassword>{{integration.transaction_counter.service_password}}</ServicePassword>
+            {% endif %}
+        </TransactionCounter>
     </APIGateway>
 
     <TokenIssuers>
@@ -280,6 +325,8 @@
     <Analytics>
         <!-- Enable Analytics for API Manager -->
         <Enabled>{{apim.analytics.enable}}</Enabled>
+
+        <PolicyEnabled>{{apim.analytics.enablePolicy}}</PolicyEnabled>
 
         <Type>{{apim.analytics.type}}</Type>
 
@@ -737,6 +784,10 @@
                 <URI>/api/am/service-catalog/{serviceCatalogVersion}/oas.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/gateway/v2/server-startup-healthcheck</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>
             <ETagSkipURI>
@@ -931,6 +982,37 @@
             {% if apim.throttling.jms.start_delay is defined %}
             <InitDelay>{{apim.throttling.jms.start_delay}}</InitDelay>
             {% endif %}
+            {% if (apim.event_hub.listener.min_thread_pool_size is defined)
+            or (apim.event_hub.listener.max_thread_pool_size is defined)
+            or (apim.event_hub.listener.keep_alive_time_in_millis is defined)
+            or (apim.event_hub.listener.job_queue_size is defined)
+            or (apim.throttling.jms.min_thread_pool_size is defined)
+            or (apim.throttling.jms.max_thread_pool_size is defined)
+            or (apim.throttling.jms.keep_alive_time_in_millis is defined)
+            or (apim.throttling.jms.job_queue_size is defined) %}
+            <JMSTaskManager>
+                {% if apim.event_hub.listener.min_thread_pool_size is defined %}
+                <MinThreadPoolSize>{{apim.event_hub.listener.min_thread_pool_size}}</MinThreadPoolSize>
+                {% elif apim.throttling.jms.min_thread_pool_size is defined %}
+                <MinThreadPoolSize>{{apim.throttling.jms.min_thread_pool_size}}</MinThreadPoolSize>
+                {% endif %}
+                {% if apim.event_hub.listener.max_thread_pool_size is defined %}
+                <MaxThreadPoolSize>{{apim.event_hub.listener.max_thread_pool_size}}</MaxThreadPoolSize>
+                {% elif apim.throttling.jms.max_thread_pool_size is defined %}
+                <MaxThreadPoolSize>{{apim.throttling.jms.max_thread_pool_size}}</MaxThreadPoolSize>
+                {% endif %}
+                {% if apim.event_hub.listener.keep_alive_time_in_millis is defined %}
+                <KeepAliveTimeInMillis>{{apim.event_hub.listener.keep_alive_time_in_millis}}</KeepAliveTimeInMillis>
+                {% elif apim.throttling.jms.keep_alive_time_in_millis is defined %}
+                <KeepAliveTimeInMillis>{{apim.throttling.jms.keep_alive_time_in_millis}}</KeepAliveTimeInMillis>
+                {% endif %}
+                {% if apim.event_hub.listener.job_queue_size is defined %}
+                <JobQueueSize>{{apim.event_hub.listener.job_queue_size}}</JobQueueSize>
+                {% elif apim.throttling.jms.job_queue_size is defined %}
+                <JobQueueSize>{{apim.throttling.jms.job_queue_size}}</JobQueueSize>
+                {% endif %}
+            <JMSTaskManager>
+            {% endif %}
             <JMSConnectionParameters>
                 <transport.jms.ConnectionFactoryJNDIName>{{apim.throttling.jms.conn_jndi_name}}</transport.jms.ConnectionFactoryJNDIName>
                 <transport.jms.DestinationType>{{apim.throttling.jms.destination_type}}</transport.jms.DestinationType>
@@ -1087,6 +1169,11 @@
         <LogTracer>
             <Enabled>{{apim.open_telemetry.log_tracer.enable}}</Enabled>
         </LogTracer>
+        <ResourceAttributes>
+            {% for attribute in apim.open_telemetry.resource_attributes %}
+            <{{attribute.name}}>{{attribute.value}}</{{attribute.name}}>
+            {% endfor %}
+        </ResourceAttributes>
     </OpenTelemetry>
 
     <OpenTracer>
@@ -1101,6 +1188,12 @@
                 {% endif %}
                 {% if apim.open_tracer.remote_tracer.properties.sampler_param is defined %}
                 <SamplerParam>{{apim.open_tracer.remote_tracer.properties.sampler_param}}</SamplerParam>
+                {% endif %}
+                {% if apim.open_tracer.remote_tracer.properties.proxy_host is defined %}
+                <ProxyHost>{{apim.open_tracer.remote_tracer.properties.proxy_host}}</ProxyHost>
+                {% endif %}
+                {% if apim.open_tracer.remote_tracer.properties.proxy_port is defined %}
+                <ProxyPort>{{apim.open_tracer.remote_tracer.properties.proxy_port}}</ProxyPort>
                 {% endif %}
             </Properties>
         </RemoteTracer>

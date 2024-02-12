@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.impl.notifier.CorrelationConfigNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
@@ -214,6 +215,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIMgtDBUtil.initialize();

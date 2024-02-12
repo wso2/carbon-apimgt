@@ -28,6 +28,8 @@ public class FaultSubCategories {
         MEDIATION_ERROR,
         RESOURCE_NOT_FOUND,
         METHOD_NOT_ALLOWED,
+        INVALID_REQUEST_SCHEMA,
+        INVALID_RESPONSE_SCHEMA,
         UNCLASSIFIED
     }
 
@@ -43,6 +45,7 @@ public class FaultSubCategories {
         BLOCKED,
         CUSTOM_POLICY_LIMIT_EXCEEDED,
         BURST_CONTROL_LIMIT_EXCEEDED,
+        APPLICATION_BURST_CONTROL_LIMIT_EXCEEDED,
         QUERY_TOO_DEEP,
         QUERY_TOO_COMPLEX,
         OTHER

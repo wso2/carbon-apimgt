@@ -15,10 +15,12 @@ public class ScopeEvent extends Event{
     private List<String> roles = new ArrayList<>();
     private Map<String,String> mappings = new HashMap<>();
 
-    public ScopeEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,String name,
+    public ScopeEvent(String eventId, Long timestamp, String type, int tenantId, String tenantDomain,String name,
                       String displayName, String description) {
         this.eventId = eventId;
-        this.timeStamp = timestamp;
+        if (timestamp != null) {
+            this.timeStamp = timestamp;
+        }
         this.type = type;
         this.tenantId = tenantId;
         this.tenantDomain = tenantDomain;

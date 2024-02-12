@@ -41,7 +41,7 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
     protected JSONParser jsonParser = new JSONParser();
     protected JSONObject policyDefinition;
 
-    public FieldComplexityCalculatorImpl(String accessControlPolicy) throws ParseException {
+    public void parseAccessControlPolicy(String accessControlPolicy) throws ParseException {
         if (accessControlPolicy == null) {
             policyDefinition = new JSONObject();
         } else {

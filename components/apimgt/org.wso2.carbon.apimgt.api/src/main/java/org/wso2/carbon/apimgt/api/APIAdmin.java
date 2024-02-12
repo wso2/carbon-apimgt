@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -70,6 +71,16 @@ public interface APIAdmin  {
      * @throws APIManagementException If failed to delete environment
      */
     void deleteEnvironment(String tenantDomain, String uuid) throws APIManagementException;
+
+    /**
+     * Checks whether the given environment has active gateway policy deployments.
+     *
+     * @param tenantDomain tenant domain
+     * @param uuid         Environment identifier
+     * @return true if environment exists
+     * @throws APIManagementException If failed to check environment existence
+     */
+    boolean hasExistingDeployments(String tenantDomain, String uuid) throws APIManagementException;
 
     /**
      * Updates the details of the given Environment.
@@ -333,6 +344,14 @@ public interface APIAdmin  {
             throws APIManagementException;
 
     /**
+     * This method used to get key manager permissions with key manager id and role
+     * @param id uuid of key manager
+     * @return key manager permissions
+     * @throws APIManagementException
+     */
+    KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String id) throws APIManagementException;
+
+    /**
      * hTis method used to delete IDP mapped with key manager
      * @param organization organization requested
      * @param keyManagerConfigurationDTO key manager data
@@ -465,4 +484,27 @@ public interface APIAdmin  {
     Policy[] getPolicies(int tenantId, String level) throws APIManagementException;
 
     Policy getPolicyByNameAndType(int tenantId, String level, String name) throws APIManagementException;
+
+    /**
+     * Update the Api Provider of a given Api Id
+     *
+     * @param apiId Api ID
+     * @param provider New ProviderName/Owner of the Api
+     * @param organisation Organisation
+     * @throws APIManagementException
+     */
+    void updateApiProvider(String apiId, String provider, String organisation) throws APIManagementException;
+
+    /**
+     * Get/Search All Apis in admin portal
+     *
+     * @param searchQuery Api name search query
+     * @param organization organization
+     * @param start
+     * @param end
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedApis(String searchQuery, String organization, int start, int end)
+            throws APIManagementException;
 }

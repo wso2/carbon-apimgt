@@ -743,6 +743,10 @@ public class JMSTaskManager {
             setJmsTaskManagerState(STATE_FAILURE);
             log.error("JMS Connection failed : " + j.getMessage() + " - shutting down worker tasks");
 
+            if (messageListener instanceof JMSConnectionEventListener) {
+                ((JMSConnectionEventListener) messageListener).onDisconnect();
+            }
+
             int r = 1;
 
             long retryDuration = initialReconnectDuration;
@@ -782,6 +786,10 @@ public class JMSTaskManager {
                     isOnExceptionError = false;
                     log.info("Reconnection attempt: " + r + " for " + jmsConsumerName +
                             " was successful!");
+
+                    if (messageListener instanceof JMSConnectionEventListener) {
+                        ((JMSConnectionEventListener) messageListener).onReconnect();
+                    }
                 }
 
 

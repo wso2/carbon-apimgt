@@ -66,8 +66,7 @@ class TracingConstants {
     static final String ZIPKIN_CONFIG_HOST = "OpenTracer.RemoteTracer.Properties.HostName";
     static final String ZIPKIN_CONFIG_PROXY_HOST = "OpenTracer.RemoteTracer.Properties.ProxyHost";
     static final String ZIPKIN_CONFIG_PROXY_PORT = "OpenTracer.RemoteTracer.Properties.ProxyPort";
-    static final String ZIPKIN_CONFIG_ENDPOINT_URL
-            = "OpenTracer.RemoteTracer.Properties.EndpointUrl";
+    static final String ZIPKIN_CONFIG_ENDPOINT_URL = "OpenTracer.RemoteTracer.Properties.EndpointUrl";
 
     static final String REQUEST_ID = "request-id";
 

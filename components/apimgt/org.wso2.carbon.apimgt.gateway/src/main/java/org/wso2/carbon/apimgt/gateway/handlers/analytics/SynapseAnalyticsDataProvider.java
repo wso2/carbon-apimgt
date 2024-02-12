@@ -17,13 +17,20 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
@@ -34,6 +41,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
@@ -43,6 +51,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
@@ -50,15 +59,24 @@ import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
+import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     private static final Log log = LogFactory.getLog(SynapseAnalyticsDataProvider.class);
     private MessageContext messageContext;
     private AnalyticsCustomDataProvider analyticsCustomDataProvider;
+    private Boolean buildResponseMessage = null;
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
 
@@ -151,6 +169,48 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             api.setApiVersion(apiObj.getApiVersion());
             api.setApiCreator(apiObj.getApiProvider());
             api.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(api.getApiCreator()));
+            List<URITemplate> uriTemplates = new ArrayList<>();
+            for (URLMapping uriTemplate : apiObj.getUrlMappings()) {
+                org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate uriTemplateObj
+                        = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate();
+                if (uriTemplate.getHttpMethod() != null && uriTemplate.getHttpMethod()
+                        .equals(messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD))
+                        && uriTemplate.getUrlPattern() != null && uriTemplate.getUrlPattern()
+                        .equals(messageContext.getProperty("API_ELECTED_RESOURCE"))) {
+                    uriTemplateObj.setResourceURI(uriTemplate.getUrlPattern());
+                    uriTemplateObj.setHttpVerb(uriTemplate.getHttpMethod());
+                    uriTemplateObj.setAuthScheme(uriTemplate.getAuthScheme());
+                    List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> operationPolicies
+                            = new ArrayList<>();
+                    for (OperationPolicy operationPolicy : uriTemplate.getOperationPolicies()) {
+                        org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj
+                                = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
+                        operationPolicyObj.setPolicyVersion(operationPolicy.getPolicyVersion());
+                        operationPolicyObj.setPolicyName(operationPolicy.getPolicyName());
+                        operationPolicyObj.setPolicyId(operationPolicy.getPolicyId());
+                        operationPolicyObj.setDirection(operationPolicy.getDirection());
+                        operationPolicyObj.setOrder(operationPolicy.getOrder());
+                        operationPolicies.add(operationPolicyObj);
+                    }
+                    uriTemplateObj.setOperationPolicies(operationPolicies);
+                    uriTemplates.add(uriTemplateObj);
+                    break;
+                }
+            }
+            List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> apiPolicyList =
+                    new ArrayList<>();
+            for (OperationPolicy apiPolicy : apiObj.getApiPolicies()) {
+                org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj
+                        = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
+                operationPolicyObj.setPolicyVersion(apiPolicy.getPolicyVersion());
+                operationPolicyObj.setPolicyName(apiPolicy.getPolicyName());
+                operationPolicyObj.setPolicyId(apiPolicy.getPolicyId());
+                operationPolicyObj.setDirection(apiPolicy.getDirection());
+                operationPolicyObj.setOrder(apiPolicy.getOrder());
+                apiPolicyList.add(operationPolicyObj);
+            }
+            api.setUriTemplates(uriTemplates);
+            api.setApiPolicies(apiPolicyList);
         }
         return api;
     }
@@ -192,6 +252,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         Target target = new Target();
 
         String endpointAddress = (String) messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        if (endpointAddress == null) {
+            endpointAddress = APIMgtGatewayConstants.DUMMY_ENDPOINT_ADDRESS;
+        }
         int targetResponseCode = getTargetResponseCode();
         target.setResponseCacheHit(isCacheHit());
         target.setDestination(endpointAddress);
@@ -256,6 +319,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
         Object clientResponseCodeObj = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(SynapseConstants.HTTP_SC);
+        if (clientResponseCodeObj == null) {
+            return HttpStatus.SC_OK;
+        }
         int proxyResponseCode;
         if (clientResponseCodeObj instanceof Integer) {
             proxyResponseCode = (int) clientResponseCodeObj;
@@ -311,6 +377,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.END_USER_NAME)) {
             return (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
         }
+        if (messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.USER_ID)) {
+            return (String) messageContext.getProperty(APIMgtGatewayConstants.USER_ID);
+        }
         return null;
     }
 
@@ -334,6 +403,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
+        customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
+        customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
         return customProperties;
     }
 
@@ -388,9 +459,15 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (isCacheHit()) {
             return 0L;
         }
-        long backendStartTime = (long) messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
-        long backendEndTime = (long) messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
-        return backendEndTime - backendStartTime;
+        Object backendStartTimeObj = messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
+        long backendStartTime = backendStartTimeObj == null ? 0L : (long) backendStartTimeObj;
+        Object backendEndTimeObj = messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
+        long backendEndTime = backendEndTimeObj == null ? 0L : (long) backendEndTimeObj;
+        if (backendStartTime == 0L || backendEndTime == 0L) {
+            return 0L;
+        } else {
+            return backendEndTime - backendStartTime;
+        }
     }
 
     public long getResponseLatency() {
@@ -405,8 +482,13 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (isCacheHit()) {
             return System.currentTimeMillis() - requestInTime;
         }
-        long backendStartTime = (long) messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
-        return backendStartTime - requestInTime;
+        Object backendStartTimeObj = messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
+        long backendStartTime = backendStartTimeObj == null ? 0L : (long) backendStartTimeObj;
+        if (backendStartTime == 0L) {
+            return System.currentTimeMillis() - requestInTime;
+        } else {
+            return backendStartTime - requestInTime;
+        }
     }
 
     public long getResponseMediationLatency() {
@@ -414,8 +496,58 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (isCacheHit()) {
             return 0;
         }
-        long backendEndTime = (long) messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
-        return System.currentTimeMillis() - backendEndTime;
+        Object backendEndTimeObj = messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
+        long backendEndTime = backendEndTimeObj == null ? 0L : (long) backendEndTimeObj;
+        if (backendEndTime == 0L) {
+            return 0L;
+        } else {
+            return System.currentTimeMillis() - backendEndTime;
+        }
     }
 
+    public int getResponseSize() {
+        int responseSize = 0;
+        if (buildResponseMessage == null) {
+            Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
+            if (configs.containsKey(Constants.BUILD_RESPONSE_MESSAGE_CONFIG)) {
+                buildResponseMessage = Boolean.parseBoolean(configs.get(Constants.BUILD_RESPONSE_MESSAGE_CONFIG));
+            } else {
+                buildResponseMessage = false;
+            }
+        }
+        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
+        if (headers != null  && headers.get(HttpHeaders.CONTENT_LENGTH) != null) {
+            responseSize = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH).toString());
+        }
+        if (responseSize == 0 && buildResponseMessage) {
+            try {
+                RelayUtils.buildMessage(((Axis2MessageContext) messageContext).getAxis2MessageContext());
+            } catch (IOException ex) {
+                //In case of an exception, it won't be propagated up,and set response size to 0
+                log.error("Error occurred while building the message to" +
+                        " calculate the response body size", ex);
+            } catch (XMLStreamException ex) {
+                log.error("Error occurred while building the message to calculate the response" +
+                        " body size", ex);
+            }
+
+            SOAPEnvelope env = messageContext.getEnvelope();
+            if (env != null) {
+                SOAPBody soapbody = env.getBody();
+                if (soapbody != null) {
+                    byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
+                    responseSize =  size.length;
+                }
+            }
+        }
+        return responseSize;
+    }
+
+    public String getResponseContentType() {
+        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
+        if (headers != null && headers.get(HttpHeaders.CONTENT_TYPE) != null) {
+            return headers.get(HttpHeaders.CONTENT_TYPE).toString();
+        }
+        return UNKNOWN_VALUE;
+    }
 }

@@ -24,6 +24,8 @@ public class SubscriptionDTO   {
     private String applicationUUID = null;
     private Integer appId = null;
     private String subscriptionState = null;
+    private String apiName = null;
+    private String apiVersion = null;
 
   /**
    **/
@@ -161,6 +163,40 @@ public class SubscriptionDTO   {
     this.subscriptionState = subscriptionState;
   }
 
+  /**
+   **/
+  public SubscriptionDTO apiName(String apiName) {
+    this.apiName = apiName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiName")
+  public String getApiName() {
+    return apiName;
+  }
+  public void setApiName(String apiName) {
+    this.apiName = apiName;
+  }
+
+  /**
+   **/
+  public SubscriptionDTO apiVersion(String apiVersion) {
+    this.apiVersion = apiVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiVersion")
+  public String getApiVersion() {
+    return apiVersion;
+  }
+  public void setApiVersion(String apiVersion) {
+    this.apiVersion = apiVersion;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -178,12 +214,14 @@ public class SubscriptionDTO   {
         Objects.equals(apiId, subscription.apiId) &&
         Objects.equals(applicationUUID, subscription.applicationUUID) &&
         Objects.equals(appId, subscription.appId) &&
-        Objects.equals(subscriptionState, subscription.subscriptionState);
+        Objects.equals(subscriptionState, subscription.subscriptionState) &&
+        Objects.equals(apiName, subscription.apiName) &&
+        Objects.equals(apiVersion, subscription.apiVersion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionUUID, subscriptionId, policyId, apiUUID, apiId, applicationUUID, appId, subscriptionState);
+    return Objects.hash(subscriptionUUID, subscriptionId, policyId, apiUUID, apiId, applicationUUID, appId, subscriptionState, apiName, apiVersion);
   }
 
   @Override
@@ -199,6 +237,8 @@ public class SubscriptionDTO   {
     sb.append("    applicationUUID: ").append(toIndentedString(applicationUUID)).append("\n");
     sb.append("    appId: ").append(toIndentedString(appId)).append("\n");
     sb.append("    subscriptionState: ").append(toIndentedString(subscriptionState)).append("\n");
+    sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("}");
     return sb.toString();
   }

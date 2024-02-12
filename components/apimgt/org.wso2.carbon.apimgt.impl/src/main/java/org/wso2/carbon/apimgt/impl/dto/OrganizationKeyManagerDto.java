@@ -18,14 +18,16 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class OrganizationKeyManagerDto {
 
-    private Map<String, KeyManagerDto> keyManagerMap = new HashMap<>();
+    private Map<String, KeyManagerDto> keyManagerMap = new LinkedHashMap<>();
     private Map<String, String> issuerNameMap = new HashMap<>();
 
     public Map<String, KeyManagerDto> getKeyManagerMap() {
@@ -40,7 +42,15 @@ public class OrganizationKeyManagerDto {
 
     public void putKeyManagerDto(KeyManagerDto keyManagerDto) {
 
-        keyManagerMap.put(keyManagerDto.getName(), keyManagerDto);
+        if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerDto.getName())) {
+            Map<String, KeyManagerDto> newKeyManagerMap = new LinkedHashMap<>();
+            newKeyManagerMap.put(keyManagerDto.getName(), keyManagerDto);
+            keyManagerMap.remove(keyManagerDto.getName());
+            newKeyManagerMap.putAll(keyManagerMap);
+            keyManagerMap = newKeyManagerMap;
+        } else {
+            keyManagerMap.put(keyManagerDto.getName(), keyManagerDto);
+        }
         issuerNameMap.put(keyManagerDto.getIssuer(), keyManagerDto.getName());
     }
 

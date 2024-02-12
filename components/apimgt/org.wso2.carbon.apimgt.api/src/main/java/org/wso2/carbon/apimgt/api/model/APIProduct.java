@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -29,7 +30,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 
-public class APIProduct {
+public class APIProduct implements Serializable {
     // TODO add rest of the properties
     private APIProductIdentifier id;
     private String uuid;
@@ -131,7 +132,8 @@ public class APIProduct {
      * Used to set the workflow status in lifecycle state change workflow
      */
     private String workflowStatus = null;
-
+    private Boolean isDefaultVersion = true;
+    private boolean isPublishedDefaultVersion = false;
     public APIProduct(){}
 
     public APIProduct(APIProductIdentifier id) {
@@ -193,6 +195,20 @@ public class APIProduct {
     }
     public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
         this.technicalOwnerEmail = technicalOwnerEmail;
+    }
+    public void setDefaultVersion(Boolean isDefaultVersion) {
+        this.isDefaultVersion = isDefaultVersion;
+    }
+    public void setAsPublishedDefaultVersion(boolean value) {
+        isPublishedDefaultVersion = value;
+    }
+
+    public Boolean isDefaultVersion() {
+        return isDefaultVersion;
+    }
+
+    public Boolean isPublishedDefaultVersion() {
+        return isPublishedDefaultVersion;
     }
 
     public String getType() {

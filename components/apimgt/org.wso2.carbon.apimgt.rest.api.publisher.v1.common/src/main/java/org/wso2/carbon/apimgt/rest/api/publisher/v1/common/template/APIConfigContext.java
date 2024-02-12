@@ -104,11 +104,11 @@ public class APIConfigContext extends ConfigContext {
         APIProductIdentifier id = apiProduct.getId();
         //set the api name version and context
         context.put("apiName", id.getName());
-        context.put("apiVersion", "1.0.0");
+        context.put("apiVersion", id.getVersion());
 
         // We set the context pattern now to support plugable version strategy
         // context.put("apiContext", api.getContext());
-        context.put("apiContext", apiProduct.getContext());
+        context.put("apiContext", apiProduct.getContextTemplate());
 
         //the api object will be passed on to the template so it properties can be used to
         // customise how the synapse config is generated.

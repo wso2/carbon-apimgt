@@ -393,6 +393,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         boolean isContentAware = false;
         int spikeArrest = 0;
         String spikeArrestUnit = null;
+        int applicationSpikeArrest = 0;
+        String applicationSpikeArrestUnit = null;
         boolean stopOnQuotaReach = false;
         int graphQLMaxDepth = 0;
         int graphQLMaxComplexity = 0;
@@ -408,6 +410,12 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             }
             if (subPolicy.getRateLimitTimeUnit() != null) {
                 spikeArrestUnit = subPolicy.getRateLimitTimeUnit();
+            }
+            if (appPolicy.getBurstLimit().getRateLimitCount() > 0) {
+                applicationSpikeArrest = appPolicy.getBurstLimit().getRateLimitCount();
+            }
+            if (appPolicy.getBurstLimit().getRateLimitTimeUnit() != null) {
+                applicationSpikeArrestUnit = appPolicy.getBurstLimit().getRateLimitTimeUnit();
             }
             stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
             if (subPolicy.getGraphQLMaxDepth() > 0) {
@@ -429,6 +437,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         list.add(apiLevelThrottlingKey);
         infoDTO.setSpikeArrestLimit(spikeArrest);
         infoDTO.setSpikeArrestUnit(spikeArrestUnit);
+        infoDTO.setApplicationSpikeArrestLimit(applicationSpikeArrest);
+        infoDTO.setApplicationSpikeArrestUnit(applicationSpikeArrestUnit);
         infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
         infoDTO.setSubscriberTenantDomain(subscriberTenant);
         infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
@@ -510,6 +520,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         boolean isContentAware = false;
         int spikeArrest = 0;
         String spikeArrestUnit = null;
+        int applicationSpikeArrest = 0;
+        String applicationSpikeArrestUnit = null;
         boolean stopOnQuotaReach = false;
         int graphQLMaxDepth = 0;
         int graphQLMaxComplexity = 0;
@@ -524,6 +536,12 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             }
             if (subPolicy.getRateLimitTimeUnit() != null) {
                 spikeArrestUnit = subPolicy.getRateLimitTimeUnit();
+            }
+            if (appPolicy.getBurstLimit().getRateLimitCount() > 0) {
+                applicationSpikeArrest = appPolicy.getBurstLimit().getRateLimitCount();
+            }
+            if (appPolicy.getBurstLimit().getRateLimitTimeUnit() != null) {
+                applicationSpikeArrestUnit = appPolicy.getBurstLimit().getRateLimitTimeUnit();
             }
             stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
             if (subPolicy.getGraphQLMaxDepth() > 0) {
@@ -544,6 +562,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         list.add(apiLevelThrottlingKey);
         infoDTO.setSpikeArrestLimit(spikeArrest);
         infoDTO.setSpikeArrestUnit(spikeArrestUnit);
+        infoDTO.setApplicationSpikeArrestLimit(applicationSpikeArrest);
+        infoDTO.setApplicationSpikeArrestUnit(applicationSpikeArrestUnit);
         infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
         infoDTO.setSubscriberTenantDomain(subscriberTenant);
         infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);

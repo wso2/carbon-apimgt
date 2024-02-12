@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.output.adapter.http;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
@@ -41,8 +41,8 @@ public class ExtendedHTTPEventAdaptorTestCase {
     private static final Log logger = LogFactory.getLog(ExtendedHTTPEventAdaptorTestCase.class);
     private static final Path testDir = Paths.get("src", "test", "resources");
 
-    @Before
-    public void setupCarbonConfig() {
+    @BeforeClass
+    public static void setupCarbonConfig() {
         System.setProperty("carbon.home",
                 Paths.get(testDir.toString(), "carbon-context").toString());
         System.setProperty("tenant.name", "tenant.name");

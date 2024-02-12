@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -100,14 +101,16 @@ public class WorkflowUtils {
                         subWFDto.getTenantId(), orgId,
                         Integer.parseInt(subWFDto.getWorkflowReference()), sub.getUUID(), sub.getIdentifier().getId(),
                         sub.getIdentifier().getUUID(), sub.getApplication().getId(), sub.getApplication().getUUID(),
-                        sub.getTier().getName(), sub.getSubCreatedStatus());
+                        sub.getTier().getName(), sub.getSubCreatedStatus(), sub.getIdentifier().getName(),
+                        sub.getIdentifier().getVersion());
             } else {
                 subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
                         subWFDto.getTenantId(), orgId,
                         Integer.parseInt(subWFDto.getWorkflowReference()), sub.getUUID(), sub.getProductId().getId(),
                         sub.getProductId().getUUID(), sub.getApplication().getId(), sub.getApplication().getUUID(),
-                        sub.getTier().getName(), sub.getSubCreatedStatus());
+                        sub.getTier().getName(), sub.getSubCreatedStatus(), sub.getIdentifier().getName(),
+                        sub.getIdentifier().getVersion());
             }
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equalsIgnoreCase(wfType)) {
@@ -122,14 +125,16 @@ public class WorkflowUtils {
                         subWFDto.getTenantId(), subWFDto.getTenantDomain(),
                         Integer.parseInt(subWFDto.getWorkflowReference()), sub.getUUID(), sub.getIdentifier().getId(),
                         sub.getIdentifier().getUUID(), sub.getApplication().getId(), sub.getApplication().getUUID(),
-                        sub.getTier().getName(), sub.getSubCreatedStatus());
+                        sub.getTier().getName(), sub.getSubCreatedStatus(), sub.getIdentifier().getName(),
+                        sub.getIdentifier().getVersion());
             } else {
                 subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(),
                         subWFDto.getTenantId(), subWFDto.getTenantDomain(),
                         Integer.parseInt(subWFDto.getWorkflowReference()), sub.getUUID(), sub.getProductId().getId(),
                         sub.getProductId().getUUID(), sub.getApplication().getId(), sub.getApplication().getUUID(),
-                        sub.getTier().getName(), sub.getSubCreatedStatus());
+                        sub.getTier().getName(), sub.getSubCreatedStatus(), sub.getIdentifier().getName(),
+                        sub.getIdentifier().getVersion());
             }
 
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
@@ -139,7 +144,7 @@ public class WorkflowUtils {
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(),
                     subWFDto.getTenantId(), subWFDto.getTenantDomain(),
                     Integer.parseInt(subWFDto.getWorkflowReference()), subWFDto.getExternalWorkflowReference(), 0,
-                    "", 0, "", "", "");
+                    "", 0, "", "", "","", "");
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equalsIgnoreCase(wfType) ||
                 WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equalsIgnoreCase(wfType)) {
@@ -156,7 +161,7 @@ public class WorkflowUtils {
                     apiStateWFDto.getMetadata("ApiVersion"),
                     apiStateWFDto.getApiType(), apiStateWFDto.getMetadata( "ApiContext"),
                     apiStateWFDto.getMetadata("ApiProvider"),
-                    apiStateWFDto.getMetadata("Action"));
+                    apiStateWFDto.getMetadata("Action"), null);
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equalsIgnoreCase(wfType)) {
             ApplicationRegistrationWorkflowDTO appRegWFDto = (ApplicationRegistrationWorkflowDTO) workflowDTO;
@@ -180,6 +185,8 @@ public class WorkflowUtils {
                     appRegWFDto.getApplication().getTokenType(), appRegWFDto.getKeyManager());
             APIUtil.sendNotification(applicationRegistrationEvent,
                     APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+        } else if (WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT.equalsIgnoreCase(wfType)) {
+            completeDeploymentWorkFlow(workflowDTO);
         }
     }
 
@@ -305,6 +312,41 @@ public class WorkflowUtils {
             log.error(errorMsg, e);
         } catch (APIPersistenceException e) {
             log.error("Error while accessing lifecycle information ", e);
+        }
+    }
+
+    /**
+     * Complete the revision deployment workflow
+     *
+     * @param workflowDTO Workflow DTO object
+     */
+    protected static void completeDeploymentWorkFlow(WorkflowDTO workflowDTO) {
+
+        String externalWorkflowRef = workflowDTO.getExternalWorkflowReference();
+        try {
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            Workflow workflow = apiMgtDAO.getworkflowReferenceByExternalWorkflowReference(externalWorkflowRef);
+            String revisionId = workflow.getMetadata("revisionId");
+            String apiId = workflow.getMetadata("apiId");
+            String providerName = workflow.getMetadata("apiProvider");
+            String environment = workflow.getMetadata("environment");
+            String organization = workflow.getTenantDomain();
+            String invoker = workflow.getMetadata("userName");
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(invoker);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
+            apiProvider.resumeDeployedAPIRevision(apiId, organization, workflow.getWorkflowReference(), revisionId,
+                    environment);
+
+            //Set displayOnDevportal to true
+            APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+            apiRevisionDeployment.setRevisionUUID(workflow.getWorkflowReference());
+            apiRevisionDeployment.setDeployment(environment);
+            apiRevisionDeployment.setDisplayOnDevportal(true);
+            apiMgtDAO.updateAPIRevisionDeployment (apiId,Collections.singleton(apiRevisionDeployment));
+        } catch (APIManagementException e) {
+            String errorMsg = "Could not get workflow details for workflow reference id " + externalWorkflowRef;
+            log.error(errorMsg, e);
         }
     }
 }

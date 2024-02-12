@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.gateway.GatewayPolicyDTO;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.ResourceData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -752,6 +754,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 } else {
                     sequenceAdminServiceProxy.addSequence(element);
                 }
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.OPERATION_POLICY, sequence.getName(),
+                        APIConstants.AuditLogConstants.DEPLOYED, APIConstants.AuditLogConstants.SYSTEM +
+                                ": " + gatewayAPIDTO.getTenantDomain());
             }
         }
 
@@ -762,6 +767,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         // Add API
         if (StringUtils.isNotEmpty(gatewayAPIDTO.getApiDefinition())) {
             restapiAdminServiceProxy.addApi(gatewayAPIDTO.getApiDefinition());
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, gatewayAPIDTO.getApiId(),
+                    APIConstants.AuditLogConstants.DEPLOYED, APIConstants.AuditLogConstants.SYSTEM +
+                            ": " + gatewayAPIDTO.getTenantDomain());
         }
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " API Definition deployed");
@@ -803,6 +811,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion());
         if (restapiAdminServiceProxy.getApi(qualifiedName) != null) {
             restapiAdminServiceProxy.deleteApi(qualifiedName);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, gatewayAPIDTO.getApiId(),
+                    APIConstants.AuditLogConstants.UNDEPLOYED, APIConstants.AuditLogConstants.SYSTEM +
+                            ": " + gatewayAPIDTO.getTenantDomain());
         }
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " API Definition undeployed " +
@@ -815,6 +826,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             for (String sequenceName : gatewayAPIDTO.getSequencesToBeRemove()) {
                 if (sequenceAdminServiceProxy.isExistingSequence(sequenceName)) {
                     sequenceAdminServiceProxy.deleteSequence(sequenceName);
+                    APIUtil.logAuditMessage(APIConstants.AuditLogConstants.OPERATION_POLICY, sequenceName,
+                            APIConstants.AuditLogConstants.UNDEPLOYED,
+                            APIConstants.AuditLogConstants.SYSTEM + ": " + gatewayAPIDTO.getTenantDomain());
                 }
             }
         }
@@ -899,5 +913,55 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
                 endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
         return true;
+    }
+
+    /**
+     * Deploy gateway policy sequences to gateway.
+     *
+     * @param gatewayPolicyDTO Policy sequences data object
+     * @throws AxisFault
+     */
+    public void deployGatewayPolicy(GatewayPolicyDTO gatewayPolicyDTO) throws AxisFault {
+
+        SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                getSequenceAdminServiceClient(gatewayPolicyDTO.getTenantDomain());
+        if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded() != null) {
+            for (GatewayContentDTO sequence : gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded()) {
+                OMElement element;
+                try {
+                    element = AXIOMUtil.stringToOM(sequence.getContent());
+                } catch (XMLStreamException e) {
+                    log.error("Exception occurred while converting String to an OM.", e);
+                    throw new AxisFault(e.getMessage());
+                }
+                if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+                    sequenceAdminServiceProxy.deleteSequence(sequence.getName());
+                    sequenceAdminServiceProxy.addSequence(element);
+                } else {
+                    sequenceAdminServiceProxy.addSequence(element);
+                }
+            }
+        } else {
+            log.error("No gateway policy sequences found to be deployed");
+        }
+    }
+
+    /**
+     * Undeploy gateway policy sequences from gateway.
+     *
+     * @param gatewayPolicyDTO Policy sequences data object
+     * @throws AxisFault
+     */
+    public void unDeployGatewayPolicy(GatewayPolicyDTO gatewayPolicyDTO) throws AxisFault {
+
+        SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(
+                gatewayPolicyDTO.getTenantDomain());
+        if (gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded() != null) {
+            for (GatewayContentDTO sequence : gatewayPolicyDTO.getGatewayPolicySequenceToBeAdded()) {
+                if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
+                    sequenceAdminServiceProxy.deleteSequence(sequence.getName());
+                }
+            }
+        }
     }
 }

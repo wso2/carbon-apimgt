@@ -125,16 +125,15 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
-import java.util.UUID;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.ArrayList;
-
+import java.util.UUID;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -157,7 +156,7 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
         Caching.class, PaginationContext.class, MultitenantUtils.class, AbstractAPIManager.class, OASParserUtil.class,
         KeyManagerHolder.class, CertificateManagerImpl.class , PublisherAPI.class, Organization.class,
         APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class})
-@PowerMockIgnore("org.mockito.*")
+
 public class APIProviderImplTest {
 
     private ApiMgtDAO apimgtDAO;
@@ -734,7 +733,7 @@ public class APIProviderImplTest {
     private APIProduct createMockAPIProduct(String provider) {
 
         APIProductIdentifier productIdentifier = new APIProductIdentifier(provider, APIConstants.API_PRODUCT,
-                APIConstants.API_PRODUCT_VERSION);
+                APIConstants.API_PRODUCT_VERSION_1_0_0);
         APIProduct apiProduct = new APIProduct(productIdentifier);
         apiProduct.setContext("/test");
         apiProduct.setState(APIConstants.CREATED);

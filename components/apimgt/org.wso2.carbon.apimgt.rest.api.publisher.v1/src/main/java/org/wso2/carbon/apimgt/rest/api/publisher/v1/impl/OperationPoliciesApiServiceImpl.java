@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,7 +51,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +94,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 jsonContent = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
 
                 String fileName = policySpecFileDetail.getDataHandler().getName();
-                String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+                String fileContentType = FilenameUtils.getExtension(fileName);
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                     fileContentType = policySpecFileDetail.getContentType().toString();
                 }
@@ -170,7 +170,12 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
 
             OperationPolicyData existingPolicy =
                     apiProvider.getCommonOperationPolicyByPolicyId(operationPolicyId, organization, false);
-            if (existingPolicy != null) {
+            int policyUsageInGatewayPolicyMappings = apiProvider.getPolicyUsageByPolicyUUIDInGatewayPolicies(
+                    operationPolicyId);
+            if (policyUsageInGatewayPolicyMappings > 0) {
+                RestApiUtil.handleConflict("Common operation policy: " + operationPolicyId
+                        + " is already used in gateway policies. Cannot delete the policy", log);
+            } else if (existingPolicy != null) {
                 apiProvider.deleteOperationPolicyById(operationPolicyId, organization);
                 if (log.isDebugEnabled()) {
                     log.debug("The common operation policy " + operationPolicyId + " has been deleted");

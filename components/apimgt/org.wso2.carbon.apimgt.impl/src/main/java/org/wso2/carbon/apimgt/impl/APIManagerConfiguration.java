@@ -363,6 +363,10 @@ public class APIManagerConfiguration {
 
                 OMElement analyticsType = element.getFirstChildWithName(new QName("Type"));
                 analyticsProps.put("type", analyticsType.getText());
+
+                OMElement enablePolicy = element.getFirstChildWithName(new QName("PolicyEnabled"));
+                analyticsProps.put("policyEnabled", enablePolicy.getText());
+
                 analyticsProperties = analyticsProps;
             } else if ("PersistenceConfigs".equals(localName)) {
                 OMElement properties = element.getFirstChildWithName(new QName("Properties"));
@@ -681,6 +685,11 @@ public class APIManagerConfiguration {
                 environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_NAME)).getText()));
         environment.setDisplayName(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
+        String gatewayType = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_TYPE)).getText();
+        if (gatewayType == null || gatewayType.isEmpty()) {
+            gatewayType = APIConstants.API_GATEWAY_TYPE_REGULAR;
+        }
+        environment.setGatewayType(gatewayType);
         if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
         environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_SERVER_URL)).getText()));
@@ -1382,7 +1391,7 @@ public class APIManagerConfiguration {
                         OMElement jobQueueSizeElement = jmsTaskManagerElement
                                 .getFirstChildWithName(new QName
                                         (APIConstants.AdvancedThrottleConstants.JOB_QUEUE_SIZE));
-                        if (keepAliveTimeInMillisElement != null) {
+                        if (jobQueueSizeElement != null) {
                             jmsTaskManagerProperties.setJobQueueSize(Integer.parseInt(jobQueueSizeElement.getText()));
                         }
                     }
@@ -1668,6 +1677,14 @@ public class APIManagerConfiguration {
                             configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
                     if (claimRetrievalElement != null) {
                         jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
+                        OMElement isBindFederatedUserClaims =
+                                omElement.getFirstChildWithName(new QName(APIConstants.BINDING_FEDERATED_USER_CLAIMS));
+                        if (isBindFederatedUserClaims != null) {
+                            jwtConfigurationDto.setBindFederatedUserClaims(
+                                    Boolean.parseBoolean(isBindFederatedUserClaims.getText()));
+                        } else {
+                            jwtConfigurationDto.setBindFederatedUserClaims(true);
+                        }
                     }
                 }
             }
