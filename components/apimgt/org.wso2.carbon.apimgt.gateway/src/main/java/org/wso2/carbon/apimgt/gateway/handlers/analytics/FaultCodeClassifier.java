@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -127,6 +128,10 @@ public class FaultCodeClassifier {
             return FaultSubCategories.Other.METHOD_NOT_ALLOWED;
         } else if (isResourceNotFound()) {
             return FaultSubCategories.Other.RESOURCE_NOT_FOUND;
+        } else if (isRequestSchemaInvalid()) {
+            return FaultSubCategories.Other.INVALID_REQUEST_SCHEMA;
+        } else if (isResponseSchemaInvalid()) {
+            return FaultSubCategories.Other.INVALID_RESPONSE_SCHEMA;
         } else {
             return FaultSubCategories.Other.UNCLASSIFIED;
         }
@@ -146,6 +151,26 @@ public class FaultCodeClassifier {
             int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
             return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
                     && errorCode == Constants.METHOD_NOT_ALLOWED_ERROR_CODE;
+        }
+        return false;
+    }
+
+    private boolean isRequestSchemaInvalid() {
+        if (messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_DETAIL)) {
+            String errorDetail = (String) messageContext.getProperty(SynapseConstants.ERROR_DETAIL);
+            String errorMessage = "Schema validation failed in the Request: ";
+            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
+                    && StringUtils.isNotEmpty(errorDetail) && errorDetail.contains(errorMessage);
+        }
+        return false;
+    }
+
+    private boolean isResponseSchemaInvalid() {
+        if (messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_DETAIL)) {
+            String errorDetail = (String) messageContext.getProperty(SynapseConstants.ERROR_DETAIL);
+            String errorMessage = "Schema validation failed in the Response: ";
+            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
+                    && StringUtils.isNotEmpty(errorDetail) && errorDetail.contains(errorMessage);
         }
         return false;
     }

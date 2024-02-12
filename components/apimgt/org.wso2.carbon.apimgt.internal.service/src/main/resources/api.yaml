@@ -897,10 +897,18 @@ definitions:
         type: boolean
         description: Whether this is the default version of the API.
         example: false
+      apiPolicies:
+        type: array
+        items:
+          $ref: '#/definitions/OperationPolicy'
       urlMappings:
         type: array
         items:
           $ref: '#/definitions/URLMapping'
+      securityScheme:
+        type: string
+        description: Available authentication methods of the API.
+        example: Oauth2,api_key
 
   #-----------------------------------------------------
   # synapse Artifact resource
@@ -992,15 +1000,17 @@ definitions:
 
   KeyManager:
     properties:
+      uuid:
+        type: string
       name:
         type: string
       type:
         type: string
       enabled:
         type: boolean
-      tenantDomain:
+      organization:
         type: string
-      configuration:
+      additionalProperties:
         type: object
       tokenType:
         type: string
@@ -1050,6 +1060,10 @@ definitions:
       appId:
         type: integer
       subscriptionState:
+        type: string
+      apiName:
+        type: string
+      apiVersion:
         type: string
 
   #-----------------------------------------------------
@@ -1407,6 +1421,28 @@ definitions:
         type: array
         items:
           type: string
+      operationPolicies:
+        type: array
+        items:
+          $ref: '#/definitions/OperationPolicy'
+
+  OperationPolicy:
+    title: Operation Policy
+    properties:
+      policyName:
+        type: string
+      policyVersion:
+        type: string
+      direction:
+        type: string
+      policyId:
+        type: string
+      order:
+        type: integer
+      parameters:
+        type: object
+        additionalProperties:
+          type: object
   #-----------------------------------------------------
   # The pagination resource
   #-----------------------------------------------------

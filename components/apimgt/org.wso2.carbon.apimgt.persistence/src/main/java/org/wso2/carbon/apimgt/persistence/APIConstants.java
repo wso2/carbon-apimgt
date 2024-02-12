@@ -244,6 +244,7 @@ public final class APIConstants {
     public static final String TAG_COLON_SEARCH_TYPE_PREFIX = "tag:";
     public static final String NAME_TYPE_PREFIX = "name";
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
+    public static final String API_PROVIDER_SUFFIX_SLASH = PROVIDER_SEARCH_TYPE_PREFIX + "/";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
     public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";

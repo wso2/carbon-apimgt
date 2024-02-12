@@ -27,12 +27,13 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
                                                 KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         KeyManagerDTO keyManagerDTO = new KeyManagerDTO();
+        keyManagerDTO.setUuid(keyManagerConfigurationDTO.getUuid());
         keyManagerDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
         keyManagerDTO.setName(keyManagerConfigurationDTO.getName());
-        keyManagerDTO.setTenantDomain(tenantDomain);
+        keyManagerDTO.setOrganization(tenantDomain);
         keyManagerDTO.setType(keyManagerConfigurationDTO.getType());
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.fromValue(keyManagerConfigurationDTO.getTokenType()));
-        keyManagerDTO.setConfiguration(keyManagerConfigurationDTO.getAdditionalProperties());
+        keyManagerDTO.setAdditionalProperties(keyManagerConfigurationDTO.getAdditionalProperties());
         return keyManagerDTO;
     }
 

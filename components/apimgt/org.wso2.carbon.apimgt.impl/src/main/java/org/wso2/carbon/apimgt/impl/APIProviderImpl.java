@@ -493,7 +493,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
@@ -528,6 +528,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         //Get the local scopes set to register for the API from URI templates
         Set<Scope> scopesToRegister = getScopesToRegisterFromURITemplates(apiName, organization, uriTemplates);
+        if (scopesToRegister.isEmpty()) {
+            // We return since there is no scope to be registered.
+            return;
+        }
         //Register scopes
         for (Scope scope : scopesToRegister) {
             for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -777,7 +781,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, apiIdentifier.getApiName(),
                 api.getId().getId(), api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                api.getStatus(), APIConstants.EventAction.DEFAULT_VERSION);
+                api.getStatus(), APIConstants.EventAction.DEFAULT_VERSION, api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
@@ -785,6 +789,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (!existingAPI.getStatus().equals(api.getStatus())) {
             throw new APIManagementException("Invalid API update operation involving API status changes");
+        }
+        if (existingAPI.getGatewayType() != null && api.getGatewayType() != null
+                && !existingAPI.getGatewayType().equals(api.getGatewayType())) {
+            throw new APIManagementException("Invalid API update operation involving API gateway type changes");
         }
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -883,7 +891,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action);
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action, api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         // Extracting API details for the recommendation system
@@ -997,8 +1005,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
         // using the updated URI templates of the API.
-        deleteScopes(oldLocalScopeKeys, tenantId);
-        addScopes(newLocalScopes, tenantId);
+        updateScopes(newLocalScopes, oldLocalScopeKeys, tenantId);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
             KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
@@ -2187,7 +2194,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, orgId,
                 subscribedAPI.getSubscriptionId(), subscribedAPI.getUUID(), identifier.getId(), identifier.getUUID(),
                 subscribedAPI.getApplication().getId(), subscribedAPI.getApplication().getUUID(),
-                subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
+                subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus(), identifier.getName(),
+                identifier.getVersion());
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 
@@ -2317,7 +2325,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                     APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                    api.getStatus());
+                    api.getStatus(), api.getApiSecurity());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else {
             log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
@@ -4430,14 +4438,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(),
                             productId, product.getUuid(), product.getId().getVersion(), product.getType(), product.getContext(),
-                            APIUtil.replaceEmailDomainBack(product.getId().getProviderName()), product.getState(), action);
+                            APIUtil.replaceEmailDomainBack(product.getId().getProviderName()), product.getState(), action,
+                            product.getApiSecurity());
             APIUtil.sendNotification(apiEventToNotifyDefaultVersionAPIProduct, APIConstants.NotifierType.API.name());
         }
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(), productId,
                 product.getId().getUUID(), product.getId().getVersion(), product.getType(), product.getContext(),
-                product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE);
+                product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE, product.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         return apiToProductResourceMapping;
@@ -4900,7 +4909,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addScopes(Set<Scope> scopes, int tenantId) throws APIManagementException {
 
         if (scopes != null) {
-            scopesDAO.addScopes(scopes, tenantId);
+            if(scopesDAO.addScopes(scopes, tenantId)) {
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, APIUtil
+                                .getScopesAsString(scopes), APIConstants.AuditLogConstants.CREATED, this.username);
+            }
             for (Scope scope : scopes) {
                 ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SCOPE_CREATE.name(), tenantId,
@@ -4914,10 +4926,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
+    private void updateScopes(Set<Scope> addedScopes, Set<String> deletedScopes, int tenantId) throws APIManagementException {
+
+        if (deletedScopes != null) {
+            for (String scopeKey : deletedScopes) {
+                if (StringUtils.isNotEmpty(scopeKey)) {
+                    scopesDAO.deleteScope(scopeKey, tenantId);
+                }
+            }
+        }
+
+        if (addedScopes != null) {
+            scopesDAO.addScopes(addedScopes, tenantId);
+            ScopesEvent scopesEvent = new ScopesEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SCOPES_UPDATE.name(), tenantId,
+                    tenantDomain);
+            for (Scope scope : addedScopes) {
+                ScopeEvent scopeEvent = new ScopeEvent(null,
+                        null, null, tenantId,
+                        tenantDomain, scope.getKey(), scope.getName(), scope.getDescription());
+                if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().trim().length() > 0) {
+                    scopeEvent.setRoles(Arrays.asList(scope.getRoles().split(",")));
+                }
+                scopesEvent.addScope(scopeEvent);
+            }
+            APIUtil.sendNotification(scopesEvent, APIConstants.NotifierType.SCOPES.name());
+        }
+    }
+
     private void updateScope(Scope scope, int tenantId) throws APIManagementException {
 
         if (scope != null) {
-            scopesDAO.updateScope(scope, tenantId);
+            if (scopesDAO.updateScope(scope, tenantId)) {
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, scope.getKey(),
+                        APIConstants.AuditLogConstants.UPDATED, this.username);
+            }
             ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SCOPE_UPDATE.name(), tenantId,
                     tenantDomain, scope.getKey(), scope.getName(), scope.getDescription());
@@ -4931,7 +4974,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void deleteScope(String scopeKey, int tenantId) throws APIManagementException {
 
         if (StringUtils.isNotEmpty(scopeKey)) {
-            scopesDAO.deleteScope(scopeKey, tenantId);
+            if(scopesDAO.deleteScope(scopeKey, tenantId)) {
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, scopeKey,
+                        APIConstants.AuditLogConstants.DELETED, this.username);
+            }
             ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SCOPE_DELETE.name(), tenantId,
                     tenantDomain, scopeKey, null, null);
@@ -4949,6 +4995,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public String getSecuritySchemeOfAPI(String uuid, String organization) throws APIManagementException {
+        Organization org = new Organization(organization);
+        try {
+            return apiPersistenceInstance.getSecuritySchemeOfAPI(org, uuid);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Failed to get API", e);
+        }
+    }
+
+    @Override
     public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
         Organization org = new Organization(organization);
         try {
@@ -4958,9 +5014,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIIdentifier apiIdentifier = api.getId();
                 apiIdentifier.setUuid(uuid);
                 api.setId(apiIdentifier);
-                //Gateway type is obtained considering the gateway vendor.
-                api.setGatewayType(APIUtil.getGatewayType(publisherAPI.getGatewayVendor()));
-                api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(publisherAPI.getGatewayVendor()));
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);

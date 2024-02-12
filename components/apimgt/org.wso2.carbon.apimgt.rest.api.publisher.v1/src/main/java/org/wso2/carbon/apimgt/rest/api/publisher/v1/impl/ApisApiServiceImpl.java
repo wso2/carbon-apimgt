@@ -1931,7 +1931,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 jsonContent = RestApiPublisherUtils.readInputStream(policySpecFileInputStream, policySpecFileDetail);
 
                 String fileName = policySpecFileDetail.getDataHandler().getName();
-                String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+                String fileContentType = FilenameUtils.getExtension(fileName);
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                     fileContentType = policySpecFileDetail.getContentType().toString();
                 }
@@ -1973,6 +1973,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         log.debug("An API specific operation policy has been added for the API " + apiId +
                                 " with id " + policyID);
                     }
+                    APIUtil.logAuditMessage(APIConstants.AuditLogConstants.OPERATION_POLICY, policyID,
+                            APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
                 } else {
                     throw new APIManagementException("An API specific operation policy found for the same name.");
                 }
@@ -2154,6 +2156,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     log.debug("The operation policy " + operationPolicyId + " has been deleted from the the API "
                             + apiId);
                 }
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.OPERATION_POLICY, operationPolicyId,
+                        APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
                 return Response.ok().build();
             } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing operation policy with ID: "
@@ -2801,6 +2805,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO apiDTOFromProperties;
         try {
             apiDTOFromProperties = objectMapper.readValue(additionalProperties, APIDTO.class);
+            APIUtil.validateCharacterLengthOfAPIParams(apiDTOFromProperties.getName(),
+                    apiDTOFromProperties.getVersion(), apiDTOFromProperties.getContext(),
+                    RestApiCommonUtil.getLoggedInUsername());
             try {
                 APIUtil.validateAPIContext(apiDTOFromProperties.getContext(), apiDTOFromProperties.getName());
             } catch (APIManagementException e) {
@@ -2955,6 +2962,9 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Minimum requirement name, version, context and endpointConfig.
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            APIUtil.validateCharacterLengthOfAPIParams(additionalPropertiesAPI.getName(),
+                    additionalPropertiesAPI.getVersion(), additionalPropertiesAPI.getContext(),
+                    RestApiCommonUtil.getLoggedInUsername());
             try {
                 APIUtil.validateAPIContext(additionalPropertiesAPI.getContext(), additionalPropertiesAPI.getName());
             } catch (APIManagementException e) {
@@ -3345,6 +3355,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            APIUtil.validateCharacterLengthOfAPIParams(additionalPropertiesAPI.getName(),
+                    additionalPropertiesAPI.getVersion(), additionalPropertiesAPI.getContext(),
+                    RestApiCommonUtil.getLoggedInUsername());
             APIUtil.validateAPIContext(additionalPropertiesAPI.getContext(), additionalPropertiesAPI.getName());
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -3970,6 +3983,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (apiDTOFromProperties.getType() == null) {
                 RestApiUtil.handleBadRequest("Required property protocol is not specified for the Async API", log);
             }
+            APIUtil.validateCharacterLengthOfAPIParams(apiDTOFromProperties.getName(),
+                    apiDTOFromProperties.getVersion(), apiDTOFromProperties.getContext(),
+                    RestApiCommonUtil.getLoggedInUsername());
             try {
                 APIUtil.validateAPIContext(apiDTOFromProperties.getContext(), apiDTOFromProperties.getName());
             } catch (APIManagementException e) {

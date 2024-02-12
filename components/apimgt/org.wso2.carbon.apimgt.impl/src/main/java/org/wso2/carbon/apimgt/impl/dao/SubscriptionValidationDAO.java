@@ -21,10 +21,10 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.Nullable;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
@@ -62,12 +63,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.POLICY_ENABLED_FOR_ANALYTICS;
+
 /**
  * This Class used to handle DAO access for subscription Validation.
  */
 public class SubscriptionValidationDAO {
 
     private static Log log = LogFactory.getLog(SubscriptionValidationDAO.class);
+    private static String OPERATION_POLICY_ENABLE_WITH_ANALYTICS_EVENT = "operationPolicyEnableWithAnalyticsEvent";
+    private static Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
 
     /*
      * This method can be used to retrieve all the Subscriptions in the database
@@ -427,7 +432,7 @@ public class SubscriptionValidationDAO {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
-                                attachURlMappingDetailsOfApiProduct(connection, api);
+                                attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
                                 api.setEnvironment(deploymentName);
@@ -490,6 +495,8 @@ public class SubscriptionValidationDAO {
                 subscription.setApiUUID(resultSet.getString("API_UUID"));
                 subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                 subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                subscription.setApiName(resultSet.getString("API_NAME"));
+                subscription.setApiVersion(resultSet.getString("API_VERSION"));
                 subscriptions.add(subscription);
             }
         }
@@ -781,6 +788,8 @@ public class SubscriptionValidationDAO {
                     subscription.setApiUUID(resultSet.getString("API_UUID"));
                     subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                    subscription.setApiName(resultSet.getString("API_NAME"));
+                    subscription.setApiVersion(resultSet.getString("API_VERSION"));
                     return subscription;
                 }
 
@@ -814,6 +823,8 @@ public class SubscriptionValidationDAO {
                     subscription.setApiUUID(resultSet.getString("API_UUID"));
                     subscription.setApplicationUUID(resultSet.getString("APPLICATION_UUID"));
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
+                    subscription.setApiName(resultSet.getString("API_NAME"));
+                    subscription.setApiVersion(resultSet.getString("API_VERSION"));
                     return subscription;
                 }
 
@@ -1114,7 +1125,7 @@ public class SubscriptionValidationDAO {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
-                                attachURlMappingDetailsOfApiProduct(connection, api);
+                                attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
                             }
@@ -1150,8 +1161,9 @@ public class SubscriptionValidationDAO {
         }
     }
 
-    private void attachURlMappingDetailsOfApiProduct(Connection connection, API api) throws SQLException {
-
+    private void attachURlMappingDetailsOfApiProduct(Connection connection, API api, String revisionId)
+            throws SQLException {
+        // Need API Product revision ID to avoid unnecessary iterations
         String sql = SubscriptionValidationSQLConstants.GET_ALL_API_PRODUCT_URI_TEMPLATES_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, api.getApiId());
@@ -1177,10 +1189,16 @@ public class SubscriptionValidationDAO {
                 }
             }
         }
+
+        if (configs.containsKey(POLICY_ENABLED_FOR_ANALYTICS)) {
+            boolean isPolicyEnabled = Boolean.parseBoolean(configs.get(POLICY_ENABLED_FOR_ANALYTICS));
+            if (isPolicyEnabled) {
+                attachPolicies(connection, revisionId, api);
+            }
+        }
     }
 
     public API getAPIByContextAndVersion(String context, String version, String deployment, boolean isExpand) {
-
         String sql = SubscriptionValidationSQLConstants.GET_API_BY_CONTEXT_AND_VERSION_SQL;
         String contextWhenContextTemplateIsNull = context;
 
@@ -1222,7 +1240,7 @@ public class SubscriptionValidationDAO {
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
-                                attachURlMappingDetailsOfApiProduct(connection, api);
+                                attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
                             }
@@ -1266,6 +1284,112 @@ public class SubscriptionValidationDAO {
                     api.addResource(urlMapping);
                 }
             }
+        }
+
+        if (configs.containsKey(POLICY_ENABLED_FOR_ANALYTICS)) {
+            boolean isPolicyEnabled = Boolean.parseBoolean(configs.get(POLICY_ENABLED_FOR_ANALYTICS));
+            if (isPolicyEnabled) {
+                attachPolicies(connection, revisionId, api);
+            }
+        }
+    }
+
+    // Attach API and Operation Policies based on the API type (API/API Product)
+    private void attachPolicies(Connection connection, String revisionId, API api) throws SQLException {
+
+        // Find an optimistic solution to separate out
+        if (APIConstants.API_PRODUCT.equals(api.getApiType())) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    SubscriptionValidationSQLConstants.GET_OPERATION_POLICIES_PER_URI_BY_API_SQL)) {
+                preparedStatement.setString(1, api.getApiUUID());
+                preparedStatement.setString(2, revisionId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String httpMethod = resultSet.getString("HTTP_METHOD");
+                        String urlPattern = resultSet.getString("URL_PATTERN");
+                        String policyName = resultSet.getString("POLICY_NAME");
+                        String policyVersion = resultSet.getString("POLICY_VERSION");
+                        String operationPolicyDirection = resultSet.getString("OPERATION_POLICY_DIRECTION");
+                        String operationPolicyID = resultSet.getString("OPERATION_POLICY_UUID");
+                        String parameters = resultSet.getString("OPERATION_PARAMS");
+                        URLMapping urlMapping = null;
+                        if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
+                            urlMapping = api.getResource(urlPattern, httpMethod);
+                        }
+                        if (urlMapping != null) {
+                            if (StringUtils.isNotEmpty(operationPolicyID) && StringUtils.isNotEmpty(policyName)
+                                    && StringUtils.isNotEmpty(policyVersion) && StringUtils.isNotEmpty(
+                                    operationPolicyDirection)) {
+                                OperationPolicy operationPolicy = new OperationPolicy();
+                                operationPolicy.setPolicyId(operationPolicyID);
+                                operationPolicy.setPolicyName(policyName);
+                                operationPolicy.setPolicyVersion(policyVersion);
+                                operationPolicy.setDirection(operationPolicyDirection);
+                                operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(parameters));
+                                urlMapping.setOperationPolicies(operationPolicy);
+                                api.addResource(urlMapping);
+                            }
+                        }
+                    }
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while converting parameters to map for API : " + api.getApiUUID() + " Revision: "
+                        + revisionId, e);
+            }
+            return;
+        }
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
+                SubscriptionValidationSQLConstants.GET_OPERATION_POLICIES_PER_URI_BY_API_SQL)) {
+            preparedStatement.setString(1, api.getApiUUID());
+            preparedStatement.setString(2, revisionId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String httpMethod = resultSet.getString("HTTP_METHOD");
+                    String urlPattern = resultSet.getString("URL_PATTERN");
+                    String policyName = resultSet.getString("POLICY_NAME");
+                    String policyVersion = resultSet.getString("POLICY_VERSION");
+                    String operationPolicyDirection = resultSet.getString("OPERATION_POLICY_DIRECTION");
+                    String apiPolicyDirection = resultSet.getString("API_POLICY_DIRECTION");
+                    String operationPolicyID = resultSet.getString("OPERATION_POLICY_UUID");
+                    String apiPolicyUUID = resultSet.getString("API_POLICY_UUID");
+
+                    // We get parameters of the policies separately. However, this can be retrieved from the AM_API_OPERATION_POLICY_MAPPING as it contains both API and Operation Policies
+                    String operationParameters = resultSet.getString("OPERATION_PARAMS");
+                    String apiParams = resultSet.getString("API_PARAMS");
+                    URLMapping urlMapping = null;
+                    if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
+                        urlMapping = api.getResource(urlPattern, httpMethod);
+                    }
+                    if (urlMapping != null) {
+                        if (StringUtils.isNotEmpty(operationPolicyID) && StringUtils.isNotEmpty(policyName)
+                                && StringUtils.isNotEmpty(policyVersion) && StringUtils.isNotEmpty(
+                                operationPolicyDirection)) {
+                            OperationPolicy operationPolicy = new OperationPolicy();
+                            operationPolicy.setPolicyId(operationPolicyID);
+                            operationPolicy.setPolicyName(policyName);
+                            operationPolicy.setPolicyVersion(policyVersion);
+                            operationPolicy.setDirection(operationPolicyDirection);
+                            operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(operationParameters));
+                            urlMapping.setOperationPolicies(operationPolicy);
+                            api.addResource(urlMapping);
+                        }
+                    }
+                    if (StringUtils.isNotEmpty(apiPolicyUUID) && StringUtils.isNotEmpty(policyName)
+                            && StringUtils.isNotEmpty(policyVersion) && StringUtils.isNotEmpty(apiPolicyDirection)) {
+                        OperationPolicy apiPolicy = new OperationPolicy();
+                        apiPolicy.setPolicyId(apiPolicyUUID);
+                        apiPolicy.setPolicyName(policyName);
+                        apiPolicy.setPolicyVersion(policyVersion);
+                        apiPolicy.setDirection(apiPolicyDirection);
+                        apiPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(apiParams));
+                        api.setApiPolicy(apiPolicy);
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while converting parameters to map for API : " + api.getApiUUID() + " Revision: "
+                    + revisionId, e);
         }
     }
 
@@ -1328,7 +1452,7 @@ public class SubscriptionValidationDAO {
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
-                                attachURlMappingDetailsOfApiProduct(connection, api);
+                                attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
                             }
@@ -1417,7 +1541,7 @@ public class SubscriptionValidationDAO {
                         if (expand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equals(apiType)) {
-                                attachURlMappingDetailsOfApiProduct(connection, api);
+                                attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
                             }

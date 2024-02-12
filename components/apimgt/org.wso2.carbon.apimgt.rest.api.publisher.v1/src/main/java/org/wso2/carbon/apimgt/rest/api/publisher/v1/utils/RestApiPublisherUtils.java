@@ -293,11 +293,11 @@ public class RestApiPublisherUtils {
                 if (format.equalsIgnoreCase(ExportFormat.YAML.name())) {
                     CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,
                             ImportExportConstants.TYPE_POLICY_SPECIFICATION,
-                            policyData.getSpecification());
+                            policyData.getSpecification(), "v4.3.0");
                 } else if (format.equalsIgnoreCase(ExportFormat.JSON.name())) {
                     CommonUtil.writeDtoToFile(policyName, ExportFormat.JSON,
                             ImportExportConstants.TYPE_POLICY_SPECIFICATION,
-                            policyData.getSpecification());
+                            policyData.getSpecification(), "v4.3.0");
                 }
             }
             if (policyData.getSynapsePolicyDefinition() != null) {

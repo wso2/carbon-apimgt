@@ -90,7 +90,7 @@ info:
     Navigate through the API descriptions to find the required API, obtain an access token as described above and invoke the API with the authentication header.
     If you use a different authentication mechanism, this process may change.
 
-  version: '1.1'
+  version: '1.2'
 servers:
   - url: 'https://apis.wso2.com/api/service-catalog/v1'
   - url: 'http://apis.wso2.com/api/service-catalog/v1'

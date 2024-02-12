@@ -64,6 +64,7 @@ public class APIMgtGatewayConstants {
     public static final String REQUEST_MEDIATION_LATENCY = "request_mediation_latency";
     public static final String RESPONSE_MEDIATION_LATENCY = "response_mediation_latency";
     public static final String AM_CORRELATION_ID = "am.correlationID";
+    public static final String REFERER = "Referer";
 
     /**
      * Constants for regex protector.

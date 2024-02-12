@@ -847,11 +847,8 @@ public class PublisherCommonUtils {
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
                                                            String organization)
             throws APIManagementException, CryptoException {
-        if (APIUtil.isOnPremResolver()) {
-            String name = apiDto.getName();
-            //replace all white spaces in the API Name
-            apiDto.setName(name.replaceAll("\\s+", ""));
-        }
+        String name = apiDto.getName();
+        apiDto.setName(name.trim().replaceAll("\\s{2,}", " "));
         if (APIDTO.TypeEnum.ASYNC.equals(apiDto.getType())) {
             throw new APIManagementException("ASYNC API type does not support API creation from scratch",
                     ExceptionCodes.API_CREATION_NOT_SUPPORTED_FOR_ASYNC_TYPE_APIS);
@@ -881,6 +878,15 @@ public class PublisherCommonUtils {
         if (!PublisherCommonUtils.validateEndpoints(apiDto)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
+        }
+
+        // validate gateway type before proceeding
+        String gatewayType = apiDto.getGatewayType();
+        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
+            if (!(APIDTO.TypeEnum.HTTP.equals(apiDto.getType()) || APIDTO.TypeEnum.GRAPHQL.equals(apiDto.getType()))) {
+                throw new APIManagementException("APIs of type " + apiDto.getType() + " are not supported with " +
+                        "WSO2 APK", ExceptionCodes.INVALID_GATEWAY_TYPE);
+            }
         }
 
         Map endpointConfig = (Map) apiDto.getEndpointConfig();
@@ -1914,6 +1920,9 @@ public class PublisherCommonUtils {
             // Set username in case provider is null or empty
             provider = username;
         }
+        // validate character length
+        APIUtil.validateCharacterLengthOfAPIParams(apiProductDTO.getName(), apiProductDTO.getContext(),
+                provider);
 
         List<String> tiersFromDTO = apiProductDTO.getPolicies();
         Set<Tier> definedTiers = apiProvider.getTiers();

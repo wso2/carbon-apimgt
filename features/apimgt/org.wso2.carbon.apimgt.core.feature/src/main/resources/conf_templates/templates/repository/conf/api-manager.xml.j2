@@ -123,6 +123,7 @@
             <Environment type="{{environment_name.type}}" api-console="{{environment_name.display_in_api_console}}" isDefault="{{environment_name.show_as_token_endpoint_url}}">
                 <Name>{{environment_name.name}}</Name>
                 <DisplayName>{{environment_name.display_name}}</DisplayName>
+                <GatewayType>{{environment_name.gateway_type}}</GatewayType>
                 <Description>{{environment_name.description}}</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>{{environment_name.service_url}}</ServerURL>
@@ -324,6 +325,8 @@
     <Analytics>
         <!-- Enable Analytics for API Manager -->
         <Enabled>{{apim.analytics.enable}}</Enabled>
+
+        <PolicyEnabled>{{apim.analytics.enablePolicy}}</PolicyEnabled>
 
         <Type>{{apim.analytics.type}}</Type>
 
@@ -781,6 +784,10 @@
                 <URI>/api/am/service-catalog/{serviceCatalogVersion}/oas.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/gateway/v2/server-startup-healthcheck</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>
             <ETagSkipURI>
@@ -1181,6 +1188,12 @@
                 {% endif %}
                 {% if apim.open_tracer.remote_tracer.properties.sampler_param is defined %}
                 <SamplerParam>{{apim.open_tracer.remote_tracer.properties.sampler_param}}</SamplerParam>
+                {% endif %}
+                {% if apim.open_tracer.remote_tracer.properties.proxy_host is defined %}
+                <ProxyHost>{{apim.open_tracer.remote_tracer.properties.proxy_host}}</ProxyHost>
+                {% endif %}
+                {% if apim.open_tracer.remote_tracer.properties.proxy_port is defined %}
+                <ProxyPort>{{apim.open_tracer.remote_tracer.properties.proxy_port}}</ProxyPort>
                 {% endif %}
             </Properties>
         </RemoteTracer>

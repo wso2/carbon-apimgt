@@ -1213,6 +1213,9 @@ public abstract class AbstractAPIManager implements APIManager {
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
+        String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
+        api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(gatewayVendor));
+        api.setGatewayType(APIUtil.getGatewayType(gatewayVendor));
         // api level tier
         String apiLevelTier;
         if (api.isRevision()) {

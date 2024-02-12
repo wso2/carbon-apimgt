@@ -17,16 +17,22 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApiResultDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class APIInfoMappingUtil {
 
@@ -69,5 +75,48 @@ public class APIInfoMappingUtil {
         }
         apiInfoListDTO.setCount(apiInfoDTOs.size());
         return apiInfoListDTO;
+    }
+
+    public static void setPaginationParams(SearchResultListDTO apiListDTO, int limit, int offset,
+                                           int size) {
+
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
+
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiCommonUtil
+                    .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), null);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiCommonUtil
+                    .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), null);
+        }
+        PaginationDTO paginationDTO = getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        apiListDTO.setPagination(paginationDTO);
+    }
+
+    private static PaginationDTO getPaginationDTO(int limit, int offset, int total, String next, String previous) {
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setTotal(total);
+        paginationDTO.setNext(next);
+        paginationDTO.setPrevious(previous);
+        return paginationDTO;
+    }
+
+    public static ApiResultDTO fromAPIToAPIResultDTO(API api) {
+        ApiResultDTO apiResultDTO = new ApiResultDTO();
+        apiResultDTO.setId(api.getUuid());
+        APIIdentifier apiId = api.getId();
+        apiResultDTO.setName(apiId.getApiName());
+        apiResultDTO.setVersion(apiId.getVersion());
+        apiResultDTO.setProvider(apiId.getProviderName());
+        return apiResultDTO;
     }
 }

@@ -55,6 +55,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable, organization);
             settingsDTO.setScopes(getScopeList());
+            settingsDTO.setGatewayTypes(APIUtil.getGatewayTypes());
             settingsDTO.setCustomProperties(APIUtil.getCustomProperties(username));
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException | IOException e) {

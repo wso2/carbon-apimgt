@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
@@ -53,10 +54,12 @@ import org.wso2.carbon.apimgt.impl.notifier.events.GatewayPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ScopesEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.KeyTemplateEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.HashSet;
@@ -69,16 +72,24 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
-public class GatewayJMSMessageListener implements MessageListener {
+public class GatewayJMSMessageListener implements MessageListener, JMSConnectionEventListener {
 
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
     private boolean debugEnabled = log.isDebugEnabled();
+    private boolean refreshOnReconnect = false;
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
     private EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfiguration().getEventHubConfigurationDto();
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
     ExecutorService executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "DeploymentThread"));
+
+    public GatewayJMSMessageListener() {
+    }
+
+    public GatewayJMSMessageListener(boolean refreshOnReconnect) {
+        this.refreshOnReconnect = refreshOnReconnect;
+    }
 
     public void onMessage(Message message) {
 
@@ -244,18 +255,28 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.REMOVE_APPLICATION_KEYMAPPING.toString().equals(eventType)) {
             ApplicationRegistrationEvent event = new Gson().fromJson(eventJson, ApplicationRegistrationEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeApplicationKeyMapping(event);
-        } else if (EventType.SCOPE_CREATE.toString().equals(eventType)) {
+        } else if (EventType.SCOPES_UPDATE.toString().equals(eventType)) {
+            ScopesEvent event = new Gson().fromJson(eventJson, ScopesEvent.class);
+            for (ScopeEvent scopeEvent : event.getScopes()) {
+                ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(scopeEvent);
+            }
+        } else if (EventType.SCOPE_CREATE.toString().equals(eventType) ||
+                EventType.SCOPE_UPDATE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
-        } else if (EventType.SCOPE_UPDATE.toString().equals(eventType)) {
-            ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
-            ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, event.getName() + ": " + eventType,
+                    APIConstants.AuditLogConstants.DEPLOYED,
+                    APIConstants.AuditLogConstants.SYSTEM + ": " + event.getTenantDomain());
         } else if (EventType.SCOPE_DELETE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().deleteScope(event);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, event.getName() + ": " + eventType,
+                    APIConstants.AuditLogConstants.DEPLOYED,
+                    APIConstants.AuditLogConstants.SYSTEM + ": " + event.getTenantDomain());
         } else if (EventType.POLICY_CREATE.toString().equals(eventType) ||
-                EventType.POLICY_DELETE.toString().equals(eventType) ||
-                EventType.POLICY_UPDATE.toString().equals(eventType)) {
+            EventType.POLICY_DELETE.toString().equals(eventType) ||
+            EventType.POLICY_UPDATE.toString().equals(eventType)) {
+            String policyName = null;
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
             boolean updatePolicy = false;
             boolean deletePolicy = false;
@@ -274,6 +295,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService()
                             .removeAPIPolicy(policyEvent);
                 }
+                policyName = policyEvent.getPolicyName();
             } else if (event.getPolicyType() == PolicyType.SUBSCRIPTION) {
                 SubscriptionPolicyEvent policyEvent = new Gson().fromJson(eventJson, SubscriptionPolicyEvent.class);
                 if (updatePolicy) {
@@ -283,6 +305,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService()
                             .removeSubscriptionPolicy(policyEvent);
                 }
+                policyName = policyEvent.getPolicyName();
             } else if (event.getPolicyType() == PolicyType.APPLICATION) {
                 ApplicationPolicyEvent policyEvent = new Gson().fromJson(eventJson, ApplicationPolicyEvent.class);
                 if (updatePolicy) {
@@ -292,7 +315,11 @@ public class GatewayJMSMessageListener implements MessageListener {
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService()
                             .removeApplicationPolicy(policyEvent);
                 }
+                policyName = policyEvent.getPolicyName();
             }
+            APIUtil.logAuditMessage(event.getPolicyType().toString(), policyName + ": " + eventType,
+                    APIConstants.AuditLogConstants.DEPLOYED,
+                    APIConstants.AuditLogConstants.SYSTEM + ": " + event.getTenantDomain());
         } else if (EventType.ENDPOINT_CERTIFICATE_ADD.toString().equals(eventType) ||
                 EventType.ENDPOINT_CERTIFICATE_REMOVE.toString().equals(eventType)) {
             CertificateEvent certificateEvent = new Gson().fromJson(eventJson, CertificateEvent.class);
@@ -453,5 +480,44 @@ public class GatewayJMSMessageListener implements MessageListener {
         subscriber.setSecret(payloadData.get(APIConstants.Webhooks.SECRET).textValue());
         ServiceReferenceHolder.getInstance().getSubscriptionsDataService()
                 .removeSubscription(apiKey, topicName, tenantDomain, subscriber);
+    }
+
+    @Override
+    public void onReconnect() {
+        if (refreshOnReconnect) {
+            log.info("Refreshing gateway data stores and deployments.");
+            new Thread(() -> {
+                synchronized (this) {
+                    SubscriptionDataHolder.getInstance().refreshSubscriptionStore();
+                    redeployGatewayArtifacts();
+                }
+            }).start();
+        }
+    }
+
+    private void redeployGatewayArtifacts() {
+        Set<String> activeTenants = ServiceReferenceHolder.getInstance().getActiveTenants();
+        activeTenants.forEach(tenantDomain -> {
+            try {
+                new EndpointCertificateDeployer(tenantDomain).deployCertificatesAtStartup();
+                if (log.isDebugEnabled()) {
+                    log.debug("Redeploying artifacts for tenant: " + tenantDomain);
+                }
+                inMemoryApiDeployer.
+                        deployAllAPIs(gatewayArtifactSynchronizerProperties.getGatewayLabels(),
+                        tenantDomain, true);
+            } catch (ArtifactSynchronizerException e) {
+                log.error("Error while redeploying gateway artifacts for tenant: " + tenantDomain, e);
+            } catch (APIManagementException e) {
+                log.error("Error while redeploying endpoint certificates for tenant: " + tenantDomain, e);
+            }
+        });
+
+    }
+
+    @Override
+    public void onDisconnect() {
+        // We currently do not have any logic to execute for this scenario.
+        // Added in case we need to implement an operation in the future.
     }
 }

@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.ResourceData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -753,6 +754,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 } else {
                     sequenceAdminServiceProxy.addSequence(element);
                 }
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.OPERATION_POLICY, sequence.getName(),
+                        APIConstants.AuditLogConstants.DEPLOYED, APIConstants.AuditLogConstants.SYSTEM +
+                                ": " + gatewayAPIDTO.getTenantDomain());
             }
         }
 
@@ -763,6 +767,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         // Add API
         if (StringUtils.isNotEmpty(gatewayAPIDTO.getApiDefinition())) {
             restapiAdminServiceProxy.addApi(gatewayAPIDTO.getApiDefinition());
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, gatewayAPIDTO.getApiId(),
+                    APIConstants.AuditLogConstants.DEPLOYED, APIConstants.AuditLogConstants.SYSTEM +
+                            ": " + gatewayAPIDTO.getTenantDomain());
         }
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " API Definition deployed");
@@ -804,6 +811,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion());
         if (restapiAdminServiceProxy.getApi(qualifiedName) != null) {
             restapiAdminServiceProxy.deleteApi(qualifiedName);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, gatewayAPIDTO.getApiId(),
+                    APIConstants.AuditLogConstants.UNDEPLOYED, APIConstants.AuditLogConstants.SYSTEM +
+                            ": " + gatewayAPIDTO.getTenantDomain());
         }
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " API Definition undeployed " +
@@ -816,6 +826,9 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             for (String sequenceName : gatewayAPIDTO.getSequencesToBeRemove()) {
                 if (sequenceAdminServiceProxy.isExistingSequence(sequenceName)) {
                     sequenceAdminServiceProxy.deleteSequence(sequenceName);
+                    APIUtil.logAuditMessage(APIConstants.AuditLogConstants.OPERATION_POLICY, sequenceName,
+                            APIConstants.AuditLogConstants.UNDEPLOYED,
+                            APIConstants.AuditLogConstants.SYSTEM + ": " + gatewayAPIDTO.getTenantDomain());
                 }
             }
         }

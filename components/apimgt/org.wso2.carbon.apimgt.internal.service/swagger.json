@@ -1151,11 +1151,22 @@
           "example" : false,
           "description" : "Whether this is the default version of the API."
         },
+        "apiPolicies" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OperationPolicy"
+          }
+        },
         "urlMappings" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/URLMapping"
           }
+        },
+        "securityScheme" : {
+          "type" : "string",
+          "example" : "Oauth2,api_key",
+          "description" : "Available authentication methods of the API."
         }
       }
     },
@@ -1265,6 +1276,9 @@
     },
     "KeyManager" : {
       "properties" : {
+        "uuid" : {
+          "type" : "string"
+        },
         "name" : {
           "type" : "string"
         },
@@ -1274,10 +1288,10 @@
         "enabled" : {
           "type" : "boolean"
         },
-        "tenantDomain" : {
+        "organization" : {
           "type" : "string"
         },
-        "configuration" : {
+        "additionalProperties" : {
           "type" : "object",
           "properties" : { }
         },
@@ -1333,6 +1347,12 @@
           "type" : "integer"
         },
         "subscriptionState" : {
+          "type" : "string"
+        },
+        "apiName" : {
+          "type" : "string"
+        },
+        "apiVersion" : {
           "type" : "string"
         }
       }
@@ -1749,8 +1769,41 @@
           "items" : {
             "type" : "string"
           }
+        },
+        "operationPolicies" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OperationPolicy"
+          }
         }
       }
+    },
+    "OperationPolicy" : {
+      "properties" : {
+        "policyName" : {
+          "type" : "string"
+        },
+        "policyVersion" : {
+          "type" : "string"
+        },
+        "direction" : {
+          "type" : "string"
+        },
+        "policyId" : {
+          "type" : "string"
+        },
+        "order" : {
+          "type" : "integer"
+        },
+        "parameters" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      },
+      "title" : "Operation Policy"
     },
     "Pagination" : {
       "properties" : {

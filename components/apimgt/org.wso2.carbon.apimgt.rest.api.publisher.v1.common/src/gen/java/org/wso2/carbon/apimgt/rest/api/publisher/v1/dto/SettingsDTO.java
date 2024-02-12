@@ -28,6 +28,7 @@ public class SettingsDTO   {
   
     private String devportalUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
+    private List<String> gatewayTypes = new ArrayList<String>();
     private List<String> scopes = new ArrayList<String>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
     private List<SubscriberContactAttributeDTO> subscriberContactAttributes = new ArrayList<SubscriberContactAttributeDTO>();
@@ -74,6 +75,23 @@ public class SettingsDTO   {
   }
   public void setEnvironment(List<EnvironmentDTO> environment) {
     this.environment = environment;
+  }
+
+  /**
+   **/
+  public SettingsDTO gatewayTypes(List<String> gatewayTypes) {
+    this.gatewayTypes = gatewayTypes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"Regular\",\"APK\"]", value = "")
+  @JsonProperty("gatewayTypes")
+  public List<String> getGatewayTypes() {
+    return gatewayTypes;
+  }
+  public void setGatewayTypes(List<String> gatewayTypes) {
+    this.gatewayTypes = gatewayTypes;
   }
 
   /**
@@ -285,6 +303,7 @@ public class SettingsDTO   {
     SettingsDTO settings = (SettingsDTO) o;
     return Objects.equals(devportalUrl, settings.devportalUrl) &&
         Objects.equals(environment, settings.environment) &&
+        Objects.equals(gatewayTypes, settings.gatewayTypes) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
         Objects.equals(subscriberContactAttributes, settings.subscriberContactAttributes) &&
@@ -300,7 +319,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, customProperties);
   }
 
   @Override
@@ -310,6 +329,7 @@ public class SettingsDTO   {
     
     sb.append("    devportalUrl: ").append(toIndentedString(devportalUrl)).append("\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
+    sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("    subscriberContactAttributes: ").append(toIndentedString(subscriberContactAttributes)).append("\n");

@@ -401,6 +401,7 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         api.setApiProvider(event.getApiProvider());
         api.setApiVersion(event.getApiVersion());
         api.setContext(event.getApiContext());
+        api.setSecurityScheme(event.getSecurityScheme());
         if (log.isDebugEnabled()) {
             log.debug("Event: " + event.toString());
             log.debug("Converted : " + api.toString());

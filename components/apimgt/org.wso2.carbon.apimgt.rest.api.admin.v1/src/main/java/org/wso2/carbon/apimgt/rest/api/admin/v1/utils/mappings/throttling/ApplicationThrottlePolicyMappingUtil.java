@@ -97,7 +97,8 @@ public class ApplicationThrottlePolicyMappingUtil {
         }
         if (dto.getBurstLimit() != null) {
             BurstLimitDTO burstLimitDTO = dto.getBurstLimit();
-            if (burstLimitDTO.getRateLimitCount() > 0 && burstLimitDTO.getRateLimitTimeUnit() != null) {
+            if (burstLimitDTO.getRateLimitCount() != null && burstLimitDTO.getRateLimitCount() > 0
+                    && burstLimitDTO.getRateLimitTimeUnit() != null) {
                 appPolicy.setRateLimitCount(burstLimitDTO.getRateLimitCount());
                 appPolicy.setRateLimitTimeUnit(burstLimitDTO.getRateLimitTimeUnit());
             }

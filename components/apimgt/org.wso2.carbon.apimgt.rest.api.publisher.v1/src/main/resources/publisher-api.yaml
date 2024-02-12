@@ -8943,7 +8943,6 @@ components:
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
         name:
-          maxLength: 60
           minLength: 1
           pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
           type: string
@@ -9414,8 +9413,9 @@ components:
           title: Field to identify gateway type.
           type: string
           description: The gateway type selected for the API policies. Accepts one of the
-            following. wso2/synapse, wso2/choreo-connect.
+            following. wso2/synapse, wso2/apk.
           example: wso2/synapse
+          default: wso2/synapse
         asyncTransportProtocols:
           type: array
           description: |
@@ -10724,6 +10724,10 @@ components:
         type:
           type: string
           example: hybrid
+        gatewayType:
+          type: string
+          example: Regular
+          default: Regular
         serverUrl:
           type: string
           example: https://localhost:9443/services/
@@ -11857,6 +11861,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+        gatewayTypes:
+          type: array
+          example:
+            - Regular
+            - APK
+          items:
+            type: string
         scopes:
           type: array
           example:

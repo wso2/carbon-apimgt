@@ -175,6 +175,8 @@ public class SQLConstants {
             "   MD5 = ? " +
             "   WHERE API_ID = ?";
 
+    public static final String UPDATE_API_PROVIDER_SQL = "UPDATE AM_API SET API_PROVIDER = ? WHERE API_UUID = ?";
+
     public static final String GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL = "SELECT " +
             "   AM_SERVICE_CATALOG.MD5 AS SERVICE_MD5, " +
             "   AM_SERVICE_CATALOG.SERVICE_NAME, " +
@@ -545,6 +547,7 @@ public class SQLConstants {
                     "   API.API_UUID AS API_UUID, " +
                     "   API.API_NAME AS API_NAME, " +
                     "   API.API_TYPE AS TYPE, " +
+                    "   API.ORGANIZATION AS ORGANIZATION, "+
                     "   API.API_VERSION AS API_VERSION, " +
                     "   SUBS.TIER_ID AS TIER_ID, " +
                     "   SUBS.TIER_ID_PENDING AS TIER_ID_PENDING, " +
@@ -1456,6 +1459,9 @@ public class SQLConstants {
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
                     "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE)" +
                     " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String GET_GATEWAY_TYPE_SQL_BY_UUID =
+            "SELECT API.GATEWAY_TYPE FROM AM_API API WHERE API.API_UUID = ?";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -2694,18 +2700,18 @@ public class SQLConstants {
     /** Environment related constants **/
 
     public static final String GET_ENVIRONMENT_BY_ORGANIZATION_SQL =
-            "SELECT ID, UUID, NAME, ORGANIZATION, DISPLAY_NAME, DESCRIPTION, PROVIDER " +
+            "SELECT ID, UUID, NAME, ORGANIZATION, DISPLAY_NAME, DESCRIPTION, PROVIDER, GATEWAY_TYPE " +
             "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE ORGANIZATION = ?";
 
     public static final String GET_ENVIRONMENT_BY_ORGANIZATION_AND_UUID_SQL =
-            "SELECT ID, UUID, NAME, ORGANIZATION, DISPLAY_NAME, DESCRIPTION, PROVIDER " +
+            "SELECT ID, UUID, NAME, ORGANIZATION, DISPLAY_NAME, DESCRIPTION, PROVIDER, GATEWAY_TYPE " +
             "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE ORGANIZATION = ? AND UUID = ?";
 
     public static final String INSERT_ENVIRONMENT_SQL = "INSERT INTO " +
-            "AM_GATEWAY_ENVIRONMENT (UUID, NAME, DISPLAY_NAME, DESCRIPTION, PROVIDER, ORGANIZATION) " +
-            "VALUES (?,?,?,?,?,?)";
+            "AM_GATEWAY_ENVIRONMENT (UUID, NAME, DISPLAY_NAME, DESCRIPTION, PROVIDER, GATEWAY_TYPE, ORGANIZATION) " +
+            "VALUES (?,?,?,?,?,?,?)";
 
     public static final String INSERT_GATEWAY_VHOSTS_SQL = "INSERT INTO " +
             "AM_GW_VHOST (GATEWAY_ENV_ID, HOST, HTTP_CONTEXT, HTTP_PORT, HTTPS_PORT, WS_PORT, WSS_PORT) " +

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
 import javax.validation.constraints.*;
 
 
@@ -23,6 +24,7 @@ public class URLMappingDTO   {
     private String httpMethod = null;
     private String urlPattern = null;
     private List<String> scopes = new ArrayList<>();
+    private List<OperationPolicyDTO> operationPolicies = new ArrayList<>();
 
   /**
    **/
@@ -109,6 +111,23 @@ public class URLMappingDTO   {
     this.scopes = scopes;
   }
 
+  /**
+   **/
+  public URLMappingDTO operationPolicies(List<OperationPolicyDTO> operationPolicies) {
+    this.operationPolicies = operationPolicies;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("operationPolicies")
+  public List<OperationPolicyDTO> getOperationPolicies() {
+    return operationPolicies;
+  }
+  public void setOperationPolicies(List<OperationPolicyDTO> operationPolicies) {
+    this.operationPolicies = operationPolicies;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -123,12 +142,13 @@ public class URLMappingDTO   {
         Objects.equals(throttlingPolicy, urLMapping.throttlingPolicy) &&
         Objects.equals(httpMethod, urLMapping.httpMethod) &&
         Objects.equals(urlPattern, urLMapping.urlPattern) &&
-        Objects.equals(scopes, urLMapping.scopes);
+        Objects.equals(scopes, urLMapping.scopes) &&
+        Objects.equals(operationPolicies, urLMapping.operationPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authScheme, throttlingPolicy, httpMethod, urlPattern, scopes);
+    return Objects.hash(authScheme, throttlingPolicy, httpMethod, urlPattern, scopes, operationPolicies);
   }
 
   @Override
@@ -141,6 +161,7 @@ public class URLMappingDTO   {
     sb.append("    httpMethod: ").append(toIndentedString(httpMethod)).append("\n");
     sb.append("    urlPattern: ").append(toIndentedString(urlPattern)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    operationPolicies: ").append(toIndentedString(operationPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }
