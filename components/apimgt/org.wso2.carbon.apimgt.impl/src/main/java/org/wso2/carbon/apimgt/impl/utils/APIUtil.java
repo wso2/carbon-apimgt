@@ -6852,7 +6852,7 @@ public final class APIUtil {
         jsonObject.put("typ", entityType);
         jsonObject.put("action", action);
         jsonObject.put("performedBy", performedBy);
-        if (entityInfo != null) {
+        if (entityInfo != null && !StringUtils.isBlank(entityInfo)) {
             try {
                 JSONObject entityInfoJson = (JSONObject) new JSONParser().parse(entityInfo);
                 jsonObject.put("info", entityInfoJson);
