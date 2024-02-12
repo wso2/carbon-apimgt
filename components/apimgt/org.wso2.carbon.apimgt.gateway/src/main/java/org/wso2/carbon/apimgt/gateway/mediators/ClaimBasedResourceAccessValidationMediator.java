@@ -51,7 +51,7 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
 
         if (shouldAllowValidation) {
 
-            log.debug("Policy allows claim validation.");
+            log.debug("Policy allows claim based resource access validation.");
             String configuredClaim = (String) messageContext.getProperty(APIMgtGatewayConstants
                     .ACCESS_GRANT_CLAIM_NAME);
             String configuredClaimValue = (String) messageContext.getProperty(APIMgtGatewayConstants
@@ -89,7 +89,7 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
                 return false;
             }
         } else {
-            log.debug("Policy is configured not to allow claim validation.");
+            log.debug("Policy is configured not to allow claim based resource access validation.");
             return true;
         }
     }
