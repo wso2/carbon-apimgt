@@ -53,8 +53,6 @@ public class EventHubEventPublisherFactory implements EventPublisherFactory {
     public EventPublisher getEventPublisher(EventPublisherType eventPublisherType) {
         switch (eventPublisherType) {
             case TOKEN_REVOCATION:
-            case TOKEN_REVOKE_BY_CONSUMER_KEY_EVENT:
-            case TOKEN_REVOKE_BY_SUBJECT_ENTITY_EVENT:
             case ASYNC_WEBHOOKS:
                 return new EventHubEventStreamServiceEventPublisher();
             default:

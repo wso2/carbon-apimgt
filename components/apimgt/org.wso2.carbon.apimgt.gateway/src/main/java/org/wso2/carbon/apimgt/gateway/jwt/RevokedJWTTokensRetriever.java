@@ -124,6 +124,7 @@ public class RevokedJWTTokensRetriever extends TimerTask {
     }
 
     private void loadRevokedConsumerKeys(RevokedEventsDTO revokedEventsDTO) {
+
         if (revokedEventsDTO.getRevokedConsumerKeyList() != null && !revokedEventsDTO.getRevokedConsumerKeyList()
                 .isEmpty()) {
             for (RevokedJWTConsumerKeyDTO revokedConKeyDTO : revokedEventsDTO.getRevokedConsumerKeyList()) {
