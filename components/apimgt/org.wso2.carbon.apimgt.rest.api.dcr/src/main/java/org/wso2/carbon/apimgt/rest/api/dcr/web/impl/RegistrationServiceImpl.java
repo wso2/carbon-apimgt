@@ -144,7 +144,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                     }
                 }
 
-                String tokenType = APIConstants.TOKEN_TYPE_JWT;
+                String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
                 String profileTokenType = profile.getTokenType();
                 if (StringUtils.isNotEmpty(profileTokenType)) {
                     tokenType = profileTokenType;
