@@ -185,43 +185,42 @@ public class JWTValidator {
                         "Invalid JWT token");
             }
         }
-        if (jwtGeneratedTime != 0 && RevokedJWTDataHolder.getInstance()
-                .isRevokedConsumerKeyExists((String) signedJWTInfo.getJwtClaimsSet()
-                        .getClaim(APIMgtGatewayConstants.CLIENT_ID), jwtGeneratedTime)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Consumer key retrieved from the  jwt token map is in revoked consumer key map." +
-                        " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
+        Object authorizedPartyClaim = signedJWTInfo.getJwtClaimsSet().getClaim(APIMgtGatewayConstants.AZP_JWT_CLAIM);
+        Object entityIdClaim = signedJWTInfo.getJwtClaimsSet().getClaim(APIMgtGatewayConstants.ENTITY_ID_JWT_CLAIM);
+        if (jwtGeneratedTime != 0 && authorizedPartyClaim != null && entityIdClaim != null) {
+            String authorizedParty = (String) authorizedPartyClaim;
+            String entityId = (String) entityIdClaim;
+            if (RevokedJWTDataHolder.getInstance().isRevokedConsumerKeyExists(authorizedParty, jwtGeneratedTime)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Consumer key retrieved from the  jwt token map is in revoked consumer key map."
+                            + " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
             }
-            log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Invalid JWT token");
-        }
-        if (jwtGeneratedTime != 0 && signedJWTInfo.getJwtClaimsSet().getSubject()
-                .equals(signedJWTInfo.getJwtClaimsSet().getClaim(APIMgtGatewayConstants.CLIENT_ID))
-                && RevokedJWTDataHolder.getInstance().isRevokedSubjectEntityConsumerAppExists(
-                signedJWTInfo.getJwtClaimsSet().getSubject(), jwtGeneratedTime)) {
-            // handle user event revocations of app tokens since the 'sub' claim is client id
-            if (log.isDebugEnabled()) {
-                log.debug("Consumer key retrieved from the  jwt token map is in revoked consumer key map." +
-                        " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
+            if (StringUtils.equals(entityId, authorizedParty)
+                    && RevokedJWTDataHolder.getInstance().isRevokedSubjectEntityConsumerAppExists(
+                            entityId, jwtGeneratedTime)) {
+                // handle user event revocations of app tokens since the 'sub' claim is client id
+                if (log.isDebugEnabled()) {
+                    log.debug("Consumer key retrieved from the  jwt token map is in revoked consumer key map."
+                            + " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
             }
-            log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Invalid JWT token");
-        }
-        if (jwtGeneratedTime != 0 && !signedJWTInfo.getJwtClaimsSet().getSubject()
-                .equals(signedJWTInfo.getJwtClaimsSet().getClaim(APIMgtGatewayConstants.CLIENT_ID))
-                && RevokedJWTDataHolder.getInstance().isRevokedSubjectEntityUserExists(
-                signedJWTInfo.getJwtClaimsSet().getSubject(), jwtGeneratedTime)) {
-            if (log.isDebugEnabled()) {
-                log.debug("User id retrieved from the  jwt token map is in revoked user id map." +
-                        " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
+            if (!StringUtils.equals(entityId, authorizedParty) && RevokedJWTDataHolder.getInstance()
+                    .isRevokedSubjectEntityUserExists(entityId, jwtGeneratedTime)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User id retrieved from the  jwt token map is in revoked user id map."
+                            + " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
+                }
+                log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
             }
-            log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Invalid JWT token");
         }
-
         JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
 
         if (jwtValidationInfo != null) {
