@@ -76,9 +76,7 @@ paths:
         200:
           description: An object of revoke JWTs, revoked subject entities, revoked consumer keys
           schema:
-            type: object
-            items:
-              $ref: '#/definitions/RevokedEvents'
+            $ref: '#/definitions/RevokedEvents'
         default:
           description: Unexpected error
           schema:

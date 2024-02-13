@@ -92,7 +92,7 @@
           "200" : {
             "description" : "An object of revoke JWTs, revoked subject entities, revoked consumer keys",
             "schema" : {
-              "type" : "object"
+              "$ref" : "#/definitions/RevokedEvents"
             }
           },
           "default" : {
@@ -1345,8 +1345,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
-          "default" : "DIRECT"
+          "default" : "DIRECT",
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
         }
       }
     },
