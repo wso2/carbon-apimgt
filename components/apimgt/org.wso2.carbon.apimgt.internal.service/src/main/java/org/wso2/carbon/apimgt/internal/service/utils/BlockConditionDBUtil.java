@@ -218,8 +218,7 @@ public final class BlockConditionDBUtil {
     public static List<RevokedJWTConsumerKeyDTO> getRevokedJWTConsumerKeys() {
 
         List<RevokedJWTConsumerKeyDTO> revokedJWTConsumerKeyListDTO = new ArrayList<>();
-        String sqlQuery = "SELECT CONSUMER_KEY, TIME_REVOKED, ORGANIZATION " +
-                "FROM AM_APP_REVOKED_EVENT";
+        String sqlQuery = "SELECT CONSUMER_KEY, TIME_REVOKED, ORGANIZATION FROM AM_APP_REVOKED_EVENT";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             try (ResultSet rs = ps.executeQuery()) {
