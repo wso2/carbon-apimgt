@@ -2287,16 +2287,4 @@ public class APIManagerConfiguration {
     public void setHttpClientConfiguration(HttpClientConfigurationDTO httpClientConfiguration) {
         this.httpClientConfiguration = httpClientConfiguration;
     }
-
-    public String getResourceAccessValidationClaimName() {
-        APIManagerConfiguration configurations = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        return configurations.getFirstProperty(APIConstants.CLAIM_BASED_RESOURCE_ACCESS_VALIDATION_CLAIM_NAME);
-    }
-
-    public String getResourceAccessValidationClaimValueRegex() {
-        APIManagerConfiguration configurations = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        return configurations.getFirstProperty(APIConstants.CLAIM_BASED_RESOURCE_ACCESS_VALIDATION_CLAIM_VALUE_REGEX);
-    }
 }

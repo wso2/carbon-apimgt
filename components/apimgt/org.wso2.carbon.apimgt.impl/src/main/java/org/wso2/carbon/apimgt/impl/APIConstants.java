@@ -3053,9 +3053,4 @@ public final class APIConstants {
 
     //Property for enabling tenant aware sub claims when invoking APIs with API key
     public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
-
-    public static final String CLAIM_BASED_RESOURCE_ACCESS_VALIDATION_CLAIM_NAME =
-            "ClaimBasedResourceAccessValidation.ClaimName";
-    public static final String CLAIM_BASED_RESOURCE_ACCESS_VALIDATION_CLAIM_VALUE_REGEX =
-            "ClaimBasedResourceAccessValidation.ClaimValueRegex";
 }
