@@ -110,6 +110,7 @@ public class RevokedJWTTokensRetriever extends TimerTask {
     }
 
     private void loadRevokedJWTTokens(RevokedEventsDTO revokedEventsDTO) {
+
         if (revokedEventsDTO.getRevokedJWTList() != null && !revokedEventsDTO.getRevokedJWTList().isEmpty()) {
             for (RevokedJWTTokenDTO revokedJWTToken : revokedEventsDTO.getRevokedJWTList()) {
                 RevokedJWTDataHolder.getInstance().addRevokedJWTToMap(revokedJWTToken.getSignature(),
