@@ -565,9 +565,6 @@ public final class APIConstants {
     public static final String IS_ENABLED = "is_enabled";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
-    public static final String SUBJECT_ENTITY_REVOCATION_STREAM_ID =
-            "org.wso2.apimgt.subjectEntity.revocation.stream:1.0.0";
-    public static final String APP_REVOCATION_EVENT_STREAM_ID = "org.wso2.apimgt.app.revocation.stream:1.0.0";
     public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
     public static final String NOTIFICATION_STREAM_ID = "org.wso2.apimgt.notification.stream:1.0.0";
     public static final String WEBHOOKS_SUBSCRIPTION_STREAM_ID = "org.wso2.apimgt.webhooks.request.stream:1.0.0";
@@ -593,11 +590,6 @@ public final class APIConstants {
     public static final String KEY_MANAGER_CONSUMER_KEY = "consumer_key";
     public static final String KEY_MANAGER_CONSUMER_SECRET = "consumer_secret";
     public static final String REVOKED_TOKEN_TYPE = "type";
-    public static final String INTERNAL_REVOCATION_EVENT_TYPE = "type";
-    public static final String INTERNAL_REVOCATION_TIME = "revocationTime";
-    public static final String INTERNAL_REVOCATION_CONSUMER_KEY = "consumerKey";
-    public static final String INTERNAL_REVOCATION_ENTITY_ID = "entityId";
-    public static final String INTERNAL_REVOCATION_ENTITY_TYPE = "entityType";
     public static final String IDENTITY_REVOKE_ENDPOINT = "/oauth2/revoke";
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
@@ -2841,6 +2833,8 @@ public final class APIConstants {
         public static final String STREAM_ID = "streamId";
         public static final String ENTITY_ID = "entityId";
         public static final String ENTITY_TYPE = "entityType";
+        public static final String ENTITY_TYPE_CLIENT_ID = "CLIENT_ID";
+        public static final String ENTITY_TYPE_USER_ID = "USER_ID";
         public static final String EVENT_TYPE = "eventType";
     }
 

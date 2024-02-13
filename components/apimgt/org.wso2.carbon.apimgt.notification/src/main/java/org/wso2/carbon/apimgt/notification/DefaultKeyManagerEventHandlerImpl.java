@@ -39,10 +39,10 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
 
         if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT)) {
-            handleInternalTokenRevocationByConsumerAppEvent(event);
+            handleConsumerAppRevocationEvent(event);
         } else if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT)) {
-            handleInternalTokenRevocationBySubjectEntityEvent(event);
+            handleSubjectEntityRevocationEvent(event);
         } else if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.TOKEN_REVOCATION_EVENT)) {
             handleTokenRevocationEvent(event);
@@ -63,14 +63,14 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
         return true;
     }
 
-    private boolean handleInternalTokenRevocationByConsumerAppEvent(String event) throws APIManagementException {
+    private boolean handleConsumerAppRevocationEvent(String event) throws APIManagementException {
 
         ConsumerAppRevocationEvent tokenRevocationEvent = new Gson().fromJson(event, ConsumerAppRevocationEvent.class);
         handleConsumerAppRevocationEvent(tokenRevocationEvent);
         return true;
     }
 
-    private boolean handleInternalTokenRevocationBySubjectEntityEvent(String event) throws APIManagementException {
+    private boolean handleSubjectEntityRevocationEvent(String event) throws APIManagementException {
 
         SubjectEntityRevocationEvent tokenRevocationEvent =
                 new Gson().fromJson(event, SubjectEntityRevocationEvent.class);
