@@ -157,13 +157,6 @@ public class JWTValidator {
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
 
-        long jwtGeneratedTime = 0;
-        try {
-            jwtGeneratedTime = signedJWTInfo.getSignedJWT().getJWTClaimsSet().getIssueTime().getTime();
-        } catch (ParseException e) {
-            log.error("Error while obtaining JWT token generated time certificate. "
-                    + GatewayUtils.getMaskedToken(jwtHeader));
-        }
         // Check for CNF validation
         if (!isCNFValidationDisabled(disableCNFValidation, false)) {
             try {
@@ -187,6 +180,12 @@ public class JWTValidator {
         }
         Object authorizedPartyClaim = signedJWTInfo.getJwtClaimsSet().getClaim(APIMgtGatewayConstants.AZP_JWT_CLAIM);
         Object entityIdClaim = signedJWTInfo.getJwtClaimsSet().getClaim(APIMgtGatewayConstants.ENTITY_ID_JWT_CLAIM);
+        long jwtGeneratedTime = 0;
+        try {
+            jwtGeneratedTime = signedJWTInfo.getSignedJWT().getJWTClaimsSet().getIssueTime().getTime();
+        } catch (ParseException e) {
+            log.error("Error while obtaining JWT token generated time " + GatewayUtils.getMaskedToken(jwtHeader));
+        }
         if (jwtGeneratedTime != 0 && authorizedPartyClaim != null && entityIdClaim != null) {
             String authorizedParty = (String) authorizedPartyClaim;
             String entityId = (String) entityIdClaim;
