@@ -37,42 +37,92 @@ public class ClaimBasedResourceAccessValidationMediatorTest {
     public static final String AUT = "aut";
 
     @Test
-    public void testClientCredentialsFlowWhenClientCredentialsPolicyIsApplied() throws Exception {
+    public void testFlowWhenClaimsMatchingWithRegex() throws Exception {
 
         Map<String, String> jwtTokenClaimsMap = new HashMap<>();
         jwtTokenClaimsMap.put(AUT, APPLICATION);
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.JWT_CLAIMS))
                 .thenReturn(jwtTokenClaimsMap);
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ACCESS_GRANT_CLAIM_NAME))
-                .thenReturn(AUT);
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ACCESS_GRANT_CLAIM_VALUE))
-                .thenReturn(APPLICATION);
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.SHOULD_ALLOW_ACCESS_VALIDATION))
-                .thenReturn("true");
+        String claimValueRegex = "^[A-Za-z]+$";
+        mediator.setAccessVerificationClaim(AUT);
+        mediator.setAccessVerificationClaimValue(APPLICATION);
+        mediator.setAccessVerificationClaimValueRegex(claimValueRegex);
+        mediator.setShouldAllowValidation(true);
         Assert.assertTrue(mediator.mediate(messageContext));
     }
 
     @Test
-    public void testAuthCodeFlowWhenAuthCodePolicyIsApplied() throws Exception {
+    public void testFlowWhenClaimsMatchingWithTickFalseWithRegex() throws Exception {
 
         Map<String, String> jwtTokenClaimsMap = new HashMap<>();
-        jwtTokenClaimsMap.put(AUT, APPLICATION_USER);
+        jwtTokenClaimsMap.put(AUT, APPLICATION);
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.JWT_CLAIMS))
                 .thenReturn(jwtTokenClaimsMap);
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ACCESS_GRANT_CLAIM_NAME))
-                .thenReturn(AUT);
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ACCESS_GRANT_CLAIM_VALUE))
-                .thenReturn(APPLICATION_USER);
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.SHOULD_ALLOW_ACCESS_VALIDATION))
-                .thenReturn("true");
+        String claimValueRegex = "^[A-Za-z]+$";
+        mediator.setAccessVerificationClaim(AUT);
+        mediator.setAccessVerificationClaimValue(APPLICATION);
+        mediator.setAccessVerificationClaimValueRegex(claimValueRegex);
+        mediator.setShouldAllowValidation(false);
         Assert.assertTrue(mediator.mediate(messageContext));
     }
 
     @Test
-    public void testFlowWhenValidationIsNotAllowed() throws Exception {
+    public void testFlowWhenClaimsNotMatchingWithTickTrueWithRegex() throws Exception {
 
-        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.SHOULD_ALLOW_ACCESS_VALIDATION))
-                .thenReturn("false");
+        Map<String, String> jwtTokenClaimsMap = new HashMap<>();
+        jwtTokenClaimsMap.put(AUT, APPLICATION);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.JWT_CLAIMS))
+                .thenReturn(jwtTokenClaimsMap);
+        String claimValueRegex = "^[A-Za-z]+$";
+        mediator.setAccessVerificationClaim(AUT);
+        mediator.setAccessVerificationClaimValue(APPLICATION_USER);
+        mediator.setAccessVerificationClaimValueRegex(claimValueRegex);
+        mediator.setShouldAllowValidation(true);
+        Assert.assertTrue(mediator.mediate(messageContext));
+    }
+
+    @Test
+    public void testFlowWhenClaimsMatchingWithTickTrueWithoutRegex() throws Exception {
+
+        Map<String, String> jwtTokenClaimsMap = new HashMap<>();
+        jwtTokenClaimsMap.put(AUT, APPLICATION);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.JWT_CLAIMS))
+                .thenReturn(jwtTokenClaimsMap);
+        String claimValueRegex = "";
+        mediator.setAccessVerificationClaim(AUT);
+        mediator.setAccessVerificationClaimValue(APPLICATION);
+        mediator.setAccessVerificationClaimValueRegex(claimValueRegex);
+        mediator.setShouldAllowValidation(true);
+        Assert.assertTrue(mediator.mediate(messageContext));
+    }
+
+    @Test
+    public void testFlowWhenClaimsMatchingWithTickFalseWithoutRegex() throws Exception {
+
+        Map<String, String> jwtTokenClaimsMap = new HashMap<>();
+        jwtTokenClaimsMap.put(AUT, APPLICATION);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.JWT_CLAIMS))
+                .thenReturn(jwtTokenClaimsMap);
+        String claimValueRegex = "";
+        mediator.setAccessVerificationClaim(AUT);
+        mediator.setAccessVerificationClaimValue(APPLICATION);
+        mediator.setAccessVerificationClaimValueRegex(claimValueRegex);
+        mediator.setShouldAllowValidation(false);
+        Assert.assertTrue(mediator.mediate(messageContext));
+    }
+
+    @Test
+    public void testFlowWhenClaimsNotMatchingWithTickTrueWithoutRegex() throws Exception {
+
+        Map<String, String> jwtTokenClaimsMap = new HashMap<>();
+        jwtTokenClaimsMap.put(AUT, APPLICATION);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.JWT_CLAIMS))
+                .thenReturn(jwtTokenClaimsMap);
+        String claimValueRegex = "";
+        mediator.setAccessVerificationClaim(AUT);
+        mediator.setAccessVerificationClaimValue(APPLICATION_USER);
+        mediator.setAccessVerificationClaimValueRegex(claimValueRegex);
+        mediator.setShouldAllowValidation(true);
         Assert.assertTrue(mediator.mediate(messageContext));
     }
 }

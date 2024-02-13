@@ -30,66 +30,76 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * This mediator checks the message context for a value of a pre-configured claim which should be sent in the
+ * This mediator checks for a value of a pre-configured claim which should be sent in the
  * JWT access token. This claim value is also configured in the policy which is uploaded to each API resource
  * in the API Manager publisher. For the mediator to return true, the claim name and the claim value sent in the JWT
- * access token must be identical to the configured claim name and the value. If one of those are not identical,
- * the mediator will return false and an error will be displayed to the client.
+ * access token must be identical to the configured claim name and the value. There is also an option to configure a
+ * so the claim values will be matched against that regex. If one of those are not identical,
+ * the mediator will return false. The value sent in the token claim must be equal or match with the optionally
+ * provided regex. If the "shouldAllowValidation" is true, the flow will be allowed if the claim values are matched. If
+ * it is false, the flow will be allowed if the claim values are not matched.
  */
 public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator {
 
     private static final Log log = LogFactory.getLog(ClaimBasedResourceAccessValidationMediator.class);
+    private String accessVerificationClaim;
+    private String accessVerificationClaimValue;
+    private String accessVerificationClaimValueRegex;
+    private boolean shouldAllowValidation;
+    public static final String CLAIMS_MISMATCH_ERROR_MSG = "Configured claim and claim " +
+            "sent in token do not match.";
 
     @Override
     public boolean mediate(MessageContext messageContext) {
 
-        boolean shouldAllowValidation = Boolean.parseBoolean((String) messageContext.getProperty(APIMgtGatewayConstants
-                .SHOULD_ALLOW_ACCESS_VALIDATION));
+        String claimValueSentInToken;
+        Map<String, String> jwtTokenClaims = (Map<String, String>) messageContext
+                .getProperty(APIMgtGatewayConstants.JWT_CLAIMS);
 
-        if (shouldAllowValidation) {
+        claimValueSentInToken = jwtTokenClaims.get(accessVerificationClaim);
 
-            log.debug("Policy allows claim based resource access validation.");
-            String configuredClaim = (String) messageContext.getProperty(APIMgtGatewayConstants
-                    .ACCESS_GRANT_CLAIM_NAME);
-            String configuredClaimValue = (String) messageContext.getProperty(APIMgtGatewayConstants
-                    .ACCESS_GRANT_CLAIM_VALUE);
-            Map<String, String> jwtTokenClaims = (Map<String, String>) messageContext
-                    .getProperty(APIMgtGatewayConstants.JWT_CLAIMS);
+        if (StringUtils.isBlank(claimValueSentInToken)) {
+            log.error("The configured resource access validation claim is " +
+                    "not present in the token.");
+            handleFailure(HttpStatus.SC_FORBIDDEN, messageContext, String.format("Token doesn't contain the " +
+                    "claim \"%s\"", accessVerificationClaim), null);
+            return false;
+        }
 
-            String claimValueSentInToken;
-            claimValueSentInToken = jwtTokenClaims.get(configuredClaim);
+        if (StringUtils.isNotBlank(accessVerificationClaimValueRegex)) {
+            log.debug("A regex is provided, hence, validating the claim values using the provided regex.");
+            Pattern pattern = Pattern.compile(accessVerificationClaimValueRegex);
+            Matcher configuredClaimValueMatcher = pattern.matcher(accessVerificationClaimValue);
+            Matcher tokenSentClaimValueMatcher = pattern.matcher(claimValueSentInToken);
 
-            if (StringUtils.isBlank(claimValueSentInToken)) {
-                String errorMsg = "The configured resource access validation claim is " +
-                        "different form the claim sent in the token or vice versa.";
-                log.error(errorMsg);
-                handleFailure(HttpStatus.SC_UNAUTHORIZED, messageContext, errorMsg, null);
-                return false;
-            }
-
-            if (StringUtils.equals(configuredClaimValue, claimValueSentInToken)) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("The configured claim value \"%s\" matches with  the " +
-                            "claim sent in token\"%s\".", configuredClaim, claimValueSentInToken));
-                }
+            if ((configuredClaimValueMatcher.matches() && tokenSentClaimValueMatcher.matches())
+                    || (!(configuredClaimValueMatcher.matches() && tokenSentClaimValueMatcher.matches())
+                    && shouldAllowValidation)) {
+                log.debug("Claim values match or the flow is configured to allow when claims doesn't match. " +
+                        "Hence the flow is allowed.");
                 return true;
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("The configured claim value \"%s\" doesn't matche with  the " +
-                            "claim sent in token\"%s\".", configuredClaim, claimValueSentInToken));
-                }
-                String errorMsg = String.format("Configured claim value (%s) and claim value sent in token (%s) " +
-                                "doesn't match. The claims must match to access the resource \"%s\"", configuredClaim,
-                        claimValueSentInToken, messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE));
-                log.error(errorMsg);
-                handleFailure(HttpStatus.SC_UNAUTHORIZED, messageContext, errorMsg, null);
+                log.debug("Claim values don't match. Hence the flow is not allowed.");
+                handleFailure(HttpStatus.SC_FORBIDDEN, messageContext, CLAIMS_MISMATCH_ERROR_MSG, null);
                 return false;
             }
         } else {
-            log.debug("Policy is configured not to allow claim based resource access validation.");
-            return true;
+            log.debug("A regex is not provided, validating the claim values based on equality.");
+            if ((StringUtils.equals(accessVerificationClaimValue, claimValueSentInToken))
+                    || (!(StringUtils.equals(accessVerificationClaimValue, claimValueSentInToken))
+                    && shouldAllowValidation)) {
+                log.debug("Claim values match or the flow is configured to allow when claims doesn't match. " +
+                        "Hence the flow is allowed.");
+                return true;
+            } else {
+                log.debug("Claim values don't match. Hence the flow is not allowed.");
+                handleFailure(HttpStatus.SC_FORBIDDEN, messageContext, CLAIMS_MISMATCH_ERROR_MSG, null);
+                return false;
+            }
         }
     }
 
@@ -112,5 +122,21 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
             return;
         }
         Utils.sendFault(messageContext, errorCode);
+    }
+
+    public void setAccessVerificationClaim(String accessVerificationClaim) {
+        this.accessVerificationClaim = accessVerificationClaim;
+    }
+
+    public void setAccessVerificationClaimValue(String accessVerificationClaimValue) {
+        this.accessVerificationClaimValue = accessVerificationClaimValue;
+    }
+
+    public void setShouldAllowValidation(boolean shouldAllowValidation) {
+        this.shouldAllowValidation = shouldAllowValidation;
+    }
+
+    public void setAccessVerificationClaimValueRegex(String accessVerificationClaimValueRegex) {
+        this.accessVerificationClaimValueRegex = accessVerificationClaimValueRegex;
     }
 }
