@@ -2938,8 +2938,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             String applicationName = application.getName();
             if (!APIUtil.isApplicationOwnedBySubscriber(userId, applicationName, organization)) {
                 for (APIKey apiKey : application.getKeys()) {
-                    KeyManager keyManager =
-                            KeyManagerHolder.getKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
+                    KeyManager keyManager = KeyManagerHolder.getTenantKeyManagerInstance(
+                            APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN, apiKey.getKeyManager());
+                    if (keyManager != null) {
+                        // Prevent updating the OAuth app owner in the case of Global Key Manager.
+                        continue;
+                    } else {
+                        keyManager =
+                                KeyManagerHolder.getTenantKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
+                    }
                     /* retrieving OAuth application information for specific consumer key */
                     consumerKey = apiKey.getConsumerKey();
                     OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);

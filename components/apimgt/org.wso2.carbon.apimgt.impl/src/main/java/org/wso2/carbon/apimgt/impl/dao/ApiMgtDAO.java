@@ -9313,7 +9313,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE ORGANIZATION = ? ";
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE ORGANIZATION IN (?)";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
@@ -9327,7 +9327,7 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                    keyManagerConfigurationDTO.setOrganization(organization);
+                    keyManagerConfigurationDTO.setOrganization(resultSet.getString("ORGANIZATION"));
                     keyManagerConfigurationDTO.setTokenType(resultSet.getString("TOKEN_TYPE"));
                     keyManagerConfigurationDTO.setExternalReferenceId(resultSet.getString("EXTERNAL_REFERENCE_ID"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {

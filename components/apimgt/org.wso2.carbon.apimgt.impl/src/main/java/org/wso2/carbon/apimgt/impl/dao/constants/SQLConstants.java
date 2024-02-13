@@ -94,7 +94,8 @@ public class SQLConstants {
 
     public static final String GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL =
             " SELECT " +
-                    "   API.API_ID " +
+                    "   API.API_ID, " +
+                    "   API.API_PROVIDER " +
                     " FROM " +
                     "   AM_SUBSCRIBER SUB," +
                     "   AM_APPLICATION APP, " +

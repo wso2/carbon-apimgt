@@ -49,6 +49,8 @@ public class KeyManagerMappingUtil {
         keyManagerInfoDTO.setDescription(keyManagerConfigurationDTO.getDescription());
         keyManagerInfoDTO.setType(keyManagerConfigurationDTO.getType());
         keyManagerInfoDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
+        keyManagerInfoDTO.setIsGlobal(
+                keyManagerConfigurationDTO.getOrganization().equals(APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN));
         keyManagerInfoDTO.setTokenType(KeyManagerInfoDTO.TokenTypeEnum.
                 fromValue(keyManagerConfigurationDTO.getTokenType()));
         return keyManagerInfoDTO;
@@ -64,6 +66,8 @@ public class KeyManagerMappingUtil {
         keyManagerDTO.setDescription(keyManagerConfigurationDTO.getDescription());
         keyManagerDTO.setType(keyManagerConfigurationDTO.getType());
         keyManagerDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
+        keyManagerDTO.setGlobal(
+                keyManagerConfigurationDTO.getOrganization().equals(APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN));
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.valueOf(keyManagerConfigurationDTO.getTokenType()));
         keyManagerDTO.setAlias(keyManagerConfigurationDTO.getAlias());
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.fromValue(keyManagerConfigurationDTO.getTokenType()));

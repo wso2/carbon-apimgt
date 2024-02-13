@@ -103,6 +103,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private UserClient userClient;
     private RevokeClient revokeClient;
 
+    private Boolean kmAdminAsAppOwner = false;
+
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
         // OAuthApplications are created by calling to APIKeyMgtSubscriber Service
@@ -139,6 +141,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String[] tokenScopes = new String[1];
         tokenScopes[0] = tokenScope;
+
+        if (kmAdminAsAppOwner) {
+            overrideKMAdminAsAppOwnerProperties(oauthAppRequest);
+        }
 
         ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, false);
         ClientInfo createdClient;
@@ -375,6 +381,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         if (log.isDebugEnabled() && applicationName != null) {
             log.debug("Client Name : " + oauthClientName);
+        }
+
+        if (kmAdminAsAppOwner) {
+            overrideKMAdminAsAppOwnerProperties(appInfoDTO);
         }
 
         ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, true);
@@ -659,6 +669,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String password = (String) configuration.getParameter(APIConstants.KEY_MANAGER_PASSWORD);
         String keyManagerServiceUrl = (String) configuration.getParameter(APIConstants.AUTHSERVER_URL);
 
+        Object kmAdminAsAppOwnerParameter = configuration.getParameter(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER);
+        if (kmAdminAsAppOwnerParameter != null) {
+            kmAdminAsAppOwner = (boolean) kmAdminAsAppOwnerParameter;
+        }
+
         String dcrEndpoint;
         if (configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT) != null) {
             dcrEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
@@ -707,15 +722,50 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                             (APIConstants.KeyManager.KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT);
         }
 
-        dcrClient = Feign.builder()
+        Feign.Builder dcrFeignBuilder = Feign.builder()
                 .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(dcrEndpoint)))
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
                 .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
+                .errorDecoder(new KMClientErrorDecoder());
+
+        Feign.Builder introspectionFeignBuilder = Feign.builder()
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(introspectionEndpoint)))
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
                 .errorDecoder(new KMClientErrorDecoder())
-                .target(DCRClient.class, dcrEndpoint);
+                .encoder(new FormEncoder());
+
+        Feign.Builder scopeFeignBuilder = Feign.builder()
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(scopeEndpoint)))
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .errorDecoder(new KMClientErrorDecoder());
+
+        Feign.Builder userFeignBuilder = Feign.builder()
+                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(userInfoEndpoint)))
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .logger(new Slf4jLogger())
+                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .errorDecoder(new KMClientErrorDecoder());
+
+        if (configuration.getParameter(APIConstants.KEY_MANAGER_TENANT_DOMAIN) != null) {
+            dcrFeignBuilder.requestInterceptor(new TenantHeaderInterceptor(tenantDomain));
+            introspectionFeignBuilder.requestInterceptor(new TenantHeaderInterceptor(tenantDomain));
+            scopeFeignBuilder.requestInterceptor(new TenantHeaderInterceptor(tenantDomain));
+            userFeignBuilder.requestInterceptor(new TenantHeaderInterceptor(tenantDomain));
+        }
+
+        dcrClient = dcrFeignBuilder.target(DCRClient.class, dcrEndpoint);
+        introspectionClient = introspectionFeignBuilder.target(IntrospectionClient.class, introspectionEndpoint);
+        scopeClient = scopeFeignBuilder.target(ScopeClient.class, scopeEndpoint);
+        userClient = userFeignBuilder.target(UserClient.class, userInfoEndpoint);
         authClient = Feign.builder()
                 .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(tokenEndpoint)))
                 .encoder(new GsonEncoder())
@@ -1293,5 +1343,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 }
             }
         }
+    }
+
+    /**
+     * Override the OAuth app username with the KM admin username and tenant domain
+     * with the KM admin user's tenant domain
+     */
+    private void overrideKMAdminAsAppOwnerProperties(OAuthAppRequest oauthAppRequest) {
+        String kmAdminUsername = this.getConfigurationParamValue(APIConstants.KEY_MANAGER_USERNAME);
+        OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
+        oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, kmAdminUsername);
+        String kmAdminTenantDomain = MultitenantUtils.getTenantDomain(kmAdminUsername);
+        this.setTenantDomain(kmAdminTenantDomain);
     }
 }
