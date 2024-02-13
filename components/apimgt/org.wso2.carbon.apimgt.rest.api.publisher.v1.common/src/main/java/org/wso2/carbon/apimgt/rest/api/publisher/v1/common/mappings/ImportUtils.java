@@ -380,7 +380,7 @@ public class ImportUtils {
             }
             List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
                     tenantDomain, apiProvider, organization);
-            if (apiRevisionDeployments.size() > 0) {
+            if (apiRevisionDeployments.size() > 0 && !StringUtils.equals(currentStatus, APIStatus.RETIRED.toString())) {
                 String importedAPIUuid = importedApi.getUuid();
                 String revisionId;
                 APIRevision apiRevision = new APIRevision();
