@@ -2103,7 +2103,8 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>4.0.0-wso2v77</synapse.version>
+        <synapse.version>4.0.0-wso2v82</synapse.version>
+
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
         <!-- orbit httpmime versions-->
@@ -2141,7 +2142,7 @@
         <httpcomponents.version>4.5.10</httpcomponents.version>
         <commons-codec.version>1.14</commons-codec.version>
         <com.nimbusds.wso2.version>7.9.0.wso2v1</com.nimbusds.wso2.version>
-        <json-smart.version>2.4.11</json-smart.version>
+        <json-smart.version>2.5.0</json-smart.version>
         <org.apache.velocity.version>2.3</org.apache.velocity.version>
         <org.slf4j.version>1.7.0</org.slf4j.version>
         <slf4j.api.version>1.7.29</slf4j.api.version>
@@ -2235,7 +2236,7 @@
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
         <aspectj.version>1.9.4</aspectj.version>
         <wso2.securevault.version>1.1.3</wso2.securevault.version>
-        <com.jayway.jsonpath.version>2.6.0.wso2v2</com.jayway.jsonpath.version>
+        <com.jayway.jsonpath.version>2.9.0.wso2v1</com.jayway.jsonpath.version>
         <org.wso2.orbit.commons-text.version>1.10.0.wso2v2</org.wso2.orbit.commons-text.version>
         <commons.lang.version>2.6.0.wso2v1</commons.lang.version>
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
