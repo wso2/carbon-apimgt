@@ -4340,6 +4340,10 @@ components:
         provider:
           type: string
           example: wso2
+        type:
+          type: string
+          default: hybrid
+          example: hybrid
         gatewayType:
           type: string
           example: Regular

@@ -28,7 +28,7 @@ public class EnvironmentDTO   {
     private String id = null;
     private String name = null;
     private String displayName = null;
-    private String type = null;
+    private String type = "hybrid";
     private String gatewayType = "Regular";
     private String serverUrl = null;
     private String provider = null;

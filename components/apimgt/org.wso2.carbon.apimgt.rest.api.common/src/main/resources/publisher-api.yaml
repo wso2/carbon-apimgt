@@ -10723,6 +10723,7 @@ components:
           example: Default
         type:
           type: string
+          default: hybrid
           example: hybrid
         gatewayType:
           type: string
