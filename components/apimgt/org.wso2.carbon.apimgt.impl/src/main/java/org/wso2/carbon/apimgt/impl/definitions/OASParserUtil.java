@@ -50,6 +50,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -143,6 +144,7 @@ public class OASParserUtil {
     private static final String PARAMETERS = "parameters";
     private static final String RESPONSES = "responses";
     private static final String HEADERS = "headers";
+    private static final String EXAMPLES = "examples";
 
     private static final String REF_PREFIX = "#/components/";
     private static final String ARRAY_DATA_TYPE = "array";
@@ -162,6 +164,7 @@ public class OASParserUtil {
             referenceObjectMap.put(PARAMETERS, new HashSet<>());
             referenceObjectMap.put(RESPONSES, new HashSet<>());
             referenceObjectMap.put(HEADERS, new HashSet<>());
+            referenceObjectMap.put(EXAMPLES, new HashSet<>());
         }
 
 
@@ -382,6 +385,19 @@ public class OASParserUtil {
                             Header header = headers.get(refKey);
                             if (header != null) {
                                 components.addHeaders(refKey, header);
+                            }
+                        }
+                    }
+                }
+
+                if (EXAMPLES.equalsIgnoreCase(category)) {
+                    Map<String, Example> examples = sourceComponents.getExamples();
+
+                    if (examples != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Example example = examples.get(refKey);
+                            if (example != null) {
+                                components.addExamples(refKey, example);
                             }
                         }
                     }
@@ -674,6 +690,17 @@ public class OASParserUtil {
                 Schema schema = mediaType.getSchema();
 
                 extractReferenceFromSchema(schema, context);
+
+                Map<String, Example> examples = mediaType.getExamples();
+                if (examples != null) {
+                    for (Map.Entry<String, Example> exampleEntry : examples.entrySet()) {
+                        Example exampleValue = exampleEntry.getValue();
+                        String ref = exampleValue.get$ref();
+                        if (ref != null) {
+                            addToReferenceObjectMap(ref, context);
+                        }
+                    }
+                }
             }
         }
     }
