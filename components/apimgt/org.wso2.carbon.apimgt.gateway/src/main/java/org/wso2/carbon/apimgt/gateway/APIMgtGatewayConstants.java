@@ -47,6 +47,7 @@ public class APIMgtGatewayConstants {
     public static final String REVOKED_ACCESS_TOKEN = "RevokedAccessToken";
     public static final String DEACTIVATED_ACCESS_TOKEN = "DeactivatedAccessToken";
     public static final String SCOPES = "Scopes";
+    public static final String JWT_CLAIMS = "jwt_token_claims";
     public static final String REQUEST_EXECUTION_START_TIME = "request.execution.start.time";
     public static final String SYNAPSE_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
@@ -190,5 +191,8 @@ public class APIMgtGatewayConstants {
 
     //This will be a reserved name for the synapse message context properties.
     public static final String ADDITIONAL_ANALYTICS_PROPS = "ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH";
+    public static final String ACCESS_GRANT_CLAIM_NAME = "grantVerificationClaim";
+    public static final String ACCESS_GRANT_CLAIM_VALUE = "grantVerificationClaimValue";
+    public static final String SHOULD_ALLOW_ACCESS_VALIDATION = "shouldAllowValidation";
 }
 
