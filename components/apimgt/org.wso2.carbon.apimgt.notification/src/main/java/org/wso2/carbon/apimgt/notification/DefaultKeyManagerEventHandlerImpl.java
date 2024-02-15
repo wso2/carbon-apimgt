@@ -22,6 +22,8 @@ import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.notification.event.ConsumerAppRevocationEvent;
+import org.wso2.carbon.apimgt.notification.event.SubjectEntityRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
 
 import java.util.List;
@@ -35,7 +37,14 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
     @Override
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
 
-        if (StringUtils.isNotEmpty(event) && event.contains(APIConstants.NotificationEvent.TOKEN_REVOCATION_EVENT)) {
+        if (StringUtils.isNotEmpty(event)
+                && event.contains(APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT)) {
+            handleConsumerAppRevocationEvent(event);
+        } else if (StringUtils.isNotEmpty(event)
+                && event.contains(APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT)) {
+            handleSubjectEntityRevocationEvent(event);
+        } else if (StringUtils.isNotEmpty(event)
+                && event.contains(APIConstants.NotificationEvent.TOKEN_REVOCATION_EVENT)) {
             handleTokenRevocationEvent(event);
         }
         return true;
@@ -51,6 +60,21 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
 
         TokenRevocationEvent tokenRevocationEvent = new Gson().fromJson(event, TokenRevocationEvent.class);
         handleTokenRevocationEvent(tokenRevocationEvent);
+        return true;
+    }
+
+    private boolean handleConsumerAppRevocationEvent(String event) throws APIManagementException {
+
+        ConsumerAppRevocationEvent tokenRevocationEvent = new Gson().fromJson(event, ConsumerAppRevocationEvent.class);
+        handleConsumerAppRevocationEvent(tokenRevocationEvent);
+        return true;
+    }
+
+    private boolean handleSubjectEntityRevocationEvent(String event) throws APIManagementException {
+
+        SubjectEntityRevocationEvent tokenRevocationEvent =
+                new Gson().fromJson(event, SubjectEntityRevocationEvent.class);
+        handleSubjectEntityRevocationEvent(tokenRevocationEvent);
         return true;
     }
 }

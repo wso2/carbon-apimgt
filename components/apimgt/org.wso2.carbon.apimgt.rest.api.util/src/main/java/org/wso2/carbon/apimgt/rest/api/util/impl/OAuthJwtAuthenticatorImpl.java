@@ -69,11 +69,9 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     private boolean isRESTApiTokenCacheEnabled;
     private Map<String, TokenIssuerDto> tokenIssuers;
-    private java.util.Map<String, List<String>> audiencesMap;
 
     public OAuthJwtAuthenticatorImpl() {
         tokenIssuers = getTokenIssuers();
-        audiencesMap = getRestApiJWTAuthAudiences();
     }
 
     /**
@@ -228,71 +226,52 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
 
         if (StringUtils.isNotEmpty(issuer)) {
             //validate Issuer
-            List<String> tokenAudiences = signedJWTInfo.getJwtClaimsSet().getAudience();
             if (tokenIssuers != null && tokenIssuers.containsKey(issuer)) {
-                //validate audience
-                if (audiencesMap != null && audiencesMap.get(basePath.getPath()) != null &&
-                        tokenAudiences.stream().anyMatch(audiencesMap.get(basePath.getPath())::contains)) {
-                    if (isRESTApiTokenCacheEnabled) {
-                        JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) getRESTAPITokenCache().get(jti);
-                        if (tempJWTValidationInfo != null) {
-                            Boolean isExpired = checkTokenExpiration(new Date(tempJWTValidationInfo.getExpiryTime()));
-                            if (isExpired) {
-                                tempJWTValidationInfo.setValid(false);
-                                getRESTAPITokenCache().remove(jti);
-                                getRESTAPIInvalidTokenCache().put(jti, tempJWTValidationInfo);
-                                log.error("JWT token validation failed. Reason: Expired Token. " + maskedToken);
-                                return tempJWTValidationInfo;
-                            }
-                            //check accessToken
-                            if (!tempJWTValidationInfo.getRawPayload().equals(accessToken)) {
-                                tempJWTValidationInfo.setValid(false);
-                                getRESTAPITokenCache().remove(jti);
-                                getRESTAPIInvalidTokenCache().put(jti, tempJWTValidationInfo);
-                                log.error("JWT token validation failed. Reason: Invalid Token. " + maskedToken);
-                                return tempJWTValidationInfo;
-                            }
+                if (isRESTApiTokenCacheEnabled) {
+                    JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) getRESTAPITokenCache().get(jti);
+                    if (tempJWTValidationInfo != null) {
+                        boolean isExpired = checkTokenExpiration(new Date(tempJWTValidationInfo.getExpiryTime()));
+                        if (isExpired) {
+                            tempJWTValidationInfo.setValid(false);
+                            getRESTAPITokenCache().remove(jti);
+                            getRESTAPIInvalidTokenCache().put(jti, tempJWTValidationInfo);
+                            log.error("JWT token validation failed. Reason: Expired Token. " + maskedToken);
                             return tempJWTValidationInfo;
+                        }
+                        //check accessToken
+                        if (!tempJWTValidationInfo.getRawPayload().equals(accessToken)) {
+                            tempJWTValidationInfo.setValid(false);
+                            getRESTAPITokenCache().remove(jti);
+                            getRESTAPIInvalidTokenCache().put(jti, tempJWTValidationInfo);
+                            log.error("JWT token validation failed. Reason: Invalid Token. " + maskedToken);
+                            return tempJWTValidationInfo;
+                        }
+                        return tempJWTValidationInfo;
 
-                        } else if (getRESTAPIInvalidTokenCache().get(jti) != null) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Token retrieved from the invalid token cache. Token: " + maskedToken);
-                            }
-                            return (JWTValidationInfo) getRESTAPIInvalidTokenCache().get(jti);
+                    } else if (getRESTAPIInvalidTokenCache().get(jti) != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Token retrieved from the invalid token cache. Token: " + maskedToken);
                         }
+                        return (JWTValidationInfo) getRESTAPIInvalidTokenCache().get(jti);
                     }
-                    //info not in cache. validate signature and exp
-                    JWTValidator jwtValidator = APIMConfigUtil.getJWTValidatorMap().get(issuer);
-                    jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
-                    if (jwtValidationInfo.isValid()) {
-                        //valid token
-                        if (isRESTApiTokenCacheEnabled) {
-                            getRESTAPITokenCache().put(jti, jwtValidationInfo);
-                        }
-                    } else {
-                        //put in invalid cache
-                        if (isRESTApiTokenCacheEnabled) {
-                            getRESTAPIInvalidTokenCache().put(jti, jwtValidationInfo);
-                        }
-                        //invalid credentials : 900901 error code
-                        log.error("JWT token validation failed. Reason: Invalid Credentials. " +
-                                "Make sure you have provided the correct security credentials in the token :"
-                                + maskedToken);
+                }
+                //info not in cache. validate signature and exp
+                JWTValidator jwtValidator = APIMConfigUtil.getJWTValidatorMap().get(issuer);
+                jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+                if (jwtValidationInfo.isValid()) {
+                    //valid token
+                    if (isRESTApiTokenCacheEnabled) {
+                        getRESTAPITokenCache().put(jti, jwtValidationInfo);
                     }
                 } else {
-                    if (audiencesMap == null) {
-                        log.error("JWT token audience validation failed. Reason: No audiences registered " +
-                                "in the server");
-                    } else if (audiencesMap.get(basePath.getPath()) == null) {
-                        log.error("JWT token audience validation failed. Reason: No audiences registered " +
-                                "in the server for the base path (" + basePath.getPath() + ")");
-                    } else {
-                        log.error("JWT token audience validation failed. Reason: None of the aud present "
-                                + "in the JWT (" + tokenAudiences.toString() +
-                                ") matches the intended audience (" + audiencesMap.get(basePath.getPath())
-                                .toString() + ") for base path ( " + basePath.getPath() +  " ).");
+                    //put in invalid cache
+                    if (isRESTApiTokenCacheEnabled) {
+                        getRESTAPIInvalidTokenCache().put(jti, jwtValidationInfo);
                     }
-                    return null;
+                    //invalid credentials : 900901 error code
+                    log.error("JWT token validation failed. Reason: Invalid Credentials. " +
+                            "Make sure you have provided the correct security credentials in the token :"
+                            + maskedToken);
                 }
             } else {
                 //invalid issuer. invalid token

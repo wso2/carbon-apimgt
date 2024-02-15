@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -65,7 +66,7 @@ import java.security.cert.X509Certificate;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({JWTValidator.class, GatewayUtils.class, MultitenantUtils.class, PrivilegedCarbonContext.class,
-        ServiceReferenceHolder.class, CertificateMgtUtils.class})
+        ServiceReferenceHolder.class, CertificateMgtUtils.class, RevokedJWTDataHolder.class})
 public class JWTValidatorTest {
 
     private static String PASSWORD = "wso2carbon";
@@ -79,6 +80,9 @@ public class JWTValidatorTest {
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(RevokedJWTDataHolder.class);
+        PowerMockito.when(RevokedJWTDataHolder.getInstance())
+                .thenReturn(PowerMockito.mock(RevokedJWTDataHolder.class));
         privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);

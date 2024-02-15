@@ -28,17 +28,22 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.internal.service.dto.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.IPLevelDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.RevokedEventsDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTConsumerKeyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTSubjectEntityDTO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 /**
  * Database utility to retrieve allow list,keyTemplates and Revoked Tokens.
@@ -183,10 +188,10 @@ public final class BlockConditionDBUtil {
      *
      * @return list fo revoked JWTs
      */
-    public static RevokedJWTListDTO getRevokedJWTs() {
+    public static List<RevokedJWTDTO> getRevokedJWTs() {
 
-        RevokedJWTListDTO revokedJWTListDTO = new RevokedJWTListDTO();
-        String sqlQuery = "SELECT SIGNATURE,EXPIRY_TIMESTAMP FROM AM_REVOKED_JWT";
+        List<RevokedJWTDTO> revokedJWTListDTO = new ArrayList<>();
+        String sqlQuery = "SELECT SIGNATURE, EXPIRY_TIMESTAMP FROM AM_REVOKED_JWT";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sqlQuery);) {
             try (ResultSet rs = ps.executeQuery()) {
@@ -203,5 +208,83 @@ public final class BlockConditionDBUtil {
             log.error("Error while fetching revoked JWTs from database. ", e);
         }
         return revokedJWTListDTO;
+    }
+
+    /**
+     * Fetches all consumer keys for revoked JWTs from DB.
+     *
+     * @return list of consumer keys for revoked JWTs
+     */
+    public static List<RevokedJWTConsumerKeyDTO> getRevokedJWTConsumerKeys() {
+
+        List<RevokedJWTConsumerKeyDTO> revokedJWTConsumerKeyListDTO = new ArrayList<>();
+        String sqlQuery = "SELECT CONSUMER_KEY, TIME_REVOKED, ORGANIZATION FROM AM_APP_REVOKED_EVENT";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String consumerKey = rs.getString("CONSUMER_KEY");
+                    Timestamp revocationTime = rs.getTimestamp("TIME_REVOKED",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                    String organization = rs.getString("ORGANIZATION");
+                    RevokedJWTConsumerKeyDTO revokedJWTConsumerKeyDTO = new RevokedJWTConsumerKeyDTO();
+                    revokedJWTConsumerKeyDTO.setConsumerKey(consumerKey);
+                    revokedJWTConsumerKeyDTO.setRevocationTime(revocationTime.getTime());
+                    revokedJWTConsumerKeyDTO.setOrganization(organization);
+                    revokedJWTConsumerKeyListDTO.add(revokedJWTConsumerKeyDTO);
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while fetching revoked JWTs from database. ", e);
+        }
+        return revokedJWTConsumerKeyListDTO;
+    }
+
+    /**
+     * Fetches all users for revoked JWTs from DB.
+     *
+     * @return list of users for revoked JWTs
+     */
+    public static List<RevokedJWTSubjectEntityDTO> getRevokedJWTSubjectEntities() {
+
+        List<RevokedJWTSubjectEntityDTO> revokedJWTUserListDTO = new ArrayList<>();
+        String sqlQuery = "SELECT ENTITY_ID, ENTITY_TYPE, TIME_REVOKED, ORGANIZATION "
+                + "FROM AM_SUBJECT_ENTITY_REVOKED_EVENT";
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String subjectId = rs.getString("ENTITY_ID");
+                    String subjectIdType = rs.getString("ENTITY_TYPE");
+                    Timestamp revocationTime = rs.getTimestamp("TIME_REVOKED",
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                    String organization = rs.getString("ORGANIZATION");
+                    RevokedJWTSubjectEntityDTO revokedJWTUserDTO = new RevokedJWTSubjectEntityDTO();
+                    revokedJWTUserDTO.setEntityId(subjectId);
+                    revokedJWTUserDTO.setEntityType(subjectIdType);
+                    revokedJWTUserDTO.setRevocationTime(revocationTime.getTime());
+                    revokedJWTUserDTO.setOrganization(organization);
+                    revokedJWTUserListDTO.add(revokedJWTUserDTO);
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while fetching revoked JWTs from database. ", e);
+        }
+        return revokedJWTUserListDTO;
+    }
+
+    /**
+     * Retrieves JWT event data related to all revoked events including direct JWT revocations, indirect user event
+     * changes and application changes.
+     *
+     * @return RevokedEventsDTO    revoked event list
+     */
+    public static RevokedEventsDTO getRevokedJWTEvents() {
+
+        RevokedEventsDTO revokedEventsDTO = new RevokedEventsDTO();
+        revokedEventsDTO.setRevokedJWTList(getRevokedJWTs());
+        revokedEventsDTO.setRevokedJWTConsumerKeyList(getRevokedJWTConsumerKeys());
+        revokedEventsDTO.setRevokedJWTSubjectEntityList(getRevokedJWTSubjectEntities());
+        return revokedEventsDTO;
     }
 }

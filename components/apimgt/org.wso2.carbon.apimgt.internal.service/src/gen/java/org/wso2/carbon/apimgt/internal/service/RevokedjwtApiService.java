@@ -10,7 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.RevokedJWTListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.RevokedEventsDTO;
 
 import java.util.List;
 

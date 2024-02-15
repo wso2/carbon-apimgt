@@ -159,6 +159,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -21432,6 +21433,113 @@ public class ApiMgtDAO {
                 connection.prepareStatement(SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_METADATA)) {
             preparedStatement.setString(1, policyMappingUUID);
             preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * Persist revoked jwt users to database.
+     *
+     * @param subjectId      User id or the client id of the JWT.
+     * @param subjectIdType  Subject id type. Used to identify if the user id or the client id of the JWT.
+     * @param revocationTime revocation time of the token.
+     * @param organization   organization of the user
+     * @throws APIManagementException If an error occurs while adding subject entity revoked event.
+     */
+    public void addRevokedSubjectEntity(String subjectId, String subjectIdType,
+                                        long revocationTime, String organization) throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            String updateQuery = SQLConstants.RevokedJWTConstants.UPDATE_SUBJECT_ENTITY_REVOKED_EVENT;
+            try (PreparedStatement ps = conn.prepareStatement(updateQuery)) {
+                ps.setTimestamp(1, new Timestamp(revocationTime),
+                        Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                ps.setString(2, subjectId);
+                ps.setString(3, subjectIdType);
+                ps.setString(4, organization);
+                int rowsAffected = ps.executeUpdate();
+                if (rowsAffected == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("User event token revocation rule not found. Inserting new rule.");
+                    }
+                    conn.rollback();
+                    String insertQuery = SQLConstants.RevokedJWTConstants.INSERT_SUBJECT_ENTITY_REVOKED_EVENT;
+                    try (PreparedStatement ps1 = conn.prepareStatement(insertQuery)) {
+                        ps1.setString(1, subjectId);
+                        ps1.setString(2, subjectIdType);
+                        ps1.setTimestamp(3, new Timestamp(revocationTime));
+                        ps1.setString(4, organization);
+                        ps1.execute();
+                        conn.commit();
+                    } catch (SQLIntegrityConstraintViolationException e) {
+                        log.warn("User event token revocation rule already persisted");
+                        conn.rollback();
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("User event token revocation rule updated.");
+                    }
+                    conn.commit();
+                }
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Error while inserting user event token revocation rule to AM db." + e.getMessage(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while inserting user event token revocation rule to AM db." + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Persist revoked jwt consumer keys to  database.
+     *
+     * @param consumerKey    consumer key of the JWT.
+     * @param revocationTime revocation time of the token.
+     * @param organization   organization of the consumer key.
+     * @throws APIManagementException If an error occurs while adding consumer app revoked event.
+     */
+    public void addRevokedConsumerKey(String consumerKey, long revocationTime, String organization)
+            throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            String updateQuery = SQLConstants.RevokedJWTConstants.UPDATE_APP_REVOKED_EVENT;
+            try (PreparedStatement ps = conn.prepareStatement(updateQuery)) {
+                ps.setTimestamp(1, new Timestamp(revocationTime),
+                        Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                ps.setString(2, consumerKey);
+                ps.setString(3, organization);
+                int rowsAffected = ps.executeUpdate();
+                if (rowsAffected == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Consumer key event token revocation rule not found. Inserting new rule.");
+                    }
+                    conn.rollback();
+                    String insertQuery = SQLConstants.RevokedJWTConstants.INSERT_APP_REVOKED_EVENT;
+                    try (PreparedStatement ps1 = conn.prepareStatement(insertQuery)) {
+                        ps1.setString(1, consumerKey);
+                        ps1.setTimestamp(2, new Timestamp(revocationTime),
+                                Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                        ps1.setString(3, organization);
+                        ps1.execute();
+                    } catch (SQLIntegrityConstraintViolationException e) {
+                        log.warn("Consumer key event token revocation rule already persisted");
+                        conn.rollback();
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Consumer key event token revocation rule updated.");
+                    }
+                    conn.commit();
+                }
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Error while inserting consumer key event token revocation rule to AM db." +
+                        e.getMessage(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while inserting consumer key event token revocation rule to AM db."
+                    + e.getMessage(), e);
         }
     }
 }
