@@ -58,7 +58,11 @@ public class RuntimeArtifactGeneratorUtil {
                 ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
         if (gatewayArtifactGenerator != null) {
             List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
-            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+            if (gatewayArtifacts != null && !gatewayArtifacts.isEmpty()) {
+                return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+            } else {
+                return null;
+            }
         } else {
             Set<String> gatewayArtifactGeneratorTypes =
                     ServiceReferenceHolder.getInstance().getGatewayArtifactGeneratorTypes();
@@ -88,6 +92,7 @@ public class RuntimeArtifactGeneratorUtil {
 
     public static RuntimeArtifactDto generateMetadataArtifact(String tenantDomain, String apiId, String gatewayLabel)
             throws APIManagementException {
+
         List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
         if (gatewayArtifacts != null) {
 
@@ -193,6 +198,7 @@ public class RuntimeArtifactGeneratorUtil {
 
     private static List<APIRuntimeArtifactDto> getRuntimeArtifacts(String apiId, String gatewayLabel,
                                                                    String tenantDomain) throws APIManagementException {
+
         List<APIRuntimeArtifactDto> gatewayArtifacts;
         if (StringUtils.isNotEmpty(gatewayLabel)) {
             byte[] decodedValue = Base64.decodeBase64(gatewayLabel.getBytes());
@@ -220,6 +226,7 @@ public class RuntimeArtifactGeneratorUtil {
 
     private static List<APIRuntimeArtifactDto> getAllRuntimeArtifacts(String apiId, String gatewayLabel)
             throws APIManagementException {
+
         List<APIRuntimeArtifactDto> gatewayArtifacts;
         if (StringUtils.isNotEmpty(gatewayLabel)) {
             byte[] decodedValue = Base64.decodeBase64(gatewayLabel.getBytes());
