@@ -77,8 +77,7 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
             Matcher tokenSentClaimValueMatcher = pattern.matcher(claimValueSentInToken);
 
             if ((configuredClaimValueMatcher.matches() && tokenSentClaimValueMatcher.matches())
-                    || (!(configuredClaimValueMatcher.matches() && tokenSentClaimValueMatcher.matches())
-                    && shouldAllowValidation)) {
+                    || shouldAllowValidation) {
                 log.debug("Claim values match or the flow is configured to allow when claims doesn't match. " +
                         "Hence the flow is allowed.");
                 return true;
@@ -89,9 +88,7 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
             }
         } else {
             log.debug("A regex is not provided, validating the claim values based on equality.");
-            if ((StringUtils.equals(accessVerificationClaimValue, claimValueSentInToken))
-                    || (!(StringUtils.equals(accessVerificationClaimValue, claimValueSentInToken))
-                    && shouldAllowValidation)) {
+            if ((StringUtils.equals(accessVerificationClaimValue, claimValueSentInToken)) || shouldAllowValidation) {
                 log.debug("Claim values match or the flow is configured to allow when claims doesn't match. " +
                         "Hence the flow is allowed.");
                 return true;
