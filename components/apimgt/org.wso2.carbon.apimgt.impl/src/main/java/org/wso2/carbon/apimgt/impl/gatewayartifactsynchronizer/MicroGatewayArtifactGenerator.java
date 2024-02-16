@@ -62,7 +62,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             throws APIManagementException {
 
         try {
-            if (apiRuntimeArtifactDtoList != null || apiRuntimeArtifactDtoList.isEmpty()) {
+            if (apiRuntimeArtifactDtoList == null || apiRuntimeArtifactDtoList.isEmpty()) {
                 RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
                 runtimeArtifactDto.setFile(false);
                 runtimeArtifactDto.setArtifact(Collections.emptyList());
