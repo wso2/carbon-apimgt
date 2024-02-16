@@ -69,7 +69,7 @@
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.context.*;version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.core.*;version="${carbon.kernel.package.import.version.range}",
-                            org.wso2.carbon.event.output.adapter.core.*,
+                            org.wso2.carbon.event.output.adapter.core.*;version ="${carbon.analytics.common.version}",
                             org.wso2.carbon.utils.*;version="${carbon.kernel.package.import.version.range}",
                             *;resolution:=optional
                         </Import-Package>
