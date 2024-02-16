@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import javax.validation.constraints.*;
 
@@ -30,6 +31,7 @@ public class APIDTO   {
     private String status = null;
     private String organization = null;
     private Boolean isDefaultVersion = null;
+    private List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
     private String securityScheme = null;
 
@@ -232,6 +234,23 @@ public class APIDTO   {
 
   /**
    **/
+  public APIDTO apiPolicies(List<OperationPolicyDTO> apiPolicies) {
+    this.apiPolicies = apiPolicies;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiPolicies")
+  public List<OperationPolicyDTO> getApiPolicies() {
+    return apiPolicies;
+  }
+  public void setApiPolicies(List<OperationPolicyDTO> apiPolicies) {
+    this.apiPolicies = apiPolicies;
+  }
+
+  /**
+   **/
   public APIDTO urlMappings(List<URLMappingDTO> urlMappings) {
     this.urlMappings = urlMappings;
     return this;
@@ -286,13 +305,14 @@ public class APIDTO   {
         Objects.equals(status, API.status) &&
         Objects.equals(organization, API.organization) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
+        Objects.equals(apiPolicies, API.apiPolicies) &&
         Objects.equals(urlMappings, API.urlMappings) &&
         Objects.equals(securityScheme, API.securityScheme);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, urlMappings, securityScheme);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme);
   }
 
   @Override
@@ -311,6 +331,7 @@ public class APIDTO   {
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    organization: ").append(toIndentedString(organization)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    apiPolicies: ").append(toIndentedString(apiPolicies)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("}");

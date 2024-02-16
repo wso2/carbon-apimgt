@@ -28,6 +28,8 @@ public class FaultSubCategories {
         MEDIATION_ERROR,
         RESOURCE_NOT_FOUND,
         METHOD_NOT_ALLOWED,
+        INVALID_REQUEST_SCHEMA,
+        INVALID_RESPONSE_SCHEMA,
         UNCLASSIFIED
     }
 

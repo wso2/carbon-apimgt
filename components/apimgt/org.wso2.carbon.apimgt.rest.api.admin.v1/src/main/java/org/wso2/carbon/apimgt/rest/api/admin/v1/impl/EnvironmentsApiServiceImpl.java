@@ -14,6 +14,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.EnvironmentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -109,6 +110,13 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             APIAdmin apiAdmin = new APIAdminImpl();
             //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String gatewayType = body.getGatewayType();
+            if (!(APIConstants.API_GATEWAY_TYPE_REGULAR.equals(gatewayType) || APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType))) {
+                throw new APIManagementException("Invalid gateway type: " + gatewayType);
+            }
+            if (APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType) && hasUnsupportedVhostConfiguration(body.getVhosts())) {
+                throw new APIManagementException("Unsupported Vhost Configuration for gateway type: " + gatewayType);
+            }
             Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
             EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(apiAdmin.addEnvironment(organization, env));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + envDTO.getId());
@@ -120,5 +128,30 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * Check whether the vhost configuration is supported for APK gateway type
+     * @param vhosts
+     * @return boolean
+     */
+    private boolean hasUnsupportedVhostConfiguration(List<VHostDTO> vhosts) {
+        if (vhosts != null && !vhosts.isEmpty()) {
+            for (VHostDTO vhost : vhosts) {
+                if (hasUnsupportedConfiguration(vhost)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check whether the vhost configuration is supported for APK gateway type
+     * @param vhost
+     * @return boolean
+     */
+    private boolean hasUnsupportedConfiguration(VHostDTO vhost) {
+        return vhost.getWsHost() != null || vhost.getWssHost() != null || vhost.getWsPort() != null || vhost.getWssPort() != null;
     }
 }

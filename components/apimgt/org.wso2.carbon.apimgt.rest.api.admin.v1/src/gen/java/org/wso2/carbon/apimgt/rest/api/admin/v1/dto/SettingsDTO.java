@@ -24,6 +24,7 @@ import javax.validation.Valid;
 public class SettingsDTO   {
   
     private List<String> scopes = new ArrayList<String>();
+    private List<String> gatewayTypes = new ArrayList<String>();
     private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<SettingsKeyManagerConfigurationDTO>();
     private Boolean analyticsEnabled = null;
 
@@ -42,6 +43,23 @@ public class SettingsDTO   {
   }
   public void setScopes(List<String> scopes) {
     this.scopes = scopes;
+  }
+
+  /**
+   **/
+  public SettingsDTO gatewayTypes(List<String> gatewayTypes) {
+    this.gatewayTypes = gatewayTypes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("gatewayTypes")
+  public List<String> getGatewayTypes() {
+    return gatewayTypes;
+  }
+  public void setGatewayTypes(List<String> gatewayTypes) {
+    this.gatewayTypes = gatewayTypes;
   }
 
   /**
@@ -91,13 +109,14 @@ public class SettingsDTO   {
     }
     SettingsDTO settings = (SettingsDTO) o;
     return Objects.equals(scopes, settings.scopes) &&
+        Objects.equals(gatewayTypes, settings.gatewayTypes) &&
         Objects.equals(keyManagerConfiguration, settings.keyManagerConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, keyManagerConfiguration, analyticsEnabled);
+    return Objects.hash(scopes, gatewayTypes, keyManagerConfiguration, analyticsEnabled);
   }
 
   @Override
@@ -106,6 +125,7 @@ public class SettingsDTO   {
     sb.append("class SettingsDTO {\n");
     
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
     sb.append("    keyManagerConfiguration: ").append(toIndentedString(keyManagerConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("}");

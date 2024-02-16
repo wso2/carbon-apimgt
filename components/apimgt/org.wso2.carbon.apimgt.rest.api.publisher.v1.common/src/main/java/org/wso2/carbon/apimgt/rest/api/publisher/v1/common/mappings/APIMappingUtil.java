@@ -440,6 +440,10 @@ public class APIMappingUtil {
             model.setGatewayVendor(dto.getGatewayVendor());
         }
 
+        if (dto.getGatewayType() != null) {
+            model.setGatewayType(dto.getGatewayType());
+        }
+
         if (dto.getAsyncTransportProtocols() != null) {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);

@@ -36,7 +36,7 @@
 
   <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor">
     <property name="majorVersion" value="v1" />
-    <property name="latestVersion" value="v1.1" />
+    <property name="latestVersion" value="v1.2" />
   </bean>
   <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
   <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />

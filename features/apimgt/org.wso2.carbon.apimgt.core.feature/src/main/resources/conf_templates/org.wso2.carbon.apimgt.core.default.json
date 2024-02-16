@@ -19,7 +19,7 @@
   "database.mb.store_db.pool_options.defaultAutoCommit": "false",
   "apim.datasource.name": "jdbc/WSO2AM_DB",
   "apim.datasource_sync_runtime_artifacts.name": "jdbc/WSO2AS_DB",
-  "apim.gateway_type": "Synapse",
+  "apim.gateway_type": "Regular",
   "apim.enable_secure_vault": "false",
   "apim.jwt.enable": false,
   "apim.jwt.header": "X-JWT-Assertion",

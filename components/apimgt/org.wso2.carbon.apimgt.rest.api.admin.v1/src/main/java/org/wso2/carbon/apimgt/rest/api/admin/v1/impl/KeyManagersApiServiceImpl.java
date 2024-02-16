@@ -36,6 +36,8 @@ import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.core.Response;
 
+import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+
 public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     private static final Log log = LogFactory.getLog(KeyManagersApiServiceImpl.class);

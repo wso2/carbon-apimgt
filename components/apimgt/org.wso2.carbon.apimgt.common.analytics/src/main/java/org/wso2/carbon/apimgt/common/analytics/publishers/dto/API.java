@@ -17,6 +17,9 @@
 
 package org.wso2.carbon.apimgt.common.analytics.publishers.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Api attribute in analytics event.
  */
@@ -27,6 +30,8 @@ public class API {
     private String apiVersion;
     private String apiCreator;
     private String apiCreatorTenantDomain;
+    private List<URITemplate> uriTemplates = new ArrayList<>();
+    private List<OperationPolicy> apiPolicies = new ArrayList<>();
 
     public String getApiId() {
         return apiId;
@@ -74,5 +79,21 @@ public class API {
 
     public void setApiCreatorTenantDomain(String apiCreatorTenantDomain) {
         this.apiCreatorTenantDomain = apiCreatorTenantDomain;
+    }
+
+    public List<URITemplate> getUriTemplates() {
+        return new ArrayList(uriTemplates);
+    }
+
+    public void setUriTemplates(List<URITemplate> uriTemplates) {
+        this.uriTemplates = new ArrayList(uriTemplates);
+    }
+
+    public void setApiPolicies(List<OperationPolicy> apiPolicies) {
+        this.apiPolicies = new ArrayList(apiPolicies);
+    }
+
+    public List<OperationPolicy> getApiPolicies() {
+        return new ArrayList(apiPolicies);
     }
 }

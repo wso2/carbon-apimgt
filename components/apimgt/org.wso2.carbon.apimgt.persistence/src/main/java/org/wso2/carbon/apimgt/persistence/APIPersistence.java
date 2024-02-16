@@ -16,7 +16,9 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.persistence.dto.AdminContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
@@ -518,4 +520,9 @@ public interface APIPersistence {
      */
     Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException;
 
+    void changeApiProvider(String providerName, String apiId, String org) throws APIManagementException,
+            APIPersistenceException;
+
+    AdminContentSearchResult searchContentForAdmin(String org, String searchQuery, int start, int count,
+                                                          int limit) throws APIPersistenceException;
 }

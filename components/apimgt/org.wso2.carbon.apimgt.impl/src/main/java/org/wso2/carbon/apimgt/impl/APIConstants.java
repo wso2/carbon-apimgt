@@ -44,6 +44,8 @@ public final class APIConstants {
     //governance registry apimgt root location
     public static final String APIMGT_REGISTRY_LOCATION = "/apimgt";
 
+    public static final String POLICY_ENABLED_FOR_ANALYTICS = "policyEnabled";
+
     public static final String API_CONTEXT_ID = "api.context.id";
     //This is the resource name of API
     public static final String API_RESOURCE_NAME = "/api";
@@ -144,6 +146,10 @@ public final class APIConstants {
     public static final String SSL_VERIFY_CLIENT = "SSLVerifyClient";
 
     public static final String SSL_VERIFY_CLIENT_STATUS_REQUIRE = "require";
+
+    public static final String ADMIN_PORTAL_GET_APIS_QUERY = "name=\\*\"%s\"\\* AND" +
+            " mediaType:application\\/vnd.wso2\\-api\\+xml AND" +
+            " type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)";
 
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
@@ -705,6 +711,8 @@ public final class APIConstants {
     public static final String API_WEBSUB_GATEWAY_ENDPOINT = "GatewayWebSubEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String API_GATEWAY_TYPE_REGULAR = "Regular";
+    public static final String API_GATEWAY_TYPE_APK = "APK";
     public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
     public static final String API_GATEWAY_VIRTUAL_HOST = "VirtualHost";
     public static final String API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT = "HttpEndpoint";
@@ -760,6 +768,7 @@ public final class APIConstants {
     public static final String KEY_MANAGER = "KeyManager";
     public static final String KEY_MANAGER_USERNAME = "Username";
     public static final String KEY_MANAGER_PASSWORD = "Password";
+    public static final String KEY_MANAGER_TENANT_DOMAIN = "KeyManagerTenantDomain";
     public static final String AUTHSERVER_URL = "ServerURL";
     public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
@@ -1653,6 +1662,7 @@ public final class APIConstants {
     public static final String API_DATA_DEFAULT_THUMB = "images/api-default.png";
     public static final String API_DATA_APIS = "apis";
     public static final String API_DATA_TOT_LENGTH = "totalLength";
+    public static final String ADMIN_API_LIST_RESPONSE_PARAMS_TOTAL = "totalLength";
     public static final String API_DATA_LENGTH = "length";
     public static final String API_DATA_ISMORE = "isMore";
     public static final String API_DATA_PRODUCTION_ENDPOINTS = "production_endpoints";
@@ -2562,6 +2572,7 @@ public final class APIConstants {
         public static final String ENABLE = "Enable";
         public static final String USERNAME = "Username";
         public static final String PASSWORD = "Password";
+        public static final String KM_ADMIN_AS_APP_OWNER = "km_admin_as_app_owner";
         public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
         public static final String CLAIM_MAPPING = "claim_mappings";
         public static final String VALIDATION_TYPE = "validation_type";
@@ -3006,7 +3017,7 @@ public final class APIConstants {
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
-    public static final String WSO2_CHOREO_CONNECT_GATEWAY = "wso2/choreo-connect";
+    public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
 
     // Protocol variables
@@ -3047,6 +3058,8 @@ public final class APIConstants {
 
     public static final String CASE_SENSITIVE_CHECK_PATH =    "caseSensitiveRoleValidation";
     public static final String SOAP_TO_REST_PRESERVE_ELEMENT_ORDER = "soapToRestPreserveElementOrder";
+
+    public static final String GLOBAL_KEY_MANAGER_TENANT_DOMAIN = "WSO2/System";
 
     public static final String MIGRATE = "migrate";
     public static final String SWAGGER_RELAXED_VALIDATION = "swaggerRelaxedValidation";
