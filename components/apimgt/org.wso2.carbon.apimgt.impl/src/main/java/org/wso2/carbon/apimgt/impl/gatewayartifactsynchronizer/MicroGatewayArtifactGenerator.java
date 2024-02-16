@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
         service = GatewayArtifactGenerator.class
 )
 public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
+
     private static final EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDao =
             EnvironmentSpecificAPIPropertyDAO.getInstance();
 
@@ -60,6 +62,12 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             throws APIManagementException {
 
         try {
+            if (apiRuntimeArtifactDtoList != null || apiRuntimeArtifactDtoList.isEmpty()) {
+                RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
+                runtimeArtifactDto.setFile(false);
+                runtimeArtifactDto.setArtifact(Collections.emptyList());
+                return runtimeArtifactDto;
+            }
             DeploymentDescriptorDto descriptorDto = new DeploymentDescriptorDto();
             Map<String, ApiProjectDto> deploymentsMap = new HashMap<>();
 
@@ -68,7 +76,8 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
                 if (apiRuntimeArtifactDto.isFile()) {
                     InputStream artifact = (InputStream) apiRuntimeArtifactDto.getArtifact();
-                    String fileName = apiRuntimeArtifactDto.getApiId().concat("-").concat(apiRuntimeArtifactDto.getRevision())
+                    String fileName =
+                            apiRuntimeArtifactDto.getApiId().concat("-").concat(apiRuntimeArtifactDto.getRevision())
                             .concat(APIConstants.ZIP_FILE_EXTENSION);
                     Path path = Paths.get(tempDirectory.getAbsolutePath(), fileName);
                     FileUtils.copyInputStreamToFile(artifact, path.toFile());
@@ -81,7 +90,8 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         apiProjectDto.setEnvironments(new HashSet<>());
                         apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganization());
                     }
-                    Map<String, org.wso2.carbon.apimgt.api.model.Environment> environments = APIUtil.getEnvironments(apiRuntimeArtifactDto.getOrganization());
+                    Map<String, org.wso2.carbon.apimgt.api.model.Environment> environments =
+                            APIUtil.getEnvironments(apiRuntimeArtifactDto.getOrganization());
                     // environment is unique for a revision in a deployment
                     // create new environment
                     EnvironmentDto environment = new EnvironmentDto();
@@ -125,11 +135,13 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
     @Override
     public RuntimeArtifactDto generateGatewayPolicyArtifact(
             List<GatewayPolicyArtifactDto> gatewayPolicyArtifactDtoList) {
+
         return null;
     }
 
     private Map<String, Map<String, Environment>> getEnvironmentSpecificAPIProperties(
             List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList) throws APIManagementException {
+
         List<String> apiIds = apiRuntimeArtifactDtoList.stream()
                 .map(APIRuntimeArtifactDto::getApiId)
                 .collect(Collectors.toList());
