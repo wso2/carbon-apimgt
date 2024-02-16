@@ -657,6 +657,12 @@ public class ApisApiServiceImplUtils {
             apiToAdd.setServiceInfo("md5", service.getMd5());
             apiToAdd.setEndpointConfig(constructEndpointConfigForService(service
                     .getServiceUrl(), null));
+            if (APIConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE.equalsIgnoreCase(
+                    service.getSecurityType().toString())) {
+                apiToAdd.setApiSecurity(APIConstants.API_SECURITY_BASIC_AUTH);
+            } else {
+                apiToAdd.setApiSecurity(service.getSecurityType().toString());
+            }
         }
         APIDefinition apiDefinition = validationResponse.getParser();
         SwaggerData swaggerData;
