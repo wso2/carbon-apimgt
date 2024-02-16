@@ -58,11 +58,7 @@ public class RuntimeArtifactGeneratorUtil {
                 ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
         if (gatewayArtifactGenerator != null) {
             List<APIRuntimeArtifactDto> gatewayArtifacts = getRuntimeArtifacts(apiId, gatewayLabel, tenantDomain);
-            if (gatewayArtifacts != null && !gatewayArtifacts.isEmpty()) {
-                return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
-            } else {
-                return null;
-            }
+            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
         } else {
             Set<String> gatewayArtifactGeneratorTypes =
                     ServiceReferenceHolder.getInstance().getGatewayArtifactGeneratorTypes();
