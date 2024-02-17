@@ -7,7 +7,7 @@
  *   You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ 
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -191,6 +191,10 @@ public class APIMgtGatewayConstants {
 
     //This will be a reserved name for the synapse message context properties.
     public static final String ADDITIONAL_ANALYTICS_PROPS = "ADDITIONAL_ANALYTICS_PROPS_TO_PUBLISH";
+
+    public static final String AZP_JWT_CLAIM = "azp";
+    public static final String ENTITY_ID_JWT_CLAIM = "entity_id";
+
     public static final String ACCESS_GRANT_CLAIM_NAME = "grantVerificationClaim";
     public static final String ACCESS_GRANT_CLAIM_VALUE = "grantVerificationClaimValue";
     public static final String SHOULD_ALLOW_ACCESS_VALIDATION = "shouldAllowValidation";

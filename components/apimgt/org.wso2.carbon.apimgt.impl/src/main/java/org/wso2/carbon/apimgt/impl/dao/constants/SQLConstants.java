@@ -3431,7 +3431,21 @@ public class SQLConstants {
 
         public static final String ADD_JWT_SIGNATURE = "INSERT INTO AM_REVOKED_JWT (UUID, SIGNATURE," +
                 "EXPIRY_TIMESTAMP, TENANT_ID, TOKEN_TYPE) VALUES(?,?,?,?,?)";
+
+        public static final String INSERT_APP_REVOKED_EVENT = "INSERT INTO AM_APP_REVOKED_EVENT "
+                + "(CONSUMER_KEY, TIME_REVOKED, ORGANIZATION) VALUES (?, ?, ?)";
+
+        public static final String UPDATE_APP_REVOKED_EVENT = "UPDATE AM_APP_REVOKED_EVENT SET TIME_REVOKED = ? "
+                + "WHERE CONSUMER_KEY = ? AND ORGANIZATION = ?";
+
+        public static final String INSERT_SUBJECT_ENTITY_REVOKED_EVENT = "INSERT INTO AM_SUBJECT_ENTITY_REVOKED_EVENT "
+                + "(ENTITY_ID, ENTITY_TYPE, TIME_REVOKED, ORGANIZATION) VALUES (?, ?, ?, ?)";
+
+        public static final String UPDATE_SUBJECT_ENTITY_REVOKED_EVENT = "UPDATE AM_SUBJECT_ENTITY_REVOKED_EVENT "
+                + "SET TIME_REVOKED = ? WHERE ENTITY_ID = ? AND ENTITY_TYPE = ? AND ORGANIZATION = ?";
+
         public static final String CHECK_REVOKED_TOKEN_EXIST = "SELECT 1 FROM AM_REVOKED_JWT WHERE UUID = ?";
+
         public static final String DELETE_REVOKED_JWT = "DELETE FROM AM_REVOKED_JWT WHERE EXPIRY_TIMESTAMP < ?";
     }
 

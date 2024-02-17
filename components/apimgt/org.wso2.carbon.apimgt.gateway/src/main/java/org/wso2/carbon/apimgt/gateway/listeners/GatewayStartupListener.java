@@ -457,7 +457,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             KeyTemplateRetriever webServiceBlockConditionsRetriever = new KeyTemplateRetriever();
             webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
 
-            // Start web service based revoked JWT tokens retriever.
+            // Start web service based revoke conditions retriever. Retrieve revoked token JTIs, users and client IDs.
             // Advanced throttle properties & blocking conditions have to be enabled for JWT token
             // retrieval due to the throttle config dependency for this feature.
             RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();

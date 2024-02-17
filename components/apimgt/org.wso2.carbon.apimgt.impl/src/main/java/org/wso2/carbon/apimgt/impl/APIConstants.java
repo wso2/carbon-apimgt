@@ -2828,12 +2828,25 @@ public final class APIConstants {
 
         public static final String TOKEN_TYPE = "token_type";
         public static final String TOKEN_REVOCATION_EVENT = "token_revocation";
+        public static final String CONSUMER_APP_REVOCATION_EVENT
+                = "consumer_app_revocation_event";
+        public static final String SUBJECT_ENTITY_REVOCATION_EVENT
+                = "subject_entity_revocation_event";
         public static final String CONSUMER_KEY = "consumer_key";
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
         public static final String ORG_ID = "org_id";
         public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
+        public static final String EXPIRY_TIME = "expiryTime";
+        public static final String REVOCATION_TIME = "revocationTime";
+        public static final String ORGANIZATION = "organization";
+        public static final String STREAM_ID = "streamId";
+        public static final String ENTITY_ID = "entityId";
+        public static final String ENTITY_TYPE = "entityType";
+        public static final String ENTITY_TYPE_CLIENT_ID = "CLIENT_ID";
+        public static final String ENTITY_TYPE_USER_ID = "USER_ID";
+        public static final String EVENT_TYPE = "eventType";
     }
 
     //Constants related to user password

@@ -32,6 +32,10 @@
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-ext</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
         </dependency>
@@ -103,6 +107,7 @@
                         <Import-Package>
                             org.apache.commons.*,
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.slf4j.*;version="${slf4j.api.version}",
                             org.wso2.carbon.context.*;version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.utils.*;version="${carbon.kernel.package.import.version.range}",
                             *;resolution:=optional

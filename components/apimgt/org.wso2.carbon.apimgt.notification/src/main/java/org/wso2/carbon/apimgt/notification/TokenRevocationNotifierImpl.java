@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.notification;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.axis2.util.URL;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
@@ -30,6 +32,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.message.BasicNameValuePair;
+import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -39,7 +42,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -56,22 +61,70 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     /**
      * Method to publish the revoked token on to the realtime message broker
      *
-     * @param revokedToken requested revoked token
+     * @param revokedToken requested revoked token JTI, user id or consumer key
      * @param properties realtime notifier properties read from the config
      */
     @Override
     public void sendMessageOnRealtime(String revokedToken, Properties properties) {
+
+        if (APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT.equals(properties
+                .getProperty(APIConstants.NotificationEvent.EVENT_TYPE))) {
+            Map<String, String> consumerKeyRevocationMap = new HashMap<>();
+            consumerKeyRevocationMap.put(APIConstants.NotificationEvent.CONSUMER_KEY,
+                    properties.getProperty(APIConstants.NotificationEvent.CONSUMER_KEY));
+            consumerKeyRevocationMap.put(APIConstants.NotificationEvent.REVOCATION_TIME,
+                    properties.getProperty(APIConstants.NotificationEvent.REVOCATION_TIME));
+            revokedToken = base64Encode(consumerKeyRevocationMap);
+        } else if (APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT.equals(properties
+                .getProperty(APIConstants.NotificationEvent.EVENT_TYPE))) {
+            Map<String, String> subjectEntityRevokeMap = new HashMap<>();
+            subjectEntityRevokeMap.put(APIConstants.NotificationEvent.ENTITY_ID,
+                    properties.getProperty(APIConstants.NotificationEvent.ENTITY_ID));
+            subjectEntityRevokeMap.put(APIConstants.NotificationEvent.ENTITY_TYPE,
+                    properties.getProperty(APIConstants.NotificationEvent.ENTITY_TYPE));
+            subjectEntityRevokeMap.put(APIConstants.NotificationEvent.REVOCATION_TIME,
+                    properties.getProperty(APIConstants.NotificationEvent.REVOCATION_TIME));
+            revokedToken = base64Encode(subjectEntityRevokeMap);
+        }
+        sendRevokedTokenOnRealtime(revokedToken, properties);
+    }
+
+    private String base64Encode(Map<String, String> revokedTokenMap) {
+
+        String encodedRevokedToken = null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String revokedTokenJson = objectMapper.writeValueAsString(revokedTokenMap);
+            byte[] encodedRevokedTokenStream =
+                    Base64.encodeBase64(revokedTokenJson.getBytes(StandardCharsets.UTF_8));
+            encodedRevokedToken = new String(encodedRevokedTokenStream, StandardCharsets.UTF_8);
+        } catch (JsonProcessingException e) {
+            log.error("Error while encoding revoked token event for consumer key revocation event.");
+        }
+        return encodedRevokedToken;
+    }
+
+    private void sendRevokedTokenOnRealtime(String revokedToken, Properties properties) {
         //Variables related to Realtime Notifier
+        String type = null;
+        long expiryTimeForJWT = 0L;
+        if (properties.getProperty(APIConstants.NotificationEvent.EXPIRY_TIME) != null) {
+            expiryTimeForJWT = Long.parseLong(properties.getProperty(APIConstants.NotificationEvent.EXPIRY_TIME));
+        }
         String realtimeNotifierTTL = realTimeNotifierProperties.getProperty("ttl", DEFAULT_TTL);
-        long expiryTimeForJWT = Long.parseLong(properties.getProperty("expiryTime"));
         String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
-        String tokenType = properties.getProperty(APIConstants.NotificationEvent.TOKEN_TYPE);
+        if (APIConstants.NotificationEvent.TOKEN_REVOCATION_EVENT.equals(
+                properties.getProperty(APIConstants.NotificationEvent.EVENT_TYPE))) {
+            type = properties.getProperty(APIConstants.NotificationEvent.TOKEN_TYPE);
+        } else {
+            type = properties.getProperty(APIConstants.NotificationEvent.EVENT_TYPE);
+        }
         String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
         int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
         Object[] objects =
-                new Object[]{eventId, revokedToken, realtimeNotifierTTL, expiryTimeForJWT, tokenType, tenantId};
+                new Object[]{eventId, revokedToken, realtimeNotifierTTL, expiryTimeForJWT, type, tenantId};
         EventPublisherEvent tokenRevocationEvent = new EventPublisherEvent(APIConstants.TOKEN_REVOCATION_STREAM_ID,
-                                                                           System.currentTimeMillis(), objects);
+                System.currentTimeMillis(), objects);
         tokenRevocationEvent.setOrgId(orgId);
         APIUtil.publishEvent(EventPublisherType.TOKEN_REVOCATION, tokenRevocationEvent,
                 tokenRevocationEvent.toString());
@@ -80,16 +133,16 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     /**
      * Method to send the revoked token to the persistent storage
      *
-     * @param revokedToken token to be revoked
+     * @param revokedToken token to be revoked, user id or consumer key
      * @param properties persistent notifier properties read from the config
      */
     @Override
     public void sendMessageToPersistentStorage(String revokedToken, Properties properties) {
+
         //Variables related to Persistent Notifier
         String defaultPersistentNotifierHostname = "https://localhost:2379/v2/keys/jti/";
         String persistentNotifierHostname = properties
                 .getProperty("hostname", defaultPersistentNotifierHostname);
-        String persistentNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
         String defaultPersistentNotifierUsername = "root";
         String persistentNotifierUsername = properties
                 .getProperty("username", defaultPersistentNotifierUsername);
@@ -106,9 +159,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
                 getBytes(StandardCharsets.UTF_8));
         String authHeader = "Basic " + new String(encodedAuth, StandardCharsets.UTF_8);
         httpETCDPut.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-        List<NameValuePair> etcdParams = new ArrayList<>(2);
-        etcdParams.add(new BasicNameValuePair("value", "true"));
-        etcdParams.add(new BasicNameValuePair("ttl", persistentNotifierTTL));
+        List<NameValuePair> etcdParams = getEtcdParams(properties);
 
         //Send the revoked token to the persistent storage Server
         httpETCDPut.setEntity(new UrlEncodedFormEntity(etcdParams, StandardCharsets.UTF_8));
@@ -128,6 +179,34 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         } catch (IOException e) {
             log.error("Error while sending revoked token to the persistent storage :", e);
         }
+    }
+
+    @NotNull
+    private List<NameValuePair> getEtcdParams(Properties properties) {
+
+        List<NameValuePair> etcdParams = new ArrayList<>();
+        etcdParams.add(new BasicNameValuePair("value", "true"));
+        etcdParams.add(new BasicNameValuePair("ttl", properties.getProperty("ttl", DEFAULT_TTL)));
+        if (APIConstants.NotificationEvent.TOKEN_REVOCATION_EVENT.equals(properties
+                .getProperty(APIConstants.NotificationEvent.EVENT_TYPE))) {
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.EXPIRY_TIME,
+                    properties.getProperty(APIConstants.NotificationEvent.EXPIRY_TIME)));
+        } else if (APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT.equals(properties
+                .getProperty(APIConstants.NotificationEvent.EVENT_TYPE))) {
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.CONSUMER_KEY,
+                    properties.getProperty(APIConstants.NotificationEvent.CONSUMER_KEY)));
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.REVOCATION_TIME,
+                    properties.getProperty(APIConstants.NotificationEvent.REVOCATION_TIME)));
+        } else if (APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT.equals(properties
+                .getProperty(APIConstants.NotificationEvent.EVENT_TYPE))) {
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.ENTITY_ID,
+                    properties.getProperty(APIConstants.NotificationEvent.ENTITY_ID)));
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.ENTITY_TYPE,
+                    properties.getProperty(APIConstants.NotificationEvent.ENTITY_TYPE)));
+            etcdParams.add(new BasicNameValuePair(APIConstants.NotificationEvent.REVOCATION_TIME,
+                    properties.getProperty(APIConstants.NotificationEvent.REVOCATION_TIME)));
+        }
+        return etcdParams;
     }
 
     @Override
