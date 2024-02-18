@@ -26,12 +26,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -52,11 +55,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil.getRestApiJWTAuthAudiences;
 
 /**
  * This OAuthJwtAuthenticatorImpl class specifically implemented for API Manager store and publisher rest APIs'
@@ -223,10 +222,11 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
 
         JWTValidationInfo jwtValidationInfo;
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
+        String subject = signedJWTInfo.getJwtClaimsSet().getSubject();
 
         if (StringUtils.isNotEmpty(issuer)) {
             //validate Issuer
-            if (tokenIssuers != null && tokenIssuers.containsKey(issuer)) {
+            if (tokenIssuers != null && validateIssuer(subject, issuer, maskedToken)) {
                 if (isRESTApiTokenCacheEnabled) {
                     JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) getRESTAPITokenCache().get(jti);
                     if (tempJWTValidationInfo != null) {
@@ -256,27 +256,38 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     }
                 }
                 //info not in cache. validate signature and exp
-                JWTValidator jwtValidator = APIMConfigUtil.getJWTValidatorMap().get(issuer);
-                jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
-                if (jwtValidationInfo.isValid()) {
-                    //valid token
-                    if (isRESTApiTokenCacheEnabled) {
-                        getRESTAPITokenCache().put(jti, jwtValidationInfo);
+                JWTValidator jwtValidator = getJWTValidator(issuer, subject, maskedToken);
+                if (jwtValidator != null) {
+                    jwtValidationInfo = jwtValidator.validateToken(signedJWTInfo);
+                    if (jwtValidationInfo.isValid()) {
+                        //valid token
+                        if (isRESTApiTokenCacheEnabled) {
+                            getRESTAPITokenCache().put(jti, jwtValidationInfo);
+                        }
+                    } else {
+                        //put in invalid cache
+                        if (isRESTApiTokenCacheEnabled) {
+                            getRESTAPIInvalidTokenCache().put(jti, jwtValidationInfo);
+                        }
+                        //invalid credentials : 900901 error code
+                        log.error("JWT token validation failed. Reason: Invalid Credentials. " +
+                                "Make sure you have provided the correct security credentials in the token :"
+                                + maskedToken);
                     }
                 } else {
-                    //put in invalid cache
-                    if (isRESTApiTokenCacheEnabled) {
-                        getRESTAPIInvalidTokenCache().put(jti, jwtValidationInfo);
-                    }
-                    //invalid credentials : 900901 error code
-                    log.error("JWT token validation failed. Reason: Invalid Credentials. " +
-                            "Make sure you have provided the correct security credentials in the token :"
-                            + maskedToken);
+                    log.error("JWT token issuer validation failed. Reason: Cannot find a JWTValidator for the " +
+                            "issuer present in the JWT: " + issuer);
+                    return null;
                 }
             } else {
                 //invalid issuer. invalid token
-                log.error("JWT token issuer validation failed. Reason: Issuer present in the JWT (" + issuer
-                        + ") does not match with the token issuer (" + tokenIssuers.keySet().toString() + ")");
+                if (tokenIssuers != null) {
+                    log.error("JWT token issuer validation failed. Reason: Issuer present in the JWT (" + issuer
+                            + ") does not match with the token issuer (" + tokenIssuers.keySet() + ")");
+                } else {
+                    log.error("JWT token issuer validation failed. Reason: Issuer present in the JWT (" + issuer
+                            + ") does not match with the token issuer.");
+                }
                 return null;
             }
         } else {
@@ -284,6 +295,72 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
             return null;
         }
         return jwtValidationInfo;
+    }
+
+    /**
+     * Get logged-in organization from the sub claim of the token.
+     *
+     * @param subject     Sub claim value
+     * @param maskedToken Masked token for logging
+     * @return Organization
+     */
+    private String getOrganizationFromSubject(String subject, String maskedToken) {
+        if (subject == null) {
+            log.error("Subject is not found in the token " + maskedToken);
+            return null;
+        }
+        return MultitenantUtils.getTenantDomain(subject);
+    }
+
+    /**
+     * Retrieve JWT Validator for the given issuer.
+     *
+     * @param issuer      Issuer from the token
+     * @param subject     Subject from the token
+     * @param maskedToken Masked token string for logging
+     * @return JWTValidator implementation for the given issuer.
+     */
+    private JWTValidator getJWTValidator(String issuer, String subject, String maskedToken) {
+
+        JWTValidator jwtValidator = APIMConfigUtil.getJWTValidatorMap().get(issuer);
+        if (jwtValidator == null) {
+            String organization = getOrganizationFromSubject(subject, maskedToken);
+            if (StringUtils.isNotEmpty(issuer) && StringUtils.isNotEmpty(organization)) {
+                KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(organization, issuer);
+                if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
+                    jwtValidator = keyManagerDto.getJwtValidator();
+                }
+            }
+        }
+        return jwtValidator;
+    }
+
+    /**
+     * Validate issuer in the token against the registered token issuers/default key manager issuer.
+     *
+     * @param subject     Subject to derive the logged-in organization
+     * @param tokenIssuer Token issuer from the token
+     * @param maskedToken Masked token for logging purposes
+     * @return if issuer validation fails or sucess
+     * @throws APIManagementException if an error occurs during validation
+     */
+    private boolean validateIssuer(String subject, String tokenIssuer, String maskedToken)
+            throws APIManagementException {
+
+        String organization = getOrganizationFromSubject(subject, maskedToken);
+        if (tokenIssuers != null && !tokenIssuers.isEmpty()) {
+            return tokenIssuers.containsKey(tokenIssuer);
+        }
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                APIUtil.getDefaultKeyManagerConfiguration(organization);
+        if (keyManagerConfigurationDTO == null) {
+            //invalid issuer. invalid token
+            log.error("JWT token issuer validation failed. Reason: Default Key Manager configuration cannot be"
+                    + " found for the organization: " + organization);
+            return false;
+        }
+        return StringUtils.equals(tokenIssuer, (String) keyManagerConfigurationDTO.getAdditionalProperties()
+                .get(APIConstants.KeyManager.ISSUER));
     }
 
     /**
