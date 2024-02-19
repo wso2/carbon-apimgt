@@ -9,7 +9,6 @@ public class PortalNotificationDTO {
     private PortalNotificationType notificationType;
     private Timestamp createdTime;
     private PortalNotificationMetaData notificationMetadata;
-    private String organization;
     private List<PortalNotificationEndUserDTO> endUsers;
 
     public String getNotificationId() {
@@ -42,14 +41,6 @@ public class PortalNotificationDTO {
 
     public void setNotificationMetadata(PortalNotificationMetaData notificationMetadata) {
         this.notificationMetadata = notificationMetadata;
-    }
-
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
     }
 
     public List<PortalNotificationEndUserDTO> getEndUsers() {

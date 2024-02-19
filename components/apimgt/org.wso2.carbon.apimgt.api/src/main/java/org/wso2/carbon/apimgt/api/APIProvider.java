@@ -1908,4 +1908,24 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     int getPolicyUsageByPolicyUUIDInGatewayPolicies(String commonPolicyUUID) throws APIManagementException;
+
+    /**
+     * Method to get notifications for the given user
+     * @param username
+     * @param organization
+     * @param sortOrder
+     * @param limit
+     * @param offset
+     * @return NotificationList
+     */
+    NotificationList getNotifications(String username, String organization, String sortOrder, Integer limit, Integer offset) throws APIManagementException;
+
+    boolean deleteAllNotifications(String username, String organization) throws APIManagementException;
+
+    Notification markNotificationAsReadById(String username, String organization, String notificationId);
+
+    boolean deleteNotificationById(String username, String organization, String notificationId);
+
+    NotificationList markAllNotificationsAsRead(String username, String organization);
+
 }

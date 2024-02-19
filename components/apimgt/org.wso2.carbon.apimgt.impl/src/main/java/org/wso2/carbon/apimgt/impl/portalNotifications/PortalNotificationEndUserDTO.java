@@ -4,6 +4,7 @@ public class PortalNotificationEndUserDTO {
 
     private String notificationId;
     private String destinationUser;
+    private String organization;
     private boolean isRead;
 
     public String getNotificationId() {
@@ -22,11 +23,19 @@ public class PortalNotificationEndUserDTO {
         this.destinationUser = destinationUser;
     }
 
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
     public boolean isRead() {
         return isRead;
     }
 
     public void setRead(boolean read) {
-        isRead = read;
+        this.isRead = read;
     }
 }

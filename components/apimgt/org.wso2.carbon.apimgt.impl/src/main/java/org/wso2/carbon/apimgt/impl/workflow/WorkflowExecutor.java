@@ -109,7 +109,7 @@ public abstract class WorkflowExecutor implements Serializable {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             apiMgtDAO.updateWorkflowStatus(workflowDTO);
-            sendPubDevNotification(workflowDTO);
+            sendPortalNotifications(workflowDTO);
 
 
         } catch (APIManagementException e) {
@@ -120,13 +120,12 @@ public abstract class WorkflowExecutor implements Serializable {
 
     /** Implements the workflow related Notification logic. **/
 
-    private void sendPubDevNotification(WorkflowDTO workflowDTO) {
+    private void sendPortalNotifications(WorkflowDTO workflowDTO) {
         PortalNotificationDTO portalNotificationsDTO = new PortalNotificationDTO();
 
         portalNotificationsDTO.setNotificationType(getNotificationType(workflowDTO.getWorkflowType()));
         portalNotificationsDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));
         portalNotificationsDTO.setNotificationMetadata(getNotificationMetaData(workflowDTO));
-        portalNotificationsDTO.setOrganization(workflowDTO.getTenantDomain());
         portalNotificationsDTO.setEndUsers(getDestinationUser(workflowDTO));
 
 
@@ -194,6 +193,7 @@ public abstract class WorkflowExecutor implements Serializable {
         if(destinationUser != null){
             PortalNotificationEndUserDTO endUser = new PortalNotificationEndUserDTO();
             endUser.setDestinationUser(destinationUser);
+            endUser.setOrganization(workflowDTO.getTenantDomain());
             destinationUserList.add(endUser);
         }
 
@@ -210,7 +210,9 @@ public abstract class WorkflowExecutor implements Serializable {
         portalNotificationMetaData.setRevisionId(workflowDTO.getProperties("revisionId"));
         portalNotificationMetaData.setComment(workflowDTO.getComments());
 
-        if(WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowDTO.getWorkflowType()) || WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equals(workflowDTO.getWorkflowType())){
+        if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(
+                workflowDTO.getWorkflowType()) || WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equals(
+                workflowDTO.getWorkflowType())) {
             portalNotificationMetaData.setApiContext(workflowDTO.getMetadata("ApiContext"));
         }
 

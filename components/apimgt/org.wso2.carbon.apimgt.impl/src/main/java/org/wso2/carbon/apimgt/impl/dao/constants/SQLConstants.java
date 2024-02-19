@@ -3170,14 +3170,64 @@ public class SQLConstants {
 
 
 
-    /** Pub/Dev Notifications related constants **/
+    /** Portal Notifications related constants **/
 
     public static class PortalNotifications {
         public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION " +
-                "(NOTIFICATION_ID, NOTIFICATION_TYPE, CREATED_TIME, NOTIFICATION_METADATA, ORGANIZATION) VALUES (?, ?, ?, ?, ?)";
+                "(NOTIFICATION_ID, NOTIFICATION_TYPE, CREATED_TIME, NOTIFICATION_METADATA) VALUES (?, ?, ?, ?)";
 
         public static final String ADD_NOTIFICATION_END_USER = "INSERT INTO AM_NOTIFICATION_END_USERS " +
-                "(NOTIFICATION_ID, DESTINATION_USER) " + "VALUES (?, ?)";
+                "(NOTIFICATION_ID, DESTINATION_USER, ORGANIZATION) " + "VALUES (?, ?, ?)";
+
+        public static final String GET_NOTIFICATIONS =
+                "SELECT" +
+                        "  n.NOTIFICATION_ID," +
+                        "  n.NOTIFICATION_TYPE," +
+                        "  n.CREATED_TIME," +
+                        "  n.NOTIFICATION_METADATA," +
+                        "  e.IS_READ " +
+                "FROM AM_NOTIFICATION n " +
+                "INNER JOIN AM_NOTIFICATION_END_USERS e ON n.NOTIFICATION_ID = e.NOTIFICATION_ID " +
+                "WHERE" +
+                        "  e.DESTINATION_USER = ?" +
+                        "  AND e.ORGANIZATION = ? " +
+                "ORDER BY  n.CREATED_TIME DESC";
+
+        public static final String DELETE_ALL_NOTIFICATIONS_OF_USER = "DELETE FROM AM_NOTIFICATION_END_USERS " +
+                "WHERE DESTINATION_USER = ? AND ORGANIZATION = ?";
+
+        public static final String DELETE_NOTIFICATIONS =
+                "DELETE " +
+                "FROM AM_NOTIFICATION " +
+                "WHERE " +
+                        "NOTIFICATION_ID IN (" +
+                        "SELECT N.NOTIFICATION_ID " +
+                                "FROM AM_NOTIFICATION N " +
+                                "LEFT JOIN AM_NOTIFICATION_END_USERS NU ON N.NOTIFICATION_ID = NU.NOTIFICATION_ID " +
+                                "WHERE NU.NOTIFICATION_ID IS NULL)";
+
+        public static final String MARK_NOTIFICATION_AS_READ = "UPDATE AM_NOTIFICATION_END_USERS SET IS_READ = TRUE " +
+                "WHERE NOTIFICATION_ID = ? AND DESTINATION_USER = ? AND ORGANIZATION = ?";
+
+        public static final String MARK_ALL_NOTIFICATIONS_AS_READ = "UPDATE AM_NOTIFICATION_END_USERS SET IS_READ = TRUE " +
+                "WHERE DESTINATION_USER = ? AND ORGANIZATION = ?";
+
+        public static final String GET_NOTIFICATION_BY_ID =
+                "SELECT" +
+                        "  n.NOTIFICATION_ID," +
+                        "  n.NOTIFICATION_TYPE," +
+                        "  n.CREATED_TIME," +
+                        "  n.NOTIFICATION_METADATA," +
+                        "  e.IS_READ " +
+                "FROM AM_NOTIFICATION n " +
+                "INNER JOIN AM_NOTIFICATION_END_USERS e ON n.NOTIFICATION_ID = e.NOTIFICATION_ID " +
+                "WHERE" +
+                        "  n.NOTIFICATION_ID = ?" +
+                        "  AND e.DESTINATION_USER = ?" +
+                        "  AND e.ORGANIZATION = ?";
+
+        public static final String DELETE_NOTIFICATION_BY_ID = "DELETE FROM AM_NOTIFICATION_END_USERS " +
+                "WHERE NOTIFICATION_ID = ? AND DESTINATION_USER = ? AND ORGANIZATION = ?";
     }
 
 

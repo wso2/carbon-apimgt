@@ -42,13 +42,21 @@ public class PortalNotificationMetaData {
         this.applicationName = applicationName;
     }
 
-    public String getRequestedTier() { return requestedTier;}
+    public String getRequestedTier() {
+        return requestedTier;
+    }
 
-    public void setRequestedTier(String requestedTier) { this.requestedTier = requestedTier;}
+    public void setRequestedTier(String requestedTier) {
+        this.requestedTier = requestedTier;
+    }
 
-    public String getRevisionId() { return revisionId;}
+    public String getRevisionId() {
+        return revisionId;
+    }
 
-    public void setRevisionId(String revisionId) { this.revisionId = revisionId;}
+    public void setRevisionId(String revisionId) {
+        this.revisionId = revisionId;
+    }
 
     public String getComment() {
         return comment;
@@ -57,7 +65,5 @@ public class PortalNotificationMetaData {
     public void setComment(String comment) {
         this.comment = comment;
     }
-
-
 
 }
