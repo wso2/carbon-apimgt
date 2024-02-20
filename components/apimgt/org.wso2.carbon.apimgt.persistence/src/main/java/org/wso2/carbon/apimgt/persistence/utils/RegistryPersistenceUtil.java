@@ -545,6 +545,22 @@ public class RegistryPersistenceUtil {
     }
 
     /**
+     * This Method returns the security scheme of the API for the given artifact
+     *
+     * @param artifact
+     * @return String containing the security scheme of the API
+     * @throws APIManagementException if failed to get security scheme of API
+     */
+    public static String getSecuritySchemeOfAPI(GovernanceArtifact artifact) throws APIManagementException {
+        try {
+            return artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
+        } catch (GovernanceException e) {
+            String msg = "Failed to get security scheme of API for the artifact ";
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
      * This Method is different from getAPI method, as this one returns
      * URLTemplates without aggregating duplicates. This is to be used for building synapse config.
      *
@@ -1824,6 +1840,13 @@ public class RegistryPersistenceUtil {
         } catch (XMLStreamException e) {
             throw new APIPersistenceException("Error occurred while adding default API LifeCycle.", e);
         }
+    }
+
+    public static String extractProvider(String apiPath, String apiName) {
+        int startIndex = apiPath.indexOf(APIConstants.API_PROVIDER_SUFFIX_SLASH) +
+                APIConstants.API_PROVIDER_SUFFIX_SLASH.length();
+        int endIndex = apiPath.indexOf("/" + apiName + "/");
+        return apiPath.substring(startIndex, endIndex);
     }
 
     private static RegistryService getRegistryService() {

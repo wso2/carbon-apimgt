@@ -363,6 +363,10 @@ public class APIManagerConfiguration {
 
                 OMElement analyticsType = element.getFirstChildWithName(new QName("Type"));
                 analyticsProps.put("type", analyticsType.getText());
+
+                OMElement enablePolicy = element.getFirstChildWithName(new QName("PolicyEnabled"));
+                analyticsProps.put("policyEnabled", enablePolicy.getText());
+
                 analyticsProperties = analyticsProps;
             } else if ("PersistenceConfigs".equals(localName)) {
                 OMElement properties = element.getFirstChildWithName(new QName("Properties"));
@@ -681,6 +685,11 @@ public class APIManagerConfiguration {
                 environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_NAME)).getText()));
         environment.setDisplayName(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
+        String gatewayType = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_TYPE)).getText();
+        if (gatewayType == null || gatewayType.isEmpty()) {
+            gatewayType = APIConstants.API_GATEWAY_TYPE_REGULAR;
+        }
+        environment.setGatewayType(gatewayType);
         if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
         environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_SERVER_URL)).getText()));

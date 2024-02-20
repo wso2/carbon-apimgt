@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -154,6 +155,16 @@ public class ImportUtils {
             throws APIManagementException,
             UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
+        // removing existing subscribed apis
+        if (update) {
+            Subscriber subscriber = apiConsumer.getSubscriber(userId);
+            Set<SubscribedAPI> currentSubscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, application.getName(),
+                    application.getGroupId());
+            for (SubscribedAPI subscribedAPI : currentSubscribedAPIs) {
+                apiConsumer.removeSubscription(subscribedAPI.getAPIIdentifier(), userId, application.getId(),
+                        application.getGroupId(), application.getOrganization());
+            }
+        }
         for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
             String tenantDomain = MultitenantUtils

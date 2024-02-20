@@ -177,6 +177,8 @@ public class APIKeyValidationService {
             Timer timer5 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GENERATE_JWT"));
             Timer.Context timerContext5 = timer5.start();
+            String endUser = getEndUserFromValidationContext(validationContext);
+            validationContext.getValidationInfoDTO().setEndUserName(endUser);
             keyValidationHandler.generateConsumerToken(validationContext);
             timerContext5.stop();
         }
@@ -195,6 +197,27 @@ public class APIKeyValidationService {
         }
         timerContext.stop();
         return validationContext.getValidationInfoDTO();
+    }
+
+    /**
+     * Get the end user name from the validation context DTO
+     *
+     * @param ctx TokenValidationContext
+     * @return end user name
+     */
+    public String getEndUserFromValidationContext(TokenValidationContext ctx) {
+        boolean isAppToken = ctx.getTokenInfo().isApplicationToken();
+        APIKeyValidationInfoDTO keyInfo = ctx.getValidationInfoDTO();
+        String endUsername = keyInfo.getEndUserName();
+        if (isAppToken) {
+            endUsername = keyInfo.getSubscriber();
+            if (!APIConstants.SUPER_TENANT_DOMAIN.equals(keyInfo.getSubscriberTenantDomain())) {
+                return endUsername;
+            } else {
+                return endUsername + "@" + keyInfo.getSubscriberTenantDomain();
+            }
+        }
+        return endUsername;
     }
 
     /**

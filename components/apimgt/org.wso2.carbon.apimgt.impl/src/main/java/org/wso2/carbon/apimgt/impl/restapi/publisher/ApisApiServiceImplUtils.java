@@ -373,15 +373,14 @@ public class ApisApiServiceImplUtils {
                     log.debug(HTTP_STATUS_LOG + response.getStatusLine().getStatusCode());
                 }
                 if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
-                    String inputLine;
                     StringBuilder responseString = new StringBuilder();
-
-                    while ((inputLine = reader.readLine()) != null) {
-                        responseString.append(inputLine);
+                    try (BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
+                        String inputLine;
+                        while ((inputLine = reader.readLine()) != null) {
+                            responseString.append(inputLine);
+                        }
                     }
-                    reader.close();
                     JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
                     String report = responseJson.get(APIConstants.DATA).toString();
                     String grade = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
@@ -658,6 +657,12 @@ public class ApisApiServiceImplUtils {
             apiToAdd.setServiceInfo("md5", service.getMd5());
             apiToAdd.setEndpointConfig(constructEndpointConfigForService(service
                     .getServiceUrl(), null));
+            if (APIConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE.equalsIgnoreCase(
+                    service.getSecurityType().toString())) {
+                apiToAdd.setApiSecurity(APIConstants.API_SECURITY_BASIC_AUTH);
+            } else {
+                apiToAdd.setApiSecurity(service.getSecurityType().toString());
+            }
         }
         APIDefinition apiDefinition = validationResponse.getParser();
         SwaggerData swaggerData;

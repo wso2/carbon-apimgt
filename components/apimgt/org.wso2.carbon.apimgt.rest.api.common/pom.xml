@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.29.6-SNAPSHOT</version>
+        <version>9.29.39-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -52,6 +52,11 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.authenticator.stub</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io.wso2</groupId>
+            <artifactId>commons-io</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -157,6 +162,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
@@ -177,6 +183,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
@@ -197,6 +204,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
@@ -217,6 +225,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>

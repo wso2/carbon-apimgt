@@ -40,6 +40,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
@@ -129,7 +130,7 @@ public class GraphQLRequestProcessorTest {
     }
 
     @Test
-    public void testHandleRequestNonSubscribeMessage() {
+    public void testHandleRequestNonSubscribeMessage() throws APISecurityException {
 
         InboundMessageContext inboundMessageContext = new InboundMessageContext();
         int msgSize = 100;
@@ -149,7 +150,7 @@ public class GraphQLRequestProcessorTest {
     }
 
     @Test
-    public void testHandleRequestAuthError() {
+    public void testHandleRequestAuthError() throws APISecurityException {
 
         InboundMessageContext inboundMessageContext = new InboundMessageContext();
         int msgSize = 100;

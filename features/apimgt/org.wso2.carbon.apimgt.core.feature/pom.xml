@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.29.6-SNAPSHOT</version>
+        <version>9.29.39-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.orbit.com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <artifactId>h2-engine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>

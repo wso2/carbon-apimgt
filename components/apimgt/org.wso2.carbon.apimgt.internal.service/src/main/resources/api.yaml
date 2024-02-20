@@ -66,16 +66,17 @@ paths:
             $ref: '#/definitions/Error'
   /revokedjwt:
     get:
-      summary: JTIs of revoked jwt tokens
+      summary: JTIs of revoked jwt tokens and application and subject entity revocation event data
       description: |
-        This will provide access to JTIs of revoked JWT tokens in database.
+        This will provide access to 
+          - JTIs of directly revoked JWT tokens in database
+          - consumer application information of revoked JWTs due to application change events
+          - subject entity information of revoked JWTs due to user change events
       responses:
         200:
-          description: An array of revoke JWTs
+          description: An object of revoke JWTs, revoked subject entities, revoked consumer keys
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/RevokedJWTList'
+            $ref: '#/definitions/RevokedEvents'
         default:
           description: Unexpected error
           schema:
@@ -744,10 +745,20 @@ definitions:
         type: array
         items:
           type: string
-  RevokedJWTList:
-    type: array
-    items:
-      $ref: '#/definitions/RevokedJWT'
+  RevokedEvents:
+    properties:
+      revokedJWTList:
+        type: array
+        items:
+          $ref: '#/definitions/RevokedJWT'
+      revokedJWTSubjectEntityList:
+        type: array
+        items:
+          $ref: '#/definitions/RevokedJWTSubjectEntity'
+      revokedJWTConsumerKeyList:
+        type: array
+        items:
+          $ref: '#/definitions/RevokedJWTConsumerKey'
   RevokedJWT:
     properties:
       jwt_signature:
@@ -757,6 +768,36 @@ definitions:
         type: integer
         format: int64
         description: expiry timestamp.
+  RevokedJWTSubjectEntity:
+    properties:
+      entity_id:
+        type: string
+        description: Subject Id of the revoked JWT(s). Can be user id or client id.
+      entity_type:
+        type: string
+        description: Type of the subject id. User id or client id.
+      revocation_time:
+        type: integer
+        format: int64
+        description: revocation timestamp.
+      organization:
+        type: string
+        description: Organization of the revoked subject entity.
+  RevokedJWTConsumerKey:
+    properties:
+      consumer_key:
+        type: string
+        description: consumer key of the JWT.
+      revocation_time:
+        type: integer
+        format: int64
+        description: revocation timestamp.
+      type:
+        type: string
+        description: revoked consumer key type.
+      organization:
+        type: string
+        description: organization of the revoked consumer key
   RevokeAPIKey:
     properties:
       apiKey:
@@ -897,10 +938,18 @@ definitions:
         type: boolean
         description: Whether this is the default version of the API.
         example: false
+      apiPolicies:
+        type: array
+        items:
+          $ref: '#/definitions/OperationPolicy'
       urlMappings:
         type: array
         items:
           $ref: '#/definitions/URLMapping'
+      securityScheme:
+        type: string
+        description: Available authentication methods of the API.
+        example: Oauth2,api_key
 
   #-----------------------------------------------------
   # synapse Artifact resource
@@ -992,15 +1041,17 @@ definitions:
 
   KeyManager:
     properties:
+      uuid:
+        type: string
       name:
         type: string
       type:
         type: string
       enabled:
         type: boolean
-      tenantDomain:
+      organization:
         type: string
-      configuration:
+      additionalProperties:
         type: object
       tokenType:
         type: string
@@ -1050,6 +1101,10 @@ definitions:
       appId:
         type: integer
       subscriptionState:
+        type: string
+      apiName:
+        type: string
+      apiVersion:
         type: string
 
   #-----------------------------------------------------
@@ -1407,6 +1462,28 @@ definitions:
         type: array
         items:
           type: string
+      operationPolicies:
+        type: array
+        items:
+          $ref: '#/definitions/OperationPolicy'
+
+  OperationPolicy:
+    title: Operation Policy
+    properties:
+      policyName:
+        type: string
+      policyVersion:
+        type: string
+      direction:
+        type: string
+      policyId:
+        type: string
+      order:
+        type: integer
+      parameters:
+        type: object
+        additionalProperties:
+          type: object
   #-----------------------------------------------------
   # The pagination resource
   #-----------------------------------------------------
@@ -1524,7 +1601,7 @@ definitions:
   EventCountLimit:
     title: Event Count Limit object
     allOf:
-      - $ref: '#/components/schemas/ThrottleLimitBase'
+      - $ref: '#/definitions/ThrottleLimitBase'
       - required:
           - eventCount
         type: object

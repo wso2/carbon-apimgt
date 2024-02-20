@@ -358,6 +358,10 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:api_provider_change",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:gateway_policy_manage",
         "Roles": "admin"
       },

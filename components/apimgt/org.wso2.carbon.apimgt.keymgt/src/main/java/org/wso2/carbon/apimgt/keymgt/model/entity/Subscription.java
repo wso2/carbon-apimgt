@@ -35,6 +35,39 @@ public class Subscription implements CacheableEntity<String> {
     private String applicationUUID;
     private String subscriptionState = null;
     private long timeStamp;
+    private String apiName;
+
+    public String getSubscriptionUUID() {
+
+        return subscriptionUUID;
+    }
+
+    public void setSubscriptionUUID(String subscriptionUUID) {
+
+        this.subscriptionUUID = subscriptionUUID;
+    }
+
+    public String getApiName() {
+
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+
+        this.apiName = apiName;
+    }
+
+    public String getApiVersion() {
+
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+
+        this.apiVersion = apiVersion;
+    }
+
+    private String apiVersion;
 
     public String getSubscriptionUUId() {
 

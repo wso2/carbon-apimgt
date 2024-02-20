@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.29.6-SNAPSHOT</version>
+        <version>9.29.39-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -117,7 +117,7 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-core</artifactId>
         </dependency>
         <dependency>
@@ -244,7 +244,7 @@
                                 <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
                                 <bundleDef>javax.validation:validation-api</bundleDef>
                                 <bundleDef>com.google.guava:guava:${google.guava.version}</bundleDef>
-                                <bundleDef>io.swagger:swagger-core</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
                                 <bundleDef>com.samskivert:jmustache</bundleDef>

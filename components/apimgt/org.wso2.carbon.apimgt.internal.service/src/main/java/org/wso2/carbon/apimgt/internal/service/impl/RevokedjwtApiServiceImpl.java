@@ -11,6 +11,6 @@ public class RevokedjwtApiServiceImpl implements RevokedjwtApiService {
 
     @Override
     public Response revokedjwtGet(MessageContext messageContext) throws APIManagementException {
-        return Response.ok().entity(BlockConditionDBUtil.getRevokedJWTs()).build();
+        return Response.ok().entity(BlockConditionDBUtil.getRevokedJWTEvents()).build();
     }
 }

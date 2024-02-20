@@ -377,6 +377,7 @@ public final class APIUtil {
     private static long retrievalTimeout;
     private static final long maxRetrievalTimeout = 1000 * 60 * 60;
     private static double retryProgressionFactor;
+    private static String gatewayTypes;
     private static int maxRetryCount;
 
     //constants for getting masked token
@@ -404,6 +405,7 @@ public final class APIUtil {
         maxRetryCount = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties().getMaxRetryCount();
         retryProgressionFactor = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties()
                 .getRetryProgressionFactor();
+        gatewayTypes = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
         try {
             eventPublisherFactory = ServiceReferenceHolder.getInstance().getEventPublisherFactory();
             eventPublishers.putIfAbsent(EventPublisherType.ASYNC_WEBHOOKS,
@@ -3216,6 +3218,15 @@ public final class APIUtil {
     public static boolean isAnalyticsEnabled() {
 
         return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
+    }
+
+    public static List<String> getGatewayTypes () {
+        // Get the gateway types from the deployment.toml
+        List<String> gatewayTypesList = new ArrayList<>();
+        if (gatewayTypes != null && !gatewayTypes.isEmpty()) {
+            gatewayTypesList = Arrays.asList(gatewayTypes.split(","));
+        }
+        return gatewayTypesList;
     }
 
     /**
@@ -6841,11 +6852,13 @@ public final class APIUtil {
         jsonObject.put("typ", entityType);
         jsonObject.put("action", action);
         jsonObject.put("performedBy", performedBy);
-        try {
-            JSONObject entityInfoJson = (JSONObject) new JSONParser().parse(entityInfo);
-            jsonObject.put("info", entityInfoJson);
-        } catch (ParseException ignored) { // if entityInfo cannot be parsed as json, log as a simple string
-            jsonObject.put("info", entityInfo);
+        if (entityInfo != null && !StringUtils.isBlank(entityInfo)) {
+            try {
+                JSONObject entityInfoJson = (JSONObject) new JSONParser().parse(entityInfo);
+                jsonObject.put("info", entityInfoJson);
+            } catch (ParseException ignored) { // if entityInfo cannot be parsed as json, log as a simple string
+                jsonObject.put("info", entityInfo);
+            }
         }
         audit.info(StringEscapeUtils.unescapeJava(jsonObject.toString()));
     }
@@ -7417,11 +7430,23 @@ public final class APIUtil {
     public static KeyManagerConfiguration toKeyManagerConfiguration(String base64EncodedString)
             throws APIManagementException {
 
-        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
         String decodedString = new String(Base64.decodeBase64(base64EncodedString));
-        new Gson().fromJson(decodedString, Map.class);
-        Map configuration = new Gson().fromJson(decodedString, Map.class);
-        keyManagerConfiguration.setConfiguration(configuration);
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = new Gson().fromJson(decodedString,
+                KeyManagerConfigurationDTO.class);
+        return toKeyManagerConfiguration(keyManagerConfigurationDTO);
+    }
+
+    public static KeyManagerConfiguration toKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+    {
+
+        KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
+        keyManagerConfiguration.setName(keyManagerConfigurationDTO.getName());
+        keyManagerConfiguration.setConfiguration(keyManagerConfigurationDTO.getAdditionalProperties());
+        keyManagerConfiguration.setTenantDomain(keyManagerConfigurationDTO.getOrganization());
+        keyManagerConfiguration.setTokenType(KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO
+                .getTokenType().toUpperCase()));
+        keyManagerConfiguration.setEnabled(keyManagerConfigurationDTO.isEnabled());
+        keyManagerConfiguration.setType(keyManagerConfigurationDTO.getType());
         return keyManagerConfiguration;
     }
 
@@ -10091,15 +10116,15 @@ public final class APIUtil {
     }
 
     /**
-     * Handles gateway vendor for Choreo Connect before insert DB operations.
+     * Handles gateway vendor for APK before insert DB operations.
      *
      * @param gatewayVendorType Gateway vendor
      * @param gatewayType       Gateway type
      * @return gateway vendor for the API
      */
     public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
-        if(gatewayType != null && APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayType)) {
-            gatewayVendorType =  APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        if (gatewayType != null && APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
+            gatewayVendorType =  APIConstants.WSO2_APK_GATEWAY;
         }
         return gatewayVendorType;
     }
@@ -10114,20 +10139,20 @@ public final class APIUtil {
         String gatewayType = null;
         if (APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
             gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
-        } else if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
-            gatewayType = APIConstants.WSO2_CHOREO_CONNECT_GATEWAY;
+        } else if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
+            gatewayType = APIConstants.WSO2_APK_GATEWAY;
         }
         return gatewayType;
     }
 
     /**
-     * Replaces wso2/choreo-connect gateway vendor type as wso2 after retrieving from db.
+     * Replaces wso2/apk gateway vendor type as wso2 after retrieving from db.
      *
      * @param gatewayVendor Gateway vendor type
      * @return wso2 gateway vendor type
      */
     public static String handleGatewayVendorRetrieval(String gatewayVendor) {
-        if (APIConstants.WSO2_CHOREO_CONNECT_GATEWAY.equals(gatewayVendor)) {
+        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
             gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
         }
         return  gatewayVendor;
@@ -10284,5 +10309,19 @@ public final class APIUtil {
             return tenantConfig.get(propertyName).toString();
         }
         return null;
+    }
+
+    /**
+     * Get aggregated string from set of scopes
+     *
+     * @param scopes set of scopes
+     * @return scopes string
+     */
+    public static String getScopesAsString(Set<Scope> scopes) {
+        StringBuilder scopesStringBuilder = new StringBuilder();
+        for (Scope scope : scopes) {
+            scopesStringBuilder.append(scope.getKey()).append(" ");
+        }
+        return scopesStringBuilder.toString().trim();
     }
 }

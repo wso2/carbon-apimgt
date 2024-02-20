@@ -17,6 +17,8 @@
 package org.wso2.carbon.apimgt.rest.api.common;
 
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public interface RestAPIAuthenticator {
@@ -24,6 +26,10 @@ public interface RestAPIAuthenticator {
     boolean authenticate(Map<String,Object> message) throws APIMgtAuthorizationFailedException;
     boolean canHandle(Map<String, Object> message);
     String getAuthenticationType();
+
     int getPriority(Map<String, Object> message);
 
+    int getPriority(HashMap<String, Object> message);
+
 }
+

@@ -16,7 +16,9 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.persistence.dto.AdminContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
@@ -112,6 +114,16 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException;
+
+    /**
+     * Get security scheme of API
+     *
+     * @param org   Organization the API is owned by
+     * @param apiId API ID
+     * @return A String contains the security scheme of the API
+     * @throws APIPersistenceException if failed to get the security scheme of the API
+     */
+    String getSecuritySchemeOfAPI(Organization org, String apiId) throws APIPersistenceException;
 
     /**
      * Get the API information stored in persistence layer, that is used for publisher operations
@@ -508,4 +520,9 @@ public interface APIPersistence {
      */
     Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException;
 
+    void changeApiProvider(String providerName, String apiId, String org) throws APIManagementException,
+            APIPersistenceException;
+
+    AdminContentSearchResult searchContentForAdmin(String org, String searchQuery, int start, int count,
+                                                          int limit) throws APIPersistenceException;
 }

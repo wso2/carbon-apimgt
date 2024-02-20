@@ -21,7 +21,9 @@ package org.wso2.carbon.apimgt.internal.service.utils;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
@@ -56,6 +58,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.EventCountLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
@@ -75,7 +78,7 @@ import java.util.Set;
 
 public class SubscriptionValidationDataUtil {
 
-    private static APIDTO fromAPItoDTO(API model) {
+    private static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
         APIDTO apidto = null;
         if (model != null) {
@@ -92,6 +95,8 @@ public class SubscriptionValidationDataUtil {
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
             apidto.setOrganization(model.getOrganization());
+            apidto.setSecurityScheme(RestApiCommonUtil.getLoggedInUserProvider().
+                    getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -101,14 +106,38 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
+                List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
+                for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
+                    OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                    operationPolicyDTO.setPolicyId(operationPolicy.getPolicyId());
+                    operationPolicyDTO.setPolicyName(operationPolicy.getPolicyName());
+                    operationPolicyDTO.setPolicyVersion(operationPolicy.getPolicyVersion());
+                    operationPolicyDTO.setDirection(operationPolicy.getDirection());
+                    operationPolicyDTO.setParameters(operationPolicy.getParameters());
+                    operationPolicyDTO.setOrder(operationPolicy.getOrder());
+                    operationPolicyDTOList.add(operationPolicyDTO);
+                }
+                urlMappingDTO.setOperationPolicies(operationPolicyDTOList);
                 urlMappingsDTO.add(urlMappingDTO);
             }
+            List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
+            for (OperationPolicy apiPolicy : model.getApiPolicies()) {
+                OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                operationPolicyDTO.setPolicyId(apiPolicy.getPolicyId());
+                operationPolicyDTO.setPolicyName(apiPolicy.getPolicyName());
+                operationPolicyDTO.setPolicyVersion(apiPolicy.getPolicyVersion());
+                operationPolicyDTO.setDirection(apiPolicy.getDirection());
+                operationPolicyDTO.setOrder(apiPolicy.getOrder());
+                operationPolicyDTO.setParameters(apiPolicy.getParameters());
+                apiPolicies.add(operationPolicyDTO);
+            }
+            apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
         }
         return apidto;
     }
 
-    public static APIListDTO fromAPIToAPIListDTO(API model) {
+    public static APIListDTO fromAPIToAPIListDTO(API model) throws APIManagementException {
 
         APIListDTO apiListdto = new APIListDTO();
         if (model != null) {
@@ -124,6 +153,8 @@ public class SubscriptionValidationDataUtil {
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
             apidto.setOrganization(model.getOrganization());
+            apidto.setSecurityScheme(RestApiCommonUtil.getLoggedInUserProvider().
+                    getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -133,8 +164,32 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
+                List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
+                for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
+                    OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                    operationPolicyDTO.setPolicyId(operationPolicy.getPolicyId());
+                    operationPolicyDTO.setPolicyName(operationPolicy.getPolicyName());
+                    operationPolicyDTO.setPolicyVersion(operationPolicy.getPolicyVersion());
+                    operationPolicyDTO.setDirection(operationPolicy.getDirection());
+                    operationPolicyDTO.setOrder(operationPolicy.getOrder());
+                    operationPolicyDTO.setParameters(operationPolicy.getParameters());
+                    operationPolicyDTOList.add(operationPolicyDTO);
+                }
+                urlMappingDTO.setOperationPolicies(operationPolicyDTOList);
                 urlMappingsDTO.add(urlMappingDTO);
             }
+            List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
+            for (OperationPolicy apiPolicy : model.getApiPolicies()) {
+                OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
+                operationPolicyDTO.setPolicyId(apiPolicy.getPolicyId());
+                operationPolicyDTO.setPolicyName(apiPolicy.getPolicyName());
+                operationPolicyDTO.setPolicyVersion(apiPolicy.getPolicyVersion());
+                operationPolicyDTO.setDirection(apiPolicy.getDirection());
+                operationPolicyDTO.setParameters(apiPolicy.getParameters());
+                operationPolicyDTO.setOrder(apiPolicy.getOrder());
+                apiPolicies.add(operationPolicyDTO);
+            }
+            apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
             apiListdto.setCount(1);
             apiListdto.getList().add(apidto);
@@ -144,7 +199,7 @@ public class SubscriptionValidationDataUtil {
         return apiListdto;
     }
 
-    public static APIListDTO fromAPIListToAPIListDTO(List<API> apiList) {
+    public static APIListDTO fromAPIListToAPIListDTO(List<API> apiList) throws APIManagementException {
 
         APIListDTO apiListDTO = new APIListDTO();
 
@@ -207,7 +262,8 @@ public class SubscriptionValidationDataUtil {
                 subscriptionDTO.setSubscriptionId(subsModel.getSubscriptionId());
                 subscriptionDTO.setPolicyId(subsModel.getPolicyId());
                 subscriptionDTO.setSubscriptionState(subsModel.getSubscriptionState());
-
+                subscriptionDTO.setApiName(subsModel.getApiName());
+                subscriptionDTO.setApiVersion(subsModel.getApiVersion());
                 subscriptionListDTO.getList().add(subscriptionDTO);
 
             }

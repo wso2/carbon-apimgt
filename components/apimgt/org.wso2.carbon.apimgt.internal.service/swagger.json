@@ -85,17 +85,14 @@
     },
     "/revokedjwt" : {
       "get" : {
-        "summary" : "JTIs of revoked jwt tokens",
-        "description" : "This will provide access to JTIs of revoked JWT tokens in database.\n",
+        "summary" : "JTIs of revoked jwt tokens and application and subject entity revocation event data",
+        "description" : "This will provide access to \n  - JTIs of directly revoked JWT tokens in database\n  - consumer application information of revoked JWTs due to application change events\n  - subject entity information of revoked JWTs due to user change events\n",
         "parameters" : [ ],
         "responses" : {
           "200" : {
-            "description" : "An array of revoke JWTs",
+            "description" : "An object of revoke JWTs, revoked subject entities, revoked consumer keys",
             "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/RevokedJWTList"
-              }
+              "$ref" : "#/definitions/RevokedEvents"
             }
           },
           "default" : {
@@ -954,10 +951,26 @@
         }
       }
     },
-    "RevokedJWTList" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "#/definitions/RevokedJWT"
+    "RevokedEvents" : {
+      "properties" : {
+        "revokedJWTList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RevokedJWT"
+          }
+        },
+        "revokedJWTSubjectEntityList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RevokedJWTSubjectEntity"
+          }
+        },
+        "revokedJWTConsumerKeyList" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RevokedJWTConsumerKey"
+          }
+        }
       }
     },
     "RevokedJWT" : {
@@ -970,6 +983,48 @@
           "type" : "integer",
           "format" : "int64",
           "description" : "expiry timestamp."
+        }
+      }
+    },
+    "RevokedJWTSubjectEntity" : {
+      "properties" : {
+        "entity_id" : {
+          "type" : "string",
+          "description" : "Subject Id of the revoked JWT(s). Can be user id or client id."
+        },
+        "entity_type" : {
+          "type" : "string",
+          "description" : "Type of the subject id. User id or client id."
+        },
+        "revocation_time" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "revocation timestamp."
+        },
+        "organization" : {
+          "type" : "string",
+          "description" : "Organization of the revoked subject entity."
+        }
+      }
+    },
+    "RevokedJWTConsumerKey" : {
+      "properties" : {
+        "consumer_key" : {
+          "type" : "string",
+          "description" : "consumer key of the JWT."
+        },
+        "revocation_time" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "revocation timestamp."
+        },
+        "type" : {
+          "type" : "string",
+          "description" : "revoked consumer key type."
+        },
+        "organization" : {
+          "type" : "string",
+          "description" : "organization of the revoked consumer key"
         }
       }
     },
@@ -1151,11 +1206,22 @@
           "example" : false,
           "description" : "Whether this is the default version of the API."
         },
+        "apiPolicies" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OperationPolicy"
+          }
+        },
         "urlMappings" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/URLMapping"
           }
+        },
+        "securityScheme" : {
+          "type" : "string",
+          "example" : "Oauth2,api_key",
+          "description" : "Available authentication methods of the API."
         }
       }
     },
@@ -1265,6 +1331,9 @@
     },
     "KeyManager" : {
       "properties" : {
+        "uuid" : {
+          "type" : "string"
+        },
         "name" : {
           "type" : "string"
         },
@@ -1274,10 +1343,10 @@
         "enabled" : {
           "type" : "boolean"
         },
-        "tenantDomain" : {
+        "organization" : {
           "type" : "string"
         },
-        "configuration" : {
+        "additionalProperties" : {
           "type" : "object",
           "properties" : { }
         },
@@ -1333,6 +1402,12 @@
           "type" : "integer"
         },
         "subscriptionState" : {
+          "type" : "string"
+        },
+        "apiName" : {
+          "type" : "string"
+        },
+        "apiVersion" : {
           "type" : "string"
         }
       }
@@ -1749,8 +1824,41 @@
           "items" : {
             "type" : "string"
           }
+        },
+        "operationPolicies" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OperationPolicy"
+          }
         }
       }
+    },
+    "OperationPolicy" : {
+      "properties" : {
+        "policyName" : {
+          "type" : "string"
+        },
+        "policyVersion" : {
+          "type" : "string"
+        },
+        "direction" : {
+          "type" : "string"
+        },
+        "policyId" : {
+          "type" : "string"
+        },
+        "order" : {
+          "type" : "integer"
+        },
+        "parameters" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      },
+      "title" : "Operation Policy"
     },
     "Pagination" : {
       "properties" : {
@@ -1866,7 +1974,7 @@
     "EventCountLimit" : {
       "title" : "Event Count Limit object",
       "allOf" : [ {
-        "$ref" : "#/components/schemas/ThrottleLimitBase"
+        "$ref" : "#/definitions/ThrottleLimitBase"
       }, {
         "type" : "object",
         "required" : [ "eventCount" ],

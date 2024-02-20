@@ -28,7 +28,8 @@ public class EnvironmentDTO   {
     private String id = null;
     private String name = null;
     private String displayName = null;
-    private String type = null;
+    private String type = "hybrid";
+    private String gatewayType = "Regular";
     private String serverUrl = null;
     private String provider = null;
     private Boolean showInApiConsole = null;
@@ -105,6 +106,23 @@ public class EnvironmentDTO   {
   }
   public void setType(String type) {
     this.type = type;
+  }
+
+  /**
+   **/
+  public EnvironmentDTO gatewayType(String gatewayType) {
+    this.gatewayType = gatewayType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Regular", value = "")
+  @JsonProperty("gatewayType")
+  public String getGatewayType() {
+    return gatewayType;
+  }
+  public void setGatewayType(String gatewayType) {
+    this.gatewayType = gatewayType;
   }
 
   /**
@@ -228,6 +246,7 @@ public class EnvironmentDTO   {
         Objects.equals(name, environment.name) &&
         Objects.equals(displayName, environment.displayName) &&
         Objects.equals(type, environment.type) &&
+        Objects.equals(gatewayType, environment.gatewayType) &&
         Objects.equals(serverUrl, environment.serverUrl) &&
         Objects.equals(provider, environment.provider) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
@@ -238,7 +257,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, serverUrl, provider, showInApiConsole, vhosts, endpointURIs, additionalProperties);
+    return Objects.hash(id, name, displayName, type, gatewayType, serverUrl, provider, showInApiConsole, vhosts, endpointURIs, additionalProperties);
   }
 
   @Override
@@ -250,6 +269,7 @@ public class EnvironmentDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    serverUrl: ").append(toIndentedString(serverUrl)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    showInApiConsole: ").append(toIndentedString(showInApiConsole)).append("\n");

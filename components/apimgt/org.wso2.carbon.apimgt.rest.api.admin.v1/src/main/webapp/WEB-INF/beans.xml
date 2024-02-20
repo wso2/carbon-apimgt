@@ -40,6 +40,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.SwaggerYamlApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.GlobalKeyManagersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.AlertTypesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApi"/>
@@ -49,6 +50,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigSchemaApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
@@ -66,7 +68,7 @@
 
     <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor">
         <property name="majorVersion" value="v4" />
-        <property name="latestVersion" value="v4.0" />
+        <property name="latestVersion" value="v4.1" />
     </bean>
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />

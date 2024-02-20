@@ -18,12 +18,12 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Entity for keeping API related information.
@@ -41,7 +41,9 @@ public class API implements CacheableEntity<String> {
     private String organization;
     private boolean deployed = false;
     private boolean isDefaultVersion = false;
+    private String securityScheme;
     private String revisionId;
+    private List<OperationPolicy> apiPolicies = new ArrayList<>();
 
     public API() {
     }
@@ -204,8 +206,10 @@ public class API implements CacheableEntity<String> {
                 ", policy='" + policy + '\'' +
                 ", apiType='" + apiType + '\'' +
                 ", status='" + status + '\'' +
+                ", securityScheme='" + securityScheme + '\'' +
                 ", isDefaultVersion=" + isDefaultVersion +
                 ", urlMappings=" + urlMappings +
+                ", apiPolicies=" + apiPolicies +
                 '}';
     }
 
@@ -303,5 +307,21 @@ public class API implements CacheableEntity<String> {
 
     public void setRevisionId(String revisionId) {
         this.revisionId = revisionId;
+    }
+
+    public String getSecurityScheme() {
+        return securityScheme;
+    }
+
+    public void setSecurityScheme(String securityScheme) {
+        this.securityScheme = securityScheme;
+    }
+    
+    public void setApiPolicies(List<OperationPolicy> apiPolicies) {
+        this.apiPolicies = apiPolicies;
+    }
+
+    public List<OperationPolicy> getApiPolicies() {
+        return apiPolicies;
     }
 }

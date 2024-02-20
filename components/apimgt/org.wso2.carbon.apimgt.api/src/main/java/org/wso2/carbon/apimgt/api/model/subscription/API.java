@@ -18,8 +18,13 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Entity for keeping API related information.
@@ -39,6 +44,7 @@ public class API implements CacheableEntity<String> {
     private String status;
     private String revision;
     private String organization;
+    private Set<OperationPolicy> apiPolicies = new HashSet<>();
 
     public String getRevision() {
 
@@ -198,5 +204,13 @@ public class API implements CacheableEntity<String> {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public void setApiPolicy(OperationPolicy apiPolicy) {
+        this.apiPolicies.add(apiPolicy);
+    }
+
+    public Set<OperationPolicy> getApiPolicies() {
+        return apiPolicies;
     }
 }

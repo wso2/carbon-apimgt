@@ -1957,6 +1957,7 @@ paths:
               - AM_APPLICATION_DELETION
               - AM_API_STATE
               - AM_API_PRODUCT_STATE
+              - AM_REVISION_DEPLOYMENT
       responses:
         200:
           description: |
@@ -3173,6 +3174,177 @@ paths:
           description: |
             OK.
             Key Manager successfully deleted.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v2/global-key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
+
+  ######################################################
+  # The "Global Key Manager Collection" resource API
+  ######################################################
+  /global-key-managers:
+    get:
+      tags:
+        - Global Key Manager (Collection)
+      summary: Get all Global Key managers
+      description: |
+        Get all Global Key managers
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManagers returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManagerList'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+            - apim:keymanagers_manage
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v2/global-key-managers"'
+
+    post:
+      tags:
+        - Global Key Manager (Collection)
+      summary: Add a new Global Key Manager
+      description: |
+        Add a new Global Key Manager
+      requestBody:
+        description: |
+          Key Manager object that should to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyManager'
+        required: true
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManager'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+            - apim:keymanagers_manage
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json 
+          "https://127.0.0.1:9443/api/am/admin/v2/global-key-managers"'
+
+  ######################################################
+  # The "Global Individual KeyManager" resource APIs
+  ######################################################
+  /global-key-managers/{keyManagerId}:
+    get:
+      tags:
+        - Global Key Manager (Individual)
+      summary: Get a Global Key Manager Configuration
+      description: |
+        Retrieve a single Global Key Manager Configuration. We should provide the Id of the KeyManager as a path 
+        parameter.
+      parameters:
+        - $ref: '#/components/parameters/keyManagerId'
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManager Configuration returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManager'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+            - apim:keymanagers_manage
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
+
+    put:
+      tags:
+        - Global Key Manager (Individual)
+      summary: Update a Global Key Manager
+      description: |
+        Update a Global Key Manager by keyManager id
+      parameters:
+        - $ref: '#/components/parameters/keyManagerId'
+      requestBody:
+        description: |
+          Key Manager object with updated information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyManager'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Label updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManager'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+            - apim:keymanagers_manage
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v3/key-managers/8d263942-a6df-4cc2-a804-7a2525501450"'
+
+    delete:
+      tags:
+        - Global Key Manager (Individual)
+      summary: Delete a Global Key Manager
+      description: |
+        Delete a Global Key Manager by keyManager id
+      parameters:
+        - $ref: '#/components/parameters/keyManagerId'
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager successfully deleted.
           content: {}
         404:
           $ref: '#/components/responses/NotFound'
@@ -3225,6 +3397,106 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F "type=WSO2-IS" "https://127.0.0.1:9443/api/am/admin/v4/key-managers/discover"'
 
+  ######################################################
+  # The "API Collection" resource APIs
+  ######################################################
+  /apis:
+    get:
+      tags:
+        - APIs
+      summary: |
+        Retrieve/Search APIs
+      description: |
+        This operation provides you a list of available APIs qualifying under a given search condition.
+        Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          description: |
+            **Search and get all apis in admin portal**.
+
+            You can search by proving a keyword.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying APIs is returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResultList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:api_provider_change
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis"'
+      operationId: getAllAPIs
+  ######################################################
+  # Change Api Provider
+  ######################################################
+  /apis/{apiId}/change-provider:
+    post:
+      tags:
+        - Api Provider Change
+      summary: Update the api provider
+      description: |
+        Update the api provider
+      operationId: providerNamePost
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Api Provider updated.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:api_provider_change
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+              -H "Content-Type: application/json" "https://127.0.0.1:9443/api/am/admin/v4/provider/admin/apis/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
 components:
   schemas:
     Error:
@@ -3432,6 +3704,8 @@ components:
           properties:
             defaultLimit:
               $ref: '#/components/schemas/ThrottleLimit'
+            burstLimit:
+              $ref: '#/components/schemas/BurstLimit'
     ApplicationThrottlePolicyList:
       title: Application Level Throttling Policy List
       type: object
@@ -3756,6 +4030,18 @@ components:
           $ref: '#/components/schemas/BandwidthLimit'
         eventCount:
           $ref: '#/components/schemas/EventCountLimit'
+    BurstLimit:
+      title: Burst Limit object
+      type: object
+      properties:
+        rateLimitCount:
+          type: integer
+          description: Burst control request count
+          example: 10
+        rateLimitTimeUnit:
+          type: string
+          description: Burst control time unit
+          example: min
     MonetizationInfo:
       title: API monetization details object
       required:
@@ -4054,6 +4340,14 @@ components:
         provider:
           type: string
           example: wso2
+        type:
+          type: string
+          default: hybrid
+          example: hybrid
+        gatewayType:
+          type: string
+          example: Regular
+          default: Regular
         description:
           maxLength: 1023
           type: string
@@ -4296,6 +4590,10 @@ components:
           type: array
           items:
             type: string
+        gatewayTypes:
+          type: array
+          items:
+            type: string
         keyManagerConfiguration:
           type: array
           items:
@@ -4517,6 +4815,9 @@ components:
         enabled:
           type: boolean
           example: true
+        global:
+          type: boolean
+          example: true
         additionalProperties:
           type: object
           properties: {}
@@ -4524,6 +4825,22 @@ components:
             self_validate_jwt: true
             Username: admin
             Password: admin
+        permissions:
+          type: object
+          properties:
+            permissionType:
+              type: string
+              example: ALLOW
+              default: PUBLIC
+              enum:
+                - PUBLIC
+                - ALLOW
+                - DENY
+            roles:
+              type: array
+              items:
+                type: string
+                example: Internal/subscriber
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).
@@ -4568,6 +4885,9 @@ components:
           type: string
           example: This is a key manager for Developers
         enabled:
+          type: boolean
+          example: true
+        isGlobal:
           type: boolean
           example: true
         tokenType:
@@ -4773,6 +5093,7 @@ components:
             - API_PRODUCT_STATE
             - SUBSCRIPTION_DELETION
             - SUBSCRIPTION_UPDATE
+            - REVISION_DEPLOYMENT
         workflowStatus:
           type: string
           description: |
@@ -4920,6 +5241,55 @@ components:
             Link to the previous subset of resources qualified.
             Empty if current subset is the first subset returned.
             example: ""
+    PaginationApis:
+      title: Pagination
+      type: object
+      properties:
+        offset:
+          type: integer
+          example: 0
+        limit:
+          type: integer
+          example: 1
+        total:
+          type: integer
+          example: 10
+        next:
+          type: string
+          description: |
+            Link to the next subset of resources qualified.
+            Empty if no more resources are to be returned.
+        previous:
+          type: string
+          description: |
+            Link to the previous subset of resources qualified.
+            Empty if current subset is the first subset returned.
+    SearchResultList:
+      title: Unified Search Result List
+      type: object
+      properties:
+        apis:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiResult'
+        count:
+          type: integer
+          description: |
+            Number of results returned.
+          example: 1
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    ApiResult:
+      type: object
+      properties:
+        provider:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        id:
+          type: string
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -5219,6 +5589,14 @@ components:
       required: true
       schema:
         type: string
+    apiId:
+      name: apiId
+      in: path
+      description: |
+        **API ID** consisting of the **UUID** of the API.
+      required: true
+      schema:
+        type: string
   securitySchemes:
     OAuth2Security:
       type: oauth2
@@ -5260,3 +5638,4 @@ components:
             apim:role_manage: Manage system roles
             apim:admin_application_view: View Applications
             apim:keymanagers_manage: Manage Key Managers
+            apim:api_provider_change: Retrieve and manage applications

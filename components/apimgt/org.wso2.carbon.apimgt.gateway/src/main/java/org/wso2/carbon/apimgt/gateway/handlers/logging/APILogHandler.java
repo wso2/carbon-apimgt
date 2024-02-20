@@ -81,7 +81,8 @@ public class APILogHandler {
 
         // Get API details and set custom properties to ThreadContext
         String path = ApiUtils.getFullRequestPath(messageContext);
-        TreeMap<String, API> selectedApis = Utils.getSelectedAPIList(path, GatewayUtils.getTenantDomain());
+        TreeMap<String, API> selectedApis = Utils.getSelectedAPIList(path,
+                (String) messageContext.getProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY));
         if (selectedApis.size() > 0) {
             String selectedPath = selectedApis.firstKey();
             API selectedApi = selectedApis.get(selectedPath);

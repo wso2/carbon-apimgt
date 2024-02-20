@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.common.jms.JMSConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -58,20 +59,10 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                                     payloadData.get(APIConstants.KeyManager.KeyManagerEvent.ORGANIZATION).asText();
                             String action = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.ACTION).asText();
                             String type = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.TYPE).asText();
-                            String tokenType = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.TOKEN_TYPE)
-                                    .asText();
-                            boolean enabled =
-                                    payloadData.get(APIConstants.KeyManager.KeyManagerEvent.ENABLED).asBoolean();
                             String value = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.VALUE).asText();
                             if (StringUtils.isNotEmpty(value)) {
                                 KeyManagerConfiguration keyManagerConfiguration =
                                         APIUtil.toKeyManagerConfiguration(value);
-                                keyManagerConfiguration.setTokenType(
-                                        KeyManagerConfiguration.TokenType.valueOf(tokenType.toUpperCase()));
-                                keyManagerConfiguration.setEnabled(enabled);
-                                keyManagerConfiguration.setName(name);
-                                keyManagerConfiguration.setType(type);
-                                keyManagerConfiguration.setTenantDomain(organization);
                                 if (APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD.equals(action)) {
                                     ServiceReferenceHolder.getInstance().getKeyManagerService()
                                             .addKeyManagerConfiguration(organization, name, type,
