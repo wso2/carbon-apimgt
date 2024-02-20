@@ -643,6 +643,12 @@ public class OASParserUtil {
         }
     }
 
+    /**
+     * Process a given response entry of the API definition.
+     *
+     * @param response  The response object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
+     */
     private static void setRefOfApiResponse(ApiResponse response, SwaggerUpdateContext context) {
         Content content = response.getContent();
         if (content != null) {
@@ -669,6 +675,12 @@ public class OASParserUtil {
         }
     }
 
+    /**
+     * Process a given response header entry of the API definition.
+     *
+     * @param header  The header object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
+     */
     private static void setRefOfApiResponseHeader(Header header, SwaggerUpdateContext context) {
         Content content = header.getContent();
         if (content != null) {
@@ -700,6 +712,12 @@ public class OASParserUtil {
         }
     }
 
+    /**
+     * Process a given example entry of the API definition.
+     *
+     * @param example  The example object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
+     */
     private static void setRefOfExample(Example example, SwaggerUpdateContext context) {
         String ref = example.get$ref();
         if (ref != null) {
