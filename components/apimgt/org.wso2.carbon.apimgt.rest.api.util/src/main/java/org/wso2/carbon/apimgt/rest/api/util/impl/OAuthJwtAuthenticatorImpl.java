@@ -35,8 +35,6 @@ import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
@@ -53,6 +51,9 @@ import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.application.common.model.IdentityProviderProperty;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationManagementUtil;
+import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
+import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -238,13 +239,12 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
 
         JWTValidationInfo jwtValidationInfo;
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
-        String subject = signedJWTInfo.getJwtClaimsSet().getSubject();
 
         if (StringUtils.isNotEmpty(issuer)) {
             //validate Issuer
             JWTValidator jwtValidator;
             try {
-                jwtValidator = validateAndGetJWTValidatorForIssuer(subject, issuer, maskedToken);
+                jwtValidator = validateAndGetJWTValidatorForIssuer(signedJWTInfo.getJwtClaimsSet());
             } catch (APIManagementException e) {
                 log.error(e.getMessage(), e);
                 return null;
@@ -309,67 +309,50 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
     }
 
     /**
-     * Get logged-in organization from the sub claim of the token.
-     *
-     * @param subject     Sub claim value
-     * @param maskedToken Masked token for logging
-     * @return Organization
-     */
-    private String getOrganizationFromSubject(String subject, String maskedToken) {
-        if (subject == null) {
-            log.error("Subject is not found in the token " + maskedToken);
-            return null;
-        }
-        return MultitenantUtils.getTenantDomain(subject);
-    }
-
-    /**
      * Retrieve JWT Validator for the given issuer.
      *
      * @param issuer       Issuer from the token
-     * @param organization Organization
-     * @param maskedToken  Masked token string for logging
      * @return JWTValidator implementation for the given issuer.
      */
-    private JWTValidator getJWTValidator(String issuer, String organization, String maskedToken) {
+    private JWTValidator getJWTValidator(String issuer) {
 
-        JWTValidator jwtValidator = APIMConfigUtil.getJWTValidatorMap().get(issuer);
-        if (jwtValidator == null) {
-            if (StringUtils.isNotEmpty(issuer) && StringUtils.isNotEmpty(organization)) {
-                KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(organization, issuer);
-                if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
-                    jwtValidator = keyManagerDto.getJwtValidator();
-                }
-            }
-        }
-        return jwtValidator;
+        return APIMConfigUtil.getJWTValidatorMap().get(issuer);
     }
 
     /**
      * Validate issuer in the token against the registered token issuers/default key manager issuer.
      *
-     * @param subject     Subject to derive the logged-in organization
-     * @param tokenIssuer Token issuer from the token
-     * @param maskedToken Masked token for logging purposes
+     * @param jwtClaimsSet JWT Claim set from the token
      * @return if issuer validation fails or success
      * @throws APIManagementException if an error occurs during validation
      */
-    private JWTValidator validateAndGetJWTValidatorForIssuer(String subject, String tokenIssuer, String maskedToken)
+    private JWTValidator validateAndGetJWTValidatorForIssuer(JWTClaimsSet jwtClaimsSet)
             throws APIManagementException {
 
-        String organization = getOrganizationFromSubject(subject, maskedToken);
+        String tokenIssuer = jwtClaimsSet.getIssuer();
         if (tokenIssuers != null && !tokenIssuers.isEmpty()) {
             if (tokenIssuers.containsKey(tokenIssuer)) {
-                return getJWTValidator(tokenIssuer, organization, maskedToken);
+                return getJWTValidator(tokenIssuer);
             }
             throw new APIManagementException("JWT token issuer validation failed. Reason: Issuer present in the JWT ("
                     + tokenIssuer + ") does not match with the token issuer (" + tokenIssuers.keySet() + ")");
         }
-        IdentityProvider residentIDP = validateAndGetResidentIDPForIssuer(organization, tokenIssuer);
+        String residentTenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
+        String consumerKey = (String) jwtClaimsSet.getClaim("azp");
+        if (consumerKey != null) {
+            try {
+                residentTenantDomain = OAuth2Util.getTenantDomainOfOauthApp(consumerKey);
+            } catch (IdentityOAuth2Exception | InvalidOAuthClientException e) {
+                throw new APIManagementException("JWT token issuer validation failed. Reason: Error while retrieving "
+                        + "organization for the consumer app: " + consumerKey);
+            }
+        }
+        IdentityProvider residentIDP
+                = validateAndGetResidentIDPForIssuer(residentTenantDomain, tokenIssuer);
         if (residentIDP == null) {
             //invalid issuer. invalid token
             throw new APIManagementException("JWT token issuer validation failed. Reason: Resident Identity Provider "
-                    + "cannot be found for the organization: " + organization);
+                    + "cannot be found for the organization: " + residentTenantDomain);
         }
         JWTValidator jwtValidator = new JWTValidatorImpl();
         TokenIssuerDto tokenIssuerDto = new TokenIssuerDto(tokenIssuer);
