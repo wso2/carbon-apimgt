@@ -480,8 +480,18 @@ public class OASParserUtil {
                     if (headers != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Header header = headers.get(refKey);
-                            Content content = header.getContent();
-                            extractReferenceFromContent(content, context);
+                            setRefOfApiResponseHeader(header, context);
+                        }
+                    }
+                }
+
+                if (EXAMPLES.equalsIgnoreCase(category)) {
+                    Map<String, Example> examples = sourceComponents.getExamples();
+
+                    if (examples != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Example example = examples.get(refKey);
+                            setRefOfExample(example, context);
                         }
                     }
                 }
@@ -652,14 +662,21 @@ public class OASParserUtil {
 
                 if (headers != null) {
                     for (Header header : headers.values()) {
-                        Content content = header.getContent();
-                        extractReferenceFromContent(content, context);
-                        String ref = header.get$ref();
-                        if (ref != null) {
-                            addToReferenceObjectMap(ref, context);
-                        }
+                        setRefOfApiResponseHeader(header, context);
                     }
                 }
+            }
+        }
+    }
+
+    private static void setRefOfApiResponseHeader(Header header, SwaggerUpdateContext context) {
+        Content content = header.getContent();
+        if (content != null) {
+            extractReferenceFromContent(content, context);
+        } else {
+            String ref = header.get$ref();
+            if (ref != null) {
+                addToReferenceObjectMap(ref, context);
             }
         }
     }
@@ -683,6 +700,13 @@ public class OASParserUtil {
         }
     }
 
+    private static void setRefOfExample(Example example, SwaggerUpdateContext context) {
+        String ref = example.get$ref();
+        if (ref != null) {
+            addToReferenceObjectMap(ref, context);
+        }
+    }
+
     private static void extractReferenceFromContent(Content content, SwaggerUpdateContext context) {
         if (content != null) {
             for (MediaType mediaType : content.values()) {
@@ -693,11 +717,8 @@ public class OASParserUtil {
                 Map<String, Example> examples = mediaType.getExamples();
                 if (examples != null) {
                     for (Map.Entry<String, Example> exampleEntry : examples.entrySet()) {
-                        Example exampleValue = exampleEntry.getValue();
-                        String ref = exampleValue.get$ref();
-                        if (ref != null) {
-                            addToReferenceObjectMap(ref, context);
-                        }
+                        Example example = exampleEntry.getValue();
+                        setRefOfExample(example, context);
                     }
                 }
             }
