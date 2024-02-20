@@ -8944,26 +8944,6 @@ public final class APIUtil {
         return temp;
     }
 
-    /**
-     * Helper method to retrieve default key manager configuration for the given organization.
-     *
-     * @param organization Organization
-     * @return KeyManagerConfigurationDTO
-     * @throws APIManagementException if an error occurs while retrieving latest default key manager configs
-     */
-    public static KeyManagerConfigurationDTO getDefaultKeyManagerConfiguration(String organization) throws
-            APIManagementException {
-
-        KeyManagerConfigurationDTO keyManagerConfiguration =
-                ApiMgtDAO.getInstance().getKeyManagerConfigurationByName(organization,
-                        APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
-        if (keyManagerConfiguration != null) {
-            APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
-            return keyManagerConfiguration;
-        }
-        return null;
-    }
-
     public static KeyManagerConfigurationDTO getAndSetDefaultKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO) throws APIManagementException {
 
