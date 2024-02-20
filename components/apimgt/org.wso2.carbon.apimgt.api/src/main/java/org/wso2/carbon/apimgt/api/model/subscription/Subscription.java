@@ -34,6 +34,12 @@ public class Subscription implements CacheableEntity<String> {
 
     private String apiName;
     private String apiVersion;
+    private String apiOrganization;
+    private String appOrganization;
+
+    public Subscription() {
+
+    }
 
     public int getSubscriptionId() {
 
@@ -144,5 +150,25 @@ public class Subscription implements CacheableEntity<String> {
     public void setApiVersion(String apiVersion) {
 
         this.apiVersion = apiVersion;
+    }
+
+    public String getApiOrganization() {
+
+        return apiOrganization;
+    }
+
+    public void setApiOrganization(String apiOrganization) {
+
+        this.apiOrganization = apiOrganization;
+    }
+
+    public String getAppOrganization() {
+
+        return appOrganization;
+    }
+
+    public void setAppOrganization(String appOrganization) {
+
+        this.appOrganization = appOrganization;
     }
 }

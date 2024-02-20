@@ -56,10 +56,10 @@ public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiServic
         if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
                 xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(apiId,
-                    name, version, gatewayLabel, type);
+                    gatewayLabel, type);
         } else {
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId,
-                    name, version, gatewayLabel, type, xWSO2Tenant);
+                    gatewayLabel, type, xWSO2Tenant);
         }
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {

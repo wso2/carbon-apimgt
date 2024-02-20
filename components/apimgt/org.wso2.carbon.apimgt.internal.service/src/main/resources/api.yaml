@@ -1106,7 +1106,10 @@ definitions:
         type: string
       apiVersion:
         type: string
-
+      apiOrganization:
+        type: string
+      applicationOrganization:
+        type: string
   #-----------------------------------------------------
   # The Synapse Artifacts  List resource
   #-----------------------------------------------------

@@ -28,8 +28,8 @@ import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.ApiMetadataProjectDto;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.MetadataDescriptorDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.EnvironmentDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.MetadataDescriptorDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
@@ -50,7 +50,7 @@ public class RuntimeArtifactGeneratorUtil {
 
     private static final Log log = LogFactory.getLog(RuntimeArtifactGeneratorUtil.class);
 
-    public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String name, String version,
+    public static RuntimeArtifactDto generateRuntimeArtifact(String apiId,
                                                              String gatewayLabel, String type, String tenantDomain)
             throws APIManagementException {
 
@@ -68,7 +68,7 @@ public class RuntimeArtifactGeneratorUtil {
         }
     }
 
-    public static RuntimeArtifactDto generateAllRuntimeArtifact(String apiId, String name, String version,
+    public static RuntimeArtifactDto generateAllRuntimeArtifact(String apiId,
                                                                 String gatewayLabel, String type)
             throws APIManagementException {
 

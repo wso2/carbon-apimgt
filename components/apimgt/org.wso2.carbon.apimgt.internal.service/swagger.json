@@ -1409,6 +1409,12 @@
         },
         "apiVersion" : {
           "type" : "string"
+        },
+        "apiOrganization" : {
+          "type" : "string"
+        },
+        "applicationOrganization" : {
+          "type" : "string"
         }
       }
     },
