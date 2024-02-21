@@ -512,13 +512,17 @@ public class APIHandlerServiceComponent {
             unbind = "unsetSynapseConfigurationService")
     protected void setSynapseConfigurationService(SynapseConfigurationService synapseConfigurationService) {
 
-        log.debug("Setting SynapseConfigurationService");
+        if (log.isDebugEnabled()) {
+            log.debug("Setting SynapseConfigurationService");
+        }
         ServiceReferenceHolder.getInstance().setSynapseConfigurationService(synapseConfigurationService);
     }
 
     protected void unsetSynapseConfigurationService(SynapseConfigurationService synapseConfigurationService) {
 
-        log.debug("Un-setting SynapseConfigurationService");
+        if (log.isDebugEnabled()) {
+            log.debug("Un-setting SynapseConfigurationService");
+        }
         ServiceReferenceHolder.getInstance().setSynapseConfigurationService(null);
     }
 }
