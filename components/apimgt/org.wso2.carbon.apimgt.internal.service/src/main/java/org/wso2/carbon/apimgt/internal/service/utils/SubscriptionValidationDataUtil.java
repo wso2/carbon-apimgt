@@ -264,6 +264,8 @@ public class SubscriptionValidationDataUtil {
                 subscriptionDTO.setSubscriptionState(subsModel.getSubscriptionState());
                 subscriptionDTO.setApiName(subsModel.getApiName());
                 subscriptionDTO.setApiVersion(subsModel.getApiVersion());
+                subscriptionDTO.setApiOrganization(subsModel.getApiOrganization());
+                subscriptionDTO.setApplicationOrganization(subsModel.getAppOrganization());
                 subscriptionListDTO.getList().add(subscriptionDTO);
 
             }

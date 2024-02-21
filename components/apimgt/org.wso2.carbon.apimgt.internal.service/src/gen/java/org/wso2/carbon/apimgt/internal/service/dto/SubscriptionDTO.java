@@ -26,6 +26,8 @@ public class SubscriptionDTO   {
     private String subscriptionState = null;
     private String apiName = null;
     private String apiVersion = null;
+    private String apiOrganization = null;
+    private String applicationOrganization = null;
 
   /**
    **/
@@ -197,6 +199,40 @@ public class SubscriptionDTO   {
     this.apiVersion = apiVersion;
   }
 
+  /**
+   **/
+  public SubscriptionDTO apiOrganization(String apiOrganization) {
+    this.apiOrganization = apiOrganization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiOrganization")
+  public String getApiOrganization() {
+    return apiOrganization;
+  }
+  public void setApiOrganization(String apiOrganization) {
+    this.apiOrganization = apiOrganization;
+  }
+
+  /**
+   **/
+  public SubscriptionDTO applicationOrganization(String applicationOrganization) {
+    this.applicationOrganization = applicationOrganization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("applicationOrganization")
+  public String getApplicationOrganization() {
+    return applicationOrganization;
+  }
+  public void setApplicationOrganization(String applicationOrganization) {
+    this.applicationOrganization = applicationOrganization;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -216,12 +252,14 @@ public class SubscriptionDTO   {
         Objects.equals(appId, subscription.appId) &&
         Objects.equals(subscriptionState, subscription.subscriptionState) &&
         Objects.equals(apiName, subscription.apiName) &&
-        Objects.equals(apiVersion, subscription.apiVersion);
+        Objects.equals(apiVersion, subscription.apiVersion) &&
+        Objects.equals(apiOrganization, subscription.apiOrganization) &&
+        Objects.equals(applicationOrganization, subscription.applicationOrganization);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionUUID, subscriptionId, policyId, apiUUID, apiId, applicationUUID, appId, subscriptionState, apiName, apiVersion);
+    return Objects.hash(subscriptionUUID, subscriptionId, policyId, apiUUID, apiId, applicationUUID, appId, subscriptionState, apiName, apiVersion, apiOrganization, applicationOrganization);
   }
 
   @Override
@@ -239,6 +277,8 @@ public class SubscriptionDTO   {
     sb.append("    subscriptionState: ").append(toIndentedString(subscriptionState)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
+    sb.append("    apiOrganization: ").append(toIndentedString(apiOrganization)).append("\n");
+    sb.append("    applicationOrganization: ").append(toIndentedString(applicationOrganization)).append("\n");
     sb.append("}");
     return sb.toString();
   }

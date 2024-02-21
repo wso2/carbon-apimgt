@@ -119,7 +119,9 @@ public class SubscriptionValidationSQLConstants {
                     "   API.API_NAME AS API_NAME," +
                     "   API.API_VERSION AS API_VERSION," +
                     "   SUBS.SUB_STATUS AS STATUS," +
-                    "   SUB.TENANT_ID AS TENANT_ID" +
+                    "   SUB.TENANT_ID AS TENANT_ID," +
+                    "   APP.ORGANIZATION AS APP_ORGANIZATION,"+
+                    "   API.ORGANIZATION AS API_ORGANIZATION"+
                     " FROM " +
                     "   AM_SUBSCRIPTION SUBS," +
                     "   AM_APPLICATION APP," +
@@ -142,7 +144,9 @@ public class SubscriptionValidationSQLConstants {
                     "   API.API_NAME AS API_NAME," +
                     "   API.API_VERSION AS API_VERSION," +
                     "   SUBS.SUB_STATUS AS STATUS," +
-                    "   SUB.TENANT_ID AS TENANT_ID" +
+                    "   SUB.TENANT_ID AS TENANT_ID," +
+                    "   APP.ORGANIZATION AS APP_ORGANIZATION,"+
+                    "   API.ORGANIZATION AS API_ORGANIZATION"+
                     " FROM " +
                     "   AM_SUBSCRIPTION SUBS," +
                     "   AM_APPLICATION APP," +
@@ -163,7 +167,9 @@ public class SubscriptionValidationSQLConstants {
                     "   AM_API.API_UUID AS API_UUID," +
                     "   AM_API.API_NAME AS API_NAME," +
                     "   AM_API.API_VERSION AS API_VERSION," +
-                    "   AM_SUBSCRIPTION.SUB_STATUS AS STATUS" +
+                    "   AM_SUBSCRIPTION.SUB_STATUS AS STATUS," +
+                    "   AM_APPLICATION.ORGANIZATION AS APP_ORGANIZATION,"+
+                    "   AM_API.ORGANIZATION AS API_ORGANIZATION"+
                     " FROM " +
                     "   AM_SUBSCRIPTION," +
                     "   AM_APPLICATION," +
@@ -184,7 +190,9 @@ public class SubscriptionValidationSQLConstants {
                     "   AM_API.API_UUID AS API_UUID," +
                     "   AM_API.API_NAME AS API_NAME," +
                     "   AM_API.API_VERSION AS API_VERSION," +
-                    "   AM_SUBSCRIPTION.SUB_STATUS AS STATUS" +
+                    "   AM_SUBSCRIPTION.SUB_STATUS AS STATUS," +
+                    "   AM_APPLICATION.ORGANIZATION AS APP_ORGANIZATION,"+
+                    "   AM_API.ORGANIZATION AS API_ORGANIZATION"+
                     " FROM " +
                     "   AM_SUBSCRIPTION," +
                     "   AM_APPLICATION," +
@@ -281,7 +289,9 @@ public class SubscriptionValidationSQLConstants {
                     "   API.API_NAME AS API_NAME," +
                     "   API.API_VERSION AS API_VERSION," +
                     "   SUBS.SUB_STATUS AS STATUS," +
-                    "   SUB.TENANT_ID AS TENANT_ID" +
+                    "   SUB.TENANT_ID AS TENANT_ID," +
+                    "   APP.ORGANIZATION AS APP_ORGANIZATION,"+
+                    "   API.ORGANIZATION AS API_ORGANIZATION"+
                     " FROM " +
                     "   AM_SUBSCRIPTION SUBS," +
                     "   AM_APPLICATION APP," +
