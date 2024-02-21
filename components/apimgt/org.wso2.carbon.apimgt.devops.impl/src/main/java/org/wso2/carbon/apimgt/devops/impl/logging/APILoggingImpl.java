@@ -73,9 +73,10 @@ public class APILoggingImpl {
         publishLogAPIData(tenantId, apiId, logLevel, resourceMethod, resourcePath);
     }
 
-    private void publishLogAPIData(String tenantId, String apiId, String logLevel, String resourceMethod, String resourcePath) throws APIManagementException {
+    private void publishLogAPIData(String tenantId, String apiId, String logLevel, String resourceMethod,
+            String resourcePath) throws APIManagementException {
         APIEvent apiEvent = new APIEvent(apiId, logLevel, APIConstants.EventType.UDATE_API_LOG_LEVEL.name(),
-                apiMgtDAO.getAPIContext(apiId), resourceMethod, resourcePath, tenantId);
+                apiMgtDAO.getAPIContext(apiId), resourceMethod, resourcePath);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 

@@ -41,8 +41,8 @@ public class APIEvent extends Event {
     private APIConstants.EventAction action;
     private String securityScheme;
 
-    public APIEvent(String uuid, String logLevel, String type, String apiContext,
-                    String resourceMethod, String resourcePath, String tenantId) {
+    public APIEvent(String uuid, String logLevel, String type, String apiContext, String resourceMethod,
+            String resourcePath) {
         this.uuid = uuid;
         this.logLevel = logLevel;
         this.type = type;
