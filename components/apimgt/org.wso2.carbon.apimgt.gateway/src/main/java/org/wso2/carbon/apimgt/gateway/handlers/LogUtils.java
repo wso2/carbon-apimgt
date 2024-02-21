@@ -30,7 +30,9 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides util methods for the LogsHandler
@@ -138,7 +140,7 @@ class LogUtils {
         Collection<API> apiSet = messageContext.getEnvironment().getSynapseConfiguration().getAPIs();
         //identify the api
         for (API api : apiSet) {
-            if (ApiUtils.identifyApi(api, messageContext)) {
+            if (ApiUtils.identifySelectedAPI(api, messageContext)) {
                 selectedApi = api;
                 break;
             }
@@ -162,15 +164,16 @@ class LogUtils {
                         for (Map.Entry<Map<String, String>, String> entry : logProperties.entrySet()) {
                             Map<String, String> key = entry.getKey();
                             //if resource path is empty, proceeding with API level logs
-                            if (selectedApi.getContext().equals(key.get("context"))) {
-                                if (key.get("resourcePath") == null && key.get("resourceMethod") == null) {
+                            if (selectedApi.getContext().equals(key.get(APIConstants.API_CONTEXT_FOR_RESOURCE))) {
+                                if (key.get(APIConstants.PATH_FOR_RESOURCE) == null && key.get(
+                                        APIConstants.METHOD_FOR_RESOURCE) == null) {
                                     apiLogLevel = entry.getValue();
                                     //matching the methods first and then the resource path
-                                } else if (httpMethod.equals(key.get("resourceMethod"))) {
-                                    if (helper.getString().equals(key.get("resourcePath"))) {
+                                } else if (httpMethod.equals(key.get(APIConstants.METHOD_FOR_RESOURCE))) {
+                                    if (helper.getString().equals(key.get(APIConstants.PATH_FOR_RESOURCE))) {
                                         resourceLogLevel = entry.getValue();
-                                        resourcePath = key.get("resourcePath");
-                                        resourceMethod = key.get("resourceMethod");
+                                        resourcePath = key.get(APIConstants.PATH_FOR_RESOURCE);
+                                        resourceMethod = key.get(APIConstants.METHOD_FOR_RESOURCE);
                                     }
                                 }
                             }

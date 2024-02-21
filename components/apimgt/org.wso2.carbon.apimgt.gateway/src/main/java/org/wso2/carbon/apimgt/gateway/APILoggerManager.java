@@ -60,14 +60,16 @@ public class APILoggerManager {
                 JSONObject apiLoggerObject = apiLogArray.getJSONObject(i);
                 String resourceMethod = null;
                 String resourcePath = null;
-                if(!apiLoggerObject.isNull("resourceMethod") && !apiLoggerObject.isNull("resourcePath") ){
-                    resourceMethod = apiLoggerObject.getString("resourceMethod");
-                    resourcePath = apiLoggerObject.getString("resourcePath");
+                if (!apiLoggerObject.isNull(APIConstants.METHOD_FOR_RESOURCE) && !apiLoggerObject.isNull(
+                        APIConstants.PATH_FOR_RESOURCE)) {
+                    resourceMethod = apiLoggerObject.getString(APIConstants.METHOD_FOR_RESOURCE);
+                    resourcePath = apiLoggerObject.getString(APIConstants.PATH_FOR_RESOURCE);
                 }
                 Map<String, String> properties = new HashMap<>();
-                properties.put("context", apiLoggerObject.getString("context"));
-                properties.put("resourceMethod", resourceMethod);
-                properties.put("resourcePath", resourcePath);
+                properties.put(APIConstants.API_CONTEXT_FOR_RESOURCE,
+                        apiLoggerObject.getString(APIConstants.API_CONTEXT_FOR_RESOURCE));
+                properties.put(APIConstants.METHOD_FOR_RESOURCE, resourceMethod);
+                properties.put(APIConstants.PATH_FOR_RESOURCE, resourcePath);
                 logProperties.put(properties, apiLoggerObject.getString("logLevel"));
             }
             if (log.isDebugEnabled()) {
@@ -80,9 +82,9 @@ public class APILoggerManager {
 
     public void updateLoggerMap(String apiContext, String logLevel, String resourceMethod, String resourcePath) {
         Map<String, String> properties = new HashMap<>();
-        properties.put("context", apiContext);
-        properties.put("resourcePath", resourcePath);
-        properties.put("resourceMethod", resourceMethod);
+        properties.put(APIConstants.API_CONTEXT_FOR_RESOURCE, apiContext);
+        properties.put(APIConstants.PATH_FOR_RESOURCE, resourcePath);
+        properties.put(APIConstants.METHOD_FOR_RESOURCE, resourceMethod);
         logProperties.put(properties, logLevel);
     }
 
