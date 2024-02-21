@@ -316,6 +316,20 @@ public class OAS3ParserTest extends OASTestBase {
                         + "publisher" + File.separator + "oas3_with_default_oauth_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionEdited, response);
+
+        // Testing if the different default implicit authorizationUrl is replaced with the default value.
+        // This is a test for the fix 9620. Earlier value was replaced with the default 'https;//test.com value.
+        // Now it should not be the case.
+        swagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
+                        + "publisher" + File.separator + "oas3_with_default_implicit_authorization_url.json"),
+                "UTF-8");
+        response = parser.getOASDefinitionForPublisher(api, swagger);
+        oasDefinitionEdited = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
+                        + "publisher" + File.separator + "oas3_with_default_implicit_authorization_url_response.json"),
+                "UTF-8");
+        Assert.assertEquals(oasDefinitionEdited, response);
     }
 
 
