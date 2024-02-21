@@ -211,7 +211,7 @@ public class KeyManagerHolder {
                         tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
                     } else {
                         X509Certificate x509Certificate =
-                                APIUtil.retrieveCertificateFromContent((String) certificateValue);
+                                APIUtil.retrieveCertificateFromURLEncodedContent((String) certificateValue);
                         if (x509Certificate != null) {
                             tokenIssuerDto.setCertificate(x509Certificate);
                         }

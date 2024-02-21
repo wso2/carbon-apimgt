@@ -20,8 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.util.impl;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +27,6 @@ import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -48,12 +45,8 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.common.model.FederatedAuthenticatorConfig;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
-import org.wso2.carbon.identity.application.common.model.IdentityProviderProperty;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationManagementUtil;
-import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
-import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.idp.mgt.IdentityProviderManager;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -63,9 +56,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.security.cert.X509Certificate;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -338,17 +328,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     + tokenIssuer + ") does not match with the token issuer (" + tokenIssuers.keySet() + ")");
         }
         String residentTenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
-        String consumerKey = (String) jwtClaimsSet.getClaim("azp");
-        if (consumerKey != null) {
-            try {
-                residentTenantDomain = OAuth2Util.getTenantDomainOfOauthApp(consumerKey);
-            } catch (IdentityOAuth2Exception | InvalidOAuthClientException e) {
-                throw new APIManagementException("JWT token issuer validation failed. Reason: Error while retrieving "
-                        + "organization for the consumer app: " + consumerKey);
-            }
-        }
-        IdentityProvider residentIDP
-                = validateAndGetResidentIDPForIssuer(residentTenantDomain, tokenIssuer);
+        IdentityProvider residentIDP = validateAndGetResidentIDPForIssuer(residentTenantDomain, tokenIssuer);
         if (residentIDP == null) {
             //invalid issuer. invalid token
             throw new APIManagementException("JWT token issuer validation failed. Reason: Resident Identity Provider "
@@ -357,45 +337,20 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         JWTValidator jwtValidator = new JWTValidatorImpl();
         TokenIssuerDto tokenIssuerDto = new TokenIssuerDto(tokenIssuer);
         if (residentIDP.getCertificate() != null) {
-            tokenIssuerDto.setCertificate(retrieveCertificateFromContent(residentIDP.getCertificate()));
+            X509Certificate certificate = APIUtil.retrieveCertificateFromContent(residentIDP.getCertificate());
+            if (certificate == null) {
+                throw new APIManagementException("JWT token issuer validation failed. Reason: Certificate for resident"
+                        + " identity provider is not in base64 encoded format in organization: "
+                        + residentTenantDomain);
+            }
+            tokenIssuerDto.setCertificate(certificate);
+
         } else {
-            JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
-            jwksConfigurationDTO.setEnabled(true);
-            jwksConfigurationDTO.setUrl(getJwksUriForIDP(residentIDP));
-            tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
+            throw new APIManagementException("JWT token issuer validation failed. Reason: Certificate for resident" +
+                    " identity provider cannot be found for the organization: " + residentTenantDomain);
         }
         jwtValidator.loadTokenIssuerConfiguration(tokenIssuerDto);
         return jwtValidator;
-    }
-
-    /**
-     * Retrieve JWKS URI configured for the resident IDP.
-     *
-     * @param idp IdentityProvider
-     * @return JWKS URI
-     */
-    private String getJwksUriForIDP(IdentityProvider idp) {
-
-        String jwksUri = null;
-        IdentityProviderProperty[] identityProviderProperties = idp.getIdpProperties();
-        if (!ArrayUtils.isEmpty(identityProviderProperties)) {
-            for (IdentityProviderProperty identityProviderProperty : identityProviderProperties) {
-                if (StringUtils.equals(identityProviderProperty.getName(), JWKS_URI)) {
-                    jwksUri = identityProviderProperty.getValue();
-                    if (log.isDebugEnabled()) {
-                        log.debug("JWKS endpoint set for the identity provider : " + idp.getIdentityProviderName()
-                                + ", jwks_uri : " + jwksUri);
-                    }
-                    break;
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("JWKS endpoint not specified for the identity provider : "
-                                + idp.getIdentityProviderName());
-                    }
-                }
-            }
-        }
-        return jwksUri;
     }
 
     /**
@@ -464,29 +419,5 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     OIDC_IDP_ENTITY_ID).getValue();
         }
         return jwtIssuer.equals(issuer) ? residentIdentityProvider : null;
-    }
-
-    /**
-     * Util method to convert base64 encoded certificate content to X509Certificate instance.
-     *
-     * @param base64EncodedCertificate Base64 encoded cert string (not URL encoded)
-     * @return javax.security.cert.X509Certificate
-     * @throws APIManagementException if an error occurs while retrieving from IDP
-     */
-    private X509Certificate retrieveCertificateFromContent(String base64EncodedCertificate)
-            throws APIManagementException {
-
-        if (base64EncodedCertificate != null) {
-            base64EncodedCertificate = APIUtil.getX509certificateContent(base64EncodedCertificate);
-            byte[] bytes = Base64.decodeBase64(base64EncodedCertificate.getBytes());
-            try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                return X509Certificate.getInstance(inputStream);
-            } catch (IOException | javax.security.cert.CertificateException e) {
-                String msg = "Error while converting into X509Certificate";
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
-            }
-        }
-        return null;
     }
 }
