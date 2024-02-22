@@ -428,17 +428,25 @@ public class Utils {
 
     public static Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
-        Object validatedCert = axis2MessageContext.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
 
+        Certificate[] certs = getClientCertificatesChain(axis2MessageContext);
+        return (certs != null && certs.length > 0) ? certs[0] : null;
+    }
+
+    public static Certificate[] getClientCertificatesChain(
+            org.apache.axis2.context.MessageContext axis2MessageContext) throws APIManagementException {
+
+        Object validatedCert = axis2MessageContext.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
         if (validatedCert != null) {
-            return (Certificate) validatedCert;
+            return new Certificate[] { (Certificate) validatedCert };
         } else {
+            Certificate[] certs = null;
             Map headers =
                     (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT);
             Certificate certificateFromMessageContext = null;
             if (sslCertObject != null) {
-                Certificate[] certs = (Certificate[]) sslCertObject;
+                certs = (Certificate[]) sslCertObject;
                 certificateFromMessageContext = certs[0];
                 axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificateFromMessageContext);
             }
@@ -448,7 +456,7 @@ public class Utils {
                             .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
                         Certificate certificate = getClientCertificateFromHeader(axis2MessageContext);
                         axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificate);
-                        return certificate;
+                        return new Certificate[] { certificate };
                     }
                 } catch (APIManagementException e) {
                     String msg = "Error while validating into Certificate Existence";
@@ -456,8 +464,7 @@ public class Utils {
                     throw new APIManagementException(msg, e);
                 }
             }
-
-            return certificateFromMessageContext;
+            return certs;
         }
     }
 
@@ -504,6 +511,20 @@ public class Utils {
             String firstProperty = apiManagerConfiguration
                     .getFirstProperty(APIConstants.MutualSSL.ENABLE_CLIENT_CERTIFICATE_VALIDATION);
             return Boolean.parseBoolean(firstProperty);
+        }
+        return false;
+    }
+
+    public static boolean isCertificateChainValidationEnabled() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String validateCertificateChain =
+                    apiManagerConfiguration.getFirstProperty(APIConstants.MutualSSL.ENABLE_CERTIFICATE_CHAIN_VALIDATION);
+            if (StringUtils.isNotEmpty(validateCertificateChain)) {
+                return Boolean.parseBoolean(validateCertificateChain);
+            }
         }
         return false;
     }
@@ -702,6 +723,20 @@ public class Utils {
             log.error("Error while converting client certificate", e);
         }
         return null;
+    }
+
+    public static List<X509Certificate> convertCertificatesToX509Certificates(Certificate[] certificates) {
+
+        List<X509Certificate> x509Certificates = new ArrayList<>();
+
+        for (Certificate certificate : certificates) {
+            if (certificate instanceof X509Certificate) {
+                x509Certificates.add((X509Certificate) certificate);
+            } else {
+                log.warn("Certificate can not be converted in to X509Certificate.");
+            }
+        }
+        return x509Certificates;
     }
 
     /**
