@@ -50,7 +50,7 @@
         <param-value>
             com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider,
             org.wso2.carbon.apimgt.rest.api.dcr.web.FaultMessageBodyWriter,
-            org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper
+            org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper,
             org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter(allowHeaders=Authorization allowHeaders=X-WSO2-Tenant allowHeaders=content-type exposeHeaders=Content-Disposition allowCredentials=true allowOrigins=*)
         </param-value>
     </init-param>
