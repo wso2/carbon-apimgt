@@ -433,6 +433,12 @@ public class Utils {
         return (certs != null && certs.length > 0) ? certs[0] : null;
     }
 
+    /**
+     * Fetches client certificate chain from axis2MessageContext.
+     * @param axis2MessageContext   Relevant axis2MessageContext
+     * @return                      Array containing client certificate chain
+     * @throws APIManagementException
+     */
     public static Certificate[] getClientCertificatesChain(
             org.apache.axis2.context.MessageContext axis2MessageContext) throws APIManagementException {
 
@@ -515,6 +521,10 @@ public class Utils {
         return false;
     }
 
+    /**
+     * Checks whether certificate chain validation is enabled or not from API-M configurations.
+     * @return Boolean indicating certificate chain validation enable/disable state
+     */
     public static boolean isCertificateChainValidationEnabled() {
 
         APIManagerConfiguration apiManagerConfiguration =
@@ -542,6 +552,30 @@ public class Utils {
             }
         }
         return true;
+    }
+
+
+    /**
+     * Fetches certificate for the given distinguished name from listener trust store.
+     * @param certSubjectDN             Distinguished name of the certificate
+     * @return                          X509Certificate
+     * @throws APIManagementException
+     */
+    public static X509Certificate getCertificateFromListenerTrustStore(String certSubjectDN)
+            throws APIManagementException {
+
+        Enumeration<String> aliases = APIUtil.getAliasesFromListenerTrustStore();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            Certificate certificate = APIUtil.getCertificateFromListenerTrustStore(alias);
+            if (certificate instanceof X509Certificate) {
+                X509Certificate x509Certificate = (X509Certificate) certificate;
+                if (StringUtils.equals(x509Certificate.getSubjectDN().getName(), certSubjectDN)) {
+                    return x509Certificate;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -725,6 +759,11 @@ public class Utils {
         return null;
     }
 
+    /**
+     * Convert Certificate array to X509Certificate list.
+     * @param certificates  Certificate array that should be converted
+     * @return              X509Certificate list
+     */
     public static List<X509Certificate> convertCertificatesToX509Certificates(Certificate[] certificates) {
 
         List<X509Certificate> x509Certificates = new ArrayList<>();

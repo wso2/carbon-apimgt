@@ -156,6 +156,9 @@ public class MutualSSLAuthenticator implements Authenticator {
                 setAuthContext(messageContext, sslCerts);
             } catch (APISecurityException ex) {
                 return new AuthenticationResponse(false, isMandatory, !isMandatory, ex.getErrorCode(), ex.getMessage());
+            } catch (APIManagementException ex) {
+                return new AuthenticationResponse(false, isMandatory, !isMandatory,
+                        (int) ex.getErrorHandler().getErrorCode(), ex.getMessage());
             }
         }
         return new AuthenticationResponse(true, isMandatory, true, 0, null);
@@ -184,33 +187,30 @@ public class MutualSSLAuthenticator implements Authenticator {
     /**
      * Sets the authentication context in current message context.
      *
-     * @param messageContext        Relevant message context.
-     * @param certificatesArray      SSL certificate chain.
+     * @param messageContext    Relevant message context.
+     * @param certificatesArray SSL certificate chain.
      * @throws APISecurityException API Security exception.
      */
     private void setAuthContext(MessageContext messageContext, Certificate[] certificatesArray)
-            throws APISecurityException {
+            throws APISecurityException, APIManagementException {
 
         String tier = null;
-        String tierForIssuer = null;
         List<X509Certificate> x509Certificates = Utils.convertCertificatesToX509Certificates(certificatesArray);
         String subjectDN = x509Certificates.get(0).getSubjectDN().getName();
+        String issuerDNIdentifier = x509Certificates.get(x509Certificates.size() - 1).getIssuerDN().getName()
+                .replaceAll(",", "#").replaceAll("\"", "'").trim();
         String uniqueIdentifier = null;
-        String uniqueIdentifierForIssuer = null;
+        List<String> subjectDNIdentifiers = new ArrayList<>();
         for (X509Certificate x509Certificate : x509Certificates) {
-            String subjectDNToCheck = x509Certificate.getSubjectDN().getName().replaceAll(",", "#")
-                    .replaceAll("\"", "'").trim();
-            String issuerDN = x509Certificate.getIssuerDN().getName().replaceAll(",", "#").replaceAll("\"", "'").trim();
+            String subjectDNIdentifier = (x509Certificate.getSerialNumber() + "_"
+                    + x509Certificate.getSubjectDN()).replaceAll(",", "#").replaceAll("\"", "'").trim();
+            subjectDNIdentifiers.add(subjectDNIdentifier);
             for (Map.Entry<String, String> entry : certificates.entrySet()) {
                 String key = entry.getKey();
-                if (key.contains(subjectDNToCheck)) {
+                if (key.contains(subjectDNIdentifier)) {
                     uniqueIdentifier = key;
                     tier = entry.getValue();
                     break;
-                }
-                if (key.contains(issuerDN)) {
-                    uniqueIdentifierForIssuer = key;
-                    tierForIssuer = entry.getValue();
                 }
             }
             if (StringUtils.isNoneEmpty(tier)) {
@@ -218,13 +218,62 @@ public class MutualSSLAuthenticator implements Authenticator {
             }
         }
         if (StringUtils.isEmpty(tier)) {
-            uniqueIdentifier = uniqueIdentifierForIssuer;
-            tier = tierForIssuer;
+            for (Map.Entry<String, String> entry : certificates.entrySet()) {
+                String key = entry.getKey();
+                if (key.contains(issuerDNIdentifier)) {
+                    uniqueIdentifier = key;
+                    tier = entry.getValue();
+                }
+            }
+        }
+        if (StringUtils.isEmpty(tier)) {
+            tier = getTierFromCompleteCertificateChain(x509Certificates, subjectDNIdentifiers);
         }
         if (StringUtils.isEmpty(tier)) {
             handleCertificateNotAssociatedToAPIFailure(messageContext);
         }
         setAuthenticationContext(messageContext, subjectDN, uniqueIdentifier, tier);
+    }
+
+    /**
+     * Fetches tier assigned to the client certificate after making the complete certificate chain using certificates
+     * in truststore.
+     *
+     * @param x509Certificates  Client certificate chain
+     * @param uniqueIdentifiers Unique identifiers list for client certificate chain
+     * @return Tier
+     * @throws APIManagementException
+     */
+    private String getTierFromCompleteCertificateChain(List<X509Certificate> x509Certificates,
+            List<String> uniqueIdentifiers) throws APIManagementException {
+
+        String tier = null;
+        X509Certificate certificate = x509Certificates.get(x509Certificates.size() - 1);
+        String subjectDN = certificate.getSubjectDN().getName();
+        String issuerDN = certificate.getIssuerDN().getName();
+        boolean isIssuerCertificateUpdated = !StringUtils.equals(subjectDN, issuerDN);
+
+        while (isIssuerCertificateUpdated) {
+            X509Certificate issuerCertificate = Utils.getCertificateFromListenerTrustStore(issuerDN);
+            if (issuerCertificate == null) {
+                isIssuerCertificateUpdated = false;
+            } else {
+                issuerDN = issuerCertificate.getIssuerDN().getName();
+                subjectDN = issuerCertificate.getSubjectDN().getName();
+                String uniqueIdentifier = (issuerCertificate.getSerialNumber() + "_"
+                        + issuerCertificate.getSubjectDN()).replaceAll(",", "#").replaceAll("\"", "'").trim();
+                uniqueIdentifiers.add(uniqueIdentifier);
+                isIssuerCertificateUpdated = !StringUtils.equals(subjectDN, issuerDN);
+            }
+        }
+
+        for (String uniqueIdentifier : uniqueIdentifiers) {
+            tier = certificates.get(uniqueIdentifier);
+            if (StringUtils.isNotEmpty(tier)) {
+                break;
+            }
+        }
+        return tier;
     }
 
     /**

@@ -8331,6 +8331,30 @@ public final class APIUtil {
     }
 
     /**
+     * Fetches certificate for given certificate alias from listener trust store.
+     * @param certAlias                 Certificate alias
+     * @return                          Certificate
+     * @throws APIManagementException
+     */
+    public static Certificate getCertificateFromListenerTrustStore(String certAlias) throws APIManagementException {
+
+        Certificate publicCert = null;
+        try {
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getListenerTrustStore();
+            if (trustStore != null) {
+                // Read public certificate from trust store
+                publicCert = trustStore.getCertificate(certAlias);
+            }
+        } catch (KeyStoreException e) {
+            String msg = "Error while retrieving public certificate with alias : "
+                    + certAlias;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return publicCert;
+    }
+
+    /**
      * Verify the JWT token signature.
      * <p>
      * This method only used for API Key revocation which contains some duplicate logic in GatewayUtils class.
@@ -8759,6 +8783,26 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Fetches all the trusted certificate aliases from listener trust store.
+     * @return                          Trusted certificate aliases
+     * @throws APIManagementException
+     */
+    public static Enumeration<String> getAliasesFromListenerTrustStore() throws APIManagementException {
+
+        try {
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getListenerTrustStore();
+            if (trustStore != null) {
+                return trustStore.aliases();
+            }
+        } catch (KeyStoreException e) {
+            String msg = "Error getting certificate aliases from trust store";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return null;
     }
 
     public static boolean isDevPortalAnonymous() {
