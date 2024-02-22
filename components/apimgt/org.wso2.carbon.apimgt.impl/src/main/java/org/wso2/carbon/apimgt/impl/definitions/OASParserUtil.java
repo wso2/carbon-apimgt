@@ -42,6 +42,7 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Yaml;
 import io.swagger.parser.util.DeserializationUtils;
+import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
@@ -62,6 +63,7 @@ import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.converter.SwaggerConverter;
 import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -93,6 +95,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -134,6 +137,9 @@ public class OASParserUtil {
     public enum SwaggerVersion {
         SWAGGER,
         OPEN_API,
+    }
+    public enum OpenAPISpecVersion {
+        V31
     }
 
     private static final String REQUEST_BODIES = "requestBodies";
@@ -281,7 +287,7 @@ public class OASParserUtil {
         // Update reference definitions
         setReferenceObjectDefinitions(destOpenAPI, context);
 
-        return Json.pretty(destOpenAPI);
+        return convertOAStoJSON(destOpenAPI);
     }
 
     private static void setScopes(final OpenAPI destOpenAPI, final Set<Scope> aggregatedScopes) {
@@ -867,7 +873,7 @@ public class OASParserUtil {
             ParseOptions options = new ParseOptions();
             options.setResolve(true);
             OpenAPI openAPI = openAPIV3Parser.read(filePath, null, options);
-            openAPIContent = Json.pretty(openAPI);
+            openAPIContent = convertOAStoJSON(openAPI);
         } else if (SwaggerVersion.SWAGGER.equals(version)) {
             SwaggerParser parser = new SwaggerParser();
             Swagger swagger = parser.read(filePath, null, true);
@@ -880,6 +886,42 @@ public class OASParserUtil {
         APIDefinitionValidationResponse apiDefinitionValidationResponse;
         apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
         return apiDefinitionValidationResponse;
+    }
+
+    /**
+     * Convert OAS definition to JSON
+     *
+     * @param oasDefinition
+     * @return
+     */
+    public static String convertOAStoJSON(OpenAPI oasDefinition) {
+
+        String jsonString = null;
+        //Custom json mapper to parse OAS 3.1 definitions as the default parser drops mandatory licence.identifier field
+        if (isOpenAPIVersion31(oasDefinition)) {
+            ObjectMapper mapper = Json.mapper().copy();
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            //Custom Mixin for License object for OAS 3.1
+            mapper.addMixIn(License.class, License31Mixin.class);
+            try {
+                jsonString = mapper.writeValueAsString(oasDefinition);
+            } catch (JsonProcessingException e) {
+                log.error("Error while converting OAS definition to JSON", e);
+            }
+        } else {
+            jsonString = Json.pretty(oasDefinition);
+        }
+        return jsonString;
+    }
+
+    /**
+     * Check whether the given openAPI definition is OAS 3.1
+     * @param oasDefinition
+     * @return
+     */
+    public static boolean isOpenAPIVersion31(OpenAPI oasDefinition) {
+        return OpenAPISpecVersion.V31.equals(oasDefinition.getSpecVersion().name());
     }
 
     /**

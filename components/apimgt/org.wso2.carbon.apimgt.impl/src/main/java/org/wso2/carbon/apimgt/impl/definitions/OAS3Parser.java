@@ -237,7 +237,7 @@ public class OAS3Parser extends APIDefinition {
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
             checkAndSetEmptyScope(swagger);
-            returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
+            returnMap.put(APIConstants.SWAGGER, prettifyOAS3ToJson(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }
         return returnMap;
@@ -619,7 +619,7 @@ public class OAS3Parser extends APIDefinition {
                 addOrUpdatePathToSwagger(openAPI, resource);
             }
         }
-        return Json.pretty(openAPI);
+        return prettifyOAS3ToJson(openAPI);
     }
 
     /**
@@ -704,7 +704,7 @@ public class OAS3Parser extends APIDefinition {
         if (!APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             preserveResourcePathOrderFromAPI(swaggerData, openAPI);
         }
-        return Json.pretty(openAPI);
+        return prettifyOAS3ToJson(openAPI);
     }
 
     /**
@@ -996,7 +996,7 @@ public class OAS3Parser extends APIDefinition {
         }
         openAPI.addExtension(APIConstants.X_WSO2_RESPONSE_CACHE,
                 OASParserUtil.getResponseCacheConfig(api.getResponseCache(), api.getCacheTimeout()));
-        return Json.pretty(openAPI);
+        return prettifyOAS3ToJson(openAPI);
     }
 
     @Override
@@ -1304,7 +1304,7 @@ public class OAS3Parser extends APIDefinition {
             authUrl = (hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL)).concat("/authorize");
         }
         updateSwaggerSecurityDefinitionForStore(openAPI, swaggerData, authUrl);
-        return Json.pretty(openAPI);
+        return prettifyOAS3ToJson(openAPI);
     }
 
 
@@ -1602,7 +1602,7 @@ public class OAS3Parser extends APIDefinition {
             swagger.addExtension(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, true);
             // no need to check resource levels since both cannot exist at the same time.
             log.debug("API Level policy is content aware..");
-            return Json.pretty(swagger);
+            return prettifyOAS3ToJson(swagger);
         }
         // if api level tier exists, skip checking for resource level tiers since both cannot exist at the same time.
         if (apiLevelTier != null) {
@@ -1624,7 +1624,7 @@ public class OAS3Parser extends APIDefinition {
                     }
                 }
             }
-            return Json.pretty(swagger);
+            return prettifyOAS3ToJson(swagger);
         }
     }
 
@@ -1692,7 +1692,7 @@ public class OAS3Parser extends APIDefinition {
                         for (Scope legacyScope : legacyScopes) {
                             if (!defaultScopes.containsKey(legacyScope.getKey())) {
                                 openAPI = processLegacyScopes(openAPI);
-                                return Json.pretty(openAPI);
+                                return prettifyOAS3ToJson(openAPI);
                             }
                         }
                     }
@@ -1704,7 +1704,7 @@ public class OAS3Parser extends APIDefinition {
             openAPI = processLegacyScopes(openAPI);
             openAPI = injectOtherScopesToDefaultScheme(openAPI);
             openAPI = injectOtherResourceScopesToDefaultScheme(openAPI);
-            return Json.pretty(openAPI);
+            return prettifyOAS3ToJson(openAPI);
         }
         return swaggerContent;
     }
@@ -1733,7 +1733,7 @@ public class OAS3Parser extends APIDefinition {
                 }
             }
         }
-        return Json.pretty(openAPI);
+        return prettifyOAS3ToJson(openAPI);
     }
 
     @Override
@@ -1791,7 +1791,7 @@ public class OAS3Parser extends APIDefinition {
                 }
             }
         }
-        return Json.pretty(updatedOpenAPI);
+        return prettifyOAS3ToJson(updatedOpenAPI);
     }
 
     /**
@@ -2206,7 +2206,16 @@ public class OAS3Parser extends APIDefinition {
                 }
             }
         }
-        return Json.pretty(openAPI);
+        return prettifyOAS3ToJson(openAPI);
+    }
+
+    /**
+     * This method prettify the OA3 definition to a JSON object
+     * @param openAPI
+     * @return
+     */
+    public String prettifyOAS3ToJson(OpenAPI openAPI) {
+        return OASParserUtil.convertOAStoJSON(openAPI);
     }
 
     @Override
