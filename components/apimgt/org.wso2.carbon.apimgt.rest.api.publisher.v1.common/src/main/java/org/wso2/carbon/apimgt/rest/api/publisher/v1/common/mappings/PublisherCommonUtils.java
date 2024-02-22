@@ -392,6 +392,7 @@ public class PublisherCommonUtils {
                 }
 
                 apiToUpdate.setUriTemplates(uriTemplates);
+                apiToUpdate.setSwaggerDefinition(newDefinition);
             }
         } else {
             String oldDefinition = apiProvider
@@ -399,6 +400,7 @@ public class PublisherCommonUtils {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
+            apiToUpdate.setSwaggerDefinition(updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
