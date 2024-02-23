@@ -304,7 +304,6 @@ public class LogsHandler extends AbstractSynapseHandler {
         // if the logging API data holder is empty or null return null
         if (!logProperties.isEmpty()) {
             return LogUtils.getMatchingLogLevel(ctx, logProperties);
-            //return LogUtils.getMatchingLogLevel(ctx, logProperties);
         }
         return null;
     }

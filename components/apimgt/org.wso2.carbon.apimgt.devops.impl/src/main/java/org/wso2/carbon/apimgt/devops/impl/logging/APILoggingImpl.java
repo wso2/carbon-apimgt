@@ -39,7 +39,7 @@ public class APILoggingImpl {
     private static final String PER_API_LOGGING_PERMISSION_PATH = "/permission/protected/configure/logging";
     private static final String INVALID_LOGGING_PERMISSION = "Invalid logging permission";
     private static final String INCORRECT_LOGGING_PER_API_RESOURCE_REQUEST = "Resource Method and Resource Path both " +
-            "should included";
+            "should be included";
     private static final String REQUIRED_API_RESOURCE_IS_NOT_AVAILABLE = "Requested resource is not available";
     private final ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
