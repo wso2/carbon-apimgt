@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info:
+  title: ' '
+  version: 1.0.0
+  license:
+    name: 'MIT'
+servers:
+  - url: /
+paths:
+  /:
+    get:
+      operationId: operation1_get_/
+      responses:
+        "500":
+          description: Found unexpected output
+          content:
+            text/plain:
+              schema:
+                type: string
+components: {}

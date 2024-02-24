@@ -1,0 +1,82 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "PizzaShackAPI",
+    "description" : "This is a RESTFul API for Pizza Shack online pizza delivery store.\n",
+    "contact" : {
+      "name" : "John Doe",
+      "url" : "http://www.pizzashack.com",
+      "email" : "architecture@pizzashack.com"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "https://localhost/"
+  } ],
+  "security" : [ {
+    "basic_auth" : [ ]
+  }, {
+    "api_key" : [ ]
+  } ],
+  "paths" : {
+    "/test" : {
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "ok"
+          }
+        },
+        "security" : [ {
+          "basic_auth" : [ ]
+        }, {
+          "api_key" : [ ]
+        } ],
+        "x-auth-type" : "Application & Application User",
+        "x-throttling-tier" : "Unlimited",
+        "x-basic-auth-scopes" : [ "MenuScope" ]
+      },
+      "post" : {
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "ok"
+          }
+        },
+        "security" : [ {
+          "basic_auth" : [ ]
+        }, {
+          "api_key" : [ ]
+        } ],
+        "x-auth-type" : "Application & Application User",
+        "x-throttling-tier" : "Unlimited",
+        "x-basic-auth-scopes" : [ "OrderScope", "MenuScope" ]
+      }
+    }
+  },
+  "components" : {
+    "securitySchemes" : {
+      "basic_auth" : {
+        "type" : "http",
+        "scheme" : "basic",
+        "x-scopes" : {
+          "OrderScope" : "",
+          "MenuScope" : "description"
+        },
+        "x-scopes-bindings" : {
+          "OrderScope" : "admin",
+          "MenuScope" : ""
+        }
+      },
+      "api_key" : {
+        "type" : "apiKey",
+        "name" : "apikey",
+        "in" : "header"
+      }
+    }
+  }
+}

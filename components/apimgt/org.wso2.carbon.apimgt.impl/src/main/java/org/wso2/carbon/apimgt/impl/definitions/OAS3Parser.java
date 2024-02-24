@@ -99,8 +99,13 @@ public class OAS3Parser extends APIDefinition {
     private List<String> getOtherSchemes() {
         return otherSchemes;
     }
+    private String specVersion;
     private void setOtherSchemes(List<String> otherSchemes) {
         this.otherSchemes = otherSchemes;
+    }
+    public OAS3Parser() {}
+    public OAS3Parser(String specVersion) {
+        this.specVersion = specVersion;
     }
 
     /**
@@ -281,6 +286,9 @@ public class OAS3Parser extends APIDefinition {
      */
     private String getJsonExample(Schema model, Map<String, Schema> definitions) {
         Example example = ExampleBuilder.fromSchema(model, definitions);
+        if (example == null) {
+            return "";
+        }
         SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
         Json.mapper().registerModule(simpleModule);
         return Json.pretty(example);
@@ -295,6 +303,9 @@ public class OAS3Parser extends APIDefinition {
      */
     private String getXmlExample(Schema model, Map<String, Schema> definitions) {
         Example example = ExampleBuilder.fromSchema(model, definitions);
+        if (example == null) {
+            return "";
+        }
         String rawXmlExample = new XmlExampleSerializer().serialize(example);
         return rawXmlExample.replace("<?xml version='1.1' encoding='UTF-8'?>", "");
     }
@@ -581,7 +592,12 @@ public class OAS3Parser extends APIDefinition {
      */
     @Override
     public String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException {
+
         OpenAPI openAPI = new OpenAPI();
+        //Set the openAPI 3.1.0 version
+        if (APIConstants.OAS_V31.equalsIgnoreCase(specVersion)) {
+            openAPI.setOpenapi(APIConstants.OPEN_API_V31_VERSION);
+        }
 
         // create path if null
         if (openAPI.getPaths() == null) {
@@ -2226,5 +2242,12 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public String getType() {
         return null;
+    }
+
+    public String getSpecVersion() {
+        return specVersion;
+    }
+    public void setSpecVersion(String specVersion) {
+        this.specVersion = specVersion;
     }
 }

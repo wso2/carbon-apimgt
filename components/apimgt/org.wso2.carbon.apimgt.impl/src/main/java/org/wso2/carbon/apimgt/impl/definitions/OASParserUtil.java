@@ -63,7 +63,6 @@ import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.converter.SwaggerConverter;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -137,9 +136,6 @@ public class OASParserUtil {
     public enum SwaggerVersion {
         SWAGGER,
         OPEN_API,
-    }
-    public enum OpenAPISpecVersion {
-        V31
     }
 
     private static final String REQUEST_BODIES = "requestBodies";
@@ -902,7 +898,7 @@ public class OASParserUtil {
             ObjectMapper mapper = Json.mapper().copy();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            //Custom Mixin for License object for OAS 3.1
+            //Custom Mixin for License object in OAS 3.1
             mapper.addMixIn(License.class, License31Mixin.class);
             try {
                 jsonString = mapper.writeValueAsString(oasDefinition);
@@ -921,7 +917,7 @@ public class OASParserUtil {
      * @return
      */
     public static boolean isOpenAPIVersion31(OpenAPI oasDefinition) {
-        return OpenAPISpecVersion.V31.equals(oasDefinition.getSpecVersion().name());
+        return APIConstants.OAS_V31.equals(oasDefinition.getSpecVersion().name());
     }
 
     /**

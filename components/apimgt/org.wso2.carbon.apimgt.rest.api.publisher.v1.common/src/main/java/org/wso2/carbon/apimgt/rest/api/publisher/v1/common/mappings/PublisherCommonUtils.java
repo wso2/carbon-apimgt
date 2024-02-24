@@ -935,6 +935,8 @@ public class PublisherCommonUtils {
             APIDefinition oasParser;
             if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
                 oasParser = new OAS2Parser();
+            } else if (RestApiConstants.OAS_VERSION_31.equalsIgnoreCase(oasVersion)) {
+                oasParser = new OAS3Parser(RestApiConstants.OAS_VERSION_31);
             } else {
                 oasParser = new OAS3Parser();
             }
