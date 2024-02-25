@@ -2022,7 +2022,7 @@
 
         <carbon.commons.version>4.10.3</carbon.commons.version>
 
-        <carbon.registry.version>4.8.23</carbon.registry.version>
+        <carbon.registry.version>4.8.25</carbon.registry.version>
         <carbon.mediation.version>4.7.194</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
