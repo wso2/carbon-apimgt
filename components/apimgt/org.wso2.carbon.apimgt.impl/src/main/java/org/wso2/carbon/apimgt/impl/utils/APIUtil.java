@@ -9229,7 +9229,14 @@ public final class APIUtil {
         return content.trim();
     }
 
-    public static X509Certificate retrieveCertificateFromContent(String base64EncodedCertificate)
+    /**
+     * Util method to convert Base64 URL encoded certificate content to X509Certificate instance.
+     *
+     * @param base64EncodedCertificate Base64 URL encoded cert string
+     * @return javax.security.cert.X509Certificate
+     * @throws APIManagementException if an error occurs while retrieving from IDP
+     */
+    public static X509Certificate retrieveCertificateFromURLEncodedContent(String base64EncodedCertificate)
             throws APIManagementException {
 
         if (base64EncodedCertificate != null) {
@@ -9242,6 +9249,30 @@ public final class APIUtil {
 
             base64EncodedCertificate = APIUtil.getX509certificateContent(base64EncodedCertificate);
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
+            try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
+                return X509Certificate.getInstance(inputStream);
+            } catch (IOException | javax.security.cert.CertificateException e) {
+                String msg = "Error while converting into X509Certificate";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Util method to convert non URL encoded but base64 encoded certificate content to X509Certificate instance.
+     *
+     * @param base64EncodedCertificate Base64 encoded cert string (not URL encoded)
+     * @return javax.security.cert.X509Certificate
+     * @throws APIManagementException if an error occurs while retrieving from IDP
+     */
+    public static X509Certificate retrieveCertificateFromContent(String base64EncodedCertificate)
+            throws APIManagementException {
+
+        if (base64EncodedCertificate != null) {
+            base64EncodedCertificate = APIUtil.getX509certificateContent(base64EncodedCertificate);
+            byte[] bytes = Base64.decodeBase64(base64EncodedCertificate.getBytes());
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
                 return X509Certificate.getInstance(inputStream);
             } catch (IOException | javax.security.cert.CertificateException e) {

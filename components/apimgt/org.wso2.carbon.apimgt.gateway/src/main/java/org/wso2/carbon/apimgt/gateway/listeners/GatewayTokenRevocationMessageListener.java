@@ -89,9 +89,15 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                     revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY) != null &&
                     revokedTokenMap.containsKey(APIConstants.NotificationEvent.REVOCATION_TIME) &&
                     revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null) {
-                RevokedJWTDataHolder.getInstance().addRevokedConsumerKeyToMap(
-                        (String) revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY),
-                        (long) revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+                try {
+                    RevokedJWTDataHolder.getInstance().addRevokedConsumerKeyToMap(
+                            (String) revokedTokenMap.get(APIConstants.NotificationEvent.CONSUMER_KEY),
+                            convertRevokedTime(revokedTokenMap));
+                } catch (NumberFormatException e) {
+                    log.warn("Event dropped due to unsupported value type for "
+                            + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
+                            + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+                }
             }
         } else if (APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT.equals(tokenType)) {
             HashMap<String, Object> revokedTokenMap = base64Decode(revokedToken);
@@ -99,7 +105,14 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                     revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME) != null &&
                     revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID) != null) {
                 String entityType = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_TYPE);
-                long revocationTime = (long) revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME);
+                long revocationTime = 0;
+                try {
+                    revocationTime = convertRevokedTime(revokedTokenMap);
+                } catch (NumberFormatException e) {
+                    log.warn("Event dropped due to unsupported value type for "
+                            + APIConstants.NotificationEvent.REVOCATION_TIME + " : "
+                            + revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
+                }
                 String entityId = (String) revokedTokenMap.get(APIConstants.NotificationEvent.ENTITY_ID);
                 if (APIConstants.NotificationEvent.ENTITY_TYPE_USER_ID.equals(entityType)) {
                     RevokedJWTDataHolder.getInstance().addRevokedSubjectEntityUserToMap(entityId, revocationTime);
@@ -137,5 +150,10 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
             log.error("Error while decoding revoked token event.");
         }
         return new HashMap<>();
+    }
+
+    private long convertRevokedTime(HashMap<String, Object> revokedTokenMap) throws NumberFormatException {
+
+        return Long.parseLong((String) revokedTokenMap.get(APIConstants.NotificationEvent.REVOCATION_TIME));
     }
 }

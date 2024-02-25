@@ -27,16 +27,17 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.RegistrationService;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.FaultResponse;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.RegistrationProfile;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationConfig;
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationRequestConfig;
+import org.wso2.carbon.identity.application.common.model.LocalAndOutboundAuthenticationConfig;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.common.model.ServiceProviderProperty;
@@ -54,11 +55,6 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
@@ -68,6 +64,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.OAUTH_CLIENT_GRANT;
 import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.OAUTH_CLIENT_NAME;
@@ -275,10 +276,10 @@ public class RegistrationServiceImpl implements RegistrationService {
      *
      * @param appRequest OAuthAppRequest object with client's payload content
      * @return created Application
-     * @throws APIKeyMgtException if failed to create the a new application
+     * @throws APIManagementException if failed to create the new application
      */
     private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest,
-            String grantType) throws APIManagementException {
+                                                   String grantType) throws APIManagementException {
         String userName;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
         String appName = applicationInfo.getClientName();
@@ -325,6 +326,14 @@ public class RegistrationServiceImpl implements RegistrationService {
             logoutConsentProperty.setValue(APIConstants.APP_SKIP_LOGOUT_CONSENT_VALUE);
             serviceProviderProperties.add(logoutConsentProperty);
 
+            if (APIConstants.JWT.equals(applicationInfo.getTokenType())) {
+                LocalAndOutboundAuthenticationConfig localAndOutboundConfig =
+                        new LocalAndOutboundAuthenticationConfig();
+                localAndOutboundConfig.setSkipConsent(true);
+                localAndOutboundConfig.setSkipLogoutConsent(true);
+                localAndOutboundConfig.setUseTenantDomainInLocalSubjectIdentifier(true);
+                serviceProvider.setLocalAndOutBoundAuthenticationConfig(localAndOutboundConfig);
+            }
             String orgId = null;
             try {
                 orgId = RestApiUtil.getValidatedOrganization(securityContext);
