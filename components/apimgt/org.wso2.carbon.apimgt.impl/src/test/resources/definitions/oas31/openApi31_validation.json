@@ -1,0 +1,134 @@
+{
+  "openapi":"3.1.0",
+  "paths":{
+    "/*":{
+      "get":{
+        "responses":{
+          "200":{
+            "description":""
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "x-auth-type":"Application",
+        "x-throttling-tier":"Unlimited"
+      },
+      "post":{
+        "requestBody":{
+          "content":{
+            "application/json":{
+              "schema":{
+                "type":"object",
+                "properties":{
+                  "payload":{
+                    "type":"string"
+                  }
+                }
+              }
+            }
+          },
+          "required":true,
+          "description":"Request Body"
+        },
+        "responses":{
+          "200":{
+            "description":""
+          }
+        },
+        "x-auth-type":"Application User",
+        "x-throttling-tier":"Unlimited"
+      },
+      "put":{
+        "requestBody":{
+          "content":{
+            "application/json":{
+              "schema":{
+                "type":"object",
+                "properties":{
+                  "payload":{
+                    "type":"string"
+                  }
+                }
+              }
+            }
+          },
+          "required":true,
+          "description":"Request Body"
+        },
+        "responses":{
+          "200":{
+            "description":""
+          }
+        },
+        "x-auth-type":"None",
+        "x-throttling-tier":"Unlimited"
+      },
+      "delete":{
+        "responses":{
+          "200":{
+            "description":""
+          }
+        },
+        "x-throttling-tier":"Unlimited"
+      }
+    },
+    "/abc":{
+      "get":{
+        "responses":{
+          "200":{
+            "description":""
+          }
+        },
+        "x-throttling-tier":"Unlimited"
+      }
+    }
+  },
+  "info":{
+    "title":"PhoneVerification",
+    "version":"1.0.0",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers":[
+    {
+      "url":"https://172.19.0.1:8243/phoneVerification/1.0.0"
+    },
+    {
+      "url":"http://172.19.0.1:8243/phoneVerification/1.0.0"
+    }
+  ],
+  "components":{
+    "securitySchemes":{
+      "default":{
+        "type":"oauth2",
+        "flows":{
+          "implicit":{
+            "authorizationUrl":"https://172.19.0.1:8243/authorize",
+            "scopes":{
+
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "NotFound": {
+        "description": ""
+      }
+    }
+  },
+  "extraInfo": {
+		"bizOwner": "John Dove",
+		"bizOwnerMail": "j.d@test.com",
+		"CORSAllowHeaders": "sessionId",
+		"endpointSecurityAuthType": "",
+		"endpointSecurityPassword": "",
+		"endpointSecurityScheme": "nonsecured",
+		"endpointSecurityUsername": "",
+		"tiersCollection": "Unlimited",
+		"visibility": "public"
+	}
+}

@@ -321,6 +321,7 @@ public final class RestApiConstants {
 
     public static final String OAS_VERSION_2 = "v2";
     public static final String OAS_VERSION_3 = "v3";
+    public static final String OAS_VERSION_31 = "v31";
 
     public static final String MESSAGE_EXCHANGE_TOKEN_INFO = "message_exchange_token_info";
 
