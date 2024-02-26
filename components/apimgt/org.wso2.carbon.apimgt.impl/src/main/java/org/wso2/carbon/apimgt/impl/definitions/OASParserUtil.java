@@ -447,18 +447,7 @@ public class OASParserUtil {
                     if (parameters != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Parameter parameter = parameters.get(refKey);
-                            //Extract the parameter reference only if it exists in the source definition
-                            if(parameter != null) {
-                                Content content = parameter.getContent();
-                                if (content != null) {
-                                    extractReferenceFromContent(content, context);
-                                } else {
-                                    String ref = parameter.get$ref();
-                                    if (ref != null) {
-                                        extractReferenceWithoutSchema(ref, context);
-                                    }
-                                }
-                            }
+                            setRefOfParameter(parameter, context);
                         }
                     }
                 }
@@ -700,6 +689,23 @@ public class OASParserUtil {
     private static void setRefOfParameters(List<Parameter> parameters, SwaggerUpdateContext context) {
         if (parameters != null) {
             for (Parameter parameter : parameters) {
+                setRefOfParameter(parameter, context);
+            }
+        }
+    }
+
+    /**
+     * Process a given parameter entry of the API definition.
+     *
+     * @param parameter  The parameter object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
+     */
+    private static void setRefOfParameter(Parameter parameter, SwaggerUpdateContext context) {
+        if (parameter != null) {
+            Content content = parameter.getContent();
+            if (content != null) {
+                extractReferenceFromContent(content, context);
+            } else {
                 Schema schema = parameter.getSchema();
                 if (schema != null) {
                     String ref = schema.get$ref();
