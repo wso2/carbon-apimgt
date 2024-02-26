@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
@@ -241,6 +242,15 @@ public final class APIMgtDBUtil {
         while (rs.next()) {
             APIRevisionDeployment apiRevisionDeployment;
             String environmentName = rs.getString("NAME");
+
+            // If the gateway defined in the deployment.toml file has been decommissioned, ignore all revision
+            // deployments for that gateway
+            if (StringUtils.isEmpty(rs.getString("VHOST"))) {
+                Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
+                if (readOnlyEnvironments.get(environmentName) == null) {
+                    continue;
+                }
+            }
             String vhost = VHostUtils.resolveIfNullToDefaultVhost(environmentName,
                     rs.getString("VHOST"));
             String revisionUuid = rs.getString("REVISION_UUID");

@@ -21,9 +21,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.language.FieldDefinition;
-import graphql.language.ObjectTypeDefinition;
-import graphql.language.TypeDefinition;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -392,6 +389,7 @@ public class PublisherCommonUtils {
                 }
 
                 apiToUpdate.setUriTemplates(uriTemplates);
+                apiToUpdate.setSwaggerDefinition(newDefinition);
             }
         } else {
             String oldDefinition = apiProvider
@@ -399,6 +397,7 @@ public class PublisherCommonUtils {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
+            apiToUpdate.setSwaggerDefinition(updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
@@ -1602,9 +1601,12 @@ public class PublisherCommonUtils {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+        List<URITemplate> operationList = graphql.extractGraphQLOperationList(schemaDefinition);
+        List<APIOperationsDTO> operationArray = APIMappingUtil
+                .fromURITemplateListToOprationList(operationList);
         List<APIOperationsDTO> operationListWithOldData = APIMappingUtil
-                .getOperationListWithOldData(originalAPI.getUriTemplates(),
-                        extractGraphQLOperationList(schemaDefinition), tenantId);
+                .getOperationListWithOldData(originalAPI.getUriTemplates(), operationArray, tenantId);
 
         Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationListWithOldData);
         originalAPI.setUriTemplates(uriTemplates);
@@ -1613,33 +1615,6 @@ public class PublisherCommonUtils {
         apiProvider.updateAPI(originalAPI, oldApi);
 
         return originalAPI;
-    }
-
-    /**
-     * Extract GraphQL Operations from given schema.
-     *
-     * @param schema graphQL Schema
-     * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
-     */
-    public static List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
-
-        List<APIOperationsDTO> operationArray = new ArrayList<>();
-        SchemaParser schemaParser = new SchemaParser();
-        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
-        Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
-        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
-            if (entry.getValue().getName().equals(APIConstants.GRAPHQL_QUERY) || entry.getValue().getName()
-                    .equals(APIConstants.GRAPHQL_MUTATION) || entry.getValue().getName()
-                    .equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
-                for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
-                    APIOperationsDTO operation = new APIOperationsDTO();
-                    operation.setVerb(entry.getKey());
-                    operation.setTarget(fieldDef.getName());
-                    operationArray.add(operation);
-                }
-            }
-        }
-        return operationArray;
     }
 
     /**
