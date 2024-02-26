@@ -121,9 +121,14 @@ public class MutualSSLAuthenticator implements Authenticator {
             }
             if (isMandatory) {
                 log.error("Mutual SSL authentication failure");
+                return new AuthenticationResponse(false, isMandatory, !isMandatory,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            } else {
+                return new AuthenticationResponse(false, isMandatory, !isMandatory,
+                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
             }
-            return new AuthenticationResponse(false, isMandatory, !isMandatory,
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         } else {
             try {
                 setAuthContext(messageContext, sslCertObject);

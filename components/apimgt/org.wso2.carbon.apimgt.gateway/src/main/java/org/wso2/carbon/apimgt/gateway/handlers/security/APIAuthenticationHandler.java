@@ -560,12 +560,20 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
         List<AuthenticationResponse> authResponses = new ArrayList<>();
+        AuthenticationResponse optionalAuthentication = null;
+        boolean mandatoryAuthFailed = false;
 
         for (Authenticator authenticator : authenticators) {
             authenticationResponse = authenticator.authenticate(messageContext);
+            if (optionalAuthentication == null &&
+                    (authenticationResponse.getErrorCode() != APISecurityConstants.API_AUTH_MISSING_CREDENTIALS
+                            || authenticationResponse.isAuthenticated())) {
+                optionalAuthentication = authenticationResponse;
+            }
             if (authenticationResponse.isMandatoryAuthentication()) {
                 // Update authentication status only if the authentication is a mandatory one
                 authenticated = authenticationResponse.isAuthenticated();
+                mandatoryAuthFailed = !(authenticationResponse.isAuthenticated());
             }
             if (!authenticationResponse.isAuthenticated()) {
                 authResponses.add(authenticationResponse);
@@ -575,8 +583,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
         }
         if (!authenticated) {
-            Pair<Integer, String> error = getError(authResponses);
-            throw new APISecurityException(error.getKey(), error.getValue());
+            if (mandatoryAuthFailed || optionalAuthentication == null) {
+                Pair<Integer, String> error = getError(authResponses);
+                throw new APISecurityException(error.getKey(), error.getValue());
+            } else if (!(optionalAuthentication.isAuthenticated())) {
+                throw new APISecurityException(optionalAuthentication.getErrorCode()
+                        , optionalAuthentication.getErrorMessage());
+            }
         }
         return true;
     }
