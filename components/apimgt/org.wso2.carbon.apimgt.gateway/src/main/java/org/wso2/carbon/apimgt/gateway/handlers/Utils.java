@@ -60,6 +60,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.GatewayCertificateMgtUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -564,10 +565,10 @@ public class Utils {
     public static X509Certificate getCertificateFromListenerTrustStore(String certSubjectDN)
             throws APIManagementException {
 
-        Enumeration<String> aliases = APIUtil.getAliasesFromListenerTrustStore();
+        Enumeration<String> aliases = GatewayCertificateMgtUtil.getAliasesFromListenerTrustStore();
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
-            Certificate certificate = APIUtil.getCertificateFromListenerTrustStore(alias);
+            Certificate certificate = GatewayCertificateMgtUtil.getCertificateFromListenerTrustStore(alias);
             if (certificate instanceof X509Certificate) {
                 X509Certificate x509Certificate = (X509Certificate) certificate;
                 if (StringUtils.equals(x509Certificate.getSubjectDN().getName(), certSubjectDN)) {

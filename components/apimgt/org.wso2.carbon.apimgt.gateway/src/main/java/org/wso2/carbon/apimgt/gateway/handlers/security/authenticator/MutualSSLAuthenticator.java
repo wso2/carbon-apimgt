@@ -207,7 +207,7 @@ public class MutualSSLAuthenticator implements Authenticator {
             subjectDNIdentifiers.add(subjectDNIdentifier);
             for (Map.Entry<String, String> entry : certificates.entrySet()) {
                 String key = entry.getKey();
-                if (key.contains(subjectDNIdentifier)) {
+                if (StringUtils.equals(subjectDNIdentifier, key)) {
                     uniqueIdentifier = key;
                     tier = entry.getValue();
                     break;
