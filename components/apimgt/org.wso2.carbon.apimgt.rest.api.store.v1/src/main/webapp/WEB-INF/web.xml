@@ -89,7 +89,7 @@
             <param-name>jaxrs.properties</param-name>
             <param-value>
                 map.cxf.interceptor.fault=true
-                attachment-max-size={systemProperties['rest.api.devportal.attachment.max.size']
+                attachment-max-size={systemProperties['rest.api.devportal.attachment.max.size']}
             </param-value>
         </init-param>
     </servlet>
