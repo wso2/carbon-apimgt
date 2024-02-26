@@ -28,7 +28,7 @@
     <servlet>
         <servlet-name>CXFServlet</servlet-name>
         <servlet-class>
-            org.apache.cxf.jaxrs.servlet.CXFNonSpringJaxrsServlet
+            org.wso2.carbon.apimgt.rest.api.util.servlet.impl.CustomCXFNonSpringJaxrsServlet
         </servlet-class>
         <init-param>
             <param-name>service-list-path</param-name>
@@ -73,6 +73,14 @@
             <param-value>
                 org.apache.cxf.transport.common.gzip.GZIPOutInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.response.ResponseOutInterceptor
+            </param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>jaxrs.properties</param-name>
+            <param-value>
+                map.cxf.interceptor.fault=true
+                attachment-max-size={systemProperties['rest.api.service.catalog.attachment.max.size']}
             </param-value>
         </init-param>
     </servlet>

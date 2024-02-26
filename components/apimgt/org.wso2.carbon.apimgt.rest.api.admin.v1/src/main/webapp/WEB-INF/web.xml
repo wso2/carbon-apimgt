@@ -28,7 +28,7 @@
     <display-name>JAX-WS/JAX-RS Servlet</display-name>
     <servlet-name>CXFServlet</servlet-name>
     <servlet-class>
-        org.apache.cxf.jaxrs.servlet.CXFNonSpringJaxrsServlet
+        org.wso2.carbon.apimgt.rest.api.util.servlet.impl.CustomCXFNonSpringJaxrsServlet
     </servlet-class>
     <load-on-startup>1</load-on-startup>
     <init-param>
@@ -86,6 +86,14 @@
         <param-value>
             org.apache.cxf.transport.common.gzip.GZIPOutInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.response.ResponseOutInterceptor
+        </param-value>
+    </init-param>
+
+    <init-param>
+        <param-name>jaxrs.properties</param-name>
+        <param-value>
+            map.cxf.interceptor.fault=true
+            attachment-max-size={systemProperties['rest.api.admin.attachment.max.size']}
         </param-value>
     </init-param>
 </servlet>
