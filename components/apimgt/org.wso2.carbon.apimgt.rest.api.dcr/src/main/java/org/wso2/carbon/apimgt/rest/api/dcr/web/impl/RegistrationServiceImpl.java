@@ -326,14 +326,6 @@ public class RegistrationServiceImpl implements RegistrationService {
             logoutConsentProperty.setValue(APIConstants.APP_SKIP_LOGOUT_CONSENT_VALUE);
             serviceProviderProperties.add(logoutConsentProperty);
 
-            if (APIConstants.JWT.equals(applicationInfo.getTokenType())) {
-                LocalAndOutboundAuthenticationConfig localAndOutboundConfig =
-                        new LocalAndOutboundAuthenticationConfig();
-                localAndOutboundConfig.setSkipConsent(true);
-                localAndOutboundConfig.setSkipLogoutConsent(true);
-                localAndOutboundConfig.setUseTenantDomainInLocalSubjectIdentifier(true);
-                serviceProvider.setLocalAndOutBoundAuthenticationConfig(localAndOutboundConfig);
-            }
             String orgId = null;
             try {
                 orgId = RestApiUtil.getValidatedOrganization(securityContext);
