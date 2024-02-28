@@ -184,6 +184,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(true);
         PowerMockito.doNothing().when(userStoreManager).updateRoleListOfUser(testUsername, null, new String[]{
                 signUpRole});
+        PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         try {
@@ -203,6 +204,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
         Mockito.when(userStoreManager.isExistingUser(testUsername)).thenReturn(true);
         Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(true);
+        PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
@@ -246,7 +248,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         userRegistrationConfigDTO.setRoles(roleMap);
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
-
+        PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.REJECTED);
         try {
@@ -264,6 +266,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         userRegistrationConfigDTO.setRoles(roleMap);
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
+        PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.REJECTED);

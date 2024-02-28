@@ -88,11 +88,14 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		PowerMockito.doNothing().when(apiMgtDAO).updateApplicationStatus(
 				Integer.parseInt(workflowDTO.getWorkflowReference()),
 				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
 		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateApplicationStatus(
 				Integer.parseInt(workflowDTO.getWorkflowReference()),
 				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+
+
 	}
 
 	@Test
@@ -108,6 +111,7 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		PowerMockito.doNothing().when(apiMgtDAO).updateApplicationStatus(
 				Integer.parseInt(workflowDTO.getWorkflowReference()),
 				APIConstants.ApplicationStatus.APPLICATION_REJECTED);
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
 		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateApplicationStatus(
@@ -128,6 +132,7 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		PowerMockito.doNothing().when(apiMgtDAO).updateApplicationStatus(
 				Integer.parseInt(workflowDTO.getWorkflowReference()),
 				APIConstants.ApplicationStatus.APPLICATION_CREATED);
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
 		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateApplicationStatus(
@@ -182,6 +187,7 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 				"creation process")).when(apiMgtDAO).updateApplicationStatus(
 				Integer.parseInt(workflowDTO.getWorkflowReference()),
 				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
 
 	}
@@ -241,6 +247,7 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		Application app = Mockito.mock(Application.class);
 		PowerMockito.doReturn(app).when(apiMgtDAO)
 				.getApplicationById(Integer.parseInt(workflowDTO.getWorkflowReference()));
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
 		// shouldn't update status

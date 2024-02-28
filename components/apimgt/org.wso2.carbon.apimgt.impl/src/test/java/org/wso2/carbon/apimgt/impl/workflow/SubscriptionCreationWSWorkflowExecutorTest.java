@@ -86,6 +86,7 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		workflowDTO.setStatus(WorkflowStatus.APPROVED);
 		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
 				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.UNBLOCKED);
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateSubscriptionStatus(
@@ -101,6 +102,7 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		workflowDTO.setStatus(WorkflowStatus.REJECTED);
 		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
 				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateSubscriptionStatus(
@@ -115,6 +117,7 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		workflowDTO.setStatus(WorkflowStatus.REJECTED);
 		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO).updateSubscriptionStatus(
 				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 
@@ -128,6 +131,7 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		workflowDTO.setStatus(WorkflowStatus.APPROVED);
 		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO).updateSubscriptionStatus(
 				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.UNBLOCKED);
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 
@@ -139,6 +143,7 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.CREATED);
+		PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
 
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 		// shouldn't update status
