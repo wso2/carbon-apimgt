@@ -84,12 +84,17 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         Target target = new Target();
         target.setTargetResponseCode(Constants.UNKNOWN_INT_VALUE);
         MetaInfo metaInfo = provider.getMetaInfo();
+        String userIp = provider.getEndUserIP();
+        if (userIp == null) {
+            userIp = Constants.UNKNOWN_VALUE;
+        }
 
         event.setApi(api);
         event.setTarget(target);
         event.setProxyResponseCode(provider.getProxyResponseCode());
         event.setRequestTimestamp(offsetDateTime);
         event.setMetaInfo(metaInfo);
+        event.setUserIp(userIp);
 
         return event;
     }
