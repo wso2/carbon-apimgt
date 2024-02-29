@@ -189,7 +189,8 @@ public class RegistrationServiceImpl implements RegistrationService {
                     returnedAPP = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
                 } else {
                     //create a new application if the application doesn't exists.
-                    returnedAPP = this.createApplication(applicationName, appRequest, grantTypes);
+                    returnedAPP = this.createApplication(applicationName, appRequest, grantTypes,
+                            profile.isUserStoreDomainInSubject());
                 }
                 //ReturnedAPP is null
                 if (returnedAPP == null) {
@@ -278,8 +279,8 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @return created Application
      * @throws APIManagementException if failed to create the new application
      */
-    private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest,
-                                                   String grantType) throws APIManagementException {
+    private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest, String grantType,
+            boolean setUserStoreDomainInSubject) throws APIManagementException {
         String userName;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
         String appName = applicationInfo.getClientName();
@@ -325,6 +326,12 @@ public class RegistrationServiceImpl implements RegistrationService {
             logoutConsentProperty.setName(APIConstants.APP_SKIP_LOGOUT_CONSENT_NAME);
             logoutConsentProperty.setValue(APIConstants.APP_SKIP_LOGOUT_CONSENT_VALUE);
             serviceProviderProperties.add(logoutConsentProperty);
+            
+            if (setUserStoreDomainInSubject) {
+                LocalAndOutboundAuthenticationConfig localAndOutboundConfig = new LocalAndOutboundAuthenticationConfig();
+                localAndOutboundConfig.setUseUserstoreDomainInLocalSubjectIdentifier(true);
+                serviceProvider.setLocalAndOutBoundAuthenticationConfig(localAndOutboundConfig);
+            }
 
             String orgId = null;
             try {
