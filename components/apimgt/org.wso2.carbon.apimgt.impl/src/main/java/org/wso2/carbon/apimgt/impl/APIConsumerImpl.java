@@ -4595,6 +4595,35 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return true;
     }
 
+    @Override
+    public NotificationList getNotifications(String username, String organization, String sortOrder, Integer limit,
+            Integer offset) throws APIManagementException{
+        return portalNotificationDAO.getNotifications(username, organization, sortOrder, limit, offset);
+    }
+
+    @Override
+    public NotificationList markAllNotificationsAsRead(String username, String organization)
+            throws APIManagementException {
+        return portalNotificationDAO.markAllNotificationsAsRead(username, organization);
+    }
+
+    @Override
+    public Notification markNotificationAsReadById(String username, String organization, String notificationId)
+            throws APIManagementException {
+        return portalNotificationDAO.markNotificationAsReadById(username, organization, notificationId);
+    }
+
+    @Override
+    public boolean deleteNotificationById(String username, String organization, String notificationId)
+            throws APIManagementException {
+        return portalNotificationDAO.deleteNotificationById(username, organization, notificationId);
+    }
+
+    @Override
+    public boolean deleteAllNotifications(String username, String organization) throws APIManagementException {
+        return portalNotificationDAO.deleteAllNotifications(username, organization);
+    }
+
     public static boolean hasIntersection(String[] arr1, String[] arr2) {
 
         Set<String> set = new HashSet<>();

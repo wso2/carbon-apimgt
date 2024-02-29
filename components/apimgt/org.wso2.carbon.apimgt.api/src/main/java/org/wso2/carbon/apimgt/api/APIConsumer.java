@@ -869,4 +869,14 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant) throws APIManagementException;
+    NotificationList getNotifications(String username, String organization, String sortOrder, Integer limit, Integer offset)
+            throws APIManagementException;
+
+    NotificationList markAllNotificationsAsRead(String username, String organization) throws APIManagementException;
+
+    Notification markNotificationAsReadById(String username, String organization, String notificationId) throws APIManagementException;
+
+    boolean deleteNotificationById(String username, String organization, String notificationId) throws APIManagementException;
+
+    boolean deleteAllNotifications(String username, String organization) throws APIManagementException;
 }
