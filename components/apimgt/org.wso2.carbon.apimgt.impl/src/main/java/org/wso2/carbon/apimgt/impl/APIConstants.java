@@ -351,7 +351,11 @@ public final class APIConstants {
     public static final String SWAGGER_API_SECURITY_BASIC_AUTH_TYPE = "basic";
     public static final String API_SECURITY_API_KEY = "api_key";
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
+
+    public static final String API_SECURITY_MUTUAL_SSL_OPTIONAL = "mutualssl_optional";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
+
+    public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_OPTIONAL = "oauth_basic_auth_api_key_optional";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
     public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----";
