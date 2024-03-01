@@ -125,6 +125,10 @@
             <artifactId>org.osgi.foundation</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
