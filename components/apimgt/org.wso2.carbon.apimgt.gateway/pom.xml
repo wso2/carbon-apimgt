@@ -85,7 +85,7 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.logging</groupId>
+            <groupId>org.wso2.org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
         </dependency>
         <dependency>
@@ -380,7 +380,7 @@
                         --add-exports java.base/sun.nio.cs=ALL-UNNAMED                 
                     </argLine>
                     <classpathDependencyExcludes>
-                        <classpathDependencyExclude>org.ops4j.pax.logging:pax-logging-api</classpathDependencyExclude>
+                        <classpathDependencyExclude>org.wso2.org.ops4j.pax.logging:pax-logging-api</classpathDependencyExclude>
                         <classpathDependencyExclude>org.wso2.orbit.com.fasterxml.jackson.core:jackson-core</classpathDependencyExclude>
                     </classpathDependencyExcludes>
                     <systemProperties>
