@@ -329,6 +329,8 @@ public class RegistrationServiceImpl implements RegistrationService {
             
             if (setUserStoreDomainInSubject) {
                 LocalAndOutboundAuthenticationConfig localAndOutboundConfig = new LocalAndOutboundAuthenticationConfig();
+                localAndOutboundConfig.setSkipConsent(true); // to prevent overriding
+                localAndOutboundConfig.setSkipLogoutConsent(true); // to prevent overriding
                 localAndOutboundConfig.setUseUserstoreDomainInLocalSubjectIdentifier(true);
                 serviceProvider.setLocalAndOutBoundAuthenticationConfig(localAndOutboundConfig);
             }
