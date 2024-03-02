@@ -189,7 +189,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     carbonContext.setTenantId(tenantId);
                     carbonContext.setUsername(username);
                     message.put(RestApiConstants.AUTH_TOKEN_INFO, oauthTokenInfo);
-                    message.put(RestApiConstants.SUB_ORGANIZATION, orgId);
+                    message.put(RestApiConstants.SUB_ORGANIZATION, tenantDomain);
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                     }
