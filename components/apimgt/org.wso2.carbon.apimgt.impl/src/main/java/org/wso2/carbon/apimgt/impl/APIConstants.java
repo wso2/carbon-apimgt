@@ -1483,6 +1483,7 @@ public final class APIConstants {
     public static final String API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION = API_STORE + "GroupingExtractor";
     public static final String API_STORE_REST_API_GROUP_EXTRACTOR_IMPLEMENTATION =
             API_STORE + "RESTApiGroupingExtractor";
+    public static final String IS_ENABLE_JWT_FOR_PORTALS = OAUTH_CONFIGS + "EnableJWTForPortals";
     public static final String API_CUSTOM_SEQUENCES_FOLDER_LOCATION =
             "repository" + File.separator + "resources" + File.separator + "customsequences";
     public static final String WORKFLOW_EXTENSION_LOCATION =

@@ -11915,6 +11915,9 @@ components:
           type: string
           description: Authorization Header
           example: authorization
+        IsJWTEnabledForLoginTokens: 
+          type: boolean
+          default: false
         customProperties:
           type: array
           items:
