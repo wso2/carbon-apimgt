@@ -20,10 +20,10 @@ package org.wso2.carbon.apimgt.common.gateway.jwtgenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
+import net.minidev.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
@@ -117,7 +117,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 if (jwtConfigurationDto.useKid()) {
                     jwtHeaderBuilder.put("kid", JWTUtil.getKID(x509Certificate));
                 }
-                jwtHeader = jwtHeaderBuilder.toString();
+                jwtHeader = jwtHeaderBuilder.toJSONString();
             } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
                 jwtHeader = addCertToHeader();
             }
@@ -204,7 +204,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         //Adding JWT standard claim
         jwtClaimSetBuilder.jwtID(UUID.randomUUID().toString());
         JWTClaimsSet jwtClaimsSet = jwtClaimSetBuilder.build();
-        return jwtClaimsSet.toJSONObject().toString();
+        Map<String, Object> claimMap = jwtClaimsSet.toJSONObject();
+        return new JSONObject(claimMap).toJSONString();
     }
 
     public String encode(byte[] stringToBeEncoded) throws JWTGeneratorException {

@@ -452,7 +452,7 @@ public class ApiKeyAuthenticatorUtils {
         DefaultJWTClaimsVerifier jwtClaimsSetVerifier = new DefaultJWTClaimsVerifier();
         jwtClaimsSetVerifier.setMaxClockSkew(timestampSkew);
         try {
-            jwtClaimsSetVerifier.verify(payload);
+            jwtClaimsSetVerifier.verify(payload, null);
             if (log.isDebugEnabled()) {
                 log.debug("Token is not expired. User: " + payload.getSubject());
             }

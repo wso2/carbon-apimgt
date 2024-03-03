@@ -670,7 +670,7 @@ public class JWTValidator {
         return payload;
     }
 
-    private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) { //Holder of Key token
+    private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) throws ParseException { //Holder of Key token
 
         if (signedJWTInfo.getClientCertificate() == null ||
                 StringUtils.isEmpty(signedJWTInfo.getClientCertificateHash()) ||
@@ -701,8 +701,14 @@ public class JWTValidator {
                     checkTokenExpiration(jti, tempJWTValidationInfo, tenantDomain);
                                         /* Only when cnf validation fails the validation info is updated when it passes the other
                      validations are performed */
-                    if (!isValidCertificateBoundAccessToken(signedJWTInfo)) {
-                        tempJWTValidationInfo.setValid(false);
+                    try {
+                        if (!isValidCertificateBoundAccessToken(signedJWTInfo)) {
+                            tempJWTValidationInfo.setValid(false);
+                        }
+                    } catch (ParseException e) {
+                        log.error("Error while parsing the certificate thumbprint", e);
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
                     }
                     jwtValidationInfo = tempJWTValidationInfo;
                 }

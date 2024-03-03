@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.jwt;
 import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import net.minidev.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -28,6 +29,8 @@ import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 
 import java.io.Serializable;
 import java.security.cert.Certificate;
+import java.text.ParseException;
+import java.util.Map;
 
 /**
  * JWT internal Representation
@@ -106,11 +109,11 @@ public class SignedJWTInfo implements Serializable {
     }
 
 
-    public String getCertificateThumbprint() {
+    public String getCertificateThumbprint() throws ParseException {
 
-        if (null != jwtClaimsSet) {
-            Object thumbprint = jwtClaimsSet.getClaim(APIConstants.CNF);
-            net.minidev.json.JSONObject thumbprintJson = (net.minidev.json.JSONObject) thumbprint;
+        if (null != jwtClaimsSet && jwtClaimsSet.getClaim(APIConstants.CNF) != null) {
+            Map<String, Object> thumbPrintMap = jwtClaimsSet.getJSONObjectClaim(APIConstants.CNF);
+            JSONObject thumbprintJson = new JSONObject(thumbPrintMap);
             if (thumbprintJson != null) {
                 return thumbprintJson.getAsString(APIConstants.DIGEST);
             }
