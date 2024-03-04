@@ -127,7 +127,7 @@
                                     org.wso2.carbon.identity.framework:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}
                                 </importBundleDef>
                                 <importBundleDef>
-                                    org.wso2.carbon.event-processing:org.wso2.carbon.event.processor.stub:${event.processor.stub.version}
+                                    org.wso2.carbon.event-processing:org.wso2.carbon.event.processor.stub:${event.processor.version}
                                 </importBundleDef>
                             </importBundles>
                             <importFeatures>
