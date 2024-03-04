@@ -25,25 +25,64 @@
 
     <display-name>WSO2 APIM REST API</display-name>
     <description>WSO2 API Manager REST API</description>
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>WEB-INF/beans.xml</param-value>
-    </context-param>
-    <listener>
-        <listener-class>
-            org.springframework.web.context.ContextLoaderListener
-        </listener-class>
-    </listener>
     <servlet>
         <servlet-name>CXFServlet</servlet-name>
         <servlet-class>
-            org.apache.cxf.transport.servlet.CXFServlet
+            org.wso2.carbon.apimgt.rest.api.util.servlet.impl.CustomCXFNonSpringJaxrsServlet
         </servlet-class>
         <init-param>
             <param-name>service-list-path</param-name>
             <param-value>/service-list</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
+
+        <init-param>
+            <param-name>jaxrs.serviceClasses</param-name>
+            <param-value>
+                org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApi,
+                org.wso2.carbon.apimgt.rest.api.service.catalog.SettingsApi,
+                org.wso2.carbon.apimgt.rest.api.service.catalog.OASYamlApi
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>jaxrs.address</param-name>
+            <param-value>/</param-value>
+        </init-param>
+        <init-param>
+            <param-name>jaxrs.providers</param-name>
+            <param-value>
+                com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider,
+                org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper,
+                org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter(allowHeaders=Authorization allowHeaders=X-WSO2-Tenant allowHeaders=content-type exposeHeaders=Content-Disposition allowCredentials=true allowOrigins=*)
+            </param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>jaxrs.inInterceptors</param-name>
+            <param-value>
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor,
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor,
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor,
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor,
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor,
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>jaxrs.outInterceptors</param-name>
+            <param-value>
+                org.apache.cxf.transport.common.gzip.GZIPOutInterceptor,
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.response.ResponseOutInterceptor
+            </param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>jaxrs.properties</param-name>
+            <param-value>
+                map.cxf.interceptor.fault=true
+                attachment-max-size={systemProperties['rest.api.service.catalog.attachment.max.size']}
+            </param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>CXFServlet</servlet-name>
