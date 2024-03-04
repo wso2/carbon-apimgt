@@ -18,14 +18,13 @@
 
 package org.wso2.carbon.apimgt.keymgt.token;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
+import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -46,7 +45,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -192,7 +190,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             JSONObject jwtHeaderBuilder = new JSONObject();
             jwtHeaderBuilder.put("typ", "JWT");
             jwtHeaderBuilder.put("alg", APIUtil.getJWSCompliantAlgorithmCode(NONE));
-            jwtHeader = jwtHeaderBuilder.toString();
+            jwtHeader = jwtHeaderBuilder.toJSONString();
         } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
             jwtHeader = addCertToHeader(tenantDomain);
         }
@@ -263,7 +261,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 //Adding JTI standard claim
                 jwtClaimsSetBuilder.jwtID(UUID.randomUUID().toString());
             }
-            return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
+            Map<String, Object> jwtClaims = jwtClaimsSetBuilder.build().toJSONObject();
+            return new JSONObject(jwtClaims).toJSONString();
         }
         return null;
     }
@@ -417,7 +416,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             if (useKid) {
                 jwtHeader.put("kid", JWTUtil.getKID(x509Certificate));
             }
-            return jwtHeader.toString();
+            return jwtHeader.toJSONString();
 
         } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
             throw new APIManagementException("Error in generating public certificate thumbprint", e);

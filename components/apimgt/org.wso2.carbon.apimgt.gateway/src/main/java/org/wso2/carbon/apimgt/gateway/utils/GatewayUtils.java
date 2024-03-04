@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import com.google.gson.Gson;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
@@ -28,6 +29,7 @@ import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
@@ -96,6 +98,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -114,6 +117,7 @@ public class GatewayUtils {
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
     private static final String HTTP_SC = "HTTP_SC";
     private static final String HTTP_SC_DESC = "HTTP_SC_DESC";
+    private static final Gson gson = new Gson();
 
     public static boolean isClusteringEnabled() {
 
@@ -680,9 +684,9 @@ public class GatewayUtils {
         authContext.setApiTier(apiLevelPolicy);
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
-            JSONObject
-                    applicationObj = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
-
+            Map<String, Object> applicationObjMap =
+                    payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+            JSONObject applicationObj = new JSONObject(applicationObjMap);
             authContext
                     .setApplicationId(
                             String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
@@ -705,11 +709,13 @@ public class GatewayUtils {
             authContext.setTier(subscriptionTier);
             authContext.setSubscriberTenantDomain(
                     api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN));
-            JSONObject tierInfo = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.TIER_INFO);
+            Map<String, Object> tierInfoObj = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.TIER_INFO);
+            JSONObject tierInfo = new JSONObject(tierInfoObj);
             authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
             authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
             if (tierInfo.get(subscriptionTier) != null) {
-                JSONObject subscriptionTierObj = (JSONObject) tierInfo.get(subscriptionTier);
+                String jsonString = gson.toJson(tierInfo.get(subscriptionTier));
+                JSONObject subscriptionTierObj = JSONValue.parse(jsonString, JSONObject.class);
                 authContext.setStopOnQuotaReach(
                         Boolean.parseBoolean(
                                 subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH)));
@@ -827,8 +833,16 @@ public class GatewayUtils {
         JSONObject application;
         int appId = 0;
         if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
-            application = (JSONObject) payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION);
-            appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            try {
+                Map<String, Object> applicationObjMap =
+                        payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+                application = new JSONObject(applicationObjMap);
+                appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            } catch (ParseException e) {
+                log.error("Error while parsing the application object from the JWT token.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            }
         }
         // validate subscription
         // if the appId is equal to 0 then it's a internal key
@@ -839,10 +853,10 @@ public class GatewayUtils {
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS) != null) {
             // Subscription validation
-            JSONArray subscribedAPIs =
-                    (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
+            ArrayList subscribedAPIs = (ArrayList) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
             for (Object subscribedAPI : subscribedAPIs) {
-                JSONObject subscribedAPIsJSONObject = (JSONObject) subscribedAPI;
+                String subscribedAPIsJSONString = gson.toJson(subscribedAPI);
+                JSONObject subscribedAPIsJSONObject = JSONValue.parse(subscribedAPIsJSONString, JSONObject.class);
                 if (apiContext
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
@@ -913,8 +927,16 @@ public class GatewayUtils {
         JSONObject application;
         int appId = 0;
         if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
-            application = (JSONObject) payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION);
-            appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            try {
+                Map<String, Object> applicationObjMap =
+                        payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+                application = new JSONObject(applicationObjMap);
+                appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            } catch (ParseException e) {
+                log.error("Error while parsing the application object from the JWT token.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            }
         }
         // validate subscription
         // if the appId is equal to 0 then it's a internal key
@@ -925,10 +947,11 @@ public class GatewayUtils {
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS) != null) {
             // Subscription validation
-            JSONArray subscribedAPIs =
-                    (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
+            ArrayList subscribedAPIs =
+                    (ArrayList) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
             for (Object subscribedAPI : subscribedAPIs) {
-                JSONObject subscribedAPIsJSONObject = (JSONObject) subscribedAPI;
+                String subscribedAPIsJSONString = gson.toJson(subscribedAPI);
+                JSONObject subscribedAPIsJSONObject = JSONValue.parse(subscribedAPIsJSONString, JSONObject.class);
                 if (apiContext
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
@@ -1145,8 +1168,9 @@ public class GatewayUtils {
 
             Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
             if (claims.get(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+                String applicationString = gson.toJson(claims.get(APIConstants.JwtTokenConstants.APPLICATION));
                 JSONObject
-                        applicationObj = (JSONObject) claims.get(APIConstants.JwtTokenConstants.APPLICATION);
+                        applicationObj = JSONValue.parse(applicationString, JSONObject.class);
                 jwtInfoDto.setApplicationId(
                         String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
                 jwtInfoDto
@@ -1599,7 +1623,7 @@ public class GatewayUtils {
         DefaultJWTClaimsVerifier jwtClaimsSetVerifier = new DefaultJWTClaimsVerifier();
         jwtClaimsSetVerifier.setMaxClockSkew(timestampSkew);
         try {
-            jwtClaimsSetVerifier.verify(payload);
+            jwtClaimsSetVerifier.verify(payload, null);
             if (log.isDebugEnabled()) {
                 log.debug("Token is not expired. User: " + payload.getSubject());
             }
