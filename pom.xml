@@ -2276,6 +2276,6 @@
         <h2.orbit.version>2.2.224.wso2v2</h2.orbit.version>
         <tomcat.version>9.0.53</tomcat.version>
         <tika.version>2.7.0</tika.version>
-        <batik.version>1.16</batik.version>
+        <batik.version>1.17</batik.version>
     </properties>
 </project>
