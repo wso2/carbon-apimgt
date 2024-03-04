@@ -56,7 +56,7 @@
             <artifactId>zipkin-reporter</artifactId>
         </dependency>
         <dependency>
-        <groupId>io.zipkin.reporter2</groupId>
+        <groupId>org.wso2.orbit.io.zipkin.reporter2</groupId>
         <artifactId>zipkin-sender-okhttp3</artifactId>
         </dependency>
         <dependency>
@@ -103,7 +103,7 @@
                                 <bundleDef>org.wso2.orbit.io.opentelemetry:opentelemetry-all</bundleDef>
                                 <bundleDef>io.zipkin.zipkin2:zipkin</bundleDef>
                                 <bundleDef>io.zipkin.reporter2:zipkin-reporter</bundleDef>
-                                <bundleDef>io.zipkin.reporter2:zipkin-sender-okhttp3</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.zipkin.reporter2:zipkin-sender-okhttp3</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio</bundleDef>
                                 <bundleDef>javax.annotation:javax.annotation-api</bundleDef>
