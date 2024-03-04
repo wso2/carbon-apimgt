@@ -234,12 +234,24 @@ components:
 
     LoggingApiInput:
       title: API Info object with log details
+      required:
+        - logLevel
       properties:
         logLevel:
           type: string
           example: FULL
+        resourceMethod:
+          type: string
+          example: GET
+        resourcePath:
+          type: string
+          example: /v1.0.0/pizza
     LoggingApiOutput:
       title: API Info object with log details
+      required:
+        - context
+        - logLevel
+        - apiId
       properties:
         context:
           type: string
@@ -250,6 +262,12 @@ components:
         apiId:
           type: string
           example: 12d6e73c-778d-45ac-b57d-117c6c5092a4
+        resourceMethod:
+          type: string
+          example: GET
+        resourcePath:
+          type: string
+          example: /v1.0.0/pizza
     Error:
       title: Error object returned with 4XX HTTP Status
       required:

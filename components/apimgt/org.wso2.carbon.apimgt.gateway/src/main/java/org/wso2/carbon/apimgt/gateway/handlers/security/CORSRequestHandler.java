@@ -33,6 +33,7 @@ import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.handlers.LogsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -158,8 +159,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
             String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                    getProperty(Constants.Configuration.HTTP_METHOD);
+            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                    .getProperty(Constants.Configuration.HTTP_METHOD);
             API selectedApi = Utils.getSelectedAPI(messageContext);
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext();
@@ -170,38 +171,34 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             Utils.setSubRequestPath(selectedApi, messageContext);
 
             if (selectedApi != null) {
-                Resource[] allAPIResources = selectedApi.getResources();
-                Set<Resource> acceptableResources = new LinkedHashSet<>();
+                if ((messageContext.getProperty(RESTConstants.SELECTED_RESOURCE) != null)) {
+                    selectedResource = Utils.getSelectedResource(messageContext, httpMethod, corsRequestMethod);
+                } else {
+                    Resource[] allAPIResources = selectedApi.getResources();
+                    Set<Resource> acceptableResources
+                            = Utils.getAcceptableResources(allAPIResources, httpMethod, corsRequestMethod);
 
-                for (Resource resource : allAPIResources) {
-                    //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                    if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
-                            Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
-                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                        acceptableResources.add(resource);
-                    }
-                }
-
-                if (!acceptableResources.isEmpty()) {
-                    for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                        Resource resource = dispatcher.findResource(messageContext, acceptableResources);
-                        if (resource != null) {
-                            selectedResource = resource;
-                            break;
+                    if (!acceptableResources.isEmpty()) {
+                        for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                            Resource resource = dispatcher.findResource(messageContext, acceptableResources);
+                            if (resource != null) {
+                                selectedResource = resource;
+                                break;
+                            }
+                        }
+                        if (selectedResource == null) {
+                            handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
+                            return false;
                         }
                     }
-                    if (selectedResource == null) {
+                    //If no acceptable resources are found
+                    else {
+                        //We're going to send a 405 or a 404. Run the following logic to determine which.
                         handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
                         return false;
                     }
-                }
-                //If no acceptable resources are found
-                else {
-                    //We're going to send a 405 or a 404. Run the following logic to determine which.
-                    handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
-                    return false;
-                }
 
+                }
                 //No matching resource found
                 if (selectedResource == null) {
                     //Respond with a 404
