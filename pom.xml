@@ -2127,15 +2127,15 @@
 
         <json-simple.wso2.version>1.1.1</json-simple.wso2.version>
         <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
-        <apache.poi.version>4.1.2.wso2v1</apache.poi.version>
-        <apache.poi.import.range>[3.0, 4.9)</apache.poi.import.range>
+        <apache.poi.version>5.2.5.wso2v1</apache.poi.version>
+        <apache.poi.import.range>[5.0, 6.0)</apache.poi.import.range>
         <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
         <owasp.encoder.version>1.2.2</owasp.encoder.version>
 
         <httpclient.version>4.3.6.wso2v3</httpclient.version>
         <wss4j.version>1.5.11-wso2v18</wss4j.version>
         <commons-logging.version>1.1.1</commons-logging.version>
-        <commons-io.version>2.4.0.wso2v1</commons-io.version>
+        <commons-io.version>2.15.1.wso2v1</commons-io.version>
         <commons-httpclient.version>3.1</commons-httpclient.version>
         <google.code.gson.version>2.9.1</google.code.gson.version>
         <httpcomponents.version>4.5.10</httpcomponents.version>

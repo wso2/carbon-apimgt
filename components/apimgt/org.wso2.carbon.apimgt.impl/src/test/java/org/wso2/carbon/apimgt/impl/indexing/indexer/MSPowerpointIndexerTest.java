@@ -16,10 +16,10 @@
 
 package org.wso2.carbon.apimgt.impl.indexing.indexer;
 
-import org.apache.poi.hslf.extractor.PowerPointExtractor;
+import org.apache.poi.hslf.usermodel.HSLFSlideShow;
 import org.apache.poi.poifs.filesystem.OfficeXmlFileException;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.xslf.extractor.XSLFPowerPointExtractor;
+import org.apache.poi.sl.extractor.SlideShowExtractor;
+import org.apache.poi.sl.usermodel.SlideShow;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.solr.common.SolrException;
 import org.junit.Assert;
@@ -30,7 +30,6 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.registry.indexing.AsyncIndexer;
 import org.wso2.carbon.registry.indexing.IndexingConstants;
 import org.wso2.carbon.registry.indexing.solr.IndexDocument;
@@ -39,7 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ MSPowerpointIndexer.class, PowerPointExtractor.class })
+@PrepareForTest({ MSPowerpointIndexer.class, HSLFSlideShow.class })
 public class MSPowerpointIndexerTest {
     private AsyncIndexer.File2Index file2Index;
 
@@ -51,23 +50,24 @@ public class MSPowerpointIndexerTest {
 
     @Test
     public void testShouldReturnIndexedDocumentWhenParameterCorrect() throws Exception {
-        POIFSFileSystem ppExtractor = Mockito.mock(POIFSFileSystem.class);
-        PowerPointExtractor powerPointExtractor = Mockito.mock(PowerPointExtractor.class);
-        XSLFPowerPointExtractor xslfExtractor = Mockito.mock(XSLFPowerPointExtractor.class);
+        HSLFSlideShow hslfSlideShow = Mockito.mock(HSLFSlideShow.class);
+        SlideShowExtractor hslfSlideShowExtractor = Mockito.mock(SlideShowExtractor.class);
+        PowerMockito.whenNew(HSLFSlideShow.class).withParameterTypes(InputStream.class)
+                .withArguments(Mockito.any())
+                .thenReturn(hslfSlideShow);
+        PowerMockito.whenNew(SlideShowExtractor.class).withParameterTypes(SlideShow.class)
+                .withArguments(hslfSlideShow).thenReturn(hslfSlideShowExtractor);
+        Mockito.when(hslfSlideShowExtractor.getText()).thenReturn("");
+
+        SlideShowExtractor xmlSlideShowExtractor = Mockito.mock(SlideShowExtractor.class);
         XMLSlideShow xmlSlideShow = Mockito.mock(XMLSlideShow.class);
-        PowerMockito.whenNew(POIFSFileSystem.class).withParameterTypes(InputStream.class)
-                .withArguments(Mockito.any(InputStream.class))
-                .thenThrow(OfficeXmlFileException.class)
-                .thenReturn(ppExtractor)
-                .thenThrow(APIManagementException.class);
-        PowerMockito.whenNew(PowerPointExtractor.class).withParameterTypes(POIFSFileSystem.class)
-                .withArguments(ppExtractor).thenReturn(powerPointExtractor);
         PowerMockito.whenNew(XMLSlideShow.class).withParameterTypes(InputStream.class)
                 .withArguments(Mockito.any())
                 .thenReturn(xmlSlideShow);
-        PowerMockito.whenNew(XSLFPowerPointExtractor.class).withArguments(xmlSlideShow).thenReturn(xslfExtractor);
-        Mockito.when(powerPointExtractor.getText()).thenReturn("");
-        Mockito.when(xslfExtractor.getText()).thenReturn("");
+        PowerMockito.whenNew(SlideShowExtractor.class).withParameterTypes(SlideShow.class)
+                .withArguments(xmlSlideShow).thenReturn(xmlSlideShowExtractor);
+        Mockito.when(xmlSlideShowExtractor.getText()).thenReturn("");
+
         MSPowerpointIndexer indexer = new MSPowerpointIndexer();
 
         IndexDocument ppDoc = indexer.getIndexedDocument(file2Index);
@@ -93,7 +93,7 @@ public class MSPowerpointIndexerTest {
 
     @Test(expected = SolrException.class)
     public void testShouldThrowExceptionWhenFailToReadFile() throws Exception {
-        PowerMockito.whenNew(POIFSFileSystem.class).withParameterTypes(InputStream.class)
+        PowerMockito.whenNew(HSLFSlideShow.class).withParameterTypes(InputStream.class)
                 .withArguments(Mockito.any(InputStream.class))
                 .thenThrow(OfficeXmlFileException.class);
         PowerMockito.whenNew(XMLSlideShow.class).withParameterTypes(InputStream.class)
