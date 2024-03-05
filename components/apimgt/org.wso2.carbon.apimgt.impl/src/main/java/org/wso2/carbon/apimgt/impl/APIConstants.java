@@ -2146,8 +2146,8 @@ public final class APIConstants {
         public static final String TOKEN_TYPE = "token_type";
         public static final String API_KEY_TOKEN_TYPE = "apiKey";
         public static final String DECODING_ALGORITHM_BASE64URL = "base64url";
-        public static final String APP_DOMAIN = "app_domain";
-        public static final String USER_DOMAIN = "user_domain";
+        public static final String APP_DOMAIN = "app_td";
+        public static final String USER_DOMAIN = "user_td";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
