@@ -53,7 +53,8 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigSchemaApi,
-            org.wso2.carbon.apimgt.rest.api.admin.v1.GlobalKeyManagersApi
+            org.wso2.carbon.apimgt.rest.api.admin.v1.GlobalKeyManagersApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApi
         </param-value>
     </init-param>
     <init-param>
