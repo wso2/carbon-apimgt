@@ -4554,6 +4554,80 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/throttling-policies/api/Platinum"'
 
+
+  /throttling-policies/subscription/reset:
+    post:
+      tags:
+        - Throttling Policies
+      summary: Reset Subscription Throttle Policy
+      description: |
+        This operation can be used to reset the throttle policy for a specific subscription tier.
+      requestBody:
+        description: |
+          Payload for which the subscription-level throttle policy needs to be reset
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscriptionthrottlereset'
+        required: true
+      responses:
+        200:
+          description: OK. Subscription-level throttle policy reset successfully
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:subscription_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k \
+            -H "Content-Type: application/json" -X POST -d @payload.json \
+            "https://localhost:9443/api/am/publisher/v4/throttling-policies/subscription/reset"'
+
+  /throttling-policies/api/reset:
+    post:
+      tags:
+        - Throttling Policies
+      summary: Reset API/Resource Level Throttle Policy
+      description: |
+        This operation can be used to reset the throttle policy for a specific api or resource.
+      requestBody:
+        description: |
+          Payload for which the api-level throttle policy needs to be reset
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Apithrottlereset'
+      responses:
+        200:
+          description: OK.API-level throttle policy reset successfully
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k \
+            -H "Content-Type: application/json" -X POST -d @payload.json \
+            "https://localhost:9443/api/am/publisher/v4/throttling-policies/api/reset"'
+
+
+
   /apis/{apiId}/client-certificates:
     get:
       tags:
@@ -8683,6 +8757,77 @@ paths:
 
 components:
   schemas:
+    Subscriptionthrottlereset:
+      title: Reset subscription level throttling
+      type: object
+      properties:
+        policylevel:
+          type: string
+          description: the policy Level which the counters should be reset
+          example: sub
+#          enum:
+#            - application
+#            - subscription
+#            - api
+#            - resource
+        subscriptiontier:
+          type: string
+          example: "Unlimited"
+        apiContext:
+          type: string
+          example: "/pizzashack/1.0.0"
+        apiVersion:
+          type: string
+          example: "1.0.0"
+        apiTenant:
+          type: string
+          example: "carbon.super"
+        appId:
+          type: string
+          example: "1"
+        apiName:
+          type: string
+          example: "pizzashack"
+    Apithrottlereset:
+      title: Reset api level throttling
+      required:
+        - policylevel
+        - apiContext
+        - apiVersion
+        - apiTenant
+        - apiName
+      type: object
+      properties:
+        policylevel:
+          type: string
+          description: the policy Level which the counters should be reset
+          example: api
+#          enum:
+#            - application
+#            - subscription
+#            - api
+#            - resource
+        apitier:
+          type: string
+          example: "Unlimited"
+        resourceTier:
+          type: string
+          example: "Unlimited"
+        apiContext:
+          type: string
+          example: "/pizzashack/1.0.0"
+        apiVersion:
+          type: string
+          example: "1.0.0"
+        resource:
+          type: string
+          example: "/menu:GET"
+        apiTenant:
+          type: string
+          example: "carbon.super"
+        apiName:
+          type: string
+          example: "pizzashack"
     Comment:
       title: Comment
       required:

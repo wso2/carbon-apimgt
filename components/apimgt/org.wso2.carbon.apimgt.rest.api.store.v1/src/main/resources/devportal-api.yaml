@@ -3144,6 +3144,46 @@ paths:
           source: curl -k "https://localhost:9443/api/am/devportal/v3/throttling-policies/application/10PerMin"
 
   ######################################################
+  # The "Throttling Policy Reset" resource APIs
+  ######################################################
+  /throttling-policies/application/reset:
+    post:
+      tags:
+        - Throttling Policies
+        - Applications
+      summary: Reset Application-Level Throttle Policy
+      description: |
+        This operation can be used to reset the application-level throttle policy for a specific user.
+      requestBody:
+        description: |
+          Payload for which the application-level throttle policy needs to be reset
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Applicationthrottlereset'
+        required: true
+      responses:
+        200:
+          description: OK. Application-level throttle policy reset successfully
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+          - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k \
+            -H "Content-Type: application/json" -X POST -d @payload.json \
+            "https://localhost:9443/api/am/devportal/v3/throttling-policies/application/reset"'
+
+  ######################################################
   # The "Tag Collection" resource API
   ######################################################
   /tags:
@@ -3772,6 +3812,54 @@ paths:
 
 components:
   schemas:
+    Applicationthrottlereset:
+      title: Reset application level throttling
+      type: object
+      properties:
+        policyLevel:
+          type: string
+          description: the policy Level which the counters should be reset
+          example: application
+        userName:
+          type: string
+          description: The username for which the throttle policy needs to be reset
+          example: admin
+#          enum:
+#            - application
+#            - subscription
+#            - api
+#            - resource
+        applicationId:
+          type: string
+          example: "1"
+        applicationTier:
+          type: string
+          example: "50PerMin"
+#        apitier:
+#          type: string
+#          example: "50KPerMin"
+#        subscriptiontier:
+#          type: string
+#          example: "Unlimited"
+#        resourceTier:
+#          type: string
+#          example: "50KPerMin"
+#        apiContext:
+#          type: string
+#          example: "/pizzashack/1.0.0"
+#        apiVersion:
+#          type: string
+#          example: "1.0.0"
+#        appTenant:
+#          type: string
+#          example: "carbon.super"
+#        apiTenant:
+#          type: string
+#          example: "carbon.super"
+#        apiName:
+#          type: string
+#          example: "pizzashack"
+
     APIList:
       title: API List
       type: object

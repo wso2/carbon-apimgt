@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationthrottleresetDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyListDTO;
@@ -36,6 +37,25 @@ public class ThrottlingPoliciesApi  {
 
 ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
 
+
+    @POST
+    @Path("/application/reset")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Reset Application-Level Throttle Policy", notes = "This operation can be used to reset the application-level throttle policy for a specific user. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+        })
+    }, tags={ "Throttling Policies", "Applications",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Application-level throttle policy reset successfully", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response throttlingPoliciesApplicationResetPost(@ApiParam(value = "Payload for which the application-level throttle policy needs to be reset " ,required=true) ApplicationthrottleresetDTO applicationthrottleresetDTO) throws APIManagementException{
+        return delegate.throttlingPoliciesApplicationResetPost(applicationthrottleresetDTO, securityContext);
+    }
 
     @GET
     @Path("/{policyLevel}")

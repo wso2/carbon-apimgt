@@ -22,19 +22,31 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMDocument;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.config.SynapseConfiguration;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
+import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
-import org.wso2.carbon.apimgt.gateway.APILoggerManager;
-import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
-import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
-import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
-import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.*;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
@@ -419,6 +431,106 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                 }
             }
         }
+    }
+
+    private void publishResetEvent(PolicyResetEvent event, String eventJson) {
+        String applicationLevelThrottleKey = null;
+        String applicationLevelTier = null;
+        String apiLevelThrottleKey = null;
+        String apiLevelTier = null;
+        String subscriptionLevelTier = null;
+        String subscriptionLevelThrottleKey = null;
+        String resourceLevelThrottleKey = null;
+        String resourceLevelTier = null;
+        String authorizedUser = null;
+        String apiContext = null;
+        String apiVersion = null;
+        String subscriberTenantDomain = null;
+        String apiTenantDomain = null;
+        String applicationId = null;
+
+        MessageContext synCtx = getMessageContext();
+        AuthenticationContext authenticationContext = new AuthenticationContext();
+
+        if (event.getPolicyType() == PolicyType.APPLICATION) {
+            ApplicationPolicyResetEvent applicationEvent = new Gson().fromJson(eventJson, ApplicationPolicyResetEvent.class);
+            applicationLevelThrottleKey = applicationEvent.getAppId() + ":" + applicationEvent.getUserId() + "@" + applicationEvent.getTenantDomain();
+            applicationLevelTier = applicationEvent.getAppTier();
+            authorizedUser = applicationEvent.getUserId();
+            subscriberTenantDomain = applicationEvent.getTenantDomain();
+            applicationId = applicationEvent.getAppId();
+
+            authenticationContext.setUsername(applicationEvent.getUserId() + "@" + event.getTenantDomain());
+            authenticationContext.setApplicationId(applicationEvent.getAppId());
+            authenticationContext.setAuthenticated(true);
+        } else if (event.getPolicyType() == PolicyType.SUBSCRIPTION) {
+            SubscriptionPolicyResetEvent subscriptionEvent = new Gson().fromJson(eventJson, SubscriptionPolicyResetEvent.class);
+            subscriptionLevelTier = subscriptionEvent.getSubscriptionTier();
+            subscriptionLevelThrottleKey = subscriptionEvent.getAppId() + ":" + subscriptionEvent.getApiContext() + ":" + subscriptionEvent.getApiVersion() + ":" + subscriptionEvent.getSubscriptionTier();
+            apiContext = subscriptionEvent.getApiContext();
+            apiVersion = subscriptionEvent.getApiVersion();
+            subscriberTenantDomain = subscriptionEvent.getTenantDomain();
+            apiTenantDomain = subscriptionEvent.getTenantDomain();
+            applicationId = subscriptionEvent.getAppId();
+
+            authenticationContext.setApplicationId(subscriptionEvent.getAppId());
+            authenticationContext.setAuthenticated(true);
+        } else if (event.getPolicyType() == PolicyType.API) {
+            if (!event.getIsResourceLevel()){
+                ApiPolicyResetEvent apiEvent = new Gson().fromJson(eventJson, ApiPolicyResetEvent.class);
+                apiLevelThrottleKey = apiEvent.getApiContext() + ":" + apiEvent.getApiVersion();
+                apiLevelTier = apiEvent.getApiTier();
+                apiContext = apiEvent.getApiContext();
+                apiVersion = apiEvent.getApiVersion();
+                subscriberTenantDomain = apiEvent.getTenantDomain();
+                apiTenantDomain = apiEvent.getTenantDomain();
+            } else {
+                ResourcePolicyResetEvent resourceEvent = new Gson().fromJson(eventJson, ResourcePolicyResetEvent.class);
+                resourceLevelThrottleKey = resourceEvent.getApiContext() + "/" + resourceEvent.getApiVersion() + resourceEvent.getResource();
+                resourceLevelTier = resourceEvent.getResourceTier();
+                apiContext = resourceEvent.getApiContext();
+                apiVersion = resourceEvent.getApiVersion();
+                subscriberTenantDomain = resourceEvent.getTenantDomain();
+                apiTenantDomain = resourceEvent.getTenantDomain();
+            }
+            authenticationContext.setAuthenticated(true);
+        }
+
+        synCtx.setProperty(APISecurityUtils.API_AUTH_CONTEXT, authenticationContext);
+        synCtx.setProperty(APIConstants.POLICY_RESET, true);
+
+
+        ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
+                publishNonThrottledEvent(applicationLevelThrottleKey,
+                        applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
+                        subscriptionLevelThrottleKey, subscriptionLevelTier,
+                        resourceLevelThrottleKey, resourceLevelTier,
+                        authorizedUser, apiContext,
+                        apiVersion, subscriberTenantDomain, apiTenantDomain,
+                        applicationId,
+                        synCtx, authenticationContext);
+    }
+
+    private static MessageContext getMessageContext() {
+        SynapseConfiguration synCfg = new SynapseConfiguration();
+        org.apache.axis2.context.MessageContext axisMsgCtx;
+        try {
+            axisMsgCtx = GatewayUtils.createAxis2MessageContext();
+        } catch (AxisFault e) {
+            throw new RuntimeException(e);
+        }
+        AxisConfiguration axisConfig = new AxisConfiguration();
+        ConfigurationContext cfgCtx = new ConfigurationContext(axisConfig);
+        org.apache.axis2.context.MessageContext.setCurrentMessageContext(axisMsgCtx);
+        SOAPFactory factory = OMAbstractFactory.getSOAP11Factory();
+        SOAPEnvelope defaultEnvelope = factory.getDefaultEnvelope();
+        try {
+            axisMsgCtx.setEnvelope(defaultEnvelope);
+        } catch (AxisFault e) {
+            throw new RuntimeException(e);
+        }
+        MessageContext synCtx = new Axis2MessageContext(axisMsgCtx, synCfg, new Axis2SynapseEnvironment(cfgCtx, synCfg));
+        return synCtx;
     }
 
     private void endTenantFlow() {

@@ -101,6 +101,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyResetEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
@@ -4342,6 +4343,30 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             tier = APIUtil.getPolicyByName(PolicyConstants.POLICY_LEVEL_APP, policyId, organization);
         }
         return tier;
+    }
+
+//    public String getUserId(String userName) {
+//
+//        try {
+//            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+//            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+//                    .getTenantId(MultitenantUtils.getTenantDomain(username));
+//            org.wso2.carbon.user.api.UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+//            int user = userStoreManager.getUserId(MultitenantUtils.getTenantAwareUsername(username));
+//        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+//            // Log and return since we do not want to stop issuing the token in
+//            // case of scope validation failures.
+//            log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
+//        }
+//        String userID = null;
+//        return userID;
+//    }
+    @Override
+    public Boolean resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization) throws APIManagementException {
+        ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(UUID.randomUUID().toString(),System.currentTimeMillis(),APIConstants.EventType.POLICY_RESET.name(), tenantId,
+                organization,UUID.randomUUID().toString(), appId, userId, appTier);
+        APIUtil.sendNotification(applicationPolicyResetEvent, APIConstants.NotifierType.POLICY.name());
+        return true;
     }
 
     /**

@@ -4,8 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ThrottlingPoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
@@ -13,6 +16,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ThrottlingPolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -23,6 +27,47 @@ import javax.ws.rs.core.Response;
 import static org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer.log;
 
 public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiService {
+
+    @Override
+    public Response throttlingPoliciesApplicationResetPost(ApplicationthrottleresetDTO applicationthrottleresetDTO, MessageContext messageContext) {
+        boolean reset = false;
+        try {
+            String appTier = applicationthrottleresetDTO.getApplicationTier();
+            String applicationId = applicationthrottleresetDTO.getApplicationId();
+            String userId = applicationthrottleresetDTO.getUserName();
+            String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
+            String organization = RestApiUtil.getOrganization(messageContext);
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUsername);
+            String policyLevel = applicationthrottleresetDTO.getPolicyLevel();
+            String id = String.valueOf(apiConsumer.getApplicationByUUID(applicationId, organization).getId());
+//            APIConsumer endConsumer = RestApiCommonUtil.getConsumer(userId);
+//            String user = endConsumer.getUserId(userId);
+//            Map<String, Object> properties = APIUtil.getUserProperties(userId);
+//            String suffix = APIUtil.getUserNameWithTenantSuffix(userId);
+
+            if (StringUtils.isBlank(policyLevel)) {
+                RestApiUtil.handleBadRequest("TierLevel cannot be empty", log);
+            }
+
+            if (StringUtils.isBlank(userId)) {
+                RestApiUtil.handleBadRequest("UserId cannot be empty", log);
+            }
+
+            //retrieves the tier based on the given tier-level
+            if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+                reset = apiConsumer.resetApplicationThrottlePolicy(id, userId, appTier, organization);
+                return Response.ok().entity("Application Level Reset done "+reset + "\n").build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError("TierLevel should be of type " +
+                        PolicyConstants.POLICY_LEVEL_APP, log);
+            }
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving tiers";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
 
     @Override
     public Response throttlingPoliciesPolicyLevelGet(
