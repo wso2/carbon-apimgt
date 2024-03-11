@@ -658,11 +658,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_ENDPOINT_URL);
             }
 
+            // validate custom properties
             org.json.simple.JSONArray customProperties = APIUtil.getCustomProperties(username);
-            if (!PublisherCommonUtils.validateMandatoryProperties(customProperties, body)) {
-                Long errorCode = ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorCode();
+            List<String> errorProperties = PublisherCommonUtils.validateMandatoryProperties(customProperties, body);
+            if (!errorProperties.isEmpty()) {
+                String errorString = " : " + String.join(", ", errorProperties);
                 RestApiUtil.handleBadRequest(
-                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorMessage(), errorCode, log);
+                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorMessage() + errorString,
+                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorCode(), log);
             }
 
             // validate sandbox and production endpoints
