@@ -1,9 +1,9 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApithrottleresetDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionPolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionthrottleresetDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ThrottlingPoliciesApiService;
@@ -113,8 +113,8 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesApiResetPost(@ApiParam(value = "Payload for which the api-level throttle policy needs to be reset " ) ApithrottleresetDTO apithrottleresetDTO) throws APIManagementException{
-        return delegate.throttlingPoliciesApiResetPost(apithrottleresetDTO, securityContext);
+    public Response throttlingPoliciesApiResetPost(@ApiParam(value = "Payload for which the api-level throttle policy needs to be reset " ) ApiThrottleResetDTO apiThrottleResetDTO) throws APIManagementException{
+        return delegate.throttlingPoliciesApiResetPost(apiThrottleResetDTO, securityContext);
     }
 
     @POST
@@ -132,7 +132,7 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesSubscriptionResetPost(@ApiParam(value = "Payload for which the subscription-level throttle policy needs to be reset " ,required=true) SubscriptionthrottleresetDTO subscriptionthrottleresetDTO) throws APIManagementException{
-        return delegate.throttlingPoliciesSubscriptionResetPost(subscriptionthrottleresetDTO, securityContext);
+    public Response throttlingPoliciesSubscriptionResetPost(@ApiParam(value = "Payload for which the subscription-level throttle policy needs to be reset " ,required=true) SubscriptionThrottleResetDTO subscriptionThrottleResetDTO) throws APIManagementException{
+        return delegate.throttlingPoliciesSubscriptionResetPost(subscriptionThrottleResetDTO, securityContext);
     }
 }

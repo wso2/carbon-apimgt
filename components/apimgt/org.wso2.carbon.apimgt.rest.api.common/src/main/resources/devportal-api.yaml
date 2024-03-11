@@ -3160,7 +3160,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Applicationthrottlereset'
+              $ref: '#/components/schemas/ApplicationThrottleReset'
         required: true
       responses:
         200:
@@ -3180,7 +3180,9 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k \
-            -H "Content-Type: application/json" -X POST -d @payload.json \
+            -H "Authorization: Bearer 80249337-fe7c-3c66-bde6-ed431c144372" \
+            -H "Content-Type: application/json" -X POST \
+            -d @payload.json \
             "https://localhost:9443/api/am/devportal/v3/throttling-policies/application/reset"'
 
   ######################################################
@@ -3812,7 +3814,7 @@ paths:
 
 components:
   schemas:
-    Applicationthrottlereset:
+    ApplicationThrottleReset:
       title: Reset application level throttling
       type: object
       properties:
@@ -3824,42 +3826,12 @@ components:
           type: string
           description: The username for which the throttle policy needs to be reset
           example: admin
-#          enum:
-#            - application
-#            - subscription
-#            - api
-#            - resource
         applicationId:
           type: string
           example: "1"
         applicationTier:
           type: string
           example: "50PerMin"
-#        apitier:
-#          type: string
-#          example: "50KPerMin"
-#        subscriptiontier:
-#          type: string
-#          example: "Unlimited"
-#        resourceTier:
-#          type: string
-#          example: "50KPerMin"
-#        apiContext:
-#          type: string
-#          example: "/pizzashack/1.0.0"
-#        apiVersion:
-#          type: string
-#          example: "1.0.0"
-#        appTenant:
-#          type: string
-#          example: "carbon.super"
-#        apiTenant:
-#          type: string
-#          example: "carbon.super"
-#        apiName:
-#          type: string
-#          example: "pizzashack"
-
     APIList:
       title: API List
       type: object

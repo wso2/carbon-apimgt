@@ -4568,7 +4568,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Subscriptionthrottlereset'
+              $ref: '#/components/schemas/SubscriptionThrottleReset'
         required: true
       responses:
         200:
@@ -4588,7 +4588,9 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k \
-            -H "Content-Type: application/json" -X POST -d @payload.json \
+            -H "Authorization: Bearer 80249337-fe7c-3c66-bde6-ed431c144372" \
+            -H "Content-Type: application/json" -X POST \
+            -d @payload.json \
             "https://localhost:9443/api/am/publisher/v4/throttling-policies/subscription/reset"'
 
   /throttling-policies/api/reset:
@@ -4604,7 +4606,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Apithrottlereset'
+              $ref: '#/components/schemas/ApiThrottleReset'
       responses:
         200:
           description: OK.API-level throttle policy reset successfully
@@ -4623,7 +4625,9 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k \
-            -H "Content-Type: application/json" -X POST -d @payload.json \
+            -H "Authorization: Bearer 80249337-fe7c-3c66-bde6-ed431c144372" \
+            -H "Content-Type: application/json" -X POST \
+            -d @payload.json \
             "https://localhost:9443/api/am/publisher/v4/throttling-policies/api/reset"'
 
 
@@ -8757,62 +8761,45 @@ paths:
 
 components:
   schemas:
-    Subscriptionthrottlereset:
+    SubscriptionThrottleReset:
       title: Reset subscription level throttling
       type: object
       properties:
-        policylevel:
+        policyLevel:
           type: string
           description: the policy Level which the counters should be reset
           example: sub
-#          enum:
-#            - application
-#            - subscription
-#            - api
-#            - resource
-        subscriptiontier:
+        apiName:
           type: string
-          example: "Unlimited"
+          example: "pizzashack"
         apiContext:
           type: string
           example: "/pizzashack/1.0.0"
         apiVersion:
           type: string
           example: "1.0.0"
-        apiTenant:
-          type: string
-          example: "carbon.super"
-        appId:
+        applicationId:
           type: string
           example: "1"
-        apiName:
+        subscriptionTier:
           type: string
-          example: "pizzashack"
-    Apithrottlereset:
+          example: "Unlimited"
+    ApiThrottleReset:
       title: Reset api level throttling
       required:
-        - policylevel
+        - policyLevel
         - apiContext
         - apiVersion
-        - apiTenant
         - apiName
       type: object
       properties:
-        policylevel:
+        policyLevel:
           type: string
           description: the policy Level which the counters should be reset
           example: api
-#          enum:
-#            - application
-#            - subscription
-#            - api
-#            - resource
-        apitier:
+        apiName:
           type: string
-          example: "Unlimited"
-        resourceTier:
-          type: string
-          example: "Unlimited"
+          example: "pizzashack"
         apiContext:
           type: string
           example: "/pizzashack/1.0.0"
@@ -8822,12 +8809,12 @@ components:
         resource:
           type: string
           example: "/menu:GET"
-        apiTenant:
+        apiTier:
           type: string
-          example: "carbon.super"
-        apiName:
+          example: "Unlimited"
+        resourceTier:
           type: string
-          example: "pizzashack"
+          example: "Unlimited"
     Comment:
       title: Comment
       required:

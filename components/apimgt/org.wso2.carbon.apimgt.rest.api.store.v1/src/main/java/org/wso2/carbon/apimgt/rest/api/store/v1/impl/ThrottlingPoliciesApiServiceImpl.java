@@ -29,16 +29,16 @@ import static org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer.log;
 public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiService {
 
     @Override
-    public Response throttlingPoliciesApplicationResetPost(ApplicationthrottleresetDTO applicationthrottleresetDTO, MessageContext messageContext) {
+    public Response throttlingPoliciesApplicationResetPost(ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) {
         boolean reset = false;
         try {
-            String appTier = applicationthrottleresetDTO.getApplicationTier();
-            String applicationId = applicationthrottleresetDTO.getApplicationId();
-            String userId = applicationthrottleresetDTO.getUserName();
+            String appTier = applicationThrottleResetDTO.getApplicationTier();
+            String applicationId = applicationThrottleResetDTO.getApplicationId();
+            String userId = applicationThrottleResetDTO.getUserName();
             String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUsername);
-            String policyLevel = applicationthrottleresetDTO.getPolicyLevel();
+            String policyLevel = applicationThrottleResetDTO.getPolicyLevel();
             String id = String.valueOf(apiConsumer.getApplicationByUUID(applicationId, organization).getId());
 //            APIConsumer endConsumer = RestApiCommonUtil.getConsumer(userId);
 //            String user = endConsumer.getUserId(userId);

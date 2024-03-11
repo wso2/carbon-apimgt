@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class ApplicationthrottleresetDTO   {
+public class ApplicationThrottleResetDTO   {
   
     private String policyLevel = null;
     private String userName = null;
@@ -28,7 +28,7 @@ public class ApplicationthrottleresetDTO   {
   /**
    * the policy Level which the counters should be reset
    **/
-  public ApplicationthrottleresetDTO policyLevel(String policyLevel) {
+  public ApplicationThrottleResetDTO policyLevel(String policyLevel) {
     this.policyLevel = policyLevel;
     return this;
   }
@@ -46,7 +46,7 @@ public class ApplicationthrottleresetDTO   {
   /**
    * The username for which the throttle policy needs to be reset
    **/
-  public ApplicationthrottleresetDTO userName(String userName) {
+  public ApplicationThrottleResetDTO userName(String userName) {
     this.userName = userName;
     return this;
   }
@@ -63,7 +63,7 @@ public class ApplicationthrottleresetDTO   {
 
   /**
    **/
-  public ApplicationthrottleresetDTO applicationId(String applicationId) {
+  public ApplicationThrottleResetDTO applicationId(String applicationId) {
     this.applicationId = applicationId;
     return this;
   }
@@ -80,7 +80,7 @@ public class ApplicationthrottleresetDTO   {
 
   /**
    **/
-  public ApplicationthrottleresetDTO applicationTier(String applicationTier) {
+  public ApplicationThrottleResetDTO applicationTier(String applicationTier) {
     this.applicationTier = applicationTier;
     return this;
   }
@@ -104,11 +104,11 @@ public class ApplicationthrottleresetDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApplicationthrottleresetDTO applicationthrottlereset = (ApplicationthrottleresetDTO) o;
-    return Objects.equals(policyLevel, applicationthrottlereset.policyLevel) &&
-        Objects.equals(userName, applicationthrottlereset.userName) &&
-        Objects.equals(applicationId, applicationthrottlereset.applicationId) &&
-        Objects.equals(applicationTier, applicationthrottlereset.applicationTier);
+    ApplicationThrottleResetDTO applicationThrottleReset = (ApplicationThrottleResetDTO) o;
+    return Objects.equals(policyLevel, applicationThrottleReset.policyLevel) &&
+        Objects.equals(userName, applicationThrottleReset.userName) &&
+        Objects.equals(applicationId, applicationThrottleReset.applicationId) &&
+        Objects.equals(applicationTier, applicationThrottleReset.applicationTier);
   }
 
   @Override
@@ -119,7 +119,7 @@ public class ApplicationthrottleresetDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApplicationthrottleresetDTO {\n");
+    sb.append("class ApplicationThrottleResetDTO {\n");
     
     sb.append("    policyLevel: ").append(toIndentedString(policyLevel)).append("\n");
     sb.append("    userName: ").append(toIndentedString(userName)).append("\n");
