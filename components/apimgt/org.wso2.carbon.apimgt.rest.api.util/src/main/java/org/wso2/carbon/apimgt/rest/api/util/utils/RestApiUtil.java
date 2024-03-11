@@ -946,7 +946,7 @@ public class RestApiUtil {
      * @throws ForbiddenException
      */
     public static void handleOperationBlockedError(String msg, Throwable t, Log log)
-            throws ForbiddenException{
+            throws ForbiddenException {
         ForbiddenException forbiddenException = buildForbiddenException(msg);
         log.error(msg,t);
         throw forbiddenException;
