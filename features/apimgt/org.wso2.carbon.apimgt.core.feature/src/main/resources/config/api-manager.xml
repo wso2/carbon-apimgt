@@ -185,6 +185,34 @@
     </Analytics>
 
     <!--
+        Configurations relevant to API Chat AI feature.
+        This enables the API Chat feature which leverages AI for API testing within Developer Portal.
+    -->
+    <APIChat>
+        <!-- Enable API Chat for API Manager -->
+        <Enabled>true</Enabled>
+
+        <AuthToken>abc</AuthToken>
+
+        <Endpoint>https://test.com</Endpoint>
+
+    </APIChat>
+
+    <!--
+        Configurations relevant to Marketplace Assistant feature.
+        This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
+    -->
+    <MarketplaceAssistant>
+        <!-- Enable Marketplace Assistant for API Manager -->
+        <Enabled>true</Enabled>
+
+        <AuthToken>abc</AuthToken>
+
+        <Endpoint>https://test.com</Endpoint>
+
+    </MarketplaceAssistant>
+
+    <!--
         API key validator configuration used by API key manager (IS), API store and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
     -->

@@ -354,6 +354,34 @@
     </Analytics>
 
     <!--
+        Configurations relevant to API Chat AI feature.
+        This enables the API Chat feature which leverages AI for API testing within Developer Portal.
+    -->
+    <APIChat>
+        <!-- Enable API Chat for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.auth_token}}</AuthToken>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+    </APIChat>
+
+    <!--
+        Configurations relevant to Marketplace Assistant feature.
+        This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
+    -->
+    <MarketplaceAssistant>
+        <!-- Enable Marketplace Assistant for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.auth_token}}</AuthToken>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+    </MarketplaceAssistant>
+
+    <!--
         Configurations relevant to enable rate limit feature.
         This enables to use resources considering subscription levels.
     -->
