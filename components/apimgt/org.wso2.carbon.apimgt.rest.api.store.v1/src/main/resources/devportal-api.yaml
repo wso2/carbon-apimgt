@@ -3576,6 +3576,113 @@ paths:
           source: curl -k "https://localhost:9443/api/am/devportal/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/graphql-policies/complexity/types"
 
   ######################################################
+  # The "API Chat Feature" resource APIs
+  ######################################################
+  '/ai/api-chat/health':
+
+    #-----------------------------------------------------
+    # Check the health status of AI service
+    #-----------------------------------------------------
+    get:
+      summary: Heath check endpoint
+      security:
+        - OAuth2Security: []
+      description: |
+        Get the health status of API Chat AI service
+      operationId: getApiChatHealth
+      tags:
+        - API Chat
+      responses:
+        200:
+          description: |
+            OK.
+            Health status is returned.
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while checking the health status of API Chat service
+
+  '/ai/api-chat/prepare':
+
+    #-----------------------------------------------------
+    # Prepare API Chat for user queries by feeding spec
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security: []
+      summary: Prepare API Chat service by feeding the OpenAPI specification of the API to be tested
+      description: |
+        Processing the OpenAPI specification to extract the API endpoint definitions and generate sample queries
+      operationId: apiChatPrepare
+      parameters:
+        - $ref: '#/components/parameters/apiChatRequestId'
+      requestBody:
+        description: |
+          API Chat preparation request payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiChatPreparationRequest'
+        required: true
+      tags:
+        - API Chat
+      responses:
+        201:
+          description: |
+            Created.
+            API Chat preparation completed. Successful response with enriched API specification and sample queries.
+          content:
+            application/json:
+              schema:
+                 $ref: '#/components/schemas/ApiChatPreparationResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while preparing the API Chat service.
+
+  '/ai/api-chat/execute':
+
+    #-----------------------------------------------------
+    # Execute test specified via API Chat
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security: []
+      summary: Execute a single API test case while caching the progress
+      description: |
+        Executes a test scenario against an API; which iteratively provide resources that need to be
+        invoked alongside the inputs such as parameters, payloads, etc. while caching the progress.
+      operationId: apiChatExecute
+      parameters:
+        - $ref: '#/components/parameters/apiChatRequestId'
+      requestBody:
+        description: |
+          API Chat execute request payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiChatExecuteRequest'
+      tags:
+        - API Chat
+      responses:
+        201:
+          description: |
+            Created.
+            API Chat execute response payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiChatExecuteResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while executing test using API Chat service.
+
+  ######################################################
   # User resource APIs
   ######################################################
   /me/change-password:
@@ -5747,6 +5854,146 @@ components:
           type: array
           items:
             type: string
+    ApiChatPreparationRequest:
+      title: API Chat prepare request
+      required:
+        - openapi
+      properties:
+        openapi:
+          type: object
+          description: API specification
+    ApiChatPreparationResponse:
+      title: API Chat preparation response
+      required:
+        - apiSpec
+        - queries
+      properties:
+        apiSpec:
+          type: object
+          title: Enriched API spec
+          required:
+            - tools
+          properties:
+            serviceUrl:
+              type: string
+              description: Extracted service URL from the OpenAPI specification if there is any
+            tools:
+              type: array
+              description: Extracted Http tools from the OpenAPI specification
+              items:
+                $ref: '#/components/schemas/HttpTool'
+        queries:
+          type: array
+          description: list of sample queries
+          items:
+            $ref: '#/components/schemas/SampleQuery'
+    SampleQuery:
+      title: API Chat sample query record
+      required:
+        - scenario
+        - query
+      properties:
+        scenario:
+          type: string
+          description: scenario
+        query:
+          type: string
+          description: generated query
+    HttpTool:
+      title: HTTP tool
+      required:
+        - description
+        - method
+        - name
+        - path
+      properties:
+        name:
+          type: string
+          description: Name of the Http resource tool
+        description:
+          type: string
+          description: Description of the Http resource tool used by the LLM
+        method:
+          type: string
+          description: Http method type (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS)
+          enum:
+            - OPTIONS
+            - HEAD
+            - PATCH
+            - PUT
+            - DELETE
+            - POST
+            - GET
+        path:
+          type: string
+          description: Path of the Http resource
+        queryParameters:
+          type: object
+        pathParameters:
+          type: object
+        requestBody:
+          type: object
+    ApiChatExecuteRequest:
+      title: API Chat execute request
+      properties:
+        command:
+          type: string
+          description: |
+            User specified testcase to be tested against the API
+          example: "Get pet with id 123"
+        apiSpec:
+          type: object
+          properties:
+            serviceUrl:
+              type: string
+              description: Service URL of API if any
+            tools:
+              type: array
+              description: Extracted Http tools from the OpenAPI specification
+              items:
+                $ref: '#/components/schemas/HttpTool'
+        response:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: HTTP status code of the response
+              example: 201
+            headers:
+              type: object
+              description: Response headers
+            body:
+              type: object
+              description: Response payload
+    ApiChatExecuteResponse:
+      title: API Chat execution response
+      required:
+        - taskStatus
+      properties:
+        taskStatus:
+          type: string
+          description: Task status (IN_PROGRESS, TERMINATED or COMPLETED)
+          enum:
+            - IN_PROGRESS
+            - TERMINATED
+            - COMPLETED
+          example: COMPLETED
+        resource:
+          type: object
+          properties:
+            method:
+              type: string
+              description: HTTP method of the resource
+            path:
+              type: string
+              description: Path of the resource
+            inputs:
+              type: object
+              description: Input parameters for the resource
+        result:
+          type: string
+          description: completion result
+          example: "The pet with ID 123 is available. Here are the details: - ID: 123 - Name: asd - Status: available"
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -6088,6 +6335,13 @@ components:
         The alert configuration id.
         Base64 encoded value of 'apiName#apiVersion#applicationName'.
       required: true
+      schema:
+        type: string
+    apiChatRequestId:
+      name: apiChatRequestId
+      in: header
+      description: |
+        Request ID
       schema:
         type: string
   securitySchemes:
