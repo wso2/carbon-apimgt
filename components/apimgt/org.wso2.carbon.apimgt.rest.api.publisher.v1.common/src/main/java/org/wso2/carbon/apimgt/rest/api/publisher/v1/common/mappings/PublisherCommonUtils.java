@@ -2220,8 +2220,16 @@ public class PublisherCommonUtils {
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
     }
 
-    public static boolean validateMandatoryProperties(org.json.simple.JSONArray customProperties, APIDTO apiDto) {
+    /**
+     * This method is used to validate the mandatory custom properties of an API
+     *
+     * @param customProperties custom properties of the API
+     * @param apiDto API DTO to validate
+     * @return list of erroneous property names. returns an empty array if there are no errors.
+     */
+    public static List<String> validateMandatoryProperties(org.json.simple.JSONArray customProperties, APIDTO apiDto) {
 
+        List<String> errorPropertyNames = new ArrayList<>();
         Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = apiDto.getAdditionalPropertiesMap();
 
         for (int i = 0; i < customProperties.size(); i++) {
@@ -2234,7 +2242,8 @@ public class PublisherCommonUtils {
                         additionalPropertiesMap.get(propertyName + "__display");
                 APIInfoAdditionalPropertiesMapDTO mapProperty = additionalPropertiesMap.get(propertyName);
                 if (mapProperty == null && mapPropertyDisplay == null) {
-                    return false;
+                    errorPropertyNames.add(propertyName);
+                    continue;
                 }
                 String propertyValue = "";
                 String propertyValueDisplay = "";
@@ -2246,10 +2255,10 @@ public class PublisherCommonUtils {
                 }
                 if ((propertyValue == null || propertyValue.isEmpty()) &&
                         (propertyValueDisplay == null || propertyValueDisplay.isEmpty())) {
-                    return false;
+                    errorPropertyNames.add(propertyName);
                 }
             }
         }
-        return true;
+        return errorPropertyNames;
     }
 }
