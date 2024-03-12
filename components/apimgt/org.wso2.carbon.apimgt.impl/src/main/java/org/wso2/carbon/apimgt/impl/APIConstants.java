@@ -1487,6 +1487,7 @@ public final class APIConstants {
     public static final String API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION = API_STORE + "GroupingExtractor";
     public static final String API_STORE_REST_API_GROUP_EXTRACTOR_IMPLEMENTATION =
             API_STORE + "RESTApiGroupingExtractor";
+    public static final String IS_ENABLE_JWT_FOR_PORTALS = OAUTH_CONFIGS + "EnableJWTForPortals";
     public static final String API_CUSTOM_SEQUENCES_FOLDER_LOCATION =
             "repository" + File.separator + "resources" + File.separator + "customsequences";
     public static final String WORKFLOW_EXTENSION_LOCATION =
@@ -2151,6 +2152,8 @@ public final class APIConstants {
         public static final String TOKEN_TYPE = "token_type";
         public static final String API_KEY_TOKEN_TYPE = "apiKey";
         public static final String DECODING_ALGORITHM_BASE64URL = "base64url";
+        public static final String APP_DOMAIN = "app_td";
+        public static final String USER_DOMAIN = "user_td";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

@@ -7053,6 +7053,24 @@ public final class APIUtil {
     }
 
     /**
+     * Enable jwt for portal logins
+     *
+     * @return boolean value of the config
+     */
+    public static boolean isJWTEnabledForPortals() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+
+        String isEnabledJwtForPortals = config.getFirstProperty(APIConstants.IS_ENABLE_JWT_FOR_PORTALS);
+        if (isEnabledJwtForPortals != null) {
+            return Boolean.valueOf(isEnabledJwtForPortals);
+        }
+
+        return false;
+
+    }
+    /**
      * Used to check whether Provisioning Out-of-Band OAuth Clients feature is enabled
      *
      * @return true if feature is enabled

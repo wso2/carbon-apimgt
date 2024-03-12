@@ -39,6 +39,7 @@ public class SettingsDTO   {
     private String defaultAdvancePolicy = null;
     private String defaultSubscriptionPolicy = null;
     private String authorizationHeader = null;
+    private Boolean isJWTEnabledForLoginTokens = false;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
@@ -275,6 +276,23 @@ public class SettingsDTO   {
 
   /**
    **/
+  public SettingsDTO isJWTEnabledForLoginTokens(Boolean isJWTEnabledForLoginTokens) {
+    this.isJWTEnabledForLoginTokens = isJWTEnabledForLoginTokens;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("IsJWTEnabledForLoginTokens")
+  public Boolean isIsJWTEnabledForLoginTokens() {
+    return isJWTEnabledForLoginTokens;
+  }
+  public void setIsJWTEnabledForLoginTokens(Boolean isJWTEnabledForLoginTokens) {
+    this.isJWTEnabledForLoginTokens = isJWTEnabledForLoginTokens;
+  }
+
+  /**
+   **/
   public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
     return this;
@@ -314,12 +332,13 @@ public class SettingsDTO   {
         Objects.equals(defaultAdvancePolicy, settings.defaultAdvancePolicy) &&
         Objects.equals(defaultSubscriptionPolicy, settings.defaultSubscriptionPolicy) &&
         Objects.equals(authorizationHeader, settings.authorizationHeader) &&
+        Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, customProperties);
   }
 
   @Override
@@ -340,6 +359,7 @@ public class SettingsDTO   {
     sb.append("    defaultAdvancePolicy: ").append(toIndentedString(defaultAdvancePolicy)).append("\n");
     sb.append("    defaultSubscriptionPolicy: ").append(toIndentedString(defaultSubscriptionPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
+    sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();
