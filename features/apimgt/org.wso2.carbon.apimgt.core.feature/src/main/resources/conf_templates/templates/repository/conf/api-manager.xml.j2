@@ -434,6 +434,9 @@
         <!-- Whether to validate certificate bound access tokens-->
         <EnableCertificateBoundAccessToken>{{apim.oauth_config.enable_certificate_bound_access_token}}</EnableCertificateBoundAccessToken>
 
+        {% if apim.oauth_config.enable_jwt_for_portals is defined %}
+        <EnableJWTForPortals>{{apim.oauth_config.enable_jwt_for_portals}}</EnableJWTForPortals>
+        {% endif %}
     </OAuthConfigurations>
 
     <AccessTokenBinding>
