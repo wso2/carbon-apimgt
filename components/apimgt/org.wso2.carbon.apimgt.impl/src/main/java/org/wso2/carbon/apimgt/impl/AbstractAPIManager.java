@@ -1214,9 +1214,15 @@ public abstract class AbstractAPIManager implements APIManager {
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
-        String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
-        api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(gatewayVendor));
-        api.setGatewayType(APIUtil.getGatewayType(gatewayVendor));
+        if (api.getGatewayVendor() == null) {
+            String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
+            if (gatewayVendor == null) {
+                gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+            }
+            api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(gatewayVendor));
+            api.setGatewayType(APIUtil.getGatewayType(gatewayVendor));
+        }
+
         // api level tier
         String apiLevelTier;
         if (api.isRevision()) {
