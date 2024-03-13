@@ -2977,6 +2977,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
 
         isAppUpdated = apiMgtDAO.updateApplicationOwner(userId, application);
+
+        if (isAppUpdated) {
+            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
+                    tenantDomain, application.getId(), application.getUUID(), application.getName(),
+                    application.getTokenType(), application.getTier(), application.getGroupId(),
+                    application.getApplicationAttributes(), userId);
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        }
         return isAppUpdated;
     }
 
