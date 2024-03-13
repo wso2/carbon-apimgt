@@ -58,6 +58,7 @@ public class SettingsMappingUtil {
 
         SettingsDTO settingsDTO = new SettingsDTO();
         EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
+        settingsDTO.setIsJWTEnabledForLoginTokens(APIUtil.isJWTEnabledForPortals());
         if (isUserAvailable) {
             Map<String, Environment> environments = APIUtil.getEnvironments(organization);
             if (environments != null) {
@@ -87,7 +88,6 @@ public class SettingsMappingUtil {
                     APIUtil.isExternalStoresEnabled(RestApiCommonUtil.getLoggedInUserTenantDomain()));
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
-            settingsDTO.setIsJWTEnabledForLoginTokens(APIUtil.isJWTEnabledForPortals());
             Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
             String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
                     APIConstants.AUTHORIZATION_HEADER);
