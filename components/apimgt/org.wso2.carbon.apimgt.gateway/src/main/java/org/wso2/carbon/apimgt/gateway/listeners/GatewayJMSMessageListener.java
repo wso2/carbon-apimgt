@@ -529,7 +529,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         } catch (AxisFault e) {
             throw new RuntimeException(e);
         }
-        MessageContext synCtx = new Axis2MessageContext(axisMsgCtx, synCfg, new Axis2SynapseEnvironment(cfgCtx, synCfg));
+        MessageContext synCtx = new Axis2MessageContext(axisMsgCtx, synCfg, null);
         return synCtx;
     }
 

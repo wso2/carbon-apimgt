@@ -38,25 +38,6 @@ public class ThrottlingPoliciesApi  {
 ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
 
 
-    @POST
-    @Path("/application/reset")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Reset Application-Level Throttle Policy", notes = "This operation can be used to reset the application-level throttle policy for a specific user. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
-        })
-    }, tags={ "Throttling Policies", "Applications",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Application-level throttle policy reset successfully", response = Void.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesApplicationResetPost(@ApiParam(value = "Payload for which the application-level throttle policy needs to be reset " ,required=true) ApplicationThrottleResetDTO applicationThrottleResetDTO) throws APIManagementException{
-        return delegate.throttlingPoliciesApplicationResetPost(applicationThrottleResetDTO, securityContext);
-    }
-
     @GET
     @Path("/{policyLevel}")
     
@@ -82,7 +63,7 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "Throttling Policies" })
+    }, tags={ "Throttling Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Throttling Policy returned ", response = ThrottlingPolicyDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
@@ -90,5 +71,24 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response throttlingPoliciesPolicyLevelPolicyIdGet(@ApiParam(value = "The name of the policy ",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "List Application or Subscription type thro. ",required=true, allowableValues="application, subscription") @PathParam("policyLevel") String policyLevel,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.throttlingPoliciesPolicyLevelPolicyIdGet(policyId, policyLevel, xWSO2Tenant, ifNoneMatch, securityContext);
+    }
+
+    @POST
+    @Path("/reset")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Reset Application-Level Throttle Policy", notes = "This operation can be used to reset the application-level throttle policy for a specific user. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+        })
+    }, tags={ "Throttling Policies", "Applications" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Application-level throttle policy reset successfully", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response throttlingPoliciesResetPost(@ApiParam(value = "Payload for which the application-level throttle policy needs to be reset " ,required=true) ApplicationThrottleResetDTO applicationThrottleResetDTO) throws APIManagementException{
+        return delegate.throttlingPoliciesResetPost(applicationThrottleResetDTO, securityContext);
     }
 }

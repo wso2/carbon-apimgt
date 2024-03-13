@@ -3146,7 +3146,7 @@ paths:
   ######################################################
   # The "Throttling Policy Reset" resource APIs
   ######################################################
-  /throttling-policies/application/reset:
+  /throttling-policies/reset:
     post:
       tags:
         - Throttling Policies
@@ -3183,7 +3183,7 @@ paths:
             -H "Authorization: Bearer 80249337-fe7c-3c66-bde6-ed431c144372" \
             -H "Content-Type: application/json" -X POST \
             -d @payload.json \
-            "https://localhost:9443/api/am/devportal/v3/throttling-policies/application/reset"'
+            "https://localhost:9443/api/am/devportal/v3/throttling-policies/reset"'
 
   ######################################################
   # The "Tag Collection" resource API
@@ -3818,10 +3818,6 @@ components:
       title: Reset application level throttling
       type: object
       properties:
-        policyLevel:
-          type: string
-          description: the policy Level which the counters should be reset
-          example: application
         userName:
           type: string
           description: The username for which the throttle policy needs to be reset

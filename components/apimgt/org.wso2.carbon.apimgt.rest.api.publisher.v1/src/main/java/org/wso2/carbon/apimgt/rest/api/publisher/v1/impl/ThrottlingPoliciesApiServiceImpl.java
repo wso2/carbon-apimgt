@@ -172,56 +172,55 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         return null;
     }
 
+//    @Override
+//    public Response throttlingPoliciesApiResetPost(ApiThrottleResetDTO apiThrottleResetDTO, MessageContext messageContext) {
+//        int tierLevel =-1;
+//        boolean reset = false;
+//        try {
+//            String apiContext = apiThrottleResetDTO.getApiContext();
+//            String apiVersion = apiThrottleResetDTO.getApiVersion();
+//            String apiTier = apiThrottleResetDTO.getApiTier();
+//            String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
+//            String organization = RestApiUtil.getOrganization(messageContext);
+//            APIProvider apiProvider = RestApiCommonUtil.getProvider(loggedInUsername);
+//            String policyLevel = apiThrottleResetDTO.getPolicyLevel();
+//
+//            if (StringUtils.isBlank(policyLevel)) {
+//                RestApiUtil.handleBadRequest("tierLevel cannot be empty", log);
+//            }
+//
+//            if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+//                reset = apiProvider.resetApiThrottlePolicy(apiContext, apiVersion, apiTier, organization);
+//                return Response.ok().entity("API Level Reset done "+reset + "\n").build();
+//            } else if (PolicyConstants.POLICY_LEVEL_RESOURCE.equals(policyLevel)) {
+//                String resourceTier = apiThrottleResetDTO.getResourceTier();
+//                String resource = apiThrottleResetDTO.getResource();
+//                reset = apiProvider.resetResourceThrottlePolicy(apiContext, apiVersion, apiTier, resourceTier, resource, organization);
+//                return Response.ok().entity("Resource Level Reset done " + reset + "\n").build();
+//            } else {
+//                RestApiUtil.handleResourceNotFoundError("TierLevel should be of " +
+//                        PolicyConstants.POLICY_LEVEL_API + " or " + PolicyConstants.POLICY_LEVEL_RESOURCE, log);
+//            }
+//
+//        } catch (APIManagementException e) {
+//            String errorMessage = "Error while retrieving tiers";
+//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+//        }
+//        return null;
+//    }
+
     @Override
-    public Response throttlingPoliciesApiResetPost(ApiThrottleResetDTO apiThrottleResetDTO, MessageContext messageContext) {
-        int tierLevel =-1;
+    public Response throttlingPoliciesResetPost(ThrottlePolicyResetDTO throttlePolicyResetDTO, MessageContext messageContext) {
         boolean reset = false;
         try {
-            String apiContext = apiThrottleResetDTO.getApiContext();
-            String apiVersion = apiThrottleResetDTO.getApiVersion();
-            String apiTier = apiThrottleResetDTO.getApiTier();
+            String appId = throttlePolicyResetDTO.getApplicationId();
+            String apiContext = throttlePolicyResetDTO.getApiContext();
+            String apiVersion = throttlePolicyResetDTO.getApiVersion();
+            String subscriptionTier = throttlePolicyResetDTO.getSubscriptionTier();
             String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(loggedInUsername);
-            String policyLevel = apiThrottleResetDTO.getPolicyLevel();
-
-            if (StringUtils.isBlank(policyLevel)) {
-                RestApiUtil.handleBadRequest("tierLevel cannot be empty", log);
-            }
-
-            if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
-                reset = apiProvider.resetApiThrottlePolicy(apiContext, apiVersion, apiTier, organization);
-                return Response.ok().entity("API Level Reset done "+reset + "\n").build();
-            } else if (PolicyConstants.POLICY_LEVEL_RESOURCE.equals(policyLevel)) {
-                String resourceTier = apiThrottleResetDTO.getResourceTier();
-                String resource = apiThrottleResetDTO.getResource();
-                reset = apiProvider.resetResourceThrottlePolicy(apiContext, apiVersion, apiTier, resourceTier, resource, organization);
-                return Response.ok().entity("Resource Level Reset done " + reset + "\n").build();
-            } else {
-                RestApiUtil.handleResourceNotFoundError("TierLevel should be of " +
-                        PolicyConstants.POLICY_LEVEL_API + " or " + PolicyConstants.POLICY_LEVEL_RESOURCE, log);
-            }
-
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving tiers";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
-    }
-
-    @Override
-    public Response throttlingPoliciesSubscriptionResetPost(SubscriptionThrottleResetDTO subscriptionThrottleResetDTO, MessageContext messageContext) {
-        int tierLevel =-1;
-        boolean reset = false;
-        try {
-            String appId = subscriptionThrottleResetDTO.getApplicationId();
-            String apiContext = subscriptionThrottleResetDTO.getApiContext();
-            String apiVersion = subscriptionThrottleResetDTO.getApiVersion();
-            String subscriptionTier = subscriptionThrottleResetDTO.getSubscriptionTier();
-            String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
-            String organization = RestApiUtil.getOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getProvider(loggedInUsername);
-            String policyLevel = subscriptionThrottleResetDTO.getPolicyLevel();
+            String policyLevel = throttlePolicyResetDTO.getPolicyLevel();
 
             if (StringUtils.isBlank(policyLevel)) {
                 RestApiUtil.handleBadRequest("tierLevel cannot be empty", log);
@@ -231,9 +230,19 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
             if (PolicyConstants.POLICY_LEVEL_SUB.equals(policyLevel)) {
                 reset = apiProvider.resetSubscriptionThrottlePolicy(appId, apiContext, apiVersion, subscriptionTier, organization);
                 return Response.ok().entity("Subscription Level Reset done "+reset + "\n").build();
+            } else if (PolicyConstants.POLICY_LEVEL_API.equals(policyLevel)) {
+                String apiTier = throttlePolicyResetDTO.getApiTier();
+                reset = apiProvider.resetApiThrottlePolicy(apiContext, apiVersion, apiTier, organization);
+                return Response.ok().entity("API Level Reset done "+reset + "\n").build();
+            } else if (PolicyConstants.POLICY_LEVEL_RESOURCE.equals(policyLevel)) {
+                String apiTier = throttlePolicyResetDTO.getApiTier();
+                String resourceTier = throttlePolicyResetDTO.getResourceTier();
+                String resource = throttlePolicyResetDTO.getResource();
+                reset = apiProvider.resetResourceThrottlePolicy(apiContext, apiVersion, apiTier, resourceTier, resource, organization);
+                return Response.ok().entity("Resource Level Reset done " + reset + "\n").build();
             } else {
                 RestApiUtil.handleResourceNotFoundError("TierLevel should be of type " +
-                        PolicyConstants.POLICY_LEVEL_SUB, log);
+                        PolicyConstants.POLICY_LEVEL_SUB+ ", " + PolicyConstants.POLICY_LEVEL_API + " or " + PolicyConstants.POLICY_LEVEL_RESOURCE, log);
             }
 
         } catch (APIManagementException e) {

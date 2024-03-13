@@ -20,28 +20,9 @@ import javax.validation.Valid;
 
 public class ApplicationThrottleResetDTO   {
   
-    private String policyLevel = null;
     private String userName = null;
     private String applicationId = null;
     private String applicationTier = null;
-
-  /**
-   * the policy Level which the counters should be reset
-   **/
-  public ApplicationThrottleResetDTO policyLevel(String policyLevel) {
-    this.policyLevel = policyLevel;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "application", value = "the policy Level which the counters should be reset")
-  @JsonProperty("policyLevel")
-  public String getPolicyLevel() {
-    return policyLevel;
-  }
-  public void setPolicyLevel(String policyLevel) {
-    this.policyLevel = policyLevel;
-  }
 
   /**
    * The username for which the throttle policy needs to be reset
@@ -105,15 +86,14 @@ public class ApplicationThrottleResetDTO   {
       return false;
     }
     ApplicationThrottleResetDTO applicationThrottleReset = (ApplicationThrottleResetDTO) o;
-    return Objects.equals(policyLevel, applicationThrottleReset.policyLevel) &&
-        Objects.equals(userName, applicationThrottleReset.userName) &&
+    return Objects.equals(userName, applicationThrottleReset.userName) &&
         Objects.equals(applicationId, applicationThrottleReset.applicationId) &&
         Objects.equals(applicationTier, applicationThrottleReset.applicationTier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyLevel, userName, applicationId, applicationTier);
+    return Objects.hash(userName, applicationId, applicationTier);
   }
 
   @Override
@@ -121,7 +101,6 @@ public class ApplicationThrottleResetDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationThrottleResetDTO {\n");
     
-    sb.append("    policyLevel: ").append(toIndentedString(policyLevel)).append("\n");
     sb.append("    userName: ").append(toIndentedString(userName)).append("\n");
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    applicationTier: ").append(toIndentedString(applicationTier)).append("\n");

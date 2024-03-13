@@ -1,9 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionPolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionThrottleResetDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlePolicyResetDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ThrottlingPoliciesApiService;
@@ -99,40 +98,21 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     }
 
     @POST
-    @Path("/api/reset")
+    @Path("/reset")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Reset API/Resource Level Throttle Policy", notes = "This operation can be used to reset the throttle policy for a specific api or resource. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
-        })
-    }, tags={ "Throttling Policies",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK.API-level throttle policy reset successfully", response = Void.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesApiResetPost(@ApiParam(value = "Payload for which the api-level throttle policy needs to be reset " ) ApiThrottleResetDTO apiThrottleResetDTO) throws APIManagementException{
-        return delegate.throttlingPoliciesApiResetPost(apiThrottleResetDTO, securityContext);
-    }
-
-    @POST
-    @Path("/subscription/reset")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Reset Subscription Throttle Policy", notes = "This operation can be used to reset the throttle policy for a specific subscription tier. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Reset Subscription/API/Resource Throttle Policy", notes = "This operation can be used to reset the throttle policy for a specific subscription, api or resource tier. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscription_manage", description = "Manage all Subscription related operations")
         })
     }, tags={ "Throttling Policies" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Subscription-level throttle policy reset successfully", response = Void.class),
+        @ApiResponse(code = 200, message = "OK. Throttle policy reset successfully", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response throttlingPoliciesSubscriptionResetPost(@ApiParam(value = "Payload for which the subscription-level throttle policy needs to be reset " ,required=true) SubscriptionThrottleResetDTO subscriptionThrottleResetDTO) throws APIManagementException{
-        return delegate.throttlingPoliciesSubscriptionResetPost(subscriptionThrottleResetDTO, securityContext);
+    public Response throttlingPoliciesResetPost(@ApiParam(value = "Payload for which the throttle policy needs to be reset " ) ThrottlePolicyResetDTO throttlePolicyResetDTO) throws APIManagementException{
+        return delegate.throttlingPoliciesResetPost(throttlePolicyResetDTO, securityContext);
     }
 }

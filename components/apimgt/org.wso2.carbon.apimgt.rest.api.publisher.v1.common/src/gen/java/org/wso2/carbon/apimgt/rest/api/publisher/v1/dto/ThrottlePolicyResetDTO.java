@@ -18,26 +18,28 @@ import javax.validation.Valid;
 
 
 
-public class ApiThrottleResetDTO   {
+public class ThrottlePolicyResetDTO   {
   
     private String policyLevel = null;
     private String apiName = null;
     private String apiContext = null;
     private String apiVersion = null;
     private String resource = null;
+    private String applicationId = null;
+    private String subscriptionTier = null;
     private String apiTier = null;
     private String resourceTier = null;
 
   /**
    * the policy Level which the counters should be reset
    **/
-  public ApiThrottleResetDTO policyLevel(String policyLevel) {
+  public ThrottlePolicyResetDTO policyLevel(String policyLevel) {
     this.policyLevel = policyLevel;
     return this;
   }
 
   
-  @ApiModelProperty(example = "api", required = true, value = "the policy Level which the counters should be reset")
+  @ApiModelProperty(example = "sub/api/resource", required = true, value = "the policy Level which the counters should be reset")
   @JsonProperty("policyLevel")
   @NotNull
   public String getPolicyLevel() {
@@ -49,7 +51,7 @@ public class ApiThrottleResetDTO   {
 
   /**
    **/
-  public ApiThrottleResetDTO apiName(String apiName) {
+  public ThrottlePolicyResetDTO apiName(String apiName) {
     this.apiName = apiName;
     return this;
   }
@@ -67,7 +69,7 @@ public class ApiThrottleResetDTO   {
 
   /**
    **/
-  public ApiThrottleResetDTO apiContext(String apiContext) {
+  public ThrottlePolicyResetDTO apiContext(String apiContext) {
     this.apiContext = apiContext;
     return this;
   }
@@ -85,7 +87,7 @@ public class ApiThrottleResetDTO   {
 
   /**
    **/
-  public ApiThrottleResetDTO apiVersion(String apiVersion) {
+  public ThrottlePolicyResetDTO apiVersion(String apiVersion) {
     this.apiVersion = apiVersion;
     return this;
   }
@@ -103,7 +105,7 @@ public class ApiThrottleResetDTO   {
 
   /**
    **/
-  public ApiThrottleResetDTO resource(String resource) {
+  public ThrottlePolicyResetDTO resource(String resource) {
     this.resource = resource;
     return this;
   }
@@ -120,7 +122,41 @@ public class ApiThrottleResetDTO   {
 
   /**
    **/
-  public ApiThrottleResetDTO apiTier(String apiTier) {
+  public ThrottlePolicyResetDTO applicationId(String applicationId) {
+    this.applicationId = applicationId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "")
+  @JsonProperty("applicationId")
+  public String getApplicationId() {
+    return applicationId;
+  }
+  public void setApplicationId(String applicationId) {
+    this.applicationId = applicationId;
+  }
+
+  /**
+   **/
+  public ThrottlePolicyResetDTO subscriptionTier(String subscriptionTier) {
+    this.subscriptionTier = subscriptionTier;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Unlimited", value = "")
+  @JsonProperty("subscriptionTier")
+  public String getSubscriptionTier() {
+    return subscriptionTier;
+  }
+  public void setSubscriptionTier(String subscriptionTier) {
+    this.subscriptionTier = subscriptionTier;
+  }
+
+  /**
+   **/
+  public ThrottlePolicyResetDTO apiTier(String apiTier) {
     this.apiTier = apiTier;
     return this;
   }
@@ -137,7 +173,7 @@ public class ApiThrottleResetDTO   {
 
   /**
    **/
-  public ApiThrottleResetDTO resourceTier(String resourceTier) {
+  public ThrottlePolicyResetDTO resourceTier(String resourceTier) {
     this.resourceTier = resourceTier;
     return this;
   }
@@ -161,31 +197,35 @@ public class ApiThrottleResetDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApiThrottleResetDTO apiThrottleReset = (ApiThrottleResetDTO) o;
-    return Objects.equals(policyLevel, apiThrottleReset.policyLevel) &&
-        Objects.equals(apiName, apiThrottleReset.apiName) &&
-        Objects.equals(apiContext, apiThrottleReset.apiContext) &&
-        Objects.equals(apiVersion, apiThrottleReset.apiVersion) &&
-        Objects.equals(resource, apiThrottleReset.resource) &&
-        Objects.equals(apiTier, apiThrottleReset.apiTier) &&
-        Objects.equals(resourceTier, apiThrottleReset.resourceTier);
+    ThrottlePolicyResetDTO throttlePolicyReset = (ThrottlePolicyResetDTO) o;
+    return Objects.equals(policyLevel, throttlePolicyReset.policyLevel) &&
+        Objects.equals(apiName, throttlePolicyReset.apiName) &&
+        Objects.equals(apiContext, throttlePolicyReset.apiContext) &&
+        Objects.equals(apiVersion, throttlePolicyReset.apiVersion) &&
+        Objects.equals(resource, throttlePolicyReset.resource) &&
+        Objects.equals(applicationId, throttlePolicyReset.applicationId) &&
+        Objects.equals(subscriptionTier, throttlePolicyReset.subscriptionTier) &&
+        Objects.equals(apiTier, throttlePolicyReset.apiTier) &&
+        Objects.equals(resourceTier, throttlePolicyReset.resourceTier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyLevel, apiName, apiContext, apiVersion, resource, apiTier, resourceTier);
+    return Objects.hash(policyLevel, apiName, apiContext, apiVersion, resource, applicationId, subscriptionTier, apiTier, resourceTier);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApiThrottleResetDTO {\n");
+    sb.append("class ThrottlePolicyResetDTO {\n");
     
     sb.append("    policyLevel: ").append(toIndentedString(policyLevel)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiContext: ").append(toIndentedString(apiContext)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    resource: ").append(toIndentedString(resource)).append("\n");
+    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
+    sb.append("    subscriptionTier: ").append(toIndentedString(subscriptionTier)).append("\n");
     sb.append("    apiTier: ").append(toIndentedString(apiTier)).append("\n");
     sb.append("    resourceTier: ").append(toIndentedString(resourceTier)).append("\n");
     sb.append("}");

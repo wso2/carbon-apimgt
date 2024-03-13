@@ -29,7 +29,7 @@ import static org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer.log;
 public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiService {
 
     @Override
-    public Response throttlingPoliciesApplicationResetPost(ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) {
+    public Response throttlingPoliciesResetPost(ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) {
         boolean reset = false;
         try {
             String appTier = applicationThrottleResetDTO.getApplicationTier();
@@ -37,30 +37,33 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
             String userId = applicationThrottleResetDTO.getUserName();
             String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getOrganization(messageContext);
+
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUsername);
-            String policyLevel = applicationThrottleResetDTO.getPolicyLevel();
+//            String policyLevel = applicationThrottleResetDTO.getPolicyLevel();
             String id = String.valueOf(apiConsumer.getApplicationByUUID(applicationId, organization).getId());
 //            APIConsumer endConsumer = RestApiCommonUtil.getConsumer(userId);
 //            String user = endConsumer.getUserId(userId);
 //            Map<String, Object> properties = APIUtil.getUserProperties(userId);
 //            String suffix = APIUtil.getUserNameWithTenantSuffix(userId);
 
-            if (StringUtils.isBlank(policyLevel)) {
-                RestApiUtil.handleBadRequest("TierLevel cannot be empty", log);
-            }
+//            if (StringUtils.isBlank(policyLevel)) {
+//                RestApiUtil.handleBadRequest("TierLevel cannot be empty", log);
+//            }
 
             if (StringUtils.isBlank(userId)) {
                 RestApiUtil.handleBadRequest("UserId cannot be empty", log);
             }
 
+            reset = apiConsumer.resetApplicationThrottlePolicy(id, userId, appTier, organization);
+            return Response.ok().entity("Application Level Reset done "+reset + "\n").build();
             //retrieves the tier based on the given tier-level
-            if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
-                reset = apiConsumer.resetApplicationThrottlePolicy(id, userId, appTier, organization);
-                return Response.ok().entity("Application Level Reset done "+reset + "\n").build();
-            } else {
-                RestApiUtil.handleResourceNotFoundError("TierLevel should be of type " +
-                        PolicyConstants.POLICY_LEVEL_APP, log);
-            }
+//            if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+//                reset = apiConsumer.resetApplicationThrottlePolicy(id, userId, appTier, organization);
+//                return Response.ok().entity("Application Level Reset done "+reset + "\n").build();
+//            } else {
+//                RestApiUtil.handleResourceNotFoundError("TierLevel should be of type " +
+//                        PolicyConstants.POLICY_LEVEL_APP, log);
+//            }
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
