@@ -127,6 +127,24 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
         return delegate.keyManagersKeyManagerIdPut(keyManagerId, keyManagerDTO, securityContext);
     }
 
+    @GET
+    @Path("/{keyManagerId}/usages")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve Key Manager Usages (APIs and Applications)", notes = "Retrieves a list of APIs and Applications that are utilizing the specified Key Manager identified by the provided ID. The Key Manager ID should be provided as a path parameter. ", response = KeyManagerDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:admin_operations", description = "Manage API categories and Key Managers related operations")
+        })
+    }, tags={ "Key Manager (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. KeyManager configuration returned. ", response = KeyManagerDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response keyManagersKeyManagerIdUsagesGet(@ApiParam(value = "Key Manager UUID ",required=true) @PathParam("keyManagerId") String keyManagerId,  @ApiParam(value = "Starting number for pagination. ", defaultValue="0") @DefaultValue("0") @QueryParam("start") Integer start,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit) throws APIManagementException{
+        return delegate.keyManagersKeyManagerIdUsagesGet(keyManagerId, start, offset, limit, securityContext);
+    }
+
     @POST
     
     @Consumes({ "application/json" })

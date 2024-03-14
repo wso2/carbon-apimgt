@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -64,6 +65,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
@@ -9799,6 +9801,49 @@ public class ApiMgtDAO {
                     }
                     apiKey.setCreateMode(createMode);
                     return apiKey;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while Retrieving Key Mapping ", e);
+        }
+        return null;
+    }
+
+    public KeyManagerApplicationInfo getKeyManagerNameAndConsumerKeyByAppIdAndKeyMappingId(int applicationId,
+            String keyMappingId) throws APIManagementException {
+
+        String query = SQLConstants.KeyManagerSqlConstants
+                .GET_KEY_MANAGER_NAME_AND_CONSUMER_KEY_BY_APPLICATION_ID_AND_KEY_MAPPING_ID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setString(2, keyMappingId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    KeyManagerApplicationInfo keyManagerApplicationInfo = new KeyManagerApplicationInfo();
+                    keyManagerApplicationInfo.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                    keyManagerApplicationInfo.setKeyManagerName(resultSet.getString("KEY_MANAGER_NAME"));
+                    keyManagerApplicationInfo.setMode(resultSet.getString("CREATE_MODE"));
+                    return keyManagerApplicationInfo;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while Retrieving Key Mapping ", e);
+        }
+        return null;
+    }
+
+    public String getKeyManagerNameFromKeyMappingId(String keyMappingId)
+            throws APIManagementException {
+
+        final String query = "SELECT NAME AS KEY_MANAGER_NAME FROM AM_KEY_MANAGER AKM, AM_APPLICATION_KEY_MAPPING " +
+                "AAKM WHERE AAKM.UUID = ? AND AKM.UUID=AAKM.KEY_MANAGER;";
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, keyMappingId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("KEY_MANAGER_NAME");
                 }
             }
         } catch (SQLException e) {
@@ -20152,6 +20197,32 @@ public class ApiMgtDAO {
             }
         }
         return policyIds;
+    }
+
+    public List<ApplicationInfoKeyManager> getAllApplicationsOfKeyManager(String keyManagerId) throws
+            APIManagementException {
+
+        ArrayList<ApplicationInfoKeyManager> applicationsList = new ArrayList<>();
+        String sqlQuery = SQLConstants.GET_APPLICATIONS_OF_KEY_MANAGERS_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, keyManagerId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                ApplicationInfoKeyManager application;
+                while (rs.next()) {
+                    application = new ApplicationInfoKeyManager();
+                    application.setUuid(rs.getString("UUID"));
+                    application.setName(rs.getString("NAME"));
+                    application.setOwner(rs.getString("CREATED_BY"));
+                    application.setOrganization(rs.getString("ORGANIZATION"));
+                    applicationsList.add(application);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error when reading the application information from the persistence store.", e);
+        }
+        return applicationsList;
     }
 
     /**

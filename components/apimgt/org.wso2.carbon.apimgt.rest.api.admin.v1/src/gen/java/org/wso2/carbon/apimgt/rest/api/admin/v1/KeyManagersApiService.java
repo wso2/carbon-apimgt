@@ -28,5 +28,6 @@ public interface KeyManagersApiService {
       public Response keyManagersKeyManagerIdDelete(String keyManagerId, MessageContext messageContext) throws APIManagementException;
       public Response keyManagersKeyManagerIdGet(String keyManagerId, MessageContext messageContext) throws APIManagementException;
       public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO keyManagerDTO, MessageContext messageContext) throws APIManagementException;
+      public Response keyManagersKeyManagerIdUsagesGet(String keyManagerId, Integer start, Integer offset, Integer limit, MessageContext messageContext) throws APIManagementException;
       public Response keyManagersPost(KeyManagerDTO keyManagerDTO, MessageContext messageContext) throws APIManagementException;
 }
