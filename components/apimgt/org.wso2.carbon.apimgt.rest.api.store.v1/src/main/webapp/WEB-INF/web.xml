@@ -48,7 +48,8 @@
                 org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApi,
                 org.wso2.carbon.apimgt.rest.api.store.v1.KeyManagersApi,
                 org.wso2.carbon.apimgt.rest.api.store.v1.MeApi,
-                org.wso2.carbon.apimgt.rest.api.store.v1.WebhooksApi
+                org.wso2.carbon.apimgt.rest.api.store.v1.WebhooksApi,
+                org.wso2.carbon.apimgt.rest.api.store.v1.AiApi
             </param-value>
         </init-param>
         <init-param>

@@ -59,6 +59,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
@@ -10387,4 +10388,56 @@ public final class APIUtil {
         }
         return scopesStringBuilder.toString().trim();
     }
+
+    /**
+     * Check whether API Chat feature is enabled
+     *
+     * @return returns true if API Chat feature is enabled, false if disabled.
+     */
+    public static boolean isApiChatEnabled() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String isApiChatEnabled = config.getFirstProperty(APIConstants.API_CHAT_ENABLED);
+        if (isApiChatEnabled == null) {
+            return false;
+        }
+
+        return Boolean.parseBoolean(isApiChatEnabled);
+    }
+
+    /**
+     * This method is used for AI Service calls related to API-Chat feature and Marketplace-Assistant feature
+     *
+     * @param endpointConfigName Config name to retrieve the AI Service URL
+     * @param authTokenConfigName Config name to retrieve the token for authentication purposes
+     * @return CloseableHttpResponse
+     * @throws APIManagementException
+     */
+    public static CloseableHttpResponse getAIServiceHealth(String endpointConfigName, String authTokenConfigName)
+            throws APIManagementException, MalformedURLException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String endpoint = config.getFirstProperty(endpointConfigName);
+        String authToken = config.getFirstProperty(authTokenConfigName);
+
+        HttpGet healthGet = new HttpGet(endpoint + "/health");
+        healthGet.setHeader("auth-key", authToken);
+
+        URL url = new URL(endpoint);
+        int port = url.getPort();
+        String protocol = url.getProtocol();
+        HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+        try {
+            return executeHTTPRequest(healthGet, httpClient);
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
+
+//    public static CloseableHttpResponse invokeAIService(String endpointConfigName, String authTokenConfigName) {
+//
+//    }
 }
