@@ -5108,6 +5108,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
                     populateAPIStatus(mappedAPI);
                     populateDefaultVersion(mappedAPI);
+                    populateGatewayVendor(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 result.setApis(apiList);
@@ -5215,6 +5216,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
                     populateAPIStatus(mappedAPI);
                     populateDefaultVersion(mappedAPI);
+                    populateGatewayVendor(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
