@@ -21,8 +21,6 @@ import javax.validation.Valid;
 public class ApplicationThrottleResetDTO   {
   
     private String userName = null;
-    private String applicationId = null;
-    private String applicationTier = null;
 
   /**
    * The username for which the throttle policy needs to be reset
@@ -42,40 +40,6 @@ public class ApplicationThrottleResetDTO   {
     this.userName = userName;
   }
 
-  /**
-   **/
-  public ApplicationThrottleResetDTO applicationId(String applicationId) {
-    this.applicationId = applicationId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "1", value = "")
-  @JsonProperty("applicationId")
-  public String getApplicationId() {
-    return applicationId;
-  }
-  public void setApplicationId(String applicationId) {
-    this.applicationId = applicationId;
-  }
-
-  /**
-   **/
-  public ApplicationThrottleResetDTO applicationTier(String applicationTier) {
-    this.applicationTier = applicationTier;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "50PerMin", value = "")
-  @JsonProperty("applicationTier")
-  public String getApplicationTier() {
-    return applicationTier;
-  }
-  public void setApplicationTier(String applicationTier) {
-    this.applicationTier = applicationTier;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -86,14 +50,12 @@ public class ApplicationThrottleResetDTO   {
       return false;
     }
     ApplicationThrottleResetDTO applicationThrottleReset = (ApplicationThrottleResetDTO) o;
-    return Objects.equals(userName, applicationThrottleReset.userName) &&
-        Objects.equals(applicationId, applicationThrottleReset.applicationId) &&
-        Objects.equals(applicationTier, applicationThrottleReset.applicationTier);
+    return Objects.equals(userName, applicationThrottleReset.userName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(userName, applicationId, applicationTier);
+    return Objects.hash(userName);
   }
 
   @Override
@@ -102,8 +64,6 @@ public class ApplicationThrottleResetDTO   {
     sb.append("class ApplicationThrottleResetDTO {\n");
     
     sb.append("    userName: ").append(toIndentedString(userName)).append("\n");
-    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
-    sb.append("    applicationTier: ").append(toIndentedString(applicationTier)).append("\n");
     sb.append("}");
     return sb.toString();
   }

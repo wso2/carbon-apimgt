@@ -9,7 +9,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyListDTO;
@@ -25,5 +24,4 @@ import javax.ws.rs.core.SecurityContext;
 public interface ThrottlingPoliciesApiService {
       public Response throttlingPoliciesPolicyLevelGet(String policyLevel, Integer limit, Integer offset, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response throttlingPoliciesPolicyLevelPolicyIdGet(String policyId, String policyLevel, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesResetPost(ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) throws APIManagementException;
 }

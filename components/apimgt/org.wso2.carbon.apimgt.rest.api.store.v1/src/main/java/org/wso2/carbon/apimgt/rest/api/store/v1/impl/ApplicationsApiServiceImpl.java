@@ -57,21 +57,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
@@ -483,6 +469,50 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
             }
         }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId, ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) throws APIManagementException {
+        boolean reset = false;
+        try {
+            String userId = applicationThrottleResetDTO.getUserName();
+            String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
+            String organization = RestApiUtil.getOrganization(messageContext);
+
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUsername);
+//            String policyLevel = applicationThrottleResetDTO.getPolicyLevel();
+            String appId = String.valueOf(apiConsumer.getApplicationByUUID(applicationId, organization).getId());
+            String appTier = apiConsumer.getApplicationByUUID(applicationId, organization).getTier();
+//            APIConsumer endConsumer = RestApiCommonUtil.getConsumer(userId);
+//            String user = endConsumer.getUserId(userId);
+//            Map<String, Object> properties = APIUtil.getUserProperties(userId);
+//            String suffix = APIUtil.getUserNameWithTenantSuffix(userId);
+
+//            if (StringUtils.isBlank(policyLevel)) {
+//                RestApiUtil.handleBadRequest("TierLevel cannot be empty", log);
+//            }
+
+            if (StringUtils.isBlank(userId)) {
+                RestApiUtil.handleBadRequest("UserId cannot be empty", log);
+            }
+
+            reset = apiConsumer.resetApplicationThrottlePolicy(appId, userId, appTier, organization);
+            return Response.ok().entity("Application Level Reset done "+reset + "\n").build();
+            //retrieves the tier based on the given tier-level
+//            if (PolicyConstants.POLICY_LEVEL_APP.equals(policyLevel)) {
+//                reset = apiConsumer.resetApplicationThrottlePolicy(id, userId, appTier, organization);
+//                return Response.ok().entity("Application Level Reset done "+reset + "\n").build();
+//            } else {
+//                RestApiUtil.handleResourceNotFoundError("TierLevel should be of type " +
+//                        PolicyConstants.POLICY_LEVEL_APP, log);
+//            }
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving tiers";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+
         return null;
     }
 
