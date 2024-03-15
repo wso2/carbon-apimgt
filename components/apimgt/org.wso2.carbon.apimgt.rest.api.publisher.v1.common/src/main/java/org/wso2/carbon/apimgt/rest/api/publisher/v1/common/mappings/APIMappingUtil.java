@@ -714,6 +714,8 @@ public class APIMappingUtil {
         apiInfoDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
         apiInfoDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiInfoDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
+        apiInfoDTO.setGatewayType(api.getGatewayType());
+        apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         return apiInfoDTO;
     }
 

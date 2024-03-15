@@ -173,6 +173,20 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void populateDefaultVersion(API api) throws APIManagementException {
         apiMgtDAO.setDefaultVersion(api);
     }
+    protected void populateGatewayVendor(API api) throws APIManagementException {
+        if (api.getGatewayVendor() == null) {
+            String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(api.getUuid());
+            if (gatewayVendor == null) {
+                gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+            }
+            api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(gatewayVendor));
+            api.setGatewayType(APIUtil.getGatewayType(gatewayVendor));
+        } else {
+            String gatewayVendor = api.getGatewayVendor();
+            api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(gatewayVendor));
+            api.setGatewayType(APIUtil.getGatewayType(gatewayVendor));
+        }
+    }
     protected void populateDefaultVersion(APIProduct apiProduct) throws APIManagementException {
         apiMgtDAO.setDefaultVersion(apiProduct);
     }
@@ -1214,9 +1228,15 @@ public abstract class AbstractAPIManager implements APIManager {
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
-        String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
-        api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(gatewayVendor));
-        api.setGatewayType(APIUtil.getGatewayType(gatewayVendor));
+        if (api.getGatewayVendor() == null) {
+            String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
+            if (gatewayVendor == null) {
+                gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+            }
+            api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(gatewayVendor));
+            api.setGatewayType(APIUtil.getGatewayType(gatewayVendor));
+        }
+
         // api level tier
         String apiLevelTier;
         if (api.isRevision()) {
