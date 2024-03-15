@@ -45,7 +45,8 @@ NotificationsApiService delegate = new NotificationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Notification", notes = "This operation can be used to delete a specific notification of a user. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:notifications_manage", description = "Manage notifications")
+            @AuthorizationScope(scope = "apim:notifications_manage", description = "Manage notifications"),
+            @AuthorizationScope(scope = "apim:notifications_view", description = "View notifications")
         })
     }, tags={ "Notifications",  })
     @ApiResponses(value = { 
@@ -64,7 +65,8 @@ NotificationsApiService delegate = new NotificationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete all notifications", notes = "This operation can be used to delete all the notifications of a user. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:notifications_manage", description = "Manage notifications")
+            @AuthorizationScope(scope = "apim:notifications_manage", description = "Manage notifications"),
+            @AuthorizationScope(scope = "apim:notifications_view", description = "View notifications")
         })
     }, tags={ "Notifications",  })
     @ApiResponses(value = { 
@@ -82,7 +84,6 @@ NotificationsApiService delegate = new NotificationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get notifications", notes = "Retrieves all notifications for the user. ", response = NotificationListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:notifications_manage", description = "Manage notifications"),
             @AuthorizationScope(scope = "apim:notifications_view", description = "View notifications")
         })
     }, tags={ "Notifications",  })
@@ -101,7 +102,8 @@ NotificationsApiService delegate = new NotificationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Mark all Notifications as Read.", notes = "Mark all notifications as read. ", response = NotificationListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:notifications_manage", description = "Manage notifications")
+            @AuthorizationScope(scope = "apim:notifications_manage", description = "Manage notifications"),
+            @AuthorizationScope(scope = "apim:notifications_view", description = "View notifications")
         })
     }, tags={ "Notifications",  })
     @ApiResponses(value = { 
@@ -121,7 +123,8 @@ NotificationsApiService delegate = new NotificationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Mark a Notification as Read.", notes = "Mark a specific notification as read. ", response = NotificationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:notifications_manage", description = "Manage notifications")
+            @AuthorizationScope(scope = "apim:notifications_manage", description = "Manage notifications"),
+            @AuthorizationScope(scope = "apim:notifications_view", description = "View notifications")
         })
     }, tags={ "Notifications" })
     @ApiResponses(value = { 

@@ -1911,21 +1911,23 @@ public interface APIProvider extends APIManager {
 
     /**
      * Method to get notifications for the given user
+     *
      * @param username
      * @param organization
+     * @param portalToDisplay
      * @param sortOrder
      * @param limit
      * @param offset
      * @return NotificationList
      */
-    NotificationList getNotifications(String username, String organization, String sortOrder, Integer limit, Integer offset) throws APIManagementException;
+    NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder, Integer limit, Integer offset) throws APIManagementException;
 
-    boolean deleteAllNotifications(String username, String organization) throws APIManagementException;
+    boolean deleteAllNotifications(String username, String organization, String portalToDisplay) throws APIManagementException;
 
-    Notification markNotificationAsReadById(String username, String organization, String notificationId);
+    Notification markNotificationAsReadById(String username, String organization, String notificationId, String portalToDisplay);
 
-    boolean deleteNotificationById(String username, String organization, String notificationId);
+    boolean deleteNotificationById(String username, String organization, String notificationId, String portalToDisplay);
 
-    NotificationList markAllNotificationsAsRead(String username, String organization);
+    NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay);
 
 }

@@ -6,6 +6,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
@@ -80,6 +81,7 @@ public class PortalNotificationDAO {
             ps.setString(1, notificationId);
             ps.setString(2, endUser.getDestinationUser());
             ps.setString(3, endUser.getOrganization());
+            ps.setString(4, endUser.getPortalToDisplay());
             ps.executeUpdate();
         } catch (SQLException e) {
             log.error("Error while adding end users", e);
@@ -95,6 +97,7 @@ public class PortalNotificationDAO {
         json.put("apiName", metaData.getApi());
         json.put("apiVersion", metaData.getApiVersion());
         json.put("apiContext", metaData.getApiContext());
+        json.put("action", metaData.getAction());
         json.put("applicationName", metaData.getApplicationName());
         json.put("requestedTier", metaData.getRequestedTier());
         json.put("revisionId", metaData.getRevisionId());
@@ -102,7 +105,7 @@ public class PortalNotificationDAO {
         return json.toJSONString();
     }
 
-    public NotificationList getNotifications(String username, String organization, String sortOrder, Integer limit,
+    public NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder, Integer limit,
             Integer offset) {
 
         List<Notification> list = new ArrayList<Notification>();
@@ -120,6 +123,7 @@ public class PortalNotificationDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, username);
             ps.setString(2, organization);
+            ps.setString(3, portalToDisplay);
             rs = ps.executeQuery();
             while (rs.next()) {
                 Notification notification = new Notification();
@@ -155,6 +159,7 @@ public class PortalNotificationDAO {
             String apiName = (String) json.get("apiName");
             String apiVersion = (String) json.get("apiVersion");
             String apiContext = (String) json.get("apiContext");
+            String action = (String) json.get("action");
             String revisionId = (String) json.get("revisionId");
             String applicationName = (String) json.get("applicationName");
             String requestedTier = (String) json.get("requestedTier");
@@ -168,7 +173,7 @@ public class PortalNotificationDAO {
 
             switch (notificationType) {
             case "API_STATE_CHANGE":
-                finalComment = "API State Change request of the API: " + apiName + ", version: " + apiVersion
+                finalComment = "API State Change request to " + action + " the API: " + apiName + ", version: " + apiVersion
                         + " that has the context: " + apiContext + " has been " + status + ".";
                 break;
             case "API_PRODUCT_STATE_CHANGE":
@@ -216,7 +221,7 @@ public class PortalNotificationDAO {
         return finalComment;
     }
 
-    public boolean deleteAllNotifications(String username, String organization) {
+    public boolean deleteAllNotifications(String username, String organization, String portalToDisplay) {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -226,6 +231,7 @@ public class PortalNotificationDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, username);
             ps.setString(2, organization);
+            ps.setString(3, portalToDisplay);
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
                 String deleteNotification = SQLConstants.PortalNotifications.DELETE_NOTIFICATIONS;
@@ -241,7 +247,7 @@ public class PortalNotificationDAO {
         return false;
     }
 
-    public Notification markNotificationAsReadById(String username, String organization, String notificationId) {
+    public Notification markNotificationAsReadById(String username, String organization, String notificationId, String portalToDisplay) {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -253,9 +259,10 @@ public class PortalNotificationDAO {
             ps.setString(1, notificationId);
             ps.setString(2, username);
             ps.setString(3, organization);
+            ps.setString(4, portalToDisplay);
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
-                notification = getNotificationById(notificationId, username, organization, conn);
+                notification = getNotificationById(notificationId, username, organization, portalToDisplay, conn);
                 if (notification != null) {
                     return notification;
                 }
@@ -268,7 +275,7 @@ public class PortalNotificationDAO {
         return null;
     }
 
-    private Notification getNotificationById(String notificationId, String username, String organization,
+    private Notification getNotificationById(String notificationId, String username, String organization, String portalToDisplay,
             Connection conn) throws SQLException {
 
         PreparedStatement ps = null;
@@ -280,6 +287,7 @@ public class PortalNotificationDAO {
             ps.setString(1, notificationId);
             ps.setString(2, username);
             ps.setString(3, organization);
+            ps.setString(4, portalToDisplay);
             rs = ps.executeQuery();
             if (rs.next()) {
                 Notification notification = new Notification();
@@ -301,7 +309,7 @@ public class PortalNotificationDAO {
         return null;
     }
 
-    public boolean deleteNotificationById(String username, String organization, String notificationId) {
+    public boolean deleteNotificationById(String username, String organization, String notificationId, String portalToDisplay) {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -312,6 +320,7 @@ public class PortalNotificationDAO {
             ps.setString(1, notificationId);
             ps.setString(2, username);
             ps.setString(3, organization);
+            ps.setString(4, portalToDisplay);
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
                 String deleteNotification = SQLConstants.PortalNotifications.DELETE_NOTIFICATIONS;
@@ -327,7 +336,7 @@ public class PortalNotificationDAO {
         return false;
     }
 
-    public NotificationList markAllNotificationsAsRead(String username, String organization) {
+    public NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay) {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -338,9 +347,10 @@ public class PortalNotificationDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, username);
             ps.setString(2, organization);
+            ps.setString(3, portalToDisplay);
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
-                return getNotifications(username, organization, null, null, null);
+                return getNotifications(username, organization, portalToDisplay,null, null, null);
             }
         } catch (SQLException e) {
             log.error("Failed to mark all notifications as read", e);
@@ -348,5 +358,28 @@ public class PortalNotificationDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return null;
+    }
+
+    public String getAPIUUIDUsingNameContextVersion(String apiName, String apiContext, String apiVersion, String organization) {
+
+            String apiUUID = null;
+            String sqlQuery = SQLConstants.PortalNotifications.GET_API_UUID_USING_NAME_CONTEXT_VERSION;
+            try (Connection connection = APIMgtDBUtil.getConnection();
+                    PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+                ps.setString(1, apiName);
+                ps.setString(2, apiContext);
+                ps.setString(3, apiVersion);
+                ps.setString(4, organization);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        apiUUID = rs.getString("API_UUID");
+                    }
+                }
+            } catch (SQLException e) {
+                log.error("Failed to retrieve API UUID using name, context and version", e);
+            }
+            return apiUUID;
+
+
     }
 }

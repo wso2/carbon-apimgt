@@ -8719,7 +8719,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:notifications_manage
             - apim:notifications_view
       x-code-samples:
         - lang: Curl
@@ -8749,6 +8748,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:notifications_manage
+            - apim:notifications_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8804,6 +8804,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:notifications_manage
+            - apim:notifications_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8863,6 +8864,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:notifications_manage
+            - apim:notifications_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8895,6 +8897,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:notifications_manage
+            - apim:notifications_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"

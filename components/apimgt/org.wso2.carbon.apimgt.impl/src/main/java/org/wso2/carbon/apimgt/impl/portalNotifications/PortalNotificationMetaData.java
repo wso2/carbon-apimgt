@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.impl.portalNotifications;
 
 public class PortalNotificationMetaData {
 
+    private String action;
     private String api;
     private String apiVersion;
     private String apiContext;
@@ -9,6 +10,14 @@ public class PortalNotificationMetaData {
     private String requestedTier;
     private String revisionId;
     private String comment;
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
 
     public String getApi() {
         return api;

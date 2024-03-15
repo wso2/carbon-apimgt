@@ -33,11 +33,12 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
     public Response deleteNotification(String notificationId, MessageContext messageContext)
             throws APIManagementException {
 
+        String portalToDisplay = "developer";
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            boolean result = apiConsumer.deleteNotificationById(username, organization, notificationId);
+            boolean result = apiConsumer.deleteNotificationById(username, organization, notificationId, portalToDisplay);
             if(!result){
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
@@ -49,11 +50,12 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
 
     public Response deleteNotifications(MessageContext messageContext) throws APIManagementException {
 
+        String portalToDisplay = "developer";
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            boolean result = apiConsumer.deleteAllNotifications(username, organization);
+            boolean result = apiConsumer.deleteAllNotifications(username, organization, portalToDisplay);
             if(!result){
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
@@ -70,12 +72,13 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
         NotificationList notificationList;
+        String portalToDisplay = "developer";
 
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            notificationList = apiConsumer.getNotifications(username, organization, sortOrder, limit, offset);
+            notificationList = apiConsumer.getNotifications(username, organization, portalToDisplay, sortOrder, limit, offset);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting notifications", e);
         }
@@ -87,12 +90,13 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
             throws APIManagementException {
 
         NotificationList notificationList ;
+        String portalToDisplay = "developer";
 
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            notificationList = apiConsumer.markAllNotificationsAsRead(username, organization);
+            notificationList = apiConsumer.markAllNotificationsAsRead(username, organization, portalToDisplay);
             if(notificationList == null){
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
@@ -107,12 +111,13 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
             throws APIManagementException {
 
         Notification notification ;
+        String portalToDisplay = "developer";
 
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            notification = apiConsumer.markNotificationAsReadById(username, organization, notificationId);
+            notification = apiConsumer.markNotificationAsReadById(username, organization, notificationId, portalToDisplay);
             if(notification == null){
                 return Response.status(Response.Status.NOT_FOUND).build();
             }

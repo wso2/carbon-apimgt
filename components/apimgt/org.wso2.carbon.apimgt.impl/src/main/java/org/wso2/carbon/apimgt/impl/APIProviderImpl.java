@@ -7235,29 +7235,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public NotificationList getNotifications(String username, String organization, String sortOrder, Integer limit,
+    public NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder, Integer limit,
             Integer offset) throws APIManagementException {
-        return portalNotificationDAO.getNotifications(username, organization, sortOrder, limit, offset);
+        return portalNotificationDAO.getNotifications(username, organization, portalToDisplay, sortOrder, limit, offset);
     }
 
     @Override
-    public boolean deleteAllNotifications(String username, String organization) {
-        return portalNotificationDAO.deleteAllNotifications(username, organization);
+    public boolean deleteAllNotifications(String username, String organization, String portalToDisplay) {
+        return portalNotificationDAO.deleteAllNotifications(username, organization, portalToDisplay);
     }
 
     @Override
-    public Notification markNotificationAsReadById(String username, String organization, String notificationId) {
-        return portalNotificationDAO.markNotificationAsReadById(username, organization, notificationId);
+    public Notification markNotificationAsReadById(String username, String organization, String notificationId, String portalToDisplay) {
+        return portalNotificationDAO.markNotificationAsReadById(username, organization, notificationId, portalToDisplay);
     }
 
     @Override
-    public boolean deleteNotificationById(String username, String organization, String notificationId) {
-        return portalNotificationDAO.deleteNotificationById(username, organization, notificationId);
+    public boolean deleteNotificationById(String username, String organization, String notificationId, String portalToDisplay) {
+        return portalNotificationDAO.deleteNotificationById(username, organization, notificationId, portalToDisplay);
     }
 
     @Override
-    public NotificationList markAllNotificationsAsRead(String username, String organization) {
-        return portalNotificationDAO.markAllNotificationsAsRead(username, organization);
+    public NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay) {
+        return portalNotificationDAO.markAllNotificationsAsRead(username, organization, portalToDisplay);
     }
 
     /**
