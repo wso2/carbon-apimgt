@@ -63,7 +63,7 @@
         <init-param>
             <param-name>jaxrs.inInterceptors</param-name>
             <param-value>
-                org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v2 latestVersion=v2.2),
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v2 latestVersion=v2.3),
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor,
