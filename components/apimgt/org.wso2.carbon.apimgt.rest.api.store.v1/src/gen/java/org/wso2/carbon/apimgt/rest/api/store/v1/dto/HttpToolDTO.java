@@ -60,8 +60,7 @@ return null;
     }
     private MethodEnum method = null;
     private String path = null;
-    private Object queryParameters = null;
-    private Object pathParameters = null;
+    private Object parameters = null;
     private Object requestBody = null;
 
   /**
@@ -142,38 +141,20 @@ return null;
 
   /**
    **/
-  public HttpToolDTO queryParameters(Object queryParameters) {
-    this.queryParameters = queryParameters;
+  public HttpToolDTO parameters(Object parameters) {
+    this.parameters = parameters;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("queryParameters")
-  public Object getQueryParameters() {
-    return queryParameters;
+  @JsonProperty("parameters")
+  public Object getParameters() {
+    return parameters;
   }
-  public void setQueryParameters(Object queryParameters) {
-    this.queryParameters = queryParameters;
-  }
-
-  /**
-   **/
-  public HttpToolDTO pathParameters(Object pathParameters) {
-    this.pathParameters = pathParameters;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("pathParameters")
-  public Object getPathParameters() {
-    return pathParameters;
-  }
-  public void setPathParameters(Object pathParameters) {
-    this.pathParameters = pathParameters;
+  public void setParameters(Object parameters) {
+    this.parameters = parameters;
   }
 
   /**
@@ -208,14 +189,13 @@ return null;
         Objects.equals(description, httpTool.description) &&
         Objects.equals(method, httpTool.method) &&
         Objects.equals(path, httpTool.path) &&
-        Objects.equals(queryParameters, httpTool.queryParameters) &&
-        Objects.equals(pathParameters, httpTool.pathParameters) &&
+        Objects.equals(parameters, httpTool.parameters) &&
         Objects.equals(requestBody, httpTool.requestBody);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description, method, path, queryParameters, pathParameters, requestBody);
+    return Objects.hash(name, description, method, path, parameters, requestBody);
   }
 
   @Override
@@ -227,8 +207,7 @@ return null;
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    method: ").append(toIndentedString(method)).append("\n");
     sb.append("    path: ").append(toIndentedString(path)).append("\n");
-    sb.append("    queryParameters: ").append(toIndentedString(queryParameters)).append("\n");
-    sb.append("    pathParameters: ").append(toIndentedString(pathParameters)).append("\n");
+    sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
     sb.append("    requestBody: ").append(toIndentedString(requestBody)).append("\n");
     sb.append("}");
     return sb.toString();
