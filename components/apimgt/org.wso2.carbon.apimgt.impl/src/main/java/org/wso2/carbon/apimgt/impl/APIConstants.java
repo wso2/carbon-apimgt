@@ -506,6 +506,9 @@ public final class APIConstants {
     public static final String API_CHAT_ENABLED = API_CHAT + "Enabled";
     public static final String API_CHAT_AUTH_TOKEN = API_CHAT + "AuthToken";
     public static final String API_CHAT_ENDPOINT = API_CHAT + "Endpoint";
+    public static final String API_CHAT_HEALTH_RESOURCE = "/health"; // "/api-chat/health"
+    public static final String API_CHAT_PREPARE_RESOURCE = "/prepare"; // "/api-chat/prepare"
+    public static final String API_CHAT_EXECUTE_RESOURCE = "/execute"; // "/api-chat/execute"
 
     //documentation rxt
 
