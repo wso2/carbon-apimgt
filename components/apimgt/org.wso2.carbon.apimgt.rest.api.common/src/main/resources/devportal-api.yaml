@@ -3616,14 +3616,7 @@ paths:
       operationId: apiChatPrepare
       parameters:
         - $ref: '#/components/parameters/apiChatRequestId'
-      requestBody:
-        description: |
-          API Chat preparation request payload
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApiChatPreparationRequest'
-        required: true
+        - $ref: '#/components/parameters/apiId-Q'
       tags:
         - API Chat
       responses:
@@ -5854,14 +5847,6 @@ components:
           type: array
           items:
             type: string
-    ApiChatPreparationRequest:
-      title: API Chat prepare request
-      required:
-        - openapi
-      properties:
-        openapi:
-          type: object
-          description: API specification
     ApiChatPreparationResponse:
       title: API Chat preparation response
       required:

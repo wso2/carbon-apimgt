@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.store.v1;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatExecuteRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatExecuteResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatPreparationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatPreparationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.AiApiService;
@@ -58,7 +57,7 @@ AiApiService delegate = new AiApiServiceImpl();
 
     @POST
     @Path("/api-chat/prepare")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Prepare API Chat service by feeding the OpenAPI specification of the API to be tested", notes = "Processing the OpenAPI specification to extract the API endpoint definitions and generate sample queries ", response = ApiChatPreparationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -69,8 +68,8 @@ AiApiService delegate = new AiApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. API Chat preparation completed. Successful response with enriched API specification and sample queries. ", response = ApiChatPreparationResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. An error occurred while preparing the API Chat service. ", response = Void.class) })
-    public Response apiChatPrepare(@ApiParam(value = "API Chat preparation request payload " ,required=true) ApiChatPreparationRequestDTO apiChatPreparationRequestDTO,  @ApiParam(value = "Request ID " )@HeaderParam("apiChatRequestId") String apiChatRequestId) throws APIManagementException{
-        return delegate.apiChatPrepare(apiChatPreparationRequestDTO, apiChatRequestId, securityContext);
+    public Response apiChatPrepare( @ApiParam(value = "Request ID " )@HeaderParam("apiChatRequestId") String apiChatRequestId,  @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ")  @QueryParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apiChatPrepare(apiChatRequestId, apiId, securityContext);
     }
 
     @GET

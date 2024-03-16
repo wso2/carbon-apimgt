@@ -10407,37 +10407,60 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used for AI Service calls related to API-Chat feature and Marketplace-Assistant feature
+     * This method is used for AI Service health check purposes. This will be utilized by API-Chat feature and
+     * Marketplace-Assistant feature
      *
      * @param endpointConfigName Config name to retrieve the AI Service URL
-     * @param authTokenConfigName Config name to retrieve the token for authentication purposes
-     * @return CloseableHttpResponse
+     * @param resource           Resource that we should forward the request to
+     * @return CloseableHttpResponse of the GET call
      * @throws APIManagementException
      */
-    public static CloseableHttpResponse getAIServiceHealth(String endpointConfigName, String authTokenConfigName)
-            throws APIManagementException, MalformedURLException {
+    public static CloseableHttpResponse getAIServiceHealth(String endpointConfigName, String resource)
+            throws APIManagementException {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String endpoint = config.getFirstProperty(endpointConfigName);
-        String authToken = config.getFirstProperty(authTokenConfigName);
 
-        HttpGet healthGet = new HttpGet(endpoint + "/health");
-        healthGet.setHeader("auth-key", authToken);
-
-        URL url = new URL(endpoint);
-        int port = url.getPort();
-        String protocol = url.getProtocol();
-        HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
-
-        try {
+        try{
+            HttpGet healthGet = new HttpGet(endpoint + resource);
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
             return executeHTTPRequest(healthGet, httpClient);
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
         } catch (APIManagementException | IOException e) {
             throw new APIManagementException("Error encountered while connecting to service", e);
         }
     }
 
-//    public static CloseableHttpResponse invokeAIService(String endpointConfigName, String authTokenConfigName) {
-//
-//    }
+    public static CloseableHttpResponse invokeAIService(String endpointConfigName, String authTokenConfigName,
+            String resource, String payload, String requestId) throws  APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String endpoint = config.getFirstProperty(endpointConfigName);
+        String authToken = config.getFirstProperty(authTokenConfigName);
+        try {
+            HttpPost preparePost = new HttpPost(endpoint + resource);
+            preparePost.setHeader(HttpHeaders.AUTHORIZATION, authToken);
+            preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            preparePost.setHeader("x-request-id", requestId);
+            StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
+            preparePost.setEntity(requestEntity);
+
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+            return executeHTTPRequest(preparePost, httpClient);
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
 }
