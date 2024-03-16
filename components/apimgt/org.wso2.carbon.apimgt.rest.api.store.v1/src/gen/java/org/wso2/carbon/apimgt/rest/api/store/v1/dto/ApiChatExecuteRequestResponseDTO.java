@@ -21,6 +21,7 @@ import javax.validation.Valid;
 public class ApiChatExecuteRequestResponseDTO   {
   
     private Integer code = null;
+    private String path = null;
     private Object headers = null;
     private Object body = null;
 
@@ -40,6 +41,24 @@ public class ApiChatExecuteRequestResponseDTO   {
   }
   public void setCode(Integer code) {
     this.code = code;
+  }
+
+  /**
+   * HTTP path url with encoded parameters
+   **/
+  public ApiChatExecuteRequestResponseDTO path(String path) {
+    this.path = path;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "/order/123", value = "HTTP path url with encoded parameters")
+  @JsonProperty("path")
+  public String getPath() {
+    return path;
+  }
+  public void setPath(String path) {
+    this.path = path;
   }
 
   /**
@@ -91,13 +110,14 @@ public class ApiChatExecuteRequestResponseDTO   {
     }
     ApiChatExecuteRequestResponseDTO apiChatExecuteRequestResponse = (ApiChatExecuteRequestResponseDTO) o;
     return Objects.equals(code, apiChatExecuteRequestResponse.code) &&
+        Objects.equals(path, apiChatExecuteRequestResponse.path) &&
         Objects.equals(headers, apiChatExecuteRequestResponse.headers) &&
         Objects.equals(body, apiChatExecuteRequestResponse.body);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(code, headers, body);
+    return Objects.hash(code, path, headers, body);
   }
 
   @Override
@@ -106,6 +126,7 @@ public class ApiChatExecuteRequestResponseDTO   {
     sb.append("class ApiChatExecuteRequestResponseDTO {\n");
     
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
+    sb.append("    path: ").append(toIndentedString(path)).append("\n");
     sb.append("    headers: ").append(toIndentedString(headers)).append("\n");
     sb.append("    body: ").append(toIndentedString(body)).append("\n");
     sb.append("}");

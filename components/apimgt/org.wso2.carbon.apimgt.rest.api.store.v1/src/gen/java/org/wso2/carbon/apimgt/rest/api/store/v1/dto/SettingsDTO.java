@@ -39,6 +39,8 @@ public class SettingsDTO   {
     private String passwordPolicyPattern = null;
     private Integer passwordPolicyMinLength = null;
     private Integer passwordPolicyMaxLength = null;
+    private Boolean isApiChatEnabled = true;
+    private Boolean isAIFeatureAuthTokenProvided = false;
 
   /**
    **/
@@ -235,7 +237,7 @@ public class SettingsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("IsJWTEnabledForLoginTokens")
   public Boolean isIsJWTEnabledForLoginTokens() {
@@ -317,6 +319,42 @@ public class SettingsDTO   {
     this.passwordPolicyMaxLength = passwordPolicyMaxLength;
   }
 
+  /**
+   * Specifies whether API Chat feature is enabled.
+   **/
+  public SettingsDTO isApiChatEnabled(Boolean isApiChatEnabled) {
+    this.isApiChatEnabled = isApiChatEnabled;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "Specifies whether API Chat feature is enabled.")
+  @JsonProperty("isApiChatEnabled")
+  public Boolean isIsApiChatEnabled() {
+    return isApiChatEnabled;
+  }
+  public void setIsApiChatEnabled(Boolean isApiChatEnabled) {
+    this.isApiChatEnabled = isApiChatEnabled;
+  }
+
+  /**
+   * Checks if the auth token is provided for AI service usage.
+   **/
+  public SettingsDTO isAIFeatureAuthTokenProvided(Boolean isAIFeatureAuthTokenProvided) {
+    this.isAIFeatureAuthTokenProvided = isAIFeatureAuthTokenProvided;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "Checks if the auth token is provided for AI service usage.")
+  @JsonProperty("isAIFeatureAuthTokenProvided")
+  public Boolean isIsAIFeatureAuthTokenProvided() {
+    return isAIFeatureAuthTokenProvided;
+  }
+  public void setIsAIFeatureAuthTokenProvided(Boolean isAIFeatureAuthTokenProvided) {
+    this.isAIFeatureAuthTokenProvided = isAIFeatureAuthTokenProvided;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -342,12 +380,14 @@ public class SettingsDTO   {
         Objects.equals(userStorePasswordPattern, settings.userStorePasswordPattern) &&
         Objects.equals(passwordPolicyPattern, settings.passwordPolicyPattern) &&
         Objects.equals(passwordPolicyMinLength, settings.passwordPolicyMinLength) &&
-        Objects.equals(passwordPolicyMaxLength, settings.passwordPolicyMaxLength);
+        Objects.equals(passwordPolicyMaxLength, settings.passwordPolicyMaxLength) &&
+        Objects.equals(isApiChatEnabled, settings.isApiChatEnabled) &&
+        Objects.equals(isAIFeatureAuthTokenProvided, settings.isAIFeatureAuthTokenProvided);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength);
   }
 
   @Override
@@ -371,6 +411,8 @@ public class SettingsDTO   {
     sb.append("    passwordPolicyPattern: ").append(toIndentedString(passwordPolicyPattern)).append("\n");
     sb.append("    passwordPolicyMinLength: ").append(toIndentedString(passwordPolicyMinLength)).append("\n");
     sb.append("    passwordPolicyMaxLength: ").append(toIndentedString(passwordPolicyMaxLength)).append("\n");
+    sb.append("    isApiChatEnabled: ").append(toIndentedString(isApiChatEnabled)).append("\n");
+    sb.append("    isAIFeatureAuthTokenProvided: ").append(toIndentedString(isAIFeatureAuthTokenProvided)).append("\n");
     sb.append("}");
     return sb.toString();
   }

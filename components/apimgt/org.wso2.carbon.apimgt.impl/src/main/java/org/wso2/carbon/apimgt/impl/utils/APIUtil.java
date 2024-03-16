@@ -10407,6 +10407,22 @@ public final class APIUtil {
     }
 
     /**
+     * Checks whether an auth token is provided for AI features to use. This token is utilized for authentication and
+     * throttling purposes.
+     *
+     * @return returns true if a valid auth token is found, false otherwise.
+     */
+    public static boolean isAuthTokenProvidedForAIFeatures() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String authToken = config.getFirstProperty(APIConstants.API_CHAT_AUTH_TOKEN);
+        if (authToken == null || authToken.equals("")) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * This method is used for AI Service health check purposes. This will be utilized by API-Chat feature and
      * Marketplace-Assistant feature
      *
