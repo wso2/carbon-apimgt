@@ -237,7 +237,7 @@ public class SettingsDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
   @JsonProperty("IsJWTEnabledForLoginTokens")
   public Boolean isIsJWTEnabledForLoginTokens() {
@@ -327,7 +327,7 @@ public class SettingsDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "Specifies whether API Chat feature is enabled.")
   @JsonProperty("isApiChatEnabled")
   public Boolean isIsApiChatEnabled() {
@@ -345,7 +345,7 @@ public class SettingsDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "Checks if the auth token is provided for AI service usage.")
   @JsonProperty("isAIFeatureAuthTokenProvided")
   public Boolean isIsAIFeatureAuthTokenProvided() {
@@ -387,7 +387,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, isApiChatEnabled, isAIFeatureAuthTokenProvided);
   }
 
   @Override
