@@ -22,14 +22,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
-import org.apache.velocity.runtime.RuntimeConstants;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.ConfigContext;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 
 import java.io.File;
@@ -68,7 +65,6 @@ public class RESTToSOAPMsgTemplate {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            APIUtil.initializeVelocityContext(velocityengine);
             velocityengine.init();
             org.apache.velocity.Template t = velocityengine.getTemplate(this.getInSeqTemplatePath());
             t.merge(context, writer);
@@ -92,7 +88,6 @@ public class RESTToSOAPMsgTemplate {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            APIUtil.initializeVelocityContext(velocityengine);
             velocityengine.init();
             Template template = velocityengine.getTemplate(this.getOutSeqTemplatePath());
 

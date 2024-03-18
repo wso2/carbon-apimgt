@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -117,7 +116,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
-            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             initVelocityEngine(velocityengine);
@@ -193,7 +191,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
-            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             initVelocityEngine(velocityengine);
@@ -233,7 +230,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             initVelocityEngine(velocityengine);
@@ -271,7 +267,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            APIUtil.initializeVelocityContext(velocityengine);
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             initVelocityEngine(velocityengine);
