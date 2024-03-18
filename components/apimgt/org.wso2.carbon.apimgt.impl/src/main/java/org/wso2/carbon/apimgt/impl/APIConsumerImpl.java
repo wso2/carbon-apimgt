@@ -111,6 +111,7 @@ import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -2356,6 +2357,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
             } else {
                 throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
+            }
+            
+            if (appRegistrationWorkflow == null ) {
+                appRegistrationWorkflow = new ApplicationRegistrationSimpleWorkflowExecutor();
             }
 
             //check whether callback url is empty and set null
