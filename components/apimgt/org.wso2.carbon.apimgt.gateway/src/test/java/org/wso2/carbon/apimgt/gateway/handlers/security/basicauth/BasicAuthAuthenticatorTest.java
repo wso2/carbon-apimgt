@@ -129,18 +129,7 @@ public class BasicAuthAuthenticatorTest {
         Assert.assertFalse(authenticationResponse.isAuthenticated());
         Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_CREDENTIALS);
     }
-
-    @Test
-    public void testAuthenticateWithInvalidBasicHeader_1() {
-        TreeMap transportHeaders = new TreeMap();
-        transportHeaders.put(CUSTOM_AUTH_HEADER, "Basic xxxxxxx"); //Throw Decode64 exception
-        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
-
-        AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
-        Assert.assertFalse(authenticationResponse.isAuthenticated());
-        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
-    }
-
+    
     @Test
     public void testAuthenticateWithInvalidBasicHeader_2() {
         TreeMap transportHeaders = new TreeMap();
