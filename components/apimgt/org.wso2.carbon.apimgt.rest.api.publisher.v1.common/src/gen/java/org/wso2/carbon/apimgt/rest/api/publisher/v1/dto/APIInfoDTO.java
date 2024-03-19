@@ -75,6 +75,7 @@ return null;
     private String updatedTime = null;
     private String updatedBy = null;
     private String gatewayVendor = null;
+    private String gatewayType = "wso2/synapse";
     private Boolean advertiseOnly = null;
     private Boolean monetizedInfo = null;
     private String businessOwner = null;
@@ -394,6 +395,24 @@ return null;
   }
 
   /**
+   * Accepts one of the following. wso2/synapse, wso2/apk.
+   **/
+  public APIInfoDTO gatewayType(String gatewayType) {
+    this.gatewayType = gatewayType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2/synapse", value = "Accepts one of the following. wso2/synapse, wso2/apk.")
+  @JsonProperty("gatewayType")
+  public String getGatewayType() {
+    return gatewayType;
+  }
+  public void setGatewayType(String gatewayType) {
+    this.gatewayType = gatewayType;
+  }
+
+  /**
    **/
   public APIInfoDTO advertiseOnly(Boolean advertiseOnly) {
     this.advertiseOnly = advertiseOnly;
@@ -523,6 +542,7 @@ return null;
         Objects.equals(updatedTime, apIInfo.updatedTime) &&
         Objects.equals(updatedBy, apIInfo.updatedBy) &&
         Objects.equals(gatewayVendor, apIInfo.gatewayVendor) &&
+        Objects.equals(gatewayType, apIInfo.gatewayType) &&
         Objects.equals(advertiseOnly, apIInfo.advertiseOnly) &&
         Objects.equals(monetizedInfo, apIInfo.monetizedInfo) &&
         Objects.equals(businessOwner, apIInfo.businessOwner) &&
@@ -533,7 +553,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, updatedBy, gatewayVendor, advertiseOnly, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, updatedBy, gatewayVendor, gatewayType, advertiseOnly, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
   }
 
   @Override
@@ -559,6 +579,7 @@ return null;
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("    updatedBy: ").append(toIndentedString(updatedBy)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");
     sb.append("    businessOwner: ").append(toIndentedString(businessOwner)).append("\n");

@@ -8847,6 +8847,12 @@ components:
         gatewayVendor:
           type: string
           example: wso2
+        gatewayType:
+          title: Field to identify gateway type.
+          type: string
+          description: Accepts one of the following. wso2/synapse, wso2/apk.
+          example: wso2/synapse
+          default: wso2/synapse
         advertiseOnly:
           type: boolean
           example: true
@@ -11915,6 +11921,9 @@ components:
           type: string
           description: Authorization Header
           example: authorization
+        IsJWTEnabledForLoginTokens: 
+          type: boolean
+          default: false
         customProperties:
           type: array
           items:

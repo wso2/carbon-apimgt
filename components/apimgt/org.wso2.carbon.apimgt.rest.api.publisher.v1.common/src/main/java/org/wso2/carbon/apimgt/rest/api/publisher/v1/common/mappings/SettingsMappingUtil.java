@@ -58,6 +58,7 @@ public class SettingsMappingUtil {
 
         SettingsDTO settingsDTO = new SettingsDTO();
         EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
+        settingsDTO.setIsJWTEnabledForLoginTokens(APIUtil.isJWTEnabledForPortals());
         if (isUserAvailable) {
             Map<String, Environment> environments = APIUtil.getEnvironments(organization);
             if (environments != null) {

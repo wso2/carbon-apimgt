@@ -4594,6 +4594,9 @@ components:
           type: array
           items:
             type: string
+        IsJWTEnabledForLoginTokens: 
+          type: boolean
+          default: false
         keyManagerConfiguration:
           type: array
           items:

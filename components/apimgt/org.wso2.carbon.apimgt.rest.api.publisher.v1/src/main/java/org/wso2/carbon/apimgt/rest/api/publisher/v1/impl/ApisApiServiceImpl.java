@@ -658,11 +658,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_ENDPOINT_URL);
             }
 
+            // validate custom properties
             org.json.simple.JSONArray customProperties = APIUtil.getCustomProperties(username);
-            if (!PublisherCommonUtils.validateMandatoryProperties(customProperties, body)) {
-                Long errorCode = ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorCode();
+            List<String> errorProperties = PublisherCommonUtils.validateMandatoryProperties(customProperties, body);
+            if (!errorProperties.isEmpty()) {
+                String errorString = " : " + String.join(", ", errorProperties);
                 RestApiUtil.handleBadRequest(
-                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorMessage(), errorCode, log);
+                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorMessage() + errorString,
+                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorCode(), log);
             }
 
             // validate sandbox and production endpoints
@@ -1573,7 +1576,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return created document DTO as response
      */
     @Override
-    public Response addAPIDocument(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext) {
+    public Response addAPIDocument(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //validate if api exists
@@ -1597,8 +1601,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .handleAuthorizationFailure("Authorization failure while adding documents of API : " + apiId, e,
                                 log);
             } else {
-                String errorMessage = "Error while adding the document for API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw new APIManagementException(
+                        "Error while adding a new document to API " + apiId + " : " + e.getMessage(), e);
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving location for document " + body.getName() + " of API " + apiId;

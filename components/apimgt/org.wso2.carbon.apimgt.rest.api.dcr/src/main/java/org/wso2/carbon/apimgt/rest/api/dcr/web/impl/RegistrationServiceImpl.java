@@ -110,8 +110,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             String owner = profile.getOwner();
             String authUserName = RestApiCommonUtil.getLoggedInUsername();
 
-            //If user is in a secondory userstore, update the owner of the application with
-            //correct domain
+            //If user is in a secondary user store, update the owner of the application with the correct domain
             if (owner != null && authUserName != null) {
                 int index = authUserName.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
                 int ownerIndex = owner.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
@@ -128,7 +127,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 }
             }
 
-            //Validates if the application owner and logged in username is same.
+            //Validates if the app owner in payload and auth-user username is same or is auth-user a super admin
             if (authUserName != null && ((authUserName.equals(owner))|| isUserSuperAdmin(authUserName))) {
                 //Getting client credentials from the profile
                 String grantTypes = profile.getGrantType();
@@ -156,18 +155,10 @@ public class RegistrationServiceImpl implements RegistrationService {
                 oauthApplicationInfo.setIsSaasApplication(profile.isSaasApp());
                 oauthApplicationInfo.setTokenType(tokenType);
                 appRequest.setOAuthApplicationInfo(oauthApplicationInfo);
-                if (!authUserName.equals(owner)){
+                if (!authUserName.equals(owner)) {
                     loggedInUserTenantDomain = MultitenantUtils.getTenantDomain(owner);
-                }else{
+                } else {
                     loggedInUserTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                }
-                String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
-                String userNameForSP = MultitenantUtils.getTenantAwareUsername(userId);
-                // Replace domain separator by "_" if user is coming from a secondary userstore.
-                String domain = UserCoreUtil.extractDomainFromName(userNameForSP);
-                if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals
-                        (domain)) {
-                    userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
                 }
                 applicationName = profile.getClientName();
 
@@ -189,7 +180,8 @@ public class RegistrationServiceImpl implements RegistrationService {
                     returnedAPP = this.getExistingApp(applicationName, appServiceProvider.isSaasApp());
                 } else {
                     //create a new application if the application doesn't exists.
-                    returnedAPP = this.createApplication(applicationName, appRequest, grantTypes);
+                    returnedAPP = this.createApplication(applicationName, appRequest, grantTypes,
+                            profile.isUserStoreDomainInSubject());
                 }
                 //ReturnedAPP is null
                 if (returnedAPP == null) {
@@ -201,11 +193,22 @@ public class RegistrationServiceImpl implements RegistrationService {
                             (RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 500L, errorMsg);
                     response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
                             entity(errorDTO).build();
-                } else {
+                } else if (authUserName.equals(returnedAPP.getAppOwner())
+                        || (isUserSuperAdmin(authUserName) && owner.equals(returnedAPP.getAppOwner()))) {
+                    // Permit only if (auth user is the app owner)
+                    // or (auth user is super admin and payload.owner is same as app owner)
                     if (log.isDebugEnabled()) {
                         log.debug("OAuth app " + profile.getClientName() + " creation successful.");
                     }
                     response = Response.status(Response.Status.OK).entity(returnedAPP).build();
+                } else {
+                    String errMsg = "Access is forbidden to the application";
+                    if (log.isDebugEnabled()) {
+                        log.debug("OAuth app owner: " + returnedAPP.getAppOwner() + " is different from payload " +
+                                "owner: " + owner + " and " + errMsg);
+                    }
+                    errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403L, errMsg);
+                    response = Response.status(Response.Status.FORBIDDEN).entity(errorDTO).build();
                 }
             } else {
                 String errorMsg = "Logged in user '" + authUserName + "' and application owner '" +
@@ -274,12 +277,14 @@ public class RegistrationServiceImpl implements RegistrationService {
     /**
      * Create a new client application
      *
+     * @param applicationName application name
      * @param appRequest OAuthAppRequest object with client's payload content
+     * @param grantType grant type
      * @return created Application
-     * @throws APIManagementException if failed to create the new application
+     * @throws APIManagementException if failed to create a new application
      */
-    private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest,
-                                                   String grantType) throws APIManagementException {
+    private OAuthApplicationInfo createApplication(String applicationName, OAuthAppRequest appRequest, String grantType,
+            boolean setUserStoreDomainInSubject) throws APIManagementException {
         String userName;
         OAuthApplicationInfo applicationInfo = appRequest.getOAuthApplicationInfo();
         String appName = applicationInfo.getClientName();
@@ -325,15 +330,15 @@ public class RegistrationServiceImpl implements RegistrationService {
             logoutConsentProperty.setName(APIConstants.APP_SKIP_LOGOUT_CONSENT_NAME);
             logoutConsentProperty.setValue(APIConstants.APP_SKIP_LOGOUT_CONSENT_VALUE);
             serviceProviderProperties.add(logoutConsentProperty);
-
-            if (APIConstants.JWT.equals(applicationInfo.getTokenType())) {
-                LocalAndOutboundAuthenticationConfig localAndOutboundConfig =
-                        new LocalAndOutboundAuthenticationConfig();
-                localAndOutboundConfig.setSkipConsent(true);
-                localAndOutboundConfig.setSkipLogoutConsent(true);
-                localAndOutboundConfig.setUseTenantDomainInLocalSubjectIdentifier(true);
+            
+            if (setUserStoreDomainInSubject) {
+                LocalAndOutboundAuthenticationConfig localAndOutboundConfig = new LocalAndOutboundAuthenticationConfig();
+                localAndOutboundConfig.setSkipConsent(true); // to prevent overriding
+                localAndOutboundConfig.setSkipLogoutConsent(true); // to prevent overriding
+                localAndOutboundConfig.setUseUserstoreDomainInLocalSubjectIdentifier(true);
                 serviceProvider.setLocalAndOutBoundAuthenticationConfig(localAndOutboundConfig);
             }
+
             String orgId = null;
             try {
                 orgId = RestApiUtil.getValidatedOrganization(securityContext);
