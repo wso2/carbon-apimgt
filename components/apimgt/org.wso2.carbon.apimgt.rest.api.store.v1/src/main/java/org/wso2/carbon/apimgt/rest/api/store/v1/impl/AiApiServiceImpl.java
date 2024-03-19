@@ -57,8 +57,8 @@ public class AiApiServiceImpl implements AiApiService {
                         APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_EXECUTE_RESOURCE, payload,
                         apiChatRequestId);
                 int statusCode = response.getStatusLine().getStatusCode();
+                String responseStr = EntityUtils.toString(response.getEntity());
                 if (statusCode == HttpStatus.SC_CREATED) {
-                    String responseStr = EntityUtils.toString(response.getEntity());
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully completed the API Chat execute call with status code: " + statusCode);
                     }
@@ -70,7 +70,7 @@ public class AiApiServiceImpl implements AiApiService {
                     String errorMessage = "Error encountered while executing the API Chat service to accomodate the " +
                             "specified testing requirement";
                     log.error(errorMessage);
-                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseStr).build();
                 }
             }
         } catch (APIManagementException | IOException e) {
@@ -98,8 +98,8 @@ public class AiApiServiceImpl implements AiApiService {
                         APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_PREPARE_RESOURCE, payload,
                         apiChatRequestId);
                 int statusCode = response.getStatusLine().getStatusCode();
+                String responseStr = EntityUtils.toString(response.getEntity());
                 if (statusCode == HttpStatus.SC_CREATED) {
-                    String responseStr = EntityUtils.toString(response.getEntity());
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully executed the API Chat preparation with status code: " + statusCode);
                     }
@@ -108,9 +108,8 @@ public class AiApiServiceImpl implements AiApiService {
                             ApiChatPreparationResponseDTO.class);
                     return Response.status(Response.Status.CREATED).entity(preparationResponseDTO).build();
                 } else {
-                    String errorMessage = "Error encountered while executing the prepare statement of API Chat service";
-                    log.error(errorMessage);
-                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                    log.error("Error encountered while executing the prepare statement of API Chat service");
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseStr).build();
                 }
             }
         } catch (APIManagementException | IOException e) {
