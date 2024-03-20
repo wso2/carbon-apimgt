@@ -65,7 +65,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.locks.ReadWriteLock;
 
 /**
  * This class contains the methods used to retrieve artifacts from a storage and deploy and undeploy the API in gateway.
@@ -100,35 +99,8 @@ public class InMemoryAPIDeployer {
                 APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
                 MessageContext.setCurrentMessageContext(
                         org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
-
-                String productionEndpointName = "";
-                String sandboxEndpointName = "";
-
-                if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
-                    if (gatewayAPIDTO.getEndpointEntriesToBeAdd().length > 0) {
-                        productionEndpointName = gatewayAPIDTO.getEndpointEntriesToBeAdd()[0].getName();
-                    }
-                    if (gatewayAPIDTO.getEndpointEntriesToBeAdd().length > 1) {
-                        sandboxEndpointName = gatewayAPIDTO.getEndpointEntriesToBeAdd()[1].getName();
-                    }
-                }
-                Object sandboxLockObj = ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                        acquireLock(sandboxEndpointName);
-                Object productionLockObj = ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                        acquireLock(productionEndpointName);
-                if (sandboxLockObj instanceof ReadWriteLock && productionLockObj instanceof ReadWriteLock) {
-                    ReadWriteLock sandboxLock = (ReadWriteLock) sandboxLockObj;
-                    sandboxLock.writeLock().lock();
-                    ReadWriteLock productionLock = (ReadWriteLock) productionLockObj;
-                    productionLock.writeLock().lock();
-                    try {
-                        unDeployAPI(apiGatewayAdmin, gatewayEvent);
-                        apiGatewayAdmin.deployAPI(gatewayAPIDTO);
-                    } finally {
-                        sandboxLock.writeLock().unlock();
-                        productionLock.writeLock().unlock();
-                    }
-                }
+                unDeployAPI(apiGatewayAdmin, gatewayEvent);
+                apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
                 addDeployedGraphqlQLToAPI(gatewayAPIDTO);
                 DataHolder.getInstance().addKeyManagerToAPIMapping(apiId, gatewayAPIDTO.getKeyManagers());
