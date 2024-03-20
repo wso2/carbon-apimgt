@@ -143,7 +143,12 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
         String maskedToken = message.get(RestApiConstants.MASKED_TOKEN).toString();
         OAuthTokenInfo oauthTokenInfo = new OAuthTokenInfo();
         oauthTokenInfo.setAccessToken(accessToken);
-        oauthTokenInfo.setEndUserName(signedJWTInfo.getJwtClaimsSet().getSubject());
+        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (signedJWTInfo.getJwtClaimsSet().getClaim(JwtTokenConstants.USER_DOMAIN) != null) {
+            tenantDomain = (String) signedJWTInfo.getJwtClaimsSet().getClaim(JwtTokenConstants.USER_DOMAIN);
+        } 
+        log.debug("Tenant domain for user " + tenantDomain);
+        oauthTokenInfo.setEndUserName(signedJWTInfo.getJwtClaimsSet().getSubject() + "@" + tenantDomain);
         oauthTokenInfo.setConsumerKey(signedJWTInfo.getJwtClaimsSet().getStringClaim(JWTConstants.AUTHORIZED_PARTY));
         String scopeClaim = signedJWTInfo.getJwtClaimsSet().getStringClaim(JwtTokenConstants.SCOPE);
         if (scopeClaim != null) {
@@ -160,7 +165,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 //Add the user scopes list extracted from token to the cxf message
                 message.getExchange().put(RestApiConstants.USER_REST_API_SCOPES, oauthTokenInfo.getScopes());
                 //If scope validation successful then set tenant name and user name to current context
-                String tenantDomain = MultitenantUtils.getTenantDomain(oauthTokenInfo.getEndUserName());
+
                 int tenantId;
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
@@ -184,7 +189,7 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     carbonContext.setTenantId(tenantId);
                     carbonContext.setUsername(username);
                     message.put(RestApiConstants.AUTH_TOKEN_INFO, oauthTokenInfo);
-                    message.put(RestApiConstants.SUB_ORGANIZATION, orgId);
+                    message.put(RestApiConstants.SUB_ORGANIZATION, tenantDomain);
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                     }
@@ -328,6 +333,10 @@ public class OAuthJwtAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     + tokenIssuer + ") does not match with the token issuer (" + tokenIssuers.keySet() + ")");
         }
         String residentTenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
+        if (jwtClaimsSet.getClaim(JwtTokenConstants.APP_DOMAIN) != null) {
+            residentTenantDomain = (String) jwtClaimsSet.getClaim(JwtTokenConstants.APP_DOMAIN);
+        } 
+        log.debug("Tenant domain for residant IDP " + residentTenantDomain);
         IdentityProvider residentIDP = validateAndGetResidentIDPForIssuer(residentTenantDomain, tokenIssuer);
         if (residentIDP == null) {
             //invalid issuer. invalid token

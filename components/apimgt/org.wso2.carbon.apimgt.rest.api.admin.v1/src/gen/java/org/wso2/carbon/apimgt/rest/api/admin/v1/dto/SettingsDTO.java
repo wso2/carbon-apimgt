@@ -25,6 +25,7 @@ public class SettingsDTO   {
   
     private List<String> scopes = new ArrayList<String>();
     private List<String> gatewayTypes = new ArrayList<String>();
+    private Boolean isJWTEnabledForLoginTokens = false;
     private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<SettingsKeyManagerConfigurationDTO>();
     private Boolean analyticsEnabled = null;
 
@@ -60,6 +61,23 @@ public class SettingsDTO   {
   }
   public void setGatewayTypes(List<String> gatewayTypes) {
     this.gatewayTypes = gatewayTypes;
+  }
+
+  /**
+   **/
+  public SettingsDTO isJWTEnabledForLoginTokens(Boolean isJWTEnabledForLoginTokens) {
+    this.isJWTEnabledForLoginTokens = isJWTEnabledForLoginTokens;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("IsJWTEnabledForLoginTokens")
+  public Boolean isIsJWTEnabledForLoginTokens() {
+    return isJWTEnabledForLoginTokens;
+  }
+  public void setIsJWTEnabledForLoginTokens(Boolean isJWTEnabledForLoginTokens) {
+    this.isJWTEnabledForLoginTokens = isJWTEnabledForLoginTokens;
   }
 
   /**
@@ -110,13 +128,14 @@ public class SettingsDTO   {
     SettingsDTO settings = (SettingsDTO) o;
     return Objects.equals(scopes, settings.scopes) &&
         Objects.equals(gatewayTypes, settings.gatewayTypes) &&
+        Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(keyManagerConfiguration, settings.keyManagerConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, keyManagerConfiguration, analyticsEnabled);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, keyManagerConfiguration, analyticsEnabled);
   }
 
   @Override
@@ -126,6 +145,7 @@ public class SettingsDTO   {
     
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
+    sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    keyManagerConfiguration: ").append(toIndentedString(keyManagerConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("}");

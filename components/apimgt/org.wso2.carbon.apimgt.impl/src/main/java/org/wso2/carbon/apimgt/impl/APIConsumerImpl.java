@@ -111,6 +111,7 @@ import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -2357,6 +2358,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             } else {
                 throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
             }
+            
+            if (appRegistrationWorkflow == null ) {
+                appRegistrationWorkflow = new ApplicationRegistrationSimpleWorkflowExecutor();
+            }
 
             //check whether callback url is empty and set null
             if (StringUtils.isBlank(callbackUrl)) {
@@ -3742,6 +3747,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 APIUtil.getAvailableTiers(definedTiers, tiers, mappedAPI.getId().getApiName());
                         mappedAPI.removeAllTiers();
                         mappedAPI.setAvailableTiers(availableTiers);
+                        populateGatewayVendor(mappedAPI);
                         apiList.add(mappedAPI);
                     } catch (APIManagementException e) {
                         log.warn("Retrieving API details from DB failed for API: " + mappedAPI.getUuid() + " " + e);
@@ -3787,6 +3793,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
                     populateAPIStatus(api);
+                    populateGatewayVendor(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
@@ -3935,6 +3942,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 api.removeAllTiers();
                 api.setAvailableTiers(availableTiers);
                 api.setOrganization(organization);
+                populateGatewayVendor(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
