@@ -48,9 +48,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
@@ -126,14 +126,14 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
         validateGatewayLabels(gatewayPolicyDeploymentDTOList, organization);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            Set<String> policyMappingDeployedGateways = apiProvider.getPolicyMappingDeployedGateways(gatewayPolicyMappingId, organization);
             // checks whether the gateway policy mapping exists in the particular gateway
-            for (GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTO : gatewayPolicyDeploymentDTOList) {
+            Iterator<GatewayPolicyDeploymentDTO> iterator = gatewayPolicyDeploymentDTOList.iterator();
+            while (iterator.hasNext()) {
+                GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTO = iterator.next();
                 String gwName = gatewayPolicyDeploymentDTO.getGatewayLabel();
                 boolean isDeployment = gatewayPolicyDeploymentDTO.isGatewayDeployment();
-                if (isDeployment && !policyMappingDeployedGateways.contains(gwName) && apiProvider.hasExistingDeployments(organization, gwName)) {
-                    RestApiUtil.handleBadRequest("Gateway policy mapping is already deployed in the gateway: " + gwName,
-                            log);
+                if (isDeployment && apiProvider.hasExistingDeployments(organization, gwName)) {
+                    iterator.remove(); // Safely remove the element using the iterator
                 }
             }
             List<OperationPolicyData> operationPolicyDataList = apiProvider.getGatewayPolicyDataListByPolicyId(
