@@ -10371,4 +10371,76 @@ public final class APIUtil {
         }
         return scopesStringBuilder.toString().trim();
     }
+
+    /**
+     * Check whether API Chat feature is enabled
+     *
+     * @return returns true if API Chat feature is enabled, false if disabled.
+     */
+    public static boolean isApiChatEnabled() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String isApiChatEnabled = config.getFirstProperty(APIConstants.API_CHAT_ENABLED);
+        if (isApiChatEnabled == null) {
+            return false;
+        }
+
+        return Boolean.parseBoolean(isApiChatEnabled);
+    }
+
+    /**
+     * Checks whether an auth token is provided for AI features to use. This token is utilized for authentication and
+     * throttling purposes.
+     *
+     * @return returns true if a valid auth token is found, false otherwise.
+     */
+    public static boolean isAuthTokenProvidedForAIFeatures() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String authToken = config.getFirstProperty(APIConstants.API_CHAT_AUTH_TOKEN);
+        if (authToken == null || authToken.equals("")) {
+            return false;
+        }
+        return true;
+    }
+
+    public static String invokeAIService(String endpointConfigName, String authTokenConfigName,
+            String resource, String payload, String requestId) throws  APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String endpoint = config.getFirstProperty(endpointConfigName);
+        String authToken = config.getFirstProperty(authTokenConfigName);
+        try {
+            HttpPost preparePost = new HttpPost(endpoint + resource);
+            preparePost.setHeader(HttpHeaders.AUTHORIZATION, APIConstants.AUTHORIZATION_BEARER + authToken);
+            preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            preparePost.setHeader("x-request-id", requestId);
+            StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
+            preparePost.setEntity(requestEntity);
+
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+            CloseableHttpResponse response = executeHTTPRequest(preparePost, httpClient);
+            int statusCode = response.getStatusLine().getStatusCode();
+            String responseStr = EntityUtils.toString(response.getEntity());
+            if (statusCode == HttpStatus.SC_CREATED) {
+                return responseStr;
+            } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                throw new APIManagementException("Unexpected response detected from the AI service." + responseStr,
+                        ExceptionCodes.AI_SERVICE_INVALID_ACCESS_TOKEN);
+            } else {
+                throw new APIManagementException("Unexpected response detected from the AI service." + responseStr,
+                        ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+            }
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
 }
