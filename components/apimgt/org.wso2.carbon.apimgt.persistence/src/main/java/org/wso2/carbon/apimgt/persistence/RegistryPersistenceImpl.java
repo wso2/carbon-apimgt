@@ -3080,7 +3080,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
-                    RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
                     RegistryPersistenceUtil.registerCustomQueries(registry, null, userTenantDomain);
                     holder.setTenantId(tenantId);
                 }
@@ -3089,7 +3088,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
-                RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
                 RegistryPersistenceUtil.registerCustomQueries(registry, null, userTenantDomain);
                 holder.setTenantId(tenantId);
             }
@@ -3151,7 +3149,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 holder.setTenantId(tenantId);
             }
             RegistryPersistenceUtil.registerCustomQueries(configRegistry, username, userTenantDomain);
-            RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
         } catch (RegistryException | UserStoreException | PersistenceException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);

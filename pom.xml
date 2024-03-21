@@ -930,12 +930,6 @@
                 <version>${carbon.governance.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.wso2.carbon.governance</groupId>
-                <artifactId>org.wso2.carbon.governance.lcm</artifactId>
-                <version>${carbon.governance.version}</version>
-            </dependency>
-
 
             <dependency>
                 <groupId>org.wso2.carbon.governance</groupId>
@@ -2002,6 +1996,12 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-annotations</artifactId>
                 <version>${spotbugs.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>3.3.GA</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

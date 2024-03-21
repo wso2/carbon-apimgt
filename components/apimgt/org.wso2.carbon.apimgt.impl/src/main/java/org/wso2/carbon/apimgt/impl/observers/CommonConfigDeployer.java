@@ -29,16 +29,9 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
-import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
-
-import java.io.FileNotFoundException;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * This task provisions mandatory configs & Artifacts needed by any tenant. The reason for introducing this task is
@@ -123,17 +116,6 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
             log.error("Failed create default roles for tenant " + tenantDomain, e);
         } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment
             log.error("Exception when creating default roles for tenant " + tenantDomain, e);
-        }
-        try {
-            CommonUtil.addDefaultLifecyclesIfNotAvailable(ServiceReferenceHolder.getInstance().getRegistryService()
-                                                                  .getConfigSystemRegistry(tenantId), CommonUtil
-                                                                  .getRootSystemRegistry(tenantId));
-        } catch (RegistryException e) {
-            log.error("Error while accessing registry", e);
-        } catch (FileNotFoundException e) {
-            log.error("Error while find lifecycle.xml", e);
-        } catch (XMLStreamException e) {
-            log.error("Error while parsing Lifecycle.xml", e);
         }
         KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever =
                 new KeyManagerConfigurationDataRetriever(tenantDomain);
