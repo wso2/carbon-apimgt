@@ -210,6 +210,14 @@
 
         <Endpoint>https://test.com</Endpoint>
 
+        <ChatResource>/AI/marketplace-assistant/chat</ChatResource>
+
+        <ApiPublishResource>/AI/spec-populator/publish-api</ApiPublishResource>
+
+        <ApiDeleteResource>/AI/spec-populator/remove-api</ApiDeleteResource>
+
+        <ApiCountResource>/AI/spec-populator/api-count</ApiCountResource>
+
     </MarketplaceAssistant>
 
     <!--

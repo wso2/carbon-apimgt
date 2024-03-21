@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
+import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -116,6 +117,7 @@ public class APIManagerConfiguration {
     private boolean initialized;
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
+    private static MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDto();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
     private static Properties realtimeNotifierProperties;
@@ -167,6 +169,11 @@ public class APIManagerConfiguration {
     public MonetizationConfigurationDto getMonetizationConfigurationDto() {
 
         return monetizationConfigurationDto;
+    }
+
+    public MarketplaceAssistantConfigurationDto getMarketplaceAssistantConfigurationDto() {
+
+        return marketplaceAssistantConfigurationDto;
     }
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
@@ -624,6 +631,8 @@ public class APIManagerConfiguration {
                     jsonObject.put(APIConstants.CustomPropertyAttributes.REQUIRED, isRequired);
                     customProperties.add(jsonObject);
                 }
+            } else if (APIConstants.MARKETPLACE_ASSISTANT.equals(localName)) {
+                setMarketplaceAssistantConfiguration(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -1688,6 +1697,48 @@ public class APIManagerConfiguration {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    public void setMarketplaceAssistantConfiguration(OMElement omElement){
+        OMElement marketplaceAssistantEnableElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_ENABLED));
+        if (marketplaceAssistantEnableElement != null) {
+            marketplaceAssistantConfigurationDto.setEnabled(Boolean.parseBoolean(marketplaceAssistantEnableElement.getText()));
+        }
+        if (marketplaceAssistantConfigurationDto.isEnabled()) {
+            OMElement marketplaceAssistantEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_ENDPOINT));
+            if (marketplaceAssistantEndpoint != null) {
+                marketplaceAssistantConfigurationDto.setEndpoint(marketplaceAssistantEndpoint.getText());
+            }
+            OMElement marketplaceAssistantToken =
+                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_AUTH_TOKEN));
+
+            if (marketplaceAssistantToken != null) {
+                String AccessToken = MiscellaneousUtil.resolve(marketplaceAssistantToken, secretResolver);
+                marketplaceAssistantConfigurationDto.setAccessToken(AccessToken);
+            }
+            OMElement marketplaceAssistantApiCountResource =
+                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE));
+            if (marketplaceAssistantApiCountResource != null) {
+                marketplaceAssistantConfigurationDto.setApiCountResource(marketplaceAssistantApiCountResource.getText());
+            }
+            OMElement marketplaceAssistantApiDeleteResource =
+                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE));
+            if (marketplaceAssistantApiDeleteResource != null) {
+                marketplaceAssistantConfigurationDto.setApiDeleteResource(marketplaceAssistantApiDeleteResource.getText());
+            }
+            OMElement marketplaceAssistantApiPublishResource =
+                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE));
+            if (marketplaceAssistantApiPublishResource != null) {
+                marketplaceAssistantConfigurationDto.setApiPublishResource(marketplaceAssistantApiPublishResource.getText());
+            }
+            OMElement marketplaceAssistantChatResource =
+                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_CHAT_RESOURCE));
+            if (marketplaceAssistantChatResource != null) {
+                marketplaceAssistantConfigurationDto.setChatResource(marketplaceAssistantChatResource.getText());
             }
         }
     }

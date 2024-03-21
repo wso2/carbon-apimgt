@@ -508,6 +508,15 @@ public final class APIConstants {
     public static final String API_CHAT_ENDPOINT = API_CHAT + "Endpoint";
     public static final String API_CHAT_PREPARE_RESOURCE = "/prepare"; // "/api-chat/prepare"
     public static final String API_CHAT_EXECUTE_RESOURCE = "/chat"; // "/api-chat/chat"
+    public static final String MARKETPLACE_ASSISTANT =  "MarketplaceAssistant";
+    public static final String MARKETPLACE_ASSISTANT_ENABLED = "Enabled";
+    public static final String MARKETPLACE_ASSISTANT_AUTH_TOKEN = "AuthToken";
+    public static final String MARKETPLACE_ASSISTANT_ENDPOINT = "Endpoint";
+    public static final String MARKETPLACE_ASSISTANT_CHAT_RESOURCE = "ChatResource";
+    public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
+    public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
+    public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE =  "ApiCountResource";
+
 
     //documentation rxt
 
@@ -1685,6 +1694,33 @@ public final class APIConstants {
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     public static final String API_DATA_URL = "url";
     public static final String API_UUID = "apiUUID";
+    public static final String UUID = "uuid";
+    public static final String API_SPEC_TYPE = "api_type";
+    public static final String API_SPEC_NAME = "api_name";
+    public static final String TENANT_DOMAIN = "tenant_domain";
+    public static final String QUERY = "query";
+    public static final String HISTORY = "history";
+    public static final String VERSION = "version";
+    public static final String DESCRIPTION = "description";
+
+    public static final String DEMOTE_TO_CREATED= "Demote to Created";
+    public static final String BLOCK = "Block";
+    public static final String DEPRECATE = "Deprecate";
+    public static final String PUBLISH = "Publish";
+    public static final String DEPLOY_AS_A_PROTOTYPE = "Deploy as a Prototype";
+    public static final String REPUBLISH = "Re-Publish";
+
+    public static final String API_SPEC_TYPE_REST = "api_spec";
+    public static final String API_SPEC_TYPE_GRAPHQL = "sdl_schema";
+    public static final String API_SPEC_TYPE_ASYNC = "async_spec";
+    public static final String API_TYPE_HTTP = "HTTP";
+    public static final String API_TYPE_WEBHOOK = "WEBHOOK";
+
+    public static final String API_TYPE_REST = "REST";
+
+    public static final String API_TYPE_GRAPHQL = "GRAPHQL";
+    public static final String API_TYPE_ASYNC = "ASYNC";
+
 
     public static final String TRANSPORT_URL_IN = "TransportInURL";
 

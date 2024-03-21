@@ -291,8 +291,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (APIUtil.isApiChatEnabled()) {
                 String payload = payload = new Gson().toJson(apiChatExecuteRequestDTO);
                 String response = APIUtil.invokeAIService(APIConstants.API_CHAT_ENDPOINT,
-                        APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_EXECUTE_RESOURCE, payload,
-                        apiChatRequestId);
+                        APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_EXECUTE_RESOURCE, payload);
                 ObjectMapper objectMapper = new ObjectMapper();
                 ApiChatExecuteResponseDTO executeResponseDTO = objectMapper.readValue(response,
                         ApiChatExecuteResponseDTO.class);
@@ -322,8 +321,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String payload = "{\"openapi\": " + swaggerDefinition + "}";
 
                 String response = APIUtil.invokeAIService(APIConstants.API_CHAT_ENDPOINT,
-                        APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_PREPARE_RESOURCE, payload,
-                        apiChatRequestId);
+                        APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_PREPARE_RESOURCE, payload);
 
 //                ApiChatPreparationResponseDTO preparationResponseDTO = APIMappingUtil.fromPrepareResponseToDTO(response);
                 ObjectMapper objectMapper = new ObjectMapper();
