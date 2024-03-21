@@ -117,8 +117,13 @@ public class PortalNotificationDAO {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+        String sqlQuery;
         try {
-            String sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS;
+            if (sortOrder != null && sortOrder.equals("asc")) {
+                sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_ASC;
+            } else {
+                sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_DESC;
+            }
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, username);

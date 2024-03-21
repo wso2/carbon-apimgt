@@ -206,7 +206,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             workflowExecutor.complete(workflowDTO);
 
             WorkflowNotificationServiceImpl portalNotification = new WorkflowNotificationServiceImpl();
-            portalNotification.sendPortalNotifications(workflowDTO);
+            portalNotification.sendPortalNotifications(workflowDTO, tenantDomainOfUser);
 
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);

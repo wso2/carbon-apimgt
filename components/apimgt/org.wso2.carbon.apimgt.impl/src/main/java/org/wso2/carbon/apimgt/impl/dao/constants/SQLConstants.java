@@ -3179,7 +3179,7 @@ public class SQLConstants {
 
         public static final String ADD_NOTIFICATION_END_USER = "INSERT INTO AM_NOTIFICATION_END_USERS " +
                 "(NOTIFICATION_ID, DESTINATION_USER, ORGANIZATION, PORTAL_TO_DISPLAY) " + "VALUES (?, ?, ?, ?)";
-        public static final String GET_NOTIFICATIONS =
+        public static final String GET_NOTIFICATIONS_DESC =
                 "SELECT" +
                         "  n.NOTIFICATION_ID," +
                         "  n.NOTIFICATION_TYPE," +
@@ -3193,6 +3193,21 @@ public class SQLConstants {
                         "  AND e.ORGANIZATION = ?" +
                         "  AND e.PORTAL_TO_DISPLAY = ? " +
                 "ORDER BY  n.CREATED_TIME DESC";
+
+        public static final String GET_NOTIFICATIONS_ASC =
+                "SELECT" +
+                        "  n.NOTIFICATION_ID," +
+                        "  n.NOTIFICATION_TYPE," +
+                        "  n.CREATED_TIME," +
+                        "  n.NOTIFICATION_METADATA," +
+                        "  e.IS_READ " +
+                        "FROM AM_NOTIFICATION n " +
+                        "INNER JOIN AM_NOTIFICATION_END_USERS e ON n.NOTIFICATION_ID = e.NOTIFICATION_ID " +
+                        "WHERE" +
+                        "  e.DESTINATION_USER = ?" +
+                        "  AND e.ORGANIZATION = ?" +
+                        "  AND e.PORTAL_TO_DISPLAY = ? " +
+                        "ORDER BY  n.CREATED_TIME ASC";
 
         public static final String DELETE_ALL_NOTIFICATIONS_OF_USER = "DELETE FROM AM_NOTIFICATION_END_USERS " +
                 "WHERE DESTINATION_USER = ? AND ORGANIZATION = ? AND PORTAL_TO_DISPLAY = ?";

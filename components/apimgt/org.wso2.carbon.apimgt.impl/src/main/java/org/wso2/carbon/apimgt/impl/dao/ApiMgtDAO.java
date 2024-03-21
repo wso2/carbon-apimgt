@@ -8721,6 +8721,11 @@ public class ApiMgtDAO {
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(conn, application.getId()));
+                    }
+                }
                 String keyManagerUUID = rs.getString("KEY_MANAGER");
                 workflowDTO.setKeyManager(keyManagerUUID);
                 KeyManagerConfigurationDTO keyManagerConfigurationByUUID = getKeyManagerConfigurationByUUID(conn,

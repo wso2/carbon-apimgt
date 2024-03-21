@@ -1,26 +1,37 @@
 package org.wso2.carbon.apimgt.impl.portalNotifications;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.user.core.common.User;
+import org.wso2.carbon.user.core.service.RealmService;
 
 public class WorkflowNotificationServiceImpl implements PortalNotificationService<WorkflowDTO> {
-    public void sendPortalNotifications(WorkflowDTO workflowDTO) {
+    public void sendPortalNotifications(WorkflowDTO workflowDTO, String tenantDomainOfUser) {
         PortalNotificationDTO portalNotificationsDTO = new PortalNotificationDTO();
 
         portalNotificationsDTO.setNotificationType(getNotificationType(workflowDTO.getWorkflowType()));
         portalNotificationsDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));
         portalNotificationsDTO.setNotificationMetadata(getNotificationMetaData(workflowDTO));
-        portalNotificationsDTO.setEndUsers(getDestinationUser(workflowDTO));
+        portalNotificationsDTO.setEndUsers(getDestinationUser(workflowDTO, tenantDomainOfUser));
 
         boolean result = PortalNotificationDAO.getInstance().addNotification(portalNotificationsDTO);
 
@@ -55,7 +66,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
     }
 
     private List<PortalNotificationEndUserDTO> getDestinationUser(
-            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO) {
+            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO, String tenantDomainOfUser) {
         List<PortalNotificationEndUserDTO> destinationUserList = new ArrayList<>();
         String destinationUser = null;
 
@@ -95,7 +106,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
                 .equals(WorkflowConstants.WF_TYPE_AM_API_STATE) || workflowDTO.getWorkflowType()
                 .equals(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE)) {
             if (workflowDTO.getMetadata("Action").equals("Block") || workflowDTO.getMetadata("Action")
-                    .equals("Deprecated") || workflowDTO.getMetadata("Action").equals("Retired")) {
+                    .equals("Deprecate") || workflowDTO.getMetadata("Action").equals("Retire")) {
                 String apiUUID = null;
                 String apiName = workflowDTO.getProperties("apiName");
                 String apiContext = workflowDTO.getMetadata("ApiContext");
@@ -120,6 +131,27 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
                 }
             }
         }
+
+        if(APIUtil.isMultiGroupAppSharingEnabled()){
+            try {
+                List<User> users = getAllUsersBelongToGroup(workflowDTO, tenantDomainOfUser);
+                for (User user : users) {
+                    PortalNotificationEndUserDTO endUser = new PortalNotificationEndUserDTO();
+                    if(user.getUsername().equals(destinationUser)){
+                        continue;
+                    }
+                    endUser.setDestinationUser(user.getUsername());
+                    endUser.setOrganization(user.getTenantDomain());
+                    endUser.setPortalToDisplay("developer");
+                    destinationUserList.add(endUser);
+                }
+            } catch (APIManagementException e) {
+                System.out.println("Error while getting users belong to group - getDestinationUser()");
+            } catch (UserStoreException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
 
         return destinationUserList;
     }
@@ -188,6 +220,49 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         }
 
         return subscribedAPIs;
+    }
+
+    private List<User> getAllUsersBelongToGroup(WorkflowDTO workflowDTO, String tenantDomainOfUser)
+            throws APIManagementException, UserStoreException {
+        List<User> users = new ArrayList<>();
+        String groupId = null;
+        if (workflowDTO.getWorkflowType().equals(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION)) {
+            String applicationId = workflowDTO.getWorkflowReference();
+            int appId = Integer.parseInt(applicationId);
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            Application application = apiMgtDAO.getApplicationById(appId);
+            groupId = application.getGroupId();
+        } else if (workflowDTO.getWorkflowType()
+                .equals(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION) || workflowDTO.getWorkflowType()
+                .equals(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE) || workflowDTO.getWorkflowType()
+                .equals(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION)) {
+            SubscribedAPI sub = ApiMgtDAO.getInstance()
+                    .getSubscriptionById(Integer.parseInt(workflowDTO.getWorkflowReference()));
+            groupId = sub.getApplication().getGroupId();
+        } else if (workflowDTO.getWorkflowType().equals(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION)
+                || workflowDTO.getWorkflowType().equals(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX)) {
+            groupId = ((ApplicationRegistrationWorkflowDTO) workflowDTO).getApplication().getGroupId();
+        }
+
+        if (groupId != null) {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomainOfUser);
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+            if(realm != null){
+                org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
+                AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                String claim = config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_CLAIM_URI);
+                if (StringUtils.isBlank(claim)) {
+                    claim = "http://wso2.org/claims/organization";
+                }
+                users = abstractManager.getUserListWithID(claim , groupId, "default");
+            }
+
+        }
+        return users;
     }
 
 }
