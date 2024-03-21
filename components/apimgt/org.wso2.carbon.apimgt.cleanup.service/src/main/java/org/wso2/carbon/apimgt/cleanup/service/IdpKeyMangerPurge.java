@@ -87,7 +87,7 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                         isKeyManagerOrganizationExist = organizationPurgeDAO.keyManagerOrganizationExist(organization);
                         break;
                     case APIConstants.OrganizationDeletion.KM_RETRIEVER:
-                        keyManagerList = apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
+                        keyManagerList = apiAdmin.getKeyManagerConfigurationsByOrganization(organization, false);
                         break;
                     case APIConstants.OrganizationDeletion.IDP_DATA_REMOVER:
                         deleteIdpList(organization, keyManagerList);

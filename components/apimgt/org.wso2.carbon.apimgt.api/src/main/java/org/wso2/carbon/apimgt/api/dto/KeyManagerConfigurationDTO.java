@@ -43,6 +43,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String externalReferenceId = null;
     private String alias = null;
     private KeyManagerPermissionConfigurationDTO permissions = new KeyManagerPermissionConfigurationDTO();
+    private Boolean isUsed = null;
 
     public KeyManagerConfigurationDTO() {
     }
@@ -195,5 +196,15 @@ public class KeyManagerConfigurationDTO implements Serializable {
             permissions = new KeyManagerPermissionConfigurationDTO();
         }
         this.permissions = permissions;
+    }
+
+    public Boolean getIsUsed() {
+
+        return this.isUsed;
+    }
+
+    public void setUsed(Boolean isUsed) {
+
+        this.isUsed = isUsed;
     }
 }

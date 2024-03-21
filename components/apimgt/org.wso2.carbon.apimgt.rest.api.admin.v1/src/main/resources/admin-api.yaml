@@ -3397,16 +3397,15 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F "type=WSO2-IS" "https://127.0.0.1:9443/api/am/admin/v4/key-managers/discover"'
 
-  /key-managers/{keyManagerId}/usages:
+  /key-managers/{keyManagerId}/api-usages:
     get:
       tags:
         - Key Manager (Individual)
-      summary: Retrieve Key Manager Usages (APIs and Applications)
+      summary: Retrieve Key Manager Usages (APIs)
       description: |
-        Retrieves a list of APIs and Applications that are utilizing the specified Key Manager identified by the provided ID.
+        Retrieves a list of APIs that are specifically utilizing the Key Manager identified by the provided ID.
         The Key Manager ID should be provided as a path parameter.
       parameters:
-        - $ref: '#/components/parameters/start'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/keyManagerId'
@@ -3414,7 +3413,7 @@ paths:
         200:
           description: |
             OK.
-            KeyManager configuration returned.
+            KeyManager API usages returned.
           headers:
             Content-Type:
               description: |
@@ -3424,7 +3423,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KeyManager'
+                $ref: '#/components/schemas/KeyManagerAPIUsages'
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -3436,7 +3435,47 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/admin/v4/key-managers/usages/8d263942-a6df-4cc2-a804-7a2525501450"'
+            "https://127.0.0.1:9443/api/am/admin/v4/key-managers/8d263942-a6df-4cc2-a804-7a2525501450/api-usages"'
+
+  /key-managers/{keyManagerId}/app-usages:
+    get:
+      tags:
+        - Key Manager (Individual)
+      summary: Retrieve Key Manager Usages (Appilcations)
+      description: |
+        Retrieves a list of Applications that are specifically utilizing the Key Manager identified by the provided ID.
+        The Key Manager ID should be provided as a path parameter.
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/keyManagerId'
+      responses:
+        200:
+          description: |
+            OK.
+            KeyManager application usages returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyManagerAppUsages'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_operations
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/admin/v4/key-managers/8d263942-a6df-4cc2-a804-7a2525501450/app-usages"'
 
   ######################################################
   # The "API Collection" resource APIs
@@ -4934,6 +4973,9 @@ components:
         isGlobal:
           type: boolean
           example: true
+        isUsed:
+          type: boolean
+          example: true
         tokenType:
           type: string
           description: The type of the tokens to be used (exchanged or without exchanged).
@@ -4991,6 +5033,109 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KeyManagerInfo'
+
+    KeyManagerAppUsages:
+      title: Key Manager Application Usages.
+      required:
+        - applicationCount
+        - applications
+      type: object
+      properties:
+        applicationCount:
+          type: integer
+          description: The total count of applications.
+        applications:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationInfoKeyManager'
+
+    ApplicationInfoKeyManager:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the application.
+        uuid:
+          type: string
+          description: The UUID of the application.
+        organizationId:
+          type: string
+          nullable: true
+          description: The ID of the organization to which the application belongs.
+        owner:
+          type: string
+          description: The owner of the application.
+        organization:
+          type: string
+          description: The organization of the application.
+      required:
+        - name
+        - uuid
+        - owner
+        - organization
+
+    KeyManagerAPIUsages:
+      title: Key Manager API Usages.
+      required:
+        - apiCount
+        - apis
+      type: object
+      properties:
+        apiCount:
+          type: integer
+          description: The total count of APIs.
+        apis:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIInfoKeyManager'
+
+    APIInfoKeyManager:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the API.
+        type:
+          type: string
+          description: The type of the entry (e.g., "API").
+        name:
+          type: string
+          description: The name of the API.
+        transportType:
+          type: string
+          description: The transport type of the API.
+        description:
+          type: string
+          nullable: true
+          description: The description of the API.
+        context:
+          type: string
+          description: The context of the API.
+        version:
+          type: string
+          description: The version of the API.
+        provider:
+          type: string
+          description: The provider of the API.
+        status:
+          type: string
+          description: The status of the API.
+        thumbnailUri:
+          type: string
+          nullable: true
+          description: The URI of the thumbnail of the API.
+        advertiseOnly:
+          type: boolean
+          description: Indicates if the API is advertised only.
+        keyManagerEntry:
+          type: string
+          description: The key manager entry related to the API.
+      required:
+        - id
+        - name
+        - version
+        - provider
+
     ClaimMappingEntry:
       title: Claim Mapping Configuration
       type: object
@@ -5576,14 +5721,6 @@ components:
       schema:
         type: string
         default: application/json
-    start:
-      name: start
-      in: query
-      description: |
-        Starting number for pagination.
-      schema:
-        type: integer
-        default: 0
     limit:
       name: limit
       in: query

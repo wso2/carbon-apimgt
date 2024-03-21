@@ -59,7 +59,8 @@ public class GlobalKeyManagersApiServiceImpl implements GlobalKeyManagersApiServ
 
     public Response globalKeyManagersGet(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        List<KeyManagerConfigurationDTO> globalKeyManagerConfigurations = apiAdmin.getGlobalKeyManagerConfigurations();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        List<KeyManagerConfigurationDTO> globalKeyManagerConfigurations = apiAdmin.getGlobalKeyManagerConfigurations(tenantDomain);
         KeyManagerListDTO keyManagerListDTO =
                 KeyManagerMappingUtil.toKeyManagerListDTO(globalKeyManagerConfigurations);
         return Response.ok().entity(keyManagerListDTO).build();

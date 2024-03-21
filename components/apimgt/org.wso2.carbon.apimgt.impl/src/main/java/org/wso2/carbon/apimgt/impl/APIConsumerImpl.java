@@ -4498,7 +4498,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
-                apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
+                apiAdmin.getKeyManagerConfigurationsByOrganization(organization, false);
         List<KeyManagerConfigurationDTO> permittedKeyManagerConfigurations = new ArrayList<>();
         if (keyManagerConfigurations.size() > 0) {
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {

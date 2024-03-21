@@ -9,9 +9,18 @@ import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.model.OpenIdConnectConfiguration;
+import org.wso2.carbon.apimgt.persistence.dto.AdminApiSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.AdminContentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIInfoKeyManagerDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoKeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ClaimMappingEntryDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerAPIUsagesDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerAppUsagesDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerEndpointDTO;
@@ -53,6 +62,7 @@ public class KeyManagerMappingUtil {
                 keyManagerConfigurationDTO.getOrganization().equals(APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN));
         keyManagerInfoDTO.setTokenType(KeyManagerInfoDTO.TokenTypeEnum.
                 fromValue(keyManagerConfigurationDTO.getTokenType()));
+        keyManagerInfoDTO.setIsUsed(keyManagerConfigurationDTO.getIsUsed());
         return keyManagerInfoDTO;
     }
 
@@ -373,5 +383,73 @@ public class KeyManagerMappingUtil {
             keyManagerWellKnownResponseDTO.setValue(keyManagerDto);
         }
         return keyManagerWellKnownResponseDTO;
+    }
+
+    public static KeyManagerAPIUsagesDTO toKeyManagerAPIUsagesDTO(AdminContentSearchResult result) {
+
+        KeyManagerAPIUsagesDTO keyManagerAPIUsagesDTO = new KeyManagerAPIUsagesDTO();
+        List<APIInfoKeyManagerDTO> apis = new ArrayList<>();
+        if (result != null) {
+            List<SearchContent> searchContents = result.getApis();
+            for (SearchContent searchContent : searchContents) {
+                if (searchContent instanceof AdminApiSearchContent) {
+                    APIInfoKeyManagerDTO apiInfoKeyManagerDTO = toAPIInfoKeyManagerDTO(
+                            (AdminApiSearchContent) searchContent);
+                    apis.add(apiInfoKeyManagerDTO);
+                }
+            }
+            keyManagerAPIUsagesDTO.setApiCount(result.getApiCount());
+            keyManagerAPIUsagesDTO.setApis(apis);
+        }
+        return keyManagerAPIUsagesDTO;
+    }
+
+    public static APIInfoKeyManagerDTO toAPIInfoKeyManagerDTO(AdminApiSearchContent adminApiSearchContent) {
+
+        APIInfoKeyManagerDTO apiInfoKeyManagerDTO = new APIInfoKeyManagerDTO();
+        apiInfoKeyManagerDTO.setId(adminApiSearchContent.getId());
+        apiInfoKeyManagerDTO.setType(adminApiSearchContent.getType());
+        apiInfoKeyManagerDTO.setName(adminApiSearchContent.getName());
+        apiInfoKeyManagerDTO.setTransportType(adminApiSearchContent.getTransportType());
+        apiInfoKeyManagerDTO.setDescription(adminApiSearchContent.getDescription());
+        apiInfoKeyManagerDTO.setContext(adminApiSearchContent.getContext());
+        apiInfoKeyManagerDTO.setVersion(adminApiSearchContent.getVersion());
+        apiInfoKeyManagerDTO.setProvider(adminApiSearchContent.getProvider());
+        apiInfoKeyManagerDTO.setStatus(adminApiSearchContent.getStatus());
+        apiInfoKeyManagerDTO.setThumbnailUri(adminApiSearchContent.getThumbnailUri());
+        apiInfoKeyManagerDTO.setAdvertiseOnly(adminApiSearchContent.getAdvertiseOnly());
+        apiInfoKeyManagerDTO.setKeyManagerEntry(adminApiSearchContent.getKeyManagerEntry());
+
+        return apiInfoKeyManagerDTO;
+    }
+
+    public static KeyManagerAppUsagesDTO toKeyManagerAppUsagesDTO(
+            KeyManagerApplicationUsages keyManagerApplicationUsages) {
+
+        KeyManagerAppUsagesDTO keyManagerAppUsagesDTO = new KeyManagerAppUsagesDTO();
+        List<ApplicationInfoKeyManagerDTO> applicationDTOs = new ArrayList<>();
+        if (keyManagerApplicationUsages != null) {
+            List<ApplicationInfoKeyManager> applications = keyManagerApplicationUsages.getApplications();
+            for (ApplicationInfoKeyManager application : applications) {
+                ApplicationInfoKeyManagerDTO applicationInfoKeyManagerDTO = toApplicationInfoKeyManagerDTO(application);
+                applicationDTOs.add(applicationInfoKeyManagerDTO);
+            }
+            keyManagerAppUsagesDTO.setApplicationCount(keyManagerApplicationUsages.getApplicationCount());
+            keyManagerAppUsagesDTO.setApplications(applicationDTOs);
+        }
+        return keyManagerAppUsagesDTO;
+    }
+
+    public static ApplicationInfoKeyManagerDTO toApplicationInfoKeyManagerDTO(
+            ApplicationInfoKeyManager applicationInfoKeyManager) {
+
+        ApplicationInfoKeyManagerDTO applicationInfoKeyManagerDTO = new ApplicationInfoKeyManagerDTO();
+        applicationInfoKeyManagerDTO.setName(applicationInfoKeyManager.getUuid());
+        applicationInfoKeyManagerDTO.setUuid(applicationInfoKeyManager.getUuid());
+        applicationInfoKeyManagerDTO.setOrganization(applicationInfoKeyManager.getOrganization());
+        applicationInfoKeyManagerDTO.setOrganizationId(applicationInfoKeyManager.getOrganizationId());
+        applicationInfoKeyManagerDTO.setOwner(applicationInfoKeyManager.getOwner());
+
+        return applicationInfoKeyManagerDTO;
     }
 }
