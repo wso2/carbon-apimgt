@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -374,6 +375,9 @@ public class BasicAuthAuthenticator implements Authenticator {
         if (this.securityHeader == null) {
             try {
                 securityHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+                if (securityHeader == null) {
+                    securityHeader = HttpHeaders.AUTHORIZATION;
+                }
             } catch (APIManagementException e) {
                 log.error("Error while reading authorization header from APIM configurations", e);
             }

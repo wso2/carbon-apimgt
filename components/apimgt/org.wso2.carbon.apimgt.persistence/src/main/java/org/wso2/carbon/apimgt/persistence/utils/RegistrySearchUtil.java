@@ -206,6 +206,7 @@ public class RegistrySearchUtil {
                     apiState = keyVal[1];
                     continue;
                 }
+                keyVal[1] = keyVal[1].replaceAll(" ", "&&");
                 attributes.put(keyVal[0], keyVal[1]);
             }
         }

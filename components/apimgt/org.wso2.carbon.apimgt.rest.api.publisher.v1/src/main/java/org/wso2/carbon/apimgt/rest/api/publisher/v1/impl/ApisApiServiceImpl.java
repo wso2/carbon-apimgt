@@ -4209,6 +4209,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
             JSONObject serviceInfo = ApisApiServiceImplUtils.getServiceInfo(service);
             api.setServiceInfo(serviceInfo);
+            api.setUriTemplates(originalAPI.getUriTemplates());
             Map validationResponseMap = new HashMap();
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
