@@ -411,7 +411,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error while deleting comment " + commentId + "for API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);

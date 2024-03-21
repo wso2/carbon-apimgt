@@ -548,7 +548,10 @@ public enum ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_RESTRICTED_FOR_USER(902013, "Unauthorized Access to Key Manager", 403, "Key Manager is Restricted for this user"),
     // Admin portal get apis and api provider change related errors
     CHANGE_API_PROVIDER_FAILED(903011, "Error while changing the API provider", 500, "Error while changing the API provider in the registry or DB"),
-    GET_SEARCH_APIS_IN_ADMIN_FAILED(903012, "Error while getting the apis", 500, "Error while getting/searching the apis from registry");
+    GET_SEARCH_APIS_IN_ADMIN_FAILED(903012, "Error while getting the apis", 500, "Error while getting/searching the apis from registry"),
+
+    // AI service invocation related exceptions
+    INVALID_RESPONSE_FROM_AI_SERVICE(903100, "Invalid response from AI service", 500, "Error while invoking AI service. %s", false);
 
     private final long errorCode;
     private final String errorMessage;
