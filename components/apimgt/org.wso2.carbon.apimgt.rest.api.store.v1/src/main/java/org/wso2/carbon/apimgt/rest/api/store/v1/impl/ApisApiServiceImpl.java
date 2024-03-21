@@ -50,8 +50,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
-
+import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -261,6 +263,77 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (URISyntaxException e) {
             throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
+        }
+        return null;
+    }
+
+    @Override
+    public Response apiChatExecute(String apiId, String apiChatRequestId,
+            ApiChatExecuteRequestDTO apiChatExecuteRequestDTO, MessageContext messageContext) {
+        if (StringUtils.isEmpty(apiChatRequestId)) {
+            String errorMessage = "Error executing the API Chat service. Request UUID is a required parameter";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+            return null;
+        }
+
+        // Determine whether the request body is valid. Request should either initialize test or provide
+        // test execution progress.
+        boolean isTestInitializationRequest = !StringUtils.isEmpty(apiChatExecuteRequestDTO.getCommand()) && apiChatExecuteRequestDTO.getApiSpec() != null;
+        boolean isTestExecutionRequest = apiChatExecuteRequestDTO.getResponse() != null;
+        if (!(isTestInitializationRequest || isTestExecutionRequest)) {
+            String errorMessage = "Payload is badly formatted. Expected to have either 'command' and 'apiSpec' " +
+                    "or 'response'";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+            return null;
+        }
+
+        try {
+            if (APIUtil.isApiChatEnabled()) {
+                String payload = payload = new Gson().toJson(apiChatExecuteRequestDTO);
+                String response = APIUtil.invokeAIService(APIConstants.API_CHAT_ENDPOINT,
+                        APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_EXECUTE_RESOURCE, payload,
+                        apiChatRequestId);
+                ObjectMapper objectMapper = new ObjectMapper();
+                ApiChatExecuteResponseDTO executeResponseDTO = objectMapper.readValue(response,
+                        ApiChatExecuteResponseDTO.class);
+                return Response.status(Response.Status.CREATED).entity(executeResponseDTO).build();
+            }
+        } catch (APIManagementException | IOException e) {
+            String errorMessage = "Error encountered while executing the API Chat service to accomodate the " +
+                    "specified testing requirement";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response apiChatPrepare(String apiId, String apiChatRequestId, MessageContext messageContext) {
+        if (StringUtils.isEmpty(apiChatRequestId) || StringUtils.isEmpty(apiId)) {
+            String errorMessage = "Error while executing the prepare statement. Both API ID and request ID are " +
+                    "required parameters";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+            return null;
+        }
+        try {
+            if (APIUtil.isApiChatEnabled()) {
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+                String swaggerDefinition = apiConsumer.getOpenAPIDefinition(apiId, organization);
+                String payload = "{\"openapi\": " + swaggerDefinition + "}";
+
+                String response = APIUtil.invokeAIService(APIConstants.API_CHAT_ENDPOINT,
+                        APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_PREPARE_RESOURCE, payload,
+                        apiChatRequestId);
+
+//                ApiChatPreparationResponseDTO preparationResponseDTO = APIMappingUtil.fromPrepareResponseToDTO(response);
+                ObjectMapper objectMapper = new ObjectMapper();
+                ApiChatPreparationResponseDTO preparationResponseDTO = objectMapper.readValue(response,
+                        ApiChatPreparationResponseDTO.class);
+                return Response.status(Response.Status.CREATED).entity(preparationResponseDTO).build();
+            }
+        } catch (APIManagementException | IOException e) {
+            String errorMessage = "Error encountered while executing the prepare statement of API Chat service";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

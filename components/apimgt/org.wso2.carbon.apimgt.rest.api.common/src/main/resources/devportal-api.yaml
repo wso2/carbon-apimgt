@@ -3578,31 +3578,7 @@ paths:
   ######################################################
   # The "API Chat Feature" resource APIs
   ######################################################
-  '/ai/api-chat/health':
-
-    #-----------------------------------------------------
-    # Check the health status of AI service
-    #-----------------------------------------------------
-    get:
-      summary: Heath check endpoint
-      security:
-        - OAuth2Security: []
-      description: |
-        Get the health status of API Chat AI service
-      operationId: getApiChatHealth
-      tags:
-        - API Chat
-      responses:
-        200:
-          description: |
-            OK.
-            Health status is returned.
-        500:
-          description: |
-            Internal Server Error.
-            An error occurred while checking the health status of API Chat service
-
-  '/ai/api-chat/prepare':
+  /apis/{apiId}/api-chat/prepare:
 
     #-----------------------------------------------------
     # Prepare API Chat for user queries by feeding spec
@@ -3615,8 +3591,8 @@ paths:
         Processing the OpenAPI specification to extract the API endpoint definitions and generate sample queries
       operationId: apiChatPrepare
       parameters:
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/apiChatRequestId'
-        - $ref: '#/components/parameters/apiId-Q'
       tags:
         - API Chat
       responses:
@@ -3630,12 +3606,14 @@ paths:
                  $ref: '#/components/schemas/ApiChatPreparationResponse'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         500:
           description: |
             Internal Server Error.
             An error occurred while preparing the API Chat service.
 
-  '/ai/api-chat/execute':
+  /apis/{apiId}/api-chat/execute:
 
     #-----------------------------------------------------
     # Execute test specified via API Chat
@@ -3649,6 +3627,7 @@ paths:
         invoked alongside the inputs such as parameters, payloads, etc. while caching the progress.
       operationId: apiChatExecute
       parameters:
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/apiChatRequestId'
       requestBody:
         description: |
@@ -3670,6 +3649,8 @@ paths:
                 $ref: '#/components/schemas/ApiChatExecuteResponse'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         500:
           description: |
             Internal Server Error.

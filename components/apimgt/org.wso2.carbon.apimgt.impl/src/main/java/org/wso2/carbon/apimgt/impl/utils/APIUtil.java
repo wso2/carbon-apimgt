@@ -59,7 +59,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
@@ -10408,37 +10407,7 @@ public final class APIUtil {
         return true;
     }
 
-    /**
-     * This method is used for AI Service health check purposes. This will be utilized by API-Chat feature and
-     * Marketplace-Assistant feature
-     *
-     * @param endpointConfigName Config name to retrieve the AI Service URL
-     * @param resource           Resource that we should forward the request to
-     * @return CloseableHttpResponse of the GET call
-     * @throws APIManagementException
-     */
-    public static CloseableHttpResponse getAIServiceHealth(String endpointConfigName, String resource)
-            throws APIManagementException {
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String endpoint = config.getFirstProperty(endpointConfigName);
-
-        try{
-            HttpGet healthGet = new HttpGet(endpoint + resource);
-            URL url = new URL(endpoint);
-            int port = url.getPort();
-            String protocol = url.getProtocol();
-            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
-            return executeHTTPRequest(healthGet, httpClient);
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
-        } catch (APIManagementException | IOException e) {
-            throw new APIManagementException("Error encountered while connecting to service", e);
-        }
-    }
-
-    public static CloseableHttpResponse invokeAIService(String endpointConfigName, String authTokenConfigName,
+    public static String invokeAIService(String endpointConfigName, String authTokenConfigName,
             String resource, String payload, String requestId) throws  APIManagementException {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -10458,7 +10427,17 @@ public final class APIUtil {
             String protocol = url.getProtocol();
             HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
 
-            return executeHTTPRequest(preparePost, httpClient);
+            CloseableHttpResponse response = executeHTTPRequest(preparePost, httpClient);
+            int statusCode = response.getStatusLine().getStatusCode();
+            String responseStr = EntityUtils.toString(response.getEntity());
+            if (statusCode != HttpStatus.SC_CREATED) {
+                return responseStr;
+            } else if (statusCode != HttpStatus.SC_UNAUTHORIZED) {
+
+            }else {
+                throw new APIManagementException("Unexpected response detected from the AI service." + responseStr,
+                        ExceptionCodes.INVALID_RESPONSE_FROM_AI_SERVICE);
+            }
         } catch (MalformedURLException e) {
             throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
         } catch (APIManagementException | IOException e) {
