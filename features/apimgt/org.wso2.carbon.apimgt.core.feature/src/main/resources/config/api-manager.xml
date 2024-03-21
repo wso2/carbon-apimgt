@@ -327,6 +327,7 @@
              property,it will show two additional permission levels as visible only to all registered users in a particular
              domain or only visible to API doc creator -->
         <!--EnableAPIDocVisibilityLevels>true</EnableAPIDocVisibilityLevels-->
+        <!--EnablePortalConfigurationOnlyMode>false</EnablePortalConfigurationOnlyMode-->
         <!-- Uncomment this to limit the number of APIs in api the API Publisher -->
         <!--APIsPerPage>30</APIsPerPage-->
         <!-- This property need to be enabled to enable the publisher access control support -->
