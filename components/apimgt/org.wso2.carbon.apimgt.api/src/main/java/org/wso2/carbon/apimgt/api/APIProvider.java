@@ -1859,6 +1859,17 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
+     * Get the list of gateway labels which the policy mapping is deployed.
+     *
+     * @param gatewayPolicyMappingId Policy mapping UUID
+     * @param tenantDomain           Tenant domain
+     * @return Set of gateway labels
+     * @throws APIManagementException
+     */
+    Set<String> getPolicyMappingDeployedGateways(String gatewayPolicyMappingId, String tenantDomain)
+            throws APIManagementException;
+
+    /**
      * Checks whether a policy mapping deployment exists for a given gateway label.
      *
      * @param gatewayLabel           Gateway label
