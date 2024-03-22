@@ -39,8 +39,6 @@ import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.core.Response;
 
-import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-
 public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     private static final Log log = LogFactory.getLog(KeyManagersApiServiceImpl.class);
@@ -170,8 +168,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         } else {
             throw new APIManagementException("Requested KeyManager not found", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
-        AdminContentSearchResult result =
-                apiAdmin.getAPIUsagesByKeyManagerNameAndOrganization(organization, KeyManagerName, offset, limit);
+        AdminContentSearchResult result = apiAdmin.getAPIUsagesByKeyManagerNameAndOrganization(organization,
+                KeyManagerName, offset, limit);
 
         return Response.ok().entity(KeyManagerMappingUtil.toKeyManagerAPIUsagesDTO(result)).build();
     }
@@ -192,7 +190,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             throw new APIManagementException("Requested KeyManager not found", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
         KeyManagerApplicationUsages result = apiAdmin.getApplicationsOfKeyManager(keyManagerId, offset, limit);
-        return Response.ok().entity(result).build();
+        return Response.ok().entity(KeyManagerMappingUtil.toKeyManagerAppUsagesDTO(result)).build();
     }
 
     public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {

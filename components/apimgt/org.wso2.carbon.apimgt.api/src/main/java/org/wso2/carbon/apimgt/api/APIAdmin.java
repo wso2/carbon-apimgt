@@ -519,10 +519,12 @@ public interface APIAdmin  {
 
     /**
      * This method used to retrieve global key manager configurations with usage check
+     * @param organization organization
      * @return KeyManagerConfigurationDTO list
      * @throws APIManagementException if error occurred
      */
-    List<KeyManagerConfigurationDTO> getGlobalKeyManagerConfigurations(String organization) throws APIManagementException;
+    List<KeyManagerConfigurationDTO> getGlobalKeyManagerConfigurations(String organization)
+            throws APIManagementException;
 
     /**
      * This method used to retrieve global key manager with Id

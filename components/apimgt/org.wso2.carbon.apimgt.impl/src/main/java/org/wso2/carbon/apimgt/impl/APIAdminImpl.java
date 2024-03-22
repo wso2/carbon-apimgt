@@ -656,8 +656,7 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     public AdminContentSearchResult getAPIUsagesByKeyManagerNameAndOrganization(String org, String keyManagerName,
-            int offset, int limit)
-            throws APIManagementException {
+            int offset, int limit) throws APIManagementException {
 
         APIPersistence apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
         String searchQuery = APIConstants.API_USAGE_BY_KEY_MANAGER_QUERY.replace("$1", keyManagerName);
@@ -677,12 +676,6 @@ public class APIAdminImpl implements APIAdmin {
         keyManagerApplicationUsages.setApplicationCount(applications.size());
         keyManagerApplicationUsages.setApplications(getPaginatedApplicationList(applications, offset, limit));
         return keyManagerApplicationUsages;
-    }
-
-    public List<ApplicationInfoKeyManager> getAllApplicationsOfKeyManager(String keyManagerId)
-            throws APIManagementException {
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        return apiMgtDAO.getAllApplicationsOfKeyManager(keyManagerId);
     }
 
     private void validateKeyManagerEndpointConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
@@ -984,7 +977,7 @@ public class APIAdminImpl implements APIAdmin {
                             ExceptionCodes.KEY_MANAGER_DELETE_FAILED);
                 }
             } else {
-                throw new APIManagementException("Key Manager is already used by an API or and Application.",
+                throw new APIManagementException("Key Manager is already used by an API or an Application.",
                         ExceptionCodes.KEY_MANAGER_DELETE_FAILED);
             }
         }
@@ -1748,8 +1741,7 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<KeyManagerConfigurationDTO> getGlobalKeyManagerConfigurations()
-            throws APIManagementException {
+    public List<KeyManagerConfigurationDTO> getGlobalKeyManagerConfigurations() throws APIManagementException {
         List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getKeyManagerConfigurationsByOrganization(
                 APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN);
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurations) {

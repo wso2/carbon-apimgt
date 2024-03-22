@@ -1202,22 +1202,21 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdOauthKeysKeyMappingIdDelete(String applicationId, String keyMappingId,
-            String xWSO2Tenant,
-            MessageContext messageContext)
-            throws APIManagementException {
+            String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
             boolean result = apiConsumer.removalKeys(application, keyMappingId, xWSO2Tenant);
-            if(result) {
+            if (result) {
                 return Response.ok().build();
             } else {
                 RestApiUtil.handleResourceNotFoundError(ExceptionCodes.KEYS_DELETE_FAILED.getErrorMessage(),
                         keyMappingId, log);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while application key cleanup process", e, log);
+            RestApiUtil.handleInternalServerError("Error occurred while application key delete process", e, log);
         }
         return null;
     }

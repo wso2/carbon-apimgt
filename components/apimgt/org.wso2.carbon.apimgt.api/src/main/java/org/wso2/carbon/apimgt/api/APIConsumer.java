@@ -722,17 +722,6 @@ public interface APIConsumer extends APIManager {
     String getRequestedTenant();
 
     /**
-     * Get consumer key and key manager name by application id and key mapping id
-     * @param applicationId application id
-     * @param keyMappingId  key mapping id
-     * @return  KeyManagerApplicationInfo
-     */
-    KeyManagerApplicationInfo getKeyManagerNameAndConsumerKeyByAppIDAndKeyMapping(int applicationId,
-            String keyMappingId)
-            throws APIManagementException;
-
-
-    /**
      *
      * @param apiId API UUID
      * @return Set of Topics defined in a specified Async API

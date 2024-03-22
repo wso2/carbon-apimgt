@@ -3620,6 +3620,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
     public boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant)
             throws APIManagementException {
+
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(this.username);
 
@@ -3637,8 +3638,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-            KeyManagerApplicationInfo KeyManagerApplicationInfo = apiMgtDAO
-                    .getKeyManagerNameAndConsumerKeyByAppIdAndKeyMappingId(application.getId(), keyMappingId);
+            KeyManagerApplicationInfo KeyManagerApplicationInfo =
+                    apiMgtDAO.getKeyManagerNameAndConsumerKeyByAppIdAndKeyMappingId(application.getId(), keyMappingId);
             String keyManagerNameResult = KeyManagerApplicationInfo.getKeyManagerName();
             if (!StringUtils.isEmpty(keyManagerNameResult)) {
                 keyManagerName = keyManagerNameResult;
@@ -3658,8 +3659,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
                     APIUtil.getTenantIdFromTenantDomain(tenantDomain), application.getOrganization(),
-                    application.getId(), application.getUUID(), consumerKey, application.getKeyType(),
-                    keyManagerName);
+                    application.getId(), application.getUUID(), consumerKey, application.getKeyType(), keyManagerName);
             APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
             return true;
         } catch (APIManagementException e) {
@@ -3696,14 +3696,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         return apiKey;
     }
-
-    @Override
-    public KeyManagerApplicationInfo getKeyManagerNameAndConsumerKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
-            throws APIManagementException {
-        return apiMgtDAO
-                .getKeyManagerNameAndConsumerKeyByAppIdAndKeyMappingId(applicationId, keyMappingId);
-    }
-
 
     @Override
     public Set<Topic> getTopics(String apiId) throws APIManagementException {

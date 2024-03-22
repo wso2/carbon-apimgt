@@ -398,7 +398,7 @@ public class KeyManagerMappingUtil {
                     apis.add(apiInfoKeyManagerDTO);
                 }
             }
-            keyManagerAPIUsagesDTO.setApiCount(result.getApiCount());
+            keyManagerAPIUsagesDTO.setApiCount(result.getApiTotal());
             keyManagerAPIUsagesDTO.setApis(apis);
         }
         return keyManagerAPIUsagesDTO;
@@ -444,7 +444,7 @@ public class KeyManagerMappingUtil {
             ApplicationInfoKeyManager applicationInfoKeyManager) {
 
         ApplicationInfoKeyManagerDTO applicationInfoKeyManagerDTO = new ApplicationInfoKeyManagerDTO();
-        applicationInfoKeyManagerDTO.setName(applicationInfoKeyManager.getUuid());
+        applicationInfoKeyManagerDTO.setName(applicationInfoKeyManager.getName());
         applicationInfoKeyManagerDTO.setUuid(applicationInfoKeyManager.getUuid());
         applicationInfoKeyManagerDTO.setOrganization(applicationInfoKeyManager.getOrganization());
         applicationInfoKeyManagerDTO.setOrganizationId(applicationInfoKeyManager.getOrganizationId());

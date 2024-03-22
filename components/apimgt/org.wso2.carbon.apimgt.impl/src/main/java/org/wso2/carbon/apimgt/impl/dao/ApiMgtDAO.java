@@ -9833,25 +9833,6 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public String getKeyManagerNameFromKeyMappingId(String keyMappingId)
-            throws APIManagementException {
-
-        final String query = "SELECT NAME AS KEY_MANAGER_NAME FROM AM_KEY_MANAGER AKM, AM_APPLICATION_KEY_MAPPING " +
-                "AAKM WHERE AAKM.UUID = ? AND AKM.UUID=AAKM.KEY_MANAGER;";
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, keyMappingId);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getString("KEY_MANAGER_NAME");
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error while Retrieving Key Mapping ", e);
-        }
-        return null;
-    }
-
     public void deleteApplicationKeyMappingByMappingId(String keyMappingId) throws APIManagementException {
 
         Connection connection = null;
@@ -20199,8 +20180,8 @@ public class ApiMgtDAO {
         return policyIds;
     }
 
-    public List<ApplicationInfoKeyManager> getAllApplicationsOfKeyManager(String keyManagerId) throws
-            APIManagementException {
+    public List<ApplicationInfoKeyManager> getAllApplicationsOfKeyManager(String keyManagerId)
+            throws APIManagementException {
 
         ArrayList<ApplicationInfoKeyManager> applicationsList = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_APPLICATIONS_OF_KEY_MANAGERS_SQL;
