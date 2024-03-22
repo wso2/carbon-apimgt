@@ -461,6 +461,10 @@ public final class APIConstants {
     public static final String USE_KID = "UseKidProperty";
     public static final String CONSUMER_DIALECT_URI = "ConsumerDialectURI";
     public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
+    public static final String USE_SHA1_HASH = "UseSHA1Hash";
+
+    public static final String X5T_PARAMETER = "x5t";
+    public static final String X5T256_PARAMETER = "x5t#S256";
     public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
     public static final String TOKEN_ISSUERS = "TokenIssuers";
@@ -1377,6 +1381,8 @@ public final class APIConstants {
     public static final String VELOCITY_LOGGER = "VelocityLogger";
 
     public static final String SHA_256 = "SHA-256";
+
+    public static final String SHA_1 = "SHA-1";
 
     public static final String US_ASCII = "US-ASCII";
 
