@@ -2146,7 +2146,7 @@
         <commons-httpclient.version>3.1</commons-httpclient.version>
         <google.code.gson.version>2.10.1</google.code.gson.version>
         <httpcomponents.version>4.5.10</httpcomponents.version>
-        <commons-codec.version>1.14</commons-codec.version>
+        <commons-codec.version>1.16.0</commons-codec.version>
         <com.nimbusds.wso2.version>9.37.3.wso2v1</com.nimbusds.wso2.version>
         <json-smart.version>2.5.0</json-smart.version>
         <org.apache.velocity.version>2.3</org.apache.velocity.version>
