@@ -290,12 +290,11 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             if (APIUtil.isApiChatEnabled()) {
+                APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
                 String payload = new Gson().toJson(apiChatExecuteRequestDTO);
-                String response = APIUtil.invokeAIService(APIConstants.API_CHAT_ENDPOINT,
-                        APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_EXECUTE_RESOURCE, payload,
-                        apiChatRequestId);
+                String executionResponse = apiConsumer.invokeApiChatExecute(apiChatRequestId, payload);
                 ObjectMapper objectMapper = new ObjectMapper();
-                ApiChatExecuteResponseDTO executeResponseDTO = objectMapper.readValue(response,
+                ApiChatExecuteResponseDTO executeResponseDTO = objectMapper.readValue(executionResponse,
                         ApiChatExecuteResponseDTO.class);
                 return Response.status(Response.Status.CREATED).entity(executeResponseDTO).build();
             }
@@ -310,6 +309,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apiChatPrepare(String apiId, String apiChatRequestId, MessageContext messageContext)
             throws APIManagementException {
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         if (StringUtils.isEmpty(apiChatRequestId) || StringUtils.isEmpty(apiId)) {
             String errorMessage = "Error while executing the prepare statement. Both API ID and request ID are " +
                     "required parameters";
@@ -318,17 +318,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         try {
             if (APIUtil.isApiChatEnabled()) {
-                String organization = RestApiUtil.getValidatedOrganization(messageContext);
                 APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-                String swaggerDefinition = apiConsumer.getOpenAPIDefinition(apiId, organization);
-                String payload = "{\"openapi\": " + swaggerDefinition + "}";
-
-                String response = APIUtil.invokeAIService(APIConstants.API_CHAT_ENDPOINT,
-                        APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_PREPARE_RESOURCE, payload,
-                        apiChatRequestId);
-
+                String prepareResponse = apiConsumer.invokeApiChatPrepare(apiId, apiChatRequestId,
+                        organization);
                 ObjectMapper objectMapper = new ObjectMapper();
-                ApiChatPreparationResponseDTO preparationResponseDTO = objectMapper.readValue(response,
+                ApiChatPreparationResponseDTO preparationResponseDTO = objectMapper.readValue(prepareResponse,
                         ApiChatPreparationResponseDTO.class);
                 return Response.status(Response.Status.CREATED).entity(preparationResponseDTO).build();
             }

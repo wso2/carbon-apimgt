@@ -3309,6 +3309,23 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
+    public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
+        return APIUtil.invokeAIService(APIConstants.API_CHAT_ENDPOINT,
+                APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_EXECUTE_RESOURCE, requestPayload,
+                apiChatRequestId);
+    }
+
+    @Override
+    public String invokeApiChatPrepare(String apiId, String apiChatRequestId, String organization)
+            throws APIManagementException {
+        String swaggerDefinition = getOpenAPIDefinition(apiId, organization);
+        String payload = "{\"openapi\": " + swaggerDefinition + "}";
+        String prepareResponse = APIUtil.invokeAIService(APIConstants.API_CHAT_ENDPOINT,
+                APIConstants.API_CHAT_AUTH_TOKEN, APIConstants.API_CHAT_PREPARE_RESOURCE, payload, apiChatRequestId);
+        return prepareResponse;
+    }
+
+    @Override
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
 
