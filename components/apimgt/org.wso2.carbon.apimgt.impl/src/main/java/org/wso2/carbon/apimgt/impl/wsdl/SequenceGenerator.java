@@ -361,7 +361,7 @@ public class SequenceGenerator {
                                                                        Map<String, Model> definitions)
             throws APIManagementException {
 
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docFactory = APIUtil.getSecuredDocumentBuilder();
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         DocumentBuilder docBuilder;
         StringWriter stringWriter = new StringWriter();
@@ -571,7 +571,7 @@ public class SequenceGenerator {
      */
     private static String createParameterElements(String jsonPathElement, String type) throws APIManagementException {
 
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docFactory = APIUtil.getSecuredDocumentBuilder();
         DocumentBuilder docBuilder;
         StringWriter stringWriter = new StringWriter();
         TransformerFactory transformerFactory = TransformerFactory.newInstance();

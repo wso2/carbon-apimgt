@@ -2051,6 +2051,22 @@ public final class APIUtil {
     }
 
     /**
+     * Check if Portal Configuration Only Mode is enabled
+     *
+     * @return True if Portal Configuration Only Mode is enabled
+     */
+    public static boolean isPortalConfigurationOnlyModeEnabled() {
+        // checking if API Read Only Mode is enabled in api-manager.xml
+        String isPortalConfigurationOnlyModeEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                        getAPIManagerConfiguration().getFirstProperty(
+                                APIConstants.API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE);
+        if (StringUtils.isNotEmpty(isPortalConfigurationOnlyModeEnabled)) {
+            return Boolean.parseBoolean(isPortalConfigurationOnlyModeEnabled);
+        }
+        return false;
+    }
+
+    /**
      * Returns the External API Store Configuration with the given Store Name
      *
      * @param apiStoreName

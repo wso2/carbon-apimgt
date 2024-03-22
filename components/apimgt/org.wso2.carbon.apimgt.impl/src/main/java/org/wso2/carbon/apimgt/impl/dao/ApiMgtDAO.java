@@ -1185,7 +1185,7 @@ public class ApiMgtDAO {
                 }
                 subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
                 subscription.setTopic(resultSet.getString("HUB_TOPIC"));
-                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscription.setAppID(applicationId);
                 subscriptionSet.add(subscription);
             }
             return subscriptionSet;
@@ -9517,7 +9517,7 @@ public class ApiMgtDAO {
                 preparedStatement.setString(10, keyManagerConfigurationDTO.getExternalReferenceId());
                 preparedStatement.executeUpdate();
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
+                if (permissionDTO != null && !KeyManagerAccessPublic.equals(permissionDTO.getPermissionType())) {
                     try (PreparedStatement addPermissionStatement = conn
                             .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants
                                     .ADD_KEY_MANAGER_PERMISSION_SQL)) {
@@ -9598,7 +9598,7 @@ public class ApiMgtDAO {
                     deletePermissionsStatement.executeUpdate();
                 }
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
+                if (permissionDTO != null && !KeyManagerAccessPublic.equals(permissionDTO.getPermissionType())) {
                     try (PreparedStatement addPermissionStatement = conn.prepareStatement(SQLConstants
                             .KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
                         for (String role : permissionDTO.getRoles()) {

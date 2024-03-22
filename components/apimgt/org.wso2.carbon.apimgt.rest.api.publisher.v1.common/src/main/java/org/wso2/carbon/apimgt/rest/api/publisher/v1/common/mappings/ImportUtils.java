@@ -1631,7 +1631,13 @@ public class ImportUtils {
         }
 
         if (!StringUtils.isEmpty(pathToWsdl)) {
-            return FileUtils.readFileToByteArray(new File(pathToWsdl));
+            // Check the Canonical paths
+            File file = new File(pathToWsdl);
+            String canonicalPath = file.getCanonicalPath();
+            if (!canonicalPath.startsWith(new File(pathToArchive).getCanonicalPath())) {
+                throw new IOException("Attempt to load invalid Wsdl File. File path is outside target directory");
+            }
+            return FileUtils.readFileToByteArray(file);
         }
         throw new IOException("Missing WSDL file. It should be present.");
     }
