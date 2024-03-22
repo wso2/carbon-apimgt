@@ -91,10 +91,10 @@ public class LCManager {
      */
     public static JSONObject getDefaultLCConfigJSON() throws APIManagementException {
 
-        InputStream lcStream = LCManager.class.getClassLoader().getResourceAsStream(API_LIFECYCLE_PATH);
-        JSONParser jsonParser = new JSONParser();
-        try {
-            return (JSONObject) jsonParser.parse(new InputStreamReader(lcStream, StandardCharsets.UTF_8));
+        try (InputStream lcStream = LCManager.class.getClassLoader().getResourceAsStream(API_LIFECYCLE_PATH);
+             InputStreamReader reader = new InputStreamReader(lcStream, StandardCharsets.UTF_8)) {
+            JSONParser jsonParser = new JSONParser();
+            return (JSONObject) jsonParser.parse(reader);
         } catch (IOException | ParseException e) {
             throw new APIManagementException(e);
         }
