@@ -11906,6 +11906,12 @@ components:
           description: |
             Is Document Visibility configuration enabled
           example: false
+        portalConfigurationOnlyModeEnabled:
+          type: boolean
+          description: |
+            Is Portal Configuration Only Mode enabled
+          example: false
+          default: false
         crossTenantSubscriptionEnabled:
           type: boolean
           description: |

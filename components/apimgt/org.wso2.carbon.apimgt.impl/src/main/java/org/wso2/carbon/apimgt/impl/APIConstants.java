@@ -859,6 +859,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_URL = API_PUBLISHER + "URL";
     public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS = API_PUBLISHER
             + "EnableAPIDocVisibilityLevels";
+    public static final String API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE = API_PUBLISHER + "EnablePortalConfigurationOnlyMode";
     // Configuration that need to enable to add access control to APIs in publisher
     public static final String API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS = API_PUBLISHER
             + "EnableAccessControl";

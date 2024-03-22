@@ -35,6 +35,7 @@ public class SettingsDTO   {
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
+    private Boolean portalConfigurationOnlyModeEnabled = false;
     private Boolean crossTenantSubscriptionEnabled = false;
     private String defaultAdvancePolicy = null;
     private String defaultSubscriptionPolicy = null;
@@ -203,6 +204,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * Is Portal Configuration Only Mode enabled 
+   **/
+  public SettingsDTO portalConfigurationOnlyModeEnabled(Boolean portalConfigurationOnlyModeEnabled) {
+    this.portalConfigurationOnlyModeEnabled = portalConfigurationOnlyModeEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Is Portal Configuration Only Mode enabled ")
+  @JsonProperty("portalConfigurationOnlyModeEnabled")
+  public Boolean isPortalConfigurationOnlyModeEnabled() {
+    return portalConfigurationOnlyModeEnabled;
+  }
+  public void setPortalConfigurationOnlyModeEnabled(Boolean portalConfigurationOnlyModeEnabled) {
+    this.portalConfigurationOnlyModeEnabled = portalConfigurationOnlyModeEnabled;
+  }
+
+  /**
    * Is Cross Tenant Subscriptions Enabled 
    **/
   public SettingsDTO crossTenantSubscriptionEnabled(Boolean crossTenantSubscriptionEnabled) {
@@ -328,6 +347,7 @@ public class SettingsDTO   {
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
+        Objects.equals(portalConfigurationOnlyModeEnabled, settings.portalConfigurationOnlyModeEnabled) &&
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
         Objects.equals(defaultAdvancePolicy, settings.defaultAdvancePolicy) &&
         Objects.equals(defaultSubscriptionPolicy, settings.defaultSubscriptionPolicy) &&
@@ -338,7 +358,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, customProperties);
   }
 
   @Override
@@ -355,6 +375,7 @@ public class SettingsDTO   {
     sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
+    sb.append("    portalConfigurationOnlyModeEnabled: ").append(toIndentedString(portalConfigurationOnlyModeEnabled)).append("\n");
     sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
     sb.append("    defaultAdvancePolicy: ").append(toIndentedString(defaultAdvancePolicy)).append("\n");
     sb.append("    defaultSubscriptionPolicy: ").append(toIndentedString(defaultSubscriptionPolicy)).append("\n");
