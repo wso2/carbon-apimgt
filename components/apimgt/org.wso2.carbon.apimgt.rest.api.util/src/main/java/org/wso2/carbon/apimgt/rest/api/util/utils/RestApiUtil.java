@@ -939,6 +939,20 @@ public class RestApiUtil {
     }
 
     /**
+     * Logs the error, builds a ForbiddenException with specified details and throws it
+     * @param msg error message
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws ForbiddenException
+     */
+    public static void handleOperationBlockedError(String msg, Throwable t, Log log)
+            throws ForbiddenException {
+        ForbiddenException forbiddenException = buildForbiddenException(msg);
+        log.error(msg,t);
+        throw forbiddenException;
+    }
+
+    /**
      * Check whether the HTTP method is allowed for given resources
      *
      * @param method HTTP method
