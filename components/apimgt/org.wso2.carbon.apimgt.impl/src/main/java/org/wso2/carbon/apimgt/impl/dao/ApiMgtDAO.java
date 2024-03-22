@@ -1185,7 +1185,7 @@ public class ApiMgtDAO {
                 }
                 subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
                 subscription.setTopic(resultSet.getString("HUB_TOPIC"));
-                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscription.setAppID(applicationId);
                 subscriptionSet.add(subscription);
             }
             return subscriptionSet;
