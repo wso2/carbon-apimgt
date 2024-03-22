@@ -9517,7 +9517,7 @@ public class ApiMgtDAO {
                 preparedStatement.setString(10, keyManagerConfigurationDTO.getExternalReferenceId());
                 preparedStatement.executeUpdate();
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
+                if (permissionDTO != null && !KeyManagerAccessPublic.equals(permissionDTO.getPermissionType())) {
                     try (PreparedStatement addPermissionStatement = conn
                             .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants
                                     .ADD_KEY_MANAGER_PERMISSION_SQL)) {
@@ -9598,7 +9598,7 @@ public class ApiMgtDAO {
                     deletePermissionsStatement.executeUpdate();
                 }
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
+                if (permissionDTO != null && !KeyManagerAccessPublic.equals(permissionDTO.getPermissionType())) {
                     try (PreparedStatement addPermissionStatement = conn.prepareStatement(SQLConstants
                             .KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
                         for (String role : permissionDTO.getRoles()) {
