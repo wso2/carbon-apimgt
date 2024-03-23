@@ -392,14 +392,16 @@ public class LifeCycleUtils {
      * @param apiOrApiProductId unique ID of API or API product
      * @param uuid              unique UUID of API or API Product
      */
-    private static void sendLCStateChangeNotification(String apiName, String apiType, String apiContext, String apiVersion,
-                                                      String targetStatus, String provider, int apiOrApiProductId,
-                                                      String uuid, String organization, String securityScheme, String action, String currentStatus, String apiVisibility) throws
-            APIManagementException {
+    private static void sendLCStateChangeNotification(String apiName, String apiType, String apiContext,
+            String apiVersion, String targetStatus, String provider, int apiOrApiProductId, String uuid,
+            String organization, String securityScheme, String action, String currentStatus, String apiVisibility)
+            throws APIManagementException {
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), APIUtil.getInternalOrganizationId(organization), organization, apiName, apiOrApiProductId,
-                uuid, apiVersion, apiType, apiContext, APIUtil.replaceEmailDomainBack(provider), targetStatus, securityScheme, action, currentStatus, apiVisibility);
+                APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), APIUtil.getInternalOrganizationId(organization),
+                organization, apiName, apiOrApiProductId, uuid, apiVersion, apiType, apiContext,
+                APIUtil.replaceEmailDomainBack(provider), targetStatus, securityScheme, action, currentStatus,
+                apiVisibility);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 

@@ -108,7 +108,6 @@ public class APIManagerConfiguration {
     private JSONArray applicationAttributes = new JSONArray();
     private CacheInvalidationConfiguration cacheInvalidationConfiguration;
 
-
     private HttpClientConfigurationDTO httpClientConfiguration;
 
     private RecommendationEnvironment recommendationEnvironment;

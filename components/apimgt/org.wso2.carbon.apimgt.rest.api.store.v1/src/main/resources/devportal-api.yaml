@@ -3683,7 +3683,7 @@ paths:
         500:
           description: |
             Internal Server Error.
-            An error occurred while checking the health status of API Chat service.
+            An error occurred while retrieving the API count.
 
   '/marketplace-assistant/chat':
 
