@@ -125,6 +125,8 @@ public class SettingsMappingUtil {
         settingsDTO.setPasswordPolicyPattern(passwordPolicyPattern);
         settingsDTO.setPasswordPolicyMinLength(passwordPolicyMinLength);
         settingsDTO.setPasswordPolicyMaxLength(passwordPolicyMaxLength);
+        settingsDTO.setApiChatEnabled(APIUtil.isApiChatEnabled());
+        settingsDTO.setAiAuthTokenProvided(APIUtil.isAuthTokenProvidedForAIFeatures());
 
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());

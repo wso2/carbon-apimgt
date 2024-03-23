@@ -58,9 +58,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
@@ -10386,5 +10384,164 @@ public final class APIUtil {
             scopesStringBuilder.append(scope.getKey()).append(" ");
         }
         return scopesStringBuilder.toString().trim();
+    }
+
+    /**
+     * Check whether API Chat feature is enabled
+     *
+     * @return returns true if API Chat feature is enabled, false if disabled.
+     */
+    public static boolean isApiChatEnabled() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String isApiChatEnabled = config.getFirstProperty(APIConstants.AI.API_CHAT_ENABLED);
+        return Boolean.parseBoolean(isApiChatEnabled);
+    }
+
+    /**
+     * Checks whether an auth token is provided for AI features to use. This token is utilized for authentication and
+     * throttling purposes.
+     *
+     * @return returns true if a valid auth token is found, false otherwise.
+     */
+    public static boolean isAuthTokenProvidedForAIFeatures() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String authToken = config.getFirstProperty(APIConstants.AI.API_CHAT_AUTH_TOKEN);
+        if (StringUtils.isEmpty(authToken)) {
+            return false;
+        }
+        return true;
+    }
+
+    public static String invokeAIService(String endpointConfigName, String authTokenConfigName,
+            String resource, String payload, String requestId) throws  APIManagementException {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String endpoint = config.getFirstProperty(endpointConfigName);
+        String authToken = config.getFirstProperty(authTokenConfigName);
+        try {
+            HttpPost preparePost = new HttpPost(endpoint + resource);
+            preparePost.setHeader(HttpHeaders.AUTHORIZATION, APIConstants.AUTHORIZATION_BEARER + authToken);
+            preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            preparePost.setHeader("x-request-id", requestId);
+            StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
+            preparePost.setEntity(requestEntity);
+
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+            CloseableHttpResponse response = executeHTTPRequest(preparePost, httpClient);
+            int statusCode = response.getStatusLine().getStatusCode();
+            String responseStr = EntityUtils.toString(response.getEntity());
+            if (statusCode == HttpStatus.SC_CREATED) {
+                return responseStr;
+            } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
+                        ExceptionCodes.AI_SERVICE_INVALID_ACCESS_TOKEN);
+            } else {
+                throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
+                        ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+            }
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
+
+    /**
+     * This method is used for AI Service health check purposes. This will be utilized by API-Chat feature and
+     * Marketplace-Assistant feature
+     *
+     * @param endpoint Config name to retrieve the AI Service URL
+     * @param resource           Resource that we should forward the request to
+     * @return CloseableHttpResponse of the GET call
+     * @throws APIManagementException
+     */
+    public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String resource)
+            throws APIManagementException {
+
+        try{
+            HttpGet apiCountGet = new HttpGet(endpoint + resource);
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+            return executeHTTPRequest(apiCountGet, httpClient);
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
+
+    public static String MarketplaceAssistantPostService(String endpoint, String authToken,
+                                         String resource, String payload) throws  APIManagementException {
+
+        try {
+            HttpPost preparePost = new HttpPost(endpoint + resource);
+            preparePost.setHeader(HttpHeaders.AUTHORIZATION, authToken);
+            preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
+            preparePost.setEntity(requestEntity);
+
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+            CloseableHttpResponse response = executeHTTPRequest(preparePost, httpClient);
+            int statusCode = response.getStatusLine().getStatusCode();
+            String responseStr = EntityUtils.toString(response.getEntity());
+            if (statusCode == HttpStatus.SC_CREATED) {
+                return responseStr;
+            } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                return null;
+            } else {
+                throw new APIManagementException("Unexpected response detected from the AI service." + responseStr);
+            }
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
+
+
+    public static void DeleteApi(String endpoint, String authToken,
+                                 String resource, String uuid) throws  APIManagementException {
+
+        try {
+            String resourceWithPathParam = endpoint + resource + "/{uuid}";
+            resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
+
+            HttpDelete prepareDelete = new HttpDelete(resourceWithPathParam);
+            prepareDelete.setHeader(HttpHeaders.AUTHORIZATION, authToken);
+
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+            CloseableHttpResponse response = executeHTTPRequest(prepareDelete, httpClient);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == HttpStatus.SC_OK) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully completed the Marketplace Chat API publisher delete call with status code: " + statusCode);
+                }
+            } else {
+                String errorMessage = "Error encountered while Deleting the API from the vector database service to accommodate the " +
+                        "Marketplace assistant";
+                log.error(errorMessage);
+            }
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
     }
 }
