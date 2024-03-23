@@ -293,7 +293,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                             ApiChatResponseDTO.class);
                     return Response.status(Response.Status.CREATED).entity(preparationResponseDTO).build();
                 } catch (APIManagementException | IOException e) {
-                    String errorMessage = "Error encountered while executing the prepare statement of API Chat service";
+                    String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
+                            "service. Cause: " + e.getCause().getMessage();
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
 
@@ -360,7 +361,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     return Response.status(Response.Status.CREATED).entity(responseDTO).build();
                 } catch (APIManagementException | IOException e) {
                     String errorMessage = "Error encountered while executing the API Chat service to accommodate the " +
-                            "specified testing requirement";
+                            "specified testing requirement. Cause: " + e.getCause().getMessage();
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
             } else {

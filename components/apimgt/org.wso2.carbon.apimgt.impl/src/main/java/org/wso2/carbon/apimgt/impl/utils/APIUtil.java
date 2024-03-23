@@ -10440,10 +10440,10 @@ public final class APIUtil {
             if (statusCode == HttpStatus.SC_CREATED) {
                 return responseStr;
             } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                throw new APIManagementException("Unexpected response detected from the AI service." + responseStr,
+                throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
                         ExceptionCodes.AI_SERVICE_INVALID_ACCESS_TOKEN);
             } else {
-                throw new APIManagementException("Unexpected response detected from the AI service." + responseStr,
+                throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
                         ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
             }
         } catch (MalformedURLException e) {
