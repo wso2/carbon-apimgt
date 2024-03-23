@@ -1269,7 +1269,7 @@ public final class APIConstants {
         public static final String DELETE_PENDING = "DELETE_PENDING";
     }
 
-    public static class APIRevisionStatus { //
+    public static class APIRevisionStatus {
 
         public static final String API_REVISION_CREATED = "CREATED";
         public static final String API_REVISION_APPROVED = "APPROVED";

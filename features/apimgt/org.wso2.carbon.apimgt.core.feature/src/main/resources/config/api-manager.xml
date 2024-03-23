@@ -192,9 +192,9 @@
         <!-- Enable API Chat for API Manager -->
         <Enabled>true</Enabled>
 
-        <AuthToken>abc</AuthToken>
+        <AuthToken></AuthToken>
 
-        <Endpoint>https://test.com</Endpoint>
+        <Endpoint>http://localhost:9090</Endpoint>
 
     </APIChat>
 
@@ -206,9 +206,9 @@
         <!-- Enable Marketplace Assistant for API Manager -->
         <Enabled>true</Enabled>
 
-        <AuthToken>abc</AuthToken>
+        <AuthToken></AuthToken>
 
-        <Endpoint>https://test.com</Endpoint>
+        <Endpoint>http://localhost:9090</Endpoint>
 
     </MarketplaceAssistant>
 
