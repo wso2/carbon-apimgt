@@ -33,28 +33,19 @@ import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.*;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantApiCountResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
-import java.util.List;
-
-import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 
 public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantApiService {
-
 
     private static final Log log = LogFactory.getLog(MarketplaceAssistantApiServiceImpl.class);
 
@@ -122,6 +113,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
 
                 CloseableHttpResponse response = APIUtil.
                         getMarketplaceChatApiCount(marketplaceAssistantConfigurationDto.getEndpoint(),
+                                marketplaceAssistantConfigurationDto.getAccessToken(),
                                 marketplaceAssistantConfigurationDto.getApiCountResource());
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == HttpStatus.SC_OK) {

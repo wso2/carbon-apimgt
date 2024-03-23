@@ -5444,6 +5444,10 @@ components:
           type: boolean
           description: Checks if the auth token is provided for AI service usage.
           default: false
+        marketplaceAssistantEnabled:
+          type: boolean
+          description: Specifies whether Marketplace Assistant feature is enabled.
+          default: true
     ApplicationAttribute:
       title: Application attributes
       type: object
