@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatExecuteResponseResourceDTO;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatResponseResourceDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.EnrichedAPISpecDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SampleQueryDTO;
 import javax.validation.constraints.*;
 
 
@@ -19,8 +23,9 @@ import javax.validation.Valid;
 
 
 
-public class ApiChatExecuteResponseDTO   {
+public class ApiChatResponseDTO   {
   
+    private EnrichedAPISpecDTO apiSpec = null;
 
     @XmlType(name="TaskStatusEnum")
     @XmlEnum(String.class)
@@ -54,21 +59,39 @@ return null;
         }
     }
     private TaskStatusEnum taskStatus = null;
-    private ApiChatExecuteResponseResourceDTO resource = null;
+    private ApiChatResponseResourceDTO resource = null;
     private String result = null;
+    private List<SampleQueryDTO> queries = new ArrayList<SampleQueryDTO>();
+
+  /**
+   **/
+  public ApiChatResponseDTO apiSpec(EnrichedAPISpecDTO apiSpec) {
+    this.apiSpec = apiSpec;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("apiSpec")
+  public EnrichedAPISpecDTO getApiSpec() {
+    return apiSpec;
+  }
+  public void setApiSpec(EnrichedAPISpecDTO apiSpec) {
+    this.apiSpec = apiSpec;
+  }
 
   /**
    * Task status (IN_PROGRESS, TERMINATED or COMPLETED)
    **/
-  public ApiChatExecuteResponseDTO taskStatus(TaskStatusEnum taskStatus) {
+  public ApiChatResponseDTO taskStatus(TaskStatusEnum taskStatus) {
     this.taskStatus = taskStatus;
     return this;
   }
 
   
-  @ApiModelProperty(example = "COMPLETED", required = true, value = "Task status (IN_PROGRESS, TERMINATED or COMPLETED)")
+  @ApiModelProperty(example = "COMPLETED", value = "Task status (IN_PROGRESS, TERMINATED or COMPLETED)")
   @JsonProperty("taskStatus")
-  @NotNull
   public TaskStatusEnum getTaskStatus() {
     return taskStatus;
   }
@@ -78,7 +101,7 @@ return null;
 
   /**
    **/
-  public ApiChatExecuteResponseDTO resource(ApiChatExecuteResponseResourceDTO resource) {
+  public ApiChatResponseDTO resource(ApiChatResponseResourceDTO resource) {
     this.resource = resource;
     return this;
   }
@@ -87,17 +110,17 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("resource")
-  public ApiChatExecuteResponseResourceDTO getResource() {
+  public ApiChatResponseResourceDTO getResource() {
     return resource;
   }
-  public void setResource(ApiChatExecuteResponseResourceDTO resource) {
+  public void setResource(ApiChatResponseResourceDTO resource) {
     this.resource = resource;
   }
 
   /**
    * completion result
    **/
-  public ApiChatExecuteResponseDTO result(String result) {
+  public ApiChatResponseDTO result(String result) {
     this.result = result;
     return this;
   }
@@ -112,6 +135,25 @@ return null;
     this.result = result;
   }
 
+  /**
+   * list of sample queries
+   **/
+  public ApiChatResponseDTO queries(List<SampleQueryDTO> queries) {
+    this.queries = queries;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "list of sample queries")
+      @Valid
+  @JsonProperty("queries")
+  public List<SampleQueryDTO> getQueries() {
+    return queries;
+  }
+  public void setQueries(List<SampleQueryDTO> queries) {
+    this.queries = queries;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -121,25 +163,29 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApiChatExecuteResponseDTO apiChatExecuteResponse = (ApiChatExecuteResponseDTO) o;
-    return Objects.equals(taskStatus, apiChatExecuteResponse.taskStatus) &&
-        Objects.equals(resource, apiChatExecuteResponse.resource) &&
-        Objects.equals(result, apiChatExecuteResponse.result);
+    ApiChatResponseDTO apiChatResponse = (ApiChatResponseDTO) o;
+    return Objects.equals(apiSpec, apiChatResponse.apiSpec) &&
+        Objects.equals(taskStatus, apiChatResponse.taskStatus) &&
+        Objects.equals(resource, apiChatResponse.resource) &&
+        Objects.equals(result, apiChatResponse.result) &&
+        Objects.equals(queries, apiChatResponse.queries);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(taskStatus, resource, result);
+    return Objects.hash(apiSpec, taskStatus, resource, result, queries);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApiChatExecuteResponseDTO {\n");
+    sb.append("class ApiChatResponseDTO {\n");
     
+    sb.append("    apiSpec: ").append(toIndentedString(apiSpec)).append("\n");
     sb.append("    taskStatus: ").append(toIndentedString(taskStatus)).append("\n");
     sb.append("    resource: ").append(toIndentedString(resource)).append("\n");
     sb.append("    result: ").append(toIndentedString(result)).append("\n");
+    sb.append("    queries: ").append(toIndentedString(queries)).append("\n");
     sb.append("}");
     return sb.toString();
   }

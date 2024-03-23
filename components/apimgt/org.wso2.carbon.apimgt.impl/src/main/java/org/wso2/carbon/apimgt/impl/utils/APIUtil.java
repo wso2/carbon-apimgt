@@ -10378,14 +10378,9 @@ public final class APIUtil {
      * @return returns true if API Chat feature is enabled, false if disabled.
      */
     public static boolean isApiChatEnabled() {
-
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String isApiChatEnabled = config.getFirstProperty(APIConstants.API_CHAT_ENABLED);
-        if (isApiChatEnabled == null) {
-            return false;
-        }
-
+        String isApiChatEnabled = config.getFirstProperty(APIConstants.AI.API_CHAT_ENABLED);
         return Boolean.parseBoolean(isApiChatEnabled);
     }
 
@@ -10398,8 +10393,8 @@ public final class APIUtil {
     public static boolean isAuthTokenProvidedForAIFeatures() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String authToken = config.getFirstProperty(APIConstants.API_CHAT_AUTH_TOKEN);
-        if (authToken == null || authToken.equals("")) {
+        String authToken = config.getFirstProperty(APIConstants.AI.API_CHAT_AUTH_TOKEN);
+        if (StringUtils.isEmpty(authToken)) {
             return false;
         }
         return true;

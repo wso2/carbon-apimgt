@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.HttpToolDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,21 +20,21 @@ import javax.validation.Valid;
 
 
 
-public class ApiChatExecuteRequestApiSpecDTO   {
+public class ApiChatRequestApiSpecDTO   {
   
     private String serviceUrl = null;
-    private List<HttpToolDTO> tools = new ArrayList<HttpToolDTO>();
+    private List<Object> tools = new ArrayList<Object>();
 
   /**
    * Service URL of API if any
    **/
-  public ApiChatExecuteRequestApiSpecDTO serviceUrl(String serviceUrl) {
+  public ApiChatRequestApiSpecDTO serviceUrl(String serviceUrl) {
     this.serviceUrl = serviceUrl;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Service URL of API if any")
+  @ApiModelProperty(example = "https://localhost:8243/pizzashack/1.0.0", value = "Service URL of API if any")
   @JsonProperty("serviceUrl")
   public String getServiceUrl() {
     return serviceUrl;
@@ -47,19 +46,18 @@ public class ApiChatExecuteRequestApiSpecDTO   {
   /**
    * Extracted Http tools from the OpenAPI specification
    **/
-  public ApiChatExecuteRequestApiSpecDTO tools(List<HttpToolDTO> tools) {
+  public ApiChatRequestApiSpecDTO tools(List<Object> tools) {
     this.tools = tools;
     return this;
   }
 
   
   @ApiModelProperty(value = "Extracted Http tools from the OpenAPI specification")
-      @Valid
   @JsonProperty("tools")
-  public List<HttpToolDTO> getTools() {
+  public List<Object> getTools() {
     return tools;
   }
-  public void setTools(List<HttpToolDTO> tools) {
+  public void setTools(List<Object> tools) {
     this.tools = tools;
   }
 
@@ -72,9 +70,9 @@ public class ApiChatExecuteRequestApiSpecDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApiChatExecuteRequestApiSpecDTO apiChatExecuteRequestApiSpec = (ApiChatExecuteRequestApiSpecDTO) o;
-    return Objects.equals(serviceUrl, apiChatExecuteRequestApiSpec.serviceUrl) &&
-        Objects.equals(tools, apiChatExecuteRequestApiSpec.tools);
+    ApiChatRequestApiSpecDTO apiChatRequestApiSpec = (ApiChatRequestApiSpecDTO) o;
+    return Objects.equals(serviceUrl, apiChatRequestApiSpec.serviceUrl) &&
+        Objects.equals(tools, apiChatRequestApiSpec.tools);
   }
 
   @Override
@@ -85,7 +83,7 @@ public class ApiChatExecuteRequestApiSpecDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApiChatExecuteRequestApiSpecDTO {\n");
+    sb.append("class ApiChatRequestApiSpecDTO {\n");
     
     sb.append("    serviceUrl: ").append(toIndentedString(serviceUrl)).append("\n");
     sb.append("    tools: ").append(toIndentedString(tools)).append("\n");

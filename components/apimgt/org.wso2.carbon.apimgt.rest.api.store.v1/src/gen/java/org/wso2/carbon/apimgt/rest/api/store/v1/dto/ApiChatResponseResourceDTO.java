@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class ApiChatExecuteResponseResourceDTO   {
+public class ApiChatResponseResourceDTO   {
   
     private String method = null;
     private String path = null;
@@ -27,13 +27,13 @@ public class ApiChatExecuteResponseResourceDTO   {
   /**
    * HTTP method of the resource
    **/
-  public ApiChatExecuteResponseResourceDTO method(String method) {
+  public ApiChatResponseResourceDTO method(String method) {
     this.method = method;
     return this;
   }
 
   
-  @ApiModelProperty(value = "HTTP method of the resource")
+  @ApiModelProperty(example = "GET", value = "HTTP method of the resource")
   @JsonProperty("method")
   public String getMethod() {
     return method;
@@ -45,13 +45,13 @@ public class ApiChatExecuteResponseResourceDTO   {
   /**
    * Path of the resource
    **/
-  public ApiChatExecuteResponseResourceDTO path(String path) {
+  public ApiChatResponseResourceDTO path(String path) {
     this.path = path;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Path of the resource")
+  @ApiModelProperty(example = "/order/{orderId}", value = "Path of the resource")
   @JsonProperty("path")
   public String getPath() {
     return path;
@@ -63,13 +63,13 @@ public class ApiChatExecuteResponseResourceDTO   {
   /**
    * Input parameters for the resource
    **/
-  public ApiChatExecuteResponseResourceDTO inputs(Object inputs) {
+  public ApiChatResponseResourceDTO inputs(Object inputs) {
     this.inputs = inputs;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Input parameters for the resource")
+  @ApiModelProperty(example = "{\"parameters\":{\"orderId\":\"123\"}}", value = "Input parameters for the resource")
       @Valid
   @JsonProperty("inputs")
   public Object getInputs() {
@@ -88,10 +88,10 @@ public class ApiChatExecuteResponseResourceDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApiChatExecuteResponseResourceDTO apiChatExecuteResponseResource = (ApiChatExecuteResponseResourceDTO) o;
-    return Objects.equals(method, apiChatExecuteResponseResource.method) &&
-        Objects.equals(path, apiChatExecuteResponseResource.path) &&
-        Objects.equals(inputs, apiChatExecuteResponseResource.inputs);
+    ApiChatResponseResourceDTO apiChatResponseResource = (ApiChatResponseResourceDTO) o;
+    return Objects.equals(method, apiChatResponseResource.method) &&
+        Objects.equals(path, apiChatResponseResource.path) &&
+        Objects.equals(inputs, apiChatResponseResource.inputs);
   }
 
   @Override
@@ -102,7 +102,7 @@ public class ApiChatExecuteResponseResourceDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApiChatExecuteResponseResourceDTO {\n");
+    sb.append("class ApiChatResponseResourceDTO {\n");
     
     sb.append("    method: ").append(toIndentedString(method)).append("\n");
     sb.append("    path: ").append(toIndentedString(path)).append("\n");

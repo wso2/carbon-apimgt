@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatExecuteRequestApiSpecDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatExecuteRequestResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatRequestApiSpecDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatRequestResponseDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,16 +20,35 @@ import javax.validation.Valid;
 
 
 
-public class ApiChatExecuteRequestDTO   {
+public class ApiChatRequestDTO   {
   
+    private String apiChatRequestId = null;
     private String command = null;
-    private ApiChatExecuteRequestApiSpecDTO apiSpec = null;
-    private ApiChatExecuteRequestResponseDTO response = null;
+    private ApiChatRequestApiSpecDTO apiSpec = null;
+    private ApiChatRequestResponseDTO response = null;
+
+  /**
+   * Request UUID 
+   **/
+  public ApiChatRequestDTO apiChatRequestId(String apiChatRequestId) {
+    this.apiChatRequestId = apiChatRequestId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "faae5fcc-cbae-40c4-bf43-89931630d313", value = "Request UUID ")
+  @JsonProperty("apiChatRequestId")
+  public String getApiChatRequestId() {
+    return apiChatRequestId;
+  }
+  public void setApiChatRequestId(String apiChatRequestId) {
+    this.apiChatRequestId = apiChatRequestId;
+  }
 
   /**
    * User specified testcase to be tested against the API 
    **/
-  public ApiChatExecuteRequestDTO command(String command) {
+  public ApiChatRequestDTO command(String command) {
     this.command = command;
     return this;
   }
@@ -46,7 +65,7 @@ public class ApiChatExecuteRequestDTO   {
 
   /**
    **/
-  public ApiChatExecuteRequestDTO apiSpec(ApiChatExecuteRequestApiSpecDTO apiSpec) {
+  public ApiChatRequestDTO apiSpec(ApiChatRequestApiSpecDTO apiSpec) {
     this.apiSpec = apiSpec;
     return this;
   }
@@ -55,16 +74,16 @@ public class ApiChatExecuteRequestDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("apiSpec")
-  public ApiChatExecuteRequestApiSpecDTO getApiSpec() {
+  public ApiChatRequestApiSpecDTO getApiSpec() {
     return apiSpec;
   }
-  public void setApiSpec(ApiChatExecuteRequestApiSpecDTO apiSpec) {
+  public void setApiSpec(ApiChatRequestApiSpecDTO apiSpec) {
     this.apiSpec = apiSpec;
   }
 
   /**
    **/
-  public ApiChatExecuteRequestDTO response(ApiChatExecuteRequestResponseDTO response) {
+  public ApiChatRequestDTO response(ApiChatRequestResponseDTO response) {
     this.response = response;
     return this;
   }
@@ -73,10 +92,10 @@ public class ApiChatExecuteRequestDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("response")
-  public ApiChatExecuteRequestResponseDTO getResponse() {
+  public ApiChatRequestResponseDTO getResponse() {
     return response;
   }
-  public void setResponse(ApiChatExecuteRequestResponseDTO response) {
+  public void setResponse(ApiChatRequestResponseDTO response) {
     this.response = response;
   }
 
@@ -89,22 +108,24 @@ public class ApiChatExecuteRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApiChatExecuteRequestDTO apiChatExecuteRequest = (ApiChatExecuteRequestDTO) o;
-    return Objects.equals(command, apiChatExecuteRequest.command) &&
-        Objects.equals(apiSpec, apiChatExecuteRequest.apiSpec) &&
-        Objects.equals(response, apiChatExecuteRequest.response);
+    ApiChatRequestDTO apiChatRequest = (ApiChatRequestDTO) o;
+    return Objects.equals(apiChatRequestId, apiChatRequest.apiChatRequestId) &&
+        Objects.equals(command, apiChatRequest.command) &&
+        Objects.equals(apiSpec, apiChatRequest.apiSpec) &&
+        Objects.equals(response, apiChatRequest.response);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(command, apiSpec, response);
+    return Objects.hash(apiChatRequestId, command, apiSpec, response);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApiChatExecuteRequestDTO {\n");
+    sb.append("class ApiChatRequestDTO {\n");
     
+    sb.append("    apiChatRequestId: ").append(toIndentedString(apiChatRequestId)).append("\n");
     sb.append("    command: ").append(toIndentedString(command)).append("\n");
     sb.append("    apiSpec: ").append(toIndentedString(apiSpec)).append("\n");
     sb.append("    response: ").append(toIndentedString(response)).append("\n");

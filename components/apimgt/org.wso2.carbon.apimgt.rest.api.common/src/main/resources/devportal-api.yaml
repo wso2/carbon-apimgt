@@ -3576,79 +3576,39 @@ paths:
           source: curl -k "https://localhost:9443/api/am/devportal/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/graphql-policies/complexity/types"
 
   ######################################################
-  # The "API Chat Feature" resource APIs
+  # The "API Chat Feature" resource API
   ######################################################
-  /apis/{apiId}/api-chat/prepare:
-
-    #-----------------------------------------------------
-    # Prepare API Chat for user queries by feeding spec
-    #-----------------------------------------------------
+  /apis/{apiId}/api-chat:
     post:
       security:
         - OAuth2Security:
             - apim:subscribe
-      summary: Prepare API Chat service by feeding the OpenAPI specification of the API to be tested
-      description: |
-        Processing the OpenAPI specification to extract the API endpoint definitions and generate sample queries
-      operationId: apiChatPrepare
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/apiChatRequestId'
-      tags:
-        - API Chat
-      responses:
-        201:
-          description: |
-            Created.
-            API Chat preparation completed. Successful response with enriched API specification and sample queries.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiChatPreparationResponse'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        500:
-          description: |
-            Internal Server Error.
-            An error occurred while preparing the API Chat service.
-
-  /apis/{apiId}/api-chat/execute:
-
-    #-----------------------------------------------------
-    # Execute test specified via API Chat
-    #-----------------------------------------------------
-    post:
-      security:
-        - OAuth2Security:
-            - apim:subscribe
-      summary: Execute a single API test case while caching the progress
+      summary: Test API using a natural language query
       description: |
         Executes a test scenario against an API; which iteratively provide resources that need to be
         invoked alongside the inputs such as parameters, payloads, etc. while caching the progress.
-      operationId: apiChatExecute
+      operationId: apiChatPost
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/apiChatRequestId'
+        - $ref: '#/components/parameters/action'
       requestBody:
         description: |
-          API Chat execute request payload
+          API Chat request body
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApiChatExecuteRequest'
+              $ref: '#/components/schemas/ApiChatRequest'
       tags:
         - API Chat
       responses:
         201:
           description: |
             Created.
-            API Chat execute response payload.
+            API Chat action completed.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiChatExecuteResponse'
+                $ref: '#/components/schemas/ApiChatResponse'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -3656,7 +3616,7 @@ paths:
         500:
           description: |
             Internal Server Error.
-            An error occurred while executing test using API Chat service.
+            An error occurred while invoking the API Chat service.
 
   ######################################################
   # User resource APIs
@@ -5838,11 +5798,75 @@ components:
           type: array
           items:
             type: string
-    ApiChatPreparationResponse:
-      title: API Chat preparation response
-      required:
-        - apiSpec
-        - queries
+    ApiChatRequest:
+      title: API Chat request
+      properties:
+        apiChatRequestId:
+          type: string
+          description: |
+            Request UUID
+          example: "faae5fcc-cbae-40c4-bf43-89931630d313"
+        command:
+          type: string
+          description: |
+            User specified testcase to be tested against the API
+          example: "Get pet with id 123"
+        apiSpec:
+          type: object
+          properties:
+            serviceUrl:
+              type: string
+              description: Service URL of API if any
+              example: "https://localhost:8243/pizzashack/1.0.0"
+            tools:
+              type: array
+              description: Extracted Http tools from the OpenAPI specification
+              items:
+                type: object
+                example:
+                  name: "GET-order_orderId"
+                  description: "Get details of an Order by providing Order Id. This tool invokes a HTTP GET resource"
+                  method: "GET"
+                  path: "/order/{orderId}"
+                  parameters:
+                    orderId:
+                      location: "path"
+                      description: "Order Id"
+                      required: true
+                      style: "simple"
+                      explode: false
+                      schema:
+                        type: "string"
+                        format: "string"
+        response:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: HTTP status code of the response
+              example: 201
+            path:
+              type: string
+              description: HTTP path url with encoded parameters
+              example: "/order/123"
+            headers:
+              type: object
+              description: Response headers
+              example:
+                contentType: "application/json"
+            body:
+              type: object
+              description: Response payload
+              example:
+                orderId: "300ada62-81bd-4c89-bdfa-983de3cadd77"
+                pizzaType: "Pepperoni"
+                quantity: 2
+                customerName: "John Doe"
+                creditCardNumber: "1234567890123456"
+                address: "123 Main St"
+                delivered: false
+    ApiChatResponse:
+      title: API Chat response
       properties:
         apiSpec:
           type: object
@@ -5853,11 +5877,56 @@ components:
             serviceUrl:
               type: string
               description: Extracted service URL from the OpenAPI specification if there is any
+              example: "https://localhost:8243/pizzashack/1.0.0"
             tools:
               type: array
               description: Extracted Http tools from the OpenAPI specification
               items:
-                $ref: '#/components/schemas/HttpTool'
+                type: object
+                example:
+                  name: "GET-order_orderId"
+                  description: "Get details of an Order by providing Order Id. This tool invokes a HTTP GET resource"
+                  method: "GET"
+                  path: "/order/{orderId}"
+                  parameters:
+                    orderId:
+                      location: "path"
+                      description: "Order Id"
+                      required: true
+                      style: "simple"
+                      explode: false
+                      schema:
+                        type: "string"
+                        format: "string"
+        taskStatus:
+          type: string
+          description: Task status (IN_PROGRESS, TERMINATED or COMPLETED)
+          enum:
+            - IN_PROGRESS
+            - TERMINATED
+            - COMPLETED
+          example: COMPLETED
+        resource:
+          type: object
+          properties:
+            method:
+              type: string
+              description: HTTP method of the resource
+              example: "GET"
+            path:
+              type: string
+              description: Path of the resource
+              example: "/order/{orderId}"
+            inputs:
+              type: object
+              description: Input parameters for the resource
+              example:
+                parameters:
+                  orderId: "123"
+        result:
+          type: string
+          description: completion result
+          example: "The pet with ID 123 is available. Here are the details: - ID: 123 - Name: asd - Status: available"
         queries:
           type: array
           description: list of sample queries
@@ -5875,103 +5944,6 @@ components:
         query:
           type: string
           description: generated query
-    HttpTool:
-      title: HTTP tool
-      required:
-        - description
-        - method
-        - name
-        - path
-      properties:
-        name:
-          type: string
-          description: Name of the Http resource tool
-        description:
-          type: string
-          description: Description of the Http resource tool used by the LLM
-        method:
-          type: string
-          description: Http method type (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS)
-          enum:
-            - OPTIONS
-            - HEAD
-            - PATCH
-            - PUT
-            - DELETE
-            - POST
-            - GET
-        path:
-          type: string
-          description: Path of the Http resource
-        parameters:
-          type: object
-        requestBody:
-          type: object
-    ApiChatExecuteRequest:
-      title: API Chat execute request
-      properties:
-        command:
-          type: string
-          description: |
-            User specified testcase to be tested against the API
-          example: "Get pet with id 123"
-        apiSpec:
-          type: object
-          properties:
-            serviceUrl:
-              type: string
-              description: Service URL of API if any
-            tools:
-              type: array
-              description: Extracted Http tools from the OpenAPI specification
-              items:
-                $ref: '#/components/schemas/HttpTool'
-        response:
-          type: object
-          properties:
-            code:
-              type: integer
-              description: HTTP status code of the response
-              example: 201
-            path:
-              type: string
-              description: HTTP path url with encoded parameters
-              example: "/order/123"
-            headers:
-              type: object
-              description: Response headers
-            body:
-              type: object
-              description: Response payload
-    ApiChatExecuteResponse:
-      title: API Chat execution response
-      required:
-        - taskStatus
-      properties:
-        taskStatus:
-          type: string
-          description: Task status (IN_PROGRESS, TERMINATED or COMPLETED)
-          enum:
-            - IN_PROGRESS
-            - TERMINATED
-            - COMPLETED
-          example: COMPLETED
-        resource:
-          type: object
-          properties:
-            method:
-              type: string
-              description: HTTP method of the resource
-            path:
-              type: string
-              description: Path of the resource
-            inputs:
-              type: object
-              description: Input parameters for the resource
-        result:
-          type: string
-          description: completion result
-          example: "The pet with ID 123 is available. Here are the details: - ID: 123 - Name: asd - Status: available"
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -6315,13 +6287,16 @@ components:
       required: true
       schema:
         type: string
-    apiChatRequestId:
-      name: apiChatRequestId
-      in: header
+    action:
+      name: apiChatAction
+      in: query
       description: |
-        Request ID
+        Action to be performed on API Chat AI Agent. Specifies whether 'prepare' or 'execute'
       schema:
         type: string
+        enum:
+          - PREPARE
+          - EXECUTE
   securitySchemes:
     OAuth2Security:
       type: oauth2

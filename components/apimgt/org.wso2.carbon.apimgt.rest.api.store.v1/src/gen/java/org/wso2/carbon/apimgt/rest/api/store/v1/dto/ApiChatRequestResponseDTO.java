@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class ApiChatExecuteRequestResponseDTO   {
+public class ApiChatRequestResponseDTO   {
   
     private Integer code = null;
     private String path = null;
@@ -28,7 +28,7 @@ public class ApiChatExecuteRequestResponseDTO   {
   /**
    * HTTP status code of the response
    **/
-  public ApiChatExecuteRequestResponseDTO code(Integer code) {
+  public ApiChatRequestResponseDTO code(Integer code) {
     this.code = code;
     return this;
   }
@@ -46,7 +46,7 @@ public class ApiChatExecuteRequestResponseDTO   {
   /**
    * HTTP path url with encoded parameters
    **/
-  public ApiChatExecuteRequestResponseDTO path(String path) {
+  public ApiChatRequestResponseDTO path(String path) {
     this.path = path;
     return this;
   }
@@ -64,13 +64,13 @@ public class ApiChatExecuteRequestResponseDTO   {
   /**
    * Response headers
    **/
-  public ApiChatExecuteRequestResponseDTO headers(Object headers) {
+  public ApiChatRequestResponseDTO headers(Object headers) {
     this.headers = headers;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Response headers")
+  @ApiModelProperty(example = "{\"contentType\":\"application/json\"}", value = "Response headers")
       @Valid
   @JsonProperty("headers")
   public Object getHeaders() {
@@ -83,13 +83,13 @@ public class ApiChatExecuteRequestResponseDTO   {
   /**
    * Response payload
    **/
-  public ApiChatExecuteRequestResponseDTO body(Object body) {
+  public ApiChatRequestResponseDTO body(Object body) {
     this.body = body;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Response payload")
+  @ApiModelProperty(example = "{\"orderId\":\"300ada62-81bd-4c89-bdfa-983de3cadd77\",\"pizzaType\":\"Pepperoni\",\"quantity\":2,\"customerName\":\"John Doe\",\"creditCardNumber\":\"1234567890123456\",\"address\":\"123 Main St\",\"delivered\":false}", value = "Response payload")
       @Valid
   @JsonProperty("body")
   public Object getBody() {
@@ -108,11 +108,11 @@ public class ApiChatExecuteRequestResponseDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApiChatExecuteRequestResponseDTO apiChatExecuteRequestResponse = (ApiChatExecuteRequestResponseDTO) o;
-    return Objects.equals(code, apiChatExecuteRequestResponse.code) &&
-        Objects.equals(path, apiChatExecuteRequestResponse.path) &&
-        Objects.equals(headers, apiChatExecuteRequestResponse.headers) &&
-        Objects.equals(body, apiChatExecuteRequestResponse.body);
+    ApiChatRequestResponseDTO apiChatRequestResponse = (ApiChatRequestResponseDTO) o;
+    return Objects.equals(code, apiChatRequestResponse.code) &&
+        Objects.equals(path, apiChatRequestResponse.path) &&
+        Objects.equals(headers, apiChatRequestResponse.headers) &&
+        Objects.equals(body, apiChatRequestResponse.body);
   }
 
   @Override
@@ -123,7 +123,7 @@ public class ApiChatExecuteRequestResponseDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApiChatExecuteRequestResponseDTO {\n");
+    sb.append("class ApiChatRequestResponseDTO {\n");
     
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
     sb.append("    path: ").append(toIndentedString(path)).append("\n");

@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.HttpToolDTO;
 import javax.validation.constraints.*;
 
 
@@ -24,7 +23,7 @@ import javax.validation.Valid;
 public class EnrichedAPISpecDTO   {
   
     private String serviceUrl = null;
-    private List<HttpToolDTO> tools = new ArrayList<HttpToolDTO>();
+    private List<Object> tools = new ArrayList<Object>();
 
   /**
    * Extracted service URL from the OpenAPI specification if there is any
@@ -35,7 +34,7 @@ public class EnrichedAPISpecDTO   {
   }
 
   
-  @ApiModelProperty(value = "Extracted service URL from the OpenAPI specification if there is any")
+  @ApiModelProperty(example = "https://localhost:8243/pizzashack/1.0.0", value = "Extracted service URL from the OpenAPI specification if there is any")
   @JsonProperty("serviceUrl")
   public String getServiceUrl() {
     return serviceUrl;
@@ -47,20 +46,19 @@ public class EnrichedAPISpecDTO   {
   /**
    * Extracted Http tools from the OpenAPI specification
    **/
-  public EnrichedAPISpecDTO tools(List<HttpToolDTO> tools) {
+  public EnrichedAPISpecDTO tools(List<Object> tools) {
     this.tools = tools;
     return this;
   }
 
   
   @ApiModelProperty(required = true, value = "Extracted Http tools from the OpenAPI specification")
-      @Valid
   @JsonProperty("tools")
   @NotNull
-  public List<HttpToolDTO> getTools() {
+  public List<Object> getTools() {
     return tools;
   }
-  public void setTools(List<HttpToolDTO> tools) {
+  public void setTools(List<Object> tools) {
     this.tools = tools;
   }
 
