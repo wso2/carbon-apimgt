@@ -47,7 +47,7 @@ MarketplaceAssistantApiService delegate = new MarketplaceAssistantApiServiceImpl
         @ApiResponse(code = 200, message = "OK. Api Count is returned. ", response = MarketplaceAssistantApiCountResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error. An error occurred while checking the health status of API Chat service. ", response = Void.class) })
+        @ApiResponse(code = 500, message = "Internal Server Error. An error occurred while retrieving the API count. ", response = Void.class) })
     public Response getMarketplaceAssistantApiCount() throws APIManagementException{
         return delegate.getMarketplaceAssistantApiCount(securityContext);
     }

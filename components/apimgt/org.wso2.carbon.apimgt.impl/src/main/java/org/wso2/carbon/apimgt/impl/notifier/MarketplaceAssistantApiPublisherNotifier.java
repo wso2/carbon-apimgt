@@ -17,8 +17,6 @@ package org.wso2.carbon.apimgt.impl.notifier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -77,7 +75,6 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
             return;
         }
 
-        // [ **Publish**, **Deploy as a Prototype**, **Demote to Created**, **Block**, **Deprecate**, **Re-Publish**, **Retire** ]
         if (APIConstants.EventType.API_LIFECYCLE_CHANGE.name().equals(event.getType())) {
             String lifecycleEvent = apiEvent.getLifecycleEvent();
             String currentStatus = apiEvent.getCurrentStatus().toUpperCase();
@@ -161,8 +158,8 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
             APIUtil.MarketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
                     marketplaceAssistantConfigurationDto.getAccessToken(), marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString());
         } catch (APIManagementException e) {
-            String errorMessage = "Error encountered while Uploading the API to the vector database";
-            log.error(errorMessage);
+            String errorMessage = "Error encountered while Uploading the API to the vector database" + e.getMessage();
+            log.error(errorMessage, e);
         }
     }
 
