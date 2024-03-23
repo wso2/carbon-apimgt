@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public interface AiApiService {
+public interface MarketplaceAssistantApiService {
       public Response getMarketplaceAssistantApiCount(MessageContext messageContext) throws APIManagementException;
       public Response marketplaceAssistantExecute(MarketplaceAssistantRequestDTO marketplaceAssistantRequestDTO, MessageContext messageContext) throws APIManagementException;
 }

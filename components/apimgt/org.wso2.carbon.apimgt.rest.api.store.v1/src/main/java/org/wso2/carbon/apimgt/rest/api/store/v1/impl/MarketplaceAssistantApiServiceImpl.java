@@ -36,9 +36,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public class AiApiServiceImpl implements AiApiService {
+public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantApiService {
 
-    private static final Log log = LogFactory.getLog(AiApiServiceImpl.class);
+
+    private static final Log log = LogFactory.getLog(MarketplaceAssistantApiServiceImpl.class);
 
     private static MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto;
 
