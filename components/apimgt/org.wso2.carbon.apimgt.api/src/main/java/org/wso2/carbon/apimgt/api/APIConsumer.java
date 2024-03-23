@@ -800,6 +800,28 @@ public interface APIConsumer extends APIManager {
     Tier getThrottlePolicyByName(String name, int policyType, String organization) throws APIManagementException;
 
     /**
+     * Returns the API Chat execute call response as a string
+     *
+     * @param apiChatRequestId Request UUID
+     * @param requestPayload Request payload to be used for the AI service execute call
+     * @return execution response as a string
+     * @throws APIManagementException if execute call failed
+     */
+    String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException;
+
+    /**
+     * Returns the API Chat prepare call response as a string
+     *
+     * @param apiId            ID of the API
+     * @param apiChatRequestId Request UUID
+     * @param organization     Identifier of an organization
+     * @return prepare response
+     * @throws APIManagementException if prepare call failed
+     */
+    String invokeApiChatPrepare(String apiId, String apiChatRequestId, String organization)
+            throws APIManagementException;
+
+    /**
      * This method used to retrieve key manager configurations for tenant
      * @param organization organization of the key manager
      * @param username username of the logged in user

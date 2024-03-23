@@ -501,6 +501,23 @@ public final class APIConstants {
     public static final String DIGEST = "x5t#S256";
     public static final String CNF = "cnf";
 
+    // Constants related to AI features: API chat and Marketplace Assistant
+    public static class AI {
+
+        public static final String API_CHAT =  "APIChat.";
+        public static final String API_CHAT_ENABLED = API_CHAT + "Enabled";
+        public static final String API_CHAT_AUTH_TOKEN = API_CHAT + "AuthToken";
+        public static final String API_CHAT_ENDPOINT = API_CHAT + "Endpoint";
+        public static final String API_CHAT_PREPARE_RESOURCE = "/prepare";
+        public static final String API_CHAT_EXECUTE_RESOURCE = "/chat";
+        public static final String API_CHAT_ACTION_PREPARE = "PREPARE";
+        public static final String API_CHAT_ACTION_EXECUTE = "EXECUTE";
+
+        private AI() {
+
+        }
+    }
+
     //documentation rxt
 
     public static final String DOC_NAME = "overview_name";

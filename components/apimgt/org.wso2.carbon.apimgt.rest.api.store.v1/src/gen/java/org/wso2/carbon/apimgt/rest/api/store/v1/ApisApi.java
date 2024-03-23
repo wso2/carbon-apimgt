@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
@@ -67,6 +69,24 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) PostRequestBodyDTO postRequestBodyDTO,  @ApiParam(value = "ID of the perent comment. ")  @QueryParam("replyTo") String replyTo) throws APIManagementException{
         return delegate.addCommentToAPI(apiId, postRequestBodyDTO, replyTo, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/api-chat")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Test API using a natural language query", notes = "Executes a test scenario against an API; which iteratively provide resources that need to be invoked alongside the inputs such as parameters, payloads, etc. while caching the progress. ", response = ApiChatResponseDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "API Chat",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Created. API Chat action completed. ", response = ApiChatResponseDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error. An error occurred while invoking the API Chat service. ", response = Void.class) })
+    public Response apiChatPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Action to be performed on API Chat AI Agent. Specifies whether 'prepare' or 'execute' ", allowableValues="PREPARE, EXECUTE")  @QueryParam("apiChatAction") String apiChatAction, @ApiParam(value = "API Chat request body " ) ApiChatRequestDTO apiChatRequestDTO) throws APIManagementException{
+        return delegate.apiChatPost(apiId, apiChatAction, apiChatRequestDTO, securityContext);
     }
 
     @GET
