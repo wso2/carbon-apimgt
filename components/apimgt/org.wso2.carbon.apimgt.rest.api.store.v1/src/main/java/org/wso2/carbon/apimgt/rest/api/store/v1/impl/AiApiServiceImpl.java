@@ -36,15 +36,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantApiService {
+public class AiApiServiceImpl implements AiApiService {
 
-        private static final Log log = LogFactory.getLog(MarketplaceAssistantApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(AiApiServiceImpl.class);
 
-        private static MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto;
+    private static MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto;
 
-        @Override
-        public Response marketplaceAssistantExecute(MarketplaceAssistantRequestDTO marketplaceAssistantRequestDTO,
-            MessageContext messageContext) throws APIManagementException {
+    @Override
+    public Response marketplaceAssistantExecute(MarketplaceAssistantRequestDTO marketplaceAssistantRequestDTO,
+                                                MessageContext messageContext) throws APIManagementException {
         APIManagerConfiguration configuration = ServiceReferenceHolder.
                 getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
@@ -89,8 +89,8 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
         return null;
     }
 
-        @Override
-        public Response getMarketplaceAssistantApiCount(MessageContext messageContext) throws APIManagementException {
+    @Override
+    public Response getMarketplaceAssistantApiCount(MessageContext messageContext) throws APIManagementException {
         APIManagerConfiguration configuration = ServiceReferenceHolder.
                 getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
@@ -104,7 +104,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
 
                 CloseableHttpResponse response = APIUtil.
                         getMarketplaceChatApiCount(marketplaceAssistantConfigurationDto.getEndpoint(),
-                        marketplaceAssistantConfigurationDto.getApiCountResource());
+                                marketplaceAssistantConfigurationDto.getApiCountResource());
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == HttpStatus.SC_OK) {
                     String responseStr = EntityUtils.toString(response.getEntity());

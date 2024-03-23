@@ -4,8 +4,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantApiCountResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.MarketplaceAssistantApiService;
-import org.wso2.carbon.apimgt.rest.api.store.v1.impl.MarketplaceAssistantApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.store.v1.AiApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.impl.AiApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
@@ -24,18 +24,18 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import java.util.Map;
 import java.util.List;
 import javax.validation.constraints.*;
-@Path("/marketplace-assistant")
+@Path("/ai")
 
-@Api(description = "the marketplace-assistant API")
-
-
+@Api(description = "the ai API")
 
 
-public class MarketplaceAssistantApi  {
+
+
+public class AiApi  {
 
   @Context MessageContext securityContext;
 
-MarketplaceAssistantApiService delegate = new MarketplaceAssistantApiServiceImpl();
+AiApiService delegate = new AiApiServiceImpl();
 
 
     @GET
