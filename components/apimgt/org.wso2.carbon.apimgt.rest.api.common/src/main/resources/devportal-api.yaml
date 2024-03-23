@@ -3655,7 +3655,7 @@ paths:
   ######################################################
   # The "Marketplace Assistant Feature" resource APIs
   ######################################################
-  '/ai/api-count':
+  '/marketplace-assistant/api-count':
 
     #-----------------------------------------------------
     # Get No of apis in the VectorDB
@@ -3685,7 +3685,7 @@ paths:
             Internal Server Error.
             An error occurred while checking the health status of API Chat service.
 
-  '/ai/chat':
+  '/marketplace-assistant/chat':
 
     #-----------------------------------------------------
     # Chat with Marketplace Assistant
