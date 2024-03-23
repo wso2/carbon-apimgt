@@ -126,6 +126,7 @@ public class SettingsMappingUtil {
         settingsDTO.setPasswordPolicyMinLength(passwordPolicyMinLength);
         settingsDTO.setPasswordPolicyMaxLength(passwordPolicyMaxLength);
         settingsDTO.setApiChatEnabled(APIUtil.isApiChatEnabled());
+        settingsDTO.setMarketplaceAssistantEnabled(APIUtil.isMarketplaceAssistantEnabled());
         settingsDTO.setAiAuthTokenProvided(APIUtil.isAuthTokenProvidedForAIFeatures());
 
         if (isUserAvailable) {

@@ -152,6 +152,7 @@ import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
+import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
@@ -10387,6 +10388,18 @@ public final class APIUtil {
     }
 
     /**
+     * Check whether Marketplace Assistant is enabled
+     *
+     * @return returns true if Marketplace Assistant feature is enabled, false if disabled.
+     */
+    public static boolean isMarketplaceAssistantEnabled() {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        MarketplaceAssistantConfigurationDto configDto = configuration.getMarketplaceAssistantConfigurationDto();
+        return configDto.isEnabled();
+    }
+
+    /**
      * Check whether API Chat feature is enabled
      *
      * @return returns true if API Chat feature is enabled, false if disabled.
@@ -10423,7 +10436,7 @@ public final class APIUtil {
         String authToken = config.getFirstProperty(authTokenConfigName);
         try {
             HttpPost preparePost = new HttpPost(endpoint + resource);
-            preparePost.setHeader(HttpHeaders.AUTHORIZATION, APIConstants.AUTHORIZATION_BEARER + authToken);
+            preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             preparePost.setHeader("x-request-id", requestId);
             StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
@@ -10462,11 +10475,12 @@ public final class APIUtil {
      * @return CloseableHttpResponse of the GET call
      * @throws APIManagementException
      */
-    public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String resource)
+    public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String authToken, String resource)
             throws APIManagementException {
 
         try{
             HttpGet apiCountGet = new HttpGet(endpoint + resource);
+            apiCountGet.setHeader(APIConstants.API_KEY_AUTH, authToken);
             URL url = new URL(endpoint);
             int port = url.getPort();
             String protocol = url.getProtocol();
@@ -10484,7 +10498,7 @@ public final class APIUtil {
 
         try {
             HttpPost preparePost = new HttpPost(endpoint + resource);
-            preparePost.setHeader(HttpHeaders.AUTHORIZATION, authToken);
+            preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
             preparePost.setEntity(requestEntity);
@@ -10520,7 +10534,7 @@ public final class APIUtil {
             resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
 
             HttpDelete prepareDelete = new HttpDelete(resourceWithPathParam);
-            prepareDelete.setHeader(HttpHeaders.AUTHORIZATION, authToken);
+            prepareDelete.setHeader(APIConstants.API_KEY_AUTH, authToken);
 
             URL url = new URL(endpoint);
             int port = url.getPort();
