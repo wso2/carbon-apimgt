@@ -401,6 +401,28 @@
         <Access-Control-Allow-Credentials>false</Access-Control-Allow-Credentials>
     </CORSConfiguration>
 
+    <!--
+        Configurations relevant to Marketplace Assistant feature.
+        This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
+    -->
+    <MarketplaceAssistant>
+        <!-- Enable Marketplace Assistant for API Manager -->
+        <Enabled>true</Enabled>
+
+        <AuthToken>abc</AuthToken>
+
+        <Endpoint>https://test.com</Endpoint>
+
+        <ChatResource>/AI/marketplace-assistant/chat</ChatResource>
+
+        <ApiPublishResource>/AI/spec-populator/publish-api</ApiPublishResource>
+
+        <ApiDeleteResource>/AI/spec-populator/remove-api</ApiDeleteResource>
+
+        <ApiCountResource>/AI/spec-populator/api-count</ApiCountResource>
+
+    </MarketplaceAssistant>
+
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
          You can enable this and set preferable Logger name. -->
     <!-- VelocityLogger>VELOCITY</VelocityLogger -->

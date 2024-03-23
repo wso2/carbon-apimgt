@@ -3651,6 +3651,80 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/me/change-password"'
 
+
+  ######################################################
+  # The "Marketplace Assistant Feature" resource APIs
+  ######################################################
+  '/marketplace-assistant/api-count':
+
+    #-----------------------------------------------------
+    # Get No of apis in the VectorDB
+    #-----------------------------------------------------
+    get:
+      summary: API Count endpoint.
+      description: |
+        Get the api count of Marketplace Assistant AI service.
+      operationId: getMarketplaceAssistantApiCount
+      tags:
+        - Marketplace Assistant
+      responses:
+        200:
+          description: |
+            OK.
+            Api Count is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceAssistantApiCountResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while checking the health status of API Chat service.
+
+  '/marketplace-assistant/chat':
+
+    #-----------------------------------------------------
+    # Chat with Marketplace Assistant
+    #-----------------------------------------------------
+    post:
+      summary: Marketplace Assistant Chat Endpoint.
+      description: |
+        Send a single query to the service and get the response.
+      operationId: marketplaceAssistantExecute
+      requestBody:
+        description: |
+          Marketplace Assistant chat request payload.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarketplaceAssistantRequest'
+      tags:
+        - Marketplace Assistant
+      responses:
+        201:
+          description: |
+            Created.
+            Marketplace Assistant chat response payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceAssistantResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        429:
+          $ref: '#/components/responses/TooManyRequests'
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while executing test using Marketplace Chat service.
+
+
 components:
   schemas:
     APIList:
@@ -5944,6 +6018,81 @@ components:
         query:
           type: string
           description: generated query
+    ChatMessage:
+      required:
+        - content
+        - role
+      type: object
+      properties:
+        role:
+          type: string
+          description: user or assistant role of a chat message.
+          example: "assistant"
+        content:
+          type: string
+          description: content of the message.
+          example: "Hi, How can I help you?"
+    MarketplaceAssistantRequest:
+      required:
+        - query
+        - history
+      type: object
+      properties:
+        query:
+          type: string
+          description: natural langugae query given by the user.
+          example: "Hi"
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+    MarketplaceAssistantApi:
+      required:
+        - apiId
+        - apiName
+        - version
+      type: object
+      properties:
+        apiId:
+          type: string
+          description: Uuid of the api.
+          example: "1sbdhsjd-121n-nknsjkd-1213njb"
+        apiName:
+          type: string
+          description: name of the api.
+          example: "PizzaShackAPI"
+        version:
+          type: string
+          description: version of the api.
+          example: "1.0.0"
+    MarketplaceAssistantResponse:
+      required:
+        - response
+      type: object
+      properties:
+        response:
+          type: string
+          description: natural language response by the llm.
+          example: "Hi, How can I help you?"
+        apis:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarketplaceAssistantApi'
+    MarketplaceAssistantApiCountResponse:
+      required:
+        - count
+        - limit
+      type: object
+      properties:
+        count:
+          type: integer
+          description: no of apis stored in the vectordb.
+          example: "100"
+        limit:
+          type: integer
+          description: maximum no of apis allowed for an org.
+          example: "1000"
+
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -6045,6 +6194,18 @@ components:
             description: The entity of the request was not in a supported format
             moreInfo: ""
             error: []
+    TooManyRequests:
+      description: Too many requests.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 429
+            message: TooManyRequests
+            description: The user has exceeded the rate limit
+            moreInfo: ""
+            error: [ ]
   parameters:
     parentCommentID:
       name: replyTo
