@@ -3149,6 +3149,17 @@ public class SQLConstants {
     public static final String UPDATE_CORRELATION_CONFIG_PROPERTIES = "UPDATE AM_CORRELATION_PROPERTIES SET " +
             "PROPERTY_VALUE=? WHERE COMPONENT_NAME=? AND PROPERTY_NAME=?";
 
+    public static final String GET_SUBSCRIPTION_COUNT_OF_API_SQL =
+            " SELECT Count(SUBS.UUID) AS SUBS_COUNT" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   API.API_ID = SUBS.API_ID " +
+                    "   AND API.API_UUID = ? " +
+                    "   AND API.ORGANIZATION = ?" +
+                    "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{
