@@ -931,25 +931,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon.governance</groupId>
-                <artifactId>org.wso2.carbon.governance.lcm</artifactId>
-                <version>${carbon.governance.version}</version>
-            </dependency>
-
-
-            <dependency>
-                <groupId>org.wso2.carbon.governance</groupId>
-                <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
-                <version>${carbon.governance.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.poi.wso2</groupId>
-                        <artifactId>poi-scratchpad</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
                 <groupId>org.wso2.org.ops4j.pax.logging</groupId>
                 <artifactId>pax-logging-api</artifactId>
                 <version>${pax.logging.api.version}</version>
@@ -2003,6 +1984,12 @@
                 <artifactId>spotbugs-annotations</artifactId>
                 <version>${spotbugs.annotations.version}</version>
             </dependency>
+            <dependency>
+                <groupId>javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>3.3.GA</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2030,7 +2017,7 @@
 
         <carbon.commons.version>4.10.3</carbon.commons.version>
 
-        <carbon.registry.version>4.8.30</carbon.registry.version>
+        <carbon.registry.version>4.8.31</carbon.registry.version>
         <carbon.mediation.version>4.7.200</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
