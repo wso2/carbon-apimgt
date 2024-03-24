@@ -930,19 +930,6 @@
                 <version>${carbon.governance.version}</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>org.wso2.carbon.governance</groupId>
-                <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
-                <version>${carbon.governance.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.poi.wso2</groupId>
-                        <artifactId>poi-scratchpad</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
             <dependency>
                 <groupId>org.wso2.org.ops4j.pax.logging</groupId>
                 <artifactId>pax-logging-api</artifactId>
