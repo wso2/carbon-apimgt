@@ -53,7 +53,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         } else {
             marketplaceAssistantConfigurationDto = configuration.getMarketplaceAssistantConfigurationDto();
 
-            if (marketplaceAssistantConfigurationDto.isEnabled()) {
+            if (APIUtil.isMarketplaceAssistantEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
                 process(event);
             }
         }
