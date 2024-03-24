@@ -775,35 +775,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 .encoder(new FormEncoder())
                 .target(AuthClient.class, tokenEndpoint);
 
-        introspectionClient = Feign.builder()
-                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(introspectionEndpoint)))
-                .encoder(new GsonEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Slf4jLogger())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
-                .errorDecoder(new KMClientErrorDecoder())
-                .encoder(new FormEncoder())
-                .target(IntrospectionClient.class, introspectionEndpoint);
-        scopeClient = Feign.builder()
-                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(scopeEndpoint)))
-                .encoder(new GsonEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Slf4jLogger())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
-                .errorDecoder(new KMClientErrorDecoder())
-                .target(ScopeClient.class, scopeEndpoint);
-        userClient = Feign.builder()
-                .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(userInfoEndpoint)))
-                .encoder(new GsonEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Slf4jLogger())
-                .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
-                .requestInterceptor(new TenantHeaderInterceptor(tenantDomain))
-                .errorDecoder(new KMClientErrorDecoder())
-                .target(UserClient.class, userInfoEndpoint);
-
         if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(configuration.getType())) {
             String revokeOneTimeTokenEndpoint;
             if (configuration.getParameter(APIConstants.KeyManager.REVOKE_TOKEN_ENDPOINT) != null) {
