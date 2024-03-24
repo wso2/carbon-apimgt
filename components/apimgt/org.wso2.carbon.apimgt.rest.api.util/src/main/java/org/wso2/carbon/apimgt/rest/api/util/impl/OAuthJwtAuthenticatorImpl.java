@@ -55,7 +55,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.security.cert.X509Certificate;
+import java.security.cert.X509Certificate;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;

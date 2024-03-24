@@ -286,7 +286,7 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
-import javax.security.cert.X509Certificate;
+import java.security.cert.X509Certificate;
 import javax.validation.constraints.NotNull;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -9283,8 +9283,9 @@ public final class APIUtil {
             base64EncodedCertificate = APIUtil.getX509certificateContent(base64EncodedCertificate);
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                return X509Certificate.getInstance(inputStream);
-            } catch (IOException | javax.security.cert.CertificateException e) {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                return (X509Certificate) cf.generateCertificate(inputStream);
+            } catch (IOException | CertificateException e) {
                 String msg = "Error while converting into X509Certificate";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
@@ -9307,8 +9308,9 @@ public final class APIUtil {
             base64EncodedCertificate = APIUtil.getX509certificateContent(base64EncodedCertificate);
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate.getBytes());
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                return X509Certificate.getInstance(inputStream);
-            } catch (IOException | javax.security.cert.CertificateException e) {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                return (X509Certificate) cf.generateCertificate(inputStream);
+            } catch (IOException | CertificateException e) {
                 String msg = "Error while converting into X509Certificate";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
