@@ -61,6 +61,10 @@
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.governance</groupId>
+            <artifactId>org.wso2.carbon.governance.api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.uri.template</groupId>
             <artifactId>wso2-uri-templates</artifactId>
         </dependency>
@@ -111,6 +115,7 @@
                                 <bundleDef>
                                     org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
                                 </bundleDef>
+                                <bundleDef>org.wso2.carbon.governance:org.wso2.carbon.governance.api:${carbon.governance.version}</bundleDef>
                                 <bundleDef>com.googlecode.json-simple:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
