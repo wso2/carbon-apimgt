@@ -25,6 +25,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
@@ -36,6 +37,7 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
@@ -57,10 +59,22 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
     private final PolicyRetriever policyRetriever = new PolicyRetriever();
     private final ScheduledExecutorService policyRetrievalScheduler = Executors.newScheduledThreadPool(10,
             new PolicyRetrieverThreadFactory());
+    private final EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
+            .getAPIMConfiguration().getEventHubConfigurationDto();
 
     public void onMessage(Message message) {
 
         try {
+            if (eventHubConfigurationDto.hasEventWaitingTime()) {
+                long timeLeft = message.getJMSTimestamp() + eventHubConfigurationDto.getEventWaitingTime()
+                        - System.currentTimeMillis();
+                if (log.isDebugEnabled()) {
+                    log.debug("Event Hub waiting time: " + timeLeft);
+                }
+                if (timeLeft > 0) {
+                    Thread.sleep(timeLeft);
+                }
+            }
             if (message != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Event received in JMS Event Receiver - " + message);
@@ -94,6 +108,8 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             }
         } catch (JMSException | JsonProcessingException e) {
             log.error("JMSException occurred when processing the received message ", e);
+        } catch (InterruptedException e) {
+            log.error("Error occurred while waiting to retrieve artifacts from event hub", e);
         }
     }
 
