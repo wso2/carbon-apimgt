@@ -18,11 +18,12 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-import org.json.simple.JSONArray;
-
+/**
+ * Details related to enriched API specification
+ */
 public class APIChatAPISpec {
     private String serviceUrl = null;
-    private JSONArray tools;
+    private Object tools;
 
     public String getServiceUrl() {
         return serviceUrl;
@@ -32,11 +33,11 @@ public class APIChatAPISpec {
         this.serviceUrl = serviceUrl;
     }
 
-    public JSONArray getTools() {
+    public Object getTools() {
         return tools;
     }
 
-    public void setTools(JSONArray tools) {
+    public void setTools(Object tools) {
         this.tools = tools;
     }
 }
