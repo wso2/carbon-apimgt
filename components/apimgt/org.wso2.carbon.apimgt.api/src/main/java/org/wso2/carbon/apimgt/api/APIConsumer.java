@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -860,4 +861,12 @@ public interface APIConsumer extends APIManager {
     boolean isKeyManagerByNameAllowedForUser(String keyManagerName, String organization, String username)
             throws APIManagementException;
 
+    /**
+     * Remove application keys.
+     * @param application   application
+     * @param keyMappingId  key mapping id
+     * @param xWSO2Tenant   tenant domain
+     * @throws APIManagementException
+     */
+    boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant) throws APIManagementException;
 }

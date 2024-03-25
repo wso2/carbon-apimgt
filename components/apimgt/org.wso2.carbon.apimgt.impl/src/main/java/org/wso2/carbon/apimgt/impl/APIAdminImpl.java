@@ -27,7 +27,6 @@ import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
@@ -44,14 +43,12 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -73,24 +70,13 @@ import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.apimgt.persistence.dto.AdminApiInfo;
 import org.wso2.carbon.apimgt.persistence.dto.AdminApiSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.AdminContentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.Organization;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
-import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
-import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
@@ -117,10 +103,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -136,6 +120,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getPaginatedApplicationList;
 
 /**
  * This class provides the core API admin functionality.
@@ -390,8 +375,8 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization)
-            throws APIManagementException {
+    public List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization,
+            boolean checkUsages) throws APIManagementException {
 
         // For Choreo scenario (Choreo organization uses the same super tenant Resident Key Manager
         // Hence no need to register the default key manager per organization)
@@ -443,6 +428,10 @@ public class APIAdminImpl implements APIAdmin {
         }
 
         setIdentityProviderRelatedInformation(keyManagerConfigurationsByTenant, organization);
+        if (checkUsages) {
+            setKeyManagerUsageRelatedInformation(keyManagerConfigurationsByTenant, organization);
+        }
+
         return keyManagerConfigurationsByTenant;
     }
 
@@ -470,6 +459,29 @@ public class APIAdminImpl implements APIAdmin {
             }
         }
 
+    }
+
+    private void setKeyManagerUsageRelatedInformation(
+            List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization, String organization)
+            throws APIManagementException {
+
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByOrganization) {
+
+            KeyManagerApplicationUsages appUsages = getApplicationsOfKeyManager(keyManagerConfigurationDTO.getUuid(), 0,
+                    Integer.MAX_VALUE);
+            if (appUsages.getApplicationCount() > 0) {
+                keyManagerConfigurationDTO.setUsed(true);
+                continue;
+            }
+
+            AdminContentSearchResult apiUsages = getAPIUsagesByKeyManagerNameAndOrganization(organization,
+                    keyManagerConfigurationDTO.getName(), 0, Integer.MAX_VALUE);
+            if (apiUsages.getApiCount() > 0) {
+                keyManagerConfigurationDTO.setUsed(true);
+                continue;
+            }
+            keyManagerConfigurationDTO.setUsed(false);
+        }
     }
 
     private void setAliasForTokenExchangeKeyManagers(List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant,
@@ -641,6 +653,29 @@ public class APIAdminImpl implements APIAdmin {
         new KeyMgtNotificationSender()
                 .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
         return keyManagerConfigurationDTO;
+    }
+
+    public AdminContentSearchResult getAPIUsagesByKeyManagerNameAndOrganization(String org, String keyManagerName,
+            int offset, int limit) throws APIManagementException {
+
+        APIPersistence apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
+        String searchQuery = APIConstants.API_USAGE_BY_KEY_MANAGER_QUERY.replace("$1", keyManagerName);
+        try {
+            return apiPersistenceInstance.searchContentForAdmin(org, searchQuery, offset, limit, limit);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while finding the key manager ", e);
+        }
+    }
+
+    public KeyManagerApplicationUsages getApplicationsOfKeyManager(String keyManagerId, int offset, int limit)
+            throws APIManagementException {
+
+        KeyManagerApplicationUsages keyManagerApplicationUsages = new KeyManagerApplicationUsages();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        List<ApplicationInfoKeyManager> applications = apiMgtDAO.getAllApplicationsOfKeyManager(keyManagerId);
+        keyManagerApplicationUsages.setApplicationCount(applications.size());
+        keyManagerApplicationUsages.setApplications(getPaginatedApplicationList(applications, offset, limit));
+        return keyManagerApplicationUsages;
     }
 
     private void validateKeyManagerEndpointConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
@@ -926,14 +961,24 @@ public class APIAdminImpl implements APIAdmin {
     public void deleteKeyManagerConfigurationById(String organization, KeyManagerConfigurationDTO kmConfig)
             throws APIManagementException {
         if (kmConfig != null) {
-            if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(kmConfig.getName())) {
-                deleteIdentityProvider(organization, kmConfig);
-                apiMgtDAO.deleteKeyManagerConfigurationById(kmConfig.getUuid(), organization);
-                new KeyMgtNotificationSender()
-                        .notify(kmConfig, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
+            AdminContentSearchResult apiUsage = getAPIUsagesByKeyManagerNameAndOrganization(organization,
+                    kmConfig.getName(), 0, Integer.MAX_VALUE);
+            KeyManagerApplicationUsages appUsages = getApplicationsOfKeyManager(kmConfig.getUuid(), 0,
+                    Integer.MAX_VALUE);
+            if (apiUsage != null && apiUsage.getApiCount() == 0 && appUsages != null
+                    && appUsages.getApplicationCount() == 0) {
+                if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(kmConfig.getName())) {
+                    deleteIdentityProvider(organization, kmConfig);
+                    apiMgtDAO.deleteKeyManagerConfigurationById(kmConfig.getUuid(), organization);
+                    new KeyMgtNotificationSender()
+                            .notify(kmConfig, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
+                } else {
+                    throw new APIManagementException(APIConstants.KeyManager.DEFAULT_KEY_MANAGER + " couldn't delete",
+                            ExceptionCodes.KEY_MANAGER_DELETE_FAILED);
+                }
             } else {
-                throw new APIManagementException(APIConstants.KeyManager.DEFAULT_KEY_MANAGER + " couldn't delete",
-                        ExceptionCodes.INTERNAL_ERROR);
+                throw new APIManagementException("Key Manager is already used by an API or an Application.",
+                        ExceptionCodes.KEY_MANAGER_DELETE_FAILED);
             }
         }
     }
@@ -1702,6 +1747,17 @@ public class APIAdminImpl implements APIAdmin {
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurations) {
             decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
         }
+        return keyManagerConfigurations;
+    }
+
+    public List<KeyManagerConfigurationDTO> getGlobalKeyManagerConfigurations(String organization)
+            throws APIManagementException {
+        List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiMgtDAO.getKeyManagerConfigurationsByOrganization(
+                APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN);
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurations) {
+            decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
+        }
+        setKeyManagerUsageRelatedInformation(keyManagerConfigurations, organization);
         return keyManagerConfigurations;
     }
 }
