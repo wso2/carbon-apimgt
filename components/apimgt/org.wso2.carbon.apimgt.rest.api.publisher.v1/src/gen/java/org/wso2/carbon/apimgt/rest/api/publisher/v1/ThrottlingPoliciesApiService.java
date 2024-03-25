@@ -11,7 +11,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionPolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlePolicyResetDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
 
@@ -27,5 +26,4 @@ public interface ThrottlingPoliciesApiService {
       public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getSubscriptionThrottlingPolicies(Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getThrottlingPolicyByName(String policyName, String policyLevel, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingPoliciesResetPost(ThrottlePolicyResetDTO throttlePolicyResetDTO, MessageContext messageContext) throws APIManagementException;
 }

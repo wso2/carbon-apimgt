@@ -255,11 +255,6 @@ public interface APIProvider extends APIManager {
      */
     SubscriptionPolicy getSubscriptionPolicyByUUID(String uuid) throws APIManagementException;
 
-    boolean resetSubscriptionThrottlePolicy(String appId, String apiContext, String apiVersion, String subscriptionTier, String organization);
-
-    boolean resetApiThrottlePolicy(String apiContext, String apiVersion, String apiTier, String organization);
-
-    boolean resetResourceThrottlePolicy(String apiContext, String apiVersion, String apiTier, String resourceTier, String resource, String organization);
     /**
      * Get global throttling policy by name
      * @param policyName name of the policy
