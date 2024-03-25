@@ -835,7 +835,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
             JSONObject responseJson = ApisApiServiceImplUtils
                     .getAuditReport(api, securityAuditPropertyObject, apiDefinition, organization);
-            if (responseJson != null) {
+            if (!responseJson.isEmpty()) {
                 AuditReportDTO auditReportDTO = new AuditReportDTO();
                 auditReportDTO.setReport((String) responseJson.get("decodedReport"));
                 auditReportDTO.setGrade((String) responseJson.get("grade"));
