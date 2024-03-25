@@ -10430,11 +10430,22 @@ public final class APIUtil {
         return true;
     }
 
-    public static String invokeAIService(String endpointConfigName, String authTokenConfigName,
-            String resource, String payload, String requestId) throws  APIManagementException {
+    /**
+     * This method is used to invoke the Choreo deployed AI service.
+     *
+     * @param endpointConfigName  Name of endpoint configuration
+     * @param authTokenConfigName Name of AI token configuration
+     * @param resource            Specifies the backend resource the request should be forwarded to
+     * @param payload             Request payload that needs to be attached to the request
+     * @param requestId           UUID of the request, so that AI service can track the progress
+     * @return returns the response if invocation is successful
+     * @throws APIManagementException if an error occurs while invoking the AI service
+     */
+    public static String invokeAIService(String endpointConfigName, String authTokenConfigName, String resource,
+            String payload, String requestId) throws APIManagementException {
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
         String endpoint = config.getFirstProperty(endpointConfigName);
         String authToken = config.getFirstProperty(authTokenConfigName);
         try {

@@ -842,6 +842,14 @@
                 <URI>/api/am/gateway/v2/server-startup-healthcheck</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/devportal/{version}/marketplace-assistant/api-count</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/devportal/{version}/marketplace-assistant/chat</URI>
+                <HTTPMethods>POST</HTTPMethods>
+            </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>
             <ETagSkipURI>
@@ -950,6 +958,14 @@
             </ETagSkipURI>
             <ETagSkipURI>
                 <URI>/api/am/publisher/{version}/tiers/update-permission</URI>
+                <HTTPMethods>POST</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
+                <URI>/api/am/devportal/{version}/marketplace-assistant/api-count</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </ETagSkipURI>
+            <ETagSkipURI>
+                <URI>/api/am/devportal/{version}/marketplace-assistant/chat</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
         </ETagSkipList>

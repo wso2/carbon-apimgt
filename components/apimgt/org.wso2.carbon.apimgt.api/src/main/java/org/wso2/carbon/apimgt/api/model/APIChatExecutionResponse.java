@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+/**
+ * Details related to Published API invocation response
+ */
 public class APIChatExecutionResponse {
     private Integer code = null;
     private String path = null;
