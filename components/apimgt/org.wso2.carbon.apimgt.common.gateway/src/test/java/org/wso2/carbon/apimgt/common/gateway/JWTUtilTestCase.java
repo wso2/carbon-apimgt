@@ -61,24 +61,25 @@ public class JWTUtilTestCase {
         X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(
                 Files.newInputStream(Paths.get("src/test/resources/cnf/certificate.pem"))
         );
+        String signatureAlgorithm = "SHA256withRSA";
 
-        String jwt = JWTUtil.generateHeader(cert, "SHA256withRSA", true, false);
+        //Use SHA-256 as the certificate hashing algorithm
+        String jwt = JWTUtil.generateHeader(cert, signatureAlgorithm, true, false);
         Assert.assertNotNull(jwt);
         Assert.assertTrue(jwt.contains("kid"));
 
         String encodedThumbprint = generateCertThumbprint(cert, "SHA-256");
-        //Check if the encoded thumbprint get matched with JWT header's x5t#S256
+        //Check if the encoded thumbprint matches with the JWT header's x5t#S256
         Assert.assertTrue(jwt.contains(encodedThumbprint));
         Assert.assertTrue(jwt.contains("x5t#S256"));
 
-        Assert.assertTrue(jwt.contains("x5t#S256"));
-
-        jwt = JWTUtil.generateHeader(cert, "SHA256withRSA", false, true);
+        //Use SHA-1 as the certificate hashing algorithm
+        jwt = JWTUtil.generateHeader(cert, signatureAlgorithm, false, true);
         Assert.assertNotNull(jwt);
         Assert.assertFalse(jwt.contains("kid"));
 
         encodedThumbprint = generateCertThumbprint(cert, "SHA-1");
-        //Check if the encoded thumbprint get matched with JWT header's x5t
+        //Check if the encoded thumbprint matches with the JWT header's x5t
         Assert.assertTrue(jwt.contains(encodedThumbprint));
         Assert.assertTrue(jwt.contains("x5t"));
     }

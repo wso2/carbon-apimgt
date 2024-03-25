@@ -58,6 +58,7 @@ import java.util.UUID;
         SubscriptionDataHolder.class})
 public class TokenGenTest {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
+    private static final String signatureAlgorithm = "SHA256withRSA";
 
     @Before
     public void setUp() throws Exception {
@@ -239,11 +240,11 @@ public class TokenGenTest {
         keystore.load(inputStream, pwd);
         Certificate cert = keystore.getCertificate("wso2carbon");
 
-        //Generate JWT header using the above certificate
-        String header = AbstractJWTGenerator.generateHeader(cert, "SHA256withRSA", false, true);
+        //Generate JWT header using the above certificate. Use SHA-1 as the certificate hashing algorithm.
+        String header = AbstractJWTGenerator.generateHeader(cert, signatureAlgorithm, false, true);
 
         String encodedThumbprint = generateCertThumbprint(cert, "SHA-1");
-        //Check if the encoded thumbprint get matched with JWT header's x5t
+        //Check if the encoded thumbprint matches with the JWT header's x5t
         Assert.assertTrue(header.contains(encodedThumbprint));
         Assert.assertTrue(header.contains("x5t"));
     }
@@ -257,11 +258,11 @@ public class TokenGenTest {
         keystore.load(inputStream, pwd);
         Certificate cert = keystore.getCertificate("wso2carbon");
 
-        //Generate JWT header using the above certificate
-        String header = AbstractJWTGenerator.generateHeader(cert, "SHA256withRSA", false, false);
+        //Generate JWT header using the above certificate. Use SHA-256 as the certificate hashing algorithm.
+        String header = AbstractJWTGenerator.generateHeader(cert, signatureAlgorithm, false, false);
 
         String encodedThumbprint = generateCertThumbprint(cert, "SHA-256");
-        //Check if the encoded thumbprint get matched with JWT header's x5t#S256
+        //Check if the encoded thumbprint matches with the JWT header's x5t#S256
         Assert.assertTrue(header.contains(encodedThumbprint));
         Assert.assertTrue(header.contains("x5t#S256"));
     }
