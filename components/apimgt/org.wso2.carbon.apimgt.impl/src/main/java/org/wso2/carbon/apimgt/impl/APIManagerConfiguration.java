@@ -632,7 +632,7 @@ public class APIManagerConfiguration {
                     jsonObject.put(APIConstants.CustomPropertyAttributes.REQUIRED, isRequired);
                     customProperties.add(jsonObject);
                 }
-            } else if (APIConstants.MARKETPLACE_ASSISTANT.equals(localName)) {
+            } else if (APIConstants.AI.MARKETPLACE_ASSISTANT.equals(localName)) {
                 setMarketplaceAssistantConfiguration(element);
             }
             readChildElements(element, nameStack);
@@ -2339,40 +2339,40 @@ public class APIManagerConfiguration {
 
     public void setMarketplaceAssistantConfiguration(OMElement omElement){
         OMElement marketplaceAssistantEnableElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_ENABLED));
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_ENABLED));
         if (marketplaceAssistantEnableElement != null) {
             marketplaceAssistantConfigurationDto.setEnabled(Boolean.parseBoolean(marketplaceAssistantEnableElement.getText()));
         }
         if (marketplaceAssistantConfigurationDto.isEnabled()) {
             OMElement marketplaceAssistantEndpoint =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_ENDPOINT));
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_ENDPOINT));
             if (marketplaceAssistantEndpoint != null) {
                 marketplaceAssistantConfigurationDto.setEndpoint(marketplaceAssistantEndpoint.getText());
             }
             OMElement marketplaceAssistantToken =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_AUTH_TOKEN));
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_AUTH_TOKEN));
 
             if (marketplaceAssistantToken != null) {
                 String AccessToken = MiscellaneousUtil.resolve(marketplaceAssistantToken, secretResolver);
                 marketplaceAssistantConfigurationDto.setAccessToken(AccessToken);
             }
             OMElement marketplaceAssistantApiCountResource =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE));
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE));
             if (marketplaceAssistantApiCountResource != null) {
                 marketplaceAssistantConfigurationDto.setApiCountResource(marketplaceAssistantApiCountResource.getText());
             }
             OMElement marketplaceAssistantApiDeleteResource =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE));
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE));
             if (marketplaceAssistantApiDeleteResource != null) {
                 marketplaceAssistantConfigurationDto.setApiDeleteResource(marketplaceAssistantApiDeleteResource.getText());
             }
             OMElement marketplaceAssistantApiPublishResource =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE));
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE));
             if (marketplaceAssistantApiPublishResource != null) {
                 marketplaceAssistantConfigurationDto.setApiPublishResource(marketplaceAssistantApiPublishResource.getText());
             }
             OMElement marketplaceAssistantChatResource =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_CHAT_RESOURCE));
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_CHAT_RESOURCE));
             if (marketplaceAssistantChatResource != null) {
                 marketplaceAssistantConfigurationDto.setChatResource(marketplaceAssistantChatResource.getText());
             }
