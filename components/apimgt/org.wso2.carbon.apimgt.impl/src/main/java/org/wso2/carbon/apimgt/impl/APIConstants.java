@@ -505,12 +505,13 @@ public final class APIConstants {
     // Constants related to AI features: API chat and Marketplace Assistant
     public static class AI {
 
-        public static final String API_CHAT =  "APIChat.";
-        public static final String API_CHAT_ENABLED = API_CHAT + "Enabled";
-        public static final String API_CHAT_AUTH_TOKEN = API_CHAT + "AuthToken";
-        public static final String API_CHAT_ENDPOINT = API_CHAT + "Endpoint";
-        public static final String API_CHAT_PREPARE_RESOURCE = "/prepare";
-        public static final String API_CHAT_EXECUTE_RESOURCE = "/chat";
+        public static final String API_CHAT =  "APIChat";
+        public static final String API_CHAT_ENABLED = "Enabled";
+        public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
+        public static final String API_CHAT_ENDPOINT = "Endpoint";
+        public static final String RESOURCES = "Resources";
+        public static final String API_CHAT_PREPARE_RESOURCE = "PrepareResource";
+        public static final String API_CHAT_EXECUTE_RESOURCE = "ExecuteResource";
         public static final String API_CHAT_ACTION_PREPARE = "PREPARE";
         public static final String API_CHAT_ACTION_EXECUTE = "EXECUTE";
 

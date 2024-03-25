@@ -82,7 +82,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 payload.put(APIConstants.TENANT_DOMAIN, organization);
 
                 String response = APIUtil.
-                        MarketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                        marketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
                                 marketplaceAssistantConfigurationDto.getAccessToken(),
                                 marketplaceAssistantConfigurationDto.getChatResource(), payload.toString());
 

@@ -196,21 +196,13 @@
 
         <Endpoint>http://localhost:9090</Endpoint>
 
+        <Resources>
+            <PrepareResource>/prepare</PrepareResource>
+            <ExecuteResource>/execute</ExecuteResource>
+        </Resources>
+
     </APIChat>
 
-    <!--
-        Configurations relevant to Marketplace Assistant feature.
-        This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
-    -->
-    <MarketplaceAssistant>
-        <!-- Enable Marketplace Assistant for API Manager -->
-        <Enabled>true</Enabled>
-
-        <AuthToken></AuthToken>
-
-        <Endpoint>http://localhost:9090</Endpoint>
-
-    </MarketplaceAssistant>
 
     <!--
         API key validator configuration used by API key manager (IS), API store and API gateway.
@@ -408,19 +400,14 @@
     <MarketplaceAssistant>
         <!-- Enable Marketplace Assistant for API Manager -->
         <Enabled>true</Enabled>
-
-        <AuthToken>abc</AuthToken>
-
-        <Endpoint>https://test.com</Endpoint>
-
-        <ChatResource>/AI/marketplace-assistant/chat</ChatResource>
-
-        <ApiPublishResource>/AI/spec-populator/publish-api</ApiPublishResource>
-
-        <ApiDeleteResource>/AI/spec-populator/remove-api</ApiDeleteResource>
-
-        <ApiCountResource>/AI/spec-populator/api-count</ApiCountResource>
-
+        <AuthToken></AuthToken>
+        <Endpoint>http://localhost:9090</Endpoint>
+        <Resources>
+            <ChatResource>/chat</ChatResource>
+            <ApiPublishResource>/publish-api</ApiPublishResource>
+            <ApiDeleteResource>/remove-api</ApiDeleteResource>
+            <ApiCountResource>/api-count</ApiCountResource>
+        </Resources>
     </MarketplaceAssistant>
 
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.

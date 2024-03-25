@@ -152,6 +152,7 @@ import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
+import org.wso2.carbon.apimgt.impl.ai.ApiChatConfigurationDto;
 import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -10407,10 +10408,9 @@ public final class APIUtil {
      * @return returns true if API Chat feature is enabled, false if disabled.
      */
     public static boolean isApiChatEnabled() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String isApiChatEnabled = config.getFirstProperty(APIConstants.AI.API_CHAT_ENABLED);
-        return Boolean.parseBoolean(isApiChatEnabled);
+        ApiChatConfigurationDto configDto = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
+        return configDto.isEnabled();
     }
 
     /**
@@ -10420,22 +10420,17 @@ public final class APIUtil {
      * @return returns true if a valid auth token is found, false otherwise.
      */
     public static boolean isAuthTokenProvidedForAIFeatures() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String authToken = config.getFirstProperty(APIConstants.AI.API_CHAT_AUTH_TOKEN);
-        if (StringUtils.isEmpty(authToken)) {
+        ApiChatConfigurationDto configDto = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
+        if (StringUtils.isEmpty(configDto.getAccessToken())) {
             return false;
         }
         return true;
     }
 
-    public static String invokeAIService(String endpointConfigName, String authTokenConfigName,
+    public static String invokeAIService(String endpoint, String authToken,
             String resource, String payload, String requestId) throws  APIManagementException {
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String endpoint = config.getFirstProperty(endpointConfigName);
-        String authToken = config.getFirstProperty(authTokenConfigName);
         try {
             HttpPost preparePost = new HttpPost(endpoint + resource);
             preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
@@ -10469,11 +10464,11 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used for AI Service health check purposes. This will be utilized by API-Chat feature and
-     * Marketplace-Assistant feature
+     * This method is used to get the no of apis in the vector db for an organization
      *
-     * @param endpoint Config name to retrieve the AI Service URL
-     * @param resource           Resource that we should forward the request to
+     * @param endpoint Config name to retrieve the Service URL
+     * @param resource Resource that we should forward the request to
+     * @param authToken OnPremKey for the organization
      * @return CloseableHttpResponse of the GET call
      * @throws APIManagementException
      */
@@ -10495,7 +10490,7 @@ public final class APIUtil {
         }
     }
 
-    public static String MarketplaceAssistantPostService(String endpoint, String authToken,
+    public static String marketplaceAssistantPostService(String endpoint, String authToken,
                                          String resource, String payload) throws  APIManagementException {
 
         try {
@@ -10528,7 +10523,7 @@ public final class APIUtil {
     }
 
 
-    public static void DeleteApi(String endpoint, String authToken,
+    public static void deleteApi(String endpoint, String authToken,
                                  String resource, String uuid) throws  APIManagementException {
 
         try {
