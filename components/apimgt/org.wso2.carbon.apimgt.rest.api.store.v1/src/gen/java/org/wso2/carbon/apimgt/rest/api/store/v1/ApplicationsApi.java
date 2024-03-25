@@ -319,6 +319,25 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         return delegate.applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost(applicationId, keyMappingId, ifMatch, securityContext);
     }
 
+    @DELETE
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Remove Generated Application Keys", notes = "Remove generated application keys from dev portal rest api ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+        })
+    }, tags={ "Application Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Key removed successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.applicationsApplicationIdOauthKeysKeyMappingIdDelete(applicationId, keyMappingId, xWSO2Tenant, securityContext);
+    }
+
     @POST
     @Path("/{applicationId}/oauth-keys/{keyMappingId}/generate-token")
     @Consumes({ "application/json" })

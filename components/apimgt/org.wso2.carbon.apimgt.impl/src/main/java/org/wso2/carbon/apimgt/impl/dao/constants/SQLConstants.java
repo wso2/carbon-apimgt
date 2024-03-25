@@ -1269,6 +1269,13 @@ public class SQLConstants {
             "SELECT MAP.CONSUMER_KEY, MAP.CREATE_MODE, KM.NAME, KM.ORGANIZATION FROM AM_APPLICATION_KEY_MAPPING MAP,"
                     + " AM_KEY_MANAGER KM WHERE MAP.APPLICATION_ID = ? AND MAP.KEY_MANAGER = KM.UUID";
 
+    public static final String GET_APPLICATIONS_OF_KEY_MANAGERS_SQL =
+            "SELECT DISTINCT APP.UUID, APP.CREATED_BY, APP.NAME, APP.APPLICATION_STATUS, APP.ORGANIZATION, " +
+                    "APP.SUBSCRIBER_ID FROM AM_APPLICATION_KEY_MAPPING MAP, AM_KEY_MANAGER KM, AM_APPLICATION APP " +
+                    "WHERE MAP.KEY_MANAGER = ? " +
+                    "AND MAP.KEY_MANAGER = KM.UUID " +
+                    "AND APP.APPLICATION_ID = MAP.APPLICATION_ID";
+
     public static final String REMOVE_APPLICATION_FROM_SUBSCRIPTIONS_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";
 
@@ -3149,6 +3156,17 @@ public class SQLConstants {
     public static final String UPDATE_CORRELATION_CONFIG_PROPERTIES = "UPDATE AM_CORRELATION_PROPERTIES SET " +
             "PROPERTY_VALUE=? WHERE COMPONENT_NAME=? AND PROPERTY_NAME=?";
 
+    public static final String GET_SUBSCRIPTION_COUNT_OF_API_SQL =
+            " SELECT Count(SUBS.UUID) AS SUBS_COUNT" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   API.API_ID = SUBS.API_ID " +
+                    "   AND API.API_UUID = ? " +
+                    "   AND API.ORGANIZATION = ?" +
+                    "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{
@@ -3697,12 +3715,18 @@ public class SQLConstants {
         public static final String ADD_KEY_MANAGER =
                 " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,ORGANIZATION,ENABLED," +
                         "DISPLAY_NAME,TOKEN_TYPE,EXTERNAL_REFERENCE_ID) VALUES (?,?,?,?,?,?,?,?,?,?)";
+
         public static final String UPDATE_KEY_MANAGER =
                 "UPDATE AM_KEY_MANAGER SET NAME = ?,DESCRIPTION = ?,TYPE = ?,CONFIGURATION = ?,ORGANIZATION = ?," +
                         "ENABLED = ?,DISPLAY_NAME = ?,TOKEN_TYPE = ?, EXTERNAL_REFERENCE_ID = ? WHERE UUID = ?";
 
         public static final String DELETE_KEY_MANAGER =
                 "DELETE FROM AM_KEY_MANAGER WHERE UUID = ? AND ORGANIZATION = ?";
+
+        public static final String GET_KEY_MANAGER_NAME_AND_CONSUMER_KEY_BY_APPLICATION_ID_AND_KEY_MAPPING_ID =
+                "SELECT NAME AS KEY_MANAGER_NAME, CONSUMER_KEY, CREATE_MODE FROM AM_KEY_MANAGER AKM, " +
+                        "AM_APPLICATION_KEY_MAPPING AAKM WHERE APPLICATION_ID=? AND AAKM.UUID = ? " +
+                        "AND AKM.UUID=AAKM.KEY_MANAGER";
     }
 
     /**

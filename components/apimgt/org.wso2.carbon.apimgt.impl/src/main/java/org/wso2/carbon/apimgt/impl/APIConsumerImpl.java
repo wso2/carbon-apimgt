@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -492,6 +493,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public JSONArray getAPIRatings(String apiId) throws APIManagementException {
 
         return apiMgtDAO.getAPIRatings(apiId);
+    }
+
+    @Override
+    public long getSubscriptionCountOfAPI(String apiId, String organization) throws APIManagementException {
+
+        return apiMgtDAO.getNoOfSubscriptionsOfAPI(apiId, organization);
     }
 
     @Override
@@ -3617,6 +3624,56 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
     }
 
+    public boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant)
+            throws APIManagementException {
+
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(this.username);
+
+            if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+                int tenantId = APIUtil.getInternalOrganizationId(xWSO2Tenant);
+                // To handle choreo scenario. due to key managers are not per organization atm. using ST
+                if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                    xWSO2Tenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                }
+            }
+            String tenantDomain = this.tenantDomain;
+            if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+                tenantDomain = xWSO2Tenant;
+            }
+
+            String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            KeyManagerApplicationInfo KeyManagerApplicationInfo =
+                    apiMgtDAO.getKeyManagerNameAndConsumerKeyByAppIdAndKeyMappingId(application.getId(), keyMappingId);
+            String keyManagerNameResult = KeyManagerApplicationInfo.getKeyManagerName();
+            if (!StringUtils.isEmpty(keyManagerNameResult)) {
+                keyManagerName = keyManagerNameResult;
+            }
+            String consumerKey = KeyManagerApplicationInfo.getConsumerKey();
+
+            //Removed the key manager entry from the key manager if it is not a mapped key.xxx
+            if (KeyManagerApplicationInfo.getMode().equals(APIConstants.OAuthAppMode.CREATED.name())) {
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                keyManager.deleteApplication(consumerKey);
+            }
+
+            apiConsumer.cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(application.getId(), keyMappingId);
+
+            //publishing event for application key cleanup in gateway.
+            ApplicationRegistrationEvent removeEntryTrigger = new ApplicationRegistrationEvent(
+                    UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
+                    APIUtil.getTenantIdFromTenantDomain(tenantDomain), application.getOrganization(),
+                    application.getId(), application.getUUID(), consumerKey, application.getKeyType(), keyManagerName);
+            APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+            return true;
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error occurred while application key cleanup process",
+                    ExceptionCodes.KEYS_DELETE_FAILED);
+        }
+    }
+
     @Override
     public APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
             throws APIManagementException {
@@ -4439,7 +4496,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
-                apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
+                apiAdmin.getKeyManagerConfigurationsByOrganization(organization, false);
         List<KeyManagerConfigurationDTO> permittedKeyManagerConfigurations = new ArrayList<>();
         if (keyManagerConfigurations.size() > 0) {
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
