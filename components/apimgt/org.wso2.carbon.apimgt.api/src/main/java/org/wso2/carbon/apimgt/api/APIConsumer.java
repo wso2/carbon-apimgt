@@ -509,6 +509,15 @@ public interface APIConsumer extends APIManager {
     JSONArray getAPIRatings(String apiId) throws APIManagementException;
 
     /**
+     * Returns no of api subscriptions for given api.
+     *
+     * @param apiId
+     * @param organization
+     * @return no of subscriptions
+     * @throws APIManagementException if failed to get the subscriptions
+     */
+    public long getSubscriptionCountOfAPI(String apiId,String organization) throws APIManagementException;
+    /**
      * Returns a list of Tiers denied for the current user
      *
      * @return Set<String>

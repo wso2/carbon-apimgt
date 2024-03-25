@@ -56,6 +56,7 @@ public class APIDTO   {
     private List<String> environmentList = new ArrayList<String>();
     private List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
     private String avgRating = null;
+    private Long subscriptions = null;
     private AdvertiseInfoDTO advertiseInfo = null;
     private Boolean isSubscriptionAvailable = null;
     private List<String> categories = new ArrayList<String>();
@@ -538,6 +539,24 @@ public class APIDTO   {
   }
 
   /**
+   * The number of subscriptions for the API
+   **/
+  public APIDTO subscriptions(Long subscriptions) {
+    this.subscriptions = subscriptions;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "10", value = "The number of subscriptions for the API")
+  @JsonProperty("subscriptions")
+  public Long getSubscriptions() {
+    return subscriptions;
+  }
+  public void setSubscriptions(Long subscriptions) {
+    this.subscriptions = subscriptions;
+  }
+
+  /**
    **/
   public APIDTO advertiseInfo(AdvertiseInfoDTO advertiseInfo) {
     this.advertiseInfo = advertiseInfo;
@@ -714,6 +733,7 @@ public class APIDTO   {
         Objects.equals(environmentList, API.environmentList) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(avgRating, API.avgRating) &&
+        Objects.equals(subscriptions, API.subscriptions) &&
         Objects.equals(advertiseInfo, API.advertiseInfo) &&
         Objects.equals(isSubscriptionAvailable, API.isSubscriptionAvailable) &&
         Objects.equals(categories, API.categories) &&
@@ -726,7 +746,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, subscriptions, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols);
   }
 
   @Override
@@ -760,6 +780,7 @@ public class APIDTO   {
     sb.append("    environmentList: ").append(toIndentedString(environmentList)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
+    sb.append("    subscriptions: ").append(toIndentedString(subscriptions)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");

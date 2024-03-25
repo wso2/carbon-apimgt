@@ -4110,6 +4110,11 @@ components:
           type: string
           description: The average rating of the API
           example: "4.5"
+        subscriptions:
+            type: integer
+            format: int64
+            description: The number of subscriptions for the API
+            example: 10
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
         isSubscriptionAvailable:

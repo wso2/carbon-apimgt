@@ -2756,6 +2756,33 @@ public class ApiMgtDAO {
         return subscriptions;
     }
 
+    /**
+     * @param apiName    Name of the API
+     * @param apiVersion Version of the API
+     * @param provider   Name of API creator
+     * @return All subscriptions of a given API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public long getNoOfSubscriptionsOfAPI(String apiUUID, String organization)
+            throws APIManagementException {
+
+            String sqlQuery = SQLConstants.GET_SUBSCRIPTION_COUNT_OF_API_SQL;
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                try (PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+                    ps.setString(1, apiUUID);
+                    ps.setString(2, organization);
+                    try (ResultSet resultSet = ps.executeQuery()) {
+                        if (resultSet.next()) {
+                            return resultSet.getLong("SUBS_COUNT");
+                        }
+                    }
+                }
+        } catch (SQLException e) {
+            handleException("Error occurred while reading subscriptions of API: " + apiUUID , e);
+        }
+        return 0;
+    }
+
 
     public int addApplication(Application application, String userId, String organization)
             throws APIManagementException {

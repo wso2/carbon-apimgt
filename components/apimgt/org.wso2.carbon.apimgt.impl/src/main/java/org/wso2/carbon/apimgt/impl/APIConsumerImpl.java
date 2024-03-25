@@ -495,6 +495,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public long getSubscriptionCountOfAPI(String apiId, String organization) throws APIManagementException {
+
+        return apiMgtDAO.getNoOfSubscriptionsOfAPI(apiId, organization);
+    }
+
+    @Override
     public float getAverageAPIRating(String apiId) throws APIManagementException {
 
         return apiMgtDAO.getAverageRating(apiId);

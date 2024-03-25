@@ -1144,7 +1144,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
 
-                return APIMappingUtil.fromAPItoDTO(api, organization);
+                APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, organization);
+                long subscriptionCountOfAPI = apiConsumer.getSubscriptionCountOfAPI(apiId, organization);
+                apidto.setSubscriptions(subscriptionCountOfAPI);
+                return apidto;
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
