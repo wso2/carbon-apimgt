@@ -157,7 +157,6 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         } catch (APIManagementException e) {
             String errorMessage = "Error encountered while Uploading the API to the vector database" + e.getMessage();
             log.error(errorMessage, e);
-//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
     }
 
