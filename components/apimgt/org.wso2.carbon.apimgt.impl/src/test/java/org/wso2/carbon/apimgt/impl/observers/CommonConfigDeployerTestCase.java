@@ -30,14 +30,13 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIUtil.class, PrivilegedCarbonContext.class, ServiceReferenceHolder.class, CommonUtil.class})
+@PrepareForTest({APIUtil.class, PrivilegedCarbonContext.class, ServiceReferenceHolder.class})
 public class CommonConfigDeployerTestCase {
 
     private final int TENANT_ID = 1234;
@@ -45,7 +44,6 @@ public class CommonConfigDeployerTestCase {
 
     @Test
     public void testCreatedConfigurationContext() throws APIManagementException {
-        PowerMockito.mockStatic(CommonUtil.class);
         System.setProperty(CARBON_HOME, "");
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
@@ -84,16 +82,12 @@ public class CommonConfigDeployerTestCase {
 
         PowerMockito.verifyStatic(APIUtil.class);
         APIUtil.loadAndSyncTenantConf(TENANT_DOMAIN);
-
-        //PowerMockito.verifyStatic(APIUtil.class);
-        //APIUtil.addDefaultTenantAdvancedThrottlePolicies(TENANT_DOMAIN, TENANT_ID);
     }
 
 
     @Test
     public void testExceptions() throws Exception {
         PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.mockStatic(CommonUtil.class);
         System.setProperty(CARBON_HOME, "");
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
@@ -144,7 +138,6 @@ public class CommonConfigDeployerTestCase {
     @Test
     public void testCreatedConfigurationContextRuntimeException() throws APIManagementException {
         System.setProperty(CARBON_HOME, "");
-        PowerMockito.mockStatic(CommonUtil.class);
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);

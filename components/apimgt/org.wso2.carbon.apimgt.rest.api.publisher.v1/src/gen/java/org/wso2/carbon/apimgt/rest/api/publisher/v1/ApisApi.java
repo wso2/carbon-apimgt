@@ -462,7 +462,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Delete Pending Revision Deployment Workflow Tasks", notes = "This operation can be used to remove pending revision deployment requests that are in pending state ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "API Revisions",  })
     @ApiResponses(value = { 

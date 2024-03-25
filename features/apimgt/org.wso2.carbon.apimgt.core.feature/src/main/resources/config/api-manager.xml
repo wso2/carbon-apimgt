@@ -185,6 +185,34 @@
     </Analytics>
 
     <!--
+        Configurations relevant to API Chat AI feature.
+        This enables the API Chat feature which leverages AI for API testing within Developer Portal.
+    -->
+    <APIChat>
+        <!-- Enable API Chat for API Manager -->
+        <Enabled>true</Enabled>
+
+        <AuthToken></AuthToken>
+
+        <Endpoint>http://localhost:9090</Endpoint>
+
+    </APIChat>
+
+    <!--
+        Configurations relevant to Marketplace Assistant feature.
+        This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
+    -->
+    <MarketplaceAssistant>
+        <!-- Enable Marketplace Assistant for API Manager -->
+        <Enabled>true</Enabled>
+
+        <AuthToken></AuthToken>
+
+        <Endpoint>http://localhost:9090</Endpoint>
+
+    </MarketplaceAssistant>
+
+    <!--
         API key validator configuration used by API key manager (IS), API store and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
     -->
@@ -372,6 +400,28 @@
              It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*) -->
         <Access-Control-Allow-Credentials>false</Access-Control-Allow-Credentials>
     </CORSConfiguration>
+
+    <!--
+        Configurations relevant to Marketplace Assistant feature.
+        This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
+    -->
+    <MarketplaceAssistant>
+        <!-- Enable Marketplace Assistant for API Manager -->
+        <Enabled>true</Enabled>
+
+        <AuthToken>abc</AuthToken>
+
+        <Endpoint>https://test.com</Endpoint>
+
+        <ChatResource>/AI/marketplace-assistant/chat</ChatResource>
+
+        <ApiPublishResource>/AI/spec-populator/publish-api</ApiPublishResource>
+
+        <ApiDeleteResource>/AI/spec-populator/remove-api</ApiDeleteResource>
+
+        <ApiCountResource>/AI/spec-populator/api-count</ApiCountResource>
+
+    </MarketplaceAssistant>
 
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
          You can enable this and set preferable Logger name. -->
