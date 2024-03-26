@@ -7,6 +7,7 @@ public class ApiChatConfigurationDto {
     private String prepareResource;
     private String executeResource;
     private boolean isEnabled;
+    private boolean isAuthTokenProvided;
 
     public String getAccessToken() {
         return accessToken;
@@ -46,5 +47,13 @@ public class ApiChatConfigurationDto {
 
     public void setEnabled(boolean enabled) {
         this.isEnabled = enabled;
+    }
+
+    public boolean isAuthTokenProvided() {
+        return isAuthTokenProvided;
+    }
+
+    public void setAuthTokenProvided(boolean authTokenProvided) {
+        this.isAuthTokenProvided = authTokenProvided;
     }
 }

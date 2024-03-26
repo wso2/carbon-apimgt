@@ -9,6 +9,7 @@ public class MarketplaceAssistantConfigurationDto {
     private String apiDeleteResource;
     private String apiCountResource;
     private boolean isEnabled;
+    private boolean isAuthTokenProvided;
 
 
 
@@ -66,5 +67,13 @@ public class MarketplaceAssistantConfigurationDto {
 
     public void setEnabled(boolean enabled) {
         this.isEnabled = enabled;
+    }
+
+    public boolean isAuthTokenProvided() {
+        return isAuthTokenProvided;
+    }
+
+    public void setAuthTokenProvided(boolean authTokenProvided) {
+        this.isAuthTokenProvided = authTokenProvided;
     }
 }

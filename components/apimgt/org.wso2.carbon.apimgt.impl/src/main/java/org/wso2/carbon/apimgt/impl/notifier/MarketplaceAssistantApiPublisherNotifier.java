@@ -157,7 +157,6 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         } catch (APIManagementException e) {
             String errorMessage = "Error encountered while Uploading the API to the vector database" + e.getMessage();
             log.error(errorMessage, e);
-//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
     }
 
@@ -169,7 +168,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                     marketplaceAssistantConfigurationDto.getAccessToken(), marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
         } catch (APIManagementException e) {
             String errorMessage = "Error encountered while Deleting the API from the vector database";
-            log.error(errorMessage);
+            log.error(errorMessage, e);
         }
     }
 }

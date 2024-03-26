@@ -2364,6 +2364,7 @@ public class APIManagerConfiguration {
             if (marketplaceAssistantToken != null) {
                 String AccessToken = MiscellaneousUtil.resolve(marketplaceAssistantToken, secretResolver);
                 marketplaceAssistantConfigurationDto.setAccessToken(AccessToken);
+                marketplaceAssistantConfigurationDto.setAuthTokenProvided(true);
             }
 
             OMElement resources =
@@ -2410,6 +2411,7 @@ public class APIManagerConfiguration {
             if (apiChatToken != null) {
                 String AccessToken = MiscellaneousUtil.resolve(apiChatToken, secretResolver);
                 apiChatConfigurationDto.setAccessToken(AccessToken);
+                apiChatConfigurationDto.setAuthTokenProvided(true);
             }
 
             OMElement resources =

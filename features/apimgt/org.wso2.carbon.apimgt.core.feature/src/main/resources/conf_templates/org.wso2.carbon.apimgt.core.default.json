@@ -45,7 +45,7 @@
   "apim.analytics.enable": false,
   "apim.ai.enable": false,
   "apim.ai.token": "",
-  "apim.ai.endpoint": "http://localhost:9090",
+  "apim.ai.endpoint": "",
   "apim.ai.marketplace_assistant_chat_resource": "/ai/marketplace-assistant/chat",
   "apim.ai.marketplace_assistant_publish_api_resource": "/ai/spec-populator/publish-api",
   "apim.ai.marketplace_assistant_remove_api_resource": "/ai/spec-populator/remove-api",
