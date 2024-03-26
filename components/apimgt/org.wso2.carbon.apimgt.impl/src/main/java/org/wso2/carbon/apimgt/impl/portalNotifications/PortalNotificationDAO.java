@@ -5,9 +5,11 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.sql.Connection;
@@ -17,6 +19,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class PortalNotificationDAO {
 
@@ -106,7 +110,7 @@ public class PortalNotificationDAO {
     }
 
     public NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder, Integer limit,
-            Integer offset) {
+            Integer offset) throws APIManagementException {
 
         List<Notification> list = new ArrayList<Notification>();
         NotificationList notificationList = new NotificationList();
@@ -114,43 +118,58 @@ public class PortalNotificationDAO {
         notificationList.setPagination(pagination);
         int total = 0;
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        String sqlQueryForCount = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_COUNT;
         String sqlQuery;
-        try {
-            if (sortOrder != null && sortOrder.equals("asc")) {
-                sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_ASC;
-            } else {
-                sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_DESC;
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement psForCount = conn.prepareStatement(sqlQueryForCount)) {
+            psForCount.setString(1, username);
+            psForCount.setString(2, organization);
+            psForCount.setString(3, portalToDisplay);
+            try (ResultSet rsForCount = psForCount.executeQuery()) {
+                while (rsForCount.next()) {
+                    total = rsForCount.getInt("NOTIFICATION_COUNT");
+                }
+                if (total > 0 && limit > 0) {
+                    if (sortOrder != null && sortOrder.equals("asc")) {
+                        sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_ASC;
+                    } else {
+                        sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_DESC;
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                        ps.setString(1, username);
+                        ps.setString(2, organization);
+                        ps.setString(3, portalToDisplay);
+                        ps.setInt(4, offset);
+                        ps.setInt(5, limit);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            while (rs.next()) {
+                                Notification notification = new Notification();
+                                notification.setNotificationId(rs.getString("NOTIFICATION_ID"));
+                                notification.setNotificationType(rs.getString("NOTIFICATION_TYPE"));
+                                notification.setCreatedTime(rs.getTimestamp("CREATED_TIME").toString());
+                                notification.setComments(getCommentFromMetaData(rs.getString("NOTIFICATION_METADATA"),
+                                        rs.getString("NOTIFICATION_TYPE")));
+                                notification.setIsRead(rs.getBoolean("IS_READ"));
+                                list.add(notification);
+                            }
+                        }
+                    }
+                } else {
+                    notificationList.getPagination().setTotal(total);
+                    notificationList.setCount(total);
+                    return notificationList;
+                }
             }
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, username);
-            ps.setString(2, organization);
-            ps.setString(3, portalToDisplay);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                Notification notification = new Notification();
-                notification.setNotificationId(rs.getString("NOTIFICATION_ID"));
-                notification.setNotificationType(rs.getString("NOTIFICATION_TYPE"));
-                notification.setCreatedTime(rs.getTimestamp("CREATED_TIME").toString());
-                notification.setComments(getCommentFromMetaData(rs.getString("NOTIFICATION_METADATA"),
-                        rs.getString("NOTIFICATION_TYPE")));
-                notification.setIsRead(rs.getBoolean("IS_READ"));
-                list.add(notification);
-            }
-            notificationList.setList(list);
         } catch (SQLException e) {
-            log.error("Failed to retrieve notifications", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            handleException("Failed to retrieve notifications of the user " + username, e);
         }
         pagination.setLimit(limit);
         pagination.setOffset(offset);
         notificationList.getPagination().setTotal(total);
         notificationList.setList(list);
         notificationList.setCount(list.size());
+
         return notificationList;
     }
 
@@ -359,6 +378,8 @@ public class PortalNotificationDAO {
             }
         } catch (SQLException e) {
             log.error("Failed to mark all notifications as read", e);
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
