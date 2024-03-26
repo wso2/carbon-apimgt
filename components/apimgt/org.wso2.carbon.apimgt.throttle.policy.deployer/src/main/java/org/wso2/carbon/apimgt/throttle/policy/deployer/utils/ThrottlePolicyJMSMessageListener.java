@@ -57,7 +57,7 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
     private static final Log log = LogFactory.getLog(ThrottlePolicyJMSMessageListener.class);
 
     private final PolicyRetriever policyRetriever = new PolicyRetriever();
-    private final ScheduledExecutorService policyRetrievalScheduler = Executors.newScheduledThreadPool(10,
+    private final ScheduledExecutorService policyRetrievalScheduler = Executors.newSingleThreadScheduledExecutor(
             new PolicyRetrieverThreadFactory());
     private final EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
             .getAPIMConfiguration().getEventHubConfigurationDto();
