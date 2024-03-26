@@ -949,14 +949,6 @@
                 <URI>/api/am/publisher/{version}/tiers/update-permission</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/devportal/{version}/marketplace-assistant/api-count</URI>
-                <HTTPMethods>GET</HTTPMethods>
-            </ETagSkipURI>
-            <ETagSkipURI>
-                <URI>/api/am/devportal/{version}/marketplace-assistant/chat</URI>
-                <HTTPMethods>POST</HTTPMethods>
-            </ETagSkipURI>
         </ETagSkipList>
         {% if apim.rest_api.jwt.audience is defined %}
         <JWTAudiences>
