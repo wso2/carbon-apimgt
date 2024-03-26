@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,8 +35,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIAdmin;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -3328,14 +3332,22 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public String invokeApiChatPrepare(String apiId, String apiChatRequestId, String organization)
             throws APIManagementException {
-        ApiChatConfigurationDto configDto = ServiceReferenceHolder.
-                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
-        String swaggerDefinition = getOpenAPIDefinition(apiId, organization);
-        String payload = "{\"openapi\": " + swaggerDefinition + "}";
-        String prepareResponse = APIUtil.invokeAIService(configDto.getEndpoint(),
-                configDto.getAccessToken(), configDto.getPrepareResource(), payload,
-                apiChatRequestId);
-        return prepareResponse;
+        try {
+            // Generate the payload for prepare call
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
+            ObjectNode payload = objectMapper.createObjectNode();
+            payload.set("openapi", openAPIDefinitionJsonNode);
+
+            ApiChatConfigurationDto configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration().getApiChatConfigurationDto();
+            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+        } catch (JsonProcessingException e) {
+            String error = "Error while parsing OpenAPI definition to JSON";
+            log.error(error, e);
+            throw new APIManagementException(error, e);
+        }
     }
 
     @Override

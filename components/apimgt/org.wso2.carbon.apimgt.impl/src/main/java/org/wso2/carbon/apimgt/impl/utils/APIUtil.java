@@ -10432,22 +10432,22 @@ public final class APIUtil {
     /**
      * This method is used to invoke the Choreo deployed AI service.
      *
-     * @param endpointConfigName  Name of endpoint configuration
-     * @param authTokenConfigName Name of AI token configuration
-     * @param resource            Specifies the backend resource the request should be forwarded to
-     * @param payload             Request payload that needs to be attached to the request
-     * @param requestId           UUID of the request, so that AI service can track the progress
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken Authentication token to be sent
+     * @param resource  Specifies the backend resource the request should be forwarded to
+     * @param payload   Request payload that needs to be attached to the request
+     * @param requestId UUID of the request, so that AI service can track the progress
      * @return returns the response if invocation is successful
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    public static String invokeAIService(String endpoint, String authToken,
-            String resource, String payload, String requestId) throws  APIManagementException {
+    public static String invokeAIService(String endpoint, String authToken, String resource, String payload,
+            String requestId) throws APIManagementException {
 
         try {
             HttpPost preparePost = new HttpPost(endpoint + resource);
             preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            preparePost.setHeader("x-request-id", requestId);
+            preparePost.setHeader("apiChatRequestId", requestId);
             StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
             preparePost.setEntity(requestEntity);
 
