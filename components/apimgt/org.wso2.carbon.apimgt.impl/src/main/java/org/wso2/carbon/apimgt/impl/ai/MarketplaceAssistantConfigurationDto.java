@@ -2,71 +2,69 @@ package org.wso2.carbon.apimgt.impl.ai;
 
 public class MarketplaceAssistantConfigurationDto {
 
-    private String AccessToken;
-    private String Endpoint;
-    private String ApiPublishResource;
-    private String ChatResource;
-    private String ApiDeleteResource;
-    private String ApiCountResource;
+    private String accessToken;
+    private String endpoint;
+    private String apiPublishResource;
+    private String chatResource;
+    private String apiDeleteResource;
+    private String apiCountResource;
     private boolean isEnabled;
 
 
 
     public String getAccessToken() {
-        return AccessToken;
+        return accessToken;
     }
 
-    public void setAccessToken(String AccessToken) {
-        this.AccessToken = AccessToken;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     public String getEndpoint() {
-        return Endpoint;
+        return endpoint;
     }
 
-    public void setEndpoint(String Endpoint) {
-        this.Endpoint = Endpoint;
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
     }
 
     public String getApiPublishResource() {
-        return ApiPublishResource;
+        return apiPublishResource;
     }
 
-    public void setApiPublishResource(String ApiPublishResource) {
-        this.ApiPublishResource = ApiPublishResource;
+    public void setApiPublishResource(String apiPublishResource) {
+        this.apiPublishResource = apiPublishResource;
     }
 
     public String getChatResource() {
-        return ChatResource;
+        return chatResource;
     }
 
-    public void setChatResource(String ChatResource) {
-        this.ChatResource = ChatResource;
+    public void setChatResource(String chatResource) {
+        this.chatResource = chatResource;
     }
 
     public String getApiDeleteResource() {
-        return ApiDeleteResource;
+        return apiDeleteResource;
     }
 
-    public void setApiDeleteResource(String ApiDeleteResource) {
-        this.ApiDeleteResource = ApiDeleteResource;
+    public void setApiDeleteResource(String apiDeleteResource) {
+        this.apiDeleteResource = apiDeleteResource;
     }
 
     public String getApiCountResource() {
-        return ApiCountResource;
+        return apiCountResource;
     }
 
-    public void setApiCountResource(String ApiCountResource) {
-        this.ApiCountResource = ApiCountResource;
+    public void setApiCountResource(String apiCountResource) {
+        this.apiCountResource = apiCountResource;
     }
 
     public boolean isEnabled() {
         return isEnabled;
     }
 
-    public void setEnabled(boolean Enabled) {
-        this.isEnabled = Enabled;
+    public void setEnabled(boolean enabled) {
+        this.isEnabled = enabled;
     }
-
-
 }

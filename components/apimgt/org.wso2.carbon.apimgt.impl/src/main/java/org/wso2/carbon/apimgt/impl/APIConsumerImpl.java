@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.impl.ai.ApiChatConfigurationDto;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -3317,18 +3318,22 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
     @Override
     public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
-        return APIUtil.invokeAIService(APIConstants.AI.API_CHAT_ENDPOINT,
-                APIConstants.AI.API_CHAT_AUTH_TOKEN, APIConstants.AI.API_CHAT_EXECUTE_RESOURCE, requestPayload,
+        ApiChatConfigurationDto configDto = ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
+        return APIUtil.invokeAIService(configDto.getEndpoint(),
+                configDto.getAccessToken(), configDto.getExecuteResource(), requestPayload,
                 apiChatRequestId);
     }
 
     @Override
     public String invokeApiChatPrepare(String apiId, String apiChatRequestId, String organization)
             throws APIManagementException {
+        ApiChatConfigurationDto configDto = ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
         String swaggerDefinition = getOpenAPIDefinition(apiId, organization);
         String payload = "{\"openapi\": " + swaggerDefinition + "}";
-        String prepareResponse = APIUtil.invokeAIService(APIConstants.AI.API_CHAT_ENDPOINT,
-                APIConstants.AI.API_CHAT_AUTH_TOKEN, APIConstants.AI.API_CHAT_PREPARE_RESOURCE, payload,
+        String prepareResponse = APIUtil.invokeAIService(configDto.getEndpoint(),
+                configDto.getAccessToken(), configDto.getPrepareResource(), payload,
                 apiChatRequestId);
         return prepareResponse;
     }

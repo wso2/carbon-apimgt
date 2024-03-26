@@ -63,7 +63,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             marketplaceAssistantConfigurationDto = configuration.getMarketplaceAssistantConfigurationDto();
         }
         try {
-            if (marketplaceAssistantConfigurationDto.isEnabled()) {
+            if (APIUtil.isMarketplaceAssistantEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
 
                 boolean isChatQueryEmpty = StringUtils.isEmpty(marketplaceAssistantRequestDTO.getQuery());
                 if (isChatQueryEmpty) {
@@ -82,7 +82,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 payload.put(APIConstants.TENANT_DOMAIN, organization);
 
                 String response = APIUtil.
-                        MarketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                        marketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
                                 marketplaceAssistantConfigurationDto.getAccessToken(),
                                 marketplaceAssistantConfigurationDto.getChatResource(), payload.toString());
 
@@ -109,7 +109,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             marketplaceAssistantConfigurationDto = configuration.getMarketplaceAssistantConfigurationDto();
         }
         try {
-            if (marketplaceAssistantConfigurationDto.isEnabled()) {
+            if (APIUtil.isMarketplaceAssistantEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
 
                 CloseableHttpResponse response = APIUtil.
                         getMarketplaceChatApiCount(marketplaceAssistantConfigurationDto.getEndpoint(),

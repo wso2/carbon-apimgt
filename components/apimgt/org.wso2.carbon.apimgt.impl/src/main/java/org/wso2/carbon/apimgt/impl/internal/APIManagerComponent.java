@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
@@ -203,6 +204,7 @@ public class APIManagerComponent {
             configuration.load(filePath);
 
             boolean isMarketplaceAssistantEnabled = configuration.getMarketplaceAssistantConfigurationDto().isEnabled();
+            boolean isAuthTokenProvided = !StringUtils.isEmpty(configuration.getMarketplaceAssistantConfigurationDto().getAccessToken());
 
             //Registering Notifiers
             bundleContext.registerService(Notifier.class.getName(), new SubscriptionsNotifier(), null);
@@ -219,7 +221,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
-            if (isMarketplaceAssistantEnabled) {
+            if (isMarketplaceAssistantEnabled && isAuthTokenProvided) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
             }
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);

@@ -52,10 +52,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
             log.error("API Manager configuration is not initialized.");
         } else {
             marketplaceAssistantConfigurationDto = configuration.getMarketplaceAssistantConfigurationDto();
-
-            if (APIUtil.isMarketplaceAssistantEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
-                process(event);
-            }
+            process(event);
         }
         return true;
     }
@@ -155,7 +152,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
             payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
             payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
             payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
-            APIUtil.MarketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
+            APIUtil.marketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
                     marketplaceAssistantConfigurationDto.getAccessToken(), marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString());
         } catch (APIManagementException e) {
             String errorMessage = "Error encountered while Uploading the API to the vector database" + e.getMessage();
@@ -167,7 +164,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
 
         try {
             String uuid = apiEvent.getUuid();
-            APIUtil.DeleteApi(marketplaceAssistantConfigurationDto.getEndpoint(),
+            APIUtil.deleteApi(marketplaceAssistantConfigurationDto.getEndpoint(),
                     marketplaceAssistantConfigurationDto.getAccessToken(), marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
         } catch (APIManagementException e) {
             String errorMessage = "Error encountered while Deleting the API from the vector database";
