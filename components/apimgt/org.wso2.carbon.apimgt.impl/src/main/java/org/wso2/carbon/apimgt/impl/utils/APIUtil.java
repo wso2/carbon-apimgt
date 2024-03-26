@@ -2067,6 +2067,19 @@ public final class APIUtil {
     }
 
     /**
+     * Check if an issuer for internal keys has been defined
+     *
+     * @return String internalKeyIssuer
+     */
+    public static String getInternalKeyIssuer() {
+        // checking if an issuer for internal keys has been configured in api-manager.xml
+        String internalKeyIssuer = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(
+                        APIConstants.API_PUBLISHER_INTERNAL_KEY_ISSUER);
+        return internalKeyIssuer;
+    }
+
+    /**
      * Returns the External API Store Configuration with the given Store Name
      *
      * @param apiStoreName

@@ -50,6 +50,9 @@ public class InternalAPIKeyGenerator implements ApiKeyGenerator {
             expireIn = currentTime + jwtTokenInfoDTO.getExpirationTime();
         }
         String issuerIdentifier = OAuthServerConfiguration.getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
+        if (APIUtil.getInternalKeyIssuer() != null){
+            issuerIdentifier = APIUtil.getInternalKeyIssuer();
+        }
         JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.END_USERNAME,
                 APIUtil.getUserNameWithTenantSuffix(jwtTokenInfoDTO.getEndUserName()));
