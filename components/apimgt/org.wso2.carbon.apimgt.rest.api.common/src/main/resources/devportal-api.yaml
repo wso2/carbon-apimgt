@@ -2185,6 +2185,38 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"'
 
+    delete:
+      tags:
+        - Application Keys
+      summary: Remove Generated Application Keys
+      description: |
+        Remove generated application keys from dev portal rest api
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyMappingId'
+        - $ref: '#/components/parameters/requestedTenant'
+      responses:
+        200:
+          description: |
+            OK.
+            Key removed successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"'
+
+
   /applications/{applicationId}/oauth-keys/{keyMappingId}/regenerate-secret:
     post:
       tags:
@@ -4110,6 +4142,11 @@ components:
           type: string
           description: The average rating of the API
           example: "4.5"
+        subscriptions:
+            type: integer
+            format: int64
+            description: The number of subscriptions for the API
+            example: 10
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
         isSubscriptionAvailable:

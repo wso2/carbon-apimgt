@@ -276,10 +276,12 @@ public interface APIAdmin  {
     /**
      * This method used to retrieve key manager configurations for tenant
      * @param organization organization of the key manager
+     * @param checkUsages whether to check usages
      * @return KeyManagerConfigurationDTO list
      * @throws APIManagementException if error occurred
      */
-    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization) throws APIManagementException;
+    List<KeyManagerConfigurationDTO> getKeyManagerConfigurationsByOrganization(String organization,
+            boolean checkUsages) throws APIManagementException;
 
     /**
      * This method returns all the key managers registered in all the tenants
@@ -514,6 +516,15 @@ public interface APIAdmin  {
      * @throws APIManagementException if error occurred
      */
     List<KeyManagerConfigurationDTO> getGlobalKeyManagerConfigurations() throws APIManagementException;
+
+    /**
+     * This method used to retrieve global key manager configurations with usage check
+     * @param organization organization
+     * @return KeyManagerConfigurationDTO list
+     * @throws APIManagementException if error occurred
+     */
+    List<KeyManagerConfigurationDTO> getGlobalKeyManagerConfigurations(String organization)
+            throws APIManagementException;
 
     /**
      * This method used to retrieve global key manager with Id

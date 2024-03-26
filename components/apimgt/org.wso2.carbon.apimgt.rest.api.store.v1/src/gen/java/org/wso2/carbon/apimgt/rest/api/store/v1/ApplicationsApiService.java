@@ -50,6 +50,7 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO applicationKeyMappingRequestDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysGet(String applicationId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost(String applicationId, String keyMappingId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdOauthKeysKeyMappingIdDelete(String applicationId, String keyMappingId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost(String applicationId, String keyMappingId, ApplicationTokenGenerateRequestDTO applicationTokenGenerateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId, String keyMappingId, String groupId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdPut(String applicationId, String keyMappingId, ApplicationKeyDTO applicationKeyDTO, MessageContext messageContext) throws APIManagementException;

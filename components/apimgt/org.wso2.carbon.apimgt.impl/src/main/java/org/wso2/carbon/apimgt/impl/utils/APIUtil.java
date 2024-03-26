@@ -101,6 +101,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -10428,6 +10429,17 @@ public final class APIUtil {
         return true;
     }
 
+    /**
+     * This method is used to invoke the Choreo deployed AI service.
+     *
+     * @param endpointConfigName  Name of endpoint configuration
+     * @param authTokenConfigName Name of AI token configuration
+     * @param resource            Specifies the backend resource the request should be forwarded to
+     * @param payload             Request payload that needs to be attached to the request
+     * @param requestId           UUID of the request, so that AI service can track the progress
+     * @return returns the response if invocation is successful
+     * @throws APIManagementException if an error occurs while invoking the AI service
+     */
     public static String invokeAIService(String endpoint, String authToken,
             String resource, String payload, String requestId) throws  APIManagementException {
 
@@ -10554,5 +10566,23 @@ public final class APIUtil {
         } catch (APIManagementException | IOException e) {
             throw new APIManagementException("Error encountered while connecting to service", e);
         }
+    }
+
+    /**
+     * Retrieves a paginated list of applications from the provided list, based on the specified offset and limit.
+     *
+     * @param applications The list of applications to paginate.
+     * @param offset       The starting index of the paginated sublist.
+     * @param limit        The maximum number of applications to include in the paginated sublist.
+     * @return A paginated sublist of applications, or an empty list if the offset exceeds the size of the input list.
+     */
+    public static List<ApplicationInfoKeyManager> getPaginatedApplicationList(
+            List<ApplicationInfoKeyManager> applications, int offset, int limit) {
+
+        int endIndex = Math.min(offset + limit, applications.size());
+        if (offset >= applications.size()) {
+            return Collections.emptyList();
+        }
+        return applications.subList(offset, endIndex);
     }
 }

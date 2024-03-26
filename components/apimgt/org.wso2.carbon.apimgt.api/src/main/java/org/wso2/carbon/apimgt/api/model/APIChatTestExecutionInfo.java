@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 /**
- * Details related to API Chat test execution
+ * Details related to status update on API invocation back to the API Chat service
  */
 public class APIChatTestExecutionInfo {
     private APIChatExecutionResponse response = null;

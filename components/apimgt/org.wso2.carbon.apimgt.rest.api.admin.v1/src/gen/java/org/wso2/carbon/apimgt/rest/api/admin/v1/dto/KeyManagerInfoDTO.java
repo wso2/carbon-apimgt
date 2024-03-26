@@ -26,6 +26,7 @@ public class KeyManagerInfoDTO   {
     private String description = null;
     private Boolean enabled = null;
     private Boolean isGlobal = null;
+    private Boolean isUsed = null;
 
     @XmlType(name="TokenTypeEnum")
     @XmlEnum(String.class)
@@ -165,6 +166,23 @@ return null;
   }
 
   /**
+   **/
+  public KeyManagerInfoDTO isUsed(Boolean isUsed) {
+    this.isUsed = isUsed;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("isUsed")
+  public Boolean isIsUsed() {
+    return isUsed;
+  }
+  public void setIsUsed(Boolean isUsed) {
+    this.isUsed = isUsed;
+  }
+
+  /**
    * The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT and BOTH.
    **/
   public KeyManagerInfoDTO tokenType(TokenTypeEnum tokenType) {
@@ -198,12 +216,13 @@ return null;
         Objects.equals(description, keyManagerInfo.description) &&
         Objects.equals(enabled, keyManagerInfo.enabled) &&
         Objects.equals(isGlobal, keyManagerInfo.isGlobal) &&
+        Objects.equals(isUsed, keyManagerInfo.isUsed) &&
         Objects.equals(tokenType, keyManagerInfo.tokenType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, description, enabled, isGlobal, tokenType);
+    return Objects.hash(id, name, type, description, enabled, isGlobal, isUsed, tokenType);
   }
 
   @Override
@@ -217,6 +236,7 @@ return null;
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    isGlobal: ").append(toIndentedString(isGlobal)).append("\n");
+    sb.append("    isUsed: ").append(toIndentedString(isUsed)).append("\n");
     sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("}");
     return sb.toString();

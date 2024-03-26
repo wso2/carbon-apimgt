@@ -274,7 +274,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apiChatPost(String apiId, String apiChatAction, ApiChatRequestDTO apiChatRequestDTO,
             MessageContext messageContext) throws APIManagementException {
-        if (APIUtil.isApiChatEnabled()) {
+        if (APIUtil.isApiChatEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
             // Check the action
             if (apiChatAction.equals(APIConstants.AI.API_CHAT_ACTION_PREPARE)) {
                 // Determine whether the request body is valid. Request body should have a request UUID.
@@ -322,9 +322,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
                         APIChatAPISpec apiSpec = new APIChatAPISpec();
                         apiSpec.setServiceUrl(specDTO.getServiceUrl());
-                        JSONArray jsonArray = new JSONArray();
-                        jsonArray.addAll(specDTO.getTools());
-                        apiSpec.setTools(jsonArray);
+                        apiSpec.setTools(specDTO.getTools());
 
                         APIChatTestInitializerInfo initializerInfo = new APIChatTestInitializerInfo();
                         initializerInfo.setCommand(apiChatRequestDTO.getCommand());
@@ -1144,7 +1142,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
 
-                return APIMappingUtil.fromAPItoDTO(api, organization);
+                APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, organization);
+                long subscriptionCountOfAPI = apiConsumer.getSubscriptionCountOfAPI(apiId, organization);
+                apidto.setSubscriptions(subscriptionCountOfAPI);
+                return apidto;
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }

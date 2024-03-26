@@ -549,6 +549,8 @@ public enum ExceptionCodes implements ErrorHandler {
     // Admin portal get apis and api provider change related errors
     CHANGE_API_PROVIDER_FAILED(903011, "Error while changing the API provider", 500, "Error while changing the API provider in the registry or DB"),
     GET_SEARCH_APIS_IN_ADMIN_FAILED(903012, "Error while getting the apis", 500, "Error while getting/searching the apis from registry"),
+    KEY_MANAGER_DELETE_FAILED(902015, "Key Manager Delete error", 412,"Error while deleting the Key Manager. %s", false),
+    KEYS_DELETE_FAILED(902014, "Key Delete error", 412,"Error while deleting Keys. %s", false),
 
     // AI service invocation related exceptions
     AI_SERVICE_INVALID_RESPONSE(903100, "Invalid response from AI service", 500, "Error while invoking AI service. %s", false),
