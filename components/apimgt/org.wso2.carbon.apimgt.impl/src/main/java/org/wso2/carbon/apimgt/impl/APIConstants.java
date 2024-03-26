@@ -2180,6 +2180,7 @@ public final class APIConstants {
         public static final String CONSUMER_KEY = "consumerKey";
         public static final String AUTHORIZED_PARTY = "azp";
         public static final String KEY_ID = "kid";
+        public static final String AUDIENCE = "aud";
         public static final String JWT_ID = "jti";
         public static final String SUBSCRIPTION_TIER = "subscriptionTier";
         public static final String SUBSCRIBER_TENANT_DOMAIN = "subscriberTenantDomain";

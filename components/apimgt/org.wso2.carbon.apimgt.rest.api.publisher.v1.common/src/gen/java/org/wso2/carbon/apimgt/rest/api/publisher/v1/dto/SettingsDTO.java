@@ -35,7 +35,6 @@ public class SettingsDTO   {
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
-    private String internalKeyIssuer = null;
     private Boolean portalConfigurationOnlyModeEnabled = false;
     private Boolean crossTenantSubscriptionEnabled = false;
     private String defaultAdvancePolicy = null;
@@ -205,24 +204,6 @@ public class SettingsDTO   {
   }
 
   /**
-   * The issuer for internal keys 
-   **/
-  public SettingsDTO internalKeyIssuer(String internalKeyIssuer) {
-    this.internalKeyIssuer = internalKeyIssuer;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "The issuer for internal keys ")
-  @JsonProperty("internalKeyIssuer")
-  public String getInternalKeyIssuer() {
-    return internalKeyIssuer;
-  }
-  public void setInternalKeyIssuer(String internalKeyIssuer) {
-    this.internalKeyIssuer = internalKeyIssuer;
-  }
-
-  /**
    * Is Portal Configuration Only Mode enabled 
    **/
   public SettingsDTO portalConfigurationOnlyModeEnabled(Boolean portalConfigurationOnlyModeEnabled) {
@@ -366,7 +347,6 @@ public class SettingsDTO   {
         Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
         Objects.equals(externalStoresEnabled, settings.externalStoresEnabled) &&
         Objects.equals(docVisibilityEnabled, settings.docVisibilityEnabled) &&
-        Objects.equals(internalKeyIssuer, settings.internalKeyIssuer) &&
         Objects.equals(portalConfigurationOnlyModeEnabled, settings.portalConfigurationOnlyModeEnabled) &&
         Objects.equals(crossTenantSubscriptionEnabled, settings.crossTenantSubscriptionEnabled) &&
         Objects.equals(defaultAdvancePolicy, settings.defaultAdvancePolicy) &&
@@ -378,7 +358,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, internalKeyIssuer, portalConfigurationOnlyModeEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, customProperties);
   }
 
   @Override
@@ -395,7 +375,6 @@ public class SettingsDTO   {
     sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
     sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("    docVisibilityEnabled: ").append(toIndentedString(docVisibilityEnabled)).append("\n");
-    sb.append("    internalKeyIssuer: ").append(toIndentedString(internalKeyIssuer)).append("\n");
     sb.append("    portalConfigurationOnlyModeEnabled: ").append(toIndentedString(portalConfigurationOnlyModeEnabled)).append("\n");
     sb.append("    crossTenantSubscriptionEnabled: ").append(toIndentedString(crossTenantSubscriptionEnabled)).append("\n");
     sb.append("    defaultAdvancePolicy: ").append(toIndentedString(defaultAdvancePolicy)).append("\n");

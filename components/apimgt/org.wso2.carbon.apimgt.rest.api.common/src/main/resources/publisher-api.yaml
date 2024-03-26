@@ -11906,10 +11906,6 @@ components:
           description: |
             Is Document Visibility configuration enabled
           example: false
-        internalKeyIssuer:
-          type: string
-          description: |
-            The issuer for internal keys
         portalConfigurationOnlyModeEnabled:
           type: boolean
           description: |

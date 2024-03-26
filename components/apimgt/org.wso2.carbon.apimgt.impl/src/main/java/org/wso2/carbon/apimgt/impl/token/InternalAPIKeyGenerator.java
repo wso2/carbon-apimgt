@@ -6,6 +6,7 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -50,13 +51,15 @@ public class InternalAPIKeyGenerator implements ApiKeyGenerator {
             expireIn = currentTime + jwtTokenInfoDTO.getExpirationTime();
         }
         String issuerIdentifier = OAuthServerConfiguration.getInstance().getOpenIDConnectIDTokenIssuerIdentifier();
-        if (APIUtil.getInternalKeyIssuer() != null){
-            issuerIdentifier = APIUtil.getInternalKeyIssuer();
+        String internalKeyIssuer = APIUtil.getInternalKeyIssuer();
+        if (internalKeyIssuer != null && !StringUtils.isEmpty(internalKeyIssuer)) {
+            issuerIdentifier = internalKeyIssuer;
         }
         JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.END_USERNAME,
                 APIUtil.getUserNameWithTenantSuffix(jwtTokenInfoDTO.getEndUserName()));
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.JWT_ID, UUID.randomUUID().toString());
+        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.AUDIENCE, jwtTokenInfoDTO.getAudience());
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.ISSUER_IDENTIFIER, issuerIdentifier);
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.ISSUED_TIME, currentTime);
         if (expireIn != -1) {
