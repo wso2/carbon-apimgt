@@ -109,7 +109,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             marketplaceAssistantConfigurationDto = configuration.getMarketplaceAssistantConfigurationDto();
         }
         try {
-            if (marketplaceAssistantConfigurationDto.isEnabled()) {
+            if (APIUtil.isMarketplaceAssistantEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
 
                 CloseableHttpResponse response = APIUtil.
                         getMarketplaceChatApiCount(marketplaceAssistantConfigurationDto.getEndpoint(),
