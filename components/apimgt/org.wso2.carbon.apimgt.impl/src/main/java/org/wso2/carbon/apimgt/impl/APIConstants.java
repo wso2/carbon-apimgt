@@ -2584,6 +2584,8 @@ public final class APIConstants {
         public static final String CLIENT_CERTIFICATE_ENCODE = MUTUAL_SSL_CONFIG_ROOT + ".ClientCertificateEncode";
         public static final String ENABLE_CLIENT_CERTIFICATE_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
                 ".EnableClientCertificateValidation";
+        public static final String ENABLE_CERTIFICATE_CHAIN_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
+                ".EnableCertificateChainValidation";
     }
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";
