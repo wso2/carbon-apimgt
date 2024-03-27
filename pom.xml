@@ -2105,7 +2105,6 @@
 
         <!-- Misc Versions -->
         <synapse.version>4.0.0-wso2v103</synapse.version>
-
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
         <!-- orbit httpmime versions-->
