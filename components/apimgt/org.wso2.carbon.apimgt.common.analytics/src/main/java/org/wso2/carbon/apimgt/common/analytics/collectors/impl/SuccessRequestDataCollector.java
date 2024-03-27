@@ -72,6 +72,9 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         String userAgent = provider.getUserAgentHeader();
         String userName = provider.getUserName();
         String userIp = provider.getEndUserIP();
+        if (userName == null) {
+            userName = Constants.UNKNOWN_VALUE;
+        }
         if (userIp == null) {
             userIp = Constants.UNKNOWN_VALUE;
         }
