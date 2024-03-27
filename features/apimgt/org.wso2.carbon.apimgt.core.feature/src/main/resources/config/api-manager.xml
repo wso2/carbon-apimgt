@@ -190,11 +190,11 @@
     -->
     <APIChat>
         <!-- Enable API Chat for API Manager -->
-        <Enabled>false</Enabled>
+        <Enabled>true</Enabled>
 
         <AuthToken></AuthToken>
 
-        <Endpoint></Endpoint>
+        <Endpoint>http://localhost:9090</Endpoint>
 
         <Resources>
             <PrepareResource>/prepare</PrepareResource>
@@ -399,9 +399,9 @@
     -->
     <MarketplaceAssistant>
         <!-- Enable Marketplace Assistant for API Manager -->
-        <Enabled>false</Enabled>
+        <Enabled>true</Enabled>
         <AuthToken></AuthToken>
-        <Endpoint></Endpoint>
+        <Endpoint>http://localhost:9090</Endpoint>
         <Resources>
             <ChatResource>/chat</ChatResource>
             <ApiPublishResource>/publish-api</ApiPublishResource>
