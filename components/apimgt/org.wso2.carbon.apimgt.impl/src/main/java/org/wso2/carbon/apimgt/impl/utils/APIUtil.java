@@ -10392,44 +10392,6 @@ public final class APIUtil {
     }
 
     /**
-     * Check whether Marketplace Assistant is enabled
-     *
-     * @return returns true if Marketplace Assistant feature is enabled, false if disabled.
-     */
-    public static boolean isMarketplaceAssistantEnabled() {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        MarketplaceAssistantConfigurationDto configDto = configuration.getMarketplaceAssistantConfigurationDto();
-        return configDto.isEnabled();
-    }
-
-    /**
-     * Check whether API Chat feature is enabled
-     *
-     * @return returns true if API Chat feature is enabled, false if disabled.
-     */
-    public static boolean isApiChatEnabled() {
-        ApiChatConfigurationDto configDto = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
-        return configDto.isEnabled();
-    }
-
-    /**
-     * Checks whether an auth token is provided for AI features to use. This token is utilized for authentication and
-     * throttling purposes.
-     *
-     * @return returns true if a valid auth token is found, false otherwise.
-     */
-    public static boolean isAuthTokenProvidedForAIFeatures() {
-        ApiChatConfigurationDto configDto = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
-        if (StringUtils.isEmpty(configDto.getAccessToken())) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * This method is used to invoke the Choreo deployed AI service.
      *
      * @param endpoint  Endpoint to be invoked
@@ -10464,6 +10426,15 @@ public final class APIUtil {
             } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
                 throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
                         ExceptionCodes.AI_SERVICE_INVALID_ACCESS_TOKEN);
+            } else if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR){
+                org.json.JSONObject responseJson = new org.json.JSONObject(responseStr);
+                if (responseJson.has("detail")) {
+                    String errorMsg = (String) responseJson.get("detail");
+                    throw new APIManagementException(errorMsg,
+                            ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+                }
+                throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
+                        ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
             } else {
                 throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
                         ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);

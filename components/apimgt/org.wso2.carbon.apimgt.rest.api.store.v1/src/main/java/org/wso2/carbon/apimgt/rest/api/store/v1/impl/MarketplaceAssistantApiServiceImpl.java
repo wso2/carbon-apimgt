@@ -49,7 +49,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
 
     private static final Log log = LogFactory.getLog(MarketplaceAssistantApiServiceImpl.class);
 
-    private static MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto;
+    private static MarketplaceAssistantConfigurationDto configDto;
 
     @Override
     public Response marketplaceAssistantExecute(MarketplaceAssistantRequestDTO marketplaceAssistantRequestDTO,
@@ -60,10 +60,10 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
         } else {
-            marketplaceAssistantConfigurationDto = configuration.getMarketplaceAssistantConfigurationDto();
+            configDto = configuration.getMarketplaceAssistantConfigurationDto();
         }
         try {
-            if (APIUtil.isMarketplaceAssistantEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
+            if (configDto.isAuthTokenProvided()) {
 
                 boolean isChatQueryEmpty = StringUtils.isEmpty(marketplaceAssistantRequestDTO.getQuery());
                 if (isChatQueryEmpty) {
@@ -82,9 +82,9 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 payload.put(APIConstants.TENANT_DOMAIN, organization);
 
                 String response = APIUtil.
-                        marketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                                marketplaceAssistantConfigurationDto.getAccessToken(),
-                                marketplaceAssistantConfigurationDto.getChatResource(), payload.toString());
+                        marketplaceAssistantPostService(configDto.getEndpoint(),
+                                configDto.getAccessToken(),
+                                configDto.getChatResource(), payload.toString());
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 MarketplaceAssistantResponseDTO executeResponseDTO = objectMapper.readValue(response,
@@ -106,15 +106,15 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
         } else {
-            marketplaceAssistantConfigurationDto = configuration.getMarketplaceAssistantConfigurationDto();
+            configDto = configuration.getMarketplaceAssistantConfigurationDto();
         }
         try {
-            if (APIUtil.isMarketplaceAssistantEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
+            if (configDto.isAuthTokenProvided()) {
 
                 CloseableHttpResponse response = APIUtil.
-                        getMarketplaceChatApiCount(marketplaceAssistantConfigurationDto.getEndpoint(),
-                                marketplaceAssistantConfigurationDto.getAccessToken(),
-                                marketplaceAssistantConfigurationDto.getApiCountResource());
+                        getMarketplaceChatApiCount(configDto.getEndpoint(),
+                                configDto.getAccessToken(),
+                                configDto.getApiCountResource());
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == HttpStatus.SC_OK) {
                     String responseStr = EntityUtils.toString(response.getEntity());

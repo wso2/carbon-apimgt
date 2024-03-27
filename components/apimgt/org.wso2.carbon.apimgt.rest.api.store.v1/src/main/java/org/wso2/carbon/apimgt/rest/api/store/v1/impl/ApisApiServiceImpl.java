@@ -49,7 +49,9 @@ import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.ai.ApiChatConfigurationDto;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
@@ -274,7 +276,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apiChatPost(String apiId, String apiChatAction, ApiChatRequestDTO apiChatRequestDTO,
             MessageContext messageContext) throws APIManagementException {
-        if (APIUtil.isApiChatEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
+        ApiChatConfigurationDto configDto = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
+        if (configDto.isAuthTokenProvided()) {
             // Check the action
             if (apiChatAction.equals(APIConstants.AI.API_CHAT_ACTION_PREPARE)) {
                 // Determine whether the request body is valid. Request body should have a request UUID.
@@ -293,7 +297,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ApiChatResponseDTO preparationResponseDTO = objectMapper.readValue(prepareResponse,
                             ApiChatResponseDTO.class);
                     return Response.status(Response.Status.CREATED).entity(preparationResponseDTO).build();
-                } catch (APIManagementException | IOException e) {
+                } catch (APIManagementException e) {
+                    if (e.getErrorHandler().getHttpStatusCode() == 500){
+                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getCause().getMessage()).build();
+                    }
+                    String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
+                            "service. Cause: " + e.getCause().getMessage();
+                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                } catch (IOException e) {
                     String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
                             "service. Cause: " + e.getCause().getMessage();
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -358,7 +369,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ApiChatResponseDTO responseDTO = responseMapper.readValue(executionResponse,
                             ApiChatResponseDTO.class);
                     return Response.status(Response.Status.CREATED).entity(responseDTO).build();
-                } catch (APIManagementException | IOException e) {
+                } catch (APIManagementException e) {
+                    if (e.getErrorHandler().getHttpStatusCode() == 500){
+                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getCause().getMessage()).build();
+                    }
+                    String errorMessage = "Error encountered while executing the API Chat service to accommodate the " +
+                            "specified testing requirement. Cause: " + e.getCause().getMessage();
+                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                } catch (IOException e) {
                     String errorMessage = "Error encountered while executing the API Chat service to accommodate the " +
                             "specified testing requirement. Cause: " + e.getCause().getMessage();
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);

@@ -167,8 +167,8 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
             APIUtil.deleteApi(marketplaceAssistantConfigurationDto.getEndpoint(),
                     marketplaceAssistantConfigurationDto.getAccessToken(), marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
         } catch (APIManagementException e) {
-            String errorMessage = "Error encountered while Deleting the API from the vector database";
-            log.error(errorMessage);
+            String errorMessage = "Error encountered while Deleting the API from the vector database" + e.getMessage();
+            log.error(errorMessage, e);
         }
     }
 }

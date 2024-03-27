@@ -203,9 +203,6 @@ public class APIManagerComponent {
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             configuration.load(filePath);
 
-            boolean isMarketplaceAssistantEnabled = configuration.getMarketplaceAssistantConfigurationDto().isEnabled();
-            boolean isAuthTokenProvided = !StringUtils.isEmpty(configuration.getMarketplaceAssistantConfigurationDto().getAccessToken());
-
             //Registering Notifiers
             bundleContext.registerService(Notifier.class.getName(), new SubscriptionsNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ApisNotifier(), null);
@@ -221,7 +218,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
-            if (isMarketplaceAssistantEnabled && isAuthTokenProvided) {
+            if (configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
             }
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);

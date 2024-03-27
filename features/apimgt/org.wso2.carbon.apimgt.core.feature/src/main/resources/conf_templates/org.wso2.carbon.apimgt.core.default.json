@@ -43,7 +43,7 @@
   "apim.cache.restapi_token.expiry_time" : "300s",
   "apim.cache.restapi_cache_control_headers.max_age" : "86400s",
   "apim.analytics.enable": false,
-  "apim.ai.enable": false,
+  "apim.ai.enable": true,
   "apim.ai.token": "",
   "apim.ai.endpoint": "http://localhost:9090",
   "apim.ai.marketplace_assistant_chat_resource": "/ai/marketplace-assistant/chat",
