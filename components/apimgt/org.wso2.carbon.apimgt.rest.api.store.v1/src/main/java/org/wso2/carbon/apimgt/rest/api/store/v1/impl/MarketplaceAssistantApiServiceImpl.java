@@ -29,7 +29,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.*;
@@ -49,7 +49,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
 
     private static final Log log = LogFactory.getLog(MarketplaceAssistantApiServiceImpl.class);
 
-    private static MarketplaceAssistantConfigurationDto configDto;
+    private static MarketplaceAssistantConfigurationDTO configDto;
 
     @Override
     public Response marketplaceAssistantExecute(MarketplaceAssistantRequestDTO marketplaceAssistantRequestDTO,

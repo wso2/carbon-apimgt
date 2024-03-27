@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -41,7 +41,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
     protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(MarketplaceAssistantApiPublisherNotifier.class);
-    private static MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDto();
+    private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
