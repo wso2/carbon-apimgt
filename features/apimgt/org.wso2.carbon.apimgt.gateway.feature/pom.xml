@@ -108,10 +108,6 @@
             <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.governance</groupId>
-            <artifactId>org.wso2.carbon.governance.api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>net.sf.ehcache.wso2</groupId>
             <artifactId>ehcache</artifactId>
         </dependency>
@@ -264,7 +260,6 @@
                                 <bundleDef>
                                     org.wso2.carbon.mediation:org.wso2.carbon.endpoint.stub:${carbon.mediation.version}
                                 </bundleDef>
-                                <bundleDef>org.wso2.carbon.governance:org.wso2.carbon.governance.api:${carbon.governance.version}</bundleDef>
                                 <importBundleDef>
                                     org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}
                                 </importBundleDef>
