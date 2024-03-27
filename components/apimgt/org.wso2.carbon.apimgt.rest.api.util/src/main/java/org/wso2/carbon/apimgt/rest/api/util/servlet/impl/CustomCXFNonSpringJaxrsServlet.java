@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.util.servlet.impl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -17,6 +18,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.ws.rs.core.Application;
+
 import org.apache.cxf.Bus;
 import org.apache.cxf.common.classloader.ClassLoaderUtils;
 import org.apache.cxf.common.logging.LogUtils;
@@ -36,9 +38,11 @@ import org.apache.cxf.jaxrs.provider.ProviderFactory;
 import org.apache.cxf.jaxrs.utils.InjectionUtils;
 import org.apache.cxf.jaxrs.utils.ResourceUtils;
 import org.apache.cxf.message.Message;
+import org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter;
 import org.apache.cxf.service.invoker.Invoker;
 import org.apache.cxf.transport.http.DestinationRegistry;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
 public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
     private static final long serialVersionUID = -8916352798780577499L;
@@ -66,7 +70,8 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
     private static final String DEFAULT_PARAMETER_SPLIT_CHAR = ",";
     private static final String SPACE_PARAMETER_SPLIT_CHAR = "space";
     private static final String JAXRS_APPLICATION_PARAM = "javax.ws.rs.Application";
-
+    private static final String CORS_SYSTEM_PROPERTIES_PREFIX = "{systemProperties['";
+    private static final String CORS_SYSTEM_PROPERTIES_PATTERN = "^\\{systemProperties\\['|'\\]\\}$";
     private static Map<String, String> systemPropMap = new HashMap();
     private ClassLoader classLoader;
     private Application application;
@@ -152,7 +157,6 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
         bean.setExtensionMappings(CastUtils.cast(parseMapSequence(servletConfig.getInitParameter("jaxrs.extensions"))));
         bean.setLanguageMappings(CastUtils.cast(parseMapSequence(servletConfig.getInitParameter("jaxrs.languages"))));
         Map<String, Object> properties = CastUtils.cast(parseMapSequence(servletConfig.getInitParameter("jaxrs.properties")), String.class, Object.class);
-
         //Custom impl to allow property values to be defined as system properties
         for (Map.Entry<String, Object> entry: properties.entrySet()) {
             String key = entry.getKey();
@@ -173,6 +177,35 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
 
         if (properties != null && !properties.isEmpty()) {
             bean.getProperties(true).putAll(properties);
+        }
+        updateCORSAllowedOrigins(bean);
+    }
+
+    /**
+     * Dynamically updates CORS allowed origins based on system properties for all
+     * {@link CrossOriginResourceSharingFilter} instances in a {@link JAXRSServerFactoryBean}.
+     * <p>
+     * Iterates through the bean's providers, replacing the allowed origins with values defined in system properties
+     * if available, or defaults to {@code RestApiConstants.ALLOWED_ORIGINS_DEFAULT} otherwise.
+     *
+     * @param bean the JAX-RS server factory bean to update.
+     */
+    private void updateCORSAllowedOrigins(JAXRSServerFactoryBean bean) {
+        for (Object provider : bean.getProviders()) {
+            if (provider instanceof CrossOriginResourceSharingFilter) {
+                CrossOriginResourceSharingFilter corsFilter = (CrossOriginResourceSharingFilter) provider;
+                List<String> allowOrigins = corsFilter.getAllowOrigins();
+                if (!allowOrigins.isEmpty() && allowOrigins.get(0).startsWith(CORS_SYSTEM_PROPERTIES_PREFIX)) {
+                    String propertyKey = allowOrigins.get(0).replaceAll(CORS_SYSTEM_PROPERTIES_PATTERN, "");
+                    String propertyValue = System.getProperty(propertyKey);
+                    if (StringUtils.isEmpty(propertyValue)) {
+                        corsFilter.setAllowOrigins(Collections.singletonList(RestApiConstants.ALLOWED_ORIGINS_DEFAULT));
+                    } else {
+                        String[] originsArray = propertyValue.split(",");
+                        corsFilter.setAllowOrigins(Arrays.asList(originsArray));
+                    }
+                }
+            }
         }
     }
 

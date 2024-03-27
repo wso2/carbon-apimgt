@@ -65,7 +65,6 @@ import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -153,7 +152,6 @@ import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
@@ -10391,57 +10389,24 @@ public final class APIUtil {
     }
 
     /**
-     * Check whether Marketplace Assistant is enabled
+     * This method is used to invoke the Choreo deployed AI service.
      *
-     * @return returns true if Marketplace Assistant feature is enabled, false if disabled.
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken Authentication token to be sent
+     * @param resource  Specifies the backend resource the request should be forwarded to
+     * @param payload   Request payload that needs to be attached to the request
+     * @param requestId UUID of the request, so that AI service can track the progress
+     * @return returns the response if invocation is successful
+     * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    public static boolean isMarketplaceAssistantEnabled() {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        MarketplaceAssistantConfigurationDto configDto = configuration.getMarketplaceAssistantConfigurationDto();
-        return configDto.isEnabled();
-    }
+    public static String invokeAIService(String endpoint, String authToken, String resource, String payload,
+            String requestId) throws APIManagementException {
 
-    /**
-     * Check whether API Chat feature is enabled
-     *
-     * @return returns true if API Chat feature is enabled, false if disabled.
-     */
-    public static boolean isApiChatEnabled() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String isApiChatEnabled = config.getFirstProperty(APIConstants.AI.API_CHAT_ENABLED);
-        return Boolean.parseBoolean(isApiChatEnabled);
-    }
-
-    /**
-     * Checks whether an auth token is provided for AI features to use. This token is utilized for authentication and
-     * throttling purposes.
-     *
-     * @return returns true if a valid auth token is found, false otherwise.
-     */
-    public static boolean isAuthTokenProvidedForAIFeatures() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String authToken = config.getFirstProperty(APIConstants.AI.API_CHAT_AUTH_TOKEN);
-        if (StringUtils.isEmpty(authToken)) {
-            return false;
-        }
-        return true;
-    }
-
-    public static String invokeAIService(String endpointConfigName, String authTokenConfigName,
-            String resource, String payload, String requestId) throws  APIManagementException {
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String endpoint = config.getFirstProperty(endpointConfigName);
-        String authToken = config.getFirstProperty(authTokenConfigName);
         try {
             HttpPost preparePost = new HttpPost(endpoint + resource);
             preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            preparePost.setHeader("x-request-id", requestId);
+            preparePost.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
             StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
             preparePost.setEntity(requestEntity);
 
@@ -10458,6 +10423,15 @@ public final class APIUtil {
             } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
                 throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
                         ExceptionCodes.AI_SERVICE_INVALID_ACCESS_TOKEN);
+            } else if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR){
+                org.json.JSONObject responseJson = new org.json.JSONObject(responseStr);
+                if (responseJson.has("detail")) {
+                    String errorMsg = (String) responseJson.get("detail");
+                    throw new APIManagementException(errorMsg,
+                            ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+                }
+                throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
+                        ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
             } else {
                 throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
                         ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
@@ -10470,18 +10444,18 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used for AI Service health check purposes. This will be utilized by API-Chat feature and
-     * Marketplace-Assistant feature
+     * This method is used to get the no of apis in the vector db for an organization
      *
-     * @param endpoint Config name to retrieve the AI Service URL
-     * @param resource           Resource that we should forward the request to
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken OnPremKey for the organization
+     * @param resource  Resource that we should forward the request to
      * @return CloseableHttpResponse of the GET call
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while retrieving API count
      */
     public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String authToken, String resource)
             throws APIManagementException {
 
-        try{
+        try {
             HttpGet apiCountGet = new HttpGet(endpoint + resource);
             apiCountGet.setHeader(APIConstants.API_KEY_AUTH, authToken);
             URL url = new URL(endpoint);
@@ -10496,8 +10470,18 @@ public final class APIUtil {
         }
     }
 
-    public static String MarketplaceAssistantPostService(String endpoint, String authToken,
-                                         String resource, String payload) throws  APIManagementException {
+    /**
+     * This method is used to invoke the Choreo deployed AI service to accommodate the Marketplace Assistant chats.
+     *
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken OnPremKey for the organization
+     * @param resource  Resource that we should forward the request to
+     * @param payload   Request payload that needs to be attached to the request
+     * @return returns the response if invocation is successful
+     * @throws APIManagementException if an error occurs while invoking the AI service
+     */
+    public static String marketplaceAssistantPostService(String endpoint, String authToken, String resource,
+            String payload) throws APIManagementException {
 
         try {
             HttpPost preparePost = new HttpPost(endpoint + resource);
@@ -10528,9 +10512,17 @@ public final class APIUtil {
         }
     }
 
-
-    public static void DeleteApi(String endpoint, String authToken,
-                                 String resource, String uuid) throws  APIManagementException {
+    /**
+     * This method is used to delete an API from the vector database service to accommodate the Marketplace assistant
+     *
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken OnPremKey for the organization
+     * @param resource  Resource that we should forward the request to
+     * @param uuid      UUID of the API to be deleted
+     * @throws APIManagementException if an error occurs while deleting the API
+     */
+    public static void deleteApi(String endpoint, String authToken, String resource, String uuid)
+            throws APIManagementException {
 
         try {
             String resourceWithPathParam = endpoint + resource + "/{uuid}";
@@ -10548,11 +10540,12 @@ public final class APIUtil {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Successfully completed the Marketplace Chat API publisher delete call with status code: " + statusCode);
+                    log.debug("Successfully completed the Marketplace Assistant API publisher delete call with " +
+                            "status code: " + statusCode);
                 }
             } else {
-                String errorMessage = "Error encountered while Deleting the API from the vector database service to accommodate the " +
-                        "Marketplace assistant";
+                String errorMessage = "Error encountered while deleting the API from the vector database service " +
+                        "to accommodate the Marketplace assistant";
                 log.error(errorMessage);
             }
         } catch (MalformedURLException e) {

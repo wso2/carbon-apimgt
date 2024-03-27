@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -41,7 +41,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
     protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(MarketplaceAssistantApiPublisherNotifier.class);
-    private static MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDto();
+    private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
@@ -52,10 +52,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
             log.error("API Manager configuration is not initialized.");
         } else {
             marketplaceAssistantConfigurationDto = configuration.getMarketplaceAssistantConfigurationDto();
-
-            if (APIUtil.isMarketplaceAssistantEnabled() && APIUtil.isAuthTokenProvidedForAIFeatures()) {
-                process(event);
-            }
+            process(event);
         }
         return true;
     }
@@ -155,7 +152,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
             payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
             payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
             payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
-            APIUtil.MarketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
+            APIUtil.marketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
                     marketplaceAssistantConfigurationDto.getAccessToken(), marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString());
         } catch (APIManagementException e) {
             String errorMessage = "Error encountered while Uploading the API to the vector database" + e.getMessage();
@@ -167,11 +164,11 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
 
         try {
             String uuid = apiEvent.getUuid();
-            APIUtil.DeleteApi(marketplaceAssistantConfigurationDto.getEndpoint(),
+            APIUtil.deleteApi(marketplaceAssistantConfigurationDto.getEndpoint(),
                     marketplaceAssistantConfigurationDto.getAccessToken(), marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
         } catch (APIManagementException e) {
-            String errorMessage = "Error encountered while Deleting the API from the vector database";
-            log.error(errorMessage);
+            String errorMessage = "Error encountered while Deleting the API from the vector database" + e.getMessage();
+            log.error(errorMessage, e);
         }
     }
 }

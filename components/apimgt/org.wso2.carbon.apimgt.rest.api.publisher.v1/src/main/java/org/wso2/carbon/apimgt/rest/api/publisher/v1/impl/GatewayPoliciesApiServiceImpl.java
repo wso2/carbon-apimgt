@@ -175,7 +175,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                 String labelToCheck = dto.getGatewayLabel();
                 boolean labelFound = false;
                 for (Environment env : allEnvs) {
-                    if (env.getDisplayName().equals(labelToCheck)) {
+                    if (env.getName().equals(labelToCheck)) {
                         labelFound = true;
                         break;
                     }

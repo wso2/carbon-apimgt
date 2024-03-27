@@ -505,14 +505,25 @@ public final class APIConstants {
     // Constants related to AI features: API chat and Marketplace Assistant
     public static class AI {
 
-        public static final String API_CHAT =  "APIChat.";
-        public static final String API_CHAT_ENABLED = API_CHAT + "Enabled";
-        public static final String API_CHAT_AUTH_TOKEN = API_CHAT + "AuthToken";
-        public static final String API_CHAT_ENDPOINT = API_CHAT + "Endpoint";
-        public static final String API_CHAT_PREPARE_RESOURCE = "/prepare";
-        public static final String API_CHAT_EXECUTE_RESOURCE = "/chat";
+        public static final String API_CHAT = "APIChat";
+        public static final String API_CHAT_ENABLED = "Enabled";
+        public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
+        public static final String API_CHAT_ENDPOINT = "Endpoint";
+        public static final String RESOURCES = "Resources";
+        public static final String API_CHAT_PREPARE_RESOURCE = "PrepareResource";
+        public static final String API_CHAT_EXECUTE_RESOURCE = "ExecuteResource";
         public static final String API_CHAT_ACTION_PREPARE = "PREPARE";
         public static final String API_CHAT_ACTION_EXECUTE = "EXECUTE";
+        public static final String API_CHAT_REQUEST_ID = "apiChatRequestId";
+
+        public static final String MARKETPLACE_ASSISTANT = "MarketplaceAssistant";
+        public static final String MARKETPLACE_ASSISTANT_ENABLED = "Enabled";
+        public static final String MARKETPLACE_ASSISTANT_AUTH_TOKEN = "AuthToken";
+        public static final String MARKETPLACE_ASSISTANT_ENDPOINT = "Endpoint";
+        public static final String MARKETPLACE_ASSISTANT_CHAT_RESOURCE = "ChatResource";
+        public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
+        public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
+        public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
 
         private AI() {
 
@@ -548,17 +559,6 @@ public final class APIConstants {
     public static final String FULL_NAME = DEFAULT_CARBON_DIALECT + "/fullname";
     public static final String FIRST_NAME = DEFAULT_CARBON_DIALECT + "/givenname";
     public static final String LAST_NAME = DEFAULT_CARBON_DIALECT + "/lastname";
-
-    // constants for marketplace assistant
-    public static final String MARKETPLACE_ASSISTANT =  "MarketplaceAssistant";
-    public static final String MARKETPLACE_ASSISTANT_ENABLED = "Enabled";
-    public static final String MARKETPLACE_ASSISTANT_AUTH_TOKEN = "AuthToken";
-    public static final String MARKETPLACE_ASSISTANT_ENDPOINT = "Endpoint";
-    public static final String MARKETPLACE_ASSISTANT_CHAT_RESOURCE = "ChatResource";
-    public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
-    public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
-    public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE =  "ApiCountResource";
-
 
     //Overview constants for CORS configuration
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
@@ -2584,6 +2584,8 @@ public final class APIConstants {
         public static final String CLIENT_CERTIFICATE_ENCODE = MUTUAL_SSL_CONFIG_ROOT + ".ClientCertificateEncode";
         public static final String ENABLE_CLIENT_CERTIFICATE_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
                 ".EnableClientCertificateValidation";
+        public static final String ENABLE_CERTIFICATE_CHAIN_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
+                ".EnableCertificateChainValidation";
     }
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";

@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-import org.json.simple.JSONObject;
-
 /**
  * Details related to API Chat test initialization
  */
