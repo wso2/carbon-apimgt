@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,8 +35,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIAdmin;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -82,6 +86,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -3317,20 +3322,32 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
     @Override
     public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
-        return APIUtil.invokeAIService(APIConstants.AI.API_CHAT_ENDPOINT,
-                APIConstants.AI.API_CHAT_AUTH_TOKEN, APIConstants.AI.API_CHAT_EXECUTE_RESOURCE, requestPayload,
+        ApiChatConfigurationDTO configDto = ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
+        return APIUtil.invokeAIService(configDto.getEndpoint(),
+                configDto.getAccessToken(), configDto.getExecuteResource(), requestPayload,
                 apiChatRequestId);
     }
 
     @Override
     public String invokeApiChatPrepare(String apiId, String apiChatRequestId, String organization)
             throws APIManagementException {
-        String swaggerDefinition = getOpenAPIDefinition(apiId, organization);
-        String payload = "{\"openapi\": " + swaggerDefinition + "}";
-        String prepareResponse = APIUtil.invokeAIService(APIConstants.AI.API_CHAT_ENDPOINT,
-                APIConstants.AI.API_CHAT_AUTH_TOKEN, APIConstants.AI.API_CHAT_PREPARE_RESOURCE, payload,
-                apiChatRequestId);
-        return prepareResponse;
+        try {
+            // Generate the payload for prepare call
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
+            ObjectNode payload = objectMapper.createObjectNode();
+            payload.set("openapi", openAPIDefinitionJsonNode);
+
+            ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration().getApiChatConfigurationDto();
+            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+        } catch (JsonProcessingException e) {
+            String error = "Error while parsing OpenAPI definition to JSON";
+            log.error(error, e);
+            throw new APIManagementException(error, e);
+        }
     }
 
     @Override

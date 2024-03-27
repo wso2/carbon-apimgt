@@ -365,21 +365,12 @@
 
         <Endpoint>{{apim.ai.endpoint}}</Endpoint>
 
+        <Resources>
+            <PrepareResource>{{apim.ai.api_chat_prepare_resource}}</PrepareResource>
+            <ExecuteResource>{{apim.ai.api_chat_execute_resource}}</ExecuteResource>
+        </Resources>
+
     </APIChat>
-
-    <!--
-        Configurations relevant to Marketplace Assistant feature.
-        This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
-    -->
-    <MarketplaceAssistant>
-        <!-- Enable Marketplace Assistant for API Manager -->
-        <Enabled>{{apim.ai.enable}}</Enabled>
-
-        <AuthToken>{{apim.ai.token}}</AuthToken>
-
-        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
-
-    </MarketplaceAssistant>
 
     <!--
         Configurations relevant to enable rate limit feature.
@@ -401,14 +392,12 @@
 
         <Endpoint>{{apim.ai.endpoint}}</Endpoint>
 
-        <ChatResource>{{apim.ai.marketplace_assistant_chat_resource}}</ChatResource>
-
-        <ApiPublishResource>{{apim.ai.marketplace_assistant_publish_api_resource}}</ApiPublishResource>
-
-        <ApiDeleteResource>{{apim.ai.marketplace_assistant_remove_api_resource}}</ApiDeleteResource>
-
-        <ApiCountResource>{{apim.ai.marketplace_assistant_api_count_resource}}</ApiCountResource>
-
+        <Resources>
+            <ChatResource>{{apim.ai.marketplace_assistant_chat_resource}}</ChatResource>
+            <ApiPublishResource>{{apim.ai.marketplace_assistant_publish_api_resource}}</ApiPublishResource>
+            <ApiDeleteResource>{{apim.ai.marketplace_assistant_remove_api_resource}}</ApiDeleteResource>
+            <ApiCountResource>{{apim.ai.marketplace_assistant_api_count_resource}}</ApiCountResource>
+        </Resources>
     </MarketplaceAssistant>
 
     <!--
@@ -841,6 +830,14 @@
             <AllowedURI>
                 <URI>/api/am/gateway/v2/server-startup-healthcheck</URI>
                 <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/devportal/{version}/marketplace-assistant/api-count</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/devportal/{version}/marketplace-assistant/chat</URI>
+                <HTTPMethods>POST</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>

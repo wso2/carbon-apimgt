@@ -30,7 +30,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -80,8 +80,8 @@ public class APIManagerComponentTest {
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         OutputEventAdapterService adapterService = Mockito.mock(OutputEventAdapterService.class);
         ThrottleProperties throttleProperties = new ThrottleProperties();
-        MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto = Mockito.mock(
-                MarketplaceAssistantConfigurationDto.class);
+        MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = Mockito.mock(
+                MarketplaceAssistantConfigurationDTO.class);
 
         Mockito.doNothing().when(configuration).load(Mockito.anyString());
         Mockito.doNothing().when(authManager)

@@ -34,7 +34,8 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
@@ -49,7 +50,6 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
@@ -117,7 +117,8 @@ public class APIManagerConfiguration {
     private boolean initialized;
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
-    private static MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDto();
+    private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
+    private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -163,9 +164,14 @@ public class APIManagerConfiguration {
         return !tokenRevocationClassName.isEmpty();
     }
 
-    public MarketplaceAssistantConfigurationDto getMarketplaceAssistantConfigurationDto() {
+    public MarketplaceAssistantConfigurationDTO getMarketplaceAssistantConfigurationDto() {
 
         return marketplaceAssistantConfigurationDto;
+    }
+
+    public ApiChatConfigurationDTO getApiChatConfigurationDto() {
+
+        return apiChatConfigurationDto;
     }
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
@@ -632,8 +638,10 @@ public class APIManagerConfiguration {
                     jsonObject.put(APIConstants.CustomPropertyAttributes.REQUIRED, isRequired);
                     customProperties.add(jsonObject);
                 }
-            } else if (APIConstants.MARKETPLACE_ASSISTANT.equals(localName)) {
+            } else if (APIConstants.AI.MARKETPLACE_ASSISTANT.equals(localName)) {
                 setMarketplaceAssistantConfiguration(element);
+            } else if (APIConstants.AI.API_CHAT.equals(localName)) {
+                setApiChatConfiguration(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2339,42 +2347,88 @@ public class APIManagerConfiguration {
 
     public void setMarketplaceAssistantConfiguration(OMElement omElement){
         OMElement marketplaceAssistantEnableElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_ENABLED));
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_ENABLED));
         if (marketplaceAssistantEnableElement != null) {
             marketplaceAssistantConfigurationDto.setEnabled(Boolean.parseBoolean(marketplaceAssistantEnableElement.getText()));
         }
         if (marketplaceAssistantConfigurationDto.isEnabled()) {
             OMElement marketplaceAssistantEndpoint =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_ENDPOINT));
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_ENDPOINT));
             if (marketplaceAssistantEndpoint != null) {
                 marketplaceAssistantConfigurationDto.setEndpoint(marketplaceAssistantEndpoint.getText());
             }
             OMElement marketplaceAssistantToken =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_AUTH_TOKEN));
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_AUTH_TOKEN));
 
             if (marketplaceAssistantToken != null) {
                 String AccessToken = MiscellaneousUtil.resolve(marketplaceAssistantToken, secretResolver);
                 marketplaceAssistantConfigurationDto.setAccessToken(AccessToken);
+                if (!AccessToken.isEmpty()){
+                    marketplaceAssistantConfigurationDto.setAuthTokenProvided(true);
+                }
             }
+
+            OMElement resources =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
+
             OMElement marketplaceAssistantApiCountResource =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE));
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE));
             if (marketplaceAssistantApiCountResource != null) {
                 marketplaceAssistantConfigurationDto.setApiCountResource(marketplaceAssistantApiCountResource.getText());
             }
             OMElement marketplaceAssistantApiDeleteResource =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE));
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE));
             if (marketplaceAssistantApiDeleteResource != null) {
                 marketplaceAssistantConfigurationDto.setApiDeleteResource(marketplaceAssistantApiDeleteResource.getText());
             }
             OMElement marketplaceAssistantApiPublishResource =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE));
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE));
             if (marketplaceAssistantApiPublishResource != null) {
                 marketplaceAssistantConfigurationDto.setApiPublishResource(marketplaceAssistantApiPublishResource.getText());
             }
             OMElement marketplaceAssistantChatResource =
-                    omElement.getFirstChildWithName(new QName(APIConstants.MARKETPLACE_ASSISTANT_CHAT_RESOURCE));
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_CHAT_RESOURCE));
             if (marketplaceAssistantChatResource != null) {
                 marketplaceAssistantConfigurationDto.setChatResource(marketplaceAssistantChatResource.getText());
+            }
+        }
+    }
+
+    public void setApiChatConfiguration(OMElement omElement){
+        OMElement apiChatEnableElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_ENABLED));
+        if (apiChatEnableElement != null) {
+            apiChatConfigurationDto.setEnabled(Boolean.parseBoolean(apiChatEnableElement.getText()));
+        }
+        if (apiChatConfigurationDto.isEnabled()) {
+            OMElement apiChatEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_ENDPOINT));
+            if (apiChatEndpoint != null) {
+                apiChatConfigurationDto.setEndpoint(apiChatEndpoint.getText());
+            }
+            OMElement apiChatToken =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_AUTH_TOKEN));
+
+            if (apiChatToken != null) {
+                String AccessToken = MiscellaneousUtil.resolve(apiChatToken, secretResolver);
+                apiChatConfigurationDto.setAccessToken(AccessToken);
+                if (!AccessToken.isEmpty()){
+                    apiChatConfigurationDto.setAuthTokenProvided(true);
+                }
+            }
+
+            OMElement resources =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
+
+            OMElement apiChatPrepareResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_PREPARE_RESOURCE));
+            if (apiChatPrepareResource != null) {
+                apiChatConfigurationDto.setPrepareResource(apiChatPrepareResource.getText());
+            }
+            OMElement apiChatExecuteResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_EXECUTE_RESOURCE));
+            if (apiChatExecuteResource != null) {
+                apiChatConfigurationDto.setExecuteResource(apiChatExecuteResource.getText());
             }
         }
     }
