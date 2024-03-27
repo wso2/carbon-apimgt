@@ -255,6 +255,13 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
+    public Map<String, String> getMaskProperties() {
+        Map<String, String> maskProperties = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+                .getAPIAnalyticsConfiguration().getMaskDataProperties();
+        return maskProperties;
+    }
+
+    @Override
     public int getProxyResponseCode() {
         if (isSuccessRequest()) {
             return HttpURLConnection.HTTP_OK;

@@ -28,4 +28,13 @@ public class Constants {
     public static final String ANONYMOUS_VALUE = "anonymous";
     public static final String UNKNOWN_VALUE = "UNKNOWN";
     public static final int UNKNOWN_INT_VALUE = -1;
+    public static final String IPV4_PROP_TYPE = "IPV4";
+    public static final String IPV6_PROP_TYPE = "IPV6";
+    public static final String EMAIL_PROP_TYPE = "EMAIL";
+    public static final String USERNAME_PROP_TYPE = "USERNAME";
+
+    public static final String IPV4_MASK_VALUE = "***";
+    public static final String IPV6_MASK_VALUE = "**";
+    public static final String EMAIL_MASK_VALUE = "*****";
+    public static final String USERNAME_MASK_VALUE = "*****";
 }

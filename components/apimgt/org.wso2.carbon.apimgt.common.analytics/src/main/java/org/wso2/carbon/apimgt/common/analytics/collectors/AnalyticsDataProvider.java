@@ -73,4 +73,7 @@ public interface AnalyticsDataProvider {
     default Map<String, Object> getProperties() {
         return Collections.EMPTY_MAP;
     }
+
+    Map<String, String> getMaskProperties();
+
 }
