@@ -105,6 +105,8 @@ public class SignedJWTInfo implements Serializable {
         if (clientCertificate != null) {
             CertificateMgtUtils.convert(clientCertificate).ifPresent(x509Certificate ->
                     clientCertificateHash = X509CertUtils.computeSHA256Thumbprint(x509Certificate).toString());
+        } else {
+            this.clientCertificateHash = null;
         }
     }
 
