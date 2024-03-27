@@ -436,21 +436,13 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
     private void publishResetEvent(PolicyResetEvent event, String eventJson) {
         String applicationLevelThrottleKey = null;
         String applicationLevelTier = null;
-        String apiLevelThrottleKey = null;
-        String apiLevelTier = null;
-        String subscriptionLevelTier = null;
-        String subscriptionLevelThrottleKey = null;
-        String resourceLevelThrottleKey = null;
-        String resourceLevelTier = null;
         String authorizedUser = null;
-        String apiContext = null;
-        String apiVersion = null;
         String subscriberTenantDomain = null;
-        String apiTenantDomain = null;
         String applicationId = null;
 
         MessageContext synCtx = getMessageContext();
         AuthenticationContext authenticationContext = new AuthenticationContext();
+        authenticationContext.setAuthenticated(true);
 
         if (event.getPolicyType() == PolicyType.APPLICATION) {
             ApplicationPolicyResetEvent applicationEvent = new Gson().fromJson(eventJson, ApplicationPolicyResetEvent.class);
@@ -459,54 +451,14 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
             authorizedUser = applicationEvent.getUserId();
             subscriberTenantDomain = applicationEvent.getTenantDomain();
             applicationId = applicationEvent.getAppId();
-
-//            authenticationContext.setUsername(applicationEvent.getUserId() + "@" + event.getTenantDomain());
-//            authenticationContext.setApplicationId(applicationEvent.getAppId());
-            authenticationContext.setAuthenticated(true);
-        } else if (event.getPolicyType() == PolicyType.SUBSCRIPTION) {
-            SubscriptionPolicyResetEvent subscriptionEvent = new Gson().fromJson(eventJson, SubscriptionPolicyResetEvent.class);
-            subscriptionLevelTier = subscriptionEvent.getSubscriptionTier();
-            subscriptionLevelThrottleKey = subscriptionEvent.getAppId() + ":" + subscriptionEvent.getApiContext() + ":" + subscriptionEvent.getApiVersion() + ":" + subscriptionEvent.getSubscriptionTier();
-            apiContext = subscriptionEvent.getApiContext();
-            apiVersion = subscriptionEvent.getApiVersion();
-            subscriberTenantDomain = subscriptionEvent.getTenantDomain();
-            apiTenantDomain = subscriptionEvent.getTenantDomain();
-            applicationId = subscriptionEvent.getAppId();
-
-//            authenticationContext.setApplicationId(subscriptionEvent.getAppId());
-            authenticationContext.setAuthenticated(true);
-        } else if (event.getPolicyType() == PolicyType.API) {
-            if (!event.getIsResourceLevel()){
-                ApiPolicyResetEvent apiEvent = new Gson().fromJson(eventJson, ApiPolicyResetEvent.class);
-                apiLevelThrottleKey = apiEvent.getApiContext() + ":" + apiEvent.getApiVersion();
-                apiLevelTier = apiEvent.getApiTier();
-                apiContext = apiEvent.getApiContext();
-                apiVersion = apiEvent.getApiVersion();
-                subscriberTenantDomain = apiEvent.getTenantDomain();
-                apiTenantDomain = apiEvent.getTenantDomain();
-            } else {
-                ResourcePolicyResetEvent resourceEvent = new Gson().fromJson(eventJson, ResourcePolicyResetEvent.class);
-                resourceLevelThrottleKey = resourceEvent.getApiContext() + "/" + resourceEvent.getApiVersion() + resourceEvent.getResource();
-                resourceLevelTier = resourceEvent.getResourceTier();
-                apiContext = resourceEvent.getApiContext();
-                apiVersion = resourceEvent.getApiVersion();
-                subscriberTenantDomain = resourceEvent.getTenantDomain();
-                apiTenantDomain = resourceEvent.getTenantDomain();
-            }
-            authenticationContext.setAuthenticated(true);
         }
-
         synCtx.setProperty(APISecurityUtils.API_AUTH_CONTEXT, authenticationContext);
         synCtx.setProperty(APIConstants.POLICY_RESET, true);
 
-
         ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
-                publishNonThrottledEvent(applicationLevelThrottleKey,
-                        applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
-                        subscriptionLevelThrottleKey, subscriptionLevelTier,
-                        resourceLevelThrottleKey, resourceLevelTier,
-                        authorizedUser, apiContext,
-                        apiVersion, subscriberTenantDomain, apiTenantDomain,
+                publishResetApplicationPolicyEvent(applicationLevelThrottleKey,
+                        applicationLevelTier,
+                        authorizedUser, subscriberTenantDomain,
                         applicationId,
                         synCtx, authenticationContext);
     }
