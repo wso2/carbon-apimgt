@@ -86,7 +86,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
-import org.wso2.carbon.apimgt.impl.ai.ApiChatConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -3322,7 +3322,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
     @Override
     public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
-        ApiChatConfigurationDto configDto = ServiceReferenceHolder.
+        ApiChatConfigurationDTO configDto = ServiceReferenceHolder.
                 getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
         return APIUtil.invokeAIService(configDto.getEndpoint(),
                 configDto.getAccessToken(), configDto.getExecuteResource(), requestPayload,
@@ -3339,7 +3339,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             ObjectNode payload = objectMapper.createObjectNode();
             payload.set("openapi", openAPIDefinitionJsonNode);
 
-            ApiChatConfigurationDto configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+            ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
             return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
                     configDto.getPrepareResource(), payload.toString(), apiChatRequestId);

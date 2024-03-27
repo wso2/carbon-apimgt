@@ -34,8 +34,8 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.ai.ApiChatConfigurationDto;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
@@ -50,7 +50,6 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
@@ -118,8 +117,8 @@ public class APIManagerConfiguration {
     private boolean initialized;
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
-    private static MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDto();
-    private static ApiChatConfigurationDto apiChatConfigurationDto = new ApiChatConfigurationDto();
+    private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
+    private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -165,12 +164,12 @@ public class APIManagerConfiguration {
         return !tokenRevocationClassName.isEmpty();
     }
 
-    public MarketplaceAssistantConfigurationDto getMarketplaceAssistantConfigurationDto() {
+    public MarketplaceAssistantConfigurationDTO getMarketplaceAssistantConfigurationDto() {
 
         return marketplaceAssistantConfigurationDto;
     }
 
-    public ApiChatConfigurationDto getApiChatConfigurationDto() {
+    public ApiChatConfigurationDTO getApiChatConfigurationDto() {
 
         return apiChatConfigurationDto;
     }

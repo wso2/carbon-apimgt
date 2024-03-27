@@ -65,7 +65,6 @@ import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -153,8 +152,6 @@ import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
-import org.wso2.carbon.apimgt.impl.ai.ApiChatConfigurationDto;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
@@ -10409,7 +10406,7 @@ public final class APIUtil {
             HttpPost preparePost = new HttpPost(endpoint + resource);
             preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            preparePost.setHeader("apiChatRequestId", requestId);
+            preparePost.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
             StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
             preparePost.setEntity(requestEntity);
 
@@ -10449,16 +10446,16 @@ public final class APIUtil {
     /**
      * This method is used to get the no of apis in the vector db for an organization
      *
-     * @param endpoint Config name to retrieve the Service URL
-     * @param resource Resource that we should forward the request to
+     * @param endpoint  Endpoint to be invoked
      * @param authToken OnPremKey for the organization
+     * @param resource  Resource that we should forward the request to
      * @return CloseableHttpResponse of the GET call
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while retrieving API count
      */
     public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String authToken, String resource)
             throws APIManagementException {
 
-        try{
+        try {
             HttpGet apiCountGet = new HttpGet(endpoint + resource);
             apiCountGet.setHeader(APIConstants.API_KEY_AUTH, authToken);
             URL url = new URL(endpoint);
@@ -10473,8 +10470,18 @@ public final class APIUtil {
         }
     }
 
-    public static String marketplaceAssistantPostService(String endpoint, String authToken,
-                                         String resource, String payload) throws  APIManagementException {
+    /**
+     * This method is used to invoke the Choreo deployed AI service to accommodate the Marketplace Assistant chats.
+     *
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken OnPremKey for the organization
+     * @param resource  Resource that we should forward the request to
+     * @param payload   Request payload that needs to be attached to the request
+     * @return returns the response if invocation is successful
+     * @throws APIManagementException if an error occurs while invoking the AI service
+     */
+    public static String marketplaceAssistantPostService(String endpoint, String authToken, String resource,
+            String payload) throws APIManagementException {
 
         try {
             HttpPost preparePost = new HttpPost(endpoint + resource);
@@ -10505,9 +10512,17 @@ public final class APIUtil {
         }
     }
 
-
-    public static void deleteApi(String endpoint, String authToken,
-                                 String resource, String uuid) throws  APIManagementException {
+    /**
+     * This method is used to delete an API from the vector database service to accommodate the Marketplace assistant
+     *
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken OnPremKey for the organization
+     * @param resource  Resource that we should forward the request to
+     * @param uuid      UUID of the API to be deleted
+     * @throws APIManagementException if an error occurs while deleting the API
+     */
+    public static void deleteApi(String endpoint, String authToken, String resource, String uuid)
+            throws APIManagementException {
 
         try {
             String resourceWithPathParam = endpoint + resource + "/{uuid}";
@@ -10525,11 +10540,12 @@ public final class APIUtil {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Successfully completed the Marketplace Chat API publisher delete call with status code: " + statusCode);
+                    log.debug("Successfully completed the Marketplace Assistant API publisher delete call with " +
+                            "status code: " + statusCode);
                 }
             } else {
-                String errorMessage = "Error encountered while Deleting the API from the vector database service to accommodate the " +
-                        "Marketplace assistant";
+                String errorMessage = "Error encountered while deleting the API from the vector database service " +
+                        "to accommodate the Marketplace assistant";
                 log.error(errorMessage);
             }
         } catch (MalformedURLException e) {

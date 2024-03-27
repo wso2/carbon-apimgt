@@ -25,7 +25,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.ai.MarketplaceAssistantConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -69,8 +69,8 @@ public class APIManagerComponentImagePermissionTest {
         Registry registry = Mockito.mock(Registry.class);
         CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
         APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
-        MarketplaceAssistantConfigurationDto marketplaceAssistantConfigurationDto = Mockito.mock(
-                MarketplaceAssistantConfigurationDto.class);
+        MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = Mockito.mock(
+                MarketplaceAssistantConfigurationDTO.class);
 
         Mockito.when(componentContext.getBundleContext()).thenReturn(bundleContext);
         Mockito.when(realmService.getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID)).thenReturn(userRealm);
