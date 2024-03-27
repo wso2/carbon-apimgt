@@ -668,54 +668,36 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             log.debug("Start to undeploy API" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
 
-        String productionEndpointName = "";
-        String sandboxEndpointName = "";
-
-        if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
-            if (gatewayAPIDTO.getEndpointEntriesToBeAdd().length > 0) {
-                productionEndpointName = gatewayAPIDTO.getEndpointEntriesToBeAdd()[0].getName();
-            }
-            if (gatewayAPIDTO.getEndpointEntriesToBeAdd().length > 1) {
-                sandboxEndpointName = gatewayAPIDTO.getEndpointEntriesToBeAdd()[1].getName();
+        unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
+                endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
+        if (log.isDebugEnabled()) {
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " undeployed");
+            log.debug("Start to deploy Local entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+        }
+        // Add Local Entries
+        if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
+            for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
+                if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
+                    localEntryServiceProxy.deleteEntry(localEntry.getName());
+                    localEntryServiceProxy.addLocalEntry(localEntry.getContent());
+                } else {
+                    localEntryServiceProxy.addLocalEntry(localEntry.getContent());
+                }
             }
         }
+        if (log.isDebugEnabled()) {
+            log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Local Entries deployed");
+            log.debug("Start to deploy Endpoint entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
+        }
 
-        synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                acquireLock(productionEndpointName)) {
-            synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                    acquireLock(sandboxEndpointName)) {
-                unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
-                        endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
-                if (log.isDebugEnabled()) {
-                    log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " undeployed");
-                    log.debug("Start to deploy Local entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-                }
-                // Add Local Entries
-                if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
-                    for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
-                        if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                            localEntryServiceProxy.deleteEntry(localEntry.getName());
-                            localEntryServiceProxy.addLocalEntry(localEntry.getContent());
-                        } else {
-                            localEntryServiceProxy.addLocalEntry(localEntry.getContent());
-                        }
-                    }
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Local Entries deployed");
-                    log.debug("Start to deploy Endpoint entries" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
-                }
-
-                // Add Endpoints
-                if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
-                    for (GatewayContentDTO endpointEntry : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
-                        if (endpointAdminServiceProxy.isEndpointExist(endpointEntry.getName())) {
-                            endpointAdminServiceProxy.deleteEndpoint(endpointEntry.getName());
-                            endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
-                        } else {
-                            endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
-                        }
-                    }
+        // Add Endpoints
+        if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
+            for (GatewayContentDTO endpointEntry : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
+                if (endpointAdminServiceProxy.isEndpointExist(endpointEntry.getName())) {
+                    endpointAdminServiceProxy.deleteEndpoint(endpointEntry.getName());
+                    endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
+                } else {
+                    endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
                 }
             }
         }
@@ -918,36 +900,18 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     public boolean unDeployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
 
-        String sandboxEndpointName = "";
-        String productionEndpointName = "";
+        SequenceAdminServiceProxy sequenceAdminServiceProxy =
+                getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
+        RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
+        LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
+        EndpointAdminServiceProxy endpointAdminServiceProxy =
+                new EndpointAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
+        MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
+                new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
 
-        if (gatewayAPIDTO.getEndpointEntriesToBeRemove() != null) {
-            if (gatewayAPIDTO.getEndpointEntriesToBeRemove().length > 0) {
-                sandboxEndpointName = gatewayAPIDTO.getEndpointEntriesToBeRemove()[0];
-            }
-            if (gatewayAPIDTO.getEndpointEntriesToBeRemove().length > 1) {
-                productionEndpointName = gatewayAPIDTO.getEndpointEntriesToBeRemove()[1];
-            }
-        }
-
-        synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                acquireLock(productionEndpointName)) {
-            synchronized (ServiceReferenceHolder.getInstance().getSynapseConfigurationService().getSynapseConfiguration().
-                    acquireLock(sandboxEndpointName)) {
-                SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                        getSequenceAdminServiceClient(gatewayAPIDTO.getTenantDomain());
-                RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(gatewayAPIDTO.getTenantDomain());
-                LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
-                EndpointAdminServiceProxy endpointAdminServiceProxy =
-                        new EndpointAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-                MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy =
-                        new MediationSecurityAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-
-                unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
-                        endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
-                return true;
-            }
-        }
+        unDeployAPI(sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
+                endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
+        return true;
     }
 
     /**
