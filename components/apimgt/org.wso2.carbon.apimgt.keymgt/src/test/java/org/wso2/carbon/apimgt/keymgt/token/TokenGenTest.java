@@ -241,7 +241,7 @@ public class TokenGenTest {
         Certificate cert = keystore.getCertificate("wso2carbon");
 
         //Generate JWT header using the above certificate. Use SHA-1 as the certificate hashing algorithm.
-        String header = AbstractJWTGenerator.generateHeader(cert, signatureAlgorithm, false, true);
+        String header = AbstractJWTGenerator.generateHeader(cert, signatureAlgorithm, false, false);
 
         String encodedThumbprint = generateCertThumbprint(cert, "SHA-1");
         //Check if the encoded thumbprint matches with the JWT header's x5t
@@ -259,7 +259,7 @@ public class TokenGenTest {
         Certificate cert = keystore.getCertificate("wso2carbon");
 
         //Generate JWT header using the above certificate. Use SHA-256 as the certificate hashing algorithm.
-        String header = AbstractJWTGenerator.generateHeader(cert, signatureAlgorithm, false, false);
+        String header = AbstractJWTGenerator.generateHeader(cert, signatureAlgorithm, false, true);
 
         String encodedThumbprint = generateCertThumbprint(cert, "SHA-256");
         //Check if the encoded thumbprint matches with the JWT header's x5t#S256

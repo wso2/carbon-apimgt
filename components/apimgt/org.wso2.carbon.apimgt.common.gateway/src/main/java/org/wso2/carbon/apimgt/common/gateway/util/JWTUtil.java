@@ -88,24 +88,24 @@ public final class JWTUtil {
      * @param publicCert         The public certificate which needs to include in the header as thumbprint
      * @param signatureAlgorithm Signature algorithm which needs to include in the header
      * @param useKid             Specifies whether the header should include the kid property
-     * @param useSHA1Hash        Specifies whether to use SHA-1 algorithm to generate the certificate thumbprint
+     * @param useSHA256Hash      Specifies whether to use SHA-256 algorithm to generate the certificate thumbprint
      * @throws JWTGeneratorException
      */
 
     public static String generateHeader(Certificate publicCert, String signatureAlgorithm, boolean useKid,
-                                        boolean useSHA1Hash)
+                                        boolean useSHA256Hash)
             throws JWTGeneratorException {
 
         /*
          * Sample header
-         * {"typ":"JWT", "alg":"SHA256withRSA", "x5t#S256":"a_jhNus21KVuoFx65LmkW2O_l10",
+         * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
          * "kid":"a_jhNus21KVuoFx65LmkW2O_l10"}
-         * {"typ":"JWT", "alg":"[2]", "x5t#S256":"[1]"}
+         * {"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
          * */
         try {
             X509Certificate x509Certificate = (X509Certificate) publicCert;
 
-            String hashingAlgorithm = useSHA1Hash ? JWTConstants.SHA_1 : JWTConstants.SHA_256;
+            String hashingAlgorithm = useSHA256Hash ? JWTConstants.SHA_256 : JWTConstants.SHA_1;
             //generate the thumbprint of the certificate
             MessageDigest digestValue = MessageDigest.getInstance(hashingAlgorithm);
             byte[] der = publicCert.getEncoded();
@@ -119,10 +119,10 @@ public final class JWTUtil {
             JSONObject jwtHeader = new JSONObject();
             jwtHeader.put("typ", "JWT");
             jwtHeader.put("alg", getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            if (useSHA1Hash) {
-                jwtHeader.put(JWTConstants.X5T_PARAMETER, base64UrlEncodedThumbPrint);
-            } else {
+            if (useSHA256Hash) {
                 jwtHeader.put(JWTConstants.X5T256_PARAMETER, base64UrlEncodedThumbPrint);
+            } else {
+                jwtHeader.put(JWTConstants.X5T_PARAMETER, base64UrlEncodedThumbPrint);
             }
 
             if (useKid) {

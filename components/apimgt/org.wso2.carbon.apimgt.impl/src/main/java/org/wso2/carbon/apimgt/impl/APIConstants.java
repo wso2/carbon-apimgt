@@ -461,7 +461,7 @@ public final class APIConstants {
     public static final String USE_KID = "UseKidProperty";
     public static final String CONSUMER_DIALECT_URI = "ConsumerDialectURI";
     public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
-    public static final String USE_SHA1_HASH = "UseSHA1Hash";
+    public static final String USE_SHA256_HASH = "UseSHA256Hash";
 
     public static final String X5T_PARAMETER = "x5t";
     public static final String X5T256_PARAMETER = "x5t#S256";
