@@ -6501,6 +6501,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
         jwtTokenInfoDTO.setExpirationTime(60000l);
+        jwtTokenInfoDTO.setAudience(Arrays.asList(apiId));
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }
