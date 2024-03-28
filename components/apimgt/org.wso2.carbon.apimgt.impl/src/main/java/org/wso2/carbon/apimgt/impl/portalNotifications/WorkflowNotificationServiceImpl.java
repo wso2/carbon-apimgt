@@ -18,7 +18,9 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.user.core.common.User;
@@ -202,6 +204,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
     private List<SubscribedAPI> getAPIUsageByAPIId(String uuid, String organization, APIIdentifier apiIdEmailReplaced)
             throws APIManagementException {
         List<SubscribedAPI> subscribedAPIs = new ArrayList<>();
+        Set<String> uniqueUserSet = new HashSet<>();
         try{
             UserApplicationAPIUsage[] allApiResult = ApiMgtDAO.getInstance().getAllAPIUsageByProviderAndApiId(uuid, organization);
             for (UserApplicationAPIUsage usage : allApiResult) {
@@ -211,7 +214,10 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
                             APIUtil.replaceEmailDomain(subsApiId.getProviderName()), subsApiId.getApiName(),
                             subsApiId.getVersion());
                     if (subsApiIdEmailReplaced.equals(apiIdEmailReplaced)) {
-                        subscribedAPIs.add(apiSubscription);
+                        String userIdentifier = apiSubscription.getSubscriber().getName()+ "-" + apiSubscription.getOrganization();
+                        if (uniqueUserSet.add(userIdentifier)){
+                            subscribedAPIs.add(apiSubscription);
+                        }
                     }
                 }
             }
