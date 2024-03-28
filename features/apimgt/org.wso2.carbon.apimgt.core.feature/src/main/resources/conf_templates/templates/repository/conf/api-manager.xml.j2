@@ -70,6 +70,9 @@
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <SignatureAlgorithm>{{apim.jwt.signing_algorithm}}</SignatureAlgorithm>
 
+        <!-- Specifies whether to use SHA-1 algorithm to generate the certificate thumbprint -->
+        <UseSHA1Hash>{{apim.jwt.use_sha1_hash}}</UseSHA1Hash>
+
         <!-- This parameter specifies which implementation should be used for generating the Token. JWTGenerator is the
 	     default implementation provided. -->
         {% if apim.jwt.generator_impl is defined %}
