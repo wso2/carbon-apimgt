@@ -10389,10 +10389,11 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used to invoke the Choreo deployed AI service.
+     * This method is used to invoke the Choreo deployed AI service. This can handle both API Chat and Marketplace
+     * Assistant related POST calls.
      *
      * @param endpoint  Endpoint to be invoked
-     * @param authToken Authentication token to be sent
+     * @param authToken OnPremKey for the organization
      * @param resource  Specifies the backend resource the request should be forwarded to
      * @param payload   Request payload that needs to be attached to the request
      * @param requestId UUID of the request, so that AI service can track the progress
@@ -10406,7 +10407,9 @@ public final class APIUtil {
             HttpPost preparePost = new HttpPost(endpoint + resource);
             preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            preparePost.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
+            if(StringUtils.isNotEmpty(requestId)) {
+                preparePost.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
+            }
             StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
             preparePost.setEntity(requestEntity);
 
@@ -10463,48 +10466,6 @@ public final class APIUtil {
             String protocol = url.getProtocol();
             HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
             return executeHTTPRequest(apiCountGet, httpClient);
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
-        } catch (APIManagementException | IOException e) {
-            throw new APIManagementException("Error encountered while connecting to service", e);
-        }
-    }
-
-    /**
-     * This method is used to invoke the Choreo deployed AI service to accommodate the Marketplace Assistant chats.
-     *
-     * @param endpoint  Endpoint to be invoked
-     * @param authToken OnPremKey for the organization
-     * @param resource  Resource that we should forward the request to
-     * @param payload   Request payload that needs to be attached to the request
-     * @return returns the response if invocation is successful
-     * @throws APIManagementException if an error occurs while invoking the AI service
-     */
-    public static String marketplaceAssistantPostService(String endpoint, String authToken, String resource,
-            String payload) throws APIManagementException {
-
-        try {
-            HttpPost preparePost = new HttpPost(endpoint + resource);
-            preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
-            preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
-            preparePost.setEntity(requestEntity);
-
-            URL url = new URL(endpoint);
-            int port = url.getPort();
-            String protocol = url.getProtocol();
-            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
-
-            CloseableHttpResponse response = executeHTTPRequest(preparePost, httpClient);
-            int statusCode = response.getStatusLine().getStatusCode();
-            String responseStr = EntityUtils.toString(response.getEntity());
-            if (statusCode == HttpStatus.SC_CREATED) {
-                return responseStr;
-            } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                return null;
-            } else {
-                throw new APIManagementException("Unexpected response detected from the AI service." + responseStr);
-            }
         } catch (MalformedURLException e) {
             throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
         } catch (APIManagementException | IOException e) {

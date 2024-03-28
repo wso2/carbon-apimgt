@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
@@ -57,7 +56,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
-import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;

@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-
 /**
  * The default API notification service implementation in which API creation, update, delete and LifeCycle change
  * events are published to gateway.
@@ -41,7 +40,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
     protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(MarketplaceAssistantApiPublisherNotifier.class);
-    private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
+    private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto =
+            new MarketplaceAssistantConfigurationDTO();
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
@@ -61,7 +61,6 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
      * Add or Delete APIs from external DB when life cycle state changes
      *
      * @param event APIEvent to undeploy APIs from external gateway
-     * @return
      * @throws NotifierException if error occurs
      */
     private void process (Event event) throws NotifierException {
@@ -118,10 +117,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
-
-
             String api_type = api.getType();
-
             JSONObject payload = new JSONObject();
 
             switch (api_type) {
@@ -152,22 +148,26 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
             payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
             payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
             payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
-            APIUtil.marketplaceAssistantPostService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                    marketplaceAssistantConfigurationDto.getAccessToken(), marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString());
+            APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                    marketplaceAssistantConfigurationDto.getAccessToken(),
+                    marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
         } catch (APIManagementException e) {
-            String errorMessage = "Error encountered while Uploading the API to the vector database" + e.getMessage();
+            String errorMessage = "Error encountered while Uploading the API with UUID: " +
+                    apiId + " to the vector database" + e.getMessage();
             log.error(errorMessage, e);
         }
     }
 
     private void deleteRequest(APIEvent apiEvent) throws NotifierException {
 
+        String uuid = apiEvent.getUuid();
         try {
-            String uuid = apiEvent.getUuid();
             APIUtil.deleteApi(marketplaceAssistantConfigurationDto.getEndpoint(),
-                    marketplaceAssistantConfigurationDto.getAccessToken(), marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
+                    marketplaceAssistantConfigurationDto.getAccessToken(),
+                    marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
         } catch (APIManagementException e) {
-            String errorMessage = "Error encountered while Deleting the API from the vector database" + e.getMessage();
+            String errorMessage = "Error encountered while Deleting the API with UUID: " +
+                    uuid + " from the vector database" + e.getMessage();
             log.error(errorMessage, e);
         }
     }
