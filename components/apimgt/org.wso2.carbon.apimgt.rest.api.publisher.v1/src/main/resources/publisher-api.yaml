@@ -8946,6 +8946,11 @@ components:
             $ref: '#/components/schemas/Notification'
         pagination:
           $ref: '#/components/schemas/Pagination'
+        unreadCount:
+          type: integer
+          description: |
+            Number of Unread Notifications returned.
+          example: 5
     Comment:
       title: Comment
       required:

@@ -117,6 +117,7 @@ public class PortalNotificationDAO {
         Pagination pagination = new Pagination();
         notificationList.setPagination(pagination);
         int total = 0;
+        int unreadCount = 0;
 
         String sqlQueryForCount = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_COUNT;
         String sqlQuery;
@@ -161,6 +162,7 @@ public class PortalNotificationDAO {
                     return notificationList;
                 }
             }
+            unreadCount = getUnreadNotificationCount(username, organization, portalToDisplay, conn);
         } catch (SQLException e) {
             handleException("Failed to retrieve notifications of the user " + username, e);
         }
@@ -169,6 +171,7 @@ public class PortalNotificationDAO {
         notificationList.getPagination().setTotal(total);
         notificationList.setList(list);
         notificationList.setCount(list.size());
+        notificationList.setUnreadCount(unreadCount);
 
         return notificationList;
     }
@@ -407,5 +410,26 @@ public class PortalNotificationDAO {
             return apiUUID;
 
 
+    }
+
+    public int getUnreadNotificationCount(String username, String organization, String portalToDisplay, Connection conn)
+            throws APIManagementException {
+        int unreadCount = 0;
+        String sqlQuery = SQLConstants.PortalNotifications.GET_UNREAD_NOTIFICATION_COUNT;
+
+        try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+            ps.setString(1, username);
+            ps.setString(2, organization);
+            ps.setString(3, portalToDisplay);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    unreadCount = rs.getInt("UNREAD_NOTIFICATION_COUNT");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get unread notification count for user " + username, e);
+        }
+
+        return unreadCount;
     }
 }

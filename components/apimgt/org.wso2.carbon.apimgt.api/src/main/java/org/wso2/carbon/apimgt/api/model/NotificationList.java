@@ -9,6 +9,8 @@ public class NotificationList {
     private List<Notification> list = new ArrayList<Notification>();
     private Pagination pagination = null;
 
+    private Integer unreadCount = null;
+
     public Integer getCount() {
         return count;
     }
@@ -32,5 +34,9 @@ public class NotificationList {
     public void setPagination(Pagination pagination) {
         this.pagination = pagination;
     }
+
+    public Integer getUnreadCount() { return unreadCount; }
+
+    public void setUnreadCount(Integer unreadCount) { this.unreadCount = unreadCount; }
 
 }

@@ -27,6 +27,7 @@ public class NotificationListDTO   {
     private Integer count = null;
     private List<NotificationDTO> list = new ArrayList<NotificationDTO>();
     private PaginationDTO pagination = null;
+    private Integer unreadCount = null;
 
   /**
    * Number of Notifications returned. 
@@ -82,6 +83,24 @@ public class NotificationListDTO   {
     this.pagination = pagination;
   }
 
+  /**
+   * Number of Unread Notifications returned. 
+   **/
+  public NotificationListDTO unreadCount(Integer unreadCount) {
+    this.unreadCount = unreadCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "5", value = "Number of Unread Notifications returned. ")
+  @JsonProperty("unreadCount")
+  public Integer getUnreadCount() {
+    return unreadCount;
+  }
+  public void setUnreadCount(Integer unreadCount) {
+    this.unreadCount = unreadCount;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -94,12 +113,13 @@ public class NotificationListDTO   {
     NotificationListDTO notificationList = (NotificationListDTO) o;
     return Objects.equals(count, notificationList.count) &&
         Objects.equals(list, notificationList.list) &&
-        Objects.equals(pagination, notificationList.pagination);
+        Objects.equals(pagination, notificationList.pagination) &&
+        Objects.equals(unreadCount, notificationList.unreadCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, list, pagination);
+    return Objects.hash(count, list, pagination, unreadCount);
   }
 
   @Override
@@ -110,6 +130,7 @@ public class NotificationListDTO   {
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
+    sb.append("    unreadCount: ").append(toIndentedString(unreadCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }
