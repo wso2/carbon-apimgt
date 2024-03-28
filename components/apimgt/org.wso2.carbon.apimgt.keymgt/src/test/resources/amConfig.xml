@@ -12,7 +12,7 @@
     <JWTConfiguration>
         <EnableJWTGeneration>true</EnableJWTGeneration>
         <SignatureAlgorithm>NONE</SignatureAlgorithm>
-        <UseSHA1Hash>false</UseSHA1Hash>
+        <UseSHA256Hash>false</UseSHA256Hash>
     </JWTConfiguration>
     <APIUsageTracking>
         <Enabled>false</Enabled>
