@@ -416,7 +416,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         while (retry) {
             try {
                 boolean isArtifactsDeployed = deployGatewayPolicyArtifactsAtStartup(tenantDomain);
-                DataHolder.getInstance().setAllApisDeployed(isArtifactsDeployed);
+                DataHolder.getInstance().setAllGatewayPoliciesDeployed(isArtifactsDeployed);
                 if (isArtifactsDeployed) {
                     log.info("Gateway policy artifacts deployed Successfully in the Gateway");
                     retry = false;
