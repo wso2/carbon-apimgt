@@ -3322,11 +3322,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
     @Override
     public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
-        ApiChatConfigurationDTO configDto = ServiceReferenceHolder.
-                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
-        return APIUtil.invokeAIService(configDto.getEndpoint(),
-                configDto.getAccessToken(), configDto.getExecuteResource(), requestPayload,
-                apiChatRequestId);
+        ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getApiChatConfigurationDto();
+        return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+                configDto.getExecuteResource(), requestPayload, apiChatRequestId);
     }
 
     @Override
@@ -3337,14 +3336,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
             ObjectNode payload = objectMapper.createObjectNode();
-            payload.set("openapi", openAPIDefinitionJsonNode);
+            payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
 
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
             return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
                     configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
         } catch (JsonProcessingException e) {
-            String error = "Error while parsing OpenAPI definition to JSON";
+            String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
             log.error(error, e);
             throw new APIManagementException(error, e);
         }
