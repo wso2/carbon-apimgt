@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.impl.importexport;
 
+import org.apache.xpath.operations.Bool;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -115,18 +116,19 @@ public interface ImportExportAPI {
     /**
      * Used to import an API artifact.
      *
-     * @param fileInputStream  Input stream from the REST request
-     *                         (This will not be null when importing dependent APIs with API Products)
-     * @param preserveProvider Decision to keep or replace the provider
-     * @param rotateRevision   If the maximum revision number reached, undeploy the earliest revision and create
-     *                         a new revision
-     * @param overwrite        Whether to update the API or not
-     * @param organization     Identifier of the organization
+     * @param fileInputStream              Input stream from the REST request
+     *                                     (This will not be null when importing dependent APIs with API Products)
+     * @param preserveProvider             Decision to keep or replace the provider
+     * @param rotateRevision               If the maximum revision number reached, undeploy the earliest revision and create
+     *                                     a new revision
+     * @param overwrite                    Whether to update the API or not
+     * @param preservePortalConfigurations
+     * @param organization                 Identifier of the organization
      * @return Imported API
      * @throws APIManagementException If there is an error in importing an API
      */
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-                         Boolean overwrite, String[] tokenScopes, String organization)
+                         Boolean overwrite, Boolean preservePortalConfigurations, String[] tokenScopes, String organization)
             throws APIManagementException;
 
     /**

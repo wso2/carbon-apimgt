@@ -31,7 +31,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.NotNull;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
@@ -82,6 +81,7 @@ import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
@@ -99,6 +99,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -119,6 +120,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.validation.constraints.NotNull;
 
 /**
  * This class usesd to utility for Import API.
@@ -132,6 +134,7 @@ public class ImportUtils {
 
     public static APIDTO getImportAPIDto(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
                                          String userName) throws APIManagementException {
+
         try {
             if (importedApiDTO == null) {
                 JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider,
@@ -158,13 +161,15 @@ public class ImportUtils {
      * @param dependentAPIParamsConfigObject Params configuration of an API (this will not be null if a dependent API
      *                                       of an
      *                                       API product wants to override the parameters)
-     * @param organization  Identifier of an Organization
+     * @param organization                   Identifier of an Organization
      * @throws APIImportExportException If there is an error in importing an API
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-            Boolean rotateRevision, Boolean overwrite, Boolean dependentAPIFromProduct, String[] tokenScopes,
-            JsonObject dependentAPIParamsConfigObject, String organization) throws APIManagementException {
+                                Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations,
+                                Boolean dependentAPIFromProduct, String[] tokenScopes,
+                                JsonObject dependentAPIParamsConfigObject, String organization)
+            throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse validationResponse = null;
@@ -269,6 +274,10 @@ public class ImportUtils {
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
                 log.info("Existing API found, attempting to update it...");
                 currentStatus = targetApi.getStatus();
+                // If Portal configurations are preserved api status won't updating.
+                if (preservePortalConfigurations) {
+                    targetStatus = currentStatus;
+                }
                 // Set the status of imported API to current status of target API when updating
                 importedApiDTO.setLifeCycleStatus(currentStatus);
 
@@ -279,8 +288,40 @@ public class ImportUtils {
                     setOperationsToDTO(importedApiDTO, validationResponse);
                 }
                 targetApi.setOrganization(organization);
+                if (preservePortalConfigurations) {
+                    APIDTO convertedOldAPI = APIMappingUtil.fromAPItoDTO(targetApi);
+                    importedApiDTO.setBusinessInformation(convertedOldAPI.getBusinessInformation());
+                    importedApiDTO.setAccessControl(convertedOldAPI.getAccessControl());
+                    importedApiDTO.setDescription(convertedOldAPI.getDescription());
+                    importedApiDTO.setCategories(convertedOldAPI.getCategories());
+                    importedApiDTO.setAccessControl(convertedOldAPI.getAccessControl());
+                    importedApiDTO.setAccessControlRoles(convertedOldAPI.getAccessControlRoles());
+                    importedApiDTO.setHasThumbnail(convertedOldAPI.isHasThumbnail());
+                    importedApiDTO.setMonetization(convertedOldAPI.getMonetization());
+                    importedApiDTO.setVisibility(convertedOldAPI.getVisibility());
+                    importedApiDTO.setVisibleRoles(convertedOldAPI.getVisibleRoles());
+                    importedApiDTO.setVisibleTenants(convertedOldAPI.getVisibleTenants());
+                    importedApiDTO.setSubscriptionAvailability(convertedOldAPI.getSubscriptionAvailability());
+                    importedApiDTO.setSubscriptionAvailableTenants(convertedOldAPI.getSubscriptionAvailableTenants());
+                    importedApiDTO.monetization(convertedOldAPI.getMonetization());
+                    importedApiDTO.setTags(convertedOldAPI.getTags());
+                    List<APIInfoAdditionalPropertiesDTO> additionalProperties =
+                            convertedOldAPI.getAdditionalProperties();
+                    if (additionalProperties != null) {
+                        List<APIInfoAdditionalPropertiesDTO> additionalPropertiesDTOList = new ArrayList<>();
+                        for (APIInfoAdditionalPropertiesDTO additionalProperty : additionalProperties) {
+                            if ("github_repo".equals(additionalProperty.getName()) ||
+                                    "slack_url".equals(additionalProperty.getName())) {
+                                additionalPropertiesDTOList.add(additionalProperty);
+                            }
+                        }
+                        additionalPropertiesDTOList.addAll(importedApiDTO.getAdditionalProperties());
+                        importedApiDTO.setAdditionalProperties(additionalPropertiesDTOList);
+                    }
+                }
                 importedApi = PublisherCommonUtils.updateApiAndDefinition(targetApi, importedApiDTO,
-                        RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes, validationResponse);
+                        RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes,
+                        validationResponse);
             } else {
                 if (targetApi == null && Boolean.TRUE.equals(overwrite)) {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
@@ -299,7 +340,7 @@ public class ImportUtils {
                         // Add the validated swagger separately since the UI does the same procedure
                         PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false,
                                 organization);
-                        importedApi =  apiProvider.getAPIbyUUID(importedApi.getUuid(), currentTenantDomain);
+                        importedApi = apiProvider.getAPIbyUUID(importedApi.getUuid(), currentTenantDomain);
                     }
                 } else {
                     importedApi = PublisherCommonUtils.importAsyncAPIWithDefinition(validationResponse, Boolean.FALSE,
@@ -320,7 +361,7 @@ public class ImportUtils {
                 apiProvider.updateAPI(importedApi, oldAPI);
             }
 
-            apiProvider =  RestApiCommonUtil.getLoggedInUserProvider();
+            apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             // Retrieving the life cycle actions to do the lifecycle state change explicitly later
             lifecycleActions = getLifeCycleActions(currentStatus, targetStatus);
@@ -345,7 +386,9 @@ public class ImportUtils {
             // Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in
             // implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
-            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider, organization);
+            if (!preservePortalConfigurations) {
+                addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider, organization);
+            }
             if (StringUtils
                     .equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
                 addSOAPToREST(importedApi, validationResponse.getContent(), apiProvider);
@@ -371,7 +414,9 @@ public class ImportUtils {
             // updated in the importedAPI with current implementation. As we are updating the registry during the
             // lifecycle transition state, it will override the thumbnail RXT field as it is null in the api object
             // and without it, thumbnail is not be visible in publisher portal.
-            addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
+            if (!preservePortalConfigurations) {
+                addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
+            }
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             if (deploymentInfoArray == null && !isAdvertiseOnlyAPI(importedApiDTO)) {
@@ -473,6 +518,7 @@ public class ImportUtils {
     public static Map<String, List<OperationPolicy>> extractValidateAndDropOperationPoliciesFromURITemplate
     (List<APIOperationsDTO> operationsDTO, String extractedFolderPath, String apiUUID, String tenantDomain,
      String apiType, APIProvider provider) throws APIManagementException {
+
         Map<String, List<OperationPolicy>> operationPoliciesMap = new HashMap<>();
         for (APIOperationsDTO dto : operationsDTO) {
             String key = dto.getVerb() + ":" + dto.getTarget();
@@ -505,8 +551,12 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs while extracting, validating or dropping the policies
      */
     public static List<OperationPolicy> extractValidateAndDropAPIPoliciesFromAPI(APIDTO importedApiDTO,
-            String extractedFolderPath, String apiUUID, String tenantDomain, String apiType, APIProvider provider)
+                                                                                 String extractedFolderPath,
+                                                                                 String apiUUID, String tenantDomain
+            , String apiType,
+                                                                                 APIProvider provider)
             throws APIManagementException {
+
         List<OperationPolicy> apiPoliciesList = new ArrayList<>();
         if (importedApiDTO.getApiPolicies() != null) {
             apiPoliciesList = OperationPolicyMappingUtil
@@ -603,8 +653,9 @@ public class ImportUtils {
      * @throws APIManagementException If there is an error in validating applied policy
      */
     public static void populateAPIWithPolicies(API api, APIProvider provider, String extractedFolderPath,
-            Map<String, List<OperationPolicy>> operationLevelPoliciesMap, List<OperationPolicy> apiLevelPoliciesList,
-            String tenantDomain) throws APIManagementException {
+                                               Map<String, List<OperationPolicy>> operationLevelPoliciesMap,
+                                               List<OperationPolicy> apiLevelPoliciesList,
+                                               String tenantDomain) throws APIManagementException {
 
         String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
         Map<String, String> importedPolicies = new HashMap<>();
@@ -642,8 +693,9 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs while validating the policies
      */
     public static List<OperationPolicy> findOrImportPolicy(List<OperationPolicy> policiesList,
-            Map<String, String> importedPolicies, String policyDirectory, String tenantDomain, API api,
-            APIProvider provider) throws APIManagementException {
+                                                           Map<String, String> importedPolicies,
+                                                           String policyDirectory, String tenantDomain, API api,
+                                                           APIProvider provider) throws APIManagementException {
 
         List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
         for (OperationPolicy policy : policiesList) {
@@ -752,8 +804,9 @@ public class ImportUtils {
     public static OperationPolicySpecification getOperationPolicySpecificationFromFile(String extractedFolderPath,
                                                                                        String policyName)
             throws APIManagementException {
+
         try {
-            String jsonContent =  getFileContentAsJson(extractedFolderPath + File.separator + policyName);
+            String jsonContent = getFileContentAsJson(extractedFolderPath + File.separator + policyName);
             if (jsonContent == null) {
                 return null;
             }
@@ -772,6 +825,7 @@ public class ImportUtils {
      * @param importedApiDTO API DTO to import
      */
     public static boolean isAdvertiseOnlyAPI(APIDTO importedApiDTO) {
+
         if (importedApiDTO.getAdvertiseInfo() != null && importedApiDTO.getAdvertiseInfo().isAdvertised() == null) {
             importedApiDTO.getAdvertiseInfo().setAdvertised(Boolean.FALSE);
         }
@@ -781,8 +835,8 @@ public class ImportUtils {
     /**
      * Process the properties specific to advertise only APIs
      *
-     * @param importedApiDTO               API DTO to import
-     * @param tokenScopes Scopes of the token
+     * @param importedApiDTO API DTO to import
+     * @param tokenScopes    Scopes of the token
      */
     private static void processAdvertiseOnlyPropertiesInDTO(APIDTO importedApiDTO, String[] tokenScopes) {
         // Only the users who has admin privileges (apim:admin scope) are allowed to set the original devportal URL.
@@ -1012,10 +1066,11 @@ public class ImportUtils {
      * @param uploadedInputStream Input stream from the REST request
      * @return Path to the extracted directory
      * @throws APIManagementException If an error occurs while creating the directory, transferring files or
-     *                                  extracting the content
+     *                                extracting the content
      */
     public static String getArchivePathOfPolicyExtractedDirectory(InputStream uploadedInputStream)
             throws APIManagementException {
+
         try {
             // Temporary directory is used to create the required folders
             File importFolder = CommonUtil.createTempDirectory(null);
@@ -1058,7 +1113,7 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs while processing the policy files
      */
     public static OperationPolicyDataDTO importPolicy(String pathToArchive, String organization,
-            APIProvider apiProvider) throws APIManagementException {
+                                                      APIProvider apiProvider) throws APIManagementException {
 
         OperationPolicySpecification policySpecification = null;
         try {
@@ -1789,7 +1844,7 @@ public class ImportUtils {
      *
      * @param pathToArchive  Location of the extracted folder of the API or API Product
      * @param apiTypeWrapper Imported API or API Product
-     * @param organization  Identifier of an Organization
+     * @param organization   Identifier of an Organization
      */
     private static void addDocumentation(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider,
                                          String organization) {
@@ -1990,15 +2045,17 @@ public class ImportUtils {
                     String wsdlUrl;
                     if (APIConstants.APPLICATION_ZIP.equals(fileExtension)) {
                         wsdlUrl = apiSourcePath + RegistryConstants.PATH_SEPARATOR
-                            + org.wso2.carbon.apimgt.persistence.APIConstants.API_WSDL_ARCHIVE_LOCATION
-                            + apiProviderName + org.wso2.carbon.apimgt.persistence.APIConstants.WSDL_PROVIDER_SEPERATOR
-                            + apiName + apiVersion + org.wso2.carbon.apimgt.persistence.APIConstants.ZIP_FILE_EXTENSION;
+                                + org.wso2.carbon.apimgt.persistence.APIConstants.API_WSDL_ARCHIVE_LOCATION
+                                + apiProviderName
+                                + org.wso2.carbon.apimgt.persistence.APIConstants.WSDL_PROVIDER_SEPERATOR
+                                + apiName + apiVersion
+                                + org.wso2.carbon.apimgt.persistence.APIConstants.ZIP_FILE_EXTENSION;
                     } else {
                         wsdlUrl = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                                 + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
                     }
                     String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + wsdlUrl;
+                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + wsdlUrl;
 
                     String wsdlRegistryPath;
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
@@ -2167,11 +2224,12 @@ public class ImportUtils {
      *
      * @param pathToArchive Location of the extracted folder of the API
      * @param apiProvider   API Provider
-     * @param organization Identifier of the organization
+     * @param organization  Identifier of the organization
      * @throws APIImportExportException
      */
     private static void addClientCertificates(String pathToArchive, APIProvider apiProvider,
-            ApiTypeWrapper apiTypeWrapper, String organization, boolean isOverwrite, int tenantId)
+                                              ApiTypeWrapper apiTypeWrapper, String organization, boolean isOverwrite
+            , int tenantId)
             throws APIManagementException {
 
         try {
@@ -2239,6 +2297,7 @@ public class ImportUtils {
      */
     private static void addSOAPToREST(API importedApi, String swaggerContent, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
+
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         PublisherCommonUtils
                 .updateAPIBySettingGenerateSequencesFromSwagger(swaggerContent, importedApi, apiProvider, tenantDomain);
@@ -2318,6 +2377,7 @@ public class ImportUtils {
      */
     public static Map<String, String> getLifeCycleActions(String currentStatus, String targetStatus)
             throws APIManagementException {
+
         Map<String, String> lifeCycleActions = new LinkedHashMap<>();
         // No need to change the lifecycle if both the statuses are same
         if (!StringUtils.equalsIgnoreCase(currentStatus, targetStatus) && StringUtils.isNotEmpty(targetStatus)) {
@@ -2353,7 +2413,8 @@ public class ImportUtils {
      * @throws APIManagementException if an error occurs while changing the lifecycle status
      */
     private static void changeLifeCycleStatus(Map<String, String> lifecycleActions, String currentStatus,
-            ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
+                                              ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
+
         if (!lifecycleActions.isEmpty()) {
             for (Map.Entry<String, String> lifeCycleAction : lifecycleActions.entrySet()) {
                 // Change API the life cycle if the state transition is required
@@ -2378,13 +2439,14 @@ public class ImportUtils {
      * @param preserveProvider    Decision to keep or replace the provider
      * @param overwriteAPIProduct Whether to update the API Product or not
      * @param overwriteAPIs       Whether to update the dependent APIs or not
-     * @param organization  Organization Identifier
+     * @param organization        Organization Identifier
      * @param importAPIs          Whether to import the dependent APIs or not
      * @throws APIImportExportException If there is an error in importing an API
      */
     public static APIProduct importApiProduct(String extractedFolderPath, Boolean preserveProvider,
-            Boolean rotateRevision, Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
-            String[] tokenScopes, String organization) throws APIManagementException {
+                                              Boolean rotateRevision, Boolean overwriteAPIProduct,
+                                              Boolean overwriteAPIs, Boolean importAPIs,
+                                              String[] tokenScopes, String organization) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
@@ -2559,10 +2621,10 @@ public class ImportUtils {
     /**
      * This method checks whether the resources in the API Product are valid.
      *
-     * @param path          Location of the extracted folder of the API Product
-     * @param currentUser   The current logged in user
-     * @param apiProvider   API provider
-     * @param apiProductDto API Product DTO
+     * @param path             Location of the extracted folder of the API Product
+     * @param currentUser      The current logged in user
+     * @param apiProvider      API provider
+     * @param apiProductDto    API Product DTO
      * @param preserveProvider
      * @param organization
      * @throws IOException            If there is an error while reading an API file
@@ -2570,7 +2632,8 @@ public class ImportUtils {
      *                                or failed when checking the existence of an API
      */
     private static void checkAPIProductResourcesValid(String path, String currentUser, APIProvider apiProvider,
-            APIProductDTO apiProductDto, Boolean preserveProvider, String organization)
+                                                      APIProductDTO apiProductDto, Boolean preserveProvider,
+                                                      String organization)
             throws IOException, APIManagementException {
 
         // Get dependent APIs in the API Product
@@ -2656,7 +2719,7 @@ public class ImportUtils {
      * @param overwriteAPIs            Whether to overwrite the APIs or not
      * @param apiProductDto            API Product DTO
      * @param tokenScopes              Scopes of the token
-     * @param organization  Organization Identifier
+     * @param organization             Organization Identifier
      * @return Modified API Product DTO with the correct API UUIDs
      * @throws IOException              If there is an error while reading an API file
      * @throws APIImportExportException If there is an error in importing an API
@@ -2664,8 +2727,10 @@ public class ImportUtils {
      *                                  checking the existence of an API
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
-            APIProvider apiProvider, boolean overwriteAPIs, Boolean rotateRevision, APIProductDTO apiProductDto,
-            String[] tokenScopes, String organization) throws IOException, APIManagementException {
+                                                     APIProvider apiProvider, boolean overwriteAPIs,
+                                                     Boolean rotateRevision, APIProductDTO apiProductDto,
+                                                     String[] tokenScopes, String organization) throws IOException,
+            APIManagementException {
 
         JsonObject dependentAPIParamsConfigObject = null;
         // Retrieve the dependent APIs param configurations from the params file of the API Product
@@ -2717,13 +2782,13 @@ public class ImportUtils {
                         // otherwise do not update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
+                                    rotateRevision, Boolean.TRUE, Boolean.FALSE, Boolean.TRUE, tokenScopes,
                                     dependentAPIParamsConfigObject, organization);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
+                                rotateRevision, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, tokenScopes,
                                 dependentAPIParamsConfigObject, organization);
                     }
                 } else {
@@ -2739,7 +2804,7 @@ public class ImportUtils {
                         // If there is no API in the current tenant domain (which means the provider name is blank)
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
+                                rotateRevision, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, tokenScopes,
                                 dependentAPIParamsConfigObject, organization);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs
@@ -2747,7 +2812,7 @@ public class ImportUtils {
                         // otherwise do not import/update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
+                                    rotateRevision, Boolean.TRUE, Boolean.FALSE, Boolean.TRUE, tokenScopes,
                                     dependentAPIParamsConfigObject, organization);
                         }
                     }
@@ -2794,11 +2859,12 @@ public class ImportUtils {
      * @param importedApiProductDtO API Product DTO
      * @param apiProvider           API Provider
      * @param currentTenantDomain   Current tenant domain
-     * @param organization organization
+     * @param organization          organization
      * @throws APIManagementException If failed failed when checking the existence of an API
      */
     private static APIProductDTO updateDependentApiUuids(APIProductDTO importedApiProductDtO, APIProvider apiProvider,
-            String currentTenantDomain, String organization) throws APIManagementException {
+                                                         String currentTenantDomain, String organization)
+            throws APIManagementException {
 
         List<ProductAPIDTO> apis = importedApiProductDtO.getApis();
         for (ProductAPIDTO api : apis) {
@@ -2823,7 +2889,8 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs when retrieving the API to overwrite
      */
     private static APIProduct retrieveApiProductToOverwrite(String apiProductName, String apiProductVersion,
-            String currentTenantDomain, APIProvider apiProvider, Boolean ignoreAndImport, String organization)
+                                                            String currentTenantDomain, APIProvider apiProvider,
+        Boolean ignoreAndImport, String organization)
             throws APIManagementException {
 
         String version = StringUtils.isNotEmpty(apiProductVersion) ? apiProductVersion

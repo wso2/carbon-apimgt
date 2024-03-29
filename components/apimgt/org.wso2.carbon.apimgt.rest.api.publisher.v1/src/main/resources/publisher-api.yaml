@@ -4072,6 +4072,13 @@ paths:
           required: false
           schema:
             type: boolean
+        - name: preservePortalConfigurations
+          in: query
+          description: |
+            Preserve Portal Configurations. This is used to preserve the portal configurations of the API
+          required: false
+          schema:
+            type: boolean
       requestBody:
         content:
           multipart/form-data:
