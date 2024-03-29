@@ -81,10 +81,8 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 payload.put(APIConstants.HISTORY, history);
                 payload.put(APIConstants.TENANT_DOMAIN, organization);
 
-                String response = APIUtil.
-                        marketplaceAssistantPostService(configDto.getEndpoint(),
-                                configDto.getAccessToken(),
-                                configDto.getChatResource(), payload.toString());
+                String response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+                        configDto.getChatResource(), payload.toString(), null);
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 MarketplaceAssistantResponseDTO executeResponseDTO = objectMapper.readValue(response,
