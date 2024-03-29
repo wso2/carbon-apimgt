@@ -536,4 +536,18 @@ public class RegistrySearchUtil {
         return attributes;
     }
 
+    public static Map<String, String> getAdminSearchAttributes(String searchQuery) {
+        Map<String, String> attributes = new HashMap<String, String>();
+        if(searchQuery.equals(APIConstants.CHAR_ASTERIX)){
+            String modifiedQuery = APIConstants.API_OVERVIEW_NAME + "=" + APIConstants.CHAR_ASTERIX;
+            attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
+        }else {
+            searchQuery = searchQuery.replaceAll(" ", "\\\\ ");
+            attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, API_RXT_MEDIA_TYPE);
+            attributes.put(APIConstants.API_OVERVIEW_NAME, searchQuery);
+            attributes.put(APIConstants.API_OVERVIEW_TYPE,
+                    "(http OR ws OR soaptorest OR graphql OR soap OR sse OR websub OR webhook OR async)");
+        }
+        return attributes;
+    }
 }
