@@ -90,8 +90,18 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 return Response.status(Response.Status.CREATED).entity(executeResponseDTO).build();
             }
         } catch (APIManagementException | IOException e) {
-            String errorMessage = "Error encountered while executing the execute statement of Marketplace Assistant service";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
+            } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
+                return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
+//                String errorMessage = "Too many requests error while executing the execute statement of Marketplace " +
+//                        "Assistant service";
+//                RestApiUtil.handleTooManyRequests(errorMessage, log);
+            } else {
+                String errorMessage = "Error encountered while executing the execute statement of Marketplace " +
+                        "Assistant service";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return null;
     }
@@ -117,21 +127,23 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 if (statusCode == HttpStatus.SC_OK) {
                     String responseStr = EntityUtils.toString(response.getEntity());
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully completed the Marketplace Assistant api count call with status code: " + statusCode);
+                        log.debug("Successfully completed the Marketplace Assistant api count call with status code: " +
+                                statusCode);
                     }
                     ObjectMapper objectMapper = new ObjectMapper();
                     MarketplaceAssistantApiCountResponseDTO executeResponseDTO = objectMapper.readValue(responseStr,
                             MarketplaceAssistantApiCountResponseDTO.class);
                     return Response.status(Response.Status.OK).entity(executeResponseDTO).build();
                 } else {
-                    String errorMessage = "Error encountered while executing the Marketplace Assistant service to accomodate the " +
-                            "specified testing requirement";
+                    String errorMessage = "Error encountered while executing the Marketplace Assistant service to " +
+                            "accommodate the specified testing requirement";
                     log.error(errorMessage);
                     RestApiUtil.handleInternalServerError(errorMessage, log);
                 }
             }
         } catch (APIManagementException | IOException e) {
-            String errorMessage = "Error encountered while executing the execute statement of Marketplace Assistant service";
+            String errorMessage = "Error encountered while executing the execute statement of Marketplace " +
+                    "Assistant service";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
