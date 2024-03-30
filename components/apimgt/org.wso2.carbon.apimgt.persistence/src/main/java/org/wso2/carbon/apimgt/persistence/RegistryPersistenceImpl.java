@@ -3839,7 +3839,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             PaginationContext.init(start, count, "ASC", APIConstants.API_OVERVIEW_NAME, limit);
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
-
+            Map<String, String> attributes = RegistrySearchUtil.getAdminSearchAttributes(searchQuery);
             int tenantId = holder.getTenantId();
             if (tenantId == -1) {
                 tenantId = MultitenantConstants.SUPER_TENANT_ID;
@@ -3850,7 +3850,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
 
             SearchResultsBean resultsBean = contentBasedSearchService
-                    .searchContent(searchQuery, systemUserRegistry);
+                    .searchByAttribute(attributes, systemUserRegistry);
             String errorMsg = resultsBean.getErrorMessage();
             if (errorMsg != null) {
                 throw new APIPersistenceException("Error while searching " + errorMsg);
