@@ -1491,9 +1491,9 @@ public class APIAdminImpl implements APIAdmin {
      */
     private String buildSearchQuery(String searchQuery) {
         if (searchQuery.equals(APIConstants.CHAR_ASTERIX)) {
-            return String.format(APIConstants.ADMIN_PORTAL_GET_APIS_QUERY, APIConstants.CHAR_ASTERIX);
+            return searchQuery;
         } else {
-            return String.format(APIConstants.ADMIN_PORTAL_GET_APIS_QUERY, searchQuery);
+            return APIConstants.CHAR_ASTERIX + searchQuery + APIConstants.CHAR_ASTERIX;
         }
     }
 
