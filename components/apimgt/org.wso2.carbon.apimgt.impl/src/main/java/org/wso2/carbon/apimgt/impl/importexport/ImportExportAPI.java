@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.apimgt.impl.importexport;
 
-import org.apache.xpath.operations.Bool;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
