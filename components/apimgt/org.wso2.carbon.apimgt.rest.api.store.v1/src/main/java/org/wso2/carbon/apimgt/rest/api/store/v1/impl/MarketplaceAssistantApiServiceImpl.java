@@ -94,9 +94,6 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
             } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
                 return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
-//                String errorMessage = "Too many requests error while executing the execute statement of Marketplace " +
-//                        "Assistant service";
-//                RestApiUtil.handleTooManyRequests(errorMessage, log);
             } else {
                 String errorMessage = "Error encountered while executing the execute statement of Marketplace " +
                         "Assistant service";
