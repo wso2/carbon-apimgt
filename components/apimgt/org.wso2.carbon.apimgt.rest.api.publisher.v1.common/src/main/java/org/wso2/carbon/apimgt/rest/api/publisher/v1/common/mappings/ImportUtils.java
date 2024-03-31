@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -165,10 +166,11 @@ public class ImportUtils {
      * @throws APIImportExportException If there is an error in importing an API
      * @@return Imported API
      */
-    public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-                                Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations,
-                                Boolean dependentAPIFromProduct, String[] tokenScopes,
-                                JsonObject dependentAPIParamsConfigObject, String organization)
+    public static ImportedAPIDTO importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
+                                           Boolean rotateRevision, Boolean overwrite,
+                                           Boolean preservePortalConfigurations, Boolean dependentAPIFromProduct,
+                                           String[] tokenScopes, JsonObject dependentAPIParamsConfigObject,
+                                           String organization)
             throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -177,6 +179,7 @@ public class ImportUtils {
         API importedApi = null;
         String currentStatus;
         String targetStatus;
+        String revisionId = null;
         // Map to store the target life cycle state as key and life cycle action as the value
         Map<String, String> lifecycleActions = new LinkedHashMap<>();
         GraphqlComplexityInfo graphqlComplexityInfo = null;
@@ -427,7 +430,6 @@ public class ImportUtils {
                     tenantDomain, apiProvider, organization);
             if (apiRevisionDeployments.size() > 0 && !StringUtils.equals(currentStatus, APIStatus.RETIRED.toString())) {
                 String importedAPIUuid = importedApi.getUuid();
-                String revisionId;
                 APIRevision apiRevision = new APIRevision();
                 apiRevision.setApiUUID(importedAPIUuid);
                 apiRevision.setDescription("Revision created after importing the API");
@@ -474,10 +476,10 @@ public class ImportUtils {
                             " was deployed in " + apiRevisionDeployments.size() + " gateway environments.");
                 }
             } else {
-                log.info("Valid deployment environments were not found for the imported artifact. Only working copy " +
-                        "was updated and not deployed in any of the gateway environments.");
+                log.info("Valid deployment environments were not found for the imported artifact. Only working copy "
+                        + "was updated and not deployed in any of the gateway environments.");
             }
-            return importedApi;
+            return new ImportedAPIDTO(importedApi, revisionId);
         } catch (CryptoException | IOException e) {
             throw new APIManagementException(
                     "Error while reading API meta information from path: " + extractedFolderPath, e,
@@ -2768,7 +2770,7 @@ public class ImportUtils {
 
                 APIDTO apiDtoToImport = getImportAPIDto(apiDirectoryPath, null,
                         isDefaultProviderAllowed, currentUser);
-                API importedApi = null;
+                ImportedAPIDTO importedApi = null;
                 String apiName = apiDtoToImport.getName();
                 String apiVersion = apiDtoToImport.getVersion();
 
@@ -2820,11 +2822,12 @@ public class ImportUtils {
                 if (importedApi == null) {
                     // Retrieve the API from the environment (This happens when you have not specified
                     // the overwrite flag, so that we should retrieve the API from inside)
-                    importedApi = retrieveApiToOverwrite(apiDtoToImport.getName(), apiDtoToImport.getVersion(),
+                    importedApi = new ImportedAPIDTO(retrieveApiToOverwrite(apiDtoToImport.getName(),
+                            apiDtoToImport.getVersion(),
                             MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(currentUser)), apiProvider,
-                            Boolean.FALSE, organization);
+                            Boolean.FALSE, organization), null);
                 }
-                updateApiUuidInApiProduct(apiProductDto, importedApi);
+                updateApiUuidInApiProduct(apiProductDto, importedApi.getApi());
             }
         } else {
             String msg = "No dependent APIs supplied. Continuing ...";

@@ -4079,6 +4079,7 @@ paths:
           required: false
           schema:
             type: boolean
+        - $ref: '#/components/parameters/Accept'
       requestBody:
         content:
           multipart/form-data:
@@ -4095,6 +4096,14 @@ paths:
           description: |
             Created.
             API Imported Successfully.
+          content:
+            "text/plain":
+              schema:
+                type: string
+                example: API Imported Successfully
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/ImportAPIResponse'
         403:
           $ref: '#/components/responses/Forbidden'
         404:
@@ -11935,7 +11944,7 @@ components:
           type: string
           description: Authorization Header
           example: authorization
-        IsJWTEnabledForLoginTokens: 
+        IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
         customProperties:
@@ -12293,8 +12302,8 @@ components:
       title: Gateway Policy Mappings
       type: object
       required:
-       - policyMapping
-       - displayName
+        - policyMapping
+        - displayName
       properties:
         id:
           type: string
@@ -12494,6 +12503,20 @@ components:
           items:
             type: string
             example: ["GET","POST","PUT"]
+    ImportAPIResponse:
+      title: Import API Response
+      type: object
+      properties:
+        id:
+          type: string
+          description: |
+            UUID of the imported API
+          example: 01234567-0123-0123-0123-012345678901
+        revision:
+          type: string
+          description: |
+            Revision of the imported API
+          example: 1
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

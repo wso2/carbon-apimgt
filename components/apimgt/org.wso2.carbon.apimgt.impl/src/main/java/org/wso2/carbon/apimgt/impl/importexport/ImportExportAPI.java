@@ -19,9 +19,8 @@
 
 package org.wso2.carbon.apimgt.impl.importexport;
 
-import org.apache.xpath.operations.Bool;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 
 import java.io.File;
@@ -127,8 +126,8 @@ public interface ImportExportAPI {
      * @return Imported API
      * @throws APIManagementException If there is an error in importing an API
      */
-    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-                         Boolean overwrite, Boolean preservePortalConfigurations, String[] tokenScopes, String organization)
+    public ImportedAPIDTO importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+                                    Boolean overwrite, Boolean preservePortalConfigurations, String[] tokenScopes, String organization)
             throws APIManagementException;
 
     /**
