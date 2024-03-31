@@ -56,8 +56,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
-            boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-            boolean exportLatestRevision, String originalDevPortalUrl, String organization)
+                          boolean preserveStatus, ExportFormat format, boolean preserveDocs,
+                          boolean preserveCredentials,
+                          boolean exportLatestRevision, String originalDevPortalUrl, String organization)
             throws APIManagementException, APIImportExportException {
 
         APIIdentifier apiIdentifier;
@@ -192,8 +193,10 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     }
 
-    @Override public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-            Boolean overwrite, String[] tokenScopes, String organization) throws APIManagementException {
+    @Override
+    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+                         Boolean overwrite, Boolean preservePortalConfigurations, String[] tokenScopes,
+                         String organization) throws APIManagementException {
 
         String extractedFolderPath;
         try {
@@ -202,13 +205,14 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision,
-                overwrite, false, tokenScopes, null, organization);
+                overwrite, preservePortalConfigurations, false, tokenScopes, null, organization);
     }
 
     @Override
     public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes,
-            String organization)
+                                       Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
+                                       String[] tokenScopes,
+                                       String organization)
             throws APIManagementException {
 
         String extractedFolderPath;

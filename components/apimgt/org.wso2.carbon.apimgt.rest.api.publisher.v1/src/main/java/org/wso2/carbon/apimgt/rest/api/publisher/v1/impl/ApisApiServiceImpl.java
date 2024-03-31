@@ -3415,19 +3415,23 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred while trying to import the API
      */
     @Override public Response importAPI(InputStream fileInputStream, Attachment fileDetail,
-            Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
+                                        Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite,
+                                        Boolean preservePortalConfigurations, MessageContext messageContext) throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
         overwrite = overwrite == null ? false : overwrite;
 
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
-
+        if (preservePortalConfigurations == null) {
+            preservePortalConfigurations = false;
+        }
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-        importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite, tokenScopes, organization);
+        importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite,
+                preservePortalConfigurations, tokenScopes, organization);
         return Response.status(Response.Status.OK).entity("API imported successfully.").build();
     }
 
