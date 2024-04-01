@@ -147,13 +147,8 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                     payload.put(APIConstants.API_SPEC_TYPE, api_type);
 
                     switch (api_type) {
-                        case APIConstants.API_TYPE_PRODUCT:
-                            payload.put(APIConstants.API_SPEC_TYPE_REST, finalApi.getSwaggerDefinition());
-                            payload.put(APIConstants.API_SPEC_TYPE, APIConstants.API_TYPE_PRODUCT);
-                            break;
                         case APIConstants.API_TYPE_GRAPHQL:
                             payload.put(APIConstants.API_SPEC_TYPE_GRAPHQL, finalApi.getGraphQLSchema());
-                            payload.put(APIConstants.API_SPEC_TYPE, APIConstants.API_TYPE_GRAPHQL);
                             break;
                         case APIConstants.API_TYPE_ASYNC:
                         case APIConstants.API_TYPE_WS:
@@ -161,13 +156,12 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                         case APIConstants.API_TYPE_SSE:
                         case APIConstants.API_TYPE_WEBHOOK:
                             payload.put(APIConstants.API_SPEC_TYPE_ASYNC, finalApi.getAsyncApiDefinition());
-                            payload.put(APIConstants.API_SPEC_TYPE, APIConstants.API_TYPE_ASYNC);
                             break;
                         case APIConstants.API_TYPE_HTTP:
+                        case APIConstants.API_TYPE_PRODUCT:
                         case APIConstants.API_TYPE_SOAP:
                         case APIConstants.API_TYPE_SOAPTOREST:
                             payload.put(APIConstants.API_SPEC_TYPE_REST, finalApi.getSwaggerDefinition());
-                            payload.put(APIConstants.API_SPEC_TYPE, APIConstants.API_TYPE_REST);
                             break;
                         default:
                             break;
