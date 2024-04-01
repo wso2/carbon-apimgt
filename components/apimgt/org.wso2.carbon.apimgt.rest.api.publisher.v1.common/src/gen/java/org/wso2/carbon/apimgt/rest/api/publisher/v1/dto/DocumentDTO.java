@@ -164,7 +164,7 @@ return null;
   @ApiModelProperty(example = "PizzaShackDoc", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Size(min=1,max=60)  public String getName() {
+ @Size(min=1,max=255)  public String getName() {
     return name;
   }
   public void setName(String name) {
