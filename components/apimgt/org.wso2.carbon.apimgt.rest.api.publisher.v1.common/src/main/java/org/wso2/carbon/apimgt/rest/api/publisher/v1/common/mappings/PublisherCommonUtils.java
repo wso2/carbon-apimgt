@@ -1952,16 +1952,19 @@ public class PublisherCommonUtils {
 
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         List<APIProductResource> resources = productToBeAdded.getProductResources();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
         for (APIProductResource apiProductResource : resources) {
             API api;
             String apiUUID;
             if (apiProductResource.getProductIdentifier() != null) {
                 APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
-                String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
+                String emailReplacedAPIProviderName = APIUtil
+                        .replaceEmailDomain(productAPIIdentifier.getProviderName());
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
-                apiUUID = apiMgtDAO.getUUIDFromIdentifier(emailReplacedAPIIdentifier, productToBeAdded.getOrganization());
+                apiUUID = apiMgtDAO
+                        .getUUIDFromIdentifier(emailReplacedAPIIdentifier, productToBeAdded.getOrganization());
                 api = apiProvider.getAPIbyUUID(apiUUID, productToBeAdded.getOrganization());
             } else {
                 apiUUID = apiProductResource.getApiId();
