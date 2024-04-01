@@ -10486,7 +10486,7 @@ public final class APIUtil {
      * @param uuid      UUID of the API to be deleted
      * @throws APIManagementException if an error occurs while deleting the API
      */
-    public static void deleteApi(String endpoint, String authToken, String resource, String uuid)
+    public static void marketplaceAssistantDeleteService(String endpoint, String authToken, String resource, String uuid)
             throws APIManagementException {
 
         try {
