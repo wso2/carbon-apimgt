@@ -502,6 +502,28 @@ public class RestApiUtil {
     }
 
     /**
+     * Check if the specified throwable e is happened as the provided on-prem key is invalid
+     *
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the provided on-prem key is invalid, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToAIServiceNotAccessible(Throwable e) {
+        return detailedMessageMatches(e, "Invalid credentials");
+    }
+
+    /**
+     * Check if the specified throwable e is happened due to quota limit exceed
+     *
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the quota limit has exceeded, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToAIServiceThrottled(Throwable e) {
+        return detailedMessageMatches(e, "You have exceeded your quota");
+    }
+
+    /**
      * Check if the specified throwable e is happened as the provided meta information related to api is corrupted
      *
      * @param e throwable to check
