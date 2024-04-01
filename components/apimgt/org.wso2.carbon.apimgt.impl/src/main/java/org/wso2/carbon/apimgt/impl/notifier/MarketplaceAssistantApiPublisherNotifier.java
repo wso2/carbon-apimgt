@@ -120,70 +120,68 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
     }
 
     private void postRequest(APIEvent apiEvent) throws NotifierException {
-
-        apiMgtDAO = ApiMgtDAO.getInstance();
         String apiId = apiEvent.getUuid();
 
-        APIProvider apiProvider = null;
-        API api = null;
         try {
-            apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
+            apiMgtDAO = ApiMgtDAO.getInstance();
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
-            api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
-        } catch (APIManagementException e) {
-            throw new RuntimeException(e);
-        }
+            API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
 
-        API finalApi = api;
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
+                    try {
+                        String api_type = api.getType();
+                        JSONObject payload = new JSONObject();
 
-                try {
-                    String api_type = finalApi.getType();
-                    JSONObject payload = new JSONObject();
+                        payload.put(APIConstants.API_SPEC_TYPE, api_type);
 
-                    payload.put(APIConstants.API_SPEC_TYPE, api_type);
+                        switch (api_type) {
+                            case APIConstants.API_TYPE_GRAPHQL:
+                                payload.put(APIConstants.API_SPEC_TYPE_GRAPHQL, api.getGraphQLSchema());
+                                break;
+                            case APIConstants.API_TYPE_ASYNC:
+                            case APIConstants.API_TYPE_WS:
+                            case APIConstants.API_TYPE_WEBSUB:
+                            case APIConstants.API_TYPE_SSE:
+                            case APIConstants.API_TYPE_WEBHOOK:
+                                payload.put(APIConstants.API_SPEC_TYPE_ASYNC, api.getAsyncApiDefinition());
+                                break;
+                            case APIConstants.API_TYPE_HTTP:
+                            case APIConstants.API_TYPE_PRODUCT:
+                            case APIConstants.API_TYPE_SOAP:
+                            case APIConstants.API_TYPE_SOAPTOREST:
+                                payload.put(APIConstants.API_SPEC_TYPE_REST, api.getSwaggerDefinition());
+                                break;
+                            default:
+                                break;
+                        }
 
-                    switch (api_type) {
-                        case APIConstants.API_TYPE_GRAPHQL:
-                            payload.put(APIConstants.API_SPEC_TYPE_GRAPHQL, finalApi.getGraphQLSchema());
-                            break;
-                        case APIConstants.API_TYPE_ASYNC:
-                        case APIConstants.API_TYPE_WS:
-                        case APIConstants.API_TYPE_WEBSUB:
-                        case APIConstants.API_TYPE_SSE:
-                        case APIConstants.API_TYPE_WEBHOOK:
-                            payload.put(APIConstants.API_SPEC_TYPE_ASYNC, finalApi.getAsyncApiDefinition());
-                            break;
-                        case APIConstants.API_TYPE_HTTP:
-                        case APIConstants.API_TYPE_PRODUCT:
-                        case APIConstants.API_TYPE_SOAP:
-                        case APIConstants.API_TYPE_SOAPTOREST:
-                            payload.put(APIConstants.API_SPEC_TYPE_REST, finalApi.getSwaggerDefinition());
-                            break;
-                        default:
-                            break;
+                        payload.put(APIConstants.UUID, api.getUuid());
+                        payload.put(APIConstants.DESCRIPTION, api.getDescription());
+                        payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
+                        payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
+                        payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
+
+                        APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                                marketplaceAssistantConfigurationDto.getAccessToken(),
+                                marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+                    } catch (APIManagementException e) {
+                        String errorMessage = "Error encountered while Uploading the API with UUID: " +
+                                apiId + " to the vector database" + e.getMessage();
+                        log.error(errorMessage, e);
                     }
-
-                    payload.put(APIConstants.UUID, finalApi.getUuid());
-                    payload.put(APIConstants.DESCRIPTION, finalApi.getDescription());
-                    payload.put(APIConstants.API_SPEC_NAME, finalApi.getId().getApiName());
-                    payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
-                    payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
-
-                    APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                            marketplaceAssistantConfigurationDto.getAccessToken(),
-                            marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
-                } catch (APIManagementException e) {
-                    String errorMessage = "Error encountered while Uploading the API with UUID: " +
-                            apiId + " to the vector database" + e.getMessage();
-                    log.error(errorMessage, e);
                 }
-            }
-        });
-        thread.start();
+            });
+            thread.start();
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error encountered while Uploading the API with UUID: " +
+                    apiId + " to the vector database" + e.getMessage();
+            log.error(errorMessage, e);
+        }
     }
 
     private void deleteRequest(APIEvent apiEvent) throws NotifierException {
