@@ -58,6 +58,7 @@ import java.util.UUID;
         SubscriptionDataHolder.class})
 public class TokenGenTest {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
+    private static final String signatureAlgorithm = "SHA256withRSA";
 
     @Before
     public void setUp() throws Exception {
@@ -232,26 +233,49 @@ public class TokenGenTest {
 
     @Test
     public void testJWTx5tEncoding() throws Exception {
-        //Read public certificat
+        //Read public certificate
         InputStream inputStream = new FileInputStream("src/test/resources/wso2carbon.jks");
         KeyStore keystore = KeyStore.getInstance("JKS");
         char[] pwd = "wso2carbon".toCharArray();
         keystore.load(inputStream, pwd);
         Certificate cert = keystore.getCertificate("wso2carbon");
 
-        //Generate JWT header using the above certificate
-        String header = AbstractJWTGenerator.generateHeader(cert, "SHA256withRSA", false);
+        //Generate JWT header using the above certificate. Use SHA-1 as the certificate hashing algorithm.
+        String header = AbstractJWTGenerator.generateHeader(cert, signatureAlgorithm, false, false);
 
+        String encodedThumbprint = generateCertThumbprint(cert, "SHA-1");
+        //Check if the encoded thumbprint matches with the JWT header's x5t
+        Assert.assertTrue(header.contains(encodedThumbprint));
+        Assert.assertTrue(header.contains("x5t"));
+    }
+
+    @Test
+    public void testJWTx5tS256Encoding() throws Exception {
+        //Read public certificate
+        InputStream inputStream = new FileInputStream("src/test/resources/wso2carbon.jks");
+        KeyStore keystore = KeyStore.getInstance("JKS");
+        char[] pwd = "wso2carbon".toCharArray();
+        keystore.load(inputStream, pwd);
+        Certificate cert = keystore.getCertificate("wso2carbon");
+
+        //Generate JWT header using the above certificate. Use SHA-256 as the certificate hashing algorithm.
+        String header = AbstractJWTGenerator.generateHeader(cert, signatureAlgorithm, false, true);
+
+        String encodedThumbprint = generateCertThumbprint(cert, "SHA-256");
+        //Check if the encoded thumbprint matches with the JWT header's x5t#S256
+        Assert.assertTrue(header.contains(encodedThumbprint));
+        Assert.assertTrue(header.contains("x5t#S256"));
+    }
+
+    private String generateCertThumbprint(Certificate cert, String hashingAlgorithm) throws Exception {
         //Get the public certificate's thumbprint and base64url encode it
         byte[] der = cert.getEncoded();
-        MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
+        MessageDigest digestValue = MessageDigest.getInstance(hashingAlgorithm);
         digestValue.update(der);
         byte[] digestInBytes = digestValue.digest();
         String publicCertThumbprint = hexify(digestInBytes);
-        String encodedThumbprint = java.util.Base64.getUrlEncoder()
+        return java.util.Base64.getUrlEncoder()
                 .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
-        //Check if the encoded thumbprint get matched with JWT header's x5t
-        Assert.assertTrue(header.contains(encodedThumbprint));
     }
 
     /**

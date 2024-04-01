@@ -2185,6 +2185,38 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X PUT -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"'
 
+    delete:
+      tags:
+        - Application Keys
+      summary: Remove Generated Application Keys
+      description: |
+        Remove generated application keys from dev portal rest api
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyMappingId'
+        - $ref: '#/components/parameters/requestedTenant'
+      responses:
+        200:
+          description: |
+            OK.
+            Key removed successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584"'
+
+
   /applications/{applicationId}/oauth-keys/{keyMappingId}/regenerate-secret:
     post:
       tags:
@@ -3576,6 +3608,49 @@ paths:
           source: curl -k "https://localhost:9443/api/am/devportal/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/graphql-policies/complexity/types"
 
   ######################################################
+  # The "API Chat Feature" resource API
+  ######################################################
+  /apis/{apiId}/api-chat:
+    post:
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+      summary: Test API using a natural language query
+      description: |
+        Executes a test scenario against an API; which iteratively provide resources that need to be
+        invoked alongside the inputs such as parameters, payloads, etc. while caching the progress.
+      operationId: apiChatPost
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/action'
+      requestBody:
+        description: |
+          API Chat request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiChatRequest'
+      tags:
+        - API Chat
+      responses:
+        201:
+          description: |
+            Created.
+            API Chat action completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiChatResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while invoking the API Chat service.
+
+  ######################################################
   # User resource APIs
   ######################################################
   /me/change-password:
@@ -3607,6 +3682,80 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/me/change-password"'
+
+
+  ######################################################
+  # The "Marketplace Assistant Feature" resource APIs
+  ######################################################
+  '/marketplace-assistant/api-count':
+
+    #-----------------------------------------------------
+    # Get No of apis in the VectorDB
+    #-----------------------------------------------------
+    get:
+      summary: API Count endpoint.
+      description: |
+        Get the api count of Marketplace Assistant AI service.
+      operationId: getMarketplaceAssistantApiCount
+      tags:
+        - Marketplace Assistant
+      responses:
+        200:
+          description: |
+            OK.
+            Api Count is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceAssistantApiCountResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while retrieving the API count.
+
+  '/marketplace-assistant/chat':
+
+    #-----------------------------------------------------
+    # Chat with Marketplace Assistant
+    #-----------------------------------------------------
+    post:
+      summary: Marketplace Assistant Chat Endpoint.
+      description: |
+        Send a single query to the service and get the response.
+      operationId: marketplaceAssistantExecute
+      requestBody:
+        description: |
+          Marketplace Assistant chat request payload.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarketplaceAssistantRequest'
+      tags:
+        - Marketplace Assistant
+      responses:
+        201:
+          description: |
+            Created.
+            Marketplace Assistant chat response payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceAssistantResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        429:
+          $ref: '#/components/responses/TooManyRequests'
+        500:
+          description: |
+            Internal Server Error.
+            An error occurred while executing test using Marketplace Chat service.
+
 
 components:
   schemas:
@@ -3993,6 +4142,11 @@ components:
           type: string
           description: The average rating of the API
           example: "4.5"
+        subscriptions:
+            type: integer
+            format: int64
+            description: The number of subscriptions for the API
+            example: 10
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
         isSubscriptionAvailable:
@@ -5290,6 +5444,9 @@ components:
         IsPasswordChangeEnabled:
           type: boolean
           default: true
+        IsJWTEnabledForLoginTokens: 
+          type: boolean
+          default: false
         userStorePasswordPattern:
           type: string
           description: The 'PasswordJavaRegEx' cofigured in the UserStoreManager
@@ -5316,6 +5473,18 @@ components:
             properties too will affect the maximum password length allowed and an
             intersection of all conditions will be considered finally to validate
             the password.
+        apiChatEnabled:
+          type: boolean
+          description: Specifies whether API Chat feature is enabled.
+          default: true
+        aiAuthTokenProvided:
+          type: boolean
+          description: Checks if the auth token is provided for AI service usage.
+          default: false
+        marketplaceAssistantEnabled:
+          type: boolean
+          description: Specifies whether Marketplace Assistant feature is enabled.
+          default: true
     ApplicationAttribute:
       title: Application attributes
       type: object
@@ -5744,6 +5913,227 @@ components:
           type: array
           items:
             type: string
+    ApiChatRequest:
+      title: API Chat request
+      properties:
+        apiChatRequestId:
+          type: string
+          description: |
+            Request UUID
+          example: "faae5fcc-cbae-40c4-bf43-89931630d313"
+        command:
+          type: string
+          description: |
+            User specified testcase to be tested against the API
+          example: "Get pet with id 123"
+        apiSpec:
+          type: object
+          properties:
+            serviceUrl:
+              type: string
+              description: Service URL of API if any
+              example: "https://localhost:8243/pizzashack/1.0.0"
+            tools:
+              type: array
+              description: Extracted Http tools from the OpenAPI specification
+              items:
+                type: object
+                example:
+                  name: "GET-order_orderId"
+                  description: "Get details of an Order by providing Order Id. This tool invokes a HTTP GET resource"
+                  method: "GET"
+                  path: "/order/{orderId}"
+                  parameters:
+                    orderId:
+                      location: "path"
+                      description: "Order Id"
+                      required: true
+                      style: "simple"
+                      explode: false
+                      schema:
+                        type: "string"
+                        format: "string"
+        response:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: HTTP status code of the response
+              example: 201
+            path:
+              type: string
+              description: HTTP path url with encoded parameters
+              example: "/order/123"
+            headers:
+              type: object
+              description: Response headers
+              example:
+                contentType: "application/json"
+            body:
+              type: object
+              description: Response payload
+              example:
+                orderId: "300ada62-81bd-4c89-bdfa-983de3cadd77"
+                pizzaType: "Pepperoni"
+                quantity: 2
+                customerName: "John Doe"
+                creditCardNumber: "1234567890123456"
+                address: "123 Main St"
+                delivered: false
+    ApiChatResponse:
+      title: API Chat response
+      properties:
+        apiSpec:
+          type: object
+          title: Enriched API spec
+          required:
+            - tools
+          properties:
+            serviceUrl:
+              type: string
+              description: Extracted service URL from the OpenAPI specification if there is any
+              example: "https://localhost:8243/pizzashack/1.0.0"
+            tools:
+              type: array
+              description: Extracted Http tools from the OpenAPI specification
+              items:
+                type: object
+                example:
+                  name: "GET-order_orderId"
+                  description: "Get details of an Order by providing Order Id. This tool invokes a HTTP GET resource"
+                  method: "GET"
+                  path: "/order/{orderId}"
+                  parameters:
+                    orderId:
+                      location: "path"
+                      description: "Order Id"
+                      required: true
+                      style: "simple"
+                      explode: false
+                      schema:
+                        type: "string"
+                        format: "string"
+        taskStatus:
+          type: string
+          description: Task status (IN_PROGRESS, TERMINATED or COMPLETED)
+          enum:
+            - IN_PROGRESS
+            - TERMINATED
+            - COMPLETED
+          example: COMPLETED
+        resource:
+          type: object
+          properties:
+            method:
+              type: string
+              description: HTTP method of the resource
+              example: "GET"
+            path:
+              type: string
+              description: Path of the resource
+              example: "/order/{orderId}"
+            inputs:
+              type: object
+              description: Input parameters for the resource
+              example:
+                parameters:
+                  orderId: "123"
+        result:
+          type: string
+          description: completion result
+          example: "The pet with ID 123 is available. Here are the details: - ID: 123 - Name: asd - Status: available"
+        queries:
+          type: array
+          description: list of sample queries
+          items:
+            $ref: '#/components/schemas/SampleQuery'
+    SampleQuery:
+      title: API Chat sample query record
+      required:
+        - scenario
+        - query
+      properties:
+        scenario:
+          type: string
+          description: scenario
+        query:
+          type: string
+          description: generated query
+    ChatMessage:
+      required:
+        - content
+        - role
+      type: object
+      properties:
+        role:
+          type: string
+          description: user or assistant role of a chat message.
+          example: "assistant"
+        content:
+          type: string
+          description: content of the message.
+          example: "Hi, How can I help you?"
+    MarketplaceAssistantRequest:
+      required:
+        - query
+        - history
+      type: object
+      properties:
+        query:
+          type: string
+          description: natural langugae query given by the user.
+          example: "Hi"
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+    MarketplaceAssistantApi:
+      required:
+        - apiId
+        - apiName
+        - version
+      type: object
+      properties:
+        apiId:
+          type: string
+          description: Uuid of the api.
+          example: "1sbdhsjd-121n-nknsjkd-1213njb"
+        apiName:
+          type: string
+          description: name of the api.
+          example: "PizzaShackAPI"
+        version:
+          type: string
+          description: version of the api.
+          example: "1.0.0"
+    MarketplaceAssistantResponse:
+      required:
+        - response
+      type: object
+      properties:
+        response:
+          type: string
+          description: natural language response by the llm.
+          example: "Hi, How can I help you?"
+        apis:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarketplaceAssistantApi'
+    MarketplaceAssistantApiCountResponse:
+      required:
+        - count
+        - limit
+      type: object
+      properties:
+        count:
+          type: integer
+          description: no of apis stored in the vectordb.
+          example: "100"
+        limit:
+          type: integer
+          description: maximum no of apis allowed for an org.
+          example: "1000"
+
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -5845,6 +6235,18 @@ components:
             description: The entity of the request was not in a supported format
             moreInfo: ""
             error: []
+    TooManyRequests:
+      description: Too many requests.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 429
+            message: TooManyRequests
+            description: The user has exceeded the rate limit
+            moreInfo: ""
+            error: [ ]
   parameters:
     parentCommentID:
       name: replyTo
@@ -6087,6 +6489,16 @@ components:
       required: true
       schema:
         type: string
+    action:
+      name: apiChatAction
+      in: query
+      description: |
+        Action to be performed on API Chat AI Agent. Specifies whether 'prepare' or 'execute'
+      schema:
+        type: string
+        enum:
+          - PREPARE
+          - EXECUTE
   securitySchemes:
     OAuth2Security:
       type: oauth2

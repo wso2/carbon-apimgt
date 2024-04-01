@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -265,39 +266,40 @@ public class ImportUtils {
     public static void addApplicationKey(String username, Application application, ApplicationKeyDTO applicationKeyDTO,
             APIConsumer apiConsumer, Boolean update) throws APIManagementException {
         String[] accessAllowDomainsArray = { "ALL" };
-        JSONObject jsonParamObj = new JSONObject();
-        jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+        JsonObject jsonParamObj = new JsonObject();
+        jsonParamObj.addProperty(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
         String grantTypes = StringUtils.join(applicationKeyDTO.getSupportedGrantTypes(), ',');
         if (!StringUtils.isEmpty(grantTypes)) {
-            jsonParamObj.put(APIConstants.JSON_GRANT_TYPES, grantTypes);
+            jsonParamObj.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
         }
         /* Read clientId & clientSecret from ApplicationKeyGenerateRequestDTO object.
            User can provide clientId only or both clientId and clientSecret
            User cannot provide clientSecret only
          */
         if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerKey())) {
-            jsonParamObj.put(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
+            jsonParamObj.addProperty(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
             if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerSecret())) {
                 byte[] bytes = Base64.decodeBase64(applicationKeyDTO.getConsumerSecret());
                 String consumerSecret = new String(bytes, StandardCharsets.UTF_8);
-                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, consumerSecret);
+                jsonParamObj.addProperty(APIConstants.JSON_CLIENT_SECRET, consumerSecret);
             }
         }
         if (!StringUtils.isEmpty(applicationKeyDTO.getCallbackUrl())) {
-            jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, applicationKeyDTO.getCallbackUrl());
+            jsonParamObj.addProperty(APIConstants.JSON_CALLBACK_URL, applicationKeyDTO.getCallbackUrl());
         }
         if (applicationKeyDTO.getAdditionalProperties() != null) {
-            String additionalProperties = new Gson().toJson(applicationKeyDTO.getAdditionalProperties());
-            org.json.JSONObject jsonObject = new org.json.JSONObject(additionalProperties);
+            Gson gson = new Gson();
+            String additionalProperties = gson.toJson(applicationKeyDTO.getAdditionalProperties());
+            JsonObject jsonObject = gson.fromJson(additionalProperties, JsonObject.class);
             Set<String> keysSet = jsonObject.keySet();
             for (String key : keysSet) {
-                if (jsonObject.get(key) instanceof Double) {
-                    jsonObject.put(key, String.valueOf(((Double) jsonObject.get(key)).intValue()));
+                if (jsonObject.getAsJsonPrimitive(key).isNumber()) {
+                    jsonObject.addProperty(key, String.valueOf(jsonObject.getAsJsonPrimitive(key).getAsLong()));
                 } else {
-                    jsonObject.put(key, jsonObject.get(key).toString());
+                    jsonObject.addProperty(key, jsonObject.getAsJsonPrimitive(key).getAsString());
                 }
             }
-            jsonParamObj.put(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonObject.toString());
+            jsonParamObj.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonObject.toString());
         }
         String jsonParams = jsonParamObj.toString();
         String tokenScopes = StringUtils.join(applicationKeyDTO.getToken().getTokenScopes(), ',');

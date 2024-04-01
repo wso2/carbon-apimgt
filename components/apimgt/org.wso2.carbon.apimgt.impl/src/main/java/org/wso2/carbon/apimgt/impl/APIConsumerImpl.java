@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,8 +35,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIAdmin;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -64,6 +68,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -81,6 +86,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -111,6 +117,7 @@ import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -491,6 +498,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public JSONArray getAPIRatings(String apiId) throws APIManagementException {
 
         return apiMgtDAO.getAPIRatings(apiId);
+    }
+
+    @Override
+    public long getSubscriptionCountOfAPI(String apiId, String organization) throws APIManagementException {
+
+        return apiMgtDAO.getNoOfSubscriptionsOfAPI(apiId, organization);
     }
 
     @Override
@@ -2357,6 +2370,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             } else {
                 throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
             }
+            
+            if (appRegistrationWorkflow == null ) {
+                appRegistrationWorkflow = new ApplicationRegistrationSimpleWorkflowExecutor();
+            }
 
             //check whether callback url is empty and set null
             if (StringUtils.isBlank(callbackUrl)) {
@@ -3304,6 +3321,35 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
+    public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
+        ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getApiChatConfigurationDto();
+        return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+                configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+    }
+
+    @Override
+    public String invokeApiChatPrepare(String apiId, String apiChatRequestId, String organization)
+            throws APIManagementException {
+        try {
+            // Generate the payload for prepare call
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
+            ObjectNode payload = objectMapper.createObjectNode();
+            payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
+
+            ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration().getApiChatConfigurationDto();
+            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+        } catch (JsonProcessingException e) {
+            String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
+            log.error(error, e);
+            throw new APIManagementException(error, e);
+        }
+    }
+
+    @Override
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
 
@@ -3594,6 +3640,56 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
     }
 
+    public boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant)
+            throws APIManagementException {
+
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(this.username);
+
+            if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+                int tenantId = APIUtil.getInternalOrganizationId(xWSO2Tenant);
+                // To handle choreo scenario. due to key managers are not per organization atm. using ST
+                if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                    xWSO2Tenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                }
+            }
+            String tenantDomain = this.tenantDomain;
+            if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+                tenantDomain = xWSO2Tenant;
+            }
+
+            String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            KeyManagerApplicationInfo KeyManagerApplicationInfo =
+                    apiMgtDAO.getKeyManagerNameAndConsumerKeyByAppIdAndKeyMappingId(application.getId(), keyMappingId);
+            String keyManagerNameResult = KeyManagerApplicationInfo.getKeyManagerName();
+            if (!StringUtils.isEmpty(keyManagerNameResult)) {
+                keyManagerName = keyManagerNameResult;
+            }
+            String consumerKey = KeyManagerApplicationInfo.getConsumerKey();
+
+            //Removed the key manager entry from the key manager if it is not a mapped key.xxx
+            if (KeyManagerApplicationInfo.getMode().equals(APIConstants.OAuthAppMode.CREATED.name())) {
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                keyManager.deleteApplication(consumerKey);
+            }
+
+            apiConsumer.cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(application.getId(), keyMappingId);
+
+            //publishing event for application key cleanup in gateway.
+            ApplicationRegistrationEvent removeEntryTrigger = new ApplicationRegistrationEvent(
+                    UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
+                    APIUtil.getTenantIdFromTenantDomain(tenantDomain), application.getOrganization(),
+                    application.getId(), application.getUUID(), consumerKey, application.getKeyType(), keyManagerName);
+            APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+            return true;
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error occurred while application key cleanup process",
+                    ExceptionCodes.KEYS_DELETE_FAILED);
+        }
+    }
+
     @Override
     public APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
             throws APIManagementException {
@@ -3742,6 +3838,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 APIUtil.getAvailableTiers(definedTiers, tiers, mappedAPI.getId().getApiName());
                         mappedAPI.removeAllTiers();
                         mappedAPI.setAvailableTiers(availableTiers);
+                        populateGatewayVendor(mappedAPI);
                         apiList.add(mappedAPI);
                     } catch (APIManagementException e) {
                         log.warn("Retrieving API details from DB failed for API: " + mappedAPI.getUuid() + " " + e);
@@ -3787,6 +3884,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
                     populateAPIStatus(api);
+                    populateGatewayVendor(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
@@ -3935,6 +4033,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 api.removeAllTiers();
                 api.setAvailableTiers(availableTiers);
                 api.setOrganization(organization);
+                populateGatewayVendor(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -4413,7 +4512,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
-                apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
+                apiAdmin.getKeyManagerConfigurationsByOrganization(organization, false);
         List<KeyManagerConfigurationDTO> permittedKeyManagerConfigurations = new ArrayList<>();
         if (keyManagerConfigurations.size() > 0) {
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {

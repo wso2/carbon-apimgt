@@ -60,6 +60,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.GatewayCertificateMgtUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -428,17 +429,31 @@ public class Utils {
 
     public static Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
-        Object validatedCert = axis2MessageContext.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
 
+        Certificate[] certs = getClientCertificatesChain(axis2MessageContext);
+        return (certs != null && certs.length > 0) ? certs[0] : null;
+    }
+
+    /**
+     * Fetches client certificate chain from axis2MessageContext.
+     * @param axis2MessageContext   Relevant axis2MessageContext
+     * @return                      Array containing client certificate chain
+     * @throws APIManagementException
+     */
+    public static Certificate[] getClientCertificatesChain(
+            org.apache.axis2.context.MessageContext axis2MessageContext) throws APIManagementException {
+
+        Object validatedCert = axis2MessageContext.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
         if (validatedCert != null) {
-            return (Certificate) validatedCert;
+            return new Certificate[] { (Certificate) validatedCert };
         } else {
+            Certificate[] certs = null;
             Map headers =
                     (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT);
             Certificate certificateFromMessageContext = null;
             if (sslCertObject != null) {
-                Certificate[] certs = (Certificate[]) sslCertObject;
+                certs = (Certificate[]) sslCertObject;
                 certificateFromMessageContext = certs[0];
                 axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificateFromMessageContext);
             }
@@ -448,7 +463,7 @@ public class Utils {
                             .isCertificateExistsInListenerTrustStore(certificateFromMessageContext)) {
                         Certificate certificate = getClientCertificateFromHeader(axis2MessageContext);
                         axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificate);
-                        return certificate;
+                        return new Certificate[] { certificate };
                     }
                 } catch (APIManagementException e) {
                     String msg = "Error while validating into Certificate Existence";
@@ -456,8 +471,7 @@ public class Utils {
                     throw new APIManagementException(msg, e);
                 }
             }
-
-            return certificateFromMessageContext;
+            return certs;
         }
     }
 
@@ -470,7 +484,22 @@ public class Utils {
         byte[] bytes;
         if (certificate != null) {
             if (!isClientCertificateEncoded()) {
-                certificate = APIUtil.getX509certificateContent(certificate);
+                // Remove invalid characters, restructure line separators, and reconstruct the certificate
+                certificate = certificate
+                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING.concat(System.lineSeparator()), "")
+                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING.concat("\n"), "")
+                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                        .replaceAll(System.lineSeparator().concat(APIConstants.END_CERTIFICATE_STRING), "")
+                        .replaceAll("\n".concat(APIConstants.END_CERTIFICATE_STRING), "")
+                        .replaceAll(APIConstants.END_CERTIFICATE_STRING, "")
+                        .trim()
+                        .replaceAll(" ", System.lineSeparator())
+                        .trim();
+                certificate = APIConstants.BEGIN_CERTIFICATE_STRING
+                        .concat(System.lineSeparator())
+                        .concat(certificate)
+                        .concat(System.lineSeparator())
+                        .concat(APIConstants.END_CERTIFICATE_STRING);
                 bytes = certificate.getBytes();
             } else {
                 try {
@@ -479,7 +508,6 @@ public class Utils {
                     String msg = "Error while URL decoding certificate";
                     throw new APIManagementException(msg, e);
                 }
-
                 certificate = APIUtil.getX509certificateContent(certificate);
                 bytes = Base64.decodeBase64(certificate);
             }
@@ -508,6 +536,24 @@ public class Utils {
         return false;
     }
 
+    /**
+     * Checks whether certificate chain validation is enabled or not from API-M configurations.
+     * @return Boolean indicating certificate chain validation enable/disable state
+     */
+    public static boolean isCertificateChainValidationEnabled() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String validateCertificateChain =
+                    apiManagerConfiguration.getFirstProperty(APIConstants.MutualSSL.ENABLE_CERTIFICATE_CHAIN_VALIDATION);
+            if (StringUtils.isNotEmpty(validateCertificateChain)) {
+                return Boolean.parseBoolean(validateCertificateChain);
+            }
+        }
+        return false;
+    }
+
     private static boolean isClientCertificateEncoded() {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
@@ -521,6 +567,30 @@ public class Utils {
             }
         }
         return true;
+    }
+
+
+    /**
+     * Fetches certificate for the given distinguished name from listener trust store.
+     * @param certSubjectDN             Distinguished name of the certificate
+     * @return                          X509Certificate
+     * @throws APIManagementException
+     */
+    public static X509Certificate getCertificateFromListenerTrustStore(String certSubjectDN)
+            throws APIManagementException {
+
+        Enumeration<String> aliases = GatewayCertificateMgtUtil.getAliasesFromListenerTrustStore();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            Certificate certificate = GatewayCertificateMgtUtil.getCertificateFromListenerTrustStore(alias);
+            if (certificate instanceof X509Certificate) {
+                X509Certificate x509Certificate = (X509Certificate) certificate;
+                if (StringUtils.equals(x509Certificate.getSubjectDN().getName(), certSubjectDN)) {
+                    return x509Certificate;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -702,6 +772,25 @@ public class Utils {
             log.error("Error while converting client certificate", e);
         }
         return null;
+    }
+
+    /**
+     * Convert Certificate array to X509Certificate list.
+     * @param certificates  Certificate array that should be converted
+     * @return              X509Certificate list
+     */
+    public static List<X509Certificate> convertCertificatesToX509Certificates(Certificate[] certificates) {
+
+        List<X509Certificate> x509Certificates = new ArrayList<>();
+
+        for (Certificate certificate : certificates) {
+            if (certificate instanceof X509Certificate) {
+                x509Certificates.add((X509Certificate) certificate);
+            } else {
+                log.warn("Certificate can not be converted in to X509Certificate.");
+            }
+        }
+        return x509Certificates;
     }
 
     /**

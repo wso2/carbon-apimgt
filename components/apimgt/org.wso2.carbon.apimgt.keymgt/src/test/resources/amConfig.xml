@@ -11,7 +11,8 @@
     </Database>
     <JWTConfiguration>
         <EnableJWTGeneration>true</EnableJWTGeneration>
-	    <SignatureAlgorithm>NONE</SignatureAlgorithm>
+        <SignatureAlgorithm>NONE</SignatureAlgorithm>
+        <UseSHA256Hash>false</UseSHA256Hash>
     </JWTConfiguration>
     <APIUsageTracking>
         <Enabled>false</Enabled>

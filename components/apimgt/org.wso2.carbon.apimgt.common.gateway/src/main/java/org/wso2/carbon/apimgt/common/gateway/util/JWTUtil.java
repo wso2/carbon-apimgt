@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 
@@ -78,7 +79,7 @@ public final class JWTUtil {
 
     public static String generateHeader(Certificate publicCert, String signatureAlgorithm)
             throws JWTGeneratorException {
-        return generateHeader(publicCert, signatureAlgorithm, false);
+        return generateHeader(publicCert, signatureAlgorithm, false, false);
     }
 
     /**
@@ -87,23 +88,26 @@ public final class JWTUtil {
      * @param publicCert         The public certificate which needs to include in the header as thumbprint
      * @param signatureAlgorithm Signature algorithm which needs to include in the header
      * @param useKid             Specifies whether the header should include the kid property
+     * @param useSHA256Hash      Specifies whether to use SHA-256 algorithm to generate the certificate thumbprint
      * @throws JWTGeneratorException
      */
 
-    public static String generateHeader(Certificate publicCert, String signatureAlgorithm, boolean useKid)
+    public static String generateHeader(Certificate publicCert, String signatureAlgorithm, boolean useKid,
+                                        boolean useSHA256Hash)
             throws JWTGeneratorException {
 
         /*
          * Sample header
          * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
          * "kid":"a_jhNus21KVuoFx65LmkW2O_l10"}
-         * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
+         * {"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
          * */
         try {
             X509Certificate x509Certificate = (X509Certificate) publicCert;
 
-            //generate the SHA-1 thumbprint of the certificate
-            MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
+            String hashingAlgorithm = useSHA256Hash ? JWTConstants.SHA_256 : JWTConstants.SHA_1;
+            //generate the thumbprint of the certificate
+            MessageDigest digestValue = MessageDigest.getInstance(hashingAlgorithm);
             byte[] der = publicCert.getEncoded();
             digestValue.update(der);
             byte[] digestInBytes = digestValue.digest();
@@ -115,7 +119,12 @@ public final class JWTUtil {
             JSONObject jwtHeader = new JSONObject();
             jwtHeader.put("typ", "JWT");
             jwtHeader.put("alg", getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            jwtHeader.put("x5t", base64UrlEncodedThumbPrint);
+            if (useSHA256Hash) {
+                jwtHeader.put(JWTConstants.X5T256_PARAMETER, base64UrlEncodedThumbPrint);
+            } else {
+                jwtHeader.put(JWTConstants.X5T_PARAMETER, base64UrlEncodedThumbPrint);
+            }
+
             if (useKid) {
                 jwtHeader.put("kid", getKID(x509Certificate));
             }

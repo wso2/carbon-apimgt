@@ -58,16 +58,13 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -103,6 +100,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -287,7 +285,7 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
-import javax.security.cert.X509Certificate;
+import java.security.cert.X509Certificate;
 import javax.validation.constraints.NotNull;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -2048,6 +2046,22 @@ public final class APIUtil {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(
                 APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
+    }
+
+    /**
+     * Check if Portal Configuration Only Mode is enabled
+     *
+     * @return True if Portal Configuration Only Mode is enabled
+     */
+    public static boolean isPortalConfigurationOnlyModeEnabled() {
+        // checking if API Read Only Mode is enabled in api-manager.xml
+        String isPortalConfigurationOnlyModeEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                        getAPIManagerConfiguration().getFirstProperty(
+                                APIConstants.API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE);
+        if (StringUtils.isNotEmpty(isPortalConfigurationOnlyModeEnabled)) {
+            return Boolean.parseBoolean(isPortalConfigurationOnlyModeEnabled);
+        }
+        return false;
     }
 
     /**
@@ -7053,6 +7067,24 @@ public final class APIUtil {
     }
 
     /**
+     * Enable jwt for portal logins
+     *
+     * @return boolean value of the config
+     */
+    public static boolean isJWTEnabledForPortals() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+
+        String isEnabledJwtForPortals = config.getFirstProperty(APIConstants.IS_ENABLE_JWT_FOR_PORTALS);
+        if (isEnabledJwtForPortals != null) {
+            return Boolean.valueOf(isEnabledJwtForPortals);
+        }
+
+        return false;
+
+    }
+    /**
      * Used to check whether Provisioning Out-of-Band OAuth Clients feature is enabled
      *
      * @return true if feature is enabled
@@ -9250,8 +9282,9 @@ public final class APIUtil {
             base64EncodedCertificate = APIUtil.getX509certificateContent(base64EncodedCertificate);
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                return X509Certificate.getInstance(inputStream);
-            } catch (IOException | javax.security.cert.CertificateException e) {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                return (X509Certificate) cf.generateCertificate(inputStream);
+            } catch (IOException | CertificateException e) {
                 String msg = "Error while converting into X509Certificate";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
@@ -9274,8 +9307,9 @@ public final class APIUtil {
             base64EncodedCertificate = APIUtil.getX509certificateContent(base64EncodedCertificate);
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate.getBytes());
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                return X509Certificate.getInstance(inputStream);
-            } catch (IOException | javax.security.cert.CertificateException e) {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                return (X509Certificate) cf.generateCertificate(inputStream);
+            } catch (IOException | CertificateException e) {
                 String msg = "Error while converting into X509Certificate";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
@@ -10142,8 +10176,6 @@ public final class APIUtil {
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
-        velocityEngine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
-        velocityEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
     }
 
     /**
@@ -10354,5 +10386,155 @@ public final class APIUtil {
             scopesStringBuilder.append(scope.getKey()).append(" ");
         }
         return scopesStringBuilder.toString().trim();
+    }
+
+    /**
+     * This method is used to invoke the Choreo deployed AI service. This can handle both API Chat and Marketplace
+     * Assistant related POST calls.
+     *
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken OnPremKey for the organization
+     * @param resource  Specifies the backend resource the request should be forwarded to
+     * @param payload   Request payload that needs to be attached to the request
+     * @param requestId UUID of the request, so that AI service can track the progress
+     * @return returns the response if invocation is successful
+     * @throws APIManagementException if an error occurs while invoking the AI service
+     */
+    public static String invokeAIService(String endpoint, String authToken, String resource, String payload,
+            String requestId) throws APIManagementException {
+
+        try {
+            HttpPost preparePost = new HttpPost(endpoint + resource);
+            preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
+            preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            if (StringUtils.isNotEmpty(requestId)) {
+                preparePost.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
+            }
+            StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
+            preparePost.setEntity(requestEntity);
+
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+            CloseableHttpResponse response = executeHTTPRequest(preparePost, httpClient);
+            int statusCode = response.getStatusLine().getStatusCode();
+            String responseStr = EntityUtils.toString(response.getEntity());
+            if (statusCode == HttpStatus.SC_CREATED) {
+                return responseStr;
+            } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                String errorMsg = "Invalid credentials used when invoking the AI service.";
+                log.error(errorMsg + responseStr);
+                throw new APIManagementException(errorMsg, ExceptionCodes.AI_SERVICE_INVALID_ACCESS_TOKEN);
+            } else if (statusCode == HttpStatus.SC_TOO_MANY_REQUESTS) {
+                throw new APIManagementException("You have exceeded your quota. Please contact administrator.",
+                        ExceptionCodes.AI_SERVICE_QUOTA_EXCEEDED);
+            } else if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR){
+                org.json.JSONObject responseJson = new org.json.JSONObject(responseStr);
+                if (responseJson.has("detail")) {
+                    String errorMsg = (String) responseJson.get("detail");
+                    throw new APIManagementException(errorMsg,
+                            ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+                }
+                throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
+                        ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+            } else {
+                throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
+                        ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+            }
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
+
+    /**
+     * This method is used to get the no of apis in the vector db for an organization
+     *
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken OnPremKey for the organization
+     * @param resource  Resource that we should forward the request to
+     * @return CloseableHttpResponse of the GET call
+     * @throws APIManagementException if an error occurs while retrieving API count
+     */
+    public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String authToken, String resource)
+            throws APIManagementException {
+
+        try {
+            HttpGet apiCountGet = new HttpGet(endpoint + resource);
+            apiCountGet.setHeader(APIConstants.API_KEY_AUTH, authToken);
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+            return executeHTTPRequest(apiCountGet, httpClient);
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
+
+    /**
+     * This method is used to delete an API from the vector database service to accommodate the Marketplace assistant
+     *
+     * @param endpoint  Endpoint to be invoked
+     * @param authToken OnPremKey for the organization
+     * @param resource  Resource that we should forward the request to
+     * @param uuid      UUID of the API to be deleted
+     * @throws APIManagementException if an error occurs while deleting the API
+     */
+    public static void deleteApi(String endpoint, String authToken, String resource, String uuid)
+            throws APIManagementException {
+
+        try {
+            String resourceWithPathParam = endpoint + resource + "/{uuid}";
+            resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
+
+            HttpDelete prepareDelete = new HttpDelete(resourceWithPathParam);
+            prepareDelete.setHeader(APIConstants.API_KEY_AUTH, authToken);
+
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+            CloseableHttpResponse response = executeHTTPRequest(prepareDelete, httpClient);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == HttpStatus.SC_OK) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully completed the Marketplace Assistant API publisher delete call with " +
+                            "status code: " + statusCode);
+                }
+            } else {
+                String errorMessage = "Error encountered while deleting the API from the vector database service " +
+                        "to accommodate the Marketplace assistant";
+                log.error(errorMessage);
+            }
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (APIManagementException | IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
+
+    /**
+     * Retrieves a paginated list of applications from the provided list, based on the specified offset and limit.
+     *
+     * @param applications The list of applications to paginate.
+     * @param offset       The starting index of the paginated sublist.
+     * @param limit        The maximum number of applications to include in the paginated sublist.
+     * @return A paginated sublist of applications, or an empty list if the offset exceeds the size of the input list.
+     */
+    public static List<ApplicationInfoKeyManager> getPaginatedApplicationList(
+            List<ApplicationInfoKeyManager> applications, int offset, int limit) {
+
+        int endIndex = Math.min(offset + limit, applications.size());
+        if (offset >= applications.size()) {
+            return Collections.emptyList();
+        }
+        return applications.subList(offset, endIndex);
     }
 }

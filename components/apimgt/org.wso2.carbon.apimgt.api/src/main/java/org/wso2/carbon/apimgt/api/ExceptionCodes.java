@@ -548,7 +548,14 @@ public enum ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_RESTRICTED_FOR_USER(902013, "Unauthorized Access to Key Manager", 403, "Key Manager is Restricted for this user"),
     // Admin portal get apis and api provider change related errors
     CHANGE_API_PROVIDER_FAILED(903011, "Error while changing the API provider", 500, "Error while changing the API provider in the registry or DB"),
-    GET_SEARCH_APIS_IN_ADMIN_FAILED(903012, "Error while getting the apis", 500, "Error while getting/searching the apis from registry");
+    GET_SEARCH_APIS_IN_ADMIN_FAILED(903012, "Error while getting the apis", 500, "Error while getting/searching the apis from registry"),
+    KEY_MANAGER_DELETE_FAILED(902015, "Key Manager Delete error", 412,"Error while deleting the Key Manager. %s", false),
+    KEYS_DELETE_FAILED(902014, "Key Delete error", 412,"Error while deleting Keys. %s", false),
+
+    // AI service invocation related exceptions
+    AI_SERVICE_INVALID_RESPONSE(903100, "Invalid response from AI service", 500, "Error while invoking AI service. %s", false),
+    AI_SERVICE_INVALID_ACCESS_TOKEN(903101, "Invalid access token provided for AI service", 401, "Invalid access token provided for AI service"),
+    AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service");
 
     private final long errorCode;
     private final String errorMessage;

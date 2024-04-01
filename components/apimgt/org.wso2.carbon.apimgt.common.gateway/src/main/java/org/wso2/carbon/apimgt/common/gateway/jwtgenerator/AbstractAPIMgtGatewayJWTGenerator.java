@@ -57,6 +57,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
 
     private String signatureAlgorithm;
 
+    private boolean useSHA256Hash = false;
+
     public AbstractAPIMgtGatewayJWTGenerator() {
     }
 
@@ -71,6 +73,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
         }
+        useSHA256Hash = jwtConfigurationDto.useSHA256Hash();
 
     }
 
@@ -146,7 +149,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
 
         try {
             Certificate publicCert = jwtConfigurationDto.getPublicCert();
-            return JWTUtil.generateHeader(publicCert, signatureAlgorithm, jwtConfigurationDto.useKid());
+            return JWTUtil.generateHeader(publicCert, signatureAlgorithm, jwtConfigurationDto.useKid(),
+                    useSHA256Hash);
         } catch (Exception e) {
             String error = "Error in obtaining keystore";
             throw new JWTGeneratorException(error, e);

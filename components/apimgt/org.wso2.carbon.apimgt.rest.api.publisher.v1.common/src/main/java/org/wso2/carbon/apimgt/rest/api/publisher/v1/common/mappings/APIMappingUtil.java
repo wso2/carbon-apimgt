@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -121,7 +122,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfig
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -137,6 +137,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -190,10 +191,14 @@ public class APIMappingUtil {
         model.setContext(context);
         model.setDescription(dto.getDescription());
 
-        if (dto.getEndpointConfig() != null) {
+        Object endpointConfig = dto.getEndpointConfig();
+        if (endpointConfig != null) {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                model.setEndpointConfig(mapper.writeValueAsString(dto.getEndpointConfig()));
+                if (endpointConfig instanceof LinkedHashMap) {
+                    ((LinkedHashMap) endpointConfig).remove(APIConstants.IMPLEMENTATION_STATUS);
+                }
+                model.setEndpointConfig(mapper.writeValueAsString(endpointConfig));
             } catch (IOException e) {
                 handleException("Error while converting endpointConfig to json", e);
             }
@@ -714,6 +719,8 @@ public class APIMappingUtil {
         apiInfoDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
         apiInfoDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiInfoDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
+        apiInfoDTO.setGatewayType(api.getGatewayType());
+        apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         return apiInfoDTO;
     }
 

@@ -61,6 +61,7 @@ public class LifeCycleUtils {
         String apiContext = apiTypeWrapper.getContext();
         String uuid = apiTypeWrapper.getUuid();
         String currentStatus = apiTypeWrapper.getStatus();
+        String apiVisibility = apiTypeWrapper.getVisibility();
         targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
 
         // Update lifecycle state in the registry
@@ -77,7 +78,7 @@ public class LifeCycleUtils {
         // Add LC state change event to the event queue
         sendLCStateChangeNotification(apiName, apiType, apiContext, apiTypeWrapper.getId().getVersion(), targetStatus,
                 apiTypeWrapper.getId().getProviderName(), apiTypeWrapper.getId().getId(), uuid, orgId,
-                apiTypeWrapper.getApi() != null ? apiTypeWrapper.getApi().getApiSecurity() : null);
+                apiTypeWrapper.getApi() != null ? apiTypeWrapper.getApi().getApiSecurity() : null, action, currentStatus, apiVisibility);
 
         // Remove revisions and subscriptions after API retire
         if (!apiTypeWrapper.isAPIProduct()) {
@@ -391,14 +392,16 @@ public class LifeCycleUtils {
      * @param apiOrApiProductId unique ID of API or API product
      * @param uuid              unique UUID of API or API Product
      */
-    private static void sendLCStateChangeNotification(String apiName, String apiType, String apiContext, String apiVersion,
-                                                      String targetStatus, String provider, int apiOrApiProductId,
-                                                      String uuid, String organization, String securityScheme) throws
-            APIManagementException {
+    private static void sendLCStateChangeNotification(String apiName, String apiType, String apiContext,
+            String apiVersion, String targetStatus, String provider, int apiOrApiProductId, String uuid,
+            String organization, String securityScheme, String action, String currentStatus, String apiVisibility)
+            throws APIManagementException {
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), APIUtil.getInternalOrganizationId(organization), organization, apiName, apiOrApiProductId,
-                uuid, apiVersion, apiType, apiContext, APIUtil.replaceEmailDomainBack(provider), targetStatus, securityScheme);
+                APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), APIUtil.getInternalOrganizationId(organization),
+                organization, apiName, apiOrApiProductId, uuid, apiVersion, apiType, apiContext,
+                APIUtil.replaceEmailDomainBack(provider), targetStatus, securityScheme, action, currentStatus,
+                apiVisibility);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 

@@ -1835,6 +1835,7 @@ paths:
         - OAuth2Security:
             - apim:api_publish
             - apim:api_manage
+            - apim:api_create
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4068,6 +4069,13 @@ paths:
           in: query
           description: |
             Whether to update the API or not. This is used when updating already existing APIs
+          required: false
+          schema:
+            type: boolean
+        - name: preservePortalConfigurations
+          in: query
+          description: |
+            Preserve Portal Configurations. This is used to preserve the portal configurations of the API
           required: false
           schema:
             type: boolean
@@ -6625,7 +6633,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/api-products/copy-api-products?newVersion=2.0&defaultVersion=false&apiproductId=2fd14eb8-b828-4013-b448-0739d2e76bf7"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/api-products/copy-api-products?newVersion=2.0&defaultVersion=false&apiProductId=2fd14eb8-b828-4013-b448-0739d2e76bf7"'
       operationId: createNewAPIProductVersion
 
   /api-products/export:
@@ -8847,6 +8855,12 @@ components:
         gatewayVendor:
           type: string
           example: wso2
+        gatewayType:
+          title: Field to identify gateway type.
+          type: string
+          description: Accepts one of the following. wso2/synapse, wso2/apk.
+          example: wso2/synapse
+          default: wso2/synapse
         advertiseOnly:
           type: boolean
           example: true
@@ -11899,6 +11913,12 @@ components:
           description: |
             Is Document Visibility configuration enabled
           example: false
+        portalConfigurationOnlyModeEnabled:
+          type: boolean
+          description: |
+            Is Portal Configuration Only Mode enabled
+          example: false
+          default: false
         crossTenantSubscriptionEnabled:
           type: boolean
           description: |
@@ -11915,6 +11935,9 @@ components:
           type: string
           description: Authorization Header
           example: authorization
+        IsJWTEnabledForLoginTokens: 
+          type: boolean
+          default: false
         customProperties:
           type: array
           items:

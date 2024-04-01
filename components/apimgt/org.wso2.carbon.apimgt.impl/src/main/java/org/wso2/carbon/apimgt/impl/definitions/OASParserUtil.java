@@ -917,7 +917,7 @@ public class OASParserUtil {
      * @return
      */
     public static boolean isOpenAPIVersion31(OpenAPI oasDefinition) {
-        return APIConstants.OAS_V31.equals(oasDefinition.getSpecVersion().name());
+        return APIConstants.OAS_V31.equalsIgnoreCase(oasDefinition.getSpecVersion().name());
     }
 
     /**

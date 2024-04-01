@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -64,6 +65,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
@@ -1185,7 +1187,7 @@ public class ApiMgtDAO {
                 }
                 subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
                 subscription.setTopic(resultSet.getString("HUB_TOPIC"));
-                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscription.setAppID(applicationId);
                 subscriptionSet.add(subscription);
             }
             return subscriptionSet;
@@ -2754,6 +2756,33 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
         return subscriptions;
+    }
+
+    /**
+     * @param apiName    Name of the API
+     * @param apiVersion Version of the API
+     * @param provider   Name of API creator
+     * @return All subscriptions of a given API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public long getNoOfSubscriptionsOfAPI(String apiUUID, String organization)
+            throws APIManagementException {
+
+            String sqlQuery = SQLConstants.GET_SUBSCRIPTION_COUNT_OF_API_SQL;
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                try (PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+                    ps.setString(1, apiUUID);
+                    ps.setString(2, organization);
+                    try (ResultSet resultSet = ps.executeQuery()) {
+                        if (resultSet.next()) {
+                            return resultSet.getLong("SUBS_COUNT");
+                        }
+                    }
+                }
+        } catch (SQLException e) {
+            handleException("Error occurred while reading subscriptions of API: " + apiUUID , e);
+        }
+        return 0;
     }
 
 
@@ -9517,7 +9546,7 @@ public class ApiMgtDAO {
                 preparedStatement.setString(10, keyManagerConfigurationDTO.getExternalReferenceId());
                 preparedStatement.executeUpdate();
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
+                if (permissionDTO != null && !KeyManagerAccessPublic.equals(permissionDTO.getPermissionType())) {
                     try (PreparedStatement addPermissionStatement = conn
                             .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants
                                     .ADD_KEY_MANAGER_PERMISSION_SQL)) {
@@ -9598,7 +9627,7 @@ public class ApiMgtDAO {
                     deletePermissionsStatement.executeUpdate();
                 }
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && permissionDTO.getPermissionType() != KeyManagerAccessPublic) {
+                if (permissionDTO != null && !KeyManagerAccessPublic.equals(permissionDTO.getPermissionType())) {
                     try (PreparedStatement addPermissionStatement = conn.prepareStatement(SQLConstants
                             .KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
                         for (String role : permissionDTO.getRoles()) {
@@ -9799,6 +9828,30 @@ public class ApiMgtDAO {
                     }
                     apiKey.setCreateMode(createMode);
                     return apiKey;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while Retrieving Key Mapping ", e);
+        }
+        return null;
+    }
+
+    public KeyManagerApplicationInfo getKeyManagerNameAndConsumerKeyByAppIdAndKeyMappingId(int applicationId,
+            String keyMappingId) throws APIManagementException {
+
+        String query = SQLConstants.KeyManagerSqlConstants
+                .GET_KEY_MANAGER_NAME_AND_CONSUMER_KEY_BY_APPLICATION_ID_AND_KEY_MAPPING_ID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setString(2, keyMappingId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    KeyManagerApplicationInfo keyManagerApplicationInfo = new KeyManagerApplicationInfo();
+                    keyManagerApplicationInfo.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                    keyManagerApplicationInfo.setKeyManagerName(resultSet.getString("KEY_MANAGER_NAME"));
+                    keyManagerApplicationInfo.setMode(resultSet.getString("CREATE_MODE"));
+                    return keyManagerApplicationInfo;
                 }
             }
         } catch (SQLException e) {
@@ -16110,9 +16163,8 @@ public class ApiMgtDAO {
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                     workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
                     workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
-                    InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
-                    InputStream propertiesBlob = rs.getBinaryStream("WF_PROPERTIES");
 
+                    InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
                     if (metadataBlob != null) {
                         String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
                         Gson metadataGson = new Gson();
@@ -16123,6 +16175,7 @@ public class ApiMgtDAO {
                         workflow.setMetadata(metadataJson);
                     }
 
+                    InputStream propertiesBlob = rs.getBinaryStream("WF_PROPERTIES");
                     if (propertiesBlob != null) {
                         String properties = APIMgtDBUtil.getStringFromInputStream(propertiesBlob);
                         Gson propertiesGson = new Gson();
@@ -16180,9 +16233,8 @@ public class ApiMgtDAO {
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                     workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    InputStream targetStream = rs.getBinaryStream("WF_METADATA");
-                    InputStream propertiesTargetStream = rs.getBinaryStream("WF_PROPERTIES");
 
+                    InputStream targetStream = rs.getBinaryStream("WF_METADATA");
                     if (targetStream != null) {
                         String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
                         Gson metadataGson = new Gson();
@@ -16193,6 +16245,7 @@ public class ApiMgtDAO {
                         workflow.setMetadata(metadataJson);
                     }
 
+                    InputStream propertiesTargetStream = rs.getBinaryStream("WF_PROPERTIES");
                     if (propertiesTargetStream != null) {
                         String properties = APIMgtDBUtil.getStringFromInputStream(propertiesTargetStream);
                         Gson propertiesGson = new Gson();
@@ -20152,6 +20205,32 @@ public class ApiMgtDAO {
             }
         }
         return policyIds;
+    }
+
+    public List<ApplicationInfoKeyManager> getAllApplicationsOfKeyManager(String keyManagerId)
+            throws APIManagementException {
+
+        ArrayList<ApplicationInfoKeyManager> applicationsList = new ArrayList<>();
+        String sqlQuery = SQLConstants.GET_APPLICATIONS_OF_KEY_MANAGERS_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, keyManagerId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                ApplicationInfoKeyManager application;
+                while (rs.next()) {
+                    application = new ApplicationInfoKeyManager();
+                    application.setUuid(rs.getString("UUID"));
+                    application.setName(rs.getString("NAME"));
+                    application.setOwner(rs.getString("CREATED_BY"));
+                    application.setOrganization(rs.getString("ORGANIZATION"));
+                    applicationsList.add(application);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error when reading the application information from the persistence store.", e);
+        }
+        return applicationsList;
     }
 
     /**

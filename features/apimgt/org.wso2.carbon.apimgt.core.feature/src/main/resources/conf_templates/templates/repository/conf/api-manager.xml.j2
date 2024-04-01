@@ -70,6 +70,9 @@
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <SignatureAlgorithm>{{apim.jwt.signing_algorithm}}</SignatureAlgorithm>
 
+        <!-- Specifies whether to use SHA-256 algorithm to generate the certificate thumbprint -->
+        <UseSHA256Hash>{{apim.jwt.use_sha256_hash}}</UseSHA256Hash>
+
         <!-- This parameter specifies which implementation should be used for generating the Token. JWTGenerator is the
 	     default implementation provided. -->
         {% if apim.jwt.generator_impl is defined %}
@@ -354,12 +357,51 @@
     </Analytics>
 
     <!--
+        Configurations relevant to API Chat AI feature.
+        This enables the API Chat feature which leverages AI for API testing within Developer Portal.
+    -->
+    <APIChat>
+        <!-- Enable API Chat for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.token}}</AuthToken>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <Resources>
+            <PrepareResource>{{apim.ai.api_chat_prepare_resource}}</PrepareResource>
+            <ExecuteResource>{{apim.ai.api_chat_execute_resource}}</ExecuteResource>
+        </Resources>
+
+    </APIChat>
+
+    <!--
         Configurations relevant to enable rate limit feature.
         This enables to use resources considering subscription levels.
     -->
     <ResourceQuotaLimit>
         <EnableAPIQuotaLimit>{{apim.api_quota_limit.enable}}</EnableAPIQuotaLimit>
     </ResourceQuotaLimit>
+
+    <!--
+        Configurations relevant to Marketplace Assistant feature.
+        This enables the Marketplace Assistant feature which leverages AI for API searching within Developer Portal.
+    -->
+    <MarketplaceAssistant>
+        <!-- Enable Marketplace Assistant for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.token}}</AuthToken>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <Resources>
+            <ChatResource>{{apim.ai.marketplace_assistant_chat_resource}}</ChatResource>
+            <ApiPublishResource>{{apim.ai.marketplace_assistant_publish_api_resource}}</ApiPublishResource>
+            <ApiDeleteResource>{{apim.ai.marketplace_assistant_remove_api_resource}}</ApiDeleteResource>
+            <ApiCountResource>{{apim.ai.marketplace_assistant_api_count_resource}}</ApiCountResource>
+        </Resources>
+    </MarketplaceAssistant>
 
     <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
@@ -434,6 +476,9 @@
         <!-- Whether to validate certificate bound access tokens-->
         <EnableCertificateBoundAccessToken>{{apim.oauth_config.enable_certificate_bound_access_token}}</EnableCertificateBoundAccessToken>
 
+        {% if apim.oauth_config.enable_jwt_for_portals is defined %}
+        <EnableJWTForPortals>{{apim.oauth_config.enable_jwt_for_portals}}</EnableJWTForPortals>
+        {% endif %}
     </OAuthConfigurations>
 
     <AccessTokenBinding>
@@ -536,6 +581,7 @@
              property,it will show two additional permission levels as visible only to all registered users in a particular
              domain or only visible to API doc creator -->
         <EnableAPIDocVisibilityLevels>{{apim.publisher.enable_api_doc_visibility}}</EnableAPIDocVisibilityLevels>
+        <EnablePortalConfigurationOnlyMode>{{apim.publisher.enable_portal_configuration_only_mode}}</EnablePortalConfigurationOnlyMode>
         <!-- Uncomment this to limit the number of APIs in api the API Publisher -->
         <!--APIsPerPage>30</APIsPerPage-->
         <!-- This property need to be enabled to enable the publisher access control support -->
@@ -787,6 +833,14 @@
             <AllowedURI>
                 <URI>/api/am/gateway/v2/server-startup-healthcheck</URI>
                 <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/devportal/{version}/marketplace-assistant/api-count</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/devportal/{version}/marketplace-assistant/chat</URI>
+                <HTTPMethods>POST</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>
@@ -1354,6 +1408,9 @@
      <MutualSSL>
         <ClientCertificateHeader>{{apimgt.mutual_ssl.certificate_header}}</ClientCertificateHeader>
         <EnableClientCertificateValidation>{{apimgt.mutual_ssl.enable_client_validation}}</EnableClientCertificateValidation>
+        {% if apimgt.mutual_ssl.enable_certificate_chain_validation is defined %}
+        <EnableCertificateChainValidation>{{apimgt.mutual_ssl.enable_certificate_chain_validation}}</EnableCertificateChainValidation>
+        {% endif %}
         {% if apimgt.mutual_ssl.client_certificate_encode is defined %}
         <ClientCertificateEncode>{{apimgt.mutual_ssl.client_certificate_encode}}</ClientCertificateEncode>
         {% endif %}

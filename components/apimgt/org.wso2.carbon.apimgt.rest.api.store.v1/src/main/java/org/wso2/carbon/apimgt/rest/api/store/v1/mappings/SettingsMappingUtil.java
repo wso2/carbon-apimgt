@@ -60,6 +60,7 @@ public class SettingsMappingUtil {
         SettingsDTO settingsDTO = new SettingsDTO();
         settingsDTO.setScopes(GetScopeList());
         settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
+        settingsDTO.setIsJWTEnabledForLoginTokens(APIUtil.isJWTEnabledForPortals());
         settingsDTO.setRecommendationEnabled(recommendationEnabled);
         settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
         settingsDTO.setMonetizationEnabled(moneatizationEnabled);
@@ -124,6 +125,9 @@ public class SettingsMappingUtil {
         settingsDTO.setPasswordPolicyPattern(passwordPolicyPattern);
         settingsDTO.setPasswordPolicyMinLength(passwordPolicyMinLength);
         settingsDTO.setPasswordPolicyMaxLength(passwordPolicyMaxLength);
+        settingsDTO.setApiChatEnabled(config.getApiChatConfigurationDto().isEnabled());
+        settingsDTO.setMarketplaceAssistantEnabled(config.getMarketplaceAssistantConfigurationDto().isEnabled());
+        settingsDTO.setAiAuthTokenProvided(config.getApiChatConfigurationDto().isAuthTokenProvided());
 
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());

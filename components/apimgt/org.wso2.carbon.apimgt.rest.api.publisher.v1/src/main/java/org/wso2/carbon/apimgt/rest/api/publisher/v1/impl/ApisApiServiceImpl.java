@@ -658,11 +658,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_ENDPOINT_URL);
             }
 
+            // validate custom properties
             org.json.simple.JSONArray customProperties = APIUtil.getCustomProperties(username);
-            if (!PublisherCommonUtils.validateMandatoryProperties(customProperties, body)) {
-                Long errorCode = ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorCode();
+            List<String> errorProperties = PublisherCommonUtils.validateMandatoryProperties(customProperties, body);
+            if (!errorProperties.isEmpty()) {
+                String errorString = " : " + String.join(", ", errorProperties);
                 RestApiUtil.handleBadRequest(
-                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorMessage(), errorCode, log);
+                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorMessage() + errorString,
+                        ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorCode(), log);
             }
 
             // validate sandbox and production endpoints
@@ -832,7 +835,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
             JSONObject responseJson = ApisApiServiceImplUtils
                     .getAuditReport(api, securityAuditPropertyObject, apiDefinition, organization);
-            if (responseJson != null) {
+            if (!responseJson.isEmpty()) {
                 AuditReportDTO auditReportDTO = new AuditReportDTO();
                 auditReportDTO.setReport((String) responseJson.get("decodedReport"));
                 auditReportDTO.setGrade((String) responseJson.get("grade"));
@@ -1573,7 +1576,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return created document DTO as response
      */
     @Override
-    public Response addAPIDocument(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext) {
+    public Response addAPIDocument(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //validate if api exists
@@ -1597,8 +1601,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .handleAuthorizationFailure("Authorization failure while adding documents of API : " + apiId, e,
                                 log);
             } else {
-                String errorMessage = "Error while adding the document for API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw new APIManagementException(
+                        "Error while adding a new document to API " + apiId + " : " + e.getMessage(), e);
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving location for document " + body.getName() + " of API " + apiId;
@@ -3411,19 +3415,23 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred while trying to import the API
      */
     @Override public Response importAPI(InputStream fileInputStream, Attachment fileDetail,
-            Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
+                                        Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite,
+                                        Boolean preservePortalConfigurations, MessageContext messageContext) throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
         overwrite = overwrite == null ? false : overwrite;
 
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
-
+        if (preservePortalConfigurations == null) {
+            preservePortalConfigurations = false;
+        }
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-        importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite, tokenScopes, organization);
+        importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite,
+                preservePortalConfigurations, tokenScopes, organization);
         return Response.status(Response.Status.OK).entity("API imported successfully.").build();
     }
 
@@ -4205,6 +4213,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
             JSONObject serviceInfo = ApisApiServiceImplUtils.getServiceInfo(service);
             api.setServiceInfo(serviceInfo);
+            api.setUriTemplates(originalAPI.getUriTemplates());
             Map validationResponseMap = new HashMap();
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {

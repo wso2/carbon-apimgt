@@ -316,6 +316,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
+            /* When new applications are created, we do not honor tokenType sent in the body
+            and all the applications created will be of 'JWT' token type */
+            body.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
+
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Application createdApplication = preProcessAndAddApplication(username, body, organization);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
@@ -366,10 +370,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         if (applicationAttributes != null) {
             applicationDto.setAttributes(applicationAttributes);
         }
-
-        //we do not honor tokenType sent in the body and
-        //all the applications created will of 'JWT' token type
-        applicationDto.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
 
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
@@ -1196,6 +1196,27 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             return Response.ok().build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while application key cleanup process", e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdDelete(String applicationId, String keyMappingId,
+            String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+            boolean result = apiConsumer.removalKeys(application, keyMappingId, xWSO2Tenant);
+            if (result) {
+                return Response.ok().build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(ExceptionCodes.KEYS_DELETE_FAILED.getErrorMessage(),
+                        keyMappingId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while application key delete process", e, log);
         }
         return null;
     }

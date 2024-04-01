@@ -734,9 +734,18 @@ public class GatewayUtils {
                     ;
                 }
                 if (synCtx != null && APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_DEPTH);
-                    Integer graphQLMaxComplexity =
-                            (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_COMPLEXITY);
+                    Integer graphQLMaxDepth = 0;
+                    if (subscriptionTierObj != null
+                            && subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_DEPTH) != null) {
+                        graphQLMaxDepth = ((Number) subscriptionTierObj.get(
+                                GraphQLConstants.GRAPHQL_MAX_DEPTH)).intValue();
+                    }
+                    Integer graphQLMaxComplexity = 0;
+                    if (subscriptionTierObj != null
+                            && subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_COMPLEXITY) != null) {
+                        graphQLMaxComplexity = ((Number) subscriptionTierObj.get(
+                                GraphQLConstants.GRAPHQL_MAX_COMPLEXITY)).intValue();
+                    }
                     synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH, graphQLMaxDepth);
                     synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY, graphQLMaxComplexity);
                 }

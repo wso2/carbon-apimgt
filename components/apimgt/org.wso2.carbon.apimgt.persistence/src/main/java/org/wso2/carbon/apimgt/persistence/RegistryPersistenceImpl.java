@@ -3080,7 +3080,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
-                    RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
                     RegistryPersistenceUtil.registerCustomQueries(registry, null, userTenantDomain);
                     holder.setTenantId(tenantId);
                 }
@@ -3089,7 +3088,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
-                RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
                 RegistryPersistenceUtil.registerCustomQueries(registry, null, userTenantDomain);
                 holder.setTenantId(tenantId);
             }
@@ -3151,7 +3149,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 holder.setTenantId(tenantId);
             }
             RegistryPersistenceUtil.registerCustomQueries(configRegistry, username, userTenantDomain);
-            RegistryPersistenceUtil.addLifecycleIfNotExists(tenantId);
         } catch (RegistryException | UserStoreException | PersistenceException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
@@ -3842,7 +3839,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             PaginationContext.init(start, count, "ASC", APIConstants.API_OVERVIEW_NAME, limit);
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
-
+            Map<String, String> attributes = RegistrySearchUtil.getAdminSearchAttributes(searchQuery);
             int tenantId = holder.getTenantId();
             if (tenantId == -1) {
                 tenantId = MultitenantConstants.SUPER_TENANT_ID;
@@ -3853,7 +3850,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
 
             SearchResultsBean resultsBean = contentBasedSearchService
-                    .searchContent(searchQuery, systemUserRegistry);
+                    .searchByAttribute(attributes, systemUserRegistry);
             String errorMsg = resultsBean.getErrorMessage();
             if (errorMsg != null) {
                 throw new APIPersistenceException("Error while searching " + errorMsg);

@@ -48,6 +48,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -126,15 +127,13 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             // checks whether the gateway policy mapping exists in the particular gateway
-            for (GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTO : gatewayPolicyDeploymentDTOList) {
+            Iterator<GatewayPolicyDeploymentDTO> iterator = gatewayPolicyDeploymentDTOList.iterator();
+            while (iterator.hasNext()) {
+                GatewayPolicyDeploymentDTO gatewayPolicyDeploymentDTO = iterator.next();
                 String gwName = gatewayPolicyDeploymentDTO.getGatewayLabel();
                 boolean isDeployment = gatewayPolicyDeploymentDTO.isGatewayDeployment();
                 if (isDeployment && apiProvider.hasExistingDeployments(organization, gwName)) {
-                    RestApiUtil.handleBadRequest("Gateway policy mapping is already deployed in the gateway: " + gwName,
-                            log);
-                } else if (!isDeployment && !apiProvider.hasExistingDeployments(organization, gwName)) {
-                    RestApiUtil.handleBadRequest("Gateway policy mapping is not deployed in the gateway: " + gwName,
-                            log);
+                    iterator.remove(); // Safely remove the element using the iterator
                 }
             }
             List<OperationPolicyData> operationPolicyDataList = apiProvider.getGatewayPolicyDataListByPolicyId(
@@ -176,7 +175,7 @@ public class GatewayPoliciesApiServiceImpl implements GatewayPoliciesApiService 
                 String labelToCheck = dto.getGatewayLabel();
                 boolean labelFound = false;
                 for (Environment env : allEnvs) {
-                    if (env.getDisplayName().equals(labelToCheck)) {
+                    if (env.getName().equals(labelToCheck)) {
                         labelFound = true;
                         break;
                     }

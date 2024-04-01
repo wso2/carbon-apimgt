@@ -147,10 +147,6 @@ public final class APIConstants {
 
     public static final String SSL_VERIFY_CLIENT_STATUS_REQUIRE = "require";
 
-    public static final String ADMIN_PORTAL_GET_APIS_QUERY = "name=\\*\"%s\"\\* AND" +
-            " mediaType:application\\/vnd.wso2\\-api\\+xml AND" +
-            " type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)";
-
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
     public static final String API_DOMAIN_MAPPING_TENANT_ID_IDENTIFIER = "<tenant-id>";
@@ -446,6 +442,7 @@ public final class APIConstants {
     public static final String DOT = ".";
     public static final String DEFAULT = "DEFAULT";
     public static final String API_KEY_AUTH_TYPE = "API_KEY";
+    public static final String API_KEY_AUTH = "API-KEY";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
     public static final String JWT_DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
@@ -460,6 +457,10 @@ public final class APIConstants {
     public static final String USE_KID = "UseKidProperty";
     public static final String CONSUMER_DIALECT_URI = "ConsumerDialectURI";
     public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
+    public static final String USE_SHA256_HASH = "UseSHA256Hash";
+
+    public static final String X5T_PARAMETER = "x5t";
+    public static final String X5T256_PARAMETER = "x5t#S256";
     public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
     public static final String TOKEN_ISSUERS = "TokenIssuers";
@@ -500,6 +501,34 @@ public final class APIConstants {
     public static final String ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN = OAUTH_CONFIGS + "EnableCertificateBoundAccessToken";
     public static final String DIGEST = "x5t#S256";
     public static final String CNF = "cnf";
+
+    // Constants related to AI features: API chat and Marketplace Assistant
+    public static class AI {
+
+        public static final String API_CHAT = "APIChat";
+        public static final String API_CHAT_ENABLED = "Enabled";
+        public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
+        public static final String API_CHAT_ENDPOINT = "Endpoint";
+        public static final String RESOURCES = "Resources";
+        public static final String API_CHAT_PREPARE_RESOURCE = "PrepareResource";
+        public static final String API_CHAT_EXECUTE_RESOURCE = "ExecuteResource";
+        public static final String API_CHAT_ACTION_PREPARE = "PREPARE";
+        public static final String API_CHAT_ACTION_EXECUTE = "EXECUTE";
+        public static final String API_CHAT_REQUEST_ID = "apiChatRequestId";
+
+        public static final String MARKETPLACE_ASSISTANT = "MarketplaceAssistant";
+        public static final String MARKETPLACE_ASSISTANT_ENABLED = "Enabled";
+        public static final String MARKETPLACE_ASSISTANT_AUTH_TOKEN = "AuthToken";
+        public static final String MARKETPLACE_ASSISTANT_ENDPOINT = "Endpoint";
+        public static final String MARKETPLACE_ASSISTANT_CHAT_RESOURCE = "ChatResource";
+        public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
+        public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
+        public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
+
+        private AI() {
+
+        }
+    }
 
     //documentation rxt
 
@@ -859,6 +888,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_URL = API_PUBLISHER + "URL";
     public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS = API_PUBLISHER
             + "EnableAPIDocVisibilityLevels";
+    public static final String API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE = API_PUBLISHER + "EnablePortalConfigurationOnlyMode";
     // Configuration that need to enable to add access control to APIs in publisher
     public static final String API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS = API_PUBLISHER
             + "EnableAccessControl";
@@ -1348,6 +1378,8 @@ public final class APIConstants {
 
     public static final String SHA_256 = "SHA-256";
 
+    public static final String SHA_1 = "SHA-1";
+
     public static final String US_ASCII = "US-ASCII";
 
     public static class DigestAuthConstants {
@@ -1487,6 +1519,7 @@ public final class APIConstants {
     public static final String API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION = API_STORE + "GroupingExtractor";
     public static final String API_STORE_REST_API_GROUP_EXTRACTOR_IMPLEMENTATION =
             API_STORE + "RESTApiGroupingExtractor";
+    public static final String IS_ENABLE_JWT_FOR_PORTALS = OAUTH_CONFIGS + "EnableJWTForPortals";
     public static final String API_CUSTOM_SEQUENCES_FOLDER_LOCATION =
             "repository" + File.separator + "resources" + File.separator + "customsequences";
     public static final String WORKFLOW_EXTENSION_LOCATION =
@@ -1675,6 +1708,34 @@ public final class APIConstants {
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     public static final String API_DATA_URL = "url";
     public static final String API_UUID = "apiUUID";
+
+
+    public static final String UUID = "uuid";
+    public static final String API_SPEC_TYPE = "api_type";
+    public static final String API_SPEC_NAME = "api_name";
+    public static final String TENANT_DOMAIN = "tenant_domain";
+    public static final String QUERY = "query";
+    public static final String HISTORY = "history";
+    public static final String VERSION = "version";
+    public static final String DESCRIPTION = "description";
+
+    public static final String DEMOTE_TO_CREATED= "Demote to Created";
+    public static final String BLOCK = "Block";
+    public static final String DEPRECATE = "Deprecate";
+    public static final String PUBLISH = "Publish";
+    public static final String DEPLOY_AS_A_PROTOTYPE = "Deploy as a Prototype";
+    public static final String REPUBLISH = "Re-Publish";
+
+    public static final String API_SPEC_TYPE_REST = "api_spec";
+    public static final String API_SPEC_TYPE_GRAPHQL = "sdl_schema";
+    public static final String API_SPEC_TYPE_ASYNC = "async_spec";
+    public static final String API_TYPE_HTTP = "HTTP";
+    public static final String API_TYPE_WEBHOOK = "WEBHOOK";
+
+    public static final String API_TYPE_REST = "REST";
+
+    public static final String API_TYPE_GRAPHQL = "GRAPHQL";
+    public static final String API_TYPE_ASYNC = "ASYNC";
 
     public static final String TRANSPORT_URL_IN = "TransportInURL";
 
@@ -2151,6 +2212,8 @@ public final class APIConstants {
         public static final String TOKEN_TYPE = "token_type";
         public static final String API_KEY_TOKEN_TYPE = "apiKey";
         public static final String DECODING_ALGORITHM_BASE64URL = "base64url";
+        public static final String APP_DOMAIN = "app_td";
+        public static final String USER_DOMAIN = "user_td";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -2299,6 +2362,7 @@ public final class APIConstants {
     public static final String API_SUBSCRIPTION_TYPE = "API";
     public static final String TYPE = "type";
     public static final String TYPE_SEARCH_TYPE_KEY = "type=";
+    public static final String API_USAGE_BY_KEY_MANAGER_QUERY = "overview_keyManagers:\\*\"$1\"\\*";
 
     public static class OASResourceAuthTypes {
 
@@ -2347,6 +2411,11 @@ public final class APIConstants {
         public static final String ADDITIONAL_ATTRIBUTES = "AdditionalAttributes";
         public static final String ATTRIBUTE = "Attribute";
 
+        public static final String ANALYTICS_HOST = "AnalyticsHost";
+        public static final String ANALYTICS_PORT = "AnalyticsPort";
+        public static final String ANALYTICS_USERNAME = "AnalyticsUsername";
+        public static final String ANALYTICS_PASSWORD = "AnalyticsPassword";
+        public static final String ANALYTICS_INDEX_NAME = "AnalyticsIndexName";
         public static final String IS_ATTRIBITE_REQUIRED = "Required";
         public static final String IS_ATTRIBUTE_HIDDEN = "Hidden";
         public static final String ATTRIBUTE_DESCRIPTION = "Description";
@@ -2516,6 +2585,8 @@ public final class APIConstants {
         public static final String CLIENT_CERTIFICATE_ENCODE = MUTUAL_SSL_CONFIG_ROOT + ".ClientCertificateEncode";
         public static final String ENABLE_CLIENT_CERTIFICATE_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
                 ".EnableClientCertificateValidation";
+        public static final String ENABLE_CERTIFICATE_CHAIN_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
+                ".EnableCertificateChainValidation";
     }
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";

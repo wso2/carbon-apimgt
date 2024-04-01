@@ -37,6 +37,7 @@ import org.wso2.carbon.registry.indexing.RegistryConfigLoader;
 import org.wso2.carbon.registry.indexing.indexer.Indexer;
 
 import static org.wso2.carbon.apimgt.persistence.APIConstants.API_GLOBAL_VISIBILITY;
+import static org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_KEY_MANAGERS;
 import static org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_VISIBILITY;
 
 public class RegistrySearchUtil {
@@ -206,6 +207,7 @@ public class RegistrySearchUtil {
                     apiState = keyVal[1];
                     continue;
                 }
+                keyVal[1] = keyVal[1].replaceAll(" ", "&&");
                 attributes.put(keyVal[0], keyVal[1]);
             }
         }
@@ -535,4 +537,23 @@ public class RegistrySearchUtil {
         return attributes;
     }
 
+    public static Map<String, String> getAdminSearchAttributes(String searchQuery) {
+        Map<String, String> attributes = new HashMap<String, String>();
+        if (searchQuery.equals(APIConstants.CHAR_ASTERIX)) {
+            String modifiedQuery = APIConstants.API_OVERVIEW_NAME + "=" + APIConstants.CHAR_ASTERIX;
+            attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
+        } else if (searchQuery.startsWith(API_OVERVIEW_KEY_MANAGERS + ":")) {
+            String[] queryParts = searchQuery.split(":");
+            String name = queryParts.length > 1 ? queryParts[1] : "";
+            attributes.put(API_OVERVIEW_KEY_MANAGERS, name);
+            attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, API_RXT_MEDIA_TYPE);
+        } else {
+            searchQuery = searchQuery.replaceAll(" ", "\\\\ ");
+            attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, API_RXT_MEDIA_TYPE);
+            attributes.put(APIConstants.API_OVERVIEW_NAME, searchQuery);
+            attributes.put(APIConstants.API_OVERVIEW_TYPE,
+                    "(http OR ws OR soaptorest OR graphql OR soap OR sse OR websub OR webhook OR async)");
+        }
+        return attributes;
+    }
 }

@@ -34,6 +34,8 @@ public class JWTConfigurationDto {
     private String jwtHeader = "X-JWT-Assertion";
     private String consumerDialectUri = "http://wso2.org/claims";
     private String signatureAlgorithm = "SHA256withRSA";
+
+    private boolean useSHA256Hash = false;
     private String jwtDecoding = "base64";
     private boolean enableUserClaims;
     private String gatewayJWTGeneratorImpl;
@@ -59,6 +61,7 @@ public class JWTConfigurationDto {
         this.jwtHeader = jwtConfigurationDto.jwtHeader;
         this.consumerDialectUri = jwtConfigurationDto.consumerDialectUri;
         this.signatureAlgorithm = jwtConfigurationDto.signatureAlgorithm;
+        this.useSHA256Hash = jwtConfigurationDto.useSHA256Hash;
         this.jwtDecoding = jwtConfigurationDto.jwtDecoding;
         this.enableUserClaims = jwtConfigurationDto.enableUserClaims;
         this.gatewayJWTGeneratorImpl = jwtConfigurationDto.gatewayJWTGeneratorImpl;
@@ -190,4 +193,11 @@ public class JWTConfigurationDto {
         return ttl;
     }
 
+    public boolean useSHA256Hash() {
+        return useSHA256Hash;
+    }
+
+    public void setUseSHA256Hash(boolean useSHA256Hash) {
+        this.useSHA256Hash = useSHA256Hash;
+    }
 }

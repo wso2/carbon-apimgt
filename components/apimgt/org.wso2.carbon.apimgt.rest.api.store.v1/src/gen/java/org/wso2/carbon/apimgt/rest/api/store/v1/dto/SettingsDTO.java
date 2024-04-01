@@ -34,10 +34,14 @@ public class SettingsDTO   {
     private SettingsIdentityProviderDTO identityProvider = null;
     private Boolean isAnonymousModeEnabled = true;
     private Boolean isPasswordChangeEnabled = true;
+    private Boolean isJWTEnabledForLoginTokens = false;
     private String userStorePasswordPattern = null;
     private String passwordPolicyPattern = null;
     private Integer passwordPolicyMinLength = null;
     private Integer passwordPolicyMaxLength = null;
+    private Boolean apiChatEnabled = true;
+    private Boolean aiAuthTokenProvided = false;
+    private Boolean marketplaceAssistantEnabled = true;
 
   /**
    **/
@@ -228,6 +232,23 @@ public class SettingsDTO   {
   }
 
   /**
+   **/
+  public SettingsDTO isJWTEnabledForLoginTokens(Boolean isJWTEnabledForLoginTokens) {
+    this.isJWTEnabledForLoginTokens = isJWTEnabledForLoginTokens;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("IsJWTEnabledForLoginTokens")
+  public Boolean isIsJWTEnabledForLoginTokens() {
+    return isJWTEnabledForLoginTokens;
+  }
+  public void setIsJWTEnabledForLoginTokens(Boolean isJWTEnabledForLoginTokens) {
+    this.isJWTEnabledForLoginTokens = isJWTEnabledForLoginTokens;
+  }
+
+  /**
    * The &#39;PasswordJavaRegEx&#39; cofigured in the UserStoreManager
    **/
   public SettingsDTO userStorePasswordPattern(String userStorePasswordPattern) {
@@ -299,6 +320,60 @@ public class SettingsDTO   {
     this.passwordPolicyMaxLength = passwordPolicyMaxLength;
   }
 
+  /**
+   * Specifies whether API Chat feature is enabled.
+   **/
+  public SettingsDTO apiChatEnabled(Boolean apiChatEnabled) {
+    this.apiChatEnabled = apiChatEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Specifies whether API Chat feature is enabled.")
+  @JsonProperty("apiChatEnabled")
+  public Boolean isApiChatEnabled() {
+    return apiChatEnabled;
+  }
+  public void setApiChatEnabled(Boolean apiChatEnabled) {
+    this.apiChatEnabled = apiChatEnabled;
+  }
+
+  /**
+   * Checks if the auth token is provided for AI service usage.
+   **/
+  public SettingsDTO aiAuthTokenProvided(Boolean aiAuthTokenProvided) {
+    this.aiAuthTokenProvided = aiAuthTokenProvided;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Checks if the auth token is provided for AI service usage.")
+  @JsonProperty("aiAuthTokenProvided")
+  public Boolean isAiAuthTokenProvided() {
+    return aiAuthTokenProvided;
+  }
+  public void setAiAuthTokenProvided(Boolean aiAuthTokenProvided) {
+    this.aiAuthTokenProvided = aiAuthTokenProvided;
+  }
+
+  /**
+   * Specifies whether Marketplace Assistant feature is enabled.
+   **/
+  public SettingsDTO marketplaceAssistantEnabled(Boolean marketplaceAssistantEnabled) {
+    this.marketplaceAssistantEnabled = marketplaceAssistantEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Specifies whether Marketplace Assistant feature is enabled.")
+  @JsonProperty("marketplaceAssistantEnabled")
+  public Boolean isMarketplaceAssistantEnabled() {
+    return marketplaceAssistantEnabled;
+  }
+  public void setMarketplaceAssistantEnabled(Boolean marketplaceAssistantEnabled) {
+    this.marketplaceAssistantEnabled = marketplaceAssistantEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -320,15 +395,19 @@ public class SettingsDTO   {
         Objects.equals(identityProvider, settings.identityProvider) &&
         Objects.equals(isAnonymousModeEnabled, settings.isAnonymousModeEnabled) &&
         Objects.equals(isPasswordChangeEnabled, settings.isPasswordChangeEnabled) &&
+        Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(userStorePasswordPattern, settings.userStorePasswordPattern) &&
         Objects.equals(passwordPolicyPattern, settings.passwordPolicyPattern) &&
         Objects.equals(passwordPolicyMinLength, settings.passwordPolicyMinLength) &&
-        Objects.equals(passwordPolicyMaxLength, settings.passwordPolicyMaxLength);
+        Objects.equals(passwordPolicyMaxLength, settings.passwordPolicyMaxLength) &&
+        Objects.equals(apiChatEnabled, settings.apiChatEnabled) &&
+        Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
+        Objects.equals(marketplaceAssistantEnabled, settings.marketplaceAssistantEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled);
   }
 
   @Override
@@ -347,10 +426,14 @@ public class SettingsDTO   {
     sb.append("    identityProvider: ").append(toIndentedString(identityProvider)).append("\n");
     sb.append("    isAnonymousModeEnabled: ").append(toIndentedString(isAnonymousModeEnabled)).append("\n");
     sb.append("    isPasswordChangeEnabled: ").append(toIndentedString(isPasswordChangeEnabled)).append("\n");
+    sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    userStorePasswordPattern: ").append(toIndentedString(userStorePasswordPattern)).append("\n");
     sb.append("    passwordPolicyPattern: ").append(toIndentedString(passwordPolicyPattern)).append("\n");
     sb.append("    passwordPolicyMinLength: ").append(toIndentedString(passwordPolicyMinLength)).append("\n");
     sb.append("    passwordPolicyMaxLength: ").append(toIndentedString(passwordPolicyMaxLength)).append("\n");
+    sb.append("    apiChatEnabled: ").append(toIndentedString(apiChatEnabled)).append("\n");
+    sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
+    sb.append("    marketplaceAssistantEnabled: ").append(toIndentedString(marketplaceAssistantEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

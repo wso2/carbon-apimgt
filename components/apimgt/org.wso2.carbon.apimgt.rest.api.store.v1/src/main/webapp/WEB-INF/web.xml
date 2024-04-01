@@ -48,7 +48,8 @@
                 org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApi,
                 org.wso2.carbon.apimgt.rest.api.store.v1.KeyManagersApi,
                 org.wso2.carbon.apimgt.rest.api.store.v1.MeApi,
-                org.wso2.carbon.apimgt.rest.api.store.v1.WebhooksApi
+                org.wso2.carbon.apimgt.rest.api.store.v1.WebhooksApi,
+                org.wso2.carbon.apimgt.rest.api.store.v1.MarketplaceAssistantApi
             </param-value>
         </init-param>
         <init-param>
@@ -60,14 +61,14 @@
             <param-value>
                 com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider,
                 org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper,
-                org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter(allowHeaders=Authorization allowHeaders=X-WSO2-Tenant allowHeaders=content-type exposeHeaders=Content-Disposition allowCredentials=true allowOrigins=*)
+                org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter(allowHeaders=Authorization allowHeaders=X-WSO2-Tenant allowHeaders=content-type exposeHeaders=Content-Disposition allowCredentials=true allowOrigins={systemProperties['rest.api.devportal.allowed.origins']})
             </param-value>
         </init-param>
 
         <init-param>
             <param-name>jaxrs.inInterceptors</param-name>
             <param-value>
-                org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v3 latestVersion=v3.0),
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v3 latestVersion=v3.1),
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor,

@@ -31,7 +31,10 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.conf.OAuthEndpoint;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 
 /**
  * OAuthResponseMediator to handle error responses from OAuth 2.0 protected backends
@@ -59,7 +62,15 @@ public class OAuthResponseMediator extends AbstractMediator implements ManagedLi
                 Object oauthEndpointObject = messageContext.getProperty(APIMgtGatewayConstants.OAUTH_ENDPOINT_INSTANCE);
                 if (oauthEndpointObject instanceof OAuthEndpoint) {
                     try {
-                        OAuthTokenGenerator.generateToken((OAuthEndpoint) oauthEndpointObject, null);
+                        OAuthEndpoint oAuthEndpoint = (OAuthEndpoint) oauthEndpointObject;
+                        if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
+                             new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
+                                     .deleteKey(oAuthEndpoint.getId());
+                        } else {
+                            TokenCache.getInstance().getTokenMap().put(oAuthEndpoint.getId(), null);
+                        }
+
+                        OAuthTokenGenerator.generateToken(oAuthEndpoint, null);
                         log.error("OAuth 2.0 access token has been rejected by the backend...");
                         handleFailure(APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR, messageContext,
                                 APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE, "Please try again");
@@ -70,6 +81,11 @@ public class OAuthResponseMediator extends AbstractMediator implements ManagedLi
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean isContentAware() {
+        return false;
     }
 
     /**

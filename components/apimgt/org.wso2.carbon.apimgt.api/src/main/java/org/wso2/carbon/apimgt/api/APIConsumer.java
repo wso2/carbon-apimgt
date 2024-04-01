@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -509,6 +510,15 @@ public interface APIConsumer extends APIManager {
     JSONArray getAPIRatings(String apiId) throws APIManagementException;
 
     /**
+     * Returns no of api subscriptions for given api.
+     *
+     * @param apiId
+     * @param organization
+     * @return no of subscriptions
+     * @throws APIManagementException if failed to get the subscriptions
+     */
+    public long getSubscriptionCountOfAPI(String apiId,String organization) throws APIManagementException;
+    /**
      * Returns a list of Tiers denied for the current user
      *
      * @return Set<String>
@@ -800,6 +810,28 @@ public interface APIConsumer extends APIManager {
     Tier getThrottlePolicyByName(String name, int policyType, String organization) throws APIManagementException;
 
     /**
+     * Returns the API Chat execute call response as a string
+     *
+     * @param apiChatRequestId Request UUID
+     * @param requestPayload   Request payload to be used for the AI service execute call
+     * @return execution response as a string
+     * @throws APIManagementException if execute call failed
+     */
+    String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException;
+
+    /**
+     * Returns the API Chat prepare call response as a string
+     *
+     * @param apiId            ID of the API
+     * @param apiChatRequestId Request UUID
+     * @param organization     Identifier of an organization
+     * @return prepare response as a string
+     * @throws APIManagementException if prepare call failed
+     */
+    String invokeApiChatPrepare(String apiId, String apiChatRequestId, String organization)
+            throws APIManagementException;
+
+    /**
      * This method used to retrieve key manager configurations for tenant
      * @param organization organization of the key manager
      * @param username username of the logged in user
@@ -829,4 +861,12 @@ public interface APIConsumer extends APIManager {
     boolean isKeyManagerByNameAllowedForUser(String keyManagerName, String organization, String username)
             throws APIManagementException;
 
+    /**
+     * Remove application keys.
+     * @param application   application
+     * @param keyMappingId  key mapping id
+     * @param xWSO2Tenant   tenant domain
+     * @throws APIManagementException
+     */
+    boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant) throws APIManagementException;
 }
