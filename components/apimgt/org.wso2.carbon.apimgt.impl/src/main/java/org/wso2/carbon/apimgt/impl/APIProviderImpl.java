@@ -4593,7 +4593,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (APIConstants.BLOCKED.equals(status) ||
             APIConstants.PROTOTYPED.equals(status) ||
-            APIConstants.DEPRECATED.equals(status) ||
             APIConstants.RETIRED.equals(status)) {
             throw new APIManagementException("Cannot create API Product using API with following status: " + status,
                     ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
