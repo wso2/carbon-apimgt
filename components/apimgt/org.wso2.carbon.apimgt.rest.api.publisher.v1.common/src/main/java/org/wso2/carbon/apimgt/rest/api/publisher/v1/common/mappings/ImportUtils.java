@@ -189,7 +189,7 @@ public class ImportUtils {
         String previousApiProvider = apiProvider.getAPIProviderByNameAndOrganization(importedApiDTO.getName(),
                 RestApiCommonUtil.getLoggedInUserTenantDomain());
 
-        if (!StringUtils.isEmpty(previousApiProvider)) {
+        if (!StringUtils.isEmpty(previousApiProvider) && !overwrite) {
             //current provider is updated based on the preserve-provider input.
             //tenant domain is verified already
             // [only allows preserve-provider = false in cross tenant. (provider is set to logged-in user)]
