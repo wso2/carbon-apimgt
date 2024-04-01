@@ -128,53 +128,8 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                     getThreadLocalCarbonContext().getUsername());
             API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
 
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-
-                    try {
-                        String api_type = api.getType();
-                        JSONObject payload = new JSONObject();
-
-                        payload.put(APIConstants.API_SPEC_TYPE, api_type);
-
-                        switch (api_type) {
-                            case APIConstants.API_TYPE_GRAPHQL:
-                                payload.put(APIConstants.API_SPEC_TYPE_GRAPHQL, api.getGraphQLSchema());
-                                break;
-                            case APIConstants.API_TYPE_ASYNC:
-                            case APIConstants.API_TYPE_WS:
-                            case APIConstants.API_TYPE_WEBSUB:
-                            case APIConstants.API_TYPE_SSE:
-                            case APIConstants.API_TYPE_WEBHOOK:
-                                payload.put(APIConstants.API_SPEC_TYPE_ASYNC, api.getAsyncApiDefinition());
-                                break;
-                            case APIConstants.API_TYPE_HTTP:
-                            case APIConstants.API_TYPE_PRODUCT:
-                            case APIConstants.API_TYPE_SOAP:
-                            case APIConstants.API_TYPE_SOAPTOREST:
-                                payload.put(APIConstants.API_SPEC_TYPE_REST, api.getSwaggerDefinition());
-                                break;
-                            default:
-                                break;
-                        }
-
-                        payload.put(APIConstants.UUID, api.getUuid());
-                        payload.put(APIConstants.DESCRIPTION, api.getDescription());
-                        payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
-                        payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
-                        payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
-
-                        APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                                marketplaceAssistantConfigurationDto.getAccessToken(),
-                                marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
-                    } catch (APIManagementException e) {
-                        String errorMessage = "Error encountered while Uploading the API with UUID: " +
-                                apiId + " to the vector database" + e.getMessage();
-                        log.error(errorMessage, e);
-                    }
-                }
-            });
+            MarketplaceAssistantPostTask task = new MarketplaceAssistantPostTask(api, apiEvent, apiId);
+            Thread thread = new Thread(task, "MarketplaceAssistantPostThread");
             thread.start();
 
         } catch (APIManagementException e) {
@@ -185,23 +140,85 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
     }
 
     private void deleteRequest(APIEvent apiEvent) throws NotifierException {
-
         String uuid = apiEvent.getUuid();
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                            marketplaceAssistantConfigurationDto.getAccessToken(),
-                            marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
-                } catch (APIManagementException e) {
-                    String errorMessage = "Error encountered while Deleting the API with UUID: " +
-                            uuid + " from the vector database" + e.getMessage();
-                    log.error(errorMessage, e);
-                }
-            }
-        });
-
+        MarketplaceAssistantDeletionTask task = new MarketplaceAssistantDeletionTask(uuid);
+        Thread thread = new Thread(task, "MarketplaceAssistantDeletionThread");
         thread.start();
+    }
+
+    class MarketplaceAssistantPostTask implements Runnable {
+        private API api;
+        private APIEvent apiEvent;
+        private String apiId;
+        public MarketplaceAssistantPostTask(API api, APIEvent apiEvent, String apiId) {
+            this.api = api;
+            this.apiEvent = apiEvent;
+            this.apiId = apiId;
+        }
+
+        @Override
+        public void run() {
+            try {
+                String api_type = api.getType();
+                JSONObject payload = new JSONObject();
+
+                payload.put(APIConstants.API_SPEC_TYPE, api_type);
+
+                switch (api_type) {
+                    case APIConstants.API_TYPE_GRAPHQL:
+                        payload.put(APIConstants.API_SPEC_TYPE_GRAPHQL, api.getGraphQLSchema());
+                        break;
+                    case APIConstants.API_TYPE_ASYNC:
+                    case APIConstants.API_TYPE_WS:
+                    case APIConstants.API_TYPE_WEBSUB:
+                    case APIConstants.API_TYPE_SSE:
+                    case APIConstants.API_TYPE_WEBHOOK:
+                        payload.put(APIConstants.API_SPEC_TYPE_ASYNC, api.getAsyncApiDefinition());
+                        break;
+                    case APIConstants.API_TYPE_HTTP:
+                    case APIConstants.API_TYPE_PRODUCT:
+                    case APIConstants.API_TYPE_SOAP:
+                    case APIConstants.API_TYPE_SOAPTOREST:
+                        payload.put(APIConstants.API_SPEC_TYPE_REST, api.getSwaggerDefinition());
+                        break;
+                    default:
+                        break;
+                }
+
+                payload.put(APIConstants.UUID, api.getUuid());
+                payload.put(APIConstants.DESCRIPTION, api.getDescription());
+                payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
+                payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
+                payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
+
+                APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                        marketplaceAssistantConfigurationDto.getAccessToken(),
+                        marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+            } catch (APIManagementException e) {
+                String errorMessage = "Error encountered while Uploading the API with UUID: " +
+                        apiId + " to the vector database" + e.getMessage();
+                log.error(errorMessage, e);
+            }
+        }
+    }
+
+    class MarketplaceAssistantDeletionTask implements Runnable {
+        private String uuid;
+        public MarketplaceAssistantDeletionTask(String uuid) {
+            this.uuid = uuid;
+        }
+
+        @Override
+        public void run() {
+            try {
+                APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                        marketplaceAssistantConfigurationDto.getAccessToken(),
+                        marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
+            } catch (APIManagementException e) {
+                String errorMessage = "Error encountered while Deleting the API with UUID: " +
+                        uuid + " from the vector database" + e.getMessage();
+                log.error(errorMessage, e);
+            }
+        }
     }
 }
