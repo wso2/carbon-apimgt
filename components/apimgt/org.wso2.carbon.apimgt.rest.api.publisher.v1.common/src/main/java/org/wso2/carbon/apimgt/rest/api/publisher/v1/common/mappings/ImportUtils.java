@@ -173,6 +173,7 @@ public class ImportUtils {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse validationResponse = null;
+        GraphQLValidationResponseDTO graphQLValidationResponseDTO = null;
         String graphQLSchema = null;
         API importedApi = null;
         String currentStatus;
@@ -236,7 +237,8 @@ public class ImportUtils {
             }
             // Validate the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                graphQLSchema = retrieveValidatedGraphqlSchemaFromArchive(extractedFolderPath);
+                graphQLValidationResponseDTO = retrieveValidatedGraphqlSchemaFromArchive(extractedFolderPath);
+                graphQLSchema = graphQLValidationResponseDTO.getGraphQLInfo().getGraphQLSchema().getSchemaDefinition();
             }
             // Validate the WSDL of SOAP APIs
             if (APIConstants.API_TYPE_SOAP.equalsIgnoreCase(apiType)) {
@@ -285,7 +287,11 @@ public class ImportUtils {
                 // updating a "No resources found" error will be thrown. This is not a problem in the UI, since
                 // when updating an API from the UI there is at least one resource (operation) inside the DTO.
                 if (importedApiDTO.getOperations().isEmpty()) {
-                    setOperationsToDTO(importedApiDTO, validationResponse);
+                    if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
+                        setOperationsToDTO(importedApiDTO, graphQLValidationResponseDTO);
+                    } else {
+                        setOperationsToDTO(importedApiDTO, validationResponse);
+                    }
                 }
                 targetApi.setOrganization(organization);
                 if (preservePortalConfigurations) {
@@ -922,6 +928,20 @@ public class ImportUtils {
      * @param response API Validation Response
      * @throws APIManagementException If an error occurs when retrieving the URI templates
      */
+    private static void setOperationsToDTO(APIDTO apiDto, GraphQLValidationResponseDTO response)
+            throws APIManagementException {
+
+        List<APIOperationsDTO> apiOperationsDtos = response.getGraphQLInfo().getOperations();
+        apiDto.setOperations(apiOperationsDtos);
+    }
+
+    /**
+     * This method sets the operations which were retrieved from the swagger definition to the API DTO.
+     *
+     * @param apiDto   API DTO
+     * @param response API Validation Response
+     * @throws APIManagementException If an error occurs when retrieving the URI templates
+     */
     private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response)
             throws APIManagementException {
 
@@ -1507,7 +1527,7 @@ public class ImportUtils {
      * @param pathToArchive Path to API archive
      * @throws APIImportExportException If an error occurs while reading the file
      */
-    public static String retrieveValidatedGraphqlSchemaFromArchive(String pathToArchive)
+    public static GraphQLValidationResponseDTO retrieveValidatedGraphqlSchemaFromArchive(String pathToArchive)
             throws APIManagementException {
 
         File file = new File(pathToArchive + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION);
@@ -1520,7 +1540,7 @@ public class ImportUtils {
                         "Error occurred while importing the API. Invalid GraphQL schema definition found. "
                                 + graphQLValidationResponseDTO.getErrorMessage());
             }
-            return schemaDefinition;
+            return graphQLValidationResponseDTO;
         } catch (IOException e) {
             throw new APIManagementException("Error while reading API meta information from path: " + pathToArchive, e,
                     ExceptionCodes.ERROR_READING_META_DATA);
