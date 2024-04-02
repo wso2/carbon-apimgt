@@ -104,6 +104,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is a publisher rest api utility class.
@@ -1709,6 +1711,13 @@ public class PublisherCommonUtils {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDto);
         String documentName = documentDto.getName();
+        Pattern pattern = Pattern.compile(APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
+        Matcher matcher = pattern.matcher(documentName);
+        if (matcher.find()) {
+            throw new APIManagementException("Document name cannot contain illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )",
+                    ExceptionCodes.DOCUMENT_NAME_ILLEGAL_CHARACTERS);
+        }
         if (documentDto.getType() == null) {
             throw new APIManagementException("Documentation type cannot be empty",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
