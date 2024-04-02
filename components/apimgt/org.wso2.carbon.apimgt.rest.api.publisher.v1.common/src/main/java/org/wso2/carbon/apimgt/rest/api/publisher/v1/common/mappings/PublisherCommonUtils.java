@@ -65,7 +65,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
@@ -1952,7 +1951,6 @@ public class PublisherCommonUtils {
 
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         List<APIProductResource> resources = productToBeAdded.getProductResources();
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
         for (APIProductResource apiProductResource : resources) {
             API api;
@@ -1963,7 +1961,7 @@ public class PublisherCommonUtils {
                         .replaceEmailDomain(productAPIIdentifier.getProviderName());
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
-                apiUUID = apiMgtDAO
+                apiUUID = apiProvider
                         .getUUIDFromIdentifier(emailReplacedAPIIdentifier, productToBeAdded.getOrganization());
                 api = apiProvider.getAPIbyUUID(apiUUID, productToBeAdded.getOrganization());
             } else {

@@ -1681,6 +1681,17 @@ public interface APIProvider extends APIManager {
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
     /**
+     * Get API UUID by the API Identifier.
+     *
+     * @param identifier API Identifier
+     * @param organization identifier of the organization
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException;
+
+
+    /**
      * Returns API Search result based on fqdn of the provided endpoint.
      * Returns empty API Search result if endpoint is invalid.
      *

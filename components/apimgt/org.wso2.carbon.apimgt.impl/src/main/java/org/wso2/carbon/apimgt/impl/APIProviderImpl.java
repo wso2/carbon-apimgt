@@ -5171,6 +5171,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException {
+
+        return apiMgtDAO.getUUIDFromIdentifier(identifier, organization);
+    }
+
     /**
      * This method will populate API level policies to the given API object
      *
