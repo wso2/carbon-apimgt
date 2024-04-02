@@ -23,10 +23,15 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
@@ -41,6 +46,7 @@ import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -127,10 +133,9 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
     @Override
     public boolean generateConsumerToken(TokenValidationContext validationContext) throws APIKeyMgtException {
 
-      TokenGenerator generator = APIKeyMgtDataHolder.getTokenGenerator();
 
         try {
-            String jwt = generator.generateToken(validationContext);
+            String jwt = getCachedJWTToken(validationContext);
             validationContext.getValidationInfoDTO().setEndUserToken(jwt);
             return true;
 
@@ -139,6 +144,42 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         }
 
         return false;
+    }
+
+    private String getCachedJWTToken(TokenValidationContext validationContext) throws APIManagementException {
+        ExtendedJWTConfigurationDto jwtConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                        .getJwtConfigurationDto();
+
+        String jwtTokenCacheKey =
+                "OPAQUE:" + validationContext.getContext() + ":" + validationContext.getVersion() + ":"
+                        + validationContext.getAccessToken();
+        Object cachedJWT = CacheProvider.getGatewayJWTTokenCache().get(jwtTokenCacheKey);
+        if (cachedJWT instanceof String) {
+            long timestampSkew = getTimeStampSkewInSeconds() * 1000;
+            if (JWTUtil.isJWTValid((String) cachedJWT, jwtConfigurationDto.getJwtDecoding(), timestampSkew)) {
+                return (String) cachedJWT;
+            } else {
+                CacheProvider.getGatewayJWTTokenCache().remove(jwtTokenCacheKey);
+            }
+        }
+        synchronized (this.getClass().getName().concat(jwtTokenCacheKey).intern()) {
+            cachedJWT = CacheProvider.getGatewayJWTTokenCache().get(jwtTokenCacheKey);
+            if (cachedJWT instanceof String) {
+                long timestampSkew = getTimeStampSkewInSeconds() * 1000;
+                if (JWTUtil.isJWTValid((String) cachedJWT, jwtConfigurationDto.getJwtDecoding(), timestampSkew)) {
+                    return (String) cachedJWT;
+                } else {
+                    CacheProvider.getGatewayJWTTokenCache().remove(jwtTokenCacheKey);
+                }
+            }
+            TokenGenerator generator = APIKeyMgtDataHolder.getTokenGenerator();
+            String jwt = generator.generateToken(validationContext);
+            if (jwt != null) {
+                CacheProvider.getGatewayJWTTokenCache().put(jwtTokenCacheKey, jwt);
+            }
+            return jwt;
+        }
     }
 
     @Override
@@ -173,7 +214,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         }
         return apiKeyValidationInfoDTO;
     }
-    
+
     private boolean validateSubscriptionDetails(String context, String version, String consumerKey, String keyManager,
             APIKeyValidationInfoDTO infoDTO) {
 
@@ -200,7 +241,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         validateSubscriptionDetails(infoDTO, context, version, appId);
         return infoDTO.isAuthorized();
     }
-    
+
     private APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO, String context,
             String version, String consumerKey, String keyManager) {
         String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
@@ -212,7 +253,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         ApplicationKeyMapping key = null;
         Application app = null;
         Subscription sub = null;
-        
+
         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(apiTenantDomain);
         //TODO add a check to see whether datastore is initialized an load data using rest api if it is not loaded
@@ -253,7 +294,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         } else {
             log.error("Subscription datastore is not initialized for tenant domain " + apiTenantDomain);
         }
-        
+
         if (api != null && app != null && sub != null) {
             validate(infoDTO, apiTenantDomain, tenantId, datastore, api, key, app, sub);
         } else if (!infoDTO.isAuthorized() && infoDTO.getValidationStatus() == 0) {
@@ -577,5 +618,9 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         infoDTO.setThrottlingDataList(list);
         infoDTO.setAuthorized(true);
         return infoDTO;
+    }
+    protected long getTimeStampSkewInSeconds() {
+
+        return OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
     }
 }

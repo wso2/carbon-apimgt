@@ -1736,6 +1736,7 @@ public final class APIConstants {
 
     public static final String API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String API_TYPE_ASYNC = "ASYNC";
+    public static final String API_TYPE_PRODUCT = "APIPRODUCT";
 
     public static final String TRANSPORT_URL_IN = "TransportInURL";
 
