@@ -70,6 +70,9 @@ public class APISecurityConstants {
     public static final int API_AUTH_MISSING_OPEN_API_DEF = 900911;
     public static final String API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE = "Internal Server Error";
 
+    public static final int API_OAUTH_INVALID_AUDIENCES = 900912;
+    public static final String API_OAUTH_INVALID_AUDIENCES_MESSAGE = "The access token does not allow you to access the requested resource";
+
     public static final int OAUTH_TEMPORARY_SERVER_ERROR = 900424;
     public static final String OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE = "Temporary Server Error";
 
@@ -111,6 +114,9 @@ public class APISecurityConstants {
                 break;
             case API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE:
                 errorMessage = API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE_MESSAGE;
+                break;
+            case API_OAUTH_INVALID_AUDIENCES:
+                errorMessage = API_OAUTH_INVALID_AUDIENCES_MESSAGE;
                 break;
             case API_BLOCKED:
                 errorMessage = API_BLOCKED_MESSAGE;

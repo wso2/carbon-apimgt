@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.apimgt.persistence;
 
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -1003,6 +1004,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                 apiInfo.setAudience(artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCE));
+                String audiences = artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCES);
+                if (StringUtils.isNotEmpty(audiences)) {
+                    apiInfo.setAudiences(new Gson().fromJson(audiences, Set.class));
+                }
                 apiInfo.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
                 apiInfo.setUpdatedTime(apiResource.getLastModified());
                 apiInfo.setUpdatedBy(apiResource.getLastUpdaterUserName());
@@ -3379,6 +3384,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 info.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                 info.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
                 info.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+                String audiences = artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCES);
+                if (StringUtils.isNotEmpty(audiences)) {
+                    info.setAudiences(new Gson().fromJson(audiences, Set.class));
+                }
                 info.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                 info.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
                 info.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
