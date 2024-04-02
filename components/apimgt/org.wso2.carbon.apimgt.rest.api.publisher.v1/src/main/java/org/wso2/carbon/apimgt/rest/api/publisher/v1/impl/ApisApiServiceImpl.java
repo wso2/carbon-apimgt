@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
+import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
@@ -3416,22 +3417,29 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override public Response importAPI(InputStream fileInputStream, Attachment fileDetail,
                                         Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite,
-                                        Boolean preservePortalConfigurations, MessageContext messageContext) throws APIManagementException {
+                                        Boolean preservePortalConfigurations,String accept,
+                                        MessageContext messageContext) throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
-        overwrite = overwrite == null ? false : overwrite;
+        overwrite = overwrite != null && overwrite;
 
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
         if (preservePortalConfigurations == null) {
             preservePortalConfigurations = false;
         }
+        accept = accept != null ? accept : RestApiConstants.TEXT_PLAIN;
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-        importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite,
+        ImportedAPIDTO importedAPIDTO = importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite,
                 preservePortalConfigurations, tokenScopes, organization);
+        if (RestApiConstants.APPLICATION_JSON.equals(accept) && importedAPIDTO != null) {
+            ImportAPIResponseDTO responseDTO = new ImportAPIResponseDTO().id(importedAPIDTO.getApi().getUuid())
+                    .revision(importedAPIDTO.getRevision());
+            return Response.ok().entity(responseDTO).build();
+        }
         return Response.status(Response.Status.OK).entity("API imported successfully.").build();
     }
 

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -194,9 +195,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     }
 
     @Override
-    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-                         Boolean overwrite, Boolean preservePortalConfigurations, String[] tokenScopes,
-                         String organization) throws APIManagementException {
+    public ImportedAPIDTO importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+                                    Boolean overwrite, Boolean preservePortalConfigurations, String[] tokenScopes,
+                                    String organization) throws APIManagementException {
 
         String extractedFolderPath;
         try {

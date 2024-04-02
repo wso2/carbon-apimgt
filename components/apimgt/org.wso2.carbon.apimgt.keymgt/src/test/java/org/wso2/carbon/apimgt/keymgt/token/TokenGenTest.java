@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.KeyStoreManager;
-import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.FileInputStream;
@@ -49,8 +48,6 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.cert.Certificate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
@@ -90,10 +87,6 @@ public class TokenGenTest {
     @Ignore
     public void testAbstractJWTGenerator() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator() {
-            @Override
-            protected Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes, String username) {
-                return new HashMap<>();
-            }
         };
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
 
@@ -153,10 +146,6 @@ public class TokenGenTest {
     @Ignore
     public void testJWTGeneration() throws Exception {
         JWTGenerator jwtGen = new JWTGenerator() {
-            @Override
-            public Map<String, String> convertClaimMap(Map<ClaimMapping, String> userAttributes, String username) {
-                return new HashMap<>();
-            }
         };
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
         dto.setSubscriber("sastry");

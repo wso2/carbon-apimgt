@@ -298,12 +298,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                             ApiChatResponseDTO.class);
                     return Response.status(Response.Status.CREATED).entity(preparationResponseDTO).build();
                 } catch (APIManagementException e) {
-                    if (e.getErrorHandler().getHttpStatusCode() == 500){
-                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getCause().getMessage()).build();
+                    if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
+                        return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
+                    } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
+                        return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
+                    } else {
+                        String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
+                                "service. Cause: " + e.getCause().getMessage();
+                        RestApiUtil.handleInternalServerError(errorMessage, e, log);
                     }
-                    String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
-                            "service. Cause: " + e.getCause().getMessage();
-                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 } catch (IOException e) {
                     String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
                             "service. Cause: " + e.getCause().getMessage();
@@ -370,12 +373,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                             ApiChatResponseDTO.class);
                     return Response.status(Response.Status.CREATED).entity(responseDTO).build();
                 } catch (APIManagementException e) {
-                    if (e.getErrorHandler().getHttpStatusCode() == 500){
-                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getCause().getMessage()).build();
+                    if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
+                        return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
+                    } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
+                        return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
+                    } else {
+                        String errorMessage = "Error encountered while executing the API Chat service to " +
+                                "accommodate the specified testing requirement. Cause: " + e.getCause().getMessage();
+                        RestApiUtil.handleInternalServerError(errorMessage, e, log);
                     }
-                    String errorMessage = "Error encountered while executing the API Chat service to accommodate the " +
-                            "specified testing requirement. Cause: " + e.getCause().getMessage();
-                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 } catch (IOException e) {
                     String errorMessage = "Error encountered while executing the API Chat service to accommodate the " +
                             "specified testing requirement. Cause: " + e.getCause().getMessage();

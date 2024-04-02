@@ -10407,7 +10407,7 @@ public final class APIUtil {
             HttpPost preparePost = new HttpPost(endpoint + resource);
             preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            if(StringUtils.isNotEmpty(requestId)) {
+            if (StringUtils.isNotEmpty(requestId)) {
                 preparePost.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
             }
             StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
@@ -10424,8 +10424,12 @@ public final class APIUtil {
             if (statusCode == HttpStatus.SC_CREATED) {
                 return responseStr;
             } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                throw new APIManagementException("Unexpected response detected from the AI service. " + responseStr,
-                        ExceptionCodes.AI_SERVICE_INVALID_ACCESS_TOKEN);
+                String errorMsg = "Invalid credentials used when invoking the AI service.";
+                log.error(errorMsg + responseStr);
+                throw new APIManagementException(errorMsg, ExceptionCodes.AI_SERVICE_INVALID_ACCESS_TOKEN);
+            } else if (statusCode == HttpStatus.SC_TOO_MANY_REQUESTS) {
+                throw new APIManagementException("You have exceeded your quota. Please contact administrator.",
+                        ExceptionCodes.AI_SERVICE_QUOTA_EXCEEDED);
             } else if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR){
                 org.json.JSONObject responseJson = new org.json.JSONObject(responseStr);
                 if (responseJson.has("detail")) {
@@ -10441,7 +10445,7 @@ public final class APIUtil {
             }
         } catch (MalformedURLException e) {
             throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
-        } catch (APIManagementException | IOException e) {
+        } catch (IOException e) {
             throw new APIManagementException("Error encountered while connecting to service", e);
         }
     }
@@ -10482,7 +10486,7 @@ public final class APIUtil {
      * @param uuid      UUID of the API to be deleted
      * @throws APIManagementException if an error occurs while deleting the API
      */
-    public static void deleteApi(String endpoint, String authToken, String resource, String uuid)
+    public static void marketplaceAssistantDeleteService(String endpoint, String authToken, String resource, String uuid)
             throws APIManagementException {
 
         try {

@@ -32,6 +32,7 @@ public final class RestApiConstants {
     public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     public static final String CONTENT_DISPOSITION_FILENAME = "filename";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String TEXT_PLAIN = "text/plain";
     public static final String APPLICATION_ZIP = "application/zip";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String APPLICATION_XML = "application/xml";
