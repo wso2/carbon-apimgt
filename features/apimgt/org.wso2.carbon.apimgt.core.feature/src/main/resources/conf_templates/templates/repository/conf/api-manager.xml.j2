@@ -354,6 +354,11 @@
             {% endfor %}
         </Properties>
 
+        <MaskProperties>
+            {% for key,value in apim.analytics.mask.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </MaskProperties>
     </Analytics>
 
     <!--
