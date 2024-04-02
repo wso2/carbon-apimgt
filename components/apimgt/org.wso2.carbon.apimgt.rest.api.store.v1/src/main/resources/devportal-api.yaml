@@ -60,6 +60,9 @@ info:
     "tokenType": null
     }
     ```
+    Note that in a distributed deployment or IS as KM separated environment to invoke RESTful APIs (product APIs), users must generate tokens through API-M Control Plane's token endpoint.
+    The tokens generated using third party key managers, are to manage end-user authentication when accessing APIs.
+    
     Next you must use the above client id and secret to obtain the access token.
     We will be using the password grant type for this, you can use any grant type you desire.
     You also need to add the proper **scope** when getting the access token. All possible scopes for devportal REST API can be viewed in **OAuth2 Security** section
@@ -96,7 +99,7 @@ info:
     * Make sure you have an API Manager instance up and running.
     * Update the `basepath` parameter to match the hostname and port of the APIM instance.
 
-    [![Run in Postman](https://run.pstmn.io/button.svg)](https://god.gw.postman.com/run-collection/17491134-b8760354-b3c3-4019-b60a-e813cba8d7c0)
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/32294946-a8a1522b-31b8-4e27-8a31-6e13054bce4e)
   contact:
     name: WSO2
     url: https://wso2.com/api-manager/
@@ -3649,6 +3652,10 @@ paths:
           description: |
             Internal Server Error.
             An error occurred while invoking the API Chat service.
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Content-Type: application/json" -d @request.json
+          "https://localhost:9443/api/am/devportal/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/api-chat?apiChatAction=EXECUTE"'
 
   ######################################################
   # User resource APIs
@@ -3716,6 +3723,9 @@ paths:
           description: |
             Internal Server Error.
             An error occurred while retrieving the API count.
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k "https://localhost:9443/api/am/devportal/v3/apis/marketplace-assistant/api-count"'
 
   '/marketplace-assistant/chat':
 
@@ -3755,6 +3765,9 @@ paths:
           description: |
             Internal Server Error.
             An error occurred while executing test using Marketplace Chat service.
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -d request.json "https://localhost:9443/api/am/devportal/v3/apis/marketplace-assistant/chat"'
 
 
 components:
