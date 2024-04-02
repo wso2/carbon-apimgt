@@ -80,6 +80,9 @@ public class APISecurityConstants {
     public static final String API_AUTH_ACCESS_TOKEN_CLAIMS_INVALID_DESCRIPTION =
             "The configured resource access validation claim is not present in the token.";
 
+    public static final int API_OAUTH_INVALID_AUDIENCES = 900914;
+    public static final String API_OAUTH_INVALID_AUDIENCES_MESSAGE = "The access token does not allow you to access the requested resource";
+
     public static final int OAUTH_TEMPORARY_SERVER_ERROR = 900424;
     public static final String OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE = "Temporary Server Error";
 
@@ -122,6 +125,9 @@ public class APISecurityConstants {
                 break;
             case API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE:
                 errorMessage = API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE_MESSAGE;
+                break;
+            case API_OAUTH_INVALID_AUDIENCES:
+                errorMessage = API_OAUTH_INVALID_AUDIENCES_MESSAGE;
                 break;
             case API_BLOCKED:
                 errorMessage = API_BLOCKED_MESSAGE;

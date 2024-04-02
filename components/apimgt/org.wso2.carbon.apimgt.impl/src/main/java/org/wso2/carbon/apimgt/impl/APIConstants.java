@@ -852,6 +852,8 @@ public final class APIConstants {
     public static final String JWT_AUDIENCES = "JWTAudiences";
     public static final String JWT_AUDIENCE = "JWTAudience";
     public static final String AUDIENCE = "Audience";
+    public static final String AUDIENCES = "Audiences";
+    public static final String ALL_AUDIENCES = "all";
     public static final String BASEPATH = "Basepath";
     public static final String URN_CHOREO = "urn:choreo:";
     public static final String BASE_PATH = "http.base.path";
