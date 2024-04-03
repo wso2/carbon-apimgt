@@ -43,6 +43,8 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +60,7 @@ import static org.mockito.Mockito.when;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPOINTS;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_SANDBOX_ENDPOINTS;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE;
+import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.addDocumentationToAPI;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RestApiCommonUtil.class, WorkflowExecutorFactory.class, APIUtil.class})
@@ -77,6 +80,12 @@ public class PublisherCommonUtilsTest {
     private static final String API_PRODUCT_CONTEXT_FOR_TENANT = "/t/wso2.com/test-context";
 
     private static final String API_PRODUCT_CONTEXT_TEMPLATE = "/test-context/{version}";
+    private static final String API_ID = "f4dbe403-4e19-44e9-bb14-c83eda633791";
+    private static final String DOC_NAME = "test/documentation";
+    private static final String DOC_TYPE = "HOWTO";
+    private static final String DOC_SUMMARY = "Summary of test documentation";
+    private static final String DOC_SOURCE_TYPE = "INLINE";
+    private static final String DOC_VISIBILITY = "API_LEVEL";
 
     @Test
     public void testGetInvalidTierNames() throws Exception {
@@ -623,6 +632,26 @@ public class PublisherCommonUtilsTest {
             Assert.assertTrue("Received an incorrect error message", e.getMessage().contains(expectedMessage));
         } catch (FaultGatewaysException e) {
             Assert.fail("Received an incorrect exception");
+        }
+    }
+
+    @Test
+    public void testDocumentCreationWithIllegalCharacters() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUserProvider()).thenReturn(apiProvider);
+        DocumentDTO documentDto = new DocumentDTO();
+        documentDto.setName(DOC_NAME);
+        documentDto.setType(DocumentDTO.TypeEnum.valueOf(DOC_TYPE));
+        documentDto.setSummary(DOC_SUMMARY);
+        documentDto.setSourceType(DocumentDTO.SourceTypeEnum.valueOf(DOC_SOURCE_TYPE));
+        documentDto.setVisibility(DocumentDTO.VisibilityEnum.valueOf(DOC_VISIBILITY));
+        try {
+            addDocumentationToAPI(documentDto, API_ID, ORGANIZATION);
+            fail("Expected APIManagementException was not thrown");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Document name cannot contain illegal characters  "));
         }
     }
 
