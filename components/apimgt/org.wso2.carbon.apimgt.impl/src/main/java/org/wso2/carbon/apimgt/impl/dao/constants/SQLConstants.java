@@ -3129,7 +3129,8 @@ public class SQLConstants {
     public static final String RETRIEVE_PER_API_RESOURCE_LOGGING_BY_UUID_SQL =
             "SELECT API.API_UUID, AUM.LOG_LEVEL, API.API_NAME, AUM.HTTP_METHOD ,AUM.URL_PATTERN , API.CONTEXT, " +
                     "API.API_VERSION FROM AM_API API INNER JOIN AM_API_URL_MAPPING AUM ON " +
-                    "AUM.API_ID = API.API_ID WHERE API.API_UUID = ? AND API.ORGANIZATION= ?";
+                    "AUM.API_ID = API.API_ID WHERE API.API_UUID = ? AND API.ORGANIZATION= ? AND AUM.REVISION_UUID " +
+                    "IS NULL";
     public static final String GATEWAY_LABEL_REGEX = "_GATEWAY_LABELS_";
     public static final String API_ID_REGEX = "_API_IDS_";
     public static final String API_UUID_REGEX = "_API_UUIDS_";
