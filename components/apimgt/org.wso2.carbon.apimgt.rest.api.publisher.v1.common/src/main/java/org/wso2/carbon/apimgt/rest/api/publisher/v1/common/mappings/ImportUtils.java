@@ -1248,7 +1248,6 @@ public class ImportUtils {
         configObject = preProcessEndpointConfig(configObject);
 
         // Locate the "provider" within the "id" and set it as the current user
-        String apiName = configObject.get(ImportExportConstants.API_NAME_ELEMENT).getAsString();
 
         // The "version" may not be available for an API Product
         if (configObject.has(ImportExportConstants.VERSION_ELEMENT)) {
@@ -1258,9 +1257,7 @@ public class ImportUtils {
         }
 
         // Remove spaces of API/API Product name/version if present
-        if (apiName != null && apiVersion != null) {
-            configObject.remove(apiName);
-            configObject.addProperty(ImportExportConstants.API_NAME_ELEMENT, apiName.replace(" ", ""));
+        if (apiVersion != null) {
             if (configObject.has(ImportExportConstants.VERSION_ELEMENT)) {
                 configObject.remove(ImportExportConstants.VERSION_ELEMENT);
                 configObject.addProperty(ImportExportConstants.VERSION_ELEMENT, apiVersion.replace(" ", ""));
