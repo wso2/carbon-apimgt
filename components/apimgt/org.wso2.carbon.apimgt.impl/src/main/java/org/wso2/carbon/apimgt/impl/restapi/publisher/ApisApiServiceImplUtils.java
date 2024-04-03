@@ -693,6 +693,9 @@ public class ApisApiServiceImplUtils {
             if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
                 uriTemplate.setThrottlingTier(defaultAPILevelPolicy);
             }
+            if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+            }
         }
 
         Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);

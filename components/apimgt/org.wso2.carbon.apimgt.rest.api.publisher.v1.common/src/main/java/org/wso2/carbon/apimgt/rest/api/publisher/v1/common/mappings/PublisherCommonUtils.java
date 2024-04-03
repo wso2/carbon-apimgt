@@ -1203,7 +1203,7 @@ public class PublisherCommonUtils {
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         } else if (body.getContext().endsWith("/")) {
             throw new APIManagementException("Context cannot end with '/' character",
-                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT , body.getName(), body.getVersion()));
+                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT, body.getName(), body.getVersion()));
         }
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName(), organization)) {
             throw new APIManagementException(
@@ -1248,8 +1248,8 @@ public class PublisherCommonUtils {
                     } else {
                         throw new APIManagementException(
                                 "Error occurred while adding API. API with name " + body.getName()
-                                        + " already exists with different context" + context  + " in the organization" +
-                                        " : " + organization,  ExceptionCodes.API_ALREADY_EXISTS);
+                                        + " already exists with different context" + context + " in the organization" +
+                                        " : " + organization, ExceptionCodes.API_ALREADY_EXISTS);
                     }
                 }
             }
@@ -1959,6 +1959,28 @@ public class PublisherCommonUtils {
         }
 
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
+        List<APIProductResource> resources = productToBeAdded.getProductResources();
+
+        for (APIProductResource apiProductResource : resources) {
+            API api;
+            String apiUUID;
+            if (apiProductResource.getProductIdentifier() != null) {
+                APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
+                String emailReplacedAPIProviderName = APIUtil
+                        .replaceEmailDomain(productAPIIdentifier.getProviderName());
+                APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
+                        productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
+                apiUUID = apiProvider
+                        .getUUIDFromIdentifier(emailReplacedAPIIdentifier, productToBeAdded.getOrganization());
+                api = apiProvider.getAPIbyUUID(apiUUID, productToBeAdded.getOrganization());
+            } else {
+                apiUUID = apiProductResource.getApiId();
+                api = apiProvider.getAPIbyUUID(apiUUID, productToBeAdded.getOrganization());
+                // if API does not exist, getLightweightAPIByUUID() method throws exception.
+            }
+            validateApiLifeCycleForApiProducts(api);
+        }
+
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
@@ -1967,6 +1989,18 @@ public class PublisherCommonUtils {
 
         createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
+    }
+
+    private static void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {
+        String status = api.getStatus();
+
+        if (APIConstants.BLOCKED.equals(status) ||
+                APIConstants.PROTOTYPED.equals(status) ||
+                APIConstants.DEPRECATED.equals(status) ||
+                APIConstants.RETIRED.equals(status)) {
+            throw new APIManagementException("Cannot create API Product using API with following status: " + status,
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
+        }
     }
 
     private static void checkDuplicateContext(APIProvider apiProvider, APIProductDTO apiProductDTO, String username,
