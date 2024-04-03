@@ -5809,6 +5809,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (APIRevisionDeployment pendingRevision : apiRevisionDeployments) {
             // Set the displayOnDevportal to false for the pending revisions
             pendingRevision.setDisplayOnDevportal(false);
+            if (StringUtils.isEmpty(pendingRevision.getRevisionUUID())) {
+                pendingRevision.setRevisionUUID(apiRevisionUUID);
+            }
             for (APIRevisionDeployment currentRevision : currentPendingDeployments) {
                 if (pendingRevision.getDeployment().equals(currentRevision.getDeployment())) {
                     matchingRevisions.add(currentRevision);
