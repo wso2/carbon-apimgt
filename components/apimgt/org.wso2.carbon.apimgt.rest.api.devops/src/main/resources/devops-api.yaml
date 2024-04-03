@@ -54,6 +54,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/1/apis?log-level=FULL"'
 
 
   "/tenant-logs/{tenantId}/apis/{apiId}":
@@ -84,6 +88,10 @@ paths:
       parameters:
         - $ref: '#/components/parameters/tenantId'
         - $ref: '#/components/parameters/apiId'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/1/apis/12d6e73c-778d-45ac-b57d-117c6c5092a4"'
     put:
       summary: |
         Set logging levels of the API with its api ID
@@ -122,6 +130,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/1/apis/12d6e73c-778d-45ac-b57d-117c6c5092a4"'
 
   "/config/correlation/":
     get:
@@ -149,6 +161,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/devops/v0/config/correlation"'
 
     put:
       summary: |
@@ -186,6 +202,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d data.json
+          "https://127.0.0.1:9443/api/am/devops/v0/config/correlation"'
 
 servers:
   - url: https://apis.wso2.com/api/am/devops/v0
