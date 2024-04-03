@@ -4345,28 +4345,19 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return tier;
     }
 
-//    public String getUserId(String userName) {
-//
-//        try {
-//            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-//            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-//                    .getTenantId(MultitenantUtils.getTenantDomain(username));
-//            org.wso2.carbon.user.api.UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-//            int user = userStoreManager.getUserId(MultitenantUtils.getTenantAwareUsername(username));
-//        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-//            // Log and return since we do not want to stop issuing the token in
-//            // case of scope validation failures.
-//            log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
-//        }
-//        String userID = null;
-//        return userID;
-//    }
+    /**
+     * Send Application Policy Reset Event to Eventhub
+     *
+     * @param appId Application Identifier used by traffic manager
+     * @param userId Username for which the policy should be reset
+     * @param appTier Application Policy name
+     * @param organization Tenant which application owner belongs to
+     */
     @Override
-    public Boolean resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization) throws APIManagementException {
+    public void resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization) {
         ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(UUID.randomUUID().toString(),System.currentTimeMillis(),APIConstants.EventType.POLICY_RESET.name(), tenantId,
                 organization,UUID.randomUUID().toString(), appId, userId, appTier);
         APIUtil.sendNotification(applicationPolicyResetEvent, APIConstants.NotifierType.POLICY.name());
-        return true;
     }
 
     /**

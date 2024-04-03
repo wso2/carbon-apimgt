@@ -472,9 +472,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         return null;
     }
 
+    /**
+     * Reset Application Level Throttle Policy
+     *
+     * @param applicationId application Identifier
+     * @param applicationThrottleResetDTO request DTO containing the username
+     * @return 200 if successful
+     */
     @Override
-    public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId, ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) {
-        boolean reset = false;
+    public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId,
+                                                                     ApplicationThrottleResetDTO applicationThrottleResetDTO,
+                                                                     MessageContext messageContext) {
         try {
             String userId = applicationThrottleResetDTO.getUserName();
             String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
@@ -497,8 +505,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
             String appId = String.valueOf(application.getId());
             String appTier = application.getTier();
-            reset = apiConsumer.resetApplicationThrottlePolicy(appId, userId, appTier, organization);
-            return Response.ok().entity("Application Level Reset done "+reset + "\n").build();
+            apiConsumer.resetApplicationThrottlePolicy(appId, userId, appTier, organization);
+            return Response.ok().entity("Application Level Policy Reset successful "+"\n").build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
