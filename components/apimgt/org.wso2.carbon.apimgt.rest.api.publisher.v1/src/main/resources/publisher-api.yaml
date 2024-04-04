@@ -17,6 +17,7 @@ info:
   title: WSO2 API Manager - Publisher API
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - **Publisher**.
+    Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources/publisher-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
 
     # Authentication
     The Publisher REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking
@@ -59,6 +60,9 @@ info:
     "tokenType": null
     }
     ```
+    Note that in a distributed deployment or IS as KM separated environment to invoke RESTful APIs (product APIs), users must generate tokens through API-M Control Plane's token endpoint.
+    The tokens generated using third party key managers, are to manage end-user authentication when accessing APIs.
+    
     Next you must use the above client id and secret to obtain the access token.
     We will be using the password grant type for this, you can use any grant type you desire.
     You also need to add the proper **scope** when getting the access token. All possible scopes for publisher REST API can be viewed in **OAuth2 Security** section
@@ -95,7 +99,7 @@ info:
     * Make sure you have an API Manager instance up and running.
     * Update the `basepath` parameter to match the hostname and port of the APIM instance.
 
-    [![Run in Postman](https://run.pstmn.io/button.svg)](https://god.gw.postman.com/run-collection/17491134-edb4ef7a-1ac7-420b-8651-2d9fd5585f6c)
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/32294946-7fbaad97-7fb9-43ae-b6f2-13b63f2867d7)
   contact:
     name: WSO2
     url: https://wso2.com/api-manager/
@@ -10116,7 +10120,7 @@ components:
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
         name:
-          maxLength: 60
+          maxLength: 255
           minLength: 1
           type: string
           example: PizzaShackDoc

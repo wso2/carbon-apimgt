@@ -354,6 +354,11 @@
             {% endfor %}
         </Properties>
 
+        <MaskProperties>
+            {% for key,value in apim.analytics.mask.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </MaskProperties>
     </Analytics>
 
     <!--
@@ -582,6 +587,7 @@
              domain or only visible to API doc creator -->
         <EnableAPIDocVisibilityLevels>{{apim.publisher.enable_api_doc_visibility}}</EnableAPIDocVisibilityLevels>
         <EnablePortalConfigurationOnlyMode>{{apim.publisher.enable_portal_configuration_only_mode}}</EnablePortalConfigurationOnlyMode>
+        <InternalKeyIssuer>{{apim.publisher.internal_key_issuer}}</InternalKeyIssuer>
         <!-- Uncomment this to limit the number of APIs in api the API Publisher -->
         <!--APIsPerPage>30</APIsPerPage-->
         <!-- This property need to be enabled to enable the publisher access control support -->

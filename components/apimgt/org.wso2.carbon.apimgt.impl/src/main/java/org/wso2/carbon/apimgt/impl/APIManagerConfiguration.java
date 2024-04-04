@@ -132,6 +132,7 @@ public class APIManagerConfiguration {
     private RedisConfig redisConfig = new RedisConfig();
     private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
     private JSONObject subscriberAttributes = new JSONObject();
+    private static Map<String, String> analyticsMaskProps;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -372,6 +373,19 @@ public class APIManagerConfiguration {
                         analyticsProps.put(name, value);
                     }
                 }
+
+                // Load all the mask properties
+                OMElement maskProperties = element.getFirstChildWithName(new QName("MaskProperties"));
+                Iterator maskPropertiesIterator = maskProperties.getChildrenWithLocalName("Property");
+                Map<String, String> maskProps = new HashMap<>();
+                while (maskPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) maskPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName("name"));
+                    String value = propertyElem.getText();
+                    maskProps.put(name, value.toUpperCase());
+                }
+                analyticsMaskProps = maskProps;
+
                 OMElement authTokenElement = element.getFirstChildWithName(new QName("AuthToken"));
                 String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
                 analyticsProps.put("auth.api.token", resolvedAuthToken);
@@ -2256,6 +2270,20 @@ public class APIManagerConfiguration {
             }
         }
 
+        OMElement properties = omElement.getFirstChildWithName(new
+                QName(APIConstants.API_GATEWAY_ADDITIONAL_PROPERTIES));
+        Map<String, String> additionalProperties = new HashMap<>();
+        if (properties != null) {
+            Iterator gatewayAdditionalProperties = properties.getChildrenWithLocalName
+                    (APIConstants.API_GATEWAY_ADDITIONAL_PROPERTY);
+            while (gatewayAdditionalProperties.hasNext()) {
+                OMElement propertyElem = (OMElement) gatewayAdditionalProperties.next();
+                String propName = propertyElem.getAttributeValue(new QName("name"));
+                String resolvedValue = MiscellaneousUtil.resolve(propertyElem, secretResolver);
+                additionalProperties.put(propName, resolvedValue);
+            }
+        }
+
         OMElement eventWaitingTimeElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.EVENT_WAITING_TIME_CONFIG));
         if (eventWaitingTimeElement != null) {
@@ -2282,6 +2310,10 @@ public class APIManagerConfiguration {
 
     public static Map<String, String> getAnalyticsProperties() {
         return analyticsProperties;
+    }
+
+    public static Map<String, String> getAnalyticsMaskProperties() {
+        return analyticsMaskProps;
     }
     
     public static Map<String, String> getPersistenceProperties() {

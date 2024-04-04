@@ -419,6 +419,7 @@ public final class APIConstants {
     public static final String SUBSCRIPTION_USER_TYPE = "USER_TYPE";
     public static final String ACCESS_TOKEN_USER_TYPE_APPLICATION = "APPLICATION";
     public static final String USER_TYPE_END_USER = "END_USER";
+    public static final String REFRESH_TOKEN_TYPE = "Refresh";
     public static final String FIELD_API_NAME = "API_NAME";
     public static final String FIELD_API_VERSION = "API_VERSION";
     public static final String FIELD_CONSUMER_KEY = "CONSUMER_KEY";
@@ -891,6 +892,8 @@ public final class APIConstants {
     public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS = API_PUBLISHER
             + "EnableAPIDocVisibilityLevels";
     public static final String API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE = API_PUBLISHER + "EnablePortalConfigurationOnlyMode";
+    public static final String API_PUBLISHER_INTERNAL_KEY_ISSUER = API_PUBLISHER +
+            "InternalKeyIssuer";
     // Configuration that need to enable to add access control to APIs in publisher
     public static final String API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS = API_PUBLISHER
             + "EnableAccessControl";
@@ -2183,6 +2186,7 @@ public final class APIConstants {
         public static final String CONSUMER_KEY = "consumerKey";
         public static final String AUTHORIZED_PARTY = "azp";
         public static final String KEY_ID = "kid";
+        public static final String AUDIENCE = "aud";
         public static final String JWT_ID = "jti";
         public static final String SUBSCRIPTION_TIER = "subscriptionTier";
         public static final String SUBSCRIBER_TENANT_DOMAIN = "subscriberTenantDomain";

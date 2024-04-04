@@ -104,6 +104,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is a publisher rest api utility class.
@@ -1201,7 +1203,7 @@ public class PublisherCommonUtils {
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         } else if (body.getContext().endsWith("/")) {
             throw new APIManagementException("Context cannot end with '/' character",
-                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT , body.getName(), body.getVersion()));
+                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT, body.getName(), body.getVersion()));
         }
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName(), organization)) {
             throw new APIManagementException(
@@ -1246,8 +1248,8 @@ public class PublisherCommonUtils {
                     } else {
                         throw new APIManagementException(
                                 "Error occurred while adding API. API with name " + body.getName()
-                                        + " already exists with different context" + context  + " in the organization" +
-                                        " : " + organization,  ExceptionCodes.API_ALREADY_EXISTS);
+                                        + " already exists with different context" + context + " in the organization" +
+                                        " : " + organization, ExceptionCodes.API_ALREADY_EXISTS);
                     }
                 }
             }
@@ -1709,6 +1711,13 @@ public class PublisherCommonUtils {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDto);
         String documentName = documentDto.getName();
+        Pattern pattern = Pattern.compile(APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
+        Matcher matcher = pattern.matcher(documentName);
+        if (matcher.find()) {
+            throw new APIManagementException("Document name cannot contain illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )",
+                    ExceptionCodes.DOCUMENT_NAME_ILLEGAL_CHARACTERS);
+        }
         if (documentDto.getType() == null) {
             throw new APIManagementException("Documentation type cannot be empty",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
@@ -1950,6 +1959,28 @@ public class PublisherCommonUtils {
         }
 
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
+        List<APIProductResource> resources = productToBeAdded.getProductResources();
+
+        for (APIProductResource apiProductResource : resources) {
+            API api;
+            String apiUUID;
+            if (apiProductResource.getProductIdentifier() != null) {
+                APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
+                String emailReplacedAPIProviderName = APIUtil
+                        .replaceEmailDomain(productAPIIdentifier.getProviderName());
+                APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
+                        productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
+                apiUUID = apiProvider
+                        .getUUIDFromIdentifier(emailReplacedAPIIdentifier, productToBeAdded.getOrganization());
+                api = apiProvider.getAPIbyUUID(apiUUID, productToBeAdded.getOrganization());
+            } else {
+                apiUUID = apiProductResource.getApiId();
+                api = apiProvider.getAPIbyUUID(apiUUID, productToBeAdded.getOrganization());
+                // if API does not exist, getLightweightAPIByUUID() method throws exception.
+            }
+            validateApiLifeCycleForApiProducts(api);
+        }
+
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
@@ -1958,6 +1989,18 @@ public class PublisherCommonUtils {
 
         createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
+    }
+
+    private static void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {
+        String status = api.getStatus();
+
+        if (APIConstants.BLOCKED.equals(status) ||
+                APIConstants.PROTOTYPED.equals(status) ||
+                APIConstants.DEPRECATED.equals(status) ||
+                APIConstants.RETIRED.equals(status)) {
+            throw new APIManagementException("Cannot create API Product using API with following status: " + status,
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
+        }
     }
 
     private static void checkDuplicateContext(APIProvider apiProvider, APIProductDTO apiProductDTO, String username,
