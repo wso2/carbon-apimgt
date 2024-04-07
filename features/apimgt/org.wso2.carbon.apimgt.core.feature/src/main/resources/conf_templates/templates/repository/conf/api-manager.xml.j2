@@ -1172,6 +1172,18 @@
              {% if apim.monetization.choreo_token_endpoint is defined %}
                     <ChoreoTokenEndpoint>{{apim.monetization.choreo_token_endpoint}}</ChoreoTokenEndpoint>
              {% endif %}
+             {% if apim.monetization.analytics_host is defined %}
+                    <AnalyticsHost>{{apim.monetization.analytics_host}}</AnalyticsHost>
+             {% endif %}
+             {% if apim.monetization.analytics_port is defined %}
+                    <AnalyticsPort>{{apim.monetization.analytics_port}}</AnalyticsPort>
+             {% endif %}
+             {% if apim.monetization.analytics_username is defined %}
+                    <AnalyticsUsername>{{apim.monetization.analytics_username}}</AnalyticsUsername>
+             {% endif %}
+             {% if apim.monetization.analytics_password is defined %}
+                    <AnalyticsPassword>{{apim.monetization.analytics_password}}</AnalyticsPassword>
+             {% endif %}
         </UsagePublisher>
         {% if apim.monetization.additional_attributes is defined %}
             <AdditionalAttributes>
