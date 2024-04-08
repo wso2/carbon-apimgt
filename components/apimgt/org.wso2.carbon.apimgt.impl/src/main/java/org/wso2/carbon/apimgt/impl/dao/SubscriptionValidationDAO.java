@@ -162,7 +162,7 @@ public class SubscriptionValidationDAO {
                 }
                 String attributeName = resultSet.getString("ATTRIBUTE_NAME");
                 String attributeValue = resultSet.getString("ATTRIBUTE_VALUE");
-                if (StringUtils.isNotEmpty(attributeName) && StringUtils.isNotEmpty(attributeValue)) {
+                if (StringUtils.isNotEmpty(attributeName)) {
                     application.addAttribute(attributeName, attributeValue);
                 }
                 //read from the application_group_mapping table and make it a set

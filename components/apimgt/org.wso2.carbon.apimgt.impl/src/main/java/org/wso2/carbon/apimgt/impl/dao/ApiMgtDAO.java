@@ -14535,6 +14535,12 @@ public class ApiMgtDAO {
         return environment;
     }
 
+    private boolean isEmptyValuesInApplicationAttributesEnabled() {
+        return Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.ApplicationAttributes.
+                        ENABLE_EMPTY_VALUES_IN_APPLICATION_ATTRIBUTES));
+    }
+
     private void addApplicationAttributes(Connection conn, Map<String, String> attributes, int applicationId,
                                           int tenantId)
             throws APIManagementException {
@@ -14545,10 +14551,14 @@ public class ApiMgtDAO {
             if (attributes != null) {
                 ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
                 for (Map.Entry<String, String> attribute : attributes.entrySet()) {
-                    if (StringUtils.isNotEmpty(attribute.getKey()) && StringUtils.isNotEmpty(attribute.getValue())) {
+                    if (StringUtils.isNotEmpty(attribute.getKey())) {
+                        if (StringUtils.isEmpty(attribute.getValue()) && !isEmptyValuesInApplicationAttributesEnabled()) {
+                            continue;
+                        }
                         ps.setInt(1, applicationId);
                         ps.setString(2, attribute.getKey());
-                        ps.setString(3, attribute.getValue());
+                        ps.setString(3, conn.getMetaData().getDatabaseProductName().contains("DB2") &&
+                                StringUtils.isEmpty(attribute.getValue()) ? "N/A" : attribute.getValue());
                         ps.setInt(4, tenantId);
                         ps.addBatch();
                     }
