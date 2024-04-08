@@ -5295,7 +5295,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIProductInformation(uuid, organization, product);
                 populateAPIStatus(product);
                 populateAPITier(product);
-                populateDefaultVersion(product);
+                if (migrationEnabled == null) {
+                    populateDefaultVersion(product);
+                }
                 return product;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
