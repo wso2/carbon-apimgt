@@ -3304,10 +3304,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
             }
             apiMgtDAO.addSubscriptionPolicy(subPolicy);
-            String monetizationPlan = subPolicy.getMonetizationPlan();
-            Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
-            if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
-                createMonetizationPlan(subPolicy);
+            if (subPolicy.getBillingPlan().equalsIgnoreCase("COMMERCIAL")) {
+                String monetizationPlan = subPolicy.getMonetizationPlan();
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
+                    createMonetizationPlan(subPolicy);
+                }
             }
             //policy id is not set. retrieving policy to get the id.
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
