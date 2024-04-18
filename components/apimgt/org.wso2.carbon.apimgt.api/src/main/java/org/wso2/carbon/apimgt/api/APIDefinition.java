@@ -211,6 +211,15 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
+     * This method returns OAS definition of default security scheme which support multiple oauth flows.
+     * @param resourceConfigsJSON
+     * @return
+     * @throws APIManagementException
+     */
+    public abstract String processDefaultSchemeScopesOfMultipleOauthFlows(String resourceConfigsJSON)
+        throws APIManagementException;
+
+    /**
      * This method returns OAS definition which replaced X-WSO2-throttling-tier extension comes from
      * mgw with X-throttling-tier extensions in OAS file
      *

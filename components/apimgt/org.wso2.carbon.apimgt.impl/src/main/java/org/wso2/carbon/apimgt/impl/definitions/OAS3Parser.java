@@ -1132,6 +1132,60 @@ public class OAS3Parser extends APIDefinition {
         return scopeList;
     }
 
+    private Set<Scope> getScopesFromDefaultOAuthFlows(OpenAPI openAPI) {
+        HashSet<Scope> scopeSet = new HashSet<>();
+
+        Map<String, SecurityScheme> securitySchemes;
+        SecurityScheme defaultScheme;
+        OAuthFlows oAuthFlows;
+
+        if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents()
+                .getSecuritySchemes()) != null && (defaultScheme = securitySchemes.get(
+                OPENAPI_SECURITY_SCHEMA_KEY)) != null && (oAuthFlows = defaultScheme.getFlows()) != null) {
+
+            OAuthFlow oAuthFlow = oAuthFlows.getImplicit();
+            OAuthFlow authorizationCodeFlow = oAuthFlows.getAuthorizationCode();
+            OAuthFlow passwordFlow = oAuthFlows.getPassword();
+            OAuthFlow clientCredentialsFlow = oAuthFlows.getClientCredentials();
+
+            if (oAuthFlow != null && oAuthFlow.getScopes() != null) {
+                extractScopesFromOauthFlow(scopeSet, oAuthFlow);
+            }
+
+            if (authorizationCodeFlow != null && authorizationCodeFlow.getScopes() != null) {
+                extractScopesFromOauthFlow(scopeSet, authorizationCodeFlow);
+            }
+
+            if (passwordFlow != null) {
+                extractScopesFromOauthFlow(scopeSet, passwordFlow);
+            }
+
+            if (clientCredentialsFlow != null) {
+                extractScopesFromOauthFlow(scopeSet, clientCredentialsFlow);
+            }
+
+        }
+        return scopeSet;
+    }
+
+    private void extractScopesFromOauthFlow(HashSet<Scope> scopeSet, OAuthFlow oAuthFlow) {
+        for (Map.Entry<String, String> entry : oAuthFlow.getScopes().entrySet()) {
+            Scope scope = new Scope();
+            scope.setKey(entry.getKey());
+            scope.setName(entry.getKey());
+            scope.setDescription(entry.getValue());
+            Map<String, String> scopeBindings;
+            if (oAuthFlow.getExtensions() != null && (scopeBindings = (Map<String, String>) oAuthFlow.getExtensions()
+                    .get(APIConstants.SWAGGER_X_SCOPES_BINDINGS)) != null) {
+                if (scopeBindings.get(scope.getKey()) != null) {
+                    scope.setRoles(scopeBindings.get(scope.getKey()));
+                }
+            }
+            scopeSet.add(scope);
+        }
+    }
+
+
     /**
      * Include Scope details to the definition
      *
@@ -1957,6 +2011,58 @@ public class OAS3Parser extends APIDefinition {
             return prettifyOAS3ToJson(openAPI);
         }
         return swaggerContent;
+    }
+
+    /**
+     * This method will inject scopes of multiple oauth flows to default security schemes in the swagger definition
+     * @param swaggerContent
+     * @return String
+     */
+    @Override
+    public String processDefaultSchemeScopesOfMultipleOauthFlows(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
+        Set<Scope> scopesFromDefaultOauthFlows = getScopesFromDefaultOAuthFlows(openAPI);
+
+        if (!scopesFromDefaultOauthFlows.isEmpty()) {
+            SecurityScheme defaultScheme = openAPI.getComponents().getSecuritySchemes()
+                    .get(OPENAPI_SECURITY_SCHEMA_KEY);
+            OAuthFlow oAuthFlow = defaultScheme.getFlows().getImplicit();
+            if (oAuthFlow == null) {
+                oAuthFlow = new OAuthFlow();
+                defaultScheme.getFlows().setImplicit(oAuthFlow);
+            }
+            if (oAuthFlow.getAuthorizationUrl() == null) {
+                oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
+            }
+
+            Scopes oas3Scopes = oAuthFlow.getScopes() != null ? oAuthFlow.getScopes() : new Scopes();
+
+            Map<String, String> scopeBindings = new HashMap<>();
+
+            if (oAuthFlow.getExtensions() != null) {
+                scopeBindings = oAuthFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) != null ?
+                        (Map<String, String>) oAuthFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS) :
+                        new HashMap<>();
+            }
+
+            for (Scope scope : scopesFromDefaultOauthFlows) {
+                if (!oas3Scopes.containsKey(scope.getKey())) {
+                    String description = scope.getDescription() != null ? scope.getDescription() : "";
+                    oas3Scopes.put(scope.getKey(), description);
+                    if (scope.getRoles() != null) {
+                        String roles = (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().trim()
+                                .split(",").length > 0) ? scope.getRoles() : StringUtils.EMPTY;
+                        scopeBindings.put(scope.getKey(), roles);
+                    }
+                }
+            }
+
+            if (!scopeBindings.isEmpty()) {
+                oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+            }
+            oAuthFlow.setScopes(oas3Scopes);
+        }
+        return Json.pretty(openAPI);
     }
 
     /**

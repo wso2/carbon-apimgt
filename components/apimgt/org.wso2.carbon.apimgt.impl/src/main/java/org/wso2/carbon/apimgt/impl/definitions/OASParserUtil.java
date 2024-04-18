@@ -1731,6 +1731,9 @@ public class OASParserUtil {
         swaggerContent = apiDefinition.injectMgwThrottlingExtensionsToDefault(swaggerContent);
         //Process mgw disable security extension
         swaggerContent = apiDefinition.processDisableSecurityExtension(swaggerContent);
+
+        swaggerContent = apiDefinition.processDefaultSchemeScopesOfMultipleOauthFlows(swaggerContent);
+
         return apiDefinition.processOtherSchemeScopes(swaggerContent);
     }
 

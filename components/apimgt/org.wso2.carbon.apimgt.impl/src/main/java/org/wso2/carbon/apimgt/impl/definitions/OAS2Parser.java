@@ -1673,6 +1673,13 @@ public class OAS2Parser extends APIDefinition {
         return swaggerContent;
     }
 
+    @Override
+    public String processDefaultSchemeScopesOfMultipleOauthFlows(String swaggerContent) throws APIManagementException {
+        // This method is used to inject scopes of multiple oauth flows to the default scheme,
+        // But OAS2 does not support multiple oauth flows.
+        return null;
+    }
+
     /**
      * This method returns swagger definition which replaced X-WSO2-throttling-tier extension comes from
      * mgw with X-throttling-tier extensions in swagger file(Swagger version 2)
