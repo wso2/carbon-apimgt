@@ -1,0 +1,55 @@
+openapi: 3.0.1
+info:
+  title: TEST_API
+  version: '1.0.0'
+servers:
+  - url: 'https://localhost:8080/test_backend'
+security:
+  - default: []
+paths:
+  /testpath:
+    get:
+      parameters: []
+      responses:
+        '200':
+          description: ok
+      security:
+        - OAuth2Security:
+            - TEST_SCOPE1
+      x-auth-type: Application & Application User
+      x-throttling-tier: 10KPerMin
+      x-wso2-application-security:
+        security-types:
+          - oauth2
+        optional: false
+components:
+  securitySchemes:
+    default:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'https://test.com'
+          scopes:
+            TEST_SCOPE1: 'HI TEST_SCOPE1'
+            TEST_SCOPE3: ''
+          x-scopes-bindings:
+            TEST_SCOPE1: admin
+            TEST_SCOPE3: 'internal/publisher'
+        password:
+          tokenUrl: 'https://localhost:9443/oauth2/token'
+          scopes:
+            TEST_SCOPE1: 'TEST_SCOPE1'
+            TEST_SCOPE2: 'Hi TEST_SCOPE2'
+          x-scopes-bindings:
+            TEST_SCOPE1: 'admin'
+        clientCredentials:
+          tokenUrl: https://api.gettyimages.com/oauth2/token/
+          scopes: {}
+        authorizationCode:
+          authorizationUrl: https://slack.com/oauth/authorize
+          tokenUrl: https://slack.com/api/oauth.access
+          scopes:
+            TEST_SCOPE4: 'Hi TEST_SCOPE4'
+          x-scopes-bindings:
+            TEST_SCOPE4: 'admin'
+x-wso2-basePath: /test_context/0.1
