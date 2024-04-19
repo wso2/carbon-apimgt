@@ -456,7 +456,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         synCtx.setProperty(APIConstants.POLICY_RESET, true);
 
         ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
-                publishResetApplicationPolicyEvent(applicationLevelThrottleKey,
+                publishApplicationPolicyResetEvent(applicationLevelThrottleKey,
                         applicationLevelTier,
                         authorizedUser, subscriberTenantDomain,
                         applicationId,

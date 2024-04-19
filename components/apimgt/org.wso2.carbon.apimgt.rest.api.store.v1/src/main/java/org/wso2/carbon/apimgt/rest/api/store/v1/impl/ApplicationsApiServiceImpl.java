@@ -84,6 +84,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -484,32 +485,39 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                      ApplicationThrottleResetDTO applicationThrottleResetDTO,
                                                                      MessageContext messageContext) {
         try {
+            if (applicationThrottleResetDTO == null) {
+                RestApiUtil.handleBadRequest("Username cannot be null", log);
+            }
             String userId = applicationThrottleResetDTO.getUserName();
             String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getOrganization(messageContext);
 
             if (StringUtils.isBlank(userId)) {
-                RestApiUtil.handleBadRequest("UserId cannot be empty", log);
+                RestApiUtil.handleBadRequest("Username cannot be empty", log);
             }
-
 
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUsername);
             Application application = apiConsumer.getApplicationByUUID(applicationId, organization);
-            String suffix = APIUtil.getUserNameWithTenantSuffix(userId);
 
             if (application == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-            if (!RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+            if (!(RestAPIStoreUtils.isUserOwnerOfApplication(application) || RestAPIStoreUtils.isApplicationSharedtoUser(application))) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
             String appId = String.valueOf(application.getId());
             String appTier = application.getTier();
             apiConsumer.resetApplicationThrottlePolicy(appId, userId, appTier, organization);
-            return Response.ok().entity("Application Level Policy Reset successful "+"\n").build();
+            JSONObject obj = new JSONObject();
+            obj.put("status", "success");
+            obj.put("username", userId);
+            obj.put("application tenant", organization);
+            obj.put("application", application.getName());
+            obj.put("application tier", appTier);
+            return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving tiers";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            String errorMessage = "User " + applicationThrottleResetDTO.getUserName() +" doesn't exist in user store";
+            RestApiUtil.handleBadRequest(errorMessage, log);
         }
 
         return null;

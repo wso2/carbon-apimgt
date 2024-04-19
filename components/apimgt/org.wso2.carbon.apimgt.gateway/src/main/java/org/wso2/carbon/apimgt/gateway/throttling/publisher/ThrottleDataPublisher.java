@@ -145,7 +145,7 @@ public class ThrottleDataPublisher {
         }
     }
 
-    public void publishResetApplicationPolicyEvent(
+    public void publishApplicationPolicyResetEvent(
             String applicationLevelThrottleKey, String applicationLevelTier,
             String authorizedUser,String appTenant,
             String appId, MessageContext messageContext,
