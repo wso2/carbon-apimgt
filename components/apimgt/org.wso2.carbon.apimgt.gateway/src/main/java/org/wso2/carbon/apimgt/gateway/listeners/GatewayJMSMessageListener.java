@@ -433,7 +433,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         }
     }
 
-    private void publishResetEvent(PolicyResetEvent event, String eventJson) {
+    private void publishResetEvent(PolicyEvent event, String eventJson) {
         String applicationLevelThrottleKey = null;
         String applicationLevelTier = null;
         String authorizedUser = null;

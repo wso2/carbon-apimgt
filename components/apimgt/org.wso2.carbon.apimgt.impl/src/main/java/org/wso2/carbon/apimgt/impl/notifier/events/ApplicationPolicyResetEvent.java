@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
 
-public class ApplicationPolicyResetEvent extends PolicyResetEvent {
+public class ApplicationPolicyResetEvent extends PolicyEvent {
     private String uuid;
     private String appId;
     private String userId;
