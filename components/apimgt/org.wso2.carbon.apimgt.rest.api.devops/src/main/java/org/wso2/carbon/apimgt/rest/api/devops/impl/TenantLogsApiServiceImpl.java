@@ -37,20 +37,20 @@ import javax.ws.rs.core.Response;
  */
 public class TenantLogsApiServiceImpl implements TenantLogsApiService {
 
-    public Response tenantLogsTenantIdApisApiIdGet(String tenantId, String apiId, MessageContext messageContext)
+    public Response tenantLogsTenantApisApiIdGet(String tenant, String apiId, MessageContext messageContext)
             throws APIManagementException {
         APILoggingImpl apiLoggingImpl = new APILoggingImpl();
-        List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerListByApiId(tenantId, apiId);
+        List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerListByApiId(tenant, apiId);
         LoggingApiOutputListDTO loggingApiOutputListDT = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
         return Response.ok().entity(loggingApiOutputListDT).build();
     }
 
-    public Response tenantLogsTenantIdApisApiIdPut(String tenantId, String apiId, LoggingApiInputDTO loggingApiInputDTO,
+    public Response tenantLogsTenantApisApiIdPut(String tenant, String apiId, LoggingApiInputDTO loggingApiInputDTO,
             MessageContext messageContext) throws APIManagementException {
         if (apiId != null) {
             if (DevopsAPIUtils.validateLogLevel(loggingApiInputDTO.getLogLevel())) {
                 APILoggingImpl apiLoggingImpl = new APILoggingImpl();
-                apiLoggingImpl.addUpdateAPILogger(tenantId, apiId, loggingApiInputDTO.getLogLevel().toUpperCase(),
+                apiLoggingImpl.addUpdateAPILogger(tenant, apiId, loggingApiInputDTO.getLogLevel().toUpperCase(),
                         loggingApiInputDTO.getResourceMethod(),loggingApiInputDTO.getResourcePath());
                 return Response.ok().entity(loggingApiInputDTO).build();
             } else {
@@ -64,10 +64,10 @@ public class TenantLogsApiServiceImpl implements TenantLogsApiService {
         }
     }
 
-    public Response tenantLogsTenantIdApisGet(String tenantId, String logLevel, MessageContext messageContext)
+    public Response tenantLogsTenantApisGet(String tenant, String logLevel, MessageContext messageContext)
             throws APIManagementException {
         APILoggingImpl apiLoggingImpl = new APILoggingImpl();
-        List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerList(tenantId, logLevel);
+        List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerList(tenant, logLevel);
         LoggingApiOutputListDTO loggingApiOutputListDTO = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
         return Response.ok().entity(loggingApiOutputListDTO).build();
     }
