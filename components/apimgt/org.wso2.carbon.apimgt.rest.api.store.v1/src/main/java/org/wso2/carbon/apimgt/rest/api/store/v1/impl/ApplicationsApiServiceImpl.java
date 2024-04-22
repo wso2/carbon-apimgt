@@ -516,8 +516,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             obj.put("application tier", appTier);
             return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
         } catch (APIManagementException e) {
-            String errorMessage = "User " + applicationThrottleResetDTO.getUserName() +" doesn't exist in user store";
-            RestApiUtil.handleBadRequest(errorMessage, log);
+            RestApiUtil.handleInternalServerError("Error while resetting application " + applicationId, e, log);
         }
 
         return null;

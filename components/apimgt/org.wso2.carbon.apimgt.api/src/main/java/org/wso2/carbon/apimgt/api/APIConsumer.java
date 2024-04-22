@@ -817,7 +817,7 @@ public interface APIConsumer extends APIManager {
      * @param appTier Application Policy name
      * @param organization Tenant which application owner belongs to
      */
-    void resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization) throws APIManagementException;
+    void resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization);
 
     /**
      * Returns the API Chat execute call response as a string

@@ -4356,34 +4356,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param organization Tenant which application owner belongs to
      */
     @Override
-    public void resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization) throws APIManagementException{
-
-        try {
-            String userDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-            String userIdWithoutTenant = userId;
-            if (userId.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > 0) {
-                int i = userId.lastIndexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR);
-                userDomain = userId.substring(i+1);
-                userIdWithoutTenant = userId.substring(0,i);
-            }
-            String newTenantDomain = MultitenantUtils.getTenantDomain(userId);
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(userDomain);
-            UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-            if (userStoreManager.isExistingUser(userId)) {
-//                String idAtLast = userStoreManager.getUserIDFromUserName(userIdWithoutTenant);
-                ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(UUID.randomUUID().toString(),System.currentTimeMillis(),APIConstants.EventType.POLICY_RESET.name(), tenantId,
-                        organization,UUID.randomUUID().toString(), appId, userIdWithoutTenant, appTier);
-                APIUtil.sendNotification(applicationPolicyResetEvent, APIConstants.NotifierType.POLICY.name());
-            } else {
-                throw new APIManagementException("User " + userId + newTenantDomain +" doesn't exist in user store");
-            }
-        } catch (UserStoreException | APIManagementException e) {
-            throw new APIManagementException("User " + userId +" doesn't exist in user store");
-        }
-        ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.POLICY_RESET.name(), tenantId,
-                organization, UUID.randomUUID().toString(), appId, userId, appTier);
+    public void resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization) {
+        ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(
+                UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.POLICY_RESET.name(),
+                tenantId, organization, UUID.randomUUID().toString(), appId, userId, appTier);
         APIUtil.sendNotification(applicationPolicyResetEvent, APIConstants.NotifierType.POLICY.name());
     }
 
