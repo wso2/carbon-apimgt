@@ -229,6 +229,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.COMMERCIAL_TIER_PLAN;
+
 /**
  * This class provides the core API provider functionality. It is implemented in a very
  * self-contained and 'pure' manner, without taking requirements like security into account,
@@ -3304,10 +3306,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
             }
             apiMgtDAO.addSubscriptionPolicy(subPolicy);
-            String monetizationPlan = subPolicy.getMonetizationPlan();
-            Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
-            if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
-                createMonetizationPlan(subPolicy);
+            if (subPolicy.getBillingPlan().equalsIgnoreCase(COMMERCIAL_TIER_PLAN)) {
+                String monetizationPlan = subPolicy.getMonetizationPlan();
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
+                    createMonetizationPlan(subPolicy);
+                }
             }
             //policy id is not set. retrieving policy to get the id.
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
