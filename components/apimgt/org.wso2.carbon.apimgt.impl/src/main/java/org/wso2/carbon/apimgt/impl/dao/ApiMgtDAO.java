@@ -9382,11 +9382,12 @@ public class ApiMgtDAO {
     public KeyManagerConfigurationDTO getKeyManagerConfigurationByID(String organization, String id)
             throws APIManagementException {
 
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ? AND ORGANIZATION = ?";
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ? AND (ORGANIZATION = ? OR ORGANIZATION = ?)";
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(query)) {
             preparedStatement.setString(1, id);
             preparedStatement.setString(2, organization);
+            preparedStatement.setString(3, APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
@@ -9440,7 +9441,6 @@ public class ApiMgtDAO {
     public KeyManagerConfigurationDTO getKeyManagerConfigurationByName(String organization, String name)
             throws APIManagementException {
 
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             return getKeyManagerConfigurationByName(conn, organization, name);
         } catch (SQLException | IOException e) {
@@ -9454,10 +9454,11 @@ public class ApiMgtDAO {
                                                                         String name)
             throws SQLException, IOException, APIManagementException {
 
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND ORGANIZATION = ?";
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE NAME = ? AND (ORGANIZATION = ? OR ORGANIZATION = ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, organization);
+            preparedStatement.setString(3, APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
