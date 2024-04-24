@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -86,7 +87,7 @@ public class EndpointCertificateDeployer {
     }
 
     private void retrieveCertificatesAndDeploy(CloseableHttpResponse closeableHttpResponse) throws IOException {
-
+        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
         boolean tenantFlowStarted = false;
         if (closeableHttpResponse.getStatusLine().getStatusCode() == 200) {
             String content = EntityUtils.toString(closeableHttpResponse.getEntity());
@@ -99,10 +100,12 @@ public class EndpointCertificateDeployer {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 tenantFlowStarted = true;
-                for (CertificateMetadataDTO certificateMetadataDTO : certificateMetadataDTOList) {
-                    CertificateManagerImpl.getInstance()
-                            .addCertificateToGateway(certificateMetadataDTO.getCertificate(),
-                                    certificateMetadataDTO.getAlias());
+                synchronized (certificateManager) {
+                    for (CertificateMetadataDTO certificateMetadataDTO : certificateMetadataDTOList) {
+                        CertificateManagerImpl.getInstance()
+                                .addCertificateToGateway(certificateMetadataDTO.getCertificate(),
+                                        certificateMetadataDTO.getAlias());
+                    }
                 }
             } finally {
                 if (tenantFlowStarted) {
@@ -155,16 +158,18 @@ public class EndpointCertificateDeployer {
     }
 
     private void retrieveAllCertificatesAndDeploy(HttpEntity certContent) throws IOException {
-
+        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
         String content = EntityUtils.toString(certContent);
         List<CertificateMetadataDTO> certificateMetadataDTOList;
         Type listType = new TypeToken<List<CertificateMetadataDTO>>() {
         }.getType();
         certificateMetadataDTOList = new Gson().fromJson(content, listType);
-        for (CertificateMetadataDTO certificateMetadataDTO : certificateMetadataDTOList) {
-            CertificateManagerImpl.getInstance()
-                    .addAllCertificateToGateway(certificateMetadataDTO.getCertificate(),
-                            certificateMetadataDTO.getAlias(), certificateMetadataDTO.getTenantId());
+        synchronized (certificateManager) {
+            for (CertificateMetadataDTO certificateMetadataDTO : certificateMetadataDTOList) {
+                CertificateManagerImpl.getInstance()
+                        .addAllCertificateToGateway(certificateMetadataDTO.getCertificate(),
+                                certificateMetadataDTO.getAlias(), certificateMetadataDTO.getTenantId());
+            }
         }
     }
 }
