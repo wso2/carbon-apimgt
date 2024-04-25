@@ -141,6 +141,17 @@ public class EndpointCertificateDeployer {
         }
     }
 
+    public void deployAllTenantCertificatesAtStartup() throws APIManagementException {
+
+        String endpoint = baseURL + APIConstants.CERTIFICATE_RETRIEVAL_ENDPOINT;
+
+        try (CloseableHttpResponse closeableHttpResponse = invokeService(endpoint, tenantDomain)) {
+            retrieveAllTenantCertificatesAndDeploy(closeableHttpResponse);
+        } catch (IOException | ArtifactSynchronizerException e) {
+            throw new APIManagementException("Error while inserting certificates into truststore", e);
+        }
+    }
+
     public void deployAllCertificatesAtStartup() throws APIManagementException {
 
         String endpoint = baseURL + APIConstants.CERTIFICATE_RETRIEVAL_ENDPOINT;
@@ -154,6 +165,29 @@ public class EndpointCertificateDeployer {
             }
         } catch (IOException | ArtifactSynchronizerException e) {
             throw new APIManagementException("Error while inserting certificates into truststore", e);
+        }
+    }
+
+    private void retrieveAllTenantCertificatesAndDeploy(CloseableHttpResponse closeableHttpResponse) throws IOException {
+
+        boolean tenantFlowStarted = false;
+        if (closeableHttpResponse.getStatusLine().getStatusCode() == 200) {
+            String content = EntityUtils.toString(closeableHttpResponse.getEntity());
+            List<CertificateMetadataDTO> certificateMetadataDTOList;
+            Type listType = new TypeToken<List<CertificateMetadataDTO>>() {
+            }.getType();
+            certificateMetadataDTOList = new Gson().fromJson(content, listType);
+
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                tenantFlowStarted = true;
+                CertificateManagerImpl.getInstance().addAllTenantCertificatesToGateway(certificateMetadataDTOList);
+            } finally {
+                if (tenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
         }
     }
 
