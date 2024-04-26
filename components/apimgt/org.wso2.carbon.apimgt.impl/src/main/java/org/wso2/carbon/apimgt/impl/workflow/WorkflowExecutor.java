@@ -23,16 +23,10 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationDAO;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationDTO;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationEndUserDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationMetaData;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationType;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -109,14 +103,11 @@ public abstract class WorkflowExecutor implements Serializable {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             apiMgtDAO.updateWorkflowStatus(workflowDTO);
-
-
         } catch (APIManagementException e) {
             throw new WorkflowException("Error while updating workflow", e);
         }
         return new GeneralWorkflowResponse();
     }
-
 
     /**
      * Returns the information of the workflows whose status' match the workflowStatus

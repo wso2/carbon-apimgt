@@ -167,8 +167,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getTenantDomainFromTenantId;
-
 /**
  * This class represent the ApiMgtDAO.
  */
@@ -2630,7 +2628,7 @@ public class ApiMgtDAO {
                 int appId = result.getInt("APPLICATION_ID");
                 String subStatus = result.getString("SUB_STATUS");
                 String subsCreateState = result.getString("SUBS_CREATE_STATE");
-                String subsOrganization = getTenantDomainFromTenantId(result.getInt("SUB_TENANT_ID"));
+                String subsOrganization = APIUtil.getTenantDomainFromTenantId(result.getInt("SUB_TENANT_ID"));
                 String key = userId + "::" + application;
                 UserApplicationAPIUsage usage = userApplicationUsages.get(key);
                 if (usage == null) {
@@ -14997,7 +14995,7 @@ public class ApiMgtDAO {
                 }
                 int productId = getAPIID(uuid, connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(productIdentifier.getProviderName()));
-                String tenantDomain = getTenantDomainFromTenantId(tenantId);
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
                 URITemplate uriTemplateOriginal = apiProductResource.getUriTemplate();
                 int urlMappingId = uriTemplateOriginal.getId();
                 // Adding to AM_API_URL_MAPPING table
@@ -15897,7 +15895,7 @@ public class ApiMgtDAO {
             statement.execute();
         } catch (SQLException e) {
             handleException("Failed to update API Category : " + apiCategory.getName() + " of tenant " +
-                    getTenantDomainFromTenantId(apiCategory.getTenantID()), e);
+                    APIUtil.getTenantDomainFromTenantId(apiCategory.getTenantID()), e);
         }
     }
 
@@ -16553,7 +16551,7 @@ public class ApiMgtDAO {
             statement.executeUpdate();
         } catch (SQLException e) {
             handleException("Failed to add tenant theme of tenant "
-                    + getTenantDomainFromTenantId(tenantId), e);
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
     }
 
@@ -16574,7 +16572,7 @@ public class ApiMgtDAO {
             statement.executeUpdate();
         } catch (SQLException e) {
             handleException("Failed to update tenant theme of tenant "
-                    + getTenantDomainFromTenantId(tenantId), e);
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
     }
 
@@ -16598,7 +16596,7 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to fetch tenant theme of tenant "
-                    + getTenantDomainFromTenantId(tenantId), e);
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
         return tenantThemeContent;
     }
@@ -16621,7 +16619,7 @@ public class ApiMgtDAO {
             return resultSet.next();
         } catch (SQLException e) {
             handleException("Failed to check whether tenant theme exist for tenant "
-                    + getTenantDomainFromTenantId(tenantId), e);
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
         return false;
     }
@@ -16641,7 +16639,7 @@ public class ApiMgtDAO {
             statement.executeUpdate();
         } catch (SQLException e) {
             handleException("Failed to delete tenant theme of tenant "
-                    + getTenantDomainFromTenantId(tenantId), e);
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
     }
 
@@ -16872,7 +16870,7 @@ public class ApiMgtDAO {
                 APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                String tenantDomain = getTenantDomainFromTenantId(tenantId);
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
 
                 // Adding to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection
@@ -17779,7 +17777,7 @@ public class ApiMgtDAO {
                 APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                String tenantDomain = getTenantDomainFromTenantId(tenantId);
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
                 // Removing related Current API entries from AM_API_URL_MAPPING table
                 PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
                         .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID);
@@ -18078,7 +18076,7 @@ public class ApiMgtDAO {
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId =
                         APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
-                String tenantDomain = getTenantDomainFromTenantId(tenantId);
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
 
                 // Adding to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection
@@ -18316,7 +18314,7 @@ public class ApiMgtDAO {
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId =
                         APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
-                String tenantDomain = getTenantDomainFromTenantId(tenantId);
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
 
                 //Remove Current API Product entries from AM_API_URL_MAPPING table
                 PreparedStatement removeURLMappingsFromCurrentAPIProduct = connection.prepareStatement(

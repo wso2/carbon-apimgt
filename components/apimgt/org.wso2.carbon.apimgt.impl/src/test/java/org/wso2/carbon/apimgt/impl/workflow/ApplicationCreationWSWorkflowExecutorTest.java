@@ -95,7 +95,6 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 				Integer.parseInt(workflowDTO.getWorkflowReference()),
 				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
 
-
 	}
 
 	@Test
