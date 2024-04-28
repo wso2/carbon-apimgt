@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Pagination;
 import org.wso2.carbon.apimgt.api.model.Notification;
 import org.wso2.carbon.apimgt.api.model.NotificationList;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
@@ -99,14 +100,14 @@ public class PortalNotificationDAO {
 
     private String convertMetadataToJson(PortalNotificationMetaData metaData) {
         JSONObject json = new JSONObject();
-        json.put("apiName", metaData.getApi());
-        json.put("apiVersion", metaData.getApiVersion());
-        json.put("apiContext", metaData.getApiContext());
-        json.put("action", metaData.getAction());
-        json.put("applicationName", metaData.getApplicationName());
-        json.put("requestedTier", metaData.getRequestedTier());
-        json.put("revisionId", metaData.getRevisionId());
-        json.put("comment", metaData.getComment());
+        json.put(APIConstants.PortalNotifications.API_NAME, metaData.getApi());
+        json.put(APIConstants.PortalNotifications.API_VERSION, metaData.getApiVersion());
+        json.put(APIConstants.PortalNotifications.API_CONTEXT, metaData.getApiContext());
+        json.put(APIConstants.PortalNotifications.ACTION, metaData.getAction());
+        json.put(APIConstants.PortalNotifications.APPLICATION_NAME, metaData.getApplicationName());
+        json.put(APIConstants.PortalNotifications.REQUESTED_TIER, metaData.getRequestedTier());
+        json.put(APIConstants.PortalNotifications.REVISION_ID, metaData.getRevisionId());
+        json.put(APIConstants.PortalNotifications.COMMENT, metaData.getComment());
         return json.toJSONString();
     }
 
@@ -183,20 +184,20 @@ public class PortalNotificationDAO {
             JSONParser parser = new JSONParser();
             JSONObject json = (JSONObject) parser.parse(notificationMetadata);
 
-            String comment = (String) json.get("comment");
-            String apiName = (String) json.get("apiName");
-            String apiVersion = (String) json.get("apiVersion");
-            String apiContext = (String) json.get("apiContext");
-            String action = (String) json.get("action");
-            String revisionId = (String) json.get("revisionId");
-            String applicationName = (String) json.get("applicationName");
-            String requestedTier = (String) json.get("requestedTier");
+            String comment = (String) json.get(APIConstants.PortalNotifications.COMMENT);
+            String apiName = (String) json.get(APIConstants.PortalNotifications.API_NAME);
+            String apiVersion = (String) json.get(APIConstants.PortalNotifications.API_VERSION);
+            String apiContext = (String) json.get(APIConstants.PortalNotifications.API_CONTEXT);
+            String action = (String) json.get(APIConstants.PortalNotifications.ACTION);
+            String revisionId = (String) json.get(APIConstants.PortalNotifications.REVISION_ID);
+            String applicationName = (String) json.get(APIConstants.PortalNotifications.APPLICATION_NAME);
+            String requestedTier = (String) json.get(APIConstants.PortalNotifications.REQUESTED_TIER);
             String status;
 
-            if (comment.equals("APPROVED")) {
-                status = "approved";
+            if ("APPROVED".equals(comment)) {
+                status = APIConstants.PortalNotifications.STATUS_APPROVED;
             } else {
-                status = "rejected";
+                status = APIConstants.PortalNotifications.STATUS_REJECTED;
             }
 
             switch (notificationType) {

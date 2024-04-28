@@ -85,7 +85,8 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
     }
 
     private List<PortalNotificationEndUserDTO> getDestinationUser(
-            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO, String tenantDomainOfUser) {
+            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO, String tenantDomainOfUser)
+            throws APIManagementException {
         List<PortalNotificationEndUserDTO> destinationUserList = new ArrayList<>();
         String destinationUser = null;
 
@@ -124,8 +125,10 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         if (workflowDTO.getWorkflowType()
                 .equals(WorkflowConstants.WF_TYPE_AM_API_STATE) || workflowDTO.getWorkflowType()
                 .equals(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE)) {
-            if (workflowDTO.getMetadata("Action").equals("Block") || workflowDTO.getMetadata("Action")
-                    .equals("Deprecate") || workflowDTO.getMetadata("Action").equals("Retire")) {
+            if (workflowDTO.getMetadata("Action")
+                    .equals(APIConstants.PortalNotifications.API_BLOCK) || workflowDTO.getMetadata("Action")
+                    .equals(APIConstants.PortalNotifications.API_DEPRECATE) || workflowDTO.getMetadata("Action")
+                    .equals(APIConstants.PortalNotifications.API_RETIRE)) {
                 String apiUUID = null;
                 String apiName = workflowDTO.getProperties("apiName");
                 String apiContext = workflowDTO.getMetadata("ApiContext");
@@ -142,11 +145,11 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
                         PortalNotificationEndUserDTO endUser = new PortalNotificationEndUserDTO();
                         endUser.setDestinationUser(subscriber.getSubscriber().getName());
                         endUser.setOrganization(subscriber.getOrganization());
-                        endUser.setPortalToDisplay("developer");
+                        endUser.setPortalToDisplay(APIConstants.PortalNotifications.DEV_PORTAL);
                         destinationUserList.add(endUser);
                     }
                 } catch (APIManagementException e) {
-                    System.out.println("Error while getting subscribers of API - getDestinationUser()");
+                    APIUtil.handleException("Error while getting subscribers of API - getDestinationUser()", e);
                 }
             }
         }
@@ -161,13 +164,13 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
                     }
                     endUser.setDestinationUser(user.getUsername());
                     endUser.setOrganization(user.getTenantDomain());
-                    endUser.setPortalToDisplay("developer");
+                    endUser.setPortalToDisplay(APIConstants.PortalNotifications.DEV_PORTAL);
                     destinationUserList.add(endUser);
                 }
             } catch (APIManagementException e) {
-                System.out.println("Error while getting users belong to group - getDestinationUser()");
+                APIUtil.handleException("Error while getting users belong to group - getDestinationUser()", e);
             } catch (UserStoreException e) {
-                throw new RuntimeException(e);
+                APIUtil.handleException("User-Store Exception ", e);
             }
         }
 
@@ -178,12 +181,16 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
             org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO) {
         PortalNotificationMetaData portalNotificationMetaData = new PortalNotificationMetaData();
 
-        portalNotificationMetaData.setApi(workflowDTO.getProperties("apiName"));
-        portalNotificationMetaData.setApiVersion(workflowDTO.getProperties("apiVersion"));
-        portalNotificationMetaData.setAction(workflowDTO.getProperties("action"));
-        portalNotificationMetaData.setApplicationName(workflowDTO.getProperties("applicationName"));
-        portalNotificationMetaData.setRequestedTier(workflowDTO.getProperties("requestedTier"));
-        portalNotificationMetaData.setRevisionId(workflowDTO.getProperties("revisionId"));
+        portalNotificationMetaData.setApi(workflowDTO.getProperties(APIConstants.PortalNotifications.API_NAME));
+        portalNotificationMetaData.setApiVersion(
+                workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION));
+        portalNotificationMetaData.setAction(workflowDTO.getProperties(APIConstants.PortalNotifications.ACTION));
+        portalNotificationMetaData.setApplicationName(
+                workflowDTO.getProperties(APIConstants.PortalNotifications.APPLICATION_NAME));
+        portalNotificationMetaData.setRequestedTier(
+                workflowDTO.getProperties(APIConstants.PortalNotifications.REQUESTED_TIER));
+        portalNotificationMetaData.setRevisionId(
+                workflowDTO.getProperties(APIConstants.PortalNotifications.REVISION_ID));
         portalNotificationMetaData.setComment(workflowDTO.getComments());
 
         if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(
@@ -200,9 +207,9 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         case WorkflowConstants.WF_TYPE_AM_API_STATE:
         case WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE:
         case WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT:
-            return "publisher";
+            return APIConstants.PortalNotifications.PUBLISHER_PORTAL;
         default:
-            return "developer";
+            return APIConstants.PortalNotifications.DEV_PORTAL;
         }
     }
 
@@ -240,7 +247,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
                 }
             }
         } catch (APIManagementException e) {
-            System.out.println("Error while getting API usage by API ID - getAPIUsageByAPIId()");
+            APIUtil.handleException("Error while getting API usage by API ID - getAPIUsageByAPIId()", e);
         }
 
         return subscribedAPIs;
@@ -281,7 +288,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
                         .getAPIManagerConfigurationService().getAPIManagerConfiguration();
                 String claim = config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_CLAIM_URI);
                 if (StringUtils.isBlank(claim)) {
-                    claim = "http://wso2.org/claims/organization";
+                    claim = APIConstants.PortalNotifications.DEFAULT_CLAIM;
                 }
                 users = abstractManager.getUserListWithID(claim, groupId, "default");
             }

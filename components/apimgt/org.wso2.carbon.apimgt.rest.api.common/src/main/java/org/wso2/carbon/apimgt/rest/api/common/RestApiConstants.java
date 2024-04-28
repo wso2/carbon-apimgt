@@ -351,4 +351,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_GATEWAY_POLICIES = "gateway-policies";
 
     public static final String AUTH_TOKEN_INFO = "AUTH_TOKEN_INFO";
+
+    public static final String PUBLISHER_PORTAL = "publisher";
+    public static final String DEV_PORTAL = "devportal";
 }

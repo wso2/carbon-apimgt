@@ -39,6 +39,7 @@ import javax.ws.rs.core.Response;
 public class NotificationsApiServiceImpl implements NotificationsApiService {
 
     private static final Log log = LogFactory.getLog(NotificationsApiServiceImpl.class);
+    private final String portalToDisplay = RestApiConstants.PUBLISHER_PORTAL;
 
     @Override
     public Response getNotifications(String sortOrder, Integer limit, Integer offset, MessageContext messageContext)
@@ -48,8 +49,6 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DESCENDING_SORT_ORDER;
         NotificationList notificationList;
-        String portalToDisplay = "publisher";
-
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -73,7 +72,6 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
             MessageContext messageContext) throws APIManagementException {
         NotificationList notificationList;
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String portalToDisplay = "publisher";
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -99,7 +97,6 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
             throws APIManagementException {
         Notification notification;
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String portalToDisplay = "publisher";
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -124,7 +121,6 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
     public Response deleteNotifications(MessageContext messageContext) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String portalToDisplay = "publisher";
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -147,7 +143,6 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
     public Response deleteNotification(String notificationId, MessageContext messageContext)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String portalToDisplay = "publisher";
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
