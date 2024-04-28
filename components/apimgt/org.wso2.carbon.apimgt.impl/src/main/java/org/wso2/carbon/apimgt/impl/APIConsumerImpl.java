@@ -4597,32 +4597,85 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return true;
     }
 
+    /**
+     * Get the list of Notifications belongs to a particular developer user
+     *
+     * @param username
+     * @param organization
+     * @param portalToDisplay
+     * @param sortOrder
+     * @param limit
+     * @param offset
+     * @return List of Notifications
+     * @throws APIManagementException if failed to get notifications
+     */
     @Override
-    public NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder, Integer limit,
-            Integer offset) throws APIManagementException{
-        return portalNotificationDAO.getNotifications(username, organization, portalToDisplay, sortOrder, limit, offset);
+    public NotificationList getNotifications(String username, String organization, String portalToDisplay,
+            String sortOrder, Integer limit, Integer offset) throws APIManagementException {
+        return portalNotificationDAO.getNotifications(username, organization, portalToDisplay, sortOrder, limit,
+                offset);
     }
 
+    /**
+     * Mark all the notifications as read for a particular developer user
+     *
+     * @param username
+     * @param organization
+     * @param portalToDisplay
+     * @return List of Notifications
+     * @throws APIManagementException if failed to mark all notifications as read
+     */
     @Override
     public NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay)
             throws APIManagementException {
         return portalNotificationDAO.markAllNotificationsAsRead(username, organization, portalToDisplay);
     }
 
+    /**
+     * Mark a particular notification as read for a particular developer user
+     *
+     * @param username
+     * @param organization
+     * @param notificationId
+     * @param portalToDisplay
+     * @return updated Notification after marking as read
+     * @throws APIManagementException if failed to mark the notification as read
+     */
     @Override
-    public Notification markNotificationAsReadById(String username, String organization, String notificationId, String portalToDisplay)
-            throws APIManagementException {
-        return portalNotificationDAO.markNotificationAsReadById(username, organization, notificationId, portalToDisplay);
+    public Notification markNotificationAsReadById(String username, String organization, String notificationId,
+            String portalToDisplay) throws APIManagementException {
+        return portalNotificationDAO.markNotificationAsReadById(username, organization, notificationId,
+                portalToDisplay);
     }
 
+    /**
+     * Delete a particular notification for a particular developer user
+     *
+     * @param username
+     * @param organization
+     * @param notificationId
+     * @param portalToDisplay
+     * @return true after deleting the notifications
+     * @throws APIManagementException if failed to delete the notification
+     */
     @Override
-    public boolean deleteNotificationById(String username, String organization, String notificationId, String portalToDisplay)
-            throws APIManagementException {
+    public boolean deleteNotificationById(String username, String organization, String notificationId,
+            String portalToDisplay) throws APIManagementException {
         return portalNotificationDAO.deleteNotificationById(username, organization, notificationId, portalToDisplay);
     }
 
+    /**
+     * Delete all the notifications for a particular developer user
+     *
+     * @param username
+     * @param organization
+     * @param portalToDisplay
+     * @return true after deleting all notifications
+     * @throws APIManagementException if failed to delete all notifications
+     */
     @Override
-    public boolean deleteAllNotifications(String username, String organization, String portalToDisplay) throws APIManagementException {
+    public boolean deleteAllNotifications(String username, String organization, String portalToDisplay)
+            throws APIManagementException {
         return portalNotificationDAO.deleteAllNotifications(username, organization, portalToDisplay);
     }
 

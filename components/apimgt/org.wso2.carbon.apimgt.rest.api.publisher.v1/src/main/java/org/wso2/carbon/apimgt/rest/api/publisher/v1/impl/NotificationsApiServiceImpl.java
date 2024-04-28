@@ -56,11 +56,16 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             notificationList = apiProvider.getNotifications(username, organization, portalToDisplay, sortOrder, limit,
                     offset);
+            return Response.ok().entity(notificationList).build();
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while getting notifications", e);
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError("No any notification found", e, log);
+            } else {
+                String errorMessage = "Error while getting notifications";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
-
-        return Response.ok().entity(notificationList).build();
+        return null;
     }
 
     @Override
@@ -76,11 +81,16 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
             if (notificationList == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+            return Response.ok().entity(notificationList).build();
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while getting notifications", e);
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError("No any notification found", e, log);
+            } else {
+                String errorMessage = "Error while marking notifications as read";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
-
-        return Response.ok().entity(notificationList).build();
+        return null;
     }
 
     @Override
@@ -98,11 +108,16 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
             if (notification == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+            return Response.ok().entity(notification).build();
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while getting notification", e);
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError("No any notification found", e, log);
+            } else {
+                String errorMessage = "Error while marking the notification " + notificationId + " as read";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
-
-        return Response.ok().entity(notification).build();
+        return null;
     }
 
     @Override
@@ -118,7 +133,12 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while deleting notifications", e);
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError("No any notification found", e, log);
+            } else {
+                String errorMessage = "Error while deleting notifications";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return Response.ok().build();
     }
@@ -137,7 +157,12 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while deleting notifications", e);
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_NOTIFICATION, notificationId, e, log);
+            } else {
+                String errorMessage = "Error while deleting the notification";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return Response.ok().build();
     }

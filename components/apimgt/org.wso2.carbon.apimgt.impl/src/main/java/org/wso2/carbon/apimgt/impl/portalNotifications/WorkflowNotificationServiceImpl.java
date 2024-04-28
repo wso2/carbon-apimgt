@@ -45,7 +45,8 @@ import org.wso2.carbon.user.core.common.User;
 import org.wso2.carbon.user.core.service.RealmService;
 
 public class WorkflowNotificationServiceImpl implements PortalNotificationService<WorkflowDTO> {
-    public void sendPortalNotifications(WorkflowDTO workflowDTO, String tenantDomainOfUser) {
+    public void sendPortalNotifications(WorkflowDTO workflowDTO, String tenantDomainOfUser)
+            throws APIManagementException {
         PortalNotificationDTO portalNotificationsDTO = new PortalNotificationDTO();
         portalNotificationsDTO.setNotificationType(getNotificationType(workflowDTO.getWorkflowType()));
         portalNotificationsDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));

@@ -1920,7 +1920,8 @@ public interface APIProvider extends APIManager {
      * @param offset
      * @return NotificationList
      */
-    NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder, Integer limit, Integer offset) throws APIManagementException;
+    NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder,
+            Integer limit, Integer offset) throws APIManagementException;
 
     /**
      * Method to delete the notifications of a given user
@@ -1930,7 +1931,8 @@ public interface APIProvider extends APIManager {
      * @param portalToDisplay
      * @return true after successful deletion
      */
-    boolean deleteAllNotifications(String username, String organization, String portalToDisplay) throws APIManagementException;
+    boolean deleteAllNotifications(String username, String organization, String portalToDisplay)
+            throws APIManagementException;
 
     /**
      * Method to mark a notification as read
@@ -1941,7 +1943,8 @@ public interface APIProvider extends APIManager {
      * @param portalToDisplay
      * @return updated Notification
      */
-    Notification markNotificationAsReadById(String username, String organization, String notificationId, String portalToDisplay);
+    Notification markNotificationAsReadById(String username, String organization, String notificationId,
+            String portalToDisplay) throws APIManagementException;
 
     /**
      * Method to delete a notification by notification id
@@ -1952,7 +1955,8 @@ public interface APIProvider extends APIManager {
      * @param portalToDisplay
      * @return true after successful deletion
      */
-    boolean deleteNotificationById(String username, String organization, String notificationId, String portalToDisplay);
+    boolean deleteNotificationById(String username, String organization, String notificationId, String portalToDisplay)
+            throws APIManagementException;
 
     /**
      * Method to mark all notifications as read
@@ -1962,6 +1966,7 @@ public interface APIProvider extends APIManager {
      * @param portalToDisplay
      * @return updated NotificationList
      */
-    NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay);
+    NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay)
+            throws APIManagementException;
 
 }
