@@ -24,7 +24,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface NotificationsApiService {
-      public Response deleteNotification(String notificationId, MessageContext messageContext) throws APIManagementException;
+      public Response deleteNotificationById(String notificationId, MessageContext messageContext) throws APIManagementException;
       public Response deleteNotifications(MessageContext messageContext) throws APIManagementException;
       public Response getNotifications(String sortOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
       public Response markAllNotificationsAsRead(PatchAllNotificationsRequestDTO patchAllNotificationsRequestDTO, MessageContext messageContext) throws APIManagementException;

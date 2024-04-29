@@ -41,7 +41,7 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
     private static final Log log = LogFactory.getLog(NotificationsApiServiceImpl.class);
     private final String portalToDisplay = RestApiConstants.DEV_PORTAL;
 
-    public Response deleteNotification(String notificationId, MessageContext messageContext)
+    public Response deleteNotificationById(String notificationId, MessageContext messageContext)
             throws APIManagementException {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();

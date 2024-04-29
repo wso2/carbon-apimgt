@@ -55,8 +55,8 @@ NotificationsApiService delegate = new NotificationsApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response deleteNotification(@ApiParam(value = "**NOTIFICATION ID** consisting of the **UUID** of the NOTIFICATION ",required=true) @PathParam("notificationId") String notificationId) throws APIManagementException{
-        return delegate.deleteNotification(notificationId, securityContext);
+    public Response deleteNotificationById(@ApiParam(value = "**NOTIFICATION ID** consisting of the **UUID** of the NOTIFICATION ",required=true) @PathParam("notificationId") String notificationId) throws APIManagementException{
+        return delegate.deleteNotificationById(notificationId, securityContext);
     }
 
     @DELETE

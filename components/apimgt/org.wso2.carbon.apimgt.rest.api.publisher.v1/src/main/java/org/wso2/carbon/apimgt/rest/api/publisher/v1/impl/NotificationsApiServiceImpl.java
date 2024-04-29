@@ -140,7 +140,7 @@ public class NotificationsApiServiceImpl implements NotificationsApiService {
     }
 
     @Override
-    public Response deleteNotification(String notificationId, MessageContext messageContext)
+    public Response deleteNotificationById(String notificationId, MessageContext messageContext)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {

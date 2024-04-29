@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.impl.portalNotifications;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -33,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 
 import java.util.ArrayList;
@@ -45,6 +48,9 @@ import org.wso2.carbon.user.core.common.User;
 import org.wso2.carbon.user.core.service.RealmService;
 
 public class WorkflowNotificationServiceImpl implements PortalNotificationService<WorkflowDTO> {
+
+    private static final Log log = LogFactory.getLog(WorkflowNotificationServiceImpl.class);
+
     public void sendPortalNotifications(WorkflowDTO workflowDTO, String tenantDomainOfUser)
             throws APIManagementException {
         PortalNotificationDTO portalNotificationsDTO = new PortalNotificationDTO();
@@ -56,7 +62,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         boolean result = PortalNotificationDAO.getInstance().addNotification(portalNotificationsDTO);
 
         if (!result) {
-            System.out.println("Error while adding publisher developer notification - sedPubDevNotification()");
+            log.error("Error while adding publisher developer notification - sendPortalNotifications()");
         }
     }
 
@@ -84,8 +90,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         return null;
     }
 
-    private List<PortalNotificationEndUserDTO> getDestinationUser(
-            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO, String tenantDomainOfUser)
+    private List<PortalNotificationEndUserDTO> getDestinationUser(WorkflowDTO workflowDTO, String tenantDomainOfUser)
             throws APIManagementException {
         List<PortalNotificationEndUserDTO> destinationUserList = new ArrayList<>();
         String destinationUser = null;
@@ -177,8 +182,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         return destinationUserList;
     }
 
-    private PortalNotificationMetaData getNotificationMetaData(
-            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO) {
+    private PortalNotificationMetaData getNotificationMetaData(WorkflowDTO workflowDTO) {
         PortalNotificationMetaData portalNotificationMetaData = new PortalNotificationMetaData();
 
         portalNotificationMetaData.setApi(workflowDTO.getProperties(APIConstants.PortalNotifications.API_NAME));
@@ -282,7 +286,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
             if (realm != null) {
-                org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
+                UserStoreManager manager = realm.getUserStoreManager();
                 AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfigurationService().getAPIManagerConfiguration();

@@ -3999,7 +3999,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://localhost:9443/api/am/devportal/v3/notifications/863aef13-dab4-48b4-bf58-7363cd29601a"'
-      operationId: deleteNotification
+      operationId: deleteNotificationById
 
 
 components:
