@@ -79,6 +79,8 @@ public class PortalNotificationDAO {
             }
 
         } catch (SQLException e) {
+            handleException("Error while adding notification - SQL", e);
+        } catch (APIManagementException e) {
             handleException("Error while adding notification", e);
         }
         return false;
@@ -111,8 +113,8 @@ public class PortalNotificationDAO {
         return json.toJSONString();
     }
 
-    public NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder, Integer limit,
-            Integer offset) throws APIManagementException {
+    public NotificationList getNotifications(String username, String organization, String portalToDisplay,
+            String sortOrder, Integer limit, Integer offset) throws APIManagementException {
 
         List<Notification> list = new ArrayList<Notification>();
         NotificationList notificationList = new NotificationList();
@@ -202,8 +204,8 @@ public class PortalNotificationDAO {
 
             switch (notificationType) {
             case "API_STATE_CHANGE":
-                finalComment = "API State Change request to " + action + " the API: " + apiName + ", version: " + apiVersion
-                        + " that has the context: " + apiContext + " has been " + status + ".";
+                finalComment = "API State Change request to " + action + " the API: " + apiName + ", version: "
+                        + apiVersion + " that has the context: " + apiContext + " has been " + status + ".";
                 break;
             case "API_PRODUCT_STATE_CHANGE":
                 finalComment = "API Product State Change request of the API PRODUCT: " + apiName + ", version: "
@@ -223,8 +225,8 @@ public class PortalNotificationDAO {
                 break;
             case "SUBSCRIPTION_UPDATE":
                 finalComment = "Subscription Update request for the " + requestedTier + " for the API: " + apiName
-                        + " version: " + apiVersion + " using Application: " + applicationName + " has been " + status
-                        + ".";
+                        + " version: " + apiVersion + " using Application: " + applicationName + " has been "
+                        + status + ".";
                 break;
             case "SUBSCRIPTION_DELETION":
                 finalComment = "Subscription Deletion request for the API: " + apiName + " version: " + apiVersion
@@ -254,8 +256,7 @@ public class PortalNotificationDAO {
             throws APIManagementException {
 
         String sqlQuery = SQLConstants.PortalNotifications.DELETE_ALL_NOTIFICATIONS_OF_USER;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setString(1, username);
             ps.setString(2, organization);
             ps.setString(3, portalToDisplay);
@@ -273,13 +274,12 @@ public class PortalNotificationDAO {
         return false;
     }
 
-    public Notification markNotificationAsReadById(String username, String organization, String notificationId, String portalToDisplay)
-            throws APIManagementException {
+    public Notification markNotificationAsReadById(String username, String organization, String notificationId,
+            String portalToDisplay) throws APIManagementException {
 
         Notification notification;
         String sqlQuery = SQLConstants.PortalNotifications.MARK_NOTIFICATION_AS_READ;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setString(1, notificationId);
             ps.setString(2, username);
             ps.setString(3, organization);
@@ -292,13 +292,15 @@ public class PortalNotificationDAO {
                 }
             }
         } catch (SQLException e) {
+            handleException("Failed to mark notification as read - SQL", e);
+        } catch (APIManagementException e) {
             handleException("Failed to mark notification as read", e);
         }
         return null;
     }
 
-    private Notification getNotificationById(String notificationId, String username, String organization, String portalToDisplay,
-            Connection conn) throws APIManagementException {
+    private Notification getNotificationById(String notificationId, String username, String organization,
+            String portalToDisplay, Connection conn) throws APIManagementException {
 
         String sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATION_BY_ID;
         try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
@@ -325,12 +327,11 @@ public class PortalNotificationDAO {
         return null;
     }
 
-    public boolean deleteNotificationById(String username, String organization, String notificationId, String portalToDisplay)
-            throws APIManagementException {
+    public boolean deleteNotificationById(String username, String organization, String notificationId,
+            String portalToDisplay) throws APIManagementException {
 
         String sqlQuery = SQLConstants.PortalNotifications.DELETE_NOTIFICATION_BY_ID;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sqlQuery)){
+        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setString(1, notificationId);
             ps.setString(2, username);
             ps.setString(3, organization);
@@ -361,35 +362,36 @@ public class PortalNotificationDAO {
             ps.setString(3, portalToDisplay);
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
-                return getNotifications(username, organization, portalToDisplay,"desc", 10, 0);
+                return getNotifications(username, organization, portalToDisplay, "desc", 10, 0);
             }
         } catch (SQLException e) {
+            handleException("Failed to mark all notifications as read - SQL", e);
+        } catch (APIManagementException e) {
             handleException("Failed to mark all notifications as read", e);
         }
         return null;
     }
 
-    public String getAPIUUIDUsingNameContextVersion(String apiName, String apiContext, String apiVersion, String organization)
-            throws APIManagementException {
+    public String getAPIUUIDUsingNameContextVersion(String apiName, String apiContext, String apiVersion,
+            String organization) throws APIManagementException {
 
-            String apiUUID = null;
-            String sqlQuery = SQLConstants.PortalNotifications.GET_API_UUID_USING_NAME_CONTEXT_VERSION;
-            try (Connection connection = APIMgtDBUtil.getConnection();
-                    PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
-                ps.setString(1, apiName);
-                ps.setString(2, apiContext);
-                ps.setString(3, apiVersion);
-                ps.setString(4, organization);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        apiUUID = rs.getString("API_UUID");
-                    }
+        String apiUUID = null;
+        String sqlQuery = SQLConstants.PortalNotifications.GET_API_UUID_USING_NAME_CONTEXT_VERSION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiName);
+            ps.setString(2, apiContext);
+            ps.setString(3, apiVersion);
+            ps.setString(4, organization);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    apiUUID = rs.getString("API_UUID");
                 }
-            } catch (SQLException e) {
-                handleException("Failed to retrieve API UUID using name, context and version", e);
             }
-            return apiUUID;
-
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API UUID using name, context and version", e);
+        }
+        return apiUUID;
 
     }
 

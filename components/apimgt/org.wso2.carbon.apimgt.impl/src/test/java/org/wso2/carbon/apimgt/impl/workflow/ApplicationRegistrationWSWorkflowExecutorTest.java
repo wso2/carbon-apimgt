@@ -45,16 +45,19 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.portalNotifications.WorkflowNotificationServiceImpl;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import javax.xml.stream.XMLStreamException;
+
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * ApplicationRegistrationWSWorkflowExecutor test cases
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ApiMgtDAO.class, ApplicationRegistrationWSWorkflowExecutor.class,
-        ServiceReferenceHolder.class, AXIOMUtil.class, KeyManagerHolder.class})
+        ServiceReferenceHolder.class, AXIOMUtil.class, KeyManagerHolder.class, WorkflowNotificationServiceImpl.class})
 public class ApplicationRegistrationWSWorkflowExecutorTest {
 
     private ApplicationRegistrationWSWorkflowExecutor applicationRegistrationWSWorkflowExecutor;
@@ -67,6 +70,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
     private String adminUsername = "admin";
     private String adminPassword = "admin";
     private String callBaclURL = "http://localhost:8090/playground2.0/oauth2client";
+    WorkflowNotificationServiceImpl workflowsApiService;
 
 
     @Before
@@ -107,6 +111,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         kmConfigDTO.setOrganization("carbon.super");
         kmConfigDTO.setName("default");
         PowerMockito.when(apiMgtDAO.getKeyManagerConfigurationByUUID("default")).thenReturn(kmConfigDTO);
+        workflowsApiService = PowerMockito.mock(WorkflowNotificationServiceImpl.class);
     }
 
     @Test
@@ -191,7 +196,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         applicationRegistrationWSWorkflowExecutor.setUsername(adminUsername);
         applicationRegistrationWSWorkflowExecutor.setPassword(adminPassword.toCharArray());
         workflowDTO.setStatus(WorkflowStatus.REJECTED);
-        PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
+        PowerMockito.doNothing().when(workflowsApiService).sendPortalNotifications(any(WorkflowDTO.class), any(String.class));
         try {
             Assert.assertNotNull(applicationRegistrationWSWorkflowExecutor.complete(workflowDTO));
         } catch (WorkflowException e) {
@@ -217,7 +222,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         applicationRegistrationWSWorkflowExecutor.setPassword(adminPassword.toCharArray());
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         workflowDTO.setKeyManager("default");
-        PowerMockito.suppress(PowerMockito.method(WorkflowExecutor.class, "sendPortalNotifications", WorkflowDTO.class));
+        PowerMockito.doNothing().when(workflowsApiService).sendPortalNotifications(any(WorkflowDTO.class), any(String.class));
         try {
             Assert.assertNotNull(applicationRegistrationWSWorkflowExecutor.complete(workflowDTO));
         } catch (WorkflowException e) {
