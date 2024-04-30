@@ -51,18 +51,21 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
 
     private static final Log log = LogFactory.getLog(WorkflowNotificationServiceImpl.class);
 
-    public void sendPortalNotifications(WorkflowDTO workflowDTO, String tenantDomainOfUser)
-            throws APIManagementException {
-        PortalNotificationDTO portalNotificationsDTO = new PortalNotificationDTO();
-        portalNotificationsDTO.setNotificationType(getNotificationType(workflowDTO.getWorkflowType()));
-        portalNotificationsDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));
-        portalNotificationsDTO.setNotificationMetadata(getNotificationMetaData(workflowDTO));
-        portalNotificationsDTO.setEndUsers(getDestinationUser(workflowDTO, tenantDomainOfUser));
+    public void sendPortalNotifications(WorkflowDTO workflowDTO, String tenantDomainOfUser) {
+        try {
+            PortalNotificationDTO portalNotificationsDTO = new PortalNotificationDTO();
+            portalNotificationsDTO.setNotificationType(getNotificationType(workflowDTO.getWorkflowType()));
+            portalNotificationsDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));
+            portalNotificationsDTO.setNotificationMetadata(getNotificationMetaData(workflowDTO));
+            portalNotificationsDTO.setEndUsers(getDestinationUser(workflowDTO, tenantDomainOfUser));
 
-        boolean result = PortalNotificationDAO.getInstance().addNotification(portalNotificationsDTO);
+            boolean result = PortalNotificationDAO.getInstance().addNotification(portalNotificationsDTO);
 
-        if (!result) {
-            log.error("Error while adding publisher developer notification - sendPortalNotifications()");
+            if (!result) {
+                log.error("Error while adding publisher developer notification - sendPortalNotifications()");
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while sending portal notifications - APIManagementException");
         }
     }
 
