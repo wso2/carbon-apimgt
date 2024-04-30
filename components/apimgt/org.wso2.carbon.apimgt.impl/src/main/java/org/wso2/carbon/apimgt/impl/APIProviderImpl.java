@@ -1005,7 +1005,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action, api.getApiSecurity());
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action, api.getApiSecurity(), api.getVisibility());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         // Extracting API details for the recommendation system
@@ -4574,7 +4574,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(), productId,
                 product.getId().getUUID(), product.getId().getVersion(), product.getType(), product.getContext(),
-                product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE, product.getApiSecurity());
+                product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE, product.getApiSecurity(), product.getState(), product.getVisibility());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         return apiToProductResourceMapping;
