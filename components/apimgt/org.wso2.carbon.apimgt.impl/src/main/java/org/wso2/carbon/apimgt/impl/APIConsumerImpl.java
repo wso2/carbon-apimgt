@@ -1640,6 +1640,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                      * an extension to populate it.
                      */
                     applicationAttributes.remove(attributeName);
+                } else if (BooleanUtils.isFalse(required) && BooleanUtils.isFalse(hidden)) {
+                    /*
+                     * If an optional attribute is not provided, we add it with an empty value.
+                     */
+                    applicationAttributes.putIfAbsent(attributeName, StringUtils.EMPTY);
                 }
             }
             application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes,
@@ -1657,6 +1662,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setCallbackUrl(null);
         }
         int applicationId = apiMgtDAO.addApplication(application, userId, organization);
+        Application createdApplication = apiMgtDAO.getApplicationById(applicationId);
 
         JSONObject appLogObject = new JSONObject();
         appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
@@ -1722,18 +1728,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                 ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                        organization, applicationId, application.getUUID(), application.getName(),
-                        application.getTokenType(),
-                        application.getTier(), application.getGroupId(), application.getApplicationAttributes(),
+                        organization, applicationId, createdApplication.getUUID(), createdApplication.getName(),
+                        createdApplication.getTokenType(),
+                        createdApplication.getTier(), createdApplication.getGroupId(), createdApplication.getApplicationAttributes(),
                          userId);
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                    organization, applicationId, application.getUUID(), application.getName(),
-                    application.getTokenType(), application.getTier(), application.getGroupId(),
-                    application.getApplicationAttributes(), userId);
+                    organization, applicationId, createdApplication.getUUID(), createdApplication.getName(),
+                    createdApplication.getTokenType(), createdApplication.getTier(), createdApplication.getGroupId(),
+                    createdApplication.getApplicationAttributes(), userId);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         return applicationId;

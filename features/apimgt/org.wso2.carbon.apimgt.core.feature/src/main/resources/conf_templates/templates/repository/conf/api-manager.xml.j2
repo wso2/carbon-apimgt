@@ -1343,6 +1343,8 @@
     </ApplicationConfiguration>
     {% endif %}
 
+    <EnableEmptyValuesInApplicationAttributes>{{apim.devportal.enable_empty_values_in_application_attributes}}</EnableEmptyValuesInApplicationAttributes>
+
     {% if apim.ai_security is defined %}
     <AISecurityHandler>
         {% if apim.ai_security.operation_mode is defined %}
