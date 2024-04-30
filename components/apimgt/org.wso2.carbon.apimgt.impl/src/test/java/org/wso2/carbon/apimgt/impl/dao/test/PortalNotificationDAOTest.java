@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
+ *  WSO2 LLC. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -35,7 +35,11 @@ import org.wso2.carbon.apimgt.api.model.NotificationList;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.portalNotifications.*;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationDAO;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationDTO;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationEndUserDTO;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationMetaData;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationType;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
@@ -50,8 +54,6 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
@@ -75,8 +77,7 @@ public class PortalNotificationDAOTest {
     private static void initializeDatabase(String configFilePath)
             throws IOException, XMLStreamException, NamingException {
 
-        InputStream in;
-        in = FileUtils.openInputStream(new File(configFilePath));
+        InputStream in = FileUtils.openInputStream(new File(configFilePath));
         StAXOMBuilder builder = new StAXOMBuilder(in);
         String dataSource = builder.getDocumentElement().getFirstChildWithName(new QName("DataSourceName")).getText();
         OMElement databaseElement = builder.getDocumentElement().getFirstChildWithName(new QName("Database"));
@@ -158,14 +159,14 @@ public class PortalNotificationDAOTest {
     public void testMarkNotificationAsReadByIdSuccess() throws Exception {
         Notification notification = portalNotificationDAO.markNotificationAsReadById("helani", organization,
                 "1e2736ab-7882-4184-a1ba-6d3c07271b69", "publisher");
-        assertEquals(true, notification.getIsRead());
+        Assert.assertEquals(true, notification.getIsRead());
     }
 
     @Test
     public void testMarkAllNotificationsAsReadSuccess() throws Exception {
         NotificationList notificationList = portalNotificationDAO.markAllNotificationsAsRead("helani",
                 organization, "publisher");
-        assertEquals(true, notificationList.getList().get(0).getIsRead());
+        Assert.assertEquals(true, notificationList.getList().get(0).getIsRead());
     }
 
     @Test
@@ -186,7 +187,7 @@ public class PortalNotificationDAOTest {
     public void testGetAPIUUIDUsingNameContextVersionSuccess() throws Exception {
         String apiUUID = portalNotificationDAO.getAPIUUIDUsingNameContextVersion("testAPI1",
                 "/sample/api", "1.0.0", organization);
-        assertEquals("821b9824-eeca-4173-9f56-3dc6d46bd6eb", apiUUID);
+        Assert.assertEquals("821b9824-eeca-4173-9f56-3dc6d46bd6eb", apiUUID);
     }
 
     @Test
@@ -194,7 +195,7 @@ public class PortalNotificationDAOTest {
         Connection connection = APIMgtDBUtil.getConnection();
         int unreadCount = portalNotificationDAO.getUnreadNotificationCount("Nisha", organization,
                 "devportal", connection);
-        assertEquals(1, unreadCount);
+        Assert.assertEquals(1, unreadCount);
 
     }
 
@@ -213,34 +214,34 @@ public class PortalNotificationDAOTest {
         portalNotificationDTO.setNotificationMetadata(metaData);
         portalNotificationDTO.setEndUsers(endUsersList);
 
-        Exception exception = assertThrows(APIManagementException.class, () -> {
+        Exception exception = Assert.assertThrows(APIManagementException.class, () -> {
             portalNotificationDAO.addNotification(portalNotificationDTO);
         });
 
         String expectedMessage = "Error while adding notification";
         String actualMessage = exception.getMessage();
-        assertEquals(expectedMessage, actualMessage);
+        Assert.assertEquals(expectedMessage, actualMessage);
     }
 
     @Test
     public void testGetNotificationsFailure() throws APIManagementException {
         NotificationList notificationList = portalNotificationDAO.getNotifications("Rush", organization,
                 "publisher", "desc", 0, 10);
-        assertEquals(0, notificationList.getList().size());
+        Assert.assertEquals(0, notificationList.getList().size());
     }
 
     @Test
     public void testMarkNotificationAsReadByIdFailure() throws Exception {
         Notification notification = portalNotificationDAO.markNotificationAsReadById("Rush", organization,
                 "1e2736ab-7882-4184-a1ba-6d3c07271b69", "publisher");
-        assertNull(notification);
+        Assert.assertNull(notification);
     }
 
     @Test
     public void testMarkAllNotificationsAsReadFailure() throws Exception {
         NotificationList notificationList = portalNotificationDAO.markAllNotificationsAsRead("Rush",
                 organization, "publisher");
-        assertNull(notificationList);
+        Assert.assertNull(notificationList);
     }
 
     @Test
@@ -261,7 +262,7 @@ public class PortalNotificationDAOTest {
     public void testGetAPIUUIDUsingNameContextVersionFailure() throws Exception {
         String apiUUID = portalNotificationDAO.getAPIUUIDUsingNameContextVersion("MyApi", "/api",
                 "1.0.0", organization);
-        assertNull(apiUUID);
+        Assert.assertNull(apiUUID);
     }
 
     @Test
@@ -269,7 +270,7 @@ public class PortalNotificationDAOTest {
         Connection connection = APIMgtDBUtil.getConnection();
         int unreadCount = portalNotificationDAO.getUnreadNotificationCount("Rush", organization,
                 "publisher", connection);
-        assertEquals(0, unreadCount);
+        Assert.assertEquals(0, unreadCount);
     }
 
 }

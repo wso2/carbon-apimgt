@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License.
  *  You may obtain a copy of the License at
@@ -47,10 +47,20 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.user.core.common.User;
 import org.wso2.carbon.user.core.service.RealmService;
 
+/**
+ * This class used to insert workflow related notifications to the database,
+ * whenever admin approves or rejects a workflow request
+ */
 public class WorkflowNotificationServiceImpl implements PortalNotificationService<WorkflowDTO> {
 
     private static final Log log = LogFactory.getLog(WorkflowNotificationServiceImpl.class);
 
+    /**
+     * This method will insert workflow related notifications to the database
+     *
+     * @param workflowDTO  WorkflowDTO object that contains the workflow details
+     * @param tenantDomainOfUser Tenant domain of the user
+     */
     public void sendPortalNotifications(WorkflowDTO workflowDTO, String tenantDomainOfUser) {
         try {
             PortalNotificationDTO portalNotificationsDTO = new PortalNotificationDTO();
@@ -65,10 +75,16 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
                 log.error("Error while adding publisher developer notification - sendPortalNotifications()");
             }
         } catch (APIManagementException e) {
-            log.error("Error while sending portal notifications - APIManagementException");
+            log.error("Error while sending portal notifications");
         }
     }
 
+    /**
+     * This method will return the type of the notification
+     *
+     * @param workflowType  workflow type
+     * @return PortalNotificationType type of the notification
+     */
     private PortalNotificationType getNotificationType(String workflowType) {
         switch (workflowType) {
         case WorkflowConstants.WF_TYPE_AM_API_STATE:
@@ -93,6 +109,13 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         return null;
     }
 
+    /**
+     * This method will return a list of users that need to send notifications based on the workflow type
+     *
+     * @param workflowDTO  WorkflowDTO object that contains the workflow details
+     * @param tenantDomainOfUser Tenant domain of the user
+     * @return list of PortalNotificationEndUserDTO objects
+     */
     private List<PortalNotificationEndUserDTO> getDestinationUser(WorkflowDTO workflowDTO, String tenantDomainOfUser)
             throws APIManagementException {
         List<PortalNotificationEndUserDTO> destinationUserList = new ArrayList<>();
@@ -185,6 +208,12 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         return destinationUserList;
     }
 
+    /**
+     * This method will return a PortalNotificationMetaData object containing metadata related to the notification
+     *
+     * @param workflowDTO  WorkflowDTO object that contains the workflow details
+     * @return PortalNotificationMetaData object containing metadata related to the notification
+     */
     private PortalNotificationMetaData getNotificationMetaData(WorkflowDTO workflowDTO) {
         PortalNotificationMetaData portalNotificationMetaData = new PortalNotificationMetaData();
 
@@ -209,6 +238,12 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         return portalNotificationMetaData;
     }
 
+    /**
+     * This method will return the portal that the notifications should display
+     *
+     * @param workflowType  workflow type
+     * @return the portal that the notifications should display
+     */
     private String setPortalToDisplay(String workflowType) {
         switch (workflowType) {
         case WorkflowConstants.WF_TYPE_AM_API_STATE:
@@ -220,12 +255,28 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         }
     }
 
+    /**
+     * This method will return the UUID of a given API
+     *
+     * @param apiName Name of the API
+     * @param apiContext Context of the API
+     * @param apiVersion Version of the API
+     * @return the UUID of the API
+     */
     private String getAPIUUIDUsingNameContextVersion(String apiName, String apiContext, String apiVersion,
             String organization) throws APIManagementException {
         return PortalNotificationDAO.getInstance()
                 .getAPIUUIDUsingNameContextVersion(apiName, apiContext, apiVersion, organization);
     }
 
+    /**
+     * This method will return the list of subscribers of a given API
+     *
+     * @param apiUUID UUID of the API
+     * @param organization Organization of the API
+     * @param apiIdEmailReplaced APIIdentifier object with email replaced provider name
+     * @return the subscribers of the API
+     */
     private List<SubscribedAPI> getSubscribersOfAPI(String apiUUID, String organization,
             APIIdentifier apiIdEmailReplaced) throws APIManagementException {
         return getAPIUsageByAPIId(apiUUID, organization, apiIdEmailReplaced);
@@ -260,6 +311,13 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         return subscribedAPIs;
     }
 
+    /**
+     * This method will return all the users belongs to a given group
+     *
+     * @param workflowDTO WorkflowDTO object that contains the workflow details
+     * @param tenantDomainOfUser Tenant domain of the user
+     * @return a list of users belongs to a given group
+     */
     private List<User> getAllUsersBelongToGroup(WorkflowDTO workflowDTO, String tenantDomainOfUser)
             throws APIManagementException, UserStoreException {
         List<User> users = new ArrayList<>();

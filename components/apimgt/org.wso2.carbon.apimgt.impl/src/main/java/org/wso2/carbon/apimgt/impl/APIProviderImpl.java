@@ -7237,12 +7237,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Get the list of Notifications belongs to a particular publisher user
      *
-     * @param username
-     * @param organization
-     * @param portalToDisplay
-     * @param sortOrder
-     * @param limit
-     * @param offset
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param portalToDisplay the portal user needs to see the notifications
+     * @param sortOrder sort order of the notifications
+     * @param limit limit of the notifications
+     * @param offset offset of the notifications
      * @return List of Notifications
      * @throws APIManagementException if failed to get notifications
      */
@@ -7256,11 +7256,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Delete all notifications belongs to a particular publisher user
      *
-     * @param username
-     * @param organization
-     * @param portalToDisplay
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param portalToDisplay the portal user needs to delete the notifications
      * @return true after deleting all notifications
-     * @throws APIManagementException if failed to delete notifications
+     * @throws APIManagementException if failed to delete all notifications
      */
     @Override
     public boolean deleteAllNotifications(String username, String organization, String portalToDisplay)
@@ -7271,10 +7271,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Mark a notification as read by notification ID
      *
-     * @param username
-     * @param organization
-     * @param notificationId
-     * @param portalToDisplay
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param notificationId id of the notification that needs to update the mark as read status
+     * @param portalToDisplay the portal user needs to update the notification
      * @return updated Notification after marking as read
      * @throws APIManagementException if failed to mark the notification as read
      */
@@ -7288,10 +7288,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Delete a notification by notification ID
      *
-     * @param username
-     * @param organization
-     * @param notificationId
-     * @param portalToDisplay
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param notificationId id of the notification that needs to delete
+     * @param portalToDisplay the portal user needs to delete the notification
      * @return true after deleting the notification
      * @throws APIManagementException if failed to delete the notification
      */
@@ -7302,11 +7302,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Mark all notifications as read
+     * Mark all notifications as read of a particular publisher user
      *
-     * @param username
-     * @param organization
-     * @param portalToDisplay
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param portalToDisplay the portal user needs to update the notifications
      * @return updated NotificationList after marking all notifications as read
      * @throws APIManagementException if failed to mark all notifications as read
      */

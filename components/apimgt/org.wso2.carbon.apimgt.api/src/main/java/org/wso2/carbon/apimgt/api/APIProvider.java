@@ -1912,12 +1912,12 @@ public interface APIProvider extends APIManager {
     /**
      * Method to get notifications for the given user
      *
-     * @param username
-     * @param organization
-     * @param portalToDisplay
-     * @param sortOrder
-     * @param limit
-     * @param offset
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param portalToDisplay the portal user needs to see the notifications
+     * @param sortOrder sort order of the notifications
+     * @param limit limit of the notifications
+     * @param offset offset of the notifications
      * @return NotificationList
      */
     NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder,
@@ -1926,9 +1926,9 @@ public interface APIProvider extends APIManager {
     /**
      * Method to delete the notifications of a given user
      *
-     * @param username
-     * @param organization
-     * @param portalToDisplay
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param portalToDisplay the portal user needs to delete the notifications
      * @return true after successful deletion
      */
     boolean deleteAllNotifications(String username, String organization, String portalToDisplay)
@@ -1937,10 +1937,10 @@ public interface APIProvider extends APIManager {
     /**
      * Method to mark a notification as read
      *
-     * @param username
-     * @param organization
-     * @param notificationId
-     * @param portalToDisplay
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param notificationId id of the notification that needs to update the mark as read status
+     * @param portalToDisplay the portal user needs to update the notification
      * @return updated Notification
      */
     Notification markNotificationAsReadById(String username, String organization, String notificationId,
@@ -1949,10 +1949,10 @@ public interface APIProvider extends APIManager {
     /**
      * Method to delete a notification by notification id
      *
-     * @param username
-     * @param organization
-     * @param notificationId
-     * @param portalToDisplay
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param notificationId id of the notification that needs to delete
+     * @param portalToDisplay the portal user needs to delete the notification
      * @return true after successful deletion
      */
     boolean deleteNotificationById(String username, String organization, String notificationId, String portalToDisplay)
@@ -1961,9 +1961,9 @@ public interface APIProvider extends APIManager {
     /**
      * Method to mark all notifications as read
      *
-     * @param username
-     * @param organization
-     * @param portalToDisplay
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param portalToDisplay the portal user needs to update the notifications
      * @return updated NotificationList
      */
     NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay)

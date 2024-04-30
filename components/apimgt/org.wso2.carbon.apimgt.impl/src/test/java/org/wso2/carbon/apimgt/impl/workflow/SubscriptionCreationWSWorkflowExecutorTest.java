@@ -48,8 +48,6 @@ import org.wso2.carbon.apimgt.impl.portalNotifications.WorkflowNotificationServi
 
 import javax.xml.stream.XMLStreamException;
 
-import static org.mockito.ArgumentMatchers.any;
-
 /**
  * SubscriptionCreationSimpleWorkflowExecutor test cases
  */
@@ -89,13 +87,16 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.APPROVED);
-		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.UNBLOCKED);
-		PowerMockito.doNothing().when(workflowsApiService).sendPortalNotifications(any(WorkflowDTO.class), any(String.class));
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.UNBLOCKED);
+		PowerMockito.doNothing().when(workflowsApiService)
+				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
-		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.UNBLOCKED);
+		Mockito.verify(apiMgtDAO, Mockito.times(1))
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.UNBLOCKED);
 
 	}
 
@@ -105,37 +106,44 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.REJECTED);
-		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
-		PowerMockito.doNothing().when(workflowsApiService).sendPortalNotifications(any(WorkflowDTO.class), any(String.class));
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.doNothing().when(workflowsApiService)
+				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
-		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		Mockito.verify(apiMgtDAO, Mockito.times(1))
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
 	}
-	
-	@Test (expected = WorkflowException.class)
+
+	@Test(expected = WorkflowException.class)
 	public void testWorkflowRejectException() throws APIManagementException, WorkflowException {
 		WorkflowDTO workflowDTO = new WorkflowDTO();
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.REJECTED);
-		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
-		PowerMockito.doNothing().when(workflowsApiService).sendPortalNotifications(any(WorkflowDTO.class), any(String.class));
+		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.doNothing().when(workflowsApiService)
+				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 
 	}
-	
-	@Test (expected = WorkflowException.class)
+
+	@Test(expected = WorkflowException.class)
 	public void testWorkflowApproveException() throws APIManagementException, WorkflowException {
 		WorkflowDTO workflowDTO = new WorkflowDTO();
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.APPROVED);
-		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.UNBLOCKED);
-		PowerMockito.doNothing().when(workflowsApiService).sendPortalNotifications(any(WorkflowDTO.class), any(String.class));
+		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.UNBLOCKED);
+		PowerMockito.doNothing().when(workflowsApiService)
+				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 
 	}
@@ -146,13 +154,16 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.CREATED);
-		PowerMockito.doNothing().when(workflowsApiService).sendPortalNotifications(any(WorkflowDTO.class), any(String.class));
+		PowerMockito.doNothing().when(workflowsApiService)
+				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 		// shouldn't update status
-		Mockito.verify(apiMgtDAO, Mockito.never()).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.UNBLOCKED);
-		Mockito.verify(apiMgtDAO, Mockito.never()).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		Mockito.verify(apiMgtDAO, Mockito.never())
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.UNBLOCKED);
+		Mockito.verify(apiMgtDAO, Mockito.never())
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
 	}
 
 	@Test

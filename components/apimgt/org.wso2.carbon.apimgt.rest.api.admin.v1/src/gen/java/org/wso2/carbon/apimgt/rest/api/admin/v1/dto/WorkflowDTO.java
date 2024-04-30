@@ -114,6 +114,7 @@ return null;
   }
 
   /**
+   * This attribute contains the comments of the user who is approving or rejecting the workflow task.
    **/
   public WorkflowDTO comments(String comments) {
     this.comments = comments;

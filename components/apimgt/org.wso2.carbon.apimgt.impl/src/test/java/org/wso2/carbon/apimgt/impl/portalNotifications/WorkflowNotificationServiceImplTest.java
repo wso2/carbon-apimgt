@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
+ *  WSO2 LLC. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -29,8 +29,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
-
-import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ APIUtil.class, PortalNotificationDAO.class })
@@ -57,9 +55,9 @@ public class WorkflowNotificationServiceImplTest {
 
         PowerMockito.when(APIUtil.isMultiGroupAppSharingEnabled()).thenReturn(false);
         PowerMockito.when(PortalNotificationDAO.getInstance()).thenReturn(portalNotificationDAO);
-        when(portalNotificationDAO.addNotification(any(PortalNotificationDTO.class))).thenReturn(true);
+        Mockito.when(portalNotificationDAO.addNotification(Mockito.any(PortalNotificationDTO.class))).thenReturn(true);
         notificationService.sendPortalNotifications(workflowDTO, tenantDomainOfUser);
-        verify(portalNotificationDAO, times(1)).addNotification(any(PortalNotificationDTO.class));
+        Mockito.verify(portalNotificationDAO, Mockito.times(1)).addNotification(Mockito.any(PortalNotificationDTO.class));
     }
 
     private WorkflowDTO createMockWorkflowDTO() {

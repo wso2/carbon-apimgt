@@ -50,8 +50,6 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
 import javax.xml.stream.XMLStreamException;
 
-import static org.mockito.ArgumentMatchers.any;
-
 /**
  * ApplicationRegistrationWSWorkflowExecutor test cases
  */
@@ -196,7 +194,8 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         applicationRegistrationWSWorkflowExecutor.setUsername(adminUsername);
         applicationRegistrationWSWorkflowExecutor.setPassword(adminPassword.toCharArray());
         workflowDTO.setStatus(WorkflowStatus.REJECTED);
-        PowerMockito.doNothing().when(workflowsApiService).sendPortalNotifications(any(WorkflowDTO.class), any(String.class));
+        PowerMockito.doNothing().when(workflowsApiService)
+                .sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
         try {
             Assert.assertNotNull(applicationRegistrationWSWorkflowExecutor.complete(workflowDTO));
         } catch (WorkflowException e) {
@@ -222,7 +221,8 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         applicationRegistrationWSWorkflowExecutor.setPassword(adminPassword.toCharArray());
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         workflowDTO.setKeyManager("default");
-        PowerMockito.doNothing().when(workflowsApiService).sendPortalNotifications(any(WorkflowDTO.class), any(String.class));
+        PowerMockito.doNothing().when(workflowsApiService)
+                .sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
         try {
             Assert.assertNotNull(applicationRegistrationWSWorkflowExecutor.complete(workflowDTO));
         } catch (WorkflowException e) {
