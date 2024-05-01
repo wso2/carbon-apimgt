@@ -196,47 +196,47 @@ public class PortalNotificationDAO {
             String requestedTier = (String) json.get(APIConstants.PortalNotifications.REQUESTED_TIER);
             String status;
 
-            if ("APPROVED".equals(comment)) {
+            if (APIConstants.PortalNotifications.APPROVED.equals(comment)) {
                 status = APIConstants.PortalNotifications.STATUS_APPROVED;
             } else {
                 status = APIConstants.PortalNotifications.STATUS_REJECTED;
             }
 
-            switch (notificationType) {
-            case "API_STATE_CHANGE":
+            switch (PortalNotificationType.valueOf(notificationType)) {
+            case API_STATE_CHANGE:
                 finalComment = "API State Change request to " + action + " the API: " + apiName + ", version: "
                         + apiVersion + " that has the context: " + apiContext + " has been " + status + ".";
                 break;
-            case "API_PRODUCT_STATE_CHANGE":
+            case API_PRODUCT_STATE_CHANGE:
                 finalComment = "API Product State Change request of the API PRODUCT: " + apiName + ", version: "
                         + apiVersion + " that has the context: " + apiContext + " has been " + status + ".";
                 break;
-            case "API_REVISION_DEPLOYMENT":
+            case API_REVISION_DEPLOYMENT:
                 finalComment = "API Revision Deployment request of the API: " + apiName + ", version: " + apiVersion
                         + " for RevisionId: " + revisionId + " has been " + status + ".";
                 break;
-            case "APPLICATION_CREATION":
+            case APPLICATION_CREATION:
                 finalComment = "Application Creation request for the Application: " + applicationName + " has been "
                         + status + ".";
                 break;
-            case "SUBSCRIPTION_CREATION":
+            case SUBSCRIPTION_CREATION:
                 finalComment = "Subscription Creation request for the API: " + apiName + " version: " + apiVersion
                         + " using Application: " + applicationName + " has been " + status + ".";
                 break;
-            case "SUBSCRIPTION_UPDATE":
+            case SUBSCRIPTION_UPDATE:
                 finalComment = "Subscription Update request for the " + requestedTier + " for the API: " + apiName
                         + " version: " + apiVersion + " using Application: " + applicationName + " has been "
                         + status + ".";
                 break;
-            case "SUBSCRIPTION_DELETION":
+            case SUBSCRIPTION_DELETION:
                 finalComment = "Subscription Deletion request for the API: " + apiName + " version: " + apiVersion
                         + " using Application: " + applicationName + " has been " + status + ".";
                 break;
-            case "APPLICATION_REGISTRATION_PRODUCTION":
+            case APPLICATION_REGISTRATION_PRODUCTION:
                 finalComment = "Production Key Generation request for the Application: " + applicationName
                         + " has been " + status + ".";
                 break;
-            case "APPLICATION_REGISTRATION_SANDBOX":
+            case APPLICATION_REGISTRATION_SANDBOX:
                 finalComment = "Sandbox Key Generation request for the Application: " + applicationName + " has been "
                         + status + ".";
                 break;

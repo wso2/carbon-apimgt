@@ -1729,6 +1729,8 @@ public final class APIConstants {
     public static final String DEPLOY_AS_A_PROTOTYPE = "Deploy as a Prototype";
     public static final String REPUBLISH = "Re-Publish";
 
+    public static final String RETIRE = "Retire";
+
     public static final String API_SPEC_TYPE_REST = "api_spec";
     public static final String API_SPEC_TYPE_GRAPHQL = "sdl_schema";
     public static final String API_SPEC_TYPE_ASYNC = "async_spec";
@@ -3168,8 +3170,6 @@ public final class APIConstants {
         public static final String PUBLISHER_PORTAL = "publisher";
         public static final String DEV_PORTAL = "devportal";
         public static final String DEFAULT_CLAIM = "http://wso2.org/claims/organization";
-        public static final String API_BLOCK = "Block";
-        public static final String API_DEPRECATE = "Deprecate";
-        public static final String API_RETIRE = "Retire";
+        public static final String APPROVED = "APPROVED";
     }
 }

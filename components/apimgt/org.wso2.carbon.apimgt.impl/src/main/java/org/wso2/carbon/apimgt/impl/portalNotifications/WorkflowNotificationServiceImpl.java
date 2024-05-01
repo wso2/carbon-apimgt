@@ -156,10 +156,8 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         if (workflowDTO.getWorkflowType()
                 .equals(WorkflowConstants.WF_TYPE_AM_API_STATE) || workflowDTO.getWorkflowType()
                 .equals(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE)) {
-            if (workflowDTO.getMetadata("Action")
-                    .equals(APIConstants.PortalNotifications.API_BLOCK) || workflowDTO.getMetadata("Action")
-                    .equals(APIConstants.PortalNotifications.API_DEPRECATE) || workflowDTO.getMetadata("Action")
-                    .equals(APIConstants.PortalNotifications.API_RETIRE)) {
+            if (workflowDTO.getMetadata("Action").equals(APIConstants.BLOCK) || workflowDTO.getMetadata("Action")
+                    .equals(APIConstants.DEPRECATE) || workflowDTO.getMetadata("Action").equals(APIConstants.RETIRE)) {
                 String apiUUID = null;
                 String apiName = workflowDTO.getProperties("apiName");
                 String apiContext = workflowDTO.getMetadata("ApiContext");
@@ -279,16 +277,11 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
      */
     private List<SubscribedAPI> getSubscribersOfAPI(String apiUUID, String organization,
             APIIdentifier apiIdEmailReplaced) throws APIManagementException {
-        return getAPIUsageByAPIId(apiUUID, organization, apiIdEmailReplaced);
-    }
-
-    private List<SubscribedAPI> getAPIUsageByAPIId(String uuid, String organization, APIIdentifier apiIdEmailReplaced)
-            throws APIManagementException {
         List<SubscribedAPI> subscribedAPIs = new ArrayList<>();
         Set<String> uniqueUserSet = new HashSet<>();
         try {
             UserApplicationAPIUsage[] allApiResult = ApiMgtDAO.getInstance()
-                    .getAllAPIUsageByProviderAndApiId(uuid, organization);
+                    .getAllAPIUsageByProviderAndApiId(apiUUID, organization);
             for (UserApplicationAPIUsage usage : allApiResult) {
                 for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
                     APIIdentifier subsApiId = apiSubscription.getAPIIdentifier();
@@ -307,7 +300,6 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         } catch (APIManagementException e) {
             APIUtil.handleException("Error while getting API usage by API ID - getAPIUsageByAPIId()", e);
         }
-
         return subscribedAPIs;
     }
 
