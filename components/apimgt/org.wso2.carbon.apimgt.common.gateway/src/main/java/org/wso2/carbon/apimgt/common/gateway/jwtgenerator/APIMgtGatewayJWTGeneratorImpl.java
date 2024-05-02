@@ -91,6 +91,12 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         if (jwtInfoDto.getOrganizations() != null) {
             claims.put(JWTConstants.ORGANIZATIONS, jwtInfoDto.getOrganizations());
         }
+        Map<String, Object> jwtTokenClaims = jwtInfoDto.getJwtValidationInfo().getClaims();
+        if (jwtTokenClaims != null &&
+                jwtTokenClaims.get(JWTConstants.AUTHORIZED_USER_TYPE) != null) {
+            claims.put(dialect + "originalAut", jwtTokenClaims.get(JWTConstants.AUTHORIZED_USER_TYPE));
+        }
+
         return claims;
     }
 
