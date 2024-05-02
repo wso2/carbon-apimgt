@@ -3158,9 +3158,12 @@ public final class APIConstants {
 
     public static class PortalNotifications {
         public static final String ACTION = "action";
+        public static final String ACTION_META = "Action";
         public static final String API_NAME = "apiName";
         public static final String API_VERSION = "apiVersion";
         public static final String API_CONTEXT = "apiContext";
+        public static final String API_CONTEXT_META = "ApiContext";
+        public static final String API_PROVIDER = "ApiProvider";
         public static final String APPLICATION_NAME = "applicationName";
         public static final String REQUESTED_TIER = "requestedTier";
         public static final String REVISION_ID = "revisionId";

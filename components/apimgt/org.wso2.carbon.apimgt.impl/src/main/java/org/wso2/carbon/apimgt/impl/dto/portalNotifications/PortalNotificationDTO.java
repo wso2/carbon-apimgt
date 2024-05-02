@@ -16,7 +16,10 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.portalNotifications;
+package org.wso2.carbon.apimgt.impl.dto.portalNotifications;
+
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationMetaData;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationType;
 
 import java.sql.Timestamp;
 import java.util.List;

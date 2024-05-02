@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.portalNotifications;
+package org.wso2.carbon.apimgt.impl.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +29,10 @@ import org.wso2.carbon.apimgt.api.model.Notification;
 import org.wso2.carbon.apimgt.api.model.NotificationList;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationDTO;
+import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationEndUserDTO;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationMetaData;
+import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationType;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.sql.Connection;
@@ -79,8 +83,6 @@ public class PortalNotificationDAO {
             }
 
         } catch (SQLException e) {
-            handleException("Error while adding notification - SQL", e);
-        } catch (APIManagementException e) {
             handleException("Error while adding notification", e);
         }
         return false;
@@ -292,8 +294,6 @@ public class PortalNotificationDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to mark notification as read - SQL", e);
-        } catch (APIManagementException e) {
             handleException("Failed to mark notification as read", e);
         }
         return null;
@@ -365,8 +365,6 @@ public class PortalNotificationDAO {
                 return getNotifications(username, organization, portalToDisplay, "desc", 10, 0);
             }
         } catch (SQLException e) {
-            handleException("Failed to mark all notifications as read - SQL", e);
-        } catch (APIManagementException e) {
             handleException("Failed to mark all notifications as read", e);
         }
         return null;

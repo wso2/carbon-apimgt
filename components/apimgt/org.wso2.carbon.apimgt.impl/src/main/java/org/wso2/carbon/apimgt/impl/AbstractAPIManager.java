@@ -54,7 +54,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationDAO;
+import org.wso2.carbon.apimgt.impl.dao.PortalNotificationDAO;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;

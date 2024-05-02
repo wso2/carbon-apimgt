@@ -189,7 +189,6 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             }
 
             if (body.getComments() != null) {
-                System.out.println(body.getComments());
                 workflowDTO.setComments(body.getComments());
             }
 

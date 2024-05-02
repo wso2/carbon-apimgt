@@ -29,7 +29,10 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.PortalNotificationDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationDTO;
+import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationEndUserDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -156,13 +159,15 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         if (workflowDTO.getWorkflowType()
                 .equals(WorkflowConstants.WF_TYPE_AM_API_STATE) || workflowDTO.getWorkflowType()
                 .equals(WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE)) {
-            if (workflowDTO.getMetadata("Action").equals(APIConstants.BLOCK) || workflowDTO.getMetadata("Action")
-                    .equals(APIConstants.DEPRECATE) || workflowDTO.getMetadata("Action").equals(APIConstants.RETIRE)) {
+            if (workflowDTO.getMetadata(APIConstants.PortalNotifications.ACTION_META)
+                    .equals(APIConstants.BLOCK) || workflowDTO.getMetadata(APIConstants.PortalNotifications.ACTION_META)
+                    .equals(APIConstants.DEPRECATE) || workflowDTO.getMetadata(
+                    APIConstants.PortalNotifications.ACTION_META).equals(APIConstants.RETIRE)) {
                 String apiUUID = null;
-                String apiName = workflowDTO.getProperties("apiName");
-                String apiContext = workflowDTO.getMetadata("ApiContext");
-                String apiVersion = workflowDTO.getProperties("apiVersion");
-                String provider = workflowDTO.getMetadata("ApiProvider");
+                String apiName = workflowDTO.getProperties(APIConstants.PortalNotifications.API_NAME);
+                String apiContext = workflowDTO.getMetadata(APIConstants.PortalNotifications.API_CONTEXT_META);
+                String apiVersion = workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION);
+                String provider = workflowDTO.getMetadata(APIConstants.PortalNotifications.API_PROVIDER);
                 try {
                     apiUUID = getAPIUUIDUsingNameContextVersion(apiName, apiContext, apiVersion,
                             workflowDTO.getTenantDomain());
@@ -230,7 +235,7 @@ public class WorkflowNotificationServiceImpl implements PortalNotificationServic
         if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(
                 workflowDTO.getWorkflowType()) || WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE.equals(
                 workflowDTO.getWorkflowType())) {
-            portalNotificationMetaData.setApiContext(workflowDTO.getMetadata("ApiContext"));
+            portalNotificationMetaData.setApiContext(workflowDTO.getMetadata(APIConstants.PortalNotifications.API_CONTEXT_META));
         }
 
         return portalNotificationMetaData;

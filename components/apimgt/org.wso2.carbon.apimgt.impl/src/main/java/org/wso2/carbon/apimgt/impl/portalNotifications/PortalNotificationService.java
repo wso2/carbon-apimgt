@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.portalNotifications;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
-
 public interface PortalNotificationService<T> {
 
     void sendPortalNotifications(T notificationObject, String tenantDomain);

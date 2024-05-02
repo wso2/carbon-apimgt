@@ -35,9 +35,9 @@ import org.wso2.carbon.apimgt.api.model.NotificationList;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationDAO;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationDTO;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationEndUserDTO;
+import org.wso2.carbon.apimgt.impl.dao.PortalNotificationDAO;
+import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationDTO;
+import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationEndUserDTO;
 import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationMetaData;
 import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationType;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -218,7 +218,7 @@ public class PortalNotificationDAOTest {
             portalNotificationDAO.addNotification(portalNotificationDTO);
         });
 
-        String expectedMessage = "Error while adding notification";
+        String expectedMessage = "Error while adding end users";
         String actualMessage = exception.getMessage();
         Assert.assertEquals(expectedMessage, actualMessage);
     }
