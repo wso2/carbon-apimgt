@@ -22,31 +22,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMDocument;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.Constants;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.config.SynapseConfiguration;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
-import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
 import org.wso2.carbon.apimgt.gateway.*;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
@@ -431,48 +415,6 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                 }
             }
         }
-    }
-
-    private void publishResetEvent(PolicyEvent event, String eventJson) {
-        String applicationLevelThrottleKey = null;
-        String applicationLevelTier = null;
-        String authorizedUser = null;
-        String subscriberTenantDomain = null;
-        String applicationId = null;
-
-        MessageContext synCtx = getMessageContext();
-        AuthenticationContext authenticationContext = new AuthenticationContext();
-        authenticationContext.setAuthenticated(true);
-
-        if (event.getPolicyType() == PolicyType.APPLICATION) {
-            ApplicationPolicyResetEvent applicationEvent = new Gson().fromJson(eventJson, ApplicationPolicyResetEvent.class);
-            applicationLevelThrottleKey = applicationEvent.getAppId() + ":" + applicationEvent.getUserId() + "@" + applicationEvent.getTenantDomain();
-            applicationLevelTier = applicationEvent.getAppTier();
-            authorizedUser = applicationEvent.getUserId();
-            subscriberTenantDomain = applicationEvent.getTenantDomain();
-            applicationId = applicationEvent.getAppId();
-        }
-        synCtx.setProperty(APISecurityUtils.API_AUTH_CONTEXT, authenticationContext);
-        synCtx.setProperty(APIConstants.POLICY_RESET, true);
-
-        ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
-                publishApplicationPolicyResetEvent(applicationLevelThrottleKey,
-                        applicationLevelTier,
-                        authorizedUser, subscriberTenantDomain,
-                        applicationId,
-                        synCtx, authenticationContext);
-    }
-
-    private static MessageContext getMessageContext() {
-        SynapseConfiguration synCfg = new SynapseConfiguration();
-        org.apache.axis2.context.MessageContext axisMsgCtx;
-        try {
-            axisMsgCtx = GatewayUtils.createAxis2MessageContext();
-            axisMsgCtx.setEnvelope(OMAbstractFactory.getSOAP11Factory().getDefaultEnvelope());
-        } catch (AxisFault e) {
-            throw new RuntimeException(e);
-        }
-        return new Axis2MessageContext(axisMsgCtx, synCfg, null);
     }
 
     private void endTenantFlow() {

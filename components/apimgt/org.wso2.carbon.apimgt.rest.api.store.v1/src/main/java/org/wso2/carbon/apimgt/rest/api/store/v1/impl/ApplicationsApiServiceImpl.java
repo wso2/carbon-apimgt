@@ -482,12 +482,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId,
-                                                                     ApplicationThrottleResetDTO applicationThrottleResetDTO,
-                                                                     MessageContext messageContext) {
+            ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) {
         try {
             if (applicationThrottleResetDTO == null) {
                 RestApiUtil.handleBadRequest("Username cannot be null", log);
             }
+
             String userId = applicationThrottleResetDTO.getUserName();
             String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getOrganization(messageContext);
@@ -502,19 +502,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (application == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-            if (!(RestAPIStoreUtils.isUserOwnerOfApplication(application) || RestAPIStoreUtils.isApplicationSharedtoUser(application))) {
+            if (!(RestAPIStoreUtils.isUserOwnerOfApplication(application)
+                    || RestAPIStoreUtils.isApplicationSharedtoUser(application))) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
+
             String appId = String.valueOf(application.getId());
             String appTier = application.getTier();
+            //send the reset request as an event to the eventhub
             apiConsumer.resetApplicationThrottlePolicy(appId, userId, appTier, organization);
-            JSONObject obj = new JSONObject();
-            obj.put("status", "success");
-            obj.put("username", userId);
-            obj.put("application tenant", organization);
-            obj.put("application", application.getName());
-            obj.put("application tier", appTier);
-            return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
+            return Response.ok().build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while resetting application " + applicationId, e, log);
         }

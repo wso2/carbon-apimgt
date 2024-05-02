@@ -275,9 +275,6 @@ public class DataProcessAndPublishingAgent implements Runnable {
             }
 
         }
-        if (messageContext.getProperty(APIConstants.POLICY_RESET) != null){
-            jsonObMap.put(APIThrottleConstants.THROTTLE_RESET,true);
-        }
 
         Object[] objects = new Object[]{messageContext.getMessageID(),
                                         this.applicationLevelThrottleKey, this.applicationLevelTier,

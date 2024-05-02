@@ -145,29 +145,6 @@ public class ThrottleDataPublisher {
         }
     }
 
-    public void publishApplicationPolicyResetEvent(
-            String applicationLevelThrottleKey, String applicationLevelTier,
-            String authorizedUser,String appTenant,
-            String appId, MessageContext messageContext,
-            AuthenticationContext authenticationContext) {
-        try {
-            if (dataPublisherPool != null) {
-                DataProcessAndPublishingAgent agent = dataPublisherPool.get();
-                agent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
-                        null, null,
-                        null, null,
-                        null, null,
-                        authorizedUser, null, null, appTenant, null, appId, messageContext,
-                        authenticationContext);
-                executor.execute(agent);
-            } else {
-                log.debug("Throttle data publisher pool is not initialized.");
-            }
-        } catch (Exception e) {
-            log.error("Error while publishing throttling events to global policy server", e);
-        }
-    }
-
     /**
      * This class will act as thread pool executor and after executing each thread it will return runnable
      * object back to pool. This implementation specifically used to minimize number of objectes created during
