@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLOperationInfoAnalyzer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -52,6 +53,10 @@ public class WebSocketAnalyticsMetricsHandler {
 
     public void handlePublish(ChannelHandlerContext ctx) {
         WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, PUBLISH);
+        if (WebSocketUtils.getPropertyFromChannel("GRAPHQL_PAYLOAD", ctx) != null) {
+            GraphQLSubscriptionOperationInfoAnalyzer operationInfoAnalyzer = new GraphQLSubscriptionOperationInfoAnalyzer();
+            operationInfoAnalyzer.analyzePayload(ctx);
+        }
         collectData(ctx);
     }
 

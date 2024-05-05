@@ -24,17 +24,22 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.analytics.collectors.RequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLAnalyticsDataProvider;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLOperationInfoAnalyzer;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
 import java.util.Map;
 
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.TRANSPORT_HEADERS;
 /**
  * Global synapse handler to publish analytics data to analytics cloud.
  */
@@ -82,13 +87,27 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
             return true;
         }
+        Object transportHeaders = ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                getProperty(TRANSPORT_HEADERS);
+        messageContext.setProperty(TRANSPORT_HEADERS, transportHeaders);
+
         AnalyticsDataProvider provider;
         Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING);
-        if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
-            provider = new AsyncAnalyticsDataProvider(messageContext);
-        } else {
-            provider = new SynapseAnalyticsDataProvider(messageContext,
+        if (messageContext.getProperty(APIConstants.API_TYPE) == "GRAPHQL") {
+            if (APIUtil.isAnalyticsEnabled()) {
+                GraphQLOperationInfoAnalyzer operationInfoAnalyzer = new GraphQLOperationInfoAnalyzer();
+                operationInfoAnalyzer.analyzePayload(messageContext);
+            }
+            provider = new GraphQLAnalyticsDataProvider(messageContext,
                     ServiceReferenceHolder.getInstance().getAnalyticsCustomDataProvider());
+        } else {
+            if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
+                provider = new AsyncAnalyticsDataProvider(messageContext);
+
+            } else {
+                provider = new SynapseAnalyticsDataProvider(messageContext,
+                        ServiceReferenceHolder.getInstance().getAnalyticsCustomDataProvider());
+            }
         }
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         try {

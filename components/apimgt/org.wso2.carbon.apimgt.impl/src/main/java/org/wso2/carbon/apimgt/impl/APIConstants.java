@@ -1316,6 +1316,8 @@ public final class APIConstants {
     public static final String OPERATION_SECURITY_DISABLED = "Disabled";
     public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
     public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
+    public static final String TYPE_DEFINITION = "TYPE_DEFINITION";
+    public static final String VARIABLE_MAP = "VARIABLE_MAP";
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "WSO2GraphQLAccessControlPolicy";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";

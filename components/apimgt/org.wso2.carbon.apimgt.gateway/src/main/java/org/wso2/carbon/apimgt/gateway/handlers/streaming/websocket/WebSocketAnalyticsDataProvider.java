@@ -319,7 +319,27 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
                 WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx));
         return customProperties;
     }
-    
+
+    @Override
+    public Map<String, Object> getOperationProperties() {
+        Map<String, Object> customProperties;
+
+        if (analyticsCustomDataProvider != null) {
+            customProperties = analyticsCustomDataProvider.getCustomProperties(ctx);
+        } else {
+            customProperties = new HashMap<>();
+        }
+        customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
+        customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
+        customProperties.put(Constants.RESPONSE_SIZE,
+                WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx));
+//        customProperties.put("typeUsage",
+//                WebSocketUtils.getPropertyFromChannel("TYPE_USAGE", ctx));
+        customProperties.put("fieldUsage",
+                WebSocketUtils.getPropertyFromChannel("FIELD_USAGE", ctx));
+        return customProperties;
+    }
+
     @Override
     public String getUserName() {
 

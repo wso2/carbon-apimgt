@@ -27,6 +27,8 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLType;
 import graphql.validation.Validator;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.llom.OMElementImpl;
+import org.apache.axiom.om.impl.llom.OMTextImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -52,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Iterator;
 
 import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
 
@@ -62,6 +65,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
     private static final String GRAPHQL_API = "GRAPHQL";
     private static final String HTTP_VERB = "HTTP_VERB";
+    private static final String HTTP_NAME = "HTTP_NAME";
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
     private GraphQLSchemaDTO graphQLSchemaDTO;
@@ -92,6 +96,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 return true;
             }
             String payload;
+            OMElement variables;
+            HashMap<String, Object> variablesMap = null;
             Parser parser = new Parser();
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
@@ -106,6 +112,12 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     OMElement body = axis2MC.getEnvelope().getBody().getFirstElement();
                     if (body != null && body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null){
                         payload = body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)).getText();
+                        if (body.getFirstChildWithName(QName.valueOf("variables")) != null) {
+                            variables = body.getFirstChildWithName(QName.valueOf("variables"));
+                            ArrayList<OMElement> variablesArray = convertXMLToArray(variables);
+                            variablesMap = convertArrayToMap(variablesArray);
+                            messageContext.setProperty(APIConstants.VARIABLE_MAP, variablesMap);
+                        }
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Invalid query parameter " + queryParams[0]);
@@ -136,6 +148,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             messageContext.setProperty(HTTP_VERB, httpVerb);
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(HTTP_METHOD,
                                     operation.getOperation().toString());
+                            messageContext.setProperty(HTTP_NAME, operation.getName());
                             String operationList = GraphQLProcessorUtil.getOperationListAsString(operation,
                                     graphQLSchemaDTO.getTypeDefinitionRegistry());
                             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
@@ -159,6 +172,34 @@ public class GraphQLAPIHandler extends AbstractHandler {
         return false;
     }
 
+    private HashMap<String, Object> convertArrayToMap(ArrayList<OMElement> variablesArray) {
+        HashMap<String, Object> externalVariables = new HashMap<>();
+        for(OMElement omElement: variablesArray){
+            externalVariables = getVariables(omElement, externalVariables);
+        }
+        return externalVariables;
+    }
+
+    private ArrayList<OMElement> convertXMLToArray(OMElement variables) {
+        ArrayList<OMElement> variablesArray = new ArrayList<>();
+        Iterator it = variables.getChildElements();
+        while (it.hasNext()) {
+            variablesArray.add((OMElement) it.next());
+        }
+        return variablesArray;
+    }
+
+    private HashMap<String, Object> getVariables(OMElement omElement, HashMap<String, Object> externalVariables) {
+        String variableKey = omElement.getLocalName();
+        Object variable = null;
+        if (omElement.getFirstOMChild() instanceof OMTextImpl){
+            variable = ((OMTextImpl) omElement.getFirstOMChild()).getText();
+        } else if (omElement.getFirstOMChild() instanceof OMElementImpl) {
+            variable = convertArrayToMap(convertXMLToArray(omElement));
+        }
+        externalVariables.put(variableKey, variable);
+        return externalVariables;
+    }
     /**
      * Support GraphQL APIs for basic,JWT  authentication, this method extract the scopes and operations from
      * local Entry and set them to properties. If the operations have scopes, scopes operation mapping and scope
@@ -221,6 +262,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         messageContext.setProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, graphQLAccessControlPolicy);
         messageContext.setProperty(APIConstants.API_TYPE, GRAPHQL_API);
         messageContext.setProperty(APIConstants.GRAPHQL_SCHEMA, graphQLSchemaDTO.getGraphQLSchema());
+        messageContext.setProperty(APIConstants.TYPE_DEFINITION, graphQLSchemaDTO.getTypeDefinitionRegistry());
     }
 
     private void setMappingList(String additionalTypeName, String base64DecodedTypeValue,

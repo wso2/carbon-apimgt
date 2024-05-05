@@ -1,52 +1,28 @@
-/*
- *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
-
-package org.wso2.carbon.apimgt.gateway.handlers.analytics;
+package org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics;
 
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.*;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Error;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.URITemplate;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
+import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.FaultCodeClassifier;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -62,48 +38,29 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
+import static org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor.log;
 
-public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
+public class GraphQLAnalyticsDataProvider implements AnalyticsDataProvider {
 
-    private static final Log log = LogFactory.getLog(SynapseAnalyticsDataProvider.class);
     private MessageContext messageContext;
     private AnalyticsCustomDataProvider analyticsCustomDataProvider;
     private Boolean buildResponseMessage = null;
 
-    public SynapseAnalyticsDataProvider(MessageContext messageContext) {
-
+    public GraphQLAnalyticsDataProvider(MessageContext messageContext) {
         this.messageContext = messageContext;
     }
 
-    public SynapseAnalyticsDataProvider(MessageContext messageContext,
-                                        AnalyticsCustomDataProvider analyticsCustomDataProvider) {
-
+    public GraphQLAnalyticsDataProvider(MessageContext messageContext, AnalyticsCustomDataProvider analyticsCustomDataProvider) {
         this.messageContext = messageContext;
         this.analyticsCustomDataProvider = analyticsCustomDataProvider;
     }
 
-    public static String sortGraphQLOperations(String apiResourceTemplates) {
-
-        if (apiResourceTemplates == null || !apiResourceTemplates.contains(",")) {
-            return apiResourceTemplates;
-        }
-        String[] list = apiResourceTemplates.split(",");
-        // sorting alphabetical order
-        Arrays.sort(list);
-        return String.join(",", list);
-    }
-
     @Override
     public EventCategory getEventCategory() {
-
         if (isSuccessRequest()) {
             return EventCategory.SUCCESS;
         } else if (isFaultRequest()) {
@@ -115,21 +72,27 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public boolean isAnonymous() {
-
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
-        return isAuthenticated() && APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername());
+         return isAuthenticated() && APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername());
+    }
+
+    private boolean isSuccessRequest() {
+        return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)
+                && APISecurityUtils.getAuthenticationContext(messageContext) != null;
+    }
+
+    private boolean isFaultRequest() {
+        return messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE);
     }
 
     @Override
     public boolean isAuthenticated() {
-
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
         return authContext != null && authContext.isAuthenticated();
     }
 
     @Override
     public FaultCategory getFaultType() {
-
         if (isAuthFaultRequest()) {
             return FaultCategory.AUTH;
         } else if (isThrottledFaultRequest()) {
@@ -141,9 +104,29 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
     }
 
+    private boolean isAuthFaultRequest() {
+
+        int errorCode = getErrorCode();
+        return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
+    }
+    private boolean isThrottledFaultRequest() {
+
+        int errorCode = getErrorCode();
+        return errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END;
+    }
+
+    private boolean isTargetFaultRequest() {
+
+        int errorCode = getErrorCode();
+        return (errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END)
+                || errorCode == Constants.ENDPOINT_SUSPENDED_ERROR_CODE;
+    }
+
     @Override
     public API getApi() throws DataNotFoundException {
-
         String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
@@ -182,7 +165,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     uriTemplateObj.setAuthScheme(uriTemplate.getAuthScheme());
                     List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> operationPolicies
                             = new ArrayList<>();
-                    for (OperationPolicy operationPolicy : uriTemplate.getOperationPolicies()) {
+                    for (org.wso2.carbon.apimgt.api.model.OperationPolicy operationPolicy : uriTemplate.getOperationPolicies()) {
                         org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj
                                 = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
                         operationPolicyObj.setPolicyVersion(operationPolicy.getPolicyVersion());
@@ -199,7 +182,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             }
             List<org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy> apiPolicyList =
                     new ArrayList<>();
-            for (OperationPolicy apiPolicy : apiObj.getApiPolicies()) {
+            for (org.wso2.carbon.apimgt.api.model.OperationPolicy apiPolicy : apiObj.getApiPolicies()) {
                 org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy operationPolicyObj
                         = new org.wso2.carbon.apimgt.common.analytics.publishers.dto.OperationPolicy();
                 operationPolicyObj.setPolicyVersion(apiPolicy.getPolicyVersion());
@@ -213,15 +196,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             api.setApiPolicies(apiPolicyList);
         }
         return api;
+
     }
 
     @Override
     public Application getApplication() throws DataNotFoundException {
-
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
-        if (authContext == null) {
-            throw new DataNotFoundException("Error occurred when getting Application information");
-        }
         Application application = new Application();
         application.setApplicationId(authContext.getApplicationUUID());
         application.setApplicationName(authContext.getApplicationName());
@@ -232,7 +212,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public Operation getOperation() throws DataNotFoundException {
-
         String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
         String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
         Operation operation = new Operation();
@@ -245,10 +224,19 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         return operation;
     }
+    public static String sortGraphQLOperations(String apiResourceTemplates) {
+
+        if (apiResourceTemplates == null || !apiResourceTemplates.contains(",")) {
+            return apiResourceTemplates;
+        }
+        String[] list = apiResourceTemplates.split(",");
+        // sorting alphabetical order
+        Arrays.sort(list);
+        return String.join(",", list);
+    }
 
     @Override
     public Target getTarget() {
-
         Target target = new Target();
 
         String endpointAddress = (String) messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
@@ -256,7 +244,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             endpointAddress = APIMgtGatewayConstants.DUMMY_ENDPOINT_ADDRESS;
         }
         int targetResponseCode = getTargetResponseCode();
-        target.setResponseCacheHit(isCacheHit());
         target.setDestination(endpointAddress);
         target.setTargetResponseCode(targetResponseCode);
         return target;
@@ -264,7 +251,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public Latencies getLatencies() {
-
         long backendLatency = getBackendLatency();
         long responseLatency = getResponseLatency();
         long requestMediationLatency = getRequestMediationLatency();
@@ -278,21 +264,48 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return latencies;
     }
 
-    private boolean isCacheHit() {
-
-        Object cacheHitObject = messageContext.getProperty(Constants.REQUEST_CACHE_HIT);
-        boolean isCacheHit = false;
-        if (cacheHitObject instanceof String) {
-            isCacheHit = Boolean.parseBoolean((String) cacheHitObject);
-        } else if (cacheHitObject instanceof Boolean) {
-            isCacheHit = (boolean) cacheHitObject;
+    public long getBackendLatency() {
+        Object backendStartTimeObj = messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
+        long backendStartTime = backendStartTimeObj == null ? 0L : (long) backendStartTimeObj;
+        Object backendEndTimeObj = messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
+        long backendEndTime = backendEndTimeObj == null ? 0L : (long) backendEndTimeObj;
+        if (backendStartTime == 0L || backendEndTime == 0L) {
+            return 0L;
+        } else {
+            return backendEndTime - backendStartTime;
         }
-        return isCacheHit;
+    }
+
+    public long getResponseLatency() {
+
+        long requestInTime = (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
+        return System.currentTimeMillis() - requestInTime;
+    }
+
+    public long getRequestMediationLatency() {
+
+        long requestInTime = (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
+        Object backendStartTimeObj = messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
+        long backendStartTime = backendStartTimeObj == null ? 0L : (long) backendStartTimeObj;
+        if (backendStartTime == 0L) {
+            return System.currentTimeMillis() - requestInTime;
+        } else {
+            return backendStartTime - requestInTime;
+        }
+    }
+
+    public long getResponseMediationLatency() {
+        Object backendEndTimeObj = messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
+        long backendEndTime = backendEndTimeObj == null ? 0L : (long) backendEndTimeObj;
+        if (backendEndTime == 0L) {
+            return 0L;
+        } else {
+            return System.currentTimeMillis() - backendEndTime;
+        }
     }
 
     @Override
     public MetaInfo getMetaInfo() {
-
         MetaInfo metaInfo = new MetaInfo();
         Object correlationId = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(CorrelationConstants.CORRELATION_ID);
@@ -316,7 +329,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public int getProxyResponseCode() {
-
         Object clientResponseCodeObj = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(SynapseConstants.HTTP_SC);
         if (clientResponseCodeObj == null) {
@@ -333,7 +345,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public int getTargetResponseCode() {
-
         Object responseCodeObject = messageContext.getProperty(Constants.BACKEND_RESPONSE_CODE);
         if (responseCodeObject == null) {
             responseCodeObject = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
@@ -349,13 +360,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public long getRequestTime() {
-
         return (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
     }
 
     @Override
     public Error getError(FaultCategory faultCategory) {
-
         int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
         FaultCodeClassifier faultCodeClassifier = new FaultCodeClassifier(messageContext);
         FaultSubCategory faultSubCategory = faultCodeClassifier.getFaultSubCategory(faultCategory, errorCode);
@@ -365,15 +374,17 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return error;
     }
 
+    private int getErrorCode() {
+        return (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
+    }
     @Override
     public String getUserAgentHeader() {
-
         return (String) messageContext.getProperty(Constants.USER_AGENT_PROPERTY);
     }
 
+
     @Override
     public String getUserName() {
-
         if (messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.END_USER_NAME)) {
             return (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
         }
@@ -381,133 +392,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return (String) messageContext.getProperty(APIMgtGatewayConstants.USER_ID);
         }
         return null;
-    }
-
-    @Override
-    public String getEndUserIP() {
-
-        if (messageContext.getPropertyKeySet().contains(Constants.USER_IP_PROPERTY)) {
-            return (String) messageContext.getProperty(Constants.USER_IP_PROPERTY);
-        }
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        Map<String, Object> customProperties;
-
-        if (analyticsCustomDataProvider != null) {
-            customProperties = analyticsCustomDataProvider.getCustomProperties(messageContext);
-        } else {
-            customProperties = new HashMap<>();
-        }
-        customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
-        customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
-        customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
-        customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
-        return customProperties;
-    }
-
-    @Override
-    public Map<String, Object> getOperationProperties() {
-        return null;
-    }
-
-    private String getApiContext() {
-
-        if (messageContext.getPropertyKeySet().contains(JWTConstants.REST_API_CONTEXT)) {
-            return (String) messageContext.getProperty(JWTConstants.REST_API_CONTEXT);
-        }
-        return null;
-    }
-
-    private boolean isSuccessRequest() {
-
-        return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)
-                && APISecurityUtils.getAuthenticationContext(messageContext) != null;
-    }
-
-    private boolean isFaultRequest() {
-
-        return messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE);
-    }
-
-    private boolean isAuthFaultRequest() {
-
-        int errorCode = getErrorCode();
-        return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
-    }
-
-    private boolean isThrottledFaultRequest() {
-
-        int errorCode = getErrorCode();
-        return errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END;
-    }
-
-    private boolean isTargetFaultRequest() {
-
-        int errorCode = getErrorCode();
-        return (errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END)
-                || errorCode == Constants.ENDPOINT_SUSPENDED_ERROR_CODE;
-    }
-
-    private int getErrorCode() {
-
-        return (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-    }
-
-    public long getBackendLatency() {
-
-        if (isCacheHit()) {
-            return 0L;
-        }
-        Object backendStartTimeObj = messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
-        long backendStartTime = backendStartTimeObj == null ? 0L : (long) backendStartTimeObj;
-        Object backendEndTimeObj = messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
-        long backendEndTime = backendEndTimeObj == null ? 0L : (long) backendEndTimeObj;
-        if (backendStartTime == 0L || backendEndTime == 0L) {
-            return 0L;
-        } else {
-            return backendEndTime - backendStartTime;
-        }
-    }
-
-    public long getResponseLatency() {
-
-        long requestInTime = (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
-        return System.currentTimeMillis() - requestInTime;
-    }
-
-    public long getRequestMediationLatency() {
-
-        long requestInTime = (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
-        if (isCacheHit()) {
-            return System.currentTimeMillis() - requestInTime;
-        }
-        Object backendStartTimeObj = messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
-        long backendStartTime = backendStartTimeObj == null ? 0L : (long) backendStartTimeObj;
-        if (backendStartTime == 0L) {
-            return System.currentTimeMillis() - requestInTime;
-        } else {
-            return backendStartTime - requestInTime;
-        }
-    }
-
-    public long getResponseMediationLatency() {
-
-        if (isCacheHit()) {
-            return 0;
-        }
-        Object backendEndTimeObj = messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
-        long backendEndTime = backendEndTimeObj == null ? 0L : (long) backendEndTimeObj;
-        if (backendEndTime == 0L) {
-            return 0L;
-        } else {
-            return System.currentTimeMillis() - backendEndTime;
-        }
     }
 
     public int getResponseSize() {
@@ -555,4 +439,74 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         return UNKNOWN_VALUE;
     }
+
+    @Override
+    public String getEndUserIP() {
+        if (messageContext.getPropertyKeySet().contains(Constants.USER_IP_PROPERTY)) {
+            return (String) messageContext.getProperty(Constants.USER_IP_PROPERTY);
+        }
+        return null;
+    }
+
+    private String getApiContext() {
+        if (messageContext.getPropertyKeySet().contains(JWTConstants.REST_API_CONTEXT)) {
+            return (String) messageContext.getProperty(JWTConstants.REST_API_CONTEXT);
+        }
+        return null;
+    }
+    @Override
+    public Map<String, Object> getProperties() {
+        Map<String, Object> customProperties;
+
+        if (analyticsCustomDataProvider != null) {
+            customProperties = analyticsCustomDataProvider.getCustomProperties(messageContext);
+        } else {
+            customProperties = new HashMap<>();
+        }
+        customProperties.put(Constants.OPERATION_NAME,  messageContext.getProperty("HTTP_NAME"));
+        customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
+        customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
+        customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
+        customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
+        //customProperties.put(Constants.TYPE_USAGE, getTypeUsage());
+        return customProperties;
+    }
+
+    private Map<String, Object> getTypeUsage() {
+        Object typeUsage =  messageContext.getProperty("TYPE_USAGE");
+        return (Map<String, Object>) typeUsage;
+    }
+
+    private Map<String, Object> getOperationInfo() {
+        Object fieldUsage =  messageContext.getProperty("FIELD_USAGE");
+        return (Map<String, Object>) fieldUsage;
+    }
+
+    public Map<String, Object> getOperationProperties() {
+        Map<String, Object> customProperties;
+        if (analyticsCustomDataProvider != null) {
+            customProperties = analyticsCustomDataProvider.getCustomProperties(messageContext);
+        } else {
+            customProperties = new HashMap<>();
+        }
+        customProperties.put(Constants.OPERATION_NAME,  messageContext.getProperty("HTTP_NAME"));
+        customProperties.put(Constants.OPERATION_INFO, getOperationInfo());
+        customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
+        customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
+        customProperties.put("accessedFields", getaccessedFields());
+        customProperties.put("mutatedFields", getMutatedFields());
+        return customProperties;
+
+    }
+
+    private Object getaccessedFields() {
+        Object accessedFields =  messageContext.getProperty("ACCESSED_FIELDS");
+        return (List<Map>)accessedFields;
+    }
+
+    private Object getMutatedFields(){
+        Object mutatedFields = messageContext.getProperty("MUTATED_FIELDS");
+        return mutatedFields;
+    }
+
 }

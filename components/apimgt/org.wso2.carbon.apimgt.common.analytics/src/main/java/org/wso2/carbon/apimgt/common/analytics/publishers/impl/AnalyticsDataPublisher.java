@@ -43,6 +43,7 @@ public class AnalyticsDataPublisher {
 
     private List<CounterMetric> successMetricReporters;
     private List<CounterMetric> faultyMetricReporters;
+    private List<CounterMetric> operationInfoMetricReporters;
 
     private AnalyticsDataPublisher() {
 
@@ -142,6 +143,9 @@ public class AnalyticsDataPublisher {
                                 MetricSchema.ERROR);
             }
 
+            this.operationInfoMetricReporters = getSuccessOrFaultyCounterMetrics(metricReporters,
+                    "graphql:operationInfo", MetricSchema.RESPONSE);
+
             // not necessary to handle IllegalArgumentException here
             // since we are handling it in getSuccessOrFaultyCounterMetrics method
         } catch (MetricCreationException e) {
@@ -163,5 +167,13 @@ public class AnalyticsDataPublisher {
             throw new MetricCreationException("None of AnalyticsDataPublishers are initialized.");
         }
         return faultyMetricReporters;
+    }
+
+    public List<CounterMetric> getOperationInfoMetricReporters() throws MetricCreationException {
+
+        if (this.operationInfoMetricReporters.isEmpty()) {
+            throw new MetricCreationException("None of AnalyticsDataPublishers are initialized.");
+        }
+        return operationInfoMetricReporters;
     }
 }
