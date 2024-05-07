@@ -333,10 +333,10 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         customProperties.put(Constants.RESPONSE_SIZE,
                 WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx));
-//        customProperties.put("typeUsage",
-//                WebSocketUtils.getPropertyFromChannel("TYPE_USAGE", ctx));
-        customProperties.put("fieldUsage",
+        customProperties.put("operationInfo",
                 WebSocketUtils.getPropertyFromChannel("FIELD_USAGE", ctx));
+        customProperties.put("accessedFields",
+                WebSocketUtils.getPropertyFromChannel("ACCESSED_FIELDS", ctx));
         return customProperties;
     }
 

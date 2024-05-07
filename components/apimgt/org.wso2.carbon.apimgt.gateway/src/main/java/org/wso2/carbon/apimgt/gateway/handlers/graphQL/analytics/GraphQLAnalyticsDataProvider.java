@@ -44,16 +44,26 @@ import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
 import static org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor.log;
 
+/**
+ *
+ */
 public class GraphQLAnalyticsDataProvider implements AnalyticsDataProvider {
 
     private MessageContext messageContext;
     private AnalyticsCustomDataProvider analyticsCustomDataProvider;
     private Boolean buildResponseMessage = null;
 
+    /**
+     * @param messageContext
+     */
     public GraphQLAnalyticsDataProvider(MessageContext messageContext) {
         this.messageContext = messageContext;
     }
 
+    /**
+     * @param messageContext
+     * @param analyticsCustomDataProvider
+     */
     public GraphQLAnalyticsDataProvider(MessageContext messageContext, AnalyticsCustomDataProvider analyticsCustomDataProvider) {
         this.messageContext = messageContext;
         this.analyticsCustomDataProvider = analyticsCustomDataProvider;

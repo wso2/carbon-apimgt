@@ -29,6 +29,7 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInterfaceType;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
@@ -221,6 +222,8 @@ public class GraphQLOperationAnalyzer {
                     returnType = ((GraphQLInterfaceType) fieldDefinition.getType()).getName();
                 } else if (fieldDefinition.getType() instanceof GraphQLObjectType) {
                     returnType = ((GraphQLObjectType) fieldDefinition.getType()).getName();
+                } else if (fieldDefinition.getType() instanceof GraphQLList){
+                    returnType = ((GraphQLObjectType)((GraphQLList)fieldDefinition.getType()).getOriginalWrappedType()).getName();
                 }
             }
         }

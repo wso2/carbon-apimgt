@@ -15,14 +15,19 @@ import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLOperatio
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ *
+ */
 public class GraphQLSubscriptionOperationInfoAnalyzer {
-    private Object APIConstants;
-    private GraphQLAnalyticsMetricsHandler graphQLMetricsHandler;
     private static final Log log = LogFactory.getLog(GraphQLSubscriptionOperationInfoAnalyzer.class);
 
+    /**
+     * @param ctx
+     */
     public void analyzePayload(ChannelHandlerContext ctx) {
         Parser parser = new Parser();
         String payload = (String) WebSocketUtils.getPropertyFromChannel("GRAPHQL_PAYLOAD", ctx);
@@ -31,7 +36,7 @@ public class GraphQLSubscriptionOperationInfoAnalyzer {
         TypeDefinitionRegistry typeDefinition = (TypeDefinitionRegistry) WebSocketUtils.getPropertyFromChannel("TYPE_DEFINITION", ctx);
         //HashMap<String, Object> variablesMap = (HashMap<String, Object>) messageContext.getProperty("VARIABLE_MAP");
         String complexityInfoJson = (String) WebSocketUtils.getPropertyFromChannel("CONTROL_INFO", ctx);
-        String type = null;
+        String type;
 
         for (Definition definition : document.getDefinitions()) {
             OperationDefinition operation = (OperationDefinition) definition;
@@ -44,6 +49,10 @@ public class GraphQLSubscriptionOperationInfoAnalyzer {
                         .getOperationInfo(type, selection, subDocument, graphQLSchema, typeDefinition, complexityInfoJson, variablesMap);
                 WebSocketUtils.setApiPropertyToChannel(ctx,
                         "FIELD_USAGE", operationInfo);
+
+                List<Map> fieldUsage = GraphQLOperationAnalyzer.getUsedFields(selection);
+                WebSocketUtils.setApiPropertyToChannel(ctx,
+                        "ACCESSED_FIELDS", fieldUsage);
 
                 RequestDataCollector dataCollector;
                 AnalyticsDataProvider provider = new WebSocketAnalyticsDataProvider(ctx,

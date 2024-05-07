@@ -42,6 +42,9 @@ public class QueryAnalyzer {
     private static final Log log = LogFactory.getLog(QueryAnalyzer.class);
     private final GraphQLSchema schema;
 
+    /**
+     * @param schema
+     */
     public QueryAnalyzer(GraphQLSchema schema) {
         this.schema = schema;
     }
