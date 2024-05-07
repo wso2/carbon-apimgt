@@ -576,6 +576,12 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
+    public void addAllTenantCertificatesToGateway(List<CertificateMetadataDTO> certificateMetadataDTOList) {
+        certificateMgtUtils.deployTenantCertsToGatewaySenderInABatch(certificateMetadataDTOList);
+        touchSSLSenderConfigFile();
+    }
+
+    @Override
     public boolean addAllCertificateToGateway(String certificate, String alias, int tenantId) {
         // Check whether the api is invoked via the APIGatewayAdmin service.
         alias = alias + "_" + tenantId;

@@ -480,7 +480,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         cleanDeployment(configContext.getAxisConfiguration().getRepository().getPath());
         new Thread(() -> {
             try {
-                new EndpointCertificateDeployer(tenantDomain).deployCertificatesAtStartup();
+                new EndpointCertificateDeployer(tenantDomain).deployAllTenantCertificatesAtStartup();
                 new GoogleAnalyticsConfigDeployer(tenantDomain).deploy();
             } catch (APIManagementException e) {
                 log.error(e);
