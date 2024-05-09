@@ -4186,9 +4186,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
                         api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
                         api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
+                        api.setRating(APIUtil.getAverageRating(publiserAPI.getId()));
                         api.setDescription(publiserAPI.getDescription());
                         api.setType(publiserAPI.getTransportType());
-                        api.setRating(0);// need to retrieve from db
                         apiSet.add(api);
                     }
                 }
