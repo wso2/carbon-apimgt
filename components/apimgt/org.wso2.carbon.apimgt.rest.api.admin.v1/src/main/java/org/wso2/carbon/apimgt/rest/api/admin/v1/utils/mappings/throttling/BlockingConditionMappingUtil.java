@@ -17,6 +17,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
@@ -31,6 +34,8 @@ import java.util.List;
  * This class is responsible for mapping Block Condition model and its sub components into REST API DTOs and vice-versa
  */
 public class BlockingConditionMappingUtil {
+
+    private static final Log log = LogFactory.getLog(BlockingConditionMappingUtil.class);
 
     /**
      * Converts a List of Block Condition in to REST API LIST DTO Object
@@ -76,8 +81,28 @@ public class BlockingConditionMappingUtil {
             dto.setConditionValue(blockCondition.getConditionValue());
         } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType()) ||
                 APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(blockCondition.getConditionType())) {
-            Object parse = new JSONParser().parse(blockCondition.getConditionValue());
-            dto.setConditionValue(parse);
+            try {
+                Object parse = new JSONParser().parse(blockCondition.getConditionValue());
+                dto.setConditionValue(parse);
+            } catch (ParseException e) {
+                // Handle migrated Fixed IP blocking conditions
+                if (blockCondition.getConditionValue() != null) {
+                    String[] conditionsArray = blockCondition.getConditionValue().split(":");
+                    if (conditionsArray.length == 2) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put(APIConstants.BLOCK_CONDITION_FIXED_IP,conditionsArray[1]);
+                        // Invert condition is set to false for migrated Fixed IP conditions as it is false always
+                        jsonObject.put(APIConstants.BLOCK_CONDITION_INVERT, Boolean.FALSE);
+                        dto.setConditionValue(jsonObject);
+                    } else {
+                        // This is a true parsing exception.
+                        log.error("Error parsing IP blocking condition value", e);
+                    }
+                } else {
+                    // This is a true parsing exception.
+                    log.error("Error parsing IP blocking condition value", e);
+                }
+            }
         }
         dto.setConditionStatus(blockCondition.isEnabled());
         return dto;
