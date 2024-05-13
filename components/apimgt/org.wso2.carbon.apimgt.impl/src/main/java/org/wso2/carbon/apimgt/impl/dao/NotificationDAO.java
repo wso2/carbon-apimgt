@@ -151,8 +151,9 @@ public class NotificationDAO {
                                     notification.setNotificationId(rs.getString("NOTIFICATION_ID"));
                                     notification.setNotificationType(rs.getString("NOTIFICATION_TYPE"));
                                     notification.setCreatedTime(rs.getTimestamp("CREATED_TIME").toString());
-                                    notification.setComments(getCommentFromMetaData(rs.getString("NOTIFICATION_METADATA"),
-                                            rs.getString("NOTIFICATION_TYPE")));
+                                    notification.setComments(
+                                            getCommentFromMetaData(rs.getString("NOTIFICATION_METADATA"),
+                                                    rs.getString("NOTIFICATION_TYPE")));
                                     notification.setIsRead(rs.getBoolean("IS_READ"));
                                     list.add(notification);
                                 }
@@ -384,7 +385,8 @@ public class NotificationDAO {
                 ps.setString(3, portalToDisplay);
                 int rowsAffected = ps.executeUpdate();
                 if (rowsAffected > 0) {
-                    NotificationList notifications = getNotifications(username, organization, portalToDisplay, "desc", 10, 0);
+                    NotificationList notifications = getNotifications(username, organization, portalToDisplay, "desc",
+                            10, 0);
                     connection.commit();
                     return notifications;
                 }
