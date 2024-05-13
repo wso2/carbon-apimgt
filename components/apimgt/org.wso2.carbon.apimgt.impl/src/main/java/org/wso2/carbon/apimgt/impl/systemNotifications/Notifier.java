@@ -16,16 +16,12 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.portalNotifications;
+package org.wso2.carbon.apimgt.impl.systemNotifications;
 
-public enum PortalNotificationType {
-    API_STATE_CHANGE,
-    API_PRODUCT_STATE_CHANGE,
-    API_REVISION_DEPLOYMENT,
-    APPLICATION_CREATION,
-    SUBSCRIPTION_CREATION,
-    SUBSCRIPTION_UPDATE,
-    SUBSCRIPTION_DELETION,
-    APPLICATION_REGISTRATION_PRODUCTION,
-    APPLICATION_REGISTRATION_SANDBOX
+import org.wso2.carbon.apimgt.impl.dto.systemNotifications.NotificationDTO;
+
+public interface Notifier {
+
+    void sendNotifications(NotificationDTO notificationDTO);
+
 }

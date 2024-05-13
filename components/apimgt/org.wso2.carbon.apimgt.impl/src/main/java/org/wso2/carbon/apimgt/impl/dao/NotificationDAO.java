@@ -29,67 +29,65 @@ import org.wso2.carbon.apimgt.api.model.Notification;
 import org.wso2.carbon.apimgt.api.model.NotificationList;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationDTO;
-import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationEndUserDTO;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationMetaData;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationType;
+import org.wso2.carbon.apimgt.impl.dto.systemNotifications.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.dto.systemNotifications.NotificationEndUserDTO;
+import org.wso2.carbon.apimgt.impl.systemNotifications.NotificationMetaData;
+import org.wso2.carbon.apimgt.impl.systemNotifications.NotificationType;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.sql.*;
+import java.time.Instant;
+import java.util.*;
 
-public class PortalNotificationDAO {
+public class NotificationDAO {
 
-    private static final Log log = LogFactory.getLog(PortalNotificationDAO.class);
+    private static final Log log = LogFactory.getLog(NotificationDAO.class);
+    private static final NotificationDAO INSTANCE = new NotificationDAO();
 
-    private static PortalNotificationDAO INSTANCE = null;
-
-    private PortalNotificationDAO() {
+    private NotificationDAO() {
     }
 
-    public static PortalNotificationDAO getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new PortalNotificationDAO();
-        }
+    public static NotificationDAO getInstance() {
         return INSTANCE;
     }
 
-    public boolean addNotification(PortalNotificationDTO portalNotificationDTO) throws APIManagementException {
+    public boolean addNotification(NotificationDTO notificationDTO) throws APIManagementException {
 
         String addNotificationQuery = SQLConstants.PortalNotifications.ADD_NOTIFICATION;
         String addEndUserQuery = SQLConstants.PortalNotifications.ADD_NOTIFICATION_END_USER;
 
-        try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(addNotificationQuery)) {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(addNotificationQuery)) {
 
-            String notificationId = UUID.randomUUID().toString();
-            ps.setString(1, notificationId);
-            ps.setString(2, portalNotificationDTO.getNotificationType().toString());
-            ps.setTimestamp(3, portalNotificationDTO.getCreatedTime());
-            String metadataJson = convertMetadataToJson(portalNotificationDTO.getNotificationMetadata());
-            ps.setString(4, metadataJson);
+                String notificationId = UUID.randomUUID().toString();
+                ps.setString(1, notificationId);
+                ps.setString(2, notificationDTO.getNotificationType().toString());
+                ps.setTimestamp(3, Timestamp.from(Instant.now()));
+                String metadataJson = convertMetadataToJson(notificationDTO.getNotificationMetadata());
+                ps.setString(4, metadataJson);
 
-            int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                for (PortalNotificationEndUserDTO endUser : portalNotificationDTO.getEndUsers()) {
-                    addEndUser(conn, addEndUserQuery, notificationId, endUser);
+                int rowsAffected = ps.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    for (NotificationEndUserDTO endUser : notificationDTO.getEndUsers()) {
+                        addEndUser(conn, addEndUserQuery, notificationId, endUser);
+                    }
+                    conn.commit();
+                    return true;
                 }
-                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Error while adding notification", e);
             }
-
         } catch (SQLException e) {
-            handleException("Error while adding notification", e);
+            handleException("Error while establishing database connection", e);
         }
         return false;
     }
 
     private void addEndUser(Connection conn, String addEndUserQuery, String notificationId,
-            PortalNotificationEndUserDTO endUser) throws APIManagementException {
+            NotificationEndUserDTO endUser) throws SQLException {
 
         try (PreparedStatement ps = conn.prepareStatement(addEndUserQuery)) {
             ps.setString(1, notificationId);
@@ -97,12 +95,10 @@ public class PortalNotificationDAO {
             ps.setString(3, endUser.getOrganization());
             ps.setString(4, endUser.getPortalToDisplay());
             ps.executeUpdate();
-        } catch (SQLException e) {
-            handleException("Error while adding end users", e);
         }
     }
 
-    private String convertMetadataToJson(PortalNotificationMetaData metaData) {
+    private String convertMetadataToJson(NotificationMetaData metaData) {
         JSONObject json = new JSONObject();
         json.put(APIConstants.PortalNotifications.API_NAME, metaData.getApi());
         json.put(APIConstants.PortalNotifications.API_VERSION, metaData.getApiVersion());
@@ -128,50 +124,54 @@ public class PortalNotificationDAO {
         String sqlQueryForCount = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_COUNT;
         String sqlQuery;
 
-        try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement psForCount = conn.prepareStatement(sqlQueryForCount)) {
-            psForCount.setString(1, username);
-            psForCount.setString(2, organization);
-            psForCount.setString(3, portalToDisplay);
-            try (ResultSet rsForCount = psForCount.executeQuery()) {
-                while (rsForCount.next()) {
-                    total = rsForCount.getInt("NOTIFICATION_COUNT");
-                }
-                if (total > 0 && limit > 0) {
-                    if (sortOrder != null && sortOrder.equals("asc")) {
-                        sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_ASC;
-                    } else {
-                        sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_DESC;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement psForCount = conn.prepareStatement(sqlQueryForCount)) {
+                psForCount.setString(1, username);
+                psForCount.setString(2, organization);
+                psForCount.setString(3, portalToDisplay);
+                try (ResultSet rsForCount = psForCount.executeQuery()) {
+                    while (rsForCount.next()) {
+                        total = rsForCount.getInt("NOTIFICATION_COUNT");
                     }
-                    try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-                        ps.setString(1, username);
-                        ps.setString(2, organization);
-                        ps.setString(3, portalToDisplay);
-                        ps.setInt(4, offset);
-                        ps.setInt(5, limit);
-                        try (ResultSet rs = ps.executeQuery()) {
-                            while (rs.next()) {
-                                Notification notification = new Notification();
-                                notification.setNotificationId(rs.getString("NOTIFICATION_ID"));
-                                notification.setNotificationType(rs.getString("NOTIFICATION_TYPE"));
-                                notification.setCreatedTime(rs.getTimestamp("CREATED_TIME").toString());
-                                notification.setComments(getCommentFromMetaData(rs.getString("NOTIFICATION_METADATA"),
-                                        rs.getString("NOTIFICATION_TYPE")));
-                                notification.setIsRead(rs.getBoolean("IS_READ"));
-                                list.add(notification);
+                    if (total > 0 && limit > 0) {
+                        if (sortOrder != null && sortOrder.equals("asc")) {
+                            sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_ASC;
+                        } else {
+                            sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATIONS_DESC;
+                        }
+                        try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                            ps.setString(1, username);
+                            ps.setString(2, organization);
+                            ps.setString(3, portalToDisplay);
+                            ps.setInt(4, offset);
+                            ps.setInt(5, limit);
+                            try (ResultSet rs = ps.executeQuery()) {
+                                while (rs.next()) {
+                                    Notification notification = new Notification();
+                                    notification.setNotificationId(rs.getString("NOTIFICATION_ID"));
+                                    notification.setNotificationType(rs.getString("NOTIFICATION_TYPE"));
+                                    notification.setCreatedTime(rs.getTimestamp("CREATED_TIME").toString());
+                                    notification.setComments(getCommentFromMetaData(rs.getString("NOTIFICATION_METADATA"),
+                                            rs.getString("NOTIFICATION_TYPE")));
+                                    notification.setIsRead(rs.getBoolean("IS_READ"));
+                                    list.add(notification);
+                                }
                             }
                         }
+                    } else {
+                        notificationList.getPagination().setTotal(total);
+                        notificationList.setCount(total);
+                        return notificationList;
                     }
-                } else {
-                    notificationList.getPagination().setTotal(total);
-                    notificationList.setCount(total);
-                    return notificationList;
                 }
+                unreadCount = getUnreadNotificationCount(username, organization, portalToDisplay, conn);
+            } catch (SQLException e) {
+                handleException("Failed to retrieve notifications of the user " + username, e);
             }
-            unreadCount = getUnreadNotificationCount(username, organization, portalToDisplay, conn);
         } catch (SQLException e) {
-            handleException("Failed to retrieve notifications of the user " + username, e);
+            handleException("Failed to establish database connection", e);
         }
+
         pagination.setLimit(limit);
         pagination.setOffset(offset);
         notificationList.getPagination().setTotal(total);
@@ -204,7 +204,7 @@ public class PortalNotificationDAO {
                 status = APIConstants.PortalNotifications.STATUS_REJECTED;
             }
 
-            switch (PortalNotificationType.valueOf(notificationType)) {
+            switch (NotificationType.valueOf(notificationType)) {
             case API_STATE_CHANGE:
                 finalComment = "API State Change request to " + action + " the API: " + apiName + ", version: "
                         + apiVersion + " that has the context: " + apiContext + " has been " + status + ".";
@@ -244,7 +244,7 @@ public class PortalNotificationDAO {
                 break;
             }
 
-            if (!comment.equals("APPROVED")) {
+            if (!APIConstants.PortalNotifications.APPROVED.equals(comment)) {
                 finalComment = finalComment + " Reason: " + comment;
             }
 
@@ -258,21 +258,29 @@ public class PortalNotificationDAO {
             throws APIManagementException {
 
         String sqlQuery = SQLConstants.PortalNotifications.DELETE_ALL_NOTIFICATIONS_OF_USER;
-        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-            ps.setString(1, username);
-            ps.setString(2, organization);
-            ps.setString(3, portalToDisplay);
-            int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                String deleteNotification = SQLConstants.PortalNotifications.DELETE_NOTIFICATIONS;
-                try (PreparedStatement preparedStatement = conn.prepareStatement(deleteNotification)) {
-                    preparedStatement.executeUpdate();
+        try (Connection conn = APIMgtDBUtil.getConnection()){
+            conn.setAutoCommit(false);
+            try ( PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                ps.setString(1, username);
+                ps.setString(2, organization);
+                ps.setString(3, portalToDisplay);
+                int rowsAffected = ps.executeUpdate();
+                if (rowsAffected > 0) {
+                    String deleteNotification = SQLConstants.PortalNotifications.DELETE_NOTIFICATIONS;
+                    try (PreparedStatement preparedStatement = conn.prepareStatement(deleteNotification)) {
+                        preparedStatement.executeUpdate();
+                    }
+                    conn.commit();
+                    return true;
                 }
-                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Failed to delete notifications", e);
             }
         } catch (SQLException e) {
-            handleException("Failed to delete notifications", e);
+            handleException("Error while establishing database connection", e);
         }
+
         return false;
     }
 
@@ -281,26 +289,34 @@ public class PortalNotificationDAO {
 
         Notification notification;
         String sqlQuery = SQLConstants.PortalNotifications.MARK_NOTIFICATION_AS_READ;
-        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-            ps.setString(1, notificationId);
-            ps.setString(2, username);
-            ps.setString(3, organization);
-            ps.setString(4, portalToDisplay);
-            int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                notification = getNotificationById(notificationId, username, organization, portalToDisplay, conn);
-                if (notification != null) {
-                    return notification;
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                ps.setString(1, notificationId);
+                ps.setString(2, username);
+                ps.setString(3, organization);
+                ps.setString(4, portalToDisplay);
+                int rowsAffected = ps.executeUpdate();
+                if (rowsAffected > 0) {
+                    notification = getNotificationById(notificationId, username, organization, portalToDisplay, conn);
+                    if (notification != null) {
+                        conn.commit();
+                        return notification;
+                    }
                 }
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Failed to mark notification as read", e);
             }
         } catch (SQLException e) {
-            handleException("Failed to mark notification as read", e);
+            handleException("Failed to establish database connection", e);
         }
         return null;
     }
 
     private Notification getNotificationById(String notificationId, String username, String organization,
-            String portalToDisplay, Connection conn) throws APIManagementException {
+            String portalToDisplay, Connection conn) throws SQLException {
 
         String sqlQuery = SQLConstants.PortalNotifications.GET_NOTIFICATION_BY_ID;
         try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
@@ -320,9 +336,6 @@ public class PortalNotificationDAO {
                     return notification;
                 }
             }
-
-        } catch (SQLException e) {
-            handleException("Failed to retrieve notification by id", e);
         }
         return null;
     }
@@ -331,21 +344,29 @@ public class PortalNotificationDAO {
             String portalToDisplay) throws APIManagementException {
 
         String sqlQuery = SQLConstants.PortalNotifications.DELETE_NOTIFICATION_BY_ID;
-        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-            ps.setString(1, notificationId);
-            ps.setString(2, username);
-            ps.setString(3, organization);
-            ps.setString(4, portalToDisplay);
-            int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                String deleteNotification = SQLConstants.PortalNotifications.DELETE_NOTIFICATIONS;
-                try (PreparedStatement preparedStatement = conn.prepareStatement(deleteNotification)) {
-                    preparedStatement.executeUpdate();
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                ps.setString(1, notificationId);
+                ps.setString(2, username);
+                ps.setString(3, organization);
+                ps.setString(4, portalToDisplay);
+                int rowsAffected = ps.executeUpdate();
+                if (rowsAffected > 0) {
+                    String deleteNotification = SQLConstants.PortalNotifications.DELETE_NOTIFICATIONS;
+                    try (PreparedStatement preparedStatement = conn.prepareStatement(deleteNotification)) {
+                        preparedStatement.executeUpdate();
+                    }
+                    conn.commit();
+                    return true;
                 }
-                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Failed to delete notification by id", e);
             }
         } catch (SQLException e) {
-            handleException("Failed to delete notification by id", e);
+            handleException("Failed to establish database connection", e);
         }
         return false;
     }
@@ -355,17 +376,24 @@ public class PortalNotificationDAO {
 
         String sqlQuery = SQLConstants.PortalNotifications.MARK_ALL_NOTIFICATIONS_AS_READ;
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
-            ps.setString(1, username);
-            ps.setString(2, organization);
-            ps.setString(3, portalToDisplay);
-            int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                return getNotifications(username, organization, portalToDisplay, "desc", 10, 0);
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+                ps.setString(1, username);
+                ps.setString(2, organization);
+                ps.setString(3, portalToDisplay);
+                int rowsAffected = ps.executeUpdate();
+                if (rowsAffected > 0) {
+                    NotificationList notifications = getNotifications(username, organization, portalToDisplay, "desc", 10, 0);
+                    connection.commit();
+                    return notifications;
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to mark all notifications as read", e);
             }
         } catch (SQLException e) {
-            handleException("Failed to mark all notifications as read", e);
+            handleException("Failed to establish database connection", e);
         }
         return null;
     }
@@ -375,6 +403,7 @@ public class PortalNotificationDAO {
 
         String apiUUID = null;
         String sqlQuery = SQLConstants.PortalNotifications.GET_API_UUID_USING_NAME_CONTEXT_VERSION;
+
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
             ps.setString(1, apiName);
@@ -387,10 +416,9 @@ public class PortalNotificationDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve API UUID using name, context and version", e);
+            handleException("Failed to retrieve API UUID using name, context, and version", e);
         }
         return apiUUID;
-
     }
 
     public int getUnreadNotificationCount(String username, String organization, String portalToDisplay, Connection conn)

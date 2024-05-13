@@ -4612,7 +4612,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public NotificationList getNotifications(String username, String organization, String portalToDisplay,
             String sortOrder, Integer limit, Integer offset) throws APIManagementException {
-        return portalNotificationDAO.getNotifications(username, organization, portalToDisplay, sortOrder, limit,
+        return notificationDAO.getNotifications(username, organization, portalToDisplay, sortOrder, limit,
                 offset);
     }
 
@@ -4628,7 +4628,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay)
             throws APIManagementException {
-        return portalNotificationDAO.markAllNotificationsAsRead(username, organization, portalToDisplay);
+        return notificationDAO.markAllNotificationsAsRead(username, organization, portalToDisplay);
     }
 
     /**
@@ -4644,7 +4644,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public Notification markNotificationAsReadById(String username, String organization, String notificationId,
             String portalToDisplay) throws APIManagementException {
-        return portalNotificationDAO.markNotificationAsReadById(username, organization, notificationId,
+        return notificationDAO.markNotificationAsReadById(username, organization, notificationId,
                 portalToDisplay);
     }
 
@@ -4661,7 +4661,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public boolean deleteNotificationById(String username, String organization, String notificationId,
             String portalToDisplay) throws APIManagementException {
-        return portalNotificationDAO.deleteNotificationById(username, organization, notificationId, portalToDisplay);
+        return notificationDAO.deleteNotificationById(username, organization, notificationId, portalToDisplay);
     }
 
     /**
@@ -4676,7 +4676,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public boolean deleteAllNotifications(String username, String organization, String portalToDisplay)
             throws APIManagementException {
-        return portalNotificationDAO.deleteAllNotifications(username, organization, portalToDisplay);
+        return notificationDAO.deleteAllNotifications(username, organization, portalToDisplay);
     }
 
     public static boolean hasIntersection(String[] arr1, String[] arr2) {

@@ -24,12 +24,14 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.portalNotifications.WorkflowNotificationServiceImpl;
+import org.wso2.carbon.apimgt.impl.systemNotifications.AbstractWFNotifier;
+import org.wso2.carbon.apimgt.impl.systemNotifications.WFNotifierFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -204,8 +206,11 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
             workflowExecutor.complete(workflowDTO);
 
-            WorkflowNotificationServiceImpl portalNotification = new WorkflowNotificationServiceImpl();
-            portalNotification.sendPortalNotifications(workflowDTO, tenantDomainOfUser);
+            AbstractWFNotifier notifier = WFNotifierFactory.getNotifier(workflowDTO.getWorkflowType());
+            if (notifier != null) {
+                notifier.sendNotifications(notifier.prepareNotification(workflowDTO));
+            }
+
 
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);

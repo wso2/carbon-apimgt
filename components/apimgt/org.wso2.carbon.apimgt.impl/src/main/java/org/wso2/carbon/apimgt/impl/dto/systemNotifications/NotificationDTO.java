@@ -16,21 +16,21 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.dto.portalNotifications;
+package org.wso2.carbon.apimgt.impl.dto.systemNotifications;
 
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationMetaData;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationType;
+import org.wso2.carbon.apimgt.impl.systemNotifications.NotificationMetaData;
+import org.wso2.carbon.apimgt.impl.systemNotifications.NotificationType;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-public class PortalNotificationDTO {
+public class NotificationDTO {
 
     private String notificationId;
-    private PortalNotificationType notificationType;
+    private NotificationType notificationType;
     private Timestamp createdTime;
-    private PortalNotificationMetaData notificationMetadata;
-    private List<PortalNotificationEndUserDTO> endUsers;
+    private NotificationMetaData notificationMetadata;
+    private List<NotificationEndUserDTO> endUsers;
 
     public String getNotificationId() {
         return notificationId;
@@ -40,11 +40,11 @@ public class PortalNotificationDTO {
         this.notificationId = notificationId;
     }
 
-    public PortalNotificationType getNotificationType() {
+    public NotificationType getNotificationType() {
         return notificationType;
     }
 
-    public void setNotificationType(PortalNotificationType notificationType) {
+    public void setNotificationType(NotificationType notificationType) {
         this.notificationType = notificationType;
     }
 
@@ -56,19 +56,19 @@ public class PortalNotificationDTO {
         this.createdTime = createdTime;
     }
 
-    public PortalNotificationMetaData getNotificationMetadata() {
+    public NotificationMetaData getNotificationMetadata() {
         return notificationMetadata;
     }
 
-    public void setNotificationMetadata(PortalNotificationMetaData notificationMetadata) {
+    public void setNotificationMetadata(NotificationMetaData notificationMetadata) {
         this.notificationMetadata = notificationMetadata;
     }
 
-    public List<PortalNotificationEndUserDTO> getEndUsers() {
+    public List<NotificationEndUserDTO> getEndUsers() {
         return endUsers;
     }
 
-    public void setEndUsers(List<PortalNotificationEndUserDTO> endUsers) {
+    public void setEndUsers(List<NotificationEndUserDTO> endUsers) {
         this.endUsers = endUsers;
     }
 }

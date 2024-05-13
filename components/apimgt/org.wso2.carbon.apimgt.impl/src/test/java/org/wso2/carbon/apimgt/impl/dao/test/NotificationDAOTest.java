@@ -35,11 +35,11 @@ import org.wso2.carbon.apimgt.api.model.NotificationList;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.dao.PortalNotificationDAO;
-import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationDTO;
-import org.wso2.carbon.apimgt.impl.dto.portalNotifications.PortalNotificationEndUserDTO;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationMetaData;
-import org.wso2.carbon.apimgt.impl.portalNotifications.PortalNotificationType;
+import org.wso2.carbon.apimgt.impl.dao.NotificationDAO;
+import org.wso2.carbon.apimgt.impl.dto.systemNotifications.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.dto.systemNotifications.NotificationEndUserDTO;
+import org.wso2.carbon.apimgt.impl.systemNotifications.NotificationMetaData;
+import org.wso2.carbon.apimgt.impl.systemNotifications.NotificationType;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
@@ -57,8 +57,8 @@ import java.util.List;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-public class PortalNotificationDAOTest {
-    public static PortalNotificationDAO portalNotificationDAO;
+public class NotificationDAOTest {
+    public static NotificationDAO notificationDAO;
 
     private static final String organization = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
@@ -71,7 +71,7 @@ public class PortalNotificationDAOTest {
         ServiceReferenceHolder.getInstance()
                 .setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(config));
         APIMgtDBUtil.initialize();
-        portalNotificationDAO = PortalNotificationDAO.getInstance();
+        notificationDAO = NotificationDAO.getInstance();
     }
 
     private static void initializeDatabase(String configFilePath)
@@ -110,33 +110,33 @@ public class PortalNotificationDAOTest {
 
     @Test
     public void testAddNotificationSuccess() throws APIManagementException {
-        PortalNotificationMetaData metaData = getPortalNotificationMetaData();
-        PortalNotificationDTO portalNotificationDTO = getPortalNotificationDTO(metaData);
+        NotificationMetaData metaData = getPortalNotificationMetaData();
+        NotificationDTO notificationDTO = getPortalNotificationDTO(metaData);
 
-        boolean result = portalNotificationDAO.addNotification(portalNotificationDTO);
+        boolean result = notificationDAO.addNotification(notificationDTO);
         Assert.assertTrue(result);
     }
 
     @NotNull
-    private static PortalNotificationDTO getPortalNotificationDTO(PortalNotificationMetaData metaData) {
-        PortalNotificationEndUserDTO endUser1 = new PortalNotificationEndUserDTO();
+    private static NotificationDTO getPortalNotificationDTO(NotificationMetaData metaData) {
+        NotificationEndUserDTO endUser1 = new NotificationEndUserDTO();
         endUser1.setDestinationUser("Kevin");
         endUser1.setOrganization(organization);
         endUser1.setPortalToDisplay("publisher");
-        List<PortalNotificationEndUserDTO> endUsersList = new ArrayList<>();
+        List<NotificationEndUserDTO> endUsersList = new ArrayList<>();
         endUsersList.add(endUser1);
 
-        PortalNotificationDTO portalNotificationDTO = new PortalNotificationDTO();
-        portalNotificationDTO.setNotificationType(PortalNotificationType.API_STATE_CHANGE);
-        portalNotificationDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));
-        portalNotificationDTO.setNotificationMetadata(metaData);
-        portalNotificationDTO.setEndUsers(endUsersList);
-        return portalNotificationDTO;
+        NotificationDTO notificationDTO = new NotificationDTO();
+        notificationDTO.setNotificationType(NotificationType.API_STATE_CHANGE);
+        notificationDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));
+        notificationDTO.setNotificationMetadata(metaData);
+        notificationDTO.setEndUsers(endUsersList);
+        return notificationDTO;
     }
 
     @NotNull
-    private static PortalNotificationMetaData getPortalNotificationMetaData() {
-        PortalNotificationMetaData metaData = new PortalNotificationMetaData();
+    private static NotificationMetaData getPortalNotificationMetaData() {
+        NotificationMetaData metaData = new NotificationMetaData();
         metaData.setApi("Sample_API");
         metaData.setApiVersion("1.0");
         metaData.setApiContext("/sample");
@@ -150,42 +150,42 @@ public class PortalNotificationDAOTest {
 
     @Test
     public void testGetNotificationsSuccess() throws APIManagementException {
-        NotificationList notificationList = portalNotificationDAO.getNotifications("helani", organization,
+        NotificationList notificationList = notificationDAO.getNotifications("helani", organization,
                 "publisher", "desc", 0, 10);
         Assert.assertNotNull(notificationList);
     }
 
     @Test
     public void testMarkNotificationAsReadByIdSuccess() throws Exception {
-        Notification notification = portalNotificationDAO.markNotificationAsReadById("helani", organization,
+        Notification notification = notificationDAO.markNotificationAsReadById("helani", organization,
                 "1e2736ab-7882-4184-a1ba-6d3c07271b69", "publisher");
         Assert.assertEquals(true, notification.getIsRead());
     }
 
     @Test
     public void testMarkAllNotificationsAsReadSuccess() throws Exception {
-        NotificationList notificationList = portalNotificationDAO.markAllNotificationsAsRead("helani",
+        NotificationList notificationList = notificationDAO.markAllNotificationsAsRead("helani",
                 organization, "publisher");
         Assert.assertEquals(true, notificationList.getList().get(0).getIsRead());
     }
 
     @Test
     public void testDeleteNotificationByIdSuccess() throws Exception {
-        boolean result = portalNotificationDAO.deleteNotificationById("helani", organization,
+        boolean result = notificationDAO.deleteNotificationById("helani", organization,
                 "7dc674f1-2b4c-4826-8e95-fa9b2628b816", "publisher");
         Assert.assertTrue(result);
     }
 
     @Test
     public void testDeleteAllNotificationsSuccess() throws Exception {
-        boolean result = portalNotificationDAO.deleteAllNotifications("Kevin", organization,
+        boolean result = notificationDAO.deleteAllNotifications("Kevin", organization,
                 "publisher");
         Assert.assertTrue(result);
     }
 
     @Test
     public void testGetAPIUUIDUsingNameContextVersionSuccess() throws Exception {
-        String apiUUID = portalNotificationDAO.getAPIUUIDUsingNameContextVersion("testAPI1",
+        String apiUUID = notificationDAO.getAPIUUIDUsingNameContextVersion("testAPI1",
                 "/sample/api", "1.0.0", organization);
         Assert.assertEquals("821b9824-eeca-4173-9f56-3dc6d46bd6eb", apiUUID);
     }
@@ -193,7 +193,7 @@ public class PortalNotificationDAOTest {
     @Test
     public void testGetUnreadNotificationCountSuccess() throws Exception {
         Connection connection = APIMgtDBUtil.getConnection();
-        int unreadCount = portalNotificationDAO.getUnreadNotificationCount("Nisha", organization,
+        int unreadCount = notificationDAO.getUnreadNotificationCount("Nisha", organization,
                 "devportal", connection);
         Assert.assertEquals(1, unreadCount);
 
@@ -201,66 +201,66 @@ public class PortalNotificationDAOTest {
 
     @Test
     public void testAddNotificationFailure() {
-        PortalNotificationMetaData metaData = getPortalNotificationMetaData();
-        PortalNotificationEndUserDTO endUser1 = new PortalNotificationEndUserDTO();
+        NotificationMetaData metaData = getPortalNotificationMetaData();
+        NotificationEndUserDTO endUser1 = new NotificationEndUserDTO();
         endUser1.setDestinationUser("Kevin");
         endUser1.setOrganization(organization);
-        List<PortalNotificationEndUserDTO> endUsersList = new ArrayList<>();
+        List<NotificationEndUserDTO> endUsersList = new ArrayList<>();
         endUsersList.add(endUser1);
 
-        PortalNotificationDTO portalNotificationDTO = new PortalNotificationDTO();
-        portalNotificationDTO.setNotificationType(PortalNotificationType.API_STATE_CHANGE);
-        portalNotificationDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));
-        portalNotificationDTO.setNotificationMetadata(metaData);
-        portalNotificationDTO.setEndUsers(endUsersList);
+        NotificationDTO notificationDTO = new NotificationDTO();
+        notificationDTO.setNotificationType(NotificationType.API_STATE_CHANGE);
+        notificationDTO.setCreatedTime(new java.sql.Timestamp(new java.util.Date().getTime()));
+        notificationDTO.setNotificationMetadata(metaData);
+        notificationDTO.setEndUsers(endUsersList);
 
         Exception exception = Assert.assertThrows(APIManagementException.class, () -> {
-            portalNotificationDAO.addNotification(portalNotificationDTO);
+            notificationDAO.addNotification(notificationDTO);
         });
 
-        String expectedMessage = "Error while adding end users";
+        String expectedMessage = "Error while adding notification";
         String actualMessage = exception.getMessage();
         Assert.assertEquals(expectedMessage, actualMessage);
     }
 
     @Test
     public void testGetNotificationsFailure() throws APIManagementException {
-        NotificationList notificationList = portalNotificationDAO.getNotifications("Rush", organization,
+        NotificationList notificationList = notificationDAO.getNotifications("Rush", organization,
                 "publisher", "desc", 0, 10);
         Assert.assertEquals(0, notificationList.getList().size());
     }
 
     @Test
     public void testMarkNotificationAsReadByIdFailure() throws Exception {
-        Notification notification = portalNotificationDAO.markNotificationAsReadById("Rush", organization,
+        Notification notification = notificationDAO.markNotificationAsReadById("Rush", organization,
                 "1e2736ab-7882-4184-a1ba-6d3c07271b69", "publisher");
         Assert.assertNull(notification);
     }
 
     @Test
     public void testMarkAllNotificationsAsReadFailure() throws Exception {
-        NotificationList notificationList = portalNotificationDAO.markAllNotificationsAsRead("Rush",
+        NotificationList notificationList = notificationDAO.markAllNotificationsAsRead("Rush",
                 organization, "publisher");
         Assert.assertNull(notificationList);
     }
 
     @Test
     public void testDeleteNotificationByIdFailure() throws Exception {
-        boolean result = portalNotificationDAO.deleteNotificationById("Rush", organization,
+        boolean result = notificationDAO.deleteNotificationById("Rush", organization,
                 "7dc674f1-2b4c-4826-8e95-fa9b2628b816", "publisher");
         Assert.assertFalse(result);
     }
 
     @Test
     public void testDeleteAllNotificationsFailure() throws Exception {
-        boolean result = portalNotificationDAO.deleteAllNotifications("Rush", organization,
+        boolean result = notificationDAO.deleteAllNotifications("Rush", organization,
                 "publisher");
         Assert.assertFalse(result);
     }
 
     @Test
     public void testGetAPIUUIDUsingNameContextVersionFailure() throws Exception {
-        String apiUUID = portalNotificationDAO.getAPIUUIDUsingNameContextVersion("MyApi", "/api",
+        String apiUUID = notificationDAO.getAPIUUIDUsingNameContextVersion("MyApi", "/api",
                 "1.0.0", organization);
         Assert.assertNull(apiUUID);
     }
@@ -268,7 +268,7 @@ public class PortalNotificationDAOTest {
     @Test
     public void testGetUnreadNotificationCountFailure() throws Exception {
         Connection connection = APIMgtDBUtil.getConnection();
-        int unreadCount = portalNotificationDAO.getUnreadNotificationCount("Rush", organization,
+        int unreadCount = notificationDAO.getUnreadNotificationCount("Rush", organization,
                 "publisher", connection);
         Assert.assertEquals(0, unreadCount);
     }

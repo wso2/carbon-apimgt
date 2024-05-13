@@ -21,14 +21,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import java.util.UUID;
 
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.Constants;
-import org.apache.axis2.addressing.EndpointReference;
-import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,8 +37,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.portalNotifications.WorkflowNotificationServiceImpl;
-
+import org.wso2.carbon.apimgt.impl.systemNotifications.SubscriptionCreationWFNotifier;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -53,13 +45,12 @@ import javax.xml.stream.XMLStreamException;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ServiceReferenceHolder.class, ApiMgtDAO.class, SubscriptionCreationWSWorkflowExecutor.class,
-		AXIOMUtil.class, WorkflowNotificationServiceImpl.class})
+		AXIOMUtil.class, SubscriptionCreationWFNotifier.class})
 public class SubscriptionCreationWSWorkflowExecutorTest {
 
 	private SubscriptionCreationWSWorkflowExecutor subscriptionCreationWSWorkflowExecutor;
 	private ApiMgtDAO apiMgtDAO;
 	private ServiceClient serviceClient;
-	WorkflowNotificationServiceImpl workflowsApiService;
 
 	@Before
 	public void init() {
@@ -73,7 +64,6 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
 		serviceClient = Mockito.mock(ServiceClient.class);
 		PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-		workflowsApiService = PowerMockito.mock(WorkflowNotificationServiceImpl.class);
 	}
 
 	@Test
@@ -90,8 +80,6 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		PowerMockito.doNothing().when(apiMgtDAO)
 				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
 						APIConstants.SubscriptionStatus.UNBLOCKED);
-		PowerMockito.doNothing().when(workflowsApiService)
-				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 		Mockito.verify(apiMgtDAO, Mockito.times(1))
@@ -109,8 +97,6 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		PowerMockito.doNothing().when(apiMgtDAO)
 				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
 						APIConstants.SubscriptionStatus.REJECTED);
-		PowerMockito.doNothing().when(workflowsApiService)
-				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 		Mockito.verify(apiMgtDAO, Mockito.times(1))
@@ -127,8 +113,6 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO)
 				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
 						APIConstants.SubscriptionStatus.REJECTED);
-		PowerMockito.doNothing().when(workflowsApiService)
-				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 
 	}
@@ -142,8 +126,6 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO)
 				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
 						APIConstants.SubscriptionStatus.UNBLOCKED);
-		PowerMockito.doNothing().when(workflowsApiService)
-				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 
 	}
@@ -154,8 +136,6 @@ public class SubscriptionCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.CREATED);
-		PowerMockito.doNothing().when(workflowsApiService)
-				.sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 		subscriptionCreationWSWorkflowExecutor.complete(workflowDTO);
 		// shouldn't update status
 		Mockito.verify(apiMgtDAO, Mockito.never())

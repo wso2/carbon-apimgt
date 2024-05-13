@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.portalNotifications.WorkflowNotificationServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
@@ -59,7 +58,7 @@ import javax.xml.stream.XMLStreamException;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class, UserSignUpWSWorkflowExecutor.class, ApiMgtDAO.class, APIUtil.class,
-        AXIOMUtil.class, SelfSignUpUtil.class, CarbonUtils.class, WorkflowNotificationServiceImpl.class})
+        AXIOMUtil.class, SelfSignUpUtil.class, CarbonUtils.class, })
 public class UserSignUpWSWorkflowExecutorTest {
 
     private UserSignUpWSWorkflowExecutor userSignUpWSWorkflowExecutor;
@@ -76,7 +75,6 @@ public class UserSignUpWSWorkflowExecutorTest {
     private String signUpRole = "Internal/subscriber";
     private int tenantID = -1234;
     private String testUsername = "PRIMARY/testuser";
-    WorkflowNotificationServiceImpl workflowsApiService;
 
     @Before
     public void init() throws Exception {
@@ -115,7 +113,6 @@ public class UserSignUpWSWorkflowExecutorTest {
         workflowDTO.setTenantDomain(tenantDomain);
         workflowDTO.setExternalWorkflowReference(externalWFReference);
         workflowDTO.setWorkflowReference(testUsername + "@carbon.super");
-        workflowsApiService = PowerMockito.mock(WorkflowNotificationServiceImpl.class);
     }
 
     @Test
@@ -187,8 +184,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(true);
         PowerMockito.doNothing().when(userStoreManager)
                 .updateRoleListOfUser(testUsername, null, new String[] { signUpRole });
-        PowerMockito.doNothing().when(workflowsApiService)
-                .sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
+
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         try {
@@ -208,8 +204,6 @@ public class UserSignUpWSWorkflowExecutorTest {
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
         Mockito.when(userStoreManager.isExistingUser(testUsername)).thenReturn(true);
         Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(true);
-        PowerMockito.doNothing().when(workflowsApiService)
-                .sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
 
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
@@ -253,8 +247,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         userRegistrationConfigDTO.setRoles(roleMap);
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
-        PowerMockito.doNothing().when(workflowsApiService)
-                .sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
+
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.REJECTED);
         try {
@@ -272,8 +265,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         userRegistrationConfigDTO.setRoles(roleMap);
         PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenReturn(userRegistrationConfigDTO);
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
-        PowerMockito.doNothing().when(workflowsApiService)
-                .sendPortalNotifications(Mockito.any(WorkflowDTO.class), Mockito.any(String.class));
+
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.REJECTED);
         Mockito.doThrow(UserStoreException.class).when(userStoreManager).deleteUser(Mockito.anyString());

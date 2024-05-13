@@ -16,9 +16,9 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.dto.portalNotifications;
+package org.wso2.carbon.apimgt.impl.dto.systemNotifications;
 
-public class PortalNotificationEndUserDTO {
+public class NotificationEndUserDTO {
 
     private String notificationId;
     private String destinationUser;

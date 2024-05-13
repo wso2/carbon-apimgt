@@ -16,9 +16,9 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.portalNotifications;
+package org.wso2.carbon.apimgt.impl.systemNotifications;
 
-public class PortalNotificationMetaData {
+public class NotificationMetaData {
 
     private String action;
     private String api;

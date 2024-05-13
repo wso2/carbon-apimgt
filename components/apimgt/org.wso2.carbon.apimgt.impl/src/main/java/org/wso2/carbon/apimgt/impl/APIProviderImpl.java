@@ -7249,7 +7249,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public NotificationList getNotifications(String username, String organization, String portalToDisplay,
             String sortOrder, Integer limit, Integer offset) throws APIManagementException {
-        return portalNotificationDAO.getNotifications(username, organization, portalToDisplay, sortOrder, limit,
+        return notificationDAO.getNotifications(username, organization, portalToDisplay, sortOrder, limit,
                 offset);
     }
 
@@ -7265,7 +7265,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean deleteAllNotifications(String username, String organization, String portalToDisplay)
             throws APIManagementException {
-        return portalNotificationDAO.deleteAllNotifications(username, organization, portalToDisplay);
+        return notificationDAO.deleteAllNotifications(username, organization, portalToDisplay);
     }
 
     /**
@@ -7281,7 +7281,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Notification markNotificationAsReadById(String username, String organization, String notificationId,
             String portalToDisplay) throws APIManagementException {
-        return portalNotificationDAO.markNotificationAsReadById(username, organization, notificationId,
+        return notificationDAO.markNotificationAsReadById(username, organization, notificationId,
                 portalToDisplay);
     }
 
@@ -7298,7 +7298,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean deleteNotificationById(String username, String organization, String notificationId,
             String portalToDisplay) throws APIManagementException {
-        return portalNotificationDAO.deleteNotificationById(username, organization, notificationId, portalToDisplay);
+        return notificationDAO.deleteNotificationById(username, organization, notificationId, portalToDisplay);
     }
 
     /**
@@ -7313,7 +7313,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay)
             throws APIManagementException {
-        return portalNotificationDAO.markAllNotificationsAsRead(username, organization, portalToDisplay);
+        return notificationDAO.markAllNotificationsAsRead(username, organization, portalToDisplay);
     }
 
     /**
