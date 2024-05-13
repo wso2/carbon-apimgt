@@ -49,8 +49,7 @@ public class SubscriptionCreationWFNotifier extends AbstractWFNotifier {
     public NotificationMetaData getNotificationMetaData(WorkflowDTO workflowDTO) {
         NotificationMetaData notificationMetaData = new NotificationMetaData();
         notificationMetaData.setApi(workflowDTO.getProperties(APIConstants.PortalNotifications.API_NAME));
-        notificationMetaData.setApiVersion(
-                workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION));
+        notificationMetaData.setApiVersion(workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION));
         notificationMetaData.setApplicationName(
                 workflowDTO.getProperties(APIConstants.PortalNotifications.APPLICATION_NAME));
         notificationMetaData.setComment(workflowDTO.getComments());

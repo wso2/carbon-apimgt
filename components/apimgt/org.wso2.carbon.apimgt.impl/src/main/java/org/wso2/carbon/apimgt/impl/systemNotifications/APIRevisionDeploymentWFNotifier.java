@@ -44,10 +44,8 @@ public class APIRevisionDeploymentWFNotifier extends AbstractWFNotifier {
     public NotificationMetaData getNotificationMetaData(WorkflowDTO workflowDTO) {
         NotificationMetaData notificationMetaData = new NotificationMetaData();
         notificationMetaData.setApi(workflowDTO.getProperties(APIConstants.PortalNotifications.API_NAME));
-        notificationMetaData.setApiVersion(
-                workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION));
-        notificationMetaData.setRevisionId(
-                workflowDTO.getProperties(APIConstants.PortalNotifications.REVISION_ID));
+        notificationMetaData.setApiVersion(workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION));
+        notificationMetaData.setRevisionId(workflowDTO.getProperties(APIConstants.PortalNotifications.REVISION_ID));
         notificationMetaData.setComment(workflowDTO.getComments());
         return notificationMetaData;
     }

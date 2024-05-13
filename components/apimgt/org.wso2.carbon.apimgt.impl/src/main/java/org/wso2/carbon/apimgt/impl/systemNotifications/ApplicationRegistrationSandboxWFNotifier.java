@@ -32,7 +32,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApplicationRegistrationSandboxWFNotifier extends AbstractWFNotifier{
+public class ApplicationRegistrationSandboxWFNotifier extends AbstractWFNotifier {
     private static final Log log = LogFactory.getLog(ApplicationRegistrationSandboxWFNotifier.class);
 
     @Override

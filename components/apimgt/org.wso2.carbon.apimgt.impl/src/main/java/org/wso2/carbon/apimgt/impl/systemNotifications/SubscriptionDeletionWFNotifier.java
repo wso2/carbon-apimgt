@@ -34,7 +34,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SubscriptionDeletionWFNotifier extends AbstractWFNotifier{
+public class SubscriptionDeletionWFNotifier extends AbstractWFNotifier {
     private static final Log log = LogFactory.getLog(SubscriptionDeletionWFNotifier.class);
 
     @Override
@@ -50,8 +50,7 @@ public class SubscriptionDeletionWFNotifier extends AbstractWFNotifier{
     public NotificationMetaData getNotificationMetaData(WorkflowDTO workflowDTO) {
         NotificationMetaData notificationMetaData = new NotificationMetaData();
         notificationMetaData.setApi(workflowDTO.getProperties(APIConstants.PortalNotifications.API_NAME));
-        notificationMetaData.setApiVersion(
-                workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION));
+        notificationMetaData.setApiVersion(workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION));
         notificationMetaData.setApplicationName(
                 workflowDTO.getProperties(APIConstants.PortalNotifications.APPLICATION_NAME));
         notificationMetaData.setComment(workflowDTO.getComments());

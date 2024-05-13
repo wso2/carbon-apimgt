@@ -46,14 +46,11 @@ public class APIProductStateChangeWFNotifier extends AbstractWFNotifier {
         NotificationMetaData notificationMetaData = new NotificationMetaData();
 
         notificationMetaData.setApi(workflowDTO.getProperties(APIConstants.PortalNotifications.API_NAME));
-        notificationMetaData.setApiVersion(
-                workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION));
+        notificationMetaData.setApiVersion(workflowDTO.getProperties(APIConstants.PortalNotifications.API_VERSION));
         notificationMetaData.setAction(workflowDTO.getProperties(APIConstants.PortalNotifications.ACTION));
-        notificationMetaData.setRevisionId(
-                workflowDTO.getProperties(APIConstants.PortalNotifications.REVISION_ID));
+        notificationMetaData.setRevisionId(workflowDTO.getProperties(APIConstants.PortalNotifications.REVISION_ID));
         notificationMetaData.setComment(workflowDTO.getComments());
-        notificationMetaData.setApiContext(
-                workflowDTO.getMetadata(APIConstants.PortalNotifications.API_CONTEXT_META));
+        notificationMetaData.setApiContext(workflowDTO.getMetadata(APIConstants.PortalNotifications.API_CONTEXT_META));
 
         return notificationMetaData;
     }

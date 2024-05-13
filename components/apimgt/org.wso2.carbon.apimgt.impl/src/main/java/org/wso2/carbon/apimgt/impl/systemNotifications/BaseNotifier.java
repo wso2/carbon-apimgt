@@ -24,20 +24,20 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.NotificationDAO;
 import org.wso2.carbon.apimgt.impl.dto.systemNotifications.NotificationDTO;
 
-public class BaseNotifier implements Notifier{
+public class BaseNotifier implements Notifier {
 
-        private static final Log log = LogFactory.getLog(BaseNotifier.class);
+    private static final Log log = LogFactory.getLog(BaseNotifier.class);
 
-        @Override
-        public void sendNotifications(NotificationDTO notificationDTO) {
-            try {
-                boolean result = NotificationDAO.getInstance().addNotification(notificationDTO);
-                    if (!result) {
-                            log.error("Error while adding publisher developer notification.");
-                    }
-            } catch (APIManagementException e) {
-                throw new RuntimeException(e);
+    @Override
+    public void sendNotifications(NotificationDTO notificationDTO) {
+        try {
+            boolean result = NotificationDAO.getInstance().addNotification(notificationDTO);
+            if (!result) {
+                log.error("Error while adding publisher developer notification.");
             }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
         }
+    }
 
 }
