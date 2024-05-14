@@ -3149,7 +3149,6 @@ paths:
   /applications/{applicationId}/reset-throttle-policy:
     post:
       tags:
-        - Throttling Policies
         - Applications
       summary: Reset Application-Level Throttle Policy
       description: |

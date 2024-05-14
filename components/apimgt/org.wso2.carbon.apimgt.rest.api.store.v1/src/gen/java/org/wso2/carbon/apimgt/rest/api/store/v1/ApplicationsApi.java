@@ -443,7 +443,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Throttling Policies", "Applications",  })
+    }, tags={ "Applications",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Application-level throttle policy reset successfully", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),

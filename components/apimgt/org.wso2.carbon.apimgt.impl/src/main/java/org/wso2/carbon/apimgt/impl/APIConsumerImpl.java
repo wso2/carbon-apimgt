@@ -4354,7 +4354,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param organization Tenant which application owner belongs to
      */
     @Override
-    public void resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization) {
+    public void resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization)
+            throws APIManagementException {
         ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(
                 UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.POLICY_RESET.name(),
                 tenantId, organization, UUID.randomUUID().toString(), appId, userId, appTier);
