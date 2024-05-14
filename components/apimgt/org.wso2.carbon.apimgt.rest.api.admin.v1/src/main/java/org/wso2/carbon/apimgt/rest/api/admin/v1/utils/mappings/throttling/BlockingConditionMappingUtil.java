@@ -95,12 +95,14 @@ public class BlockingConditionMappingUtil {
                         jsonObject.put(APIConstants.BLOCK_CONDITION_INVERT, Boolean.FALSE);
                         dto.setConditionValue(jsonObject);
                     } else {
-                        // This is a true parsing exception.
+                        // This is a true parsing exception. Hence, it will be thrown without handling.
                         log.error("Error parsing IP blocking condition value", e);
+                        throw new ParseException(ParseException.ERROR_UNEXPECTED_EXCEPTION, e);
                     }
                 } else {
-                    // This is a true parsing exception.
-                    log.error("Error parsing IP blocking condition value", e);
+                    // This is a true parsing exception. Hence, it will be thrown without handling.
+                    log.error("Error parsing IP blocking condition value. The value is null.", e);
+                    throw new ParseException(ParseException.ERROR_UNEXPECTED_EXCEPTION, e);
                 }
             }
         }
