@@ -8396,8 +8396,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -8486,9 +8484,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/GatewayPolicyDeployment'
+                $ref: '#/components/schemas/GatewayPolicyDeployment'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -9540,14 +9536,6 @@ components:
           minLength: 1
           type: string
           example: Default
-        status:
-          type: string
-          example: CREATED
-          default: CREATED
-          enum:
-            - CREATED
-            - APPROVED
-            - REJECTED
         vhost:
           maxLength: 255
           minLength: 1
@@ -9630,9 +9618,6 @@ components:
           description: |
             If the provider value is not given, the user invoking the API will be used as the provider.
           example: admin
-        version:
-          type: string
-          example: 1.0.0
         hasThumbnail:
           type: boolean
           example: true
@@ -9690,12 +9675,6 @@ components:
           minLength: 1
           type: string
           example: pizzaproduct
-        version:
-          maxLength: 30
-          minLength: 1
-          type: string
-          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
-          example: 1.0.0
         description:
           type: string
           description: A brief description about the API
@@ -9716,9 +9695,6 @@ components:
             State of the API product. Only published API products are visible on the Developer Portal
           default: CREATED
         enableSchemaValidation:
-          type: boolean
-          example: false
-        isDefaultVersion:
           type: boolean
           example: false
         isRevision:
@@ -12821,17 +12797,6 @@ components:
       in: path
       description: |
         Revision ID of an API
-      required: true
-      schema:
-        type: string
-
-    # API Revision Environment
-    # Specified as part of the path expression
-    envName:
-      name: envName
-      in: path
-      description: |
-        Environment name of an Revision
       required: true
       schema:
         type: string
