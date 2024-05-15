@@ -1321,6 +1321,13 @@ public final class APIConstants {
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "WSO2GraphQLAccessControlPolicy";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
+    public static final String OPERATION_INFO = "OPERATION_INFO";
+    public static final String ACCESSED_FIELDS = "ACCESSED_FIELDS";
+    public static final String MUTATED_FIELDS = "MUTATED_FIELDS";
+
+    public static final String QUERY = "query";
+    public static final String MUTATION = "mutation";
+    public static final String SUBSCRIPTION = "subscription";
 
     public static final String VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE = "isSubscriptionAvailable";
     public static final String VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS = "topicMappings";

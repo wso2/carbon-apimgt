@@ -317,27 +317,21 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         customProperties.put(Constants.RESPONSE_SIZE,
                 WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx));
+        if (WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) != null) {
+            customProperties.put(Constants.OPERATION_INFO, getOperationInfo());
+            customProperties.put(Constants.ACCESSED_FIELDS, getAccessedFields());
+        }
         return customProperties;
     }
 
-    @Override
-    public Map<String, Object> getOperationProperties() {
-        Map<String, Object> customProperties;
+    private Map<String, Object> getOperationInfo() {
+        Object fieldUsage =   WebSocketUtils.getPropertyFromChannel(APIConstants.OPERATION_INFO, ctx);
+        return (Map<String, Object>) fieldUsage;
+    }
 
-        if (analyticsCustomDataProvider != null) {
-            customProperties = analyticsCustomDataProvider.getCustomProperties(ctx);
-        } else {
-            customProperties = new HashMap<>();
-        }
-        customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
-        customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
-        customProperties.put(Constants.RESPONSE_SIZE,
-                WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx));
-        customProperties.put("operationInfo",
-                WebSocketUtils.getPropertyFromChannel("FIELD_USAGE", ctx));
-        customProperties.put("accessedFields",
-                WebSocketUtils.getPropertyFromChannel("ACCESSED_FIELDS", ctx));
-        return customProperties;
+    private Object getAccessedFields() {
+        Object accessedFields =  WebSocketUtils.getPropertyFromChannel(APIConstants.ACCESSED_FIELDS, ctx);
+        return accessedFields;
     }
 
     @Override

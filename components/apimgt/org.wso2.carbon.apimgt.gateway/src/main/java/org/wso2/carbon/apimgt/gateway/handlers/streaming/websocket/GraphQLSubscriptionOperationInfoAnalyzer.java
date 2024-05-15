@@ -1,6 +1,28 @@
+/*
+ *  Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 LLC. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket;
 
-import graphql.language.*;
+import graphql.language.AstPrinter;
+import graphql.language.Definition;
+import graphql.language.Document;
+import graphql.language.OperationDefinition;
+import graphql.language.Selection;
 import graphql.parser.Parser;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -9,10 +31,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.RequestDataCollector;
+import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLOperationAnalyzer;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLAnalyticsMetricsHandler;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLOperationInfoCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,22 +43,22 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- *
+ * analyze graphql subscription payload
+ * then engages metric handler to handle metric publishing
  */
 public class GraphQLSubscriptionOperationInfoAnalyzer {
     private static final Log log = LogFactory.getLog(GraphQLSubscriptionOperationInfoAnalyzer.class);
 
     /**
-     * @param ctx
+     * @param ctx Channel Handler Context
      */
     public void analyzePayload(ChannelHandlerContext ctx) {
         Parser parser = new Parser();
-        String payload = (String) WebSocketUtils.getPropertyFromChannel("GRAPHQL_PAYLOAD", ctx);
+        String payload = (String) WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx);
         Document document = parser.parseDocument(payload);
-        GraphQLSchema graphQLSchema = (GraphQLSchema) WebSocketUtils.getPropertyFromChannel("GRAPHQL_SCHEMA", ctx);
-        TypeDefinitionRegistry typeDefinition = (TypeDefinitionRegistry) WebSocketUtils.getPropertyFromChannel("TYPE_DEFINITION", ctx);
-        //HashMap<String, Object> variablesMap = (HashMap<String, Object>) messageContext.getProperty("VARIABLE_MAP");
-        String complexityInfoJson = (String) WebSocketUtils.getPropertyFromChannel("CONTROL_INFO", ctx);
+        GraphQLSchema graphQLSchema = (GraphQLSchema) WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_SCHEMA, ctx);
+        TypeDefinitionRegistry typeDefinition = (TypeDefinitionRegistry) WebSocketUtils.getPropertyFromChannel(APIConstants.TYPE_DEFINITION, ctx);
+        String complexityInfoJson = (String) WebSocketUtils.getPropertyFromChannel( APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, ctx);
         String type;
 
         for (Definition definition : document.getDefinitions()) {
@@ -48,16 +71,16 @@ public class GraphQLSubscriptionOperationInfoAnalyzer {
                 Map<String, Object> operationInfo = GraphQLOperationAnalyzer
                         .getOperationInfo(type, selection, subDocument, graphQLSchema, typeDefinition, complexityInfoJson, variablesMap);
                 WebSocketUtils.setApiPropertyToChannel(ctx,
-                        "FIELD_USAGE", operationInfo);
+                        APIConstants.OPERATION_INFO, operationInfo);
 
                 List<Map> fieldUsage = GraphQLOperationAnalyzer.getUsedFields(selection);
                 WebSocketUtils.setApiPropertyToChannel(ctx,
-                        "ACCESSED_FIELDS", fieldUsage);
+                        APIConstants.ACCESSED_FIELDS, fieldUsage);
 
                 RequestDataCollector dataCollector;
                 AnalyticsDataProvider provider = new WebSocketAnalyticsDataProvider(ctx,
                         ServiceReferenceHolder.getInstance().getAnalyticsCustomDataProvider());
-                dataCollector = new GraphQLOperationInfoCollector(provider);
+                dataCollector = new GenericRequestDataCollector(provider);
                 try {
                     dataCollector.collectData();
                 } catch (Exception e) {

@@ -74,6 +74,4 @@ public interface AnalyticsDataProvider {
         return Collections.EMPTY_MAP;
     }
 
-    Map<String, Object> getOperationProperties();
-
 }

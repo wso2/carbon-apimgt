@@ -35,13 +35,12 @@ public class Constants {
     public static final String API_CONTEXT_KEY = "apiContext";
     public static final String RESPONSE_SIZE = "responseSize";
     public static final String OPERATION_NAME = "operationName";
-    public static final String OPERATION_DEPTH = "operationDepth";
-    public static final String OPERATION_COMPLEXITY = "operationComplexity";
-    public static final String FIELD_USAGE = "fieldUsage";
+
     public static final String OPERATION_INFO = "operationInfo";
     public static final String RESPONSE_CONTENT_TYPE = "responseContentType";
     public static final String API_ANALYTICS_CUSTOM_DATA_PROVIDER_CLASS = "publisher.custom.data.provider.class";
-
+    public static final String ACCESSED_FIELDS = "accessedFields";
+    public static final String MUTATED_FIELDS = "mutatedFields";
     public static final String REGION_ID_PROP = "apim.gw.region";
     public static final String DEFAULT_REGION_ID = "default";
     public static final String SUCCESS_EVENT_TYPE = "response";
@@ -49,7 +48,6 @@ public class Constants {
     public static final String UNKNOWN_VALUE = "UNKNOWN";
     public static final int UNKNOWN_INT_VALUE = -1;
     public static final String ANONYMOUS_VALUE = "anonymous";
-    public static final String TYPE_USAGE = "typeUsage";
 
     public static final class ERROR_CODE_RANGES {
         public static final int AUTH_FAILURE_START = 900900;

@@ -34,6 +34,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.HashMap;
+import java.util.Map;
+
 /**
  * This Handler can be used to analyse GraphQL Query. This implementation uses previously set
  * complexity and depth limitation to block the complex queries before it reaches the backend.
@@ -55,11 +57,13 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             queryAnalyzer = new QueryAnalyzer(schema);
         }
         String payload = messageContext.getProperty(APIConstants.GRAPHQL_PAYLOAD).toString();
-        HashMap<String, Object> variableMap = null;
+        Map<String, Object> variableMap;
         if(messageContext.getPropertyKeySet().contains("VARIABLE_MAP")){
-            variableMap = (HashMap<String, Object>) messageContext.getProperty("VARIABLE_MAP");
+            variableMap = (Map<String, Object>) messageContext.getProperty("VARIABLE_MAP");
+        } else {
+            variableMap = new HashMap<>();
         }
-        if (!isDepthAndComplexityValid(messageContext, payload,variableMap)) {
+        if (!isDepthAndComplexityValid(messageContext, payload, variableMap)) {
             log.debug("Query was blocked by the static query analyser");
             return false;
         }
@@ -74,7 +78,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @param variableMap
      * @return true, if the query is not blocked or false, if the query is blocked
      */
-    private boolean isDepthAndComplexityValid(MessageContext messageContext, String payload, HashMap<String, Object> variableMap) {
+    private boolean isDepthAndComplexityValid(MessageContext messageContext, String payload, Map<String, Object> variableMap) {
         try {
             return isDepthValid(messageContext, payload, variableMap) && isComplexityValid(messageContext, payload,variableMap);
         } catch (Exception e) {
@@ -85,7 +89,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
         }
     }
 
-    private boolean isDepthValid(MessageContext messageContext, String payload, HashMap<String, Object> variableMap) {
+    private boolean isDepthValid(MessageContext messageContext, String payload, Map<String, Object> variableMap) {
         int maxQueryDepth = -1;
         if (messageContext.getPropertyKeySet().contains(GraphQLConstants.MAXIMUM_QUERY_DEPTH)) {
             maxQueryDepth = (int) messageContext.getProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH);
@@ -100,7 +104,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
         return true;
     }
 
-    private boolean isComplexityValid(MessageContext messageContext, String payload, HashMap<String, Object> variableMap) {
+    private boolean isComplexityValid(MessageContext messageContext, String payload, Map<String, Object> variableMap) {
         int queryComplexity = -1;
         if (messageContext.getPropertyKeySet().contains(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY)) {
             queryComplexity = (int) messageContext.getProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY);

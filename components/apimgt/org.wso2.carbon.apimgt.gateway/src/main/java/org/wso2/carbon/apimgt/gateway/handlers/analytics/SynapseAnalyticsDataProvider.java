@@ -405,12 +405,27 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
         customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
+        if (messageContext.getProperty(APIConstants.API_TYPE) == "GRAPHQL"){
+            customProperties.put(Constants.OPERATION_INFO, getOperationInfo());
+            customProperties.put(Constants.ACCESSED_FIELDS, getAccessedFields());
+            customProperties.put(Constants.MUTATED_FIELDS, getMutatedFields());
+        }
         return customProperties;
     }
 
-    @Override
-    public Map<String, Object> getOperationProperties() {
-        return null;
+    private Map<String, Object> getOperationInfo() {
+        Object fieldUsage =  messageContext.getProperty(APIConstants.OPERATION_INFO);
+        return (Map<String, Object>) fieldUsage;
+    }
+
+    private Object getAccessedFields() {
+        Object accessedFields =  messageContext.getProperty(APIConstants.ACCESSED_FIELDS);
+        return accessedFields;
+    }
+
+    private Object getMutatedFields(){
+        Object mutatedFields = messageContext.getProperty(APIConstants.MUTATED_FIELDS);
+        return mutatedFields;
     }
 
     private String getApiContext() {

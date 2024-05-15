@@ -53,6 +53,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 
@@ -97,7 +98,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
             }
             String payload;
             OMElement variables;
-            HashMap<String, Object> variablesMap = null;
+            Map<String, Object> variablesMap = null;
             Parser parser = new Parser();
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
@@ -172,8 +173,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
         return false;
     }
 
-    private HashMap<String, Object> convertArrayToMap(ArrayList<OMElement> variablesArray) {
-        HashMap<String, Object> externalVariables = new HashMap<>();
+    private Map<String, Object> convertArrayToMap(ArrayList<OMElement> variablesArray) {
+        Map<String, Object> externalVariables = new HashMap<>();
         for(OMElement omElement: variablesArray){
             externalVariables = getVariables(omElement, externalVariables);
         }
@@ -189,7 +190,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         return variablesArray;
     }
 
-    private HashMap<String, Object> getVariables(OMElement omElement, HashMap<String, Object> externalVariables) {
+    private Map<String, Object> getVariables(OMElement omElement, Map<String, Object> externalVariables) {
         String variableKey = omElement.getLocalName();
         Object variable = null;
         if (omElement.getFirstOMChild() instanceof OMTextImpl){

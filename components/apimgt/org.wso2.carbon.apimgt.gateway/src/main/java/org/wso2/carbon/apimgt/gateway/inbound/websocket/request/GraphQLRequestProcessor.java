@@ -97,7 +97,7 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                             ((JSONObject) graphQLMsg.get(GraphQLConstants.SubscriptionConstants
                                     .PAYLOAD_FIELD_NAME_PAYLOAD))
                                     .getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_QUERY);
-                    WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(), "GRAPHQL_PAYLOAD", graphQLSubscriptionPayload);
+                    WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(), APIConstants.GRAPHQL_PAYLOAD, graphQLSubscriptionPayload);
                     Document document = parser.parseDocument(graphQLSubscriptionPayload);
                     // Extract the operation type and operations from the payload
                     OperationDefinition operation = getOperationFromPayload(document);
@@ -112,15 +112,15 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                 WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
                                         APIConstants.API_ELECTED_RESOURCE, subscriptionOperation);
                                 WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
-                                        "GRAPHQL_SCHEMA", inboundMessageContext.getGraphQLSchemaDTO().getGraphQLSchema());
+                                        APIConstants.GRAPHQL_SCHEMA, inboundMessageContext.getGraphQLSchemaDTO().getGraphQLSchema());
                                 WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
-                                        "TYPE_DEFINITION", inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
+                                        APIConstants.TYPE_DEFINITION, inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
 
                                 try {
                                     String accessControlInfo = getGraphQLAccessControlInfo(inboundMessageContext.getGraphQLSchemaDTO()
                                             .getGraphQLSchema());
                                     WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
-                                            "CONTROL_INFO", accessControlInfo);
+                                            APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, accessControlInfo);
                                 } catch (APIManagementException e) {
                                     throw new RuntimeException(e);
                                 }

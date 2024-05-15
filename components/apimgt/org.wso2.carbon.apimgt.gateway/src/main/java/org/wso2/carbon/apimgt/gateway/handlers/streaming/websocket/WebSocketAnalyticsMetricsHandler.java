@@ -53,7 +53,7 @@ public class WebSocketAnalyticsMetricsHandler {
 
     public void handlePublish(ChannelHandlerContext ctx) {
         WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, PUBLISH);
-        if (WebSocketUtils.getPropertyFromChannel("GRAPHQL_PAYLOAD", ctx) != null) {
+        if (WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) != null) {
             GraphQLSubscriptionOperationInfoAnalyzer operationInfoAnalyzer = new GraphQLSubscriptionOperationInfoAnalyzer();
             operationInfoAnalyzer.analyzePayload(ctx);
         }

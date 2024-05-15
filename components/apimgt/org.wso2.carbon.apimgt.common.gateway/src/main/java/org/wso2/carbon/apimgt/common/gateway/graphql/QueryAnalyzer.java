@@ -32,6 +32,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -42,9 +43,6 @@ public class QueryAnalyzer {
     private static final Log log = LogFactory.getLog(QueryAnalyzer.class);
     private final GraphQLSchema schema;
 
-    /**
-     * @param schema
-     */
     public QueryAnalyzer(GraphQLSchema schema) {
         this.schema = schema;
     }
@@ -58,17 +56,17 @@ public class QueryAnalyzer {
      */
     public QueryAnalyzerResponseDTO analyseQueryDepth(int maxQueryDepth, String payload) {
 
-        return analyseQueryDepth(maxQueryDepth, payload, null);
+        return analyseQueryDepth(maxQueryDepth, payload, new HashMap<>());
     }
 
     /**
-     * @param maxQueryDepth
-     * @param payload
-     * @param variableMap
-     * @return
+     * @param maxQueryDepth maximum query depth
+     * @param payload       payload of the request
+     * @param variableMap   external variable map
+     * @return true, if the query depth does not exceed the maximum value or false, if query depth exceeds the maximum
      */
     public QueryAnalyzerResponseDTO analyseQueryDepth(int maxQueryDepth, String payload,
-                                                      HashMap<String, Object> variableMap) {
+                                                      Map<String, Object> variableMap) {
 
         if (log.isDebugEnabled()) {
             log.debug("Analyzing query depth for " + payload + " and max query depth:" + maxQueryDepth);
@@ -80,14 +78,10 @@ public class QueryAnalyzer {
             MaxQueryDepthInstrumentation maxQueryDepthInstrumentation =
                     new MaxQueryDepthInstrumentation(maxQueryDepth);
             GraphQL runtime = GraphQL.newGraphQL(schema).instrumentation(maxQueryDepthInstrumentation).build();
-            if (variableMap == null) {
-                variableMap = new HashMap<>();
-            }
 
             ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                     .query(payload)
-                    .context(Optional.ofNullable(null))
-                    .root(null)
+                    .context(Optional.empty())
                     .variables(variableMap)
                     .build();
 
@@ -126,7 +120,7 @@ public class QueryAnalyzer {
      */
     public QueryAnalyzerResponseDTO analyseQueryComplexity(int maxQueryComplexity, String payload,
                                                            FieldComplexityCalculator fieldComplexityCalculator) {
-        return analyseQueryComplexity(maxQueryComplexity, payload, fieldComplexityCalculator, null);
+        return analyseQueryComplexity(maxQueryComplexity, payload, fieldComplexityCalculator, new HashMap<>());
     }
 
     /**
@@ -135,13 +129,13 @@ public class QueryAnalyzer {
      * @param fieldComplexityCalculator Field Complexity Calculator
      * @param maxQueryComplexity        Maximum query complexity value
      * @param payload                   payload of the request
-     * @param variableMap
+     * @param variableMap               external variable map
      * @return true, if query complexity does not exceed the maximum or false, if query complexity exceeds the maximum
      */
 
     public QueryAnalyzerResponseDTO analyseQueryComplexity(int maxQueryComplexity, String payload,
                                                            FieldComplexityCalculator fieldComplexityCalculator,
-                                                           HashMap<String, Object> variableMap) {
+                                                           Map<String, Object> variableMap) {
 
         if (log.isDebugEnabled()) {
             log.debug("Analyzing query complexity for " + payload + " and max complexity: " + maxQueryComplexity);
@@ -155,14 +149,9 @@ public class QueryAnalyzer {
                     new MaxQueryComplexityInstrumentation(maxQueryComplexity, fieldComplexityCalculator);
             GraphQL runtime = GraphQL.newGraphQL(schema).instrumentation(maxQueryComplexityInstrumentation).build();
 
-            if (variableMap == null) {
-                variableMap = new HashMap<>();
-            }
-
             ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                     .query(payload)
-                    .context(Optional.ofNullable(null))
-                    .root(null)
+                    .context(Optional.empty())
                     .variables(variableMap)
                     .build();
 
@@ -218,7 +207,7 @@ public class QueryAnalyzer {
 
     public QueryAnalyzerResponseDTO analyseQueryMutationComplexity(String payload, int maxQueryComplexity,
                                                                    String complexityInfoJson,
-                                                                   HashMap<String, Object> variableMap)
+                                                                   Map<String, Object> variableMap)
                                                                     throws ParseException {
         FieldComplexityCalculatorImpl fieldComplexityCalculator = new FieldComplexityCalculatorImpl();
         fieldComplexityCalculator.parseAccessControlPolicy(complexityInfoJson);
