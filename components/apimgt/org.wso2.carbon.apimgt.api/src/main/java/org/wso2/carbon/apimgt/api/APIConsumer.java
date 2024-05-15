@@ -812,12 +812,11 @@ public interface APIConsumer extends APIManager {
     /**
      * Send Application Policy Reset Event to Eventhub
      *
-     * @param appId Application Identifier used by traffic manager
+     * @param applicationId Application Identifier used by traffic manager
      * @param userId Username for which the policy should be reset
-     * @param appTier Application Policy name
      * @param organization Tenant which application owner belongs to
      */
-    void resetApplicationThrottlePolicy(String appId, String userId, String appTier, String organization)
+    void resetApplicationThrottlePolicy(String applicationId, String userId, String organization)
             throws APIManagementException;
 
     /**

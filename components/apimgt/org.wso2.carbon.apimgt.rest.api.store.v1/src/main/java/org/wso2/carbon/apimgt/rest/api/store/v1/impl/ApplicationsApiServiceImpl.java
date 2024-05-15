@@ -497,25 +497,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
 
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUsername);
-            Application application = apiConsumer.getApplicationByUUID(applicationId, organization);
-
-            if (application == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-            }
-            if (!(RestAPIStoreUtils.isUserOwnerOfApplication(application)
-                    || RestAPIStoreUtils.isApplicationSharedtoUser(application))) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
-            }
-
-            String appId = String.valueOf(application.getId());
-            String appTier = application.getTier();
             //send the reset request as an event to the eventhub
-            apiConsumer.resetApplicationThrottlePolicy(appId, userId, appTier, organization);
+            apiConsumer.resetApplicationThrottlePolicy(applicationId, userId, organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while resetting application " + applicationId, e, log);
         }
-
         return null;
     }
 
