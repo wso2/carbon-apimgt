@@ -85,7 +85,7 @@ GatewayPoliciesApiService delegate = new GatewayPoliciesApiServiceImpl();
             @AuthorizationScope(scope = "apim:gateway_policy_manage", description = "Add, Update and Delete gateway policies")
         })
     }, tags={ "Gateway Policies",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Gateway policy mapping engaged successfully. ", response = GatewayPolicyDeploymentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
