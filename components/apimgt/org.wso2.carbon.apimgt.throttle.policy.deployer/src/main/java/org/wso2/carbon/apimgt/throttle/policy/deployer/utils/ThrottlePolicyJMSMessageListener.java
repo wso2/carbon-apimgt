@@ -249,15 +249,15 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             resetEvent.setOrgId(event.getTenantDomain());
             if (log.isDebugEnabled()) {
                 log.debug(
-                        "Publishing Application Throttle Reset data to traffic-manager for the application " + "with " +
-                                "ID: " + applicationId + " started" + " at " + new SimpleDateFormat(
+                        "Publishing Application Throttle Reset data to traffic-manager for the application with ID: "
+                                + applicationId + " started" + " at " + new SimpleDateFormat(
                                 "[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
             APIUtil.publishEvent(EventPublisherType.NOTIFICATION, resetEvent, loggingEvent);
             if (log.isDebugEnabled()) {
                 log.debug(
-                        "Publishing Application Throttle Reset data to traffic-manager for the application " + "with " +
-                                "ID: " + applicationId + " ended" + " at " + new SimpleDateFormat(
+                        "Publishing Application Throttle Reset data to traffic-manager for the application with ID: "
+                                + applicationId + " ended" + " at " + new SimpleDateFormat(
                                 "[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
             }
         }

@@ -88,7 +88,6 @@ public class SumAttributeAggregatorWithResetTestCase {
         inputHandler.send(new Object[]{"APIM", 3F});
         Thread.sleep(2000);
         inputHandler.send(new Object[]{"APIM", 3F});
-//        SiddhiTestHelper.waitForEvents(100, 1, atomicEventCount, 2000);
         execPlanRunTime.shutdown();
         junit.framework.Assert.assertEquals(2, atomicEventCount.intValue());
     }
@@ -140,7 +139,6 @@ public class SumAttributeAggregatorWithResetTestCase {
         inputHandler.send(new Object[]{"APIM", 3F});
         Thread.sleep(2000);
         inputHandler.send(new Object[]{"APIM", 3F});
-//        SiddhiTestHelper.waitForEvents(100, 1, atomicEventCount, 2000);
         execPlanRunTime.shutdown();
         junit.framework.Assert.assertEquals(2, atomicEventCount.intValue());
     }

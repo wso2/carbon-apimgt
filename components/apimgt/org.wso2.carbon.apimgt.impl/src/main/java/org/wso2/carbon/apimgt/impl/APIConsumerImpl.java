@@ -4363,8 +4363,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         // Check whether the application is accessible to the logged-in user
         String loggedInUser = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         if (!validateApplication(loggedInUser, appId, groupId)) {
-            log.error("Application " + applicationId + " is not accessible to user " + userId);
-            throw new APIManagementException("Application is not accessible to user " + userId);
+            log.error("Application " + applicationId + " is not accessible to user " + loggedInUser);
+            throw new APIMgtAuthorizationFailedException(
+                    "Application is not accessible to user  " + loggedInUser);
+
         }
 
         ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(
