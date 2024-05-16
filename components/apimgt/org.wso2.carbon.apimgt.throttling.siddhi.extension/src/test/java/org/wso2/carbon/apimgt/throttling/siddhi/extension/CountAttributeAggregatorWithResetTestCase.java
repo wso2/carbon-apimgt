@@ -31,6 +31,9 @@ import org.wso2.siddhi.core.util.EventPrinter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Unit Test cases related to  CountAttributeAggregator with the Reset extension
+ */
 public class CountAttributeAggregatorWithResetTestCase {
     private static final Log log = LogFactory.getLog(CountAttributeAggregatorWithResetTestCase.class);
     private AtomicInteger atomicEventCount;
@@ -41,8 +44,8 @@ public class CountAttributeAggregatorWithResetTestCase {
     }
 
     @Test
-    public void CountAggregatorTest() throws InterruptedException {
-        log.info("CountAggregator Test #1");
+    public void CountAggregatorTestWithoutReset() throws InterruptedException {
+        log.info("CountAggregator Test #1 : Without setting Reset");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -91,7 +94,7 @@ public class CountAttributeAggregatorWithResetTestCase {
     }
 
     @Test
-    public void CountAggregatorTest2() throws InterruptedException {
+    public void CountAggregatorTestWithResetSetToFalse() throws InterruptedException {
         log.info("CountAggregator Test #2 : Setting Reset value to be false");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -141,7 +144,7 @@ public class CountAttributeAggregatorWithResetTestCase {
     }
 
     @Test
-    public void CountAggregatorTest3() throws InterruptedException {
+    public void CountAggregatorTestWithResetSetToTrue() throws InterruptedException {
         log.info("CountAggregator Test #3 : Setting Reset value to be true");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -170,7 +173,6 @@ public class CountAttributeAggregatorWithResetTestCase {
                     if (atomicEventCount.get() == 1) {
                         junit.framework.Assert.assertEquals("APIM", inEvents[0].getData(0));
                         junit.framework.Assert.assertEquals(1L, inEvents[0].getData(1));
-
                     } else if (atomicEventCount.get() == 2) {
                         junit.framework.Assert.assertEquals("WSO2", inEvents[0].getData(0));
                         junit.framework.Assert.assertEquals(3L, inEvents[0].getData(1));

@@ -31,6 +31,9 @@ import org.wso2.siddhi.core.util.EventPrinter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Unit Test cases related to  SumAttributeAggregator with the Reset extension
+ */
 public class SumAttributeAggregatorWithResetTestCase {
 
     private static final Log log = LogFactory.getLog(SumAttributeAggregatorWithResetTestCase.class);
@@ -42,8 +45,8 @@ public class SumAttributeAggregatorWithResetTestCase {
     }
 
     @Test
-    public void SumAggregatorTest() throws InterruptedException {
-        log.info("SumAggregator Test #1");
+    public void SumAggregatorTestWithoutReset() throws InterruptedException {
+        log.info("SumAggregator Test #1 : Without setting Reset");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -93,7 +96,7 @@ public class SumAttributeAggregatorWithResetTestCase {
     }
 
     @Test
-    public void SumAggregatorTest2() throws InterruptedException {
+    public void SumAggregatorTestWithResetSetToFalse() throws InterruptedException {
         log.info("SumAggregator Test #2 : Setting Reset value to be false");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -144,7 +147,7 @@ public class SumAttributeAggregatorWithResetTestCase {
     }
 
     @Test
-    public void SumAggregatorTest3() throws InterruptedException {
+    public void SumAggregatorTestWithResetSetToTrue() throws InterruptedException {
         log.info("SumAggregator Test #3 : Setting Reset value to be true");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -173,7 +176,6 @@ public class SumAttributeAggregatorWithResetTestCase {
                     if (atomicEventCount.get() == 1) {
                         junit.framework.Assert.assertEquals("APIM", inEvents[0].getData(0));
                         junit.framework.Assert.assertEquals(3D, inEvents[0].getData(1));
-
                     } else if (atomicEventCount.get() == 2) {
                         junit.framework.Assert.assertEquals("WSO2", inEvents[0].getData(0));
                         junit.framework.Assert.assertEquals(6D, inEvents[0].getData(1));

@@ -641,6 +641,23 @@ public class APIConsumerImplTest {
     }
 
     @Test
+    public void testResetApplicationThrottlePolicy() throws APIManagementException {
+        Application application = new Application("app", new Subscriber("sub1"));
+        application.setGroupId("testGroupId");
+        application.setId(5);
+        application.setTier("testTier");
+
+        Mockito.when(apiMgtDAO.getApplicationByUUID(Mockito.anyString())).thenReturn(application);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        try {
+            apiConsumer.resetApplicationThrottlePolicy("1", "testUser", "testOrg");
+            Assert.fail("API management exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Application is not accessible to user"));
+        }
+    }
+
+    @Test
     public void testTokenTypeChangeWhenUpdatingApplications() throws APIManagementException {
 
         Application oldApplication = new Application("app1", new Subscriber("sub1"));

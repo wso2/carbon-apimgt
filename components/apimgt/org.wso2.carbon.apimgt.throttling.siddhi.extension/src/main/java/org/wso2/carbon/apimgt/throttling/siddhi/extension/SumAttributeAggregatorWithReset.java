@@ -54,8 +54,8 @@ public class SumAttributeAggregatorWithReset extends AttributeAggregator {
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
         if (attributeExpressionExecutors.length > 2) {
-            throw new OperationNotSupportedException("Sum aggregator has to have 1 or 2 parameters, currently " +
-                    attributeExpressionExecutors.length + " parameters provided");
+            throw new OperationNotSupportedException("Sum aggregator has to have 1 or 2 parameters, currently "
+                    + attributeExpressionExecutors.length + " parameters provided");
         }
         Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
         switch (type) {
@@ -284,5 +284,6 @@ public class SumAttributeAggregatorWithReset extends AttributeAggregator {
             Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
             value = (Long) stateEntry.getValue();
         }
+
     }
 }

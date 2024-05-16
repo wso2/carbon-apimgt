@@ -46,8 +46,6 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyD
 import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -250,16 +248,9 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             if (log.isDebugEnabled()) {
                 log.debug(
                         "Publishing Application Throttle Reset data to traffic-manager for the application with ID: "
-                                + applicationId + " started" + " at " + new SimpleDateFormat(
-                                "[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+                                + applicationId);
             }
             APIUtil.publishEvent(EventPublisherType.NOTIFICATION, resetEvent, loggingEvent);
-            if (log.isDebugEnabled()) {
-                log.debug(
-                        "Publishing Application Throttle Reset data to traffic-manager for the application with ID: "
-                                + applicationId + " ended" + " at " + new SimpleDateFormat(
-                                "[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
-            }
         }
     }
 }

@@ -4349,8 +4349,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * Send Application Policy Reset Event to Eventhub
      *
      * @param applicationId Application Identifier used by traffic manager
-     * @param userId Username for which the policy should be reset
-     * @param organization Tenant which application owner belongs to
+     * @param userId        Username for which the policy should be reset
+     * @param organization  Tenant which application owner belongs to
      */
     @Override
     public void resetApplicationThrottlePolicy(String applicationId, String userId, String organization)
@@ -4364,11 +4364,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String loggedInUser = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         if (!validateApplication(loggedInUser, appId, groupId)) {
             log.error("Application " + applicationId + " is not accessible to user " + loggedInUser);
-            throw new APIMgtAuthorizationFailedException(
-                    "Application is not accessible to user  " + loggedInUser);
-
+            throw new APIMgtAuthorizationFailedException("Application is not accessible to user  " + loggedInUser);
         }
-
         ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(
                 UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.POLICY_RESET.name(),
                 tenantId, organization, UUID.randomUUID().toString(), String.valueOf(appId), userId, appTier);

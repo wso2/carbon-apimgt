@@ -113,4 +113,5 @@ public class CountAttributeAggregatorWithReset extends AttributeAggregator {
         Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
         value = (Long) stateEntry.getValue();
     }
+
 }

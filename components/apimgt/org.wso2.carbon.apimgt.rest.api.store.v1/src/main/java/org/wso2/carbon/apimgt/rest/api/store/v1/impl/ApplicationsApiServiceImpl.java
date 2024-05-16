@@ -491,9 +491,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Reset Application Level Throttle Policy
      *
-     * @param applicationId application Identifier
+     * @param applicationId               application Identifier
      * @param applicationThrottleResetDTO request DTO containing the username
-     * @return 200 if successful
+     * @return response with status code 200 if successful
      */
     @Override
     public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId,
