@@ -865,7 +865,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         WorkflowResponse workflowResponse = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
-        checkSubscriptionAllowed(apiTypeWrapper);
+        checkSubscriptionAllowed(apiTypeWrapper, apiTypeWrapper.getTier());
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
@@ -1056,7 +1056,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiContext = api.getContext();
             apiOrgId = api.getOrganization();
         }
-        checkSubscriptionAllowed(apiTypeWrapper);
+        checkSubscriptionAllowed(apiTypeWrapper, requestedThrottlingPolicy);
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
@@ -4434,7 +4434,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      *                                subscription, this will throw an instance of APIMgtAuthorizationFailedException
       *                                with the reason as the message
      */
-    private void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper)
+    private void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper, String requestedThrottlingPolicy)
             throws APIManagementException {
 
         Set<Tier> tiers;
@@ -4492,17 +4492,17 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         List<String> allowedTierList = new ArrayList<>();
         while (iterator.hasNext()) {
             Tier t = iterator.next();
-            if (t.getName() != null && (t.getName()).equals(apiTypeWrapper.getTier())) {
+            if (t.getName() != null && (t.getName()).equals(requestedThrottlingPolicy)) {
                 isTierAllowed = true;
             }
             allowedTierList.add(t.getName());
         }
         if (!isTierAllowed) {
             String msg =
- "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
+ "Tier " + requestedThrottlingPolicy + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
                     + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
-                    apiTypeWrapper.getTier(), username));
+                    requestedThrottlingPolicy, username));
         }
     }
 
