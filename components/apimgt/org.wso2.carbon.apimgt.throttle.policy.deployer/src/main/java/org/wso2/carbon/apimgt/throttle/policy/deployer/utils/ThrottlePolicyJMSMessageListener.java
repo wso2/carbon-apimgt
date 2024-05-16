@@ -245,6 +245,7 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             EventPublisherEvent resetEvent = new EventPublisherEvent(streamID,
                     System.currentTimeMillis(), objects, loggingEvent);
             resetEvent.setOrgId(event.getTenantDomain());
+
             if (log.isDebugEnabled()) {
                 log.debug(
                         "Publishing Application Throttle Reset data to traffic-manager for the application with ID: "

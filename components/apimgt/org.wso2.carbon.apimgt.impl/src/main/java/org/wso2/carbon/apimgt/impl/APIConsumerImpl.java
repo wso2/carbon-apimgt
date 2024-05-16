@@ -4366,6 +4366,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             log.error("Application " + applicationId + " is not accessible to user " + loggedInUser);
             throw new APIMgtAuthorizationFailedException("Application is not accessible to user  " + loggedInUser);
         }
+
         ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(
                 UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.POLICY_RESET.name(),
                 tenantId, organization, UUID.randomUUID().toString(), String.valueOf(appId), userId, appTier);

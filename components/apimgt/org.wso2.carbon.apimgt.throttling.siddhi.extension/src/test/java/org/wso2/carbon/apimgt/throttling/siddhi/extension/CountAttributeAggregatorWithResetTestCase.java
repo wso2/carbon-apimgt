@@ -178,7 +178,6 @@ public class CountAttributeAggregatorWithResetTestCase {
                         junit.framework.Assert.assertEquals(3L, inEvents[0].getData(1));
                         junit.framework.Assert.assertEquals("APIM", inEvents[1].getData(0));
                         junit.framework.Assert.assertEquals(0L, inEvents[1].getData(1));
-
                     }
                 }
             }

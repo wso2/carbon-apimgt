@@ -181,7 +181,6 @@ public class SumAttributeAggregatorWithResetTestCase {
                         junit.framework.Assert.assertEquals(6D, inEvents[0].getData(1));
                         junit.framework.Assert.assertEquals("APIM", inEvents[1].getData(0));
                         junit.framework.Assert.assertEquals(0D, inEvents[1].getData(1));
-
                     }
                 }
             }
