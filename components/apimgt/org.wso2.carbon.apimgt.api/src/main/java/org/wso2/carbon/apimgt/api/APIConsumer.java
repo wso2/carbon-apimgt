@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.NotificationList;
+import org.wso2.carbon.apimgt.api.model.Notification;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -869,4 +871,64 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant) throws APIManagementException;
+
+    /**
+     * Method to get notifications for the given user
+     *
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param portalToDisplay the portal user needs to see the notifications
+     * @param sortOrder sort order of the notifications
+     * @param limit limit of the notifications
+     * @param offset offset of the notifications
+     * @return NotificationList
+     */
+    NotificationList getNotifications(String username, String organization, String portalToDisplay, String sortOrder,
+            Integer limit, Integer offset) throws APIManagementException;
+
+    /**
+     * Method to mark all notifications as read
+     *
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param portalToDisplay the portal user needs to update the notifications
+     * @return updated NotificationList
+     */
+    NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay)
+            throws APIManagementException;
+
+    /**
+     * Method to mark a notification as read
+     *
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param notificationId id of the notification that needs to update the mark as read status
+     * @param portalToDisplay the portal user needs to update the notification
+     * @return updated Notification
+     */
+    Notification markNotificationAsReadById(String username, String organization, String notificationId,
+            String portalToDisplay) throws APIManagementException;
+
+    /**
+     * Method to delete a notification by notification id
+     *
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param notificationId id of the notification that needs to delete
+     * @param portalToDisplay the portal user needs to delete the notification
+     * @return true after successful deletion
+     */
+    boolean deleteNotificationById(String username, String organization, String notificationId, String portalToDisplay)
+            throws APIManagementException;
+
+    /**
+     * Method to delete the notifications of a given user
+     *
+     * @param username username of the logged in user
+     * @param organization organization of the logged in user
+     * @param portalToDisplay the portal user needs to delete the notifications
+     * @return true after successful deletion
+     */
+    boolean deleteAllNotifications(String username, String organization, String portalToDisplay)
+            throws APIManagementException;
 }

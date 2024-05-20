@@ -53,7 +53,7 @@ import javax.xml.stream.XMLStreamException;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ApiMgtDAO.class, ApplicationRegistrationWSWorkflowExecutor.class,
-        ServiceReferenceHolder.class, AXIOMUtil.class, KeyManagerHolder.class})
+        ServiceReferenceHolder.class, AXIOMUtil.class, KeyManagerHolder.class, })
 public class ApplicationRegistrationWSWorkflowExecutorTest {
 
     private ApplicationRegistrationWSWorkflowExecutor applicationRegistrationWSWorkflowExecutor;
@@ -190,6 +190,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         applicationRegistrationWSWorkflowExecutor.setUsername(adminUsername);
         applicationRegistrationWSWorkflowExecutor.setPassword(adminPassword.toCharArray());
         workflowDTO.setStatus(WorkflowStatus.REJECTED);
+
         try {
             Assert.assertNotNull(applicationRegistrationWSWorkflowExecutor.complete(workflowDTO));
         } catch (WorkflowException e) {
@@ -215,6 +216,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         applicationRegistrationWSWorkflowExecutor.setPassword(adminPassword.toCharArray());
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         workflowDTO.setKeyManager("default");
+
         try {
             Assert.assertNotNull(applicationRegistrationWSWorkflowExecutor.complete(workflowDTO));
         } catch (WorkflowException e) {

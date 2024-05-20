@@ -913,7 +913,8 @@ public class SQLConstants {
             "   SUBS.UUID AS SUB_UUID, " +
             "   SUBS.TIER_ID AS SUB_TIER_ID, " +
             "   APP.UUID AS APP_UUID, " +
-            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE " +
+            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+            "   SUB.TENANT_ID AS SUB_TENANT_ID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS, " +
             "   AM_APPLICATION APP, " +
@@ -2127,7 +2128,7 @@ public class SQLConstants {
 
     public static final String GET_SUBSCRIPTION_STATUS_SQL =
             "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
-    
+
     public static final String GET_SUBSCRIPTION_ID_SQL =
             "SELECT SUBSCRIPTION_ID FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
 
@@ -3167,6 +3168,86 @@ public class SQLConstants {
                     "   AND API.API_UUID = ? " +
                     "   AND API.ORGANIZATION = ?" +
                     "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'";
+
+    /** Portal Notifications related constants **/
+
+    public static class PortalNotifications {
+        public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION " +
+                "(NOTIFICATION_ID, NOTIFICATION_TYPE, CREATED_TIME, NOTIFICATION_METADATA) VALUES (?, ?, ?, ?)";
+        public static final String ADD_NOTIFICATION_END_USER = "INSERT INTO AM_NOTIFICATION_END_USERS " +
+                "(NOTIFICATION_ID, DESTINATION_USER, ORGANIZATION, PORTAL_TO_DISPLAY) " + "VALUES (?, ?, ?, ?)";
+        public static final String GET_NOTIFICATIONS_DESC =
+                "SELECT" +
+                        "  n.NOTIFICATION_ID," +
+                        "  n.NOTIFICATION_TYPE," +
+                        "  n.CREATED_TIME," +
+                        "  n.NOTIFICATION_METADATA," +
+                        "  e.IS_READ " +
+                "FROM AM_NOTIFICATION n " +
+                "INNER JOIN AM_NOTIFICATION_END_USERS e ON n.NOTIFICATION_ID = e.NOTIFICATION_ID " +
+                "WHERE" +
+                        "  e.DESTINATION_USER = ?" +
+                        "  AND e.ORGANIZATION = ?" +
+                        "  AND e.PORTAL_TO_DISPLAY = ? " +
+                "ORDER BY  n.CREATED_TIME DESC " +
+                "LIMIT ? , ?"
+                ;
+        public static final String GET_NOTIFICATIONS_ASC =
+                "SELECT" +
+                        "  n.NOTIFICATION_ID," +
+                        "  n.NOTIFICATION_TYPE," +
+                        "  n.CREATED_TIME," +
+                        "  n.NOTIFICATION_METADATA," +
+                        "  e.IS_READ " +
+                        "FROM AM_NOTIFICATION n " +
+                        "INNER JOIN AM_NOTIFICATION_END_USERS e ON n.NOTIFICATION_ID = e.NOTIFICATION_ID " +
+                        "WHERE" +
+                        "  e.DESTINATION_USER = ?" +
+                        "  AND e.ORGANIZATION = ?" +
+                        "  AND e.PORTAL_TO_DISPLAY = ? " +
+                        "ORDER BY  n.CREATED_TIME ASC " +
+                        "LIMIT ? , ?"
+                ;
+        public static final String DELETE_ALL_NOTIFICATIONS_OF_USER = "DELETE FROM AM_NOTIFICATION_END_USERS " +
+                "WHERE DESTINATION_USER = ? AND ORGANIZATION = ? AND PORTAL_TO_DISPLAY = ?";
+        public static final String DELETE_NOTIFICATIONS =
+                "DELETE " +
+                "FROM AM_NOTIFICATION " +
+                "WHERE " +
+                        "NOTIFICATION_ID IN (" +
+                        "SELECT N.NOTIFICATION_ID " +
+                                "FROM AM_NOTIFICATION N " +
+                                "LEFT JOIN AM_NOTIFICATION_END_USERS NU ON N.NOTIFICATION_ID = NU.NOTIFICATION_ID " +
+                                "WHERE NU.NOTIFICATION_ID IS NULL)";
+        public static final String MARK_NOTIFICATION_AS_READ = "UPDATE AM_NOTIFICATION_END_USERS SET IS_READ = TRUE " +
+                "WHERE NOTIFICATION_ID = ? AND DESTINATION_USER = ? AND ORGANIZATION = ? AND PORTAL_TO_DISPLAY = ?";
+        public static final String MARK_ALL_NOTIFICATIONS_AS_READ =
+                "UPDATE AM_NOTIFICATION_END_USERS SET IS_READ = TRUE " +
+                "WHERE DESTINATION_USER = ? AND ORGANIZATION = ? AND PORTAL_TO_DISPLAY = ?";
+        public static final String GET_NOTIFICATION_BY_ID =
+                "SELECT" +
+                        "  n.NOTIFICATION_ID," +
+                        "  n.NOTIFICATION_TYPE," +
+                        "  n.CREATED_TIME," +
+                        "  n.NOTIFICATION_METADATA," +
+                        "  e.IS_READ " +
+                "FROM AM_NOTIFICATION n " +
+                "INNER JOIN AM_NOTIFICATION_END_USERS e ON n.NOTIFICATION_ID = e.NOTIFICATION_ID " +
+                "WHERE" +
+                        "  n.NOTIFICATION_ID = ?" +
+                        "  AND e.DESTINATION_USER = ?" +
+                        "  AND e.ORGANIZATION = ?" +
+                        "  AND e.PORTAL_TO_DISPLAY = ?";
+        public static final String DELETE_NOTIFICATION_BY_ID = "DELETE FROM AM_NOTIFICATION_END_USERS " +
+                "WHERE NOTIFICATION_ID = ? AND DESTINATION_USER = ? AND ORGANIZATION = ? AND PORTAL_TO_DISPLAY = ?";
+        public static final String GET_API_UUID_USING_NAME_CONTEXT_VERSION = "SELECT API_UUID FROM AM_API WHERE "
+                + "API_NAME = ? AND CONTEXT = ? AND API_VERSION = ? AND ORGANIZATION = ?";
+        public static final String GET_NOTIFICATIONS_COUNT = "SELECT COUNT(*) AS NOTIFICATION_COUNT FROM " +
+                "AM_NOTIFICATION_END_USERS WHERE DESTINATION_USER = ? AND ORGANIZATION = ? AND PORTAL_TO_DISPLAY = ?";
+        public static final String GET_UNREAD_NOTIFICATION_COUNT =
+                "SELECT COUNT(*) AS UNREAD_NOTIFICATION_COUNT FROM AM_NOTIFICATION_END_USERS " +
+                "WHERE DESTINATION_USER = ? AND ORGANIZATION = ? AND PORTAL_TO_DISPLAY = ? AND IS_READ = FALSE";
+    }
 
     /** Throttle related constants**/
 

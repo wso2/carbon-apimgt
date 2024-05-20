@@ -62,6 +62,7 @@ public final class RestApiConstants {
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
     public static final String RESOURCE = "resource";
+    public static final String RESOURCE_NOTIFICATION = "Notification";
     public static final String RESOURCE_API = "API";
     public static final String RESOURCE_API_PRODUCT = "API Product";
     public static final String RESOURCE_PRODUCT_DOCUMENTATION = "product documentation";
@@ -350,4 +351,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_GATEWAY_POLICIES = "gateway-policies";
 
     public static final String AUTH_TOKEN_INFO = "AUTH_TOKEN_INFO";
+
+    public static final String PUBLISHER_PORTAL = "publisher";
+    public static final String DEV_PORTAL = "devportal";
 }
