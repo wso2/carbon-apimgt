@@ -101,6 +101,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyResetEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
@@ -4342,6 +4343,34 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             tier = APIUtil.getPolicyByName(PolicyConstants.POLICY_LEVEL_APP, policyId, organization);
         }
         return tier;
+    }
+
+    /**
+     * Send Application Policy Reset Event to Eventhub
+     *
+     * @param applicationId Application Identifier used by traffic manager
+     * @param userId        Username for which the policy should be reset
+     * @param organization  Tenant which application owner belongs to
+     */
+    @Override
+    public void resetApplicationThrottlePolicy(String applicationId, String userId, String organization)
+            throws APIManagementException {
+        // Get the application
+        Application application = getApplicationByUUID(applicationId, organization);
+        String groupId = application.getGroupId();
+        int appId = application.getId();
+        String appTier = application.getTier();
+        // Check whether the application is accessible to the logged-in user
+        String loggedInUser = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+        if (!validateApplication(loggedInUser, appId, groupId)) {
+            log.error("Application " + applicationId + " is not accessible to user " + loggedInUser);
+            throw new APIMgtAuthorizationFailedException("Application is not accessible to user  " + loggedInUser);
+        }
+
+        ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(
+                UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.POLICY_RESET.name(),
+                tenantId, organization, UUID.randomUUID().toString(), String.valueOf(appId), userId, appTier);
+        APIUtil.sendNotification(applicationPolicyResetEvent, APIConstants.NotifierType.POLICY.name());
     }
 
     /**
