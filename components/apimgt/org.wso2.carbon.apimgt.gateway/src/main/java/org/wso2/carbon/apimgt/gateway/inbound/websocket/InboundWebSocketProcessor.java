@@ -313,7 +313,8 @@ public class InboundWebSocketProcessor {
             MessageContext synCtx = getMessageContext(inboundMessageContext);
             API api = InboundWebsocketProcessorUtil.getApi(synCtx, inboundMessageContext);
             if (api == null) {
-                throw new ResourceNotFoundException("No matching API found to dispatch the request");
+                throw new ResourceNotFoundException("No matching API found to dispatch the request" + " : " +
+                        inboundMessageContext.getFullRequestPath());
             }
             inboundMessageContext.setApi(api);
             reConstructFullUriWithVersion(req, synCtx, inboundMessageContext);
