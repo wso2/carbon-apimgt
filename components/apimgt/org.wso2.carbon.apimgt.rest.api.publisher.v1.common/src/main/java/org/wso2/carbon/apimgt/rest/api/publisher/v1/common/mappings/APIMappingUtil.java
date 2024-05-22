@@ -2103,6 +2103,7 @@ public class APIMappingUtil {
             workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.CREATED);
         }
 
+        workflowResponseDTO.setJsonPayload(stateChangeResponse.getWorkflowResponse().getJSONPayload());
         workflowResponseDTO.setLifecycleState(lifecycleStateDTO);
         return workflowResponseDTO;
     }
