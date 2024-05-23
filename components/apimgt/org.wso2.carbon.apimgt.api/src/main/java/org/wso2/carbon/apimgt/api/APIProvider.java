@@ -805,6 +805,7 @@ public interface APIProvider extends APIManager {
      * @param apiTypeWrapper : API Type Wrapper.
      * @param certificate   : Relevant public certificate.
      * @param alias         : Alias of the certificate.
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param organization  : Organization
      * @return SUCCESS : If operation succeeded,
      * INTERNAL_SERVER_ERROR : If any internal error occurred,
@@ -813,7 +814,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int addClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String certificate, String alias,
-                             String tierName, String organization) throws APIManagementException;
+                             String tierName, String keyType, String organization) throws APIManagementException;
 
     /**
      * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.
@@ -967,6 +968,7 @@ public interface APIProvider extends APIManager {
      * @param alias         : Alias of the certificate.
      * @param apiTypeWrapper : API Identifier of the certificate.
      * @param tier          : tier name.
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param tenantId      : Id of tenant.
      * @param organization  : organization
      * @return : 1 : If client certificate update is successful,
@@ -976,7 +978,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int updateClientCertificate(String certificate, String alias, ApiTypeWrapper apiTypeWrapper, String tier,
-                                int tenantId, String organization) throws APIManagementException;
+                                String keyType, int tenantId, String organization) throws APIManagementException;
 
     /**
      * Retrieve the certificate which matches the given alias.

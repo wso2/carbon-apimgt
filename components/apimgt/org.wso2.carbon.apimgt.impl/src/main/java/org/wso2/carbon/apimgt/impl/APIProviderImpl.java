@@ -3985,14 +3985,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public int addClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String certificate, String alias,
-                                    String tierName, String organization) throws APIManagementException {
+                                    String tierName, String keyType, String organization)
+            throws APIManagementException {
         checkAccessControlPermission(userNameWithoutChange, apiTypeWrapper.getAccessControl(),
                 apiTypeWrapper.getAccessControlRoles());
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
-        responseCode = certificateManager
-                .addClientCertificate(apiTypeWrapper.getId(), certificate, alias, tierName, tenantId, organization);
+        responseCode = certificateManager.addClientCertificate(apiTypeWrapper.getId(), certificate,
+                alias, tierName, keyType, tenantId, organization);
         return responseCode.getResponseCode();
     }
 
@@ -4136,11 +4137,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public int updateClientCertificate(String certificate, String alias, ApiTypeWrapper apiTypeWrapper,
-                                       String tier, int tenantId, String organization) throws APIManagementException {
+                                       String tier, String keyType, int tenantId, String organization)
+            throws APIManagementException {
         checkAccessControlPermission(userNameWithoutChange, apiTypeWrapper.getAccessControl(),
                 apiTypeWrapper.getAccessControlRoles());
         ResponseCode responseCode = certificateManager
-                .updateClientCertificate(certificate, alias, tier, tenantId, organization);
+                .updateClientCertificate(certificate, alias, tier, keyType, tenantId, organization);
         return responseCode != null ?
                 responseCode.getResponseCode() :
                 ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();

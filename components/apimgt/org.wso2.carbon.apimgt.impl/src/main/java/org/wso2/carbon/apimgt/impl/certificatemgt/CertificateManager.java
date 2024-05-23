@@ -175,6 +175,7 @@ public interface CertificateManager {
      * @param apiIdentifier : Identifier of the relevant API, which the client certificate is added against.
      * @param certificate   : Base64 encoded certificate string.
      * @param alias         : Alias of the certificate.
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param tenantId      : The tenant which the client certificate is added against
      * @param organization  : Organization
      * @return SUCCESS : If Operation succeeded, INTERNAL_SERVER_ERROR : If any internal error occurred,
@@ -182,7 +183,7 @@ public interface CertificateManager {
      * certificate is expired.
      */
     ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias, String tierName,
-                                      int tenantId, String organization);
+                                      String keyType, int tenantId, String organization);
 
     /**
      * Method to delete the client certificate from publisher node.
@@ -233,11 +234,12 @@ public interface CertificateManager {
      * @param alias       : The alias of the certificate that should be updated.
      * @param tenantId    : Id of the tenant.
      * @param tier        : Name of the tier
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param organization : Organization
      * @return : true if update succeeds, false if fails
      */
-    ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId,
-            String organization) throws APIManagementException;
+    ResponseCode updateClientCertificate(String certificate, String alias, String tier, String keyType,
+                                         int tenantId, String organization) throws APIManagementException;
 
     /**
      * To get the count of the client certificates updated for the particular tenant.

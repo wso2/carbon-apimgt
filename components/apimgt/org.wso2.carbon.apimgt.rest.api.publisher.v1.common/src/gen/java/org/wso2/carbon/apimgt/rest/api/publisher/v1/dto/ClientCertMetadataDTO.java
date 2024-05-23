@@ -26,6 +26,7 @@ public class ClientCertMetadataDTO   {
     private String alias = null;
     private String apiId = null;
     private String tier = null;
+    private String keyType = null;
 
   /**
    **/
@@ -78,6 +79,23 @@ public class ClientCertMetadataDTO   {
     this.tier = tier;
   }
 
+  /**
+   **/
+  public ClientCertMetadataDTO keyType(String keyType) {
+    this.keyType = keyType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PRODUCTION", value = "")
+  @JsonProperty("keyType")
+  public String getKeyType() {
+    return keyType;
+  }
+  public void setKeyType(String keyType) {
+    this.keyType = keyType;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -90,12 +108,13 @@ public class ClientCertMetadataDTO   {
     ClientCertMetadataDTO clientCertMetadata = (ClientCertMetadataDTO) o;
     return Objects.equals(alias, clientCertMetadata.alias) &&
         Objects.equals(apiId, clientCertMetadata.apiId) &&
-        Objects.equals(tier, clientCertMetadata.tier);
+        Objects.equals(tier, clientCertMetadata.tier) &&
+        Objects.equals(keyType, clientCertMetadata.keyType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(alias, apiId, tier);
+    return Objects.hash(alias, apiId, tier, keyType);
   }
 
   @Override
@@ -106,6 +125,7 @@ public class ClientCertMetadataDTO   {
     sb.append("    alias: ").append(toIndentedString(alias)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    tier: ").append(toIndentedString(tier)).append("\n");
+    sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

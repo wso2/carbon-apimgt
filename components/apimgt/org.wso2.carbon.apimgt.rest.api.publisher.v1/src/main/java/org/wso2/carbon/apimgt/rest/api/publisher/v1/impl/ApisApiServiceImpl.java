@@ -964,7 +964,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIClientCertificateByAlias(String alias, String apiId,
                                                       InputStream certificateInputStream,
                                                       Attachment certificateDetail, String tier,
-                                                      MessageContext messageContext) {
+                                                      String keyType, MessageContext messageContext) {
         try {
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
@@ -991,13 +991,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.isEmpty(base64EncodedCert) && StringUtils.isEmpty(tier)) {
                 return Response.ok().entity("Client Certificate is not updated for alias " + alias).build();
             }
+            // to make the API consistent
+            if (StringUtils.isEmpty(keyType)) {
+                keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
+            }
             int responseCode = apiProvider
-                    .updateClientCertificate(base64EncodedCert, alias, apiTypeWrapper, tier,
+                    .updateClientCertificate(base64EncodedCert, alias, apiTypeWrapper, tier, keyType.toUpperCase(),
                             tenantId, organization);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
                 ClientCertMetadataDTO clientCertMetadataDTO = new ClientCertMetadataDTO();
                 clientCertMetadataDTO.setAlias(alias);
+                clientCertMetadataDTO.setKeyType(keyType.toUpperCase());
                 clientCertMetadataDTO.setApiId(apiTypeWrapper.getUuid());
                 clientCertMetadataDTO.setTier(clientCertificateDTO.getTierName());
                 URI updatedCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + "?alias=" + alias);
@@ -1068,7 +1073,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
         public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream,
                                                 Attachment certificateDetail, String alias, String tier,
-                                                MessageContext messageContext) {
+                                                String keyType, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
@@ -1081,6 +1086,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Certificate addition failed. Proper Certificate file should be provided", log);
             }
+            // to make the API consistent
+            if (StringUtils.isBlank(keyType)) {
+                keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
+            }
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
 
@@ -1092,7 +1101,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider
-                    .addClientCertificate(userName, apiTypeWrapper, base64EncodedCert, alias, tier, organization);
+                    .addClientCertificate(userName, apiTypeWrapper, base64EncodedCert, alias, tier,
+                            keyType.toUpperCase(), organization);
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }
@@ -1101,6 +1111,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 certificateDTO.setAlias(alias);
                 certificateDTO.setApiId(apiId);
                 certificateDTO.setTier(tier);
+                certificateDTO.setKeyType(keyType.toUpperCase());
                 URI createdCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + "?alias=" + alias);
                 return Response.created(createdCertUri).entity(certificateDTO).build();
             } else if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {

@@ -195,6 +195,7 @@ public class CertificateRestApiUtils {
             clientCertMetadataDTO.setAlias(clientCertificateDTO.getAlias());
             clientCertMetadataDTO.setApiId(clientCertificateDTO.getApiIdentifier().toString());
             clientCertMetadataDTO.setTier(clientCertificateDTO.getTierName());
+            clientCertMetadataDTO.setKeyType(clientCertificateDTO.getKeyType());
             clientCertificateList.add(clientCertMetadataDTO);
         }
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, certCount);

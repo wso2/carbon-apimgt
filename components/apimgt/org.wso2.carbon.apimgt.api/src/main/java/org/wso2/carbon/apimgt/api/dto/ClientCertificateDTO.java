@@ -28,7 +28,11 @@ public class ClientCertificateDTO {
     private String certificate;
     private String uniqueId;
     private String tierName;
+    private String keyType;
     private APIIdentifier apiIdentifier;
+
+    public ClientCertificateDTO() {
+    }
 
     /**
      * To get the identifier of the API related with client certificate.
@@ -63,6 +67,23 @@ public class ClientCertificateDTO {
      */
     public void setTierName(String tierName) {
         this.tierName = tierName;
+    }
+
+    /**
+     * To get the endpoint type of the certificate.
+     * @return endpoint type.
+     */
+    public String getKeyType() {
+        return keyType;
+    }
+
+    /**
+     * To set the endpoint type for the current certificate.
+     *
+     * @param keyType endpoint type (whether PRODUCTION or SANDBOX).
+     */
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
     }
 
     /**
