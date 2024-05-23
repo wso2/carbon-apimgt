@@ -73,7 +73,7 @@ public class CertificateMgtDAO {
 
 
     private boolean addClientCertificate(Connection connection, String certificate, Identifier apiIdentifier,
-                                         String alias, String tierName,
+                                         String alias, String tierName, String keyType,
                                          int tenantId, String organization) throws SQLException {
 
         boolean result;
@@ -87,6 +87,7 @@ public class CertificateMgtDAO {
             preparedStatement.setString(6, apiIdentifier.getVersion());
             preparedStatement.setString(7, organization);
             preparedStatement.setString(8, tierName);
+            preparedStatement.setString(9, keyType);
             result = preparedStatement.executeUpdate() >= 1;
         }
         return result;
@@ -98,13 +99,14 @@ public class CertificateMgtDAO {
      * @param certificate : Specific certificate.
      * @param alias       : Alias of the certificate.
      * @param tier        : Name of tier related with the certificate.
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param tenantId    : ID of the tenant.
      * @param organization : Organization
      * @return true if the update succeeds, unless false.
      * @throws CertificateManagementException Certificate Management Exception.
      */
-    public boolean updateClientCertificate(String certificate, String alias, String tier, int tenantId,
-            String organization) throws CertificateManagementException {
+    public boolean updateClientCertificate(String certificate, String alias, String tier, String keyType,
+                                           int tenantId, String organization) throws CertificateManagementException {
 
         List<ClientCertificateDTO> clientCertificateDTOList = getClientCertificates(tenantId, alias, null,
                 organization);
@@ -124,13 +126,16 @@ public class CertificateMgtDAO {
         if (StringUtils.isNotEmpty(tier)) {
             clientCertificateDTO.setTierName(tier);
         }
+        if (StringUtils.isNotEmpty(tier)) {
+            clientCertificateDTO.setKeyType(keyType);
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
                 deleteClientCertificate(connection, null, alias, tenantId);
                 addClientCertificate(connection, clientCertificateDTO.getCertificate(),
                         clientCertificateDTO.getApiIdentifier(), alias, clientCertificateDTO.getTierName(),
-                        tenantId, organization);
+                        clientCertificateDTO.getKeyType(), tenantId, organization);
                 connection.commit();
             } catch (SQLException e) {
                 handleConnectionRollBack(connection);
@@ -296,6 +301,7 @@ public class CertificateMgtDAO {
                 alias = resultSet.getString("ALIAS");
                 ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
                 clientCertificateDTO.setTierName(resultSet.getString("TIER_NAME"));
+                clientCertificateDTO.setKeyType(resultSet.getString("KEY_TYPE"));
                 clientCertificateDTO.setAlias(alias);
                 clientCertificateDTO.setCertificate(
                         APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("CERTIFICATE")));
@@ -742,19 +748,21 @@ public class CertificateMgtDAO {
      * @param certificate   : Client certificate that need to be added.
      * @param apiIdentifier : API which the client certificate is uploaded against.
      * @param alias         : Alias for the new certificate.
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param tenantId      : The Id of the tenant who uploaded the certificate.
      * @param organization  : Organization
      * @return : True if the information is added successfully, false otherwise.
      * @throws CertificateManagementException if existing entry is found for the given endpoint or alias.
      */
     public boolean addClientCertificate(String certificate, Identifier apiIdentifier, String alias, String tierName,
-                                        int tenantId, String organization) throws CertificateManagementException {
+                                        String keyType, int tenantId, String organization)
+            throws CertificateManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
                 boolean status = addClientCertificate(connection, certificate, apiIdentifier, alias, tierName,
-                        tenantId, organization);
+                        keyType, tenantId, organization);
                 connection.commit();
                 return status;
             } catch (SQLException e) {

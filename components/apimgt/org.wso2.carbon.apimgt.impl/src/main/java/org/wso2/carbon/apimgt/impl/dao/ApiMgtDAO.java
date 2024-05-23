@@ -17046,6 +17046,7 @@ public class ApiMgtDAO {
                         clientCertificateDTO.setAlias(rs.getString(1));
                         clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
                         clientCertificateDTO.setTierName(rs.getString(3));
+                        clientCertificateDTO.setKeyType(rs.getString(4));
                         clientCertificateDTOS.add(clientCertificateDTO);
                     }
                 }
@@ -17059,7 +17060,8 @@ public class ApiMgtDAO {
                             getInputStream(clientCertificateDTO.getCertificate()));
                     insertClientCertificateStatement.setBoolean(5, false);
                     insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
-                    insertClientCertificateStatement.setString(7, apiRevision.getRevisionUUID());
+                    insertClientCertificateStatement.setString(7, clientCertificateDTO.getKeyType());
+                    insertClientCertificateStatement.setString(8, apiRevision.getRevisionUUID());
                     insertClientCertificateStatement.addBatch();
                 }
                 insertClientCertificateStatement.executeBatch();
@@ -17964,6 +17966,7 @@ public class ApiMgtDAO {
                         clientCertificateDTO.setAlias(rs.getString(1));
                         clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
                         clientCertificateDTO.setTierName(rs.getString(3));
+                        clientCertificateDTO.setKeyType(rs.getString(4));
                         clientCertificateDTOS.add(clientCertificateDTO);
                     }
                 }
@@ -17977,7 +17980,8 @@ public class ApiMgtDAO {
                             getInputStream(clientCertificateDTO.getCertificate()));
                     insertClientCertificateStatement.setBoolean(5, false);
                     insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
-                    insertClientCertificateStatement.setString(7, "Current API");
+                    insertClientCertificateStatement.setString(7, clientCertificateDTO.getKeyType());
+                    insertClientCertificateStatement.setString(8, "Current API");
                     insertClientCertificateStatement.addBatch();
                 }
                 insertClientCertificateStatement.executeBatch();
@@ -18282,6 +18286,7 @@ public class ApiMgtDAO {
                         clientCertificateDTO.setAlias(rs.getString(1));
                         clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
                         clientCertificateDTO.setTierName(rs.getString(3));
+                        clientCertificateDTO.setKeyType(rs.getString(4));
                         clientCertificateDTOS.add(clientCertificateDTO);
                     }
                 }
@@ -18295,7 +18300,8 @@ public class ApiMgtDAO {
                             getInputStream(clientCertificateDTO.getCertificate()));
                     insertClientCertificateStatement.setBoolean(5, false);
                     insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
-                    insertClientCertificateStatement.setString(7, apiRevision.getRevisionUUID());
+                    insertClientCertificateStatement.setString(7, clientCertificateDTO.getKeyType());
+                    insertClientCertificateStatement.setString(8, apiRevision.getRevisionUUID());
                     insertClientCertificateStatement.addBatch();
                 }
                 insertClientCertificateStatement.executeBatch();
@@ -18522,6 +18528,7 @@ public class ApiMgtDAO {
                         clientCertificateDTO.setAlias(rs.getString(1));
                         clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
                         clientCertificateDTO.setTierName(rs.getString(3));
+                        clientCertificateDTO.setKeyType(rs.getString(4));
                         clientCertificateDTOS.add(clientCertificateDTO);
                     }
                 }
@@ -18535,7 +18542,8 @@ public class ApiMgtDAO {
                             getInputStream(clientCertificateDTO.getCertificate()));
                     insertClientCertificateStatement.setBoolean(5, false);
                     insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
-                    insertClientCertificateStatement.setString(7, "Current API");
+                    insertClientCertificateStatement.setString(7, clientCertificateDTO.getKeyType());
+                    insertClientCertificateStatement.setString(8, "Current API");
                     insertClientCertificateStatement.addBatch();
                 }
                 insertClientCertificateStatement.executeBatch();

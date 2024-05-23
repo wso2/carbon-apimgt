@@ -102,8 +102,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public int addClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String certificate, String alias,
-                                    String tierName, String organization) throws APIManagementException {
-        return super.addClientCertificate(userName, apiTypeWrapper, certificate, alias, tierName, organization);
+                                    String tierName, String keyType, String organization) throws APIManagementException {
+        return super.addClientCertificate(userName, apiTypeWrapper, certificate, alias, tierName, keyType,
+                organization);
     }
 
     @Override
@@ -156,8 +157,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public int updateClientCertificate(String certificate, String alias, ApiTypeWrapper apiIdentifier,
-                                       String tier, int tenantId, String organization) throws APIManagementException {
-        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, tenantId, organization);
+                                       String tier, String keyType, int tenantId, String organization)
+            throws APIManagementException {
+        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, keyType,
+                tenantId, organization);
     }
 
     @Override

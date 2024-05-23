@@ -114,7 +114,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias,
-                                             String tierName, int tenantId, String organization) {
+                                             String tierName, String keyType, int tenantId, String organization) {
 
         ResponseCode responseCode;
         try {
@@ -124,7 +124,8 @@ public class CertificateManagerImpl implements CertificateManager {
                     responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
                 } else {
                     certificateMgtDAO
-                            .addClientCertificate(certificate, apiIdentifier, alias, tierName, tenantId, organization);
+                            .addClientCertificate(certificate, apiIdentifier, alias, tierName, keyType,
+                                    tenantId, organization);
                 }
             }
         } catch (CertificateManagementException e) {
@@ -454,8 +455,8 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId,
-            String organization) throws APIManagementException {
+    public ResponseCode updateClientCertificate(String certificate, String alias, String tier, String keyType,
+                                                int tenantId, String organization) throws APIManagementException {
 
         ResponseCode responseCode = ResponseCode.SUCCESS;
         if (StringUtils.isNotEmpty(certificate)) {
@@ -464,7 +465,7 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             if (responseCode.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
                 boolean isSuccess = certificateMgtDAO
-                        .updateClientCertificate(certificate, alias, tier, tenantId, organization);
+                        .updateClientCertificate(certificate, alias, tier, keyType, tenantId, organization);
                 if (isSuccess) {
                     responseCode = ResponseCode.SUCCESS;
                 } else {
