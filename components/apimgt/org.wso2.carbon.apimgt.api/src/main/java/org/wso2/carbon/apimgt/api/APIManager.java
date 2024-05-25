@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
@@ -268,6 +269,21 @@ public interface APIManager {
      * @throws APIManagementException
      */
     SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Update Existing Subscription
+     *
+     * @param apiTypeWrapper    Identifier
+     * @param userId        id of the user
+     * @param application Application
+     * @param inputSubscriptionId The ID of the subscription to be updated
+     * @param throttlingPolicy  The new throttling policy to be applied to the subscription
+     * @return SubscriptionResponse subscription response object
+     * @throws APIManagementException if failed to add subscription details to database
+     */
+    SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId,
+                                            Application application, String inputSubscriptionId,
+                                            String throttlingPolicy) throws APIManagementException;
 
     /**
      * Creates a new subscriber given the username and the grouping Id

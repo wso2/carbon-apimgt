@@ -4133,22 +4133,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    /**
-     * Returns the given workflow executor
-     *
-     * @param workflowType Workflow executor type
-     * @return WorkflowExecutor of given type
-     * @throws WorkflowException if an error occurred while getting WorkflowExecutor
-     */
-    protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws APIManagementException {
-        try {
-            return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
-        } catch (WorkflowException e) {
-            handleException("Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType);
-        }
-        return null;
-    }
-
     protected void removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<APIRevisionDeployment> gatewaysToRemove,
                                      Set<String> gatewaysToAdd)
             throws APIManagementException {
