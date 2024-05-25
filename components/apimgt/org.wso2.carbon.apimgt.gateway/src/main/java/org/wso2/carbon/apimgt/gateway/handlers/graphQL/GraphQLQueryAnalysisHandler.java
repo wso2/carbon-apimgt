@@ -58,8 +58,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
         }
         String payload = messageContext.getProperty(APIConstants.GRAPHQL_PAYLOAD).toString();
         Map<String, Object> variableMap;
-        if(messageContext.getPropertyKeySet().contains("VARIABLE_MAP")){
-            variableMap = (Map<String, Object>) messageContext.getProperty("VARIABLE_MAP");
+        if (messageContext.getPropertyKeySet().contains(APIConstants.VARIABLE_MAP)) {
+            variableMap = (Map<String, Object>) messageContext.getProperty(APIConstants.VARIABLE_MAP);
         } else {
             variableMap = new HashMap<>();
         }
@@ -80,7 +80,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      */
     private boolean isDepthAndComplexityValid(MessageContext messageContext, String payload, Map<String, Object> variableMap) {
         try {
-            return isDepthValid(messageContext, payload, variableMap) && isComplexityValid(messageContext, payload,variableMap);
+            return isDepthValid(messageContext, payload, variableMap) && isComplexityValid(messageContext, payload, variableMap);
         } catch (Exception e) {
             String errorMessage = "Policy definition parsing failed. ";
             log.error(errorMessage, e);

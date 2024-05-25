@@ -15,9 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.carbon.apimgt.common.gateway.graphql;
-
 
 import graphql.analysis.FieldComplexityCalculator;
 import graphql.analysis.FieldComplexityEnvironment;
@@ -31,6 +29,7 @@ import graphql.language.Document;
 import graphql.language.EnumValue;
 import graphql.language.Field;
 import graphql.language.FieldDefinition;
+import graphql.language.InlineFragment;
 import graphql.language.InterfaceTypeDefinition;
 import graphql.language.ListType;
 import graphql.language.ObjectField;
@@ -71,8 +70,8 @@ import java.util.Optional;
  * analyze each operation in the payload and return operation depth, complexity, accessed fields,
  * used types and mutated fields
  */
-public class GraphQLOperationAnalyzer {
-    private static final Log log = LogFactory.getLog(GraphQLOperationAnalyzer.class);
+public class GraphQLOperationAnalyzerUtil {
+    private static final Log log = LogFactory.getLog(GraphQLOperationAnalyzerUtil.class);
     private static final String OPERATION_DEPTH = "operationDepth";
     private static final String OPERATION_COMPLEXITY = "operationComplexity";
     private static final String OPERATION_NAME = "operationName";
@@ -83,13 +82,13 @@ public class GraphQLOperationAnalyzer {
     private static final String SUBSCRIPTION = "subscription";
 
     /**
-     * @param type Operation Type
-     * @param selection Selection Set
-     * @param subDocument Parsed document
-     * @param graphQLSchema GraphQL Schema
+     * @param type                   Operation Type
+     * @param selection              Selection Set
+     * @param subDocument            Parsed document
+     * @param graphQLSchema          GraphQL Schema
      * @param typeDefinitionRegistry GraphQL Type Definition Registry
-     * @param complexityInfoJson Complexity Info
-     * @param variableMap External Variables Map
+     * @param complexityInfoJson     Complexity Info
+     * @param variableMap            External Variables Map
      * @return field usages, depth, complexities of the requested query
      */
     public static Map<String, Object> getOperationInfo(String type, Selection selection, Document subDocument,
@@ -114,11 +113,11 @@ public class GraphQLOperationAnalyzer {
 
         //add return type to custom properties
         GraphQLObjectType objectType = null;
-        if (type.equals(QUERY)) {
+        if (QUERY.equals(type)) {
             objectType = graphQLSchema.getQueryType();
-        } else if (type.equals(MUTATION)) {
+        } else if (MUTATION.equals(type)) {
             objectType = graphQLSchema.getMutationType();
-        } else if (type.equals(SUBSCRIPTION)) {
+        } else if (SUBSCRIPTION.equals(type)) {
             objectType = graphQLSchema.getSubscriptionType();
         }
 
@@ -128,20 +127,13 @@ public class GraphQLOperationAnalyzer {
         }
 
         // Add all used types in a given query
-        List<String> parentList = new ArrayList<>();
+        List<String> typesUsedByEachOperation = new ArrayList<>();
         for (Definition subDefinition : subDocument.getDefinitions()) {
-            OperationDefinition subOperation =  (OperationDefinition) subDefinition;
-            Map<String, Object> typesUsedByEachOperation = getTypeList(subOperation, typeDefinitionRegistry);
-            List<Map<String, String>> usedList = (List<Map<String, String>>) typesUsedByEachOperation.get("used");
-            for (Map<String, String> entry : usedList) {
-                String parent = entry.get("parent");
-                if (!parentList.contains(parent)) {
-                    parentList.add(parent);
-                }
-            }
+            OperationDefinition subOperation = (OperationDefinition) subDefinition;
+            typesUsedByEachOperation = getTypeList(subOperation, typeDefinitionRegistry);
         }
         List<Map<String, String>> accessedTypesList = new ArrayList<>();
-        for (String parent : parentList) {
+        for (String parent : typesUsedByEachOperation) {
             Map<String, String> typeMap = new HashMap<>();
             typeMap.put("type", parent);
             accessedTypesList.add(typeMap);
@@ -154,22 +146,18 @@ public class GraphQLOperationAnalyzer {
     private static int calculateDepth(Document document, GraphQLSchema graphQLSchema,
                                       Map<String, Object> variableMap) {
         int depth = 0;
-        try {
-            if (variableMap == null) {
-                variableMap = new HashMap<>();
-            }
-            QueryTraverser queryTraverser = QueryTraverser.newQueryTraverser()
-                    .schema(graphQLSchema)
-                    .document(document)
-                    .operationName(null)
-                    .coercedVariables(CoercedVariables.of(variableMap))
-                    .build();
-            depth = queryTraverser.reducePreOrder((env, acc) -> {
-                return Math.max(getPathLength(env.getParentEnvironment()), acc);
-            }, 0);
-        } catch (Exception e) {
-            log.error("Error Occurred when collecting data", e);
+        if (variableMap == null) {
+            variableMap = new HashMap<>();
         }
+        QueryTraverser queryTraverser = QueryTraverser.newQueryTraverser()
+                .schema(graphQLSchema)
+                .document(document)
+                .coercedVariables(CoercedVariables.of(variableMap))
+                .build();
+        depth = queryTraverser.reducePreOrder((env, acc) -> {
+            return Math.max(getPathLength(env.getParentEnvironment()), acc);
+        }, 0);
+
         return depth;
     }
 
@@ -196,7 +184,6 @@ public class GraphQLOperationAnalyzer {
         QueryTraverser queryTraverser = QueryTraverser.newQueryTraverser()
                 .schema(graphQLSchema)
                 .document(document)
-                .operationName(null)
                 .coercedVariables(CoercedVariables.of(variableMap))
                 .build();
         final Map<QueryVisitorFieldEnvironment, Integer> valuesByParent = new LinkedHashMap();
@@ -218,10 +205,10 @@ public class GraphQLOperationAnalyzer {
                                            FieldComplexityCalculator fieldComplexityCalculator) {
         if (queryVisitorFieldEnvironment.isTypeNameIntrospectionField()) {
             return 0;
-        } else {
-            FieldComplexityEnvironment fieldComplexityEnvironment = convertEnv(queryVisitorFieldEnvironment);
-            return fieldComplexityCalculator.calculate(fieldComplexityEnvironment, childsComplexity);
         }
+        FieldComplexityEnvironment fieldComplexityEnvironment = convertEnv(queryVisitorFieldEnvironment);
+        return fieldComplexityCalculator.calculate(fieldComplexityEnvironment, childsComplexity);
+
     }
 
     private static FieldComplexityEnvironment convertEnv(QueryVisitorFieldEnvironment queryVisitorFieldEnvironment) {
@@ -244,9 +231,9 @@ public class GraphQLOperationAnalyzer {
                 GraphQLType fieldType = fieldDefinition.getType();
                 if (fieldType instanceof GraphQLInterfaceType || fieldType instanceof GraphQLObjectType) {
                     returnType = ((GraphQLNamedType) fieldDefinition.getType()).getName();
-                } else if (fieldType instanceof GraphQLList){
+                } else if (fieldType instanceof GraphQLList) {
                     GraphQLType wrappedType = ((GraphQLList) fieldType).getOriginalWrappedType();
-                    if (wrappedType instanceof GraphQLInterfaceType || wrappedType instanceof GraphQLObjectType){
+                    if (wrappedType instanceof GraphQLInterfaceType || wrappedType instanceof GraphQLObjectType) {
                         returnType = ((GraphQLNamedType) wrappedType).getName();
                     }
                 }
@@ -255,12 +242,12 @@ public class GraphQLOperationAnalyzer {
         return returnType;
     }
 
-    private static Map<String, Object> getTypeList(OperationDefinition operation,
-                                                  TypeDefinitionRegistry typeDefinitionRegistry) {
-        Map<String, Object> definedTypes = new HashMap<>();
+    private static List<String> getTypeList(OperationDefinition operation,
+                                                   TypeDefinitionRegistry typeDefinitionRegistry) {
+        List<String> definedTypes;
         String type = operation.getOperation().toString();
         Map<String, List<String>> result = getFieldUsage(operation);
-        definedTypes = getSchemaUsage(result, definedTypes, typeDefinitionRegistry, type);
+        definedTypes = getSchemaUsage(result, typeDefinitionRegistry, type);
         return definedTypes;
     }
 
@@ -269,9 +256,11 @@ public class GraphQLOperationAnalyzer {
         List<Selection> subDictionary = operation.getSelectionSet().getSelections();
 
         for (Selection selection : subDictionary) {
-            Field levelField = (Field) selection;
-            fieldUsage = analyzeFieldUsage(levelField.getName(), selection,
-                    null, fieldUsage);
+            if (selection instanceof Field) {
+                Field levelField = (Field) selection;
+                fieldUsage = analyzeFieldUsage(levelField.getName(), selection,
+                        null, fieldUsage);
+            }
         }
 
         Map<String, List<String>> result = new HashMap<>();
@@ -289,66 +278,83 @@ public class GraphQLOperationAnalyzer {
 
     //counts parent child usage
     private static Map<String, Integer> analyzeFieldUsage(String currentKey, Selection selection,
-                                                String immediateParent, Map<String, Integer> fieldUsage) {
-        Field levelField = (Field) selection;
-        if (levelField.getSelectionSet() == null) {
+                                                          String immediateParent, Map<String, Integer> fieldUsage) {
+        if (selection instanceof Field) {
+            Field levelField = (Field) selection;
+            if (levelField.getSelectionSet() == null) {
+                if (immediateParent != null) {
+                    String key = immediateParent + "." + currentKey;
+                    fieldUsage.put(key, fieldUsage.getOrDefault(key, 0) + 1);
+                }
+                return fieldUsage;
+            } else {
+                Map<String, Integer> tempFieldUsage = fieldUsage;
+                List<Selection> subDictionary = levelField.getSelectionSet().getSelections();
+                for (Selection child : subDictionary) {
+                    if (child instanceof Field) {
+                        Field childLevel = (Field) child;
+                        tempFieldUsage = analyzeFieldUsage(childLevel.getName(), child, levelField.getName(),
+                                tempFieldUsage);
+                    } else if (child instanceof InlineFragment) {
+                        InlineFragment childLevel = (InlineFragment) child;
+                        String typeName = ((TypeName) childLevel.getTypeCondition()).getName();
+                        List<Selection> selectionList = childLevel.getSelectionSet().getSelections();
+                        for (Selection selections : selectionList) {
+                            if (selections instanceof Field) {
+                                Field field = (Field) selections;
+                                String key = typeName + "." + field.getName();
+                                fieldUsage.put(key, 0);
+                            }
+                        }
+                    }
+                }
+            }
             if (immediateParent != null) {
                 String key = immediateParent + "." + currentKey;
                 fieldUsage.put(key, fieldUsage.getOrDefault(key, 0) + 1);
             }
-            return fieldUsage;
-        } else {
-            Map<String, Integer> tempFieldUsage = fieldUsage;
-            List<Selection> subDictionary = levelField.getSelectionSet().getSelections();
-            for (Selection child : subDictionary) {
-                Field childLevel = (Field) child;
-                tempFieldUsage = analyzeFieldUsage(childLevel.getName(), child, levelField.getName(),
-                        tempFieldUsage);
-            }
-        }
-        if (immediateParent != null) {
-            String key = immediateParent + "." + currentKey;
-            fieldUsage.put(key, fieldUsage.getOrDefault(key, 0) + 1);
         }
         return fieldUsage;
     }
 
-    private static Map<String, Object> getSchemaUsage(Map<String, List<String>> fieldUsage, Map<String,
-            Object> definedTypes, TypeDefinitionRegistry typeDefinitionRegistry, String type) {
+    private static List<String> getSchemaUsage(Map<String, List<String>> fieldUsage,
+                                               TypeDefinitionRegistry typeDefinitionRegistry, String type) {
 
         Map<String, TypeDefinition> operationList = typeDefinitionRegistry.types();
+        List<String> typeArray = new ArrayList<>();
         for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
-            if (type.equals(entry.getValue().getName().toUpperCase(Locale.ROOT))) {
+            String key = entry.getValue().getName();
+            if (type.equals(key.toUpperCase(Locale.ROOT))) {
                 for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
                     String fieldName = fieldDef.getName();
                     if (fieldUsage.containsKey(fieldName)) {
                         String typeObject = getFieldType(fieldDef.getType());
-                        List<String> leaves = fieldUsage.get(fieldName);
-                        Map<String, Boolean> definedFieldUsage = getDefinedLeafUsage(typeObject, operationList);
-                        makeTrue(leaves, definedFieldUsage);
-                        definedTypes.put(typeObject, definedFieldUsage);
+                        if (!typeArray.contains(typeObject)) {
+                            typeArray.add(typeObject);
+                        }
                     }
+                }
+            } else if (fieldUsage.containsKey(key)) {
+                if (!typeArray.contains(key)) {
+                    typeArray.add(key);
                 }
             }
         }
-        Map<String, Object> tempHashMap = new HashMap<>();
-        for (String key : definedTypes.keySet()) {
+        List<String> tempTypeArray = new ArrayList<>();
+        for (String key : typeArray) {
             List<FieldDefinition> fieldDefinition = getFieldDef(key, operationList);
             for (FieldDefinition fieldDef : fieldDefinition) {
-                if (operationList.containsKey(getFieldType(fieldDef.getType())) && !definedTypes
-                        .containsKey(getFieldType(fieldDef.getType()))) {
+                if (operationList.containsKey(getFieldType(fieldDef.getType())) &&
+                        !typeArray.contains(getFieldType(fieldDef.getType()))) {
                     String typeObject = getFieldType(fieldDef.getType());
-                    if (fieldUsage.containsKey(fieldDef.getName())) {
-                        List<String> leaves = fieldUsage.get(fieldDef.getName());
-                        Map<String, Boolean> definedFieldUsage = getDefinedLeafUsage(typeObject, operationList);
-                        makeTrue(leaves, definedFieldUsage);
-                        tempHashMap.put(getFieldType(fieldDef.getType()), definedFieldUsage);
+                    if (!typeArray.contains(typeObject)) {
+                        tempTypeArray.add(typeObject);
                     }
                 }
             }
         }
-        definedTypes.putAll(tempHashMap);
-        return analyzeUsage(definedTypes);
+        typeArray.addAll(tempTypeArray);
+        return typeArray;
     }
 
     private static List<FieldDefinition> getFieldDef(String key, Map<String, TypeDefinition> operationList) {
@@ -361,24 +367,6 @@ public class GraphQLOperationAnalyzer {
         return fieldDefinition;
     }
 
-    private static void makeTrue(List<String> leaves, Map<String, Boolean> definedFieldUsage) {
-        for (String leaf : leaves) {
-            if (definedFieldUsage.containsKey(leaf)) {
-                definedFieldUsage.put(leaf, true);
-            }
-        }
-    }
-
-    private static Map<String, Boolean> getDefinedLeafUsage(String typeObject, Map<String,
-                                                            TypeDefinition> operationList) {
-        Map<String, Boolean> definedFieldUsage = new HashMap<>();
-        List<FieldDefinition> fieldList = getFieldDef(typeObject, operationList);
-        for (FieldDefinition field : fieldList) {
-            definedFieldUsage.put(field.getName(), false);
-        }
-        return definedFieldUsage;
-    }
-
     private static String getFieldType(Type type) {
         if (type instanceof TypeName) {
             return ((TypeName) type).getName();
@@ -388,65 +376,28 @@ public class GraphQLOperationAnalyzer {
         return "";
     }
 
-    private static Map<String, Object> analyzeUsage(Map<String, Object> data) {
-        Map<String, Object> jsonMap = new HashMap<>();
-        List<Map<String, String>> usedList = new ArrayList<>();
-        List<Map<String, String>> unusedList = new ArrayList<>();
-
-        for (Map.Entry<String, Object> entry : data.entrySet()) {
-            String parent = entry.getKey();
-            Map<String, Boolean> children = (Map<String, Boolean>) entry.getValue();
-
-            for (Map.Entry<String, Boolean> childEntry : children.entrySet()) {
-                String child = childEntry.getKey();
-                boolean value = childEntry.getValue();
-
-                Map<String, String> item = new HashMap<>();
-                item.put("parent", parent);
-                item.put("child", child);
-
-                if (value) {
-                    usedList.add(item);
-                } else {
-                    unusedList.add(item);
-                }
-            }
-        }
-
-        jsonMap.put("used", usedList);
-        jsonMap.put("unused", unusedList);
-
-        return jsonMap;
-    }
-
     /**
-     * @param type Operation Type
-     * @param selection Selection Set
+     * @param selection     Selection Set
      * @param graphQLSchema GraphQL Schema
      * @param operationName Name of the mutation
-     * @param variableMap External Variable Map
+     * @param variableMap   External Variable Map
      * @return mutated fields and types
      */
-    public static List<Map<String, Object>> getMutatedFields(String type, Selection selection,
+    public static List<Map<String, String>> getMutatedFields(Selection selection,
                                                              GraphQLSchema graphQLSchema,
                                                              String operationName,
                                                              Map<String, Object> variableMap) {
-        List<Map<String, Object>> transformedArray = null;
-        if (type.equals("mutation")) {
-            Map<String, Object> transformedMap;
-            Map<String, Object> mutatedTypes = new HashMap<>();
-            if (selection instanceof Field) {
-                Field field = (Field) selection;
-                mutatedTypes = getMutatedTypesFromOperation(field.getArguments());
-            } 
-            if (variableMap != null) {
-                mutatedTypes = formatVariableMap(mutatedTypes, variableMap);
-            }
-            Map<String, String> definedTypes = getDefinedTypesFromSchema(graphQLSchema.getMutationType()
-                    .getFieldDefinition(operationName).getArguments());
-            transformedMap = transformMaps(definedTypes, mutatedTypes);
-            transformedArray = convertMapToListOfMaps(transformedMap);
+        List<Map<String, String>> transformedArray;
+        Map<String, Object> mutatedTypes = new HashMap<>();
+        if (selection instanceof Field) {
+            Field field = (Field) selection;
+            mutatedTypes = getMutatedTypesFromOperation(field.getArguments());
         }
+        if (variableMap != null) {
+            mutatedTypes = formatVariableMap(mutatedTypes, variableMap);
+        }
+        transformedArray = getDefinedTypesFromSchema(graphQLSchema.getMutationType()
+                .getFieldDefinition(operationName).getArguments(), mutatedTypes);
         return transformedArray;
     }
 
@@ -460,7 +411,10 @@ public class GraphQLOperationAnalyzer {
                 Object valueFromSecondMap = variableMap.get(valueFromFirstMap);
                 if (valueFromSecondMap instanceof Map) {
                     Map<?, ?> innerMap = (Map<?, ?>) valueFromSecondMap;
-                    String[] keysArray = innerMap.keySet().toArray(new String[0]);
+                    ArrayList<String> keysArray = new ArrayList<>();
+                    for (Object key : innerMap.keySet()) {
+                        keysArray.add(key.toString());
+                    }
                     combinedMap.put(keyFromFirstMap, keysArray);
                 } else {
                     combinedMap.put(keyFromFirstMap, valueFromSecondMap);
@@ -468,29 +422,6 @@ public class GraphQLOperationAnalyzer {
             }
         }
         return combinedMap;
-    }
-
-    private static Map<String, Object> transformMaps(Map<String, String> definedTypes,
-                                                     Map<String, Object> mutatedTypes) {
-        Map<String, Object> resultMap = new HashMap<>();
-        for (Map.Entry<String, String> entry : definedTypes.entrySet()) {
-            String newKey = entry.getValue();
-            String oldKey = entry.getKey();
-            Object newValue = mutatedTypes.get(oldKey);
-            resultMap.put(newKey, newValue);
-        }
-        return resultMap;
-    }
-
-    private static List<Map<String, Object>> convertMapToListOfMaps(Map<String, Object> inputMap) {
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
-            Map<String, Object> newMap = new HashMap<>();
-            newMap.put("type", entry.getKey());
-            newMap.put("field", entry.getValue());
-            result.add(newMap);
-        }
-        return result;
     }
 
     private static Map<String, Object> getMutatedTypesFromOperation(List<Argument> arguments) {
@@ -513,26 +444,60 @@ public class GraphQLOperationAnalyzer {
         return mutatedTypes;
     }
 
-    private static Map<String, String> getDefinedTypesFromSchema(List<GraphQLArgument> arguments) {
-        Map<String, String> definedTypes = new HashMap<>();
+    private static List<Map<String, String>> getDefinedTypesFromSchema(List<GraphQLArgument> arguments,
+                                                                       Map<String, Object> mutatedTypes) {
+        List<Map<String, String>> resultMapList = new ArrayList<>();
+        Map<String, Map> definedTypes = new HashMap<>();
         for (GraphQLArgument argument : arguments) {
-            String type = null;
             GraphQLType argumentType = argument.getType();
-            if (argumentType instanceof GraphQLEnumType) {
-                type = ((GraphQLEnumType) argumentType).getName();
-            } else if (argumentType instanceof GraphQLNonNull) {
-                GraphQLType wrappedType = ((GraphQLNonNull) argumentType).getOriginalWrappedType();
-                if (wrappedType instanceof GraphQLInputObjectType) {
-                    type = ((GraphQLInputObjectType) wrappedType).getName();
-                } else if (wrappedType instanceof GraphQLScalarType) {
-                    type = ((GraphQLScalarType) wrappedType).getName();
+            Map<String, Boolean> argumentTypeMap = getArgumentTypeName(argumentType);
+            definedTypes.put(argument.getName(), argumentTypeMap);
+        }
+
+        for (Map.Entry<String, Map> entry : definedTypes.entrySet()) {
+            String key = entry.getKey();
+            Map<String, Boolean> valueMap = entry.getValue();
+
+            for (Map.Entry<String, Boolean> valueEntry : valueMap.entrySet()) {
+                String valueKey = valueEntry.getKey();
+                Boolean value = valueEntry.getValue();
+                if (!value) {
+                    Map<String, String> resultMap = new HashMap<>();
+                    resultMap.put("field", valueKey);
+                    resultMapList.add(resultMap);
+                } else {
+                    Object nestedObject = mutatedTypes.get(key);
+                    if (nestedObject instanceof ArrayList) {
+                        for (Object nestedField : (ArrayList) nestedObject) {
+                            Map<String, String> resultMap = new HashMap<>();
+                            resultMap.put("field", valueKey + "." + nestedField.toString());
+                            resultMapList.add(resultMap);
+                        }
+                    }
                 }
             }
-            if (type != null) {
-                definedTypes.put(argument.getName(), type);
-            }
         }
-        return definedTypes;
+        return resultMapList;
+    }
+
+    private static Map<String, Boolean> getArgumentTypeName(GraphQLType argumentType) {
+        Map<String, Boolean> argumentTypeMap = new HashMap<>();
+        String type = null;
+        Boolean isInputType = false;
+        if (argumentType instanceof GraphQLEnumType) {
+            type = ((GraphQLEnumType) argumentType).getName();
+        } else if (argumentType instanceof GraphQLInputObjectType) {
+            type = ((GraphQLInputObjectType) argumentType).getName();
+            isInputType = true;
+        } else if (argumentType instanceof GraphQLScalarType) {
+            type = ((GraphQLScalarType) argumentType).getName();
+        } else if (argumentType instanceof GraphQLNonNull) {
+            return getArgumentTypeName(((GraphQLNonNull) argumentType).getOriginalWrappedType());
+        } else if (argumentType instanceof GraphQLList) {
+            return getArgumentTypeName(((GraphQLList) argumentType).getOriginalWrappedType());
+        }
+        argumentTypeMap.put(type, isInputType);
+        return argumentTypeMap;
     }
 
     /**
@@ -548,11 +513,33 @@ public class GraphQLOperationAnalyzer {
                     if (sel instanceof Field) {
                         Map<String, String> fieldName = new HashMap<>();
                         fieldName.put("fieldName", ((Field) sel).getName());
-                        accessedFields.add(fieldName);
+                        if (!containsFieldName(accessedFields, fieldName)) {
+                            accessedFields.add(fieldName);
+                        }
+                    } else if (sel instanceof InlineFragment) {
+                        for (Selection inlineFragmentSelection :
+                                ((InlineFragment) sel).getSelectionSet().getSelections()) {
+                            if (inlineFragmentSelection instanceof Field) {
+                                Map<String, String> fieldName = new HashMap<>();
+                                fieldName.put("fieldName", ((Field) inlineFragmentSelection).getName());
+                                if (!containsFieldName(accessedFields, fieldName)) {
+                                    accessedFields.add(fieldName);
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
         return accessedFields;
+    }
+
+    private static boolean containsFieldName(List<Map> accessedFields, Map<String, String> fieldName) {
+        for (Map map : accessedFields) {
+            if (map.equals(fieldName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

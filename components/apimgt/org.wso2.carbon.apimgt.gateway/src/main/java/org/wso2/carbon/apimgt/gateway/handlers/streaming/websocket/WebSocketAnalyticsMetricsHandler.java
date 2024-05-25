@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLOperationInfoAnalyzer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -37,9 +36,18 @@ public class WebSocketAnalyticsMetricsHandler {
     private static final String HANDSHAKE = "HANDSHAKE";
     private static final String PUBLISH = "PUBLISH";
     private static final String SUBSCRIBE = "SUBSCRIBE";
+    private static final String SUBSCRIPTION_HANDSHAKE = "SUBSCRIPTION_HANDSHAKE";
+    private static final String SUBSCRIPTION_INIT_PUB = "SUBSCRIPTION_INIT_PUB";
+    private static final String SUBSCRIPTION_INIT_SUB = "SUBSCRIPTION_INIT_SUB";
+    private static final String SUBSCRIPTION = "SUBSCRIPTION";
+    private static final String SUBSCRIPTION_EVENT = "SUBSCRIPTION_EVENT";
 
     public void handleHandshake(ChannelHandlerContext ctx) {
-        WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, HANDSHAKE);
+        if (APIConstants.GRAPHQL_API.equals(WebSocketUtils.getPropertyFromChannel(APIConstants.API_TYPE, ctx))) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION_HANDSHAKE);
+        } else {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, HANDSHAKE);
+        }
         String electedResource = (String) WebSocketUtils.getPropertyFromChannel(APIConstants.API_ELECTED_RESOURCE, ctx);
         /*
         Prefix electedResource with APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE_SUBSCRIBE only when collecting data for
@@ -52,16 +60,29 @@ public class WebSocketAnalyticsMetricsHandler {
     }
 
     public void handlePublish(ChannelHandlerContext ctx) {
-        WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, PUBLISH);
-        if (WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) != null) {
-            GraphQLSubscriptionOperationInfoAnalyzer operationInfoAnalyzer = new GraphQLSubscriptionOperationInfoAnalyzer();
+        if (APIConstants.GRAPHQL_API.equals(WebSocketUtils.getPropertyFromChannel(APIConstants.API_TYPE, ctx))
+                && WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) == null) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION_INIT_PUB);
+            collectData(ctx);
+        } else if (WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) != null) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION);
+            GraphQLSubscriptionOperationHandler operationInfoAnalyzer = new GraphQLSubscriptionOperationHandler();
             operationInfoAnalyzer.analyzePayload(ctx);
+        } else {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, PUBLISH);
+            collectData(ctx);
         }
-        collectData(ctx);
     }
 
     public void handleSubscribe(ChannelHandlerContext ctx) {
-        WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIBE);
+        if (APIConstants.GRAPHQL_API.equals(WebSocketUtils.getPropertyFromChannel(APIConstants.API_TYPE, ctx))
+                && WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) == null) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION_INIT_SUB);
+        } else if (WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) != null) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION_EVENT);
+        } else {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIBE);
+        }
         collectData(ctx);
     }
 

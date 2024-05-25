@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics;
 
 import org.apache.commons.logging.LogFactory;
@@ -35,14 +34,23 @@ import org.apache.commons.logging.Log;
 public class GraphQLAnalyticsMetricsHandler {
     private static final Log log = LogFactory.getLog(GraphQLAnalyticsMetricsHandler.class);
 
+    /**
+     * @param messageContext
+     */
     public void handleQuery(MessageContext messageContext) {
         collectData(messageContext);
     }
 
+    /**
+     * @param messageContext
+     */
     public void handleMutation(MessageContext messageContext) {
         collectData(messageContext);
     }
 
+    /**
+     * @param messageContext
+     */
     public void handleSubscribe(MessageContext messageContext) {
         collectData(messageContext);
     }

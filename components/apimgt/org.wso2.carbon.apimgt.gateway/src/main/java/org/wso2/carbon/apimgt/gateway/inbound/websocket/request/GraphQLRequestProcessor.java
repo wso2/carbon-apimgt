@@ -28,7 +28,6 @@ import graphql.schema.GraphQLType;
 import graphql.validation.Validator;
 import java.util.Base64;
 import java.util.Set;
-import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +36,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
-import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLOperationAnalyzer;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
@@ -81,6 +79,8 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         // so that analytics events will be published against correct resource
         WebSocketUtils.removeApiPropertyFromChannel(inboundMessageContext.getCtx(),
                 APIConstants.API_ELECTED_RESOURCE);
+        WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(), APIConstants.API_TYPE,
+                inboundMessageContext.getElectedAPI().getApiType());
         responseDTO = InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
         Parser parser = new Parser();
 
@@ -101,6 +101,7 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                     Document document = parser.parseDocument(graphQLSubscriptionPayload);
                     // Extract the operation type and operations from the payload
                     OperationDefinition operation = getOperationFromPayload(document);
+                    WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(), APIConstants.GRAPHQL_OPERATION, operation);
                     if (operation != null) {
                         if (checkIfValidSubscribeOperation(operation)) {
                             responseDTO = validateQueryPayload(inboundMessageContext, document, operationId);
@@ -117,8 +118,8 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                         APIConstants.TYPE_DEFINITION, inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
 
                                 try {
-                                    String accessControlInfo = getGraphQLAccessControlInfo(inboundMessageContext.getGraphQLSchemaDTO()
-                                            .getGraphQLSchema());
+                                    String accessControlInfo = getGraphQLAccessControlInfo(inboundMessageContext
+                                            .getGraphQLSchemaDTO().getGraphQLSchema());
                                     WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
                                             APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, accessControlInfo);
                                 } catch (APIManagementException e) {

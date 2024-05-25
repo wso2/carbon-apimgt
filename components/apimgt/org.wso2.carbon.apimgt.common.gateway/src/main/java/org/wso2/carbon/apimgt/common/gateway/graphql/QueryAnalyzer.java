@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.common.gateway.dto.QueryAnalyzerResponseDTO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * This class contains methods using for Graphql query depth and complexity analysis.
@@ -81,7 +80,6 @@ public class QueryAnalyzer {
 
             ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                     .query(payload)
-                    .context(Optional.empty())
                     .variables(variableMap)
                     .build();
 
@@ -151,7 +149,6 @@ public class QueryAnalyzer {
 
             ExecutionInput executionInput = ExecutionInput.newExecutionInput()
                     .query(payload)
-                    .context(Optional.empty())
                     .variables(variableMap)
                     .build();
 

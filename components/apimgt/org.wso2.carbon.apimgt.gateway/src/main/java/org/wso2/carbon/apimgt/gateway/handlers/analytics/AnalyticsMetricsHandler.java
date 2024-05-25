@@ -25,14 +25,11 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
-import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLOperationInfoAnalyzer;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLOperationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
 import java.util.Map;
@@ -91,8 +88,8 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         AnalyticsDataProvider provider;
         Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING);
         if (messageContext.getProperty(APIConstants.API_TYPE) == "GRAPHQL"){
-            GraphQLOperationInfoAnalyzer operationInfoAnalyzer = new GraphQLOperationInfoAnalyzer();
-            operationInfoAnalyzer.analyzePayload(messageContext);
+            GraphQLOperationHandler operationInfoAnalyzer = new GraphQLOperationHandler();
+            operationInfoAnalyzer.handleGraphQLOperation(messageContext);
         } else {
             if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
                 provider = new AsyncAnalyticsDataProvider(messageContext);
