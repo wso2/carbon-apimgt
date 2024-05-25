@@ -123,7 +123,7 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                                     WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
                                             APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, accessControlInfo);
                                 } catch (APIManagementException e) {
-                                    throw new RuntimeException(e);
+                                    log.error("Error while getting GraphQL access control info", e);
                                 }
 
                                 // extract verb info dto with throttle policy for matching verb
