@@ -32,6 +32,7 @@ import graphql.language.FieldDefinition;
 import graphql.language.InlineFragment;
 import graphql.language.InterfaceTypeDefinition;
 import graphql.language.ListType;
+import graphql.language.NonNullType;
 import graphql.language.ObjectField;
 import graphql.language.ObjectTypeDefinition;
 import graphql.language.ObjectValue;
@@ -371,7 +372,14 @@ public class GraphQLOperationAnalyzerUtil {
         if (type instanceof TypeName) {
             return ((TypeName) type).getName();
         } else if (type instanceof ListType) {
-            return ((TypeName) ((ListType) type).getType()).getName();
+            Type listType = ((ListType) type).getType();
+            if (listType instanceof TypeName) {
+                return getFieldType(listType);
+            } else if (listType instanceof NonNullType) {
+                return getFieldType(((NonNullType) listType).getType());
+            }
+        } else if (type instanceof NonNullType) {
+            return getFieldType(((NonNullType) type).getType());
         }
         return "";
     }
