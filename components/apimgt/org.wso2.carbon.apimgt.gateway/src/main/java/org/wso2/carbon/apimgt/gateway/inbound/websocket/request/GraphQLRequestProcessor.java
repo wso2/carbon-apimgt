@@ -79,8 +79,6 @@ public class GraphQLRequestProcessor extends RequestProcessor {
         // so that analytics events will be published against correct resource
         WebSocketUtils.removeApiPropertyFromChannel(inboundMessageContext.getCtx(),
                 APIConstants.API_ELECTED_RESOURCE);
-        WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(), APIConstants.API_TYPE,
-                inboundMessageContext.getElectedAPI().getApiType());
         responseDTO = InboundWebsocketProcessorUtil.authenticateToken(inboundMessageContext);
         Parser parser = new Parser();
 
@@ -106,6 +104,12 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                         if (checkIfValidSubscribeOperation(operation)) {
                             responseDTO = validateQueryPayload(inboundMessageContext, document, operationId);
                             if (!responseDTO.isError()) {
+                                String operationName = operation.getName();
+                                if (operationName == null) {
+                                    operationName = "ANONYMOUS QUERY";
+                                }
+                                WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                                        APIConstants.QUERY_NAME, operationName);
                                 // subscription operation name
                                 String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation,
                                         inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());

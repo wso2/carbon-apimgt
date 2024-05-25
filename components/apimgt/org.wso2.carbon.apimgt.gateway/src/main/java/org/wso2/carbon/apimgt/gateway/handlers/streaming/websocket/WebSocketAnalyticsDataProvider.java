@@ -320,6 +320,8 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         if (WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) != null) {
             customProperties.put(Constants.OPERATION_INFO, getOperationInfo());
             customProperties.put(Constants.ACCESSED_FIELDS, getAccessedFields());
+            customProperties.put(Constants.QUERY_NAME, WebSocketUtils
+                    .getPropertyFromChannel(APIConstants.QUERY_NAME, ctx));
         }
         return customProperties;
     }
