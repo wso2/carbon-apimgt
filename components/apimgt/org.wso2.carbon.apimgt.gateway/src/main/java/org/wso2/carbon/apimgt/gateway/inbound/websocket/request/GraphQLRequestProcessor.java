@@ -95,19 +95,41 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                             ((JSONObject) graphQLMsg.get(GraphQLConstants.SubscriptionConstants
                                     .PAYLOAD_FIELD_NAME_PAYLOAD))
                                     .getString(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_QUERY);
+                    WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(), APIConstants.GRAPHQL_PAYLOAD, graphQLSubscriptionPayload);
                     Document document = parser.parseDocument(graphQLSubscriptionPayload);
                     // Extract the operation type and operations from the payload
                     OperationDefinition operation = getOperationFromPayload(document);
+                    WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(), APIConstants.GRAPHQL_OPERATION, operation);
                     if (operation != null) {
                         if (checkIfValidSubscribeOperation(operation)) {
                             responseDTO = validateQueryPayload(inboundMessageContext, document, operationId);
                             if (!responseDTO.isError()) {
+                                String operationName = operation.getName();
+                                if (operationName == null) {
+                                    operationName = "ANONYMOUS QUERY";
+                                }
+                                WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                                        APIConstants.QUERY_NAME, operationName);
                                 // subscription operation name
                                 String subscriptionOperation = GraphQLProcessorUtil.getOperationListAsString(operation,
                                         inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
                                 // set resource name of subscription operation for analytics event publishing
                                 WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
                                         APIConstants.API_ELECTED_RESOURCE, subscriptionOperation);
+                                WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                                        APIConstants.GRAPHQL_SCHEMA, inboundMessageContext.getGraphQLSchemaDTO().getGraphQLSchema());
+                                WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                                        APIConstants.TYPE_DEFINITION, inboundMessageContext.getGraphQLSchemaDTO().getTypeDefinitionRegistry());
+
+                                try {
+                                    String accessControlInfo = getGraphQLAccessControlInfo(inboundMessageContext
+                                            .getGraphQLSchemaDTO().getGraphQLSchema());
+                                    WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(),
+                                            APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, accessControlInfo);
+                                } catch (APIManagementException e) {
+                                    log.error("Error while getting GraphQL access control info", e);
+                                }
+
                                 // extract verb info dto with throttle policy for matching verb
                                 VerbInfoDTO verbInfoDTO = InboundWebsocketProcessorUtil
                                         .findMatchingVerb(subscriptionOperation, inboundMessageContext);

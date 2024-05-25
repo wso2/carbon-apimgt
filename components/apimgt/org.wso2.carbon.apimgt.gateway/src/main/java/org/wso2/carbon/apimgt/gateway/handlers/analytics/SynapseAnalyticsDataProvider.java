@@ -77,6 +77,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     private MessageContext messageContext;
     private AnalyticsCustomDataProvider analyticsCustomDataProvider;
     private Boolean buildResponseMessage = null;
+    private static final String GRAPHQL = "GRAPHQL";
+    private static final String QUERY_NAME = "QUERY_NAME";
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
 
@@ -412,7 +414,28 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
         customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
+        if (messageContext.getProperty(APIConstants.API_TYPE) == GRAPHQL) {
+            customProperties.put(Constants.QUERY_NAME, messageContext.getProperty(QUERY_NAME));
+            customProperties.put(Constants.OPERATION_INFO, getOperationInfo());
+            customProperties.put(Constants.ACCESSED_FIELDS, getAccessedFields());
+            customProperties.put(Constants.MUTATED_FIELDS, getMutatedFields());
+        }
         return customProperties;
+    }
+
+    private Map<String, Object> getOperationInfo() {
+        Object fieldUsage = messageContext.getProperty(APIConstants.OPERATION_INFO);
+        return (Map<String, Object>) fieldUsage;
+    }
+
+    private Object getAccessedFields() {
+        Object accessedFields = messageContext.getProperty(APIConstants.ACCESSED_FIELDS);
+        return accessedFields;
+    }
+
+    private Object getMutatedFields() {
+        Object mutatedFields = messageContext.getProperty(APIConstants.MUTATED_FIELDS);
+        return mutatedFields;
     }
 
     private String getApiContext() {
@@ -515,7 +538,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     public int getResponseSize() {
         int responseSize = 0;
         if (buildResponseMessage == null) {
-            Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
+            Map<String, String> configs = APIManagerConfiguration.getAnalyticsProperties();
             if (configs.containsKey(Constants.BUILD_RESPONSE_MESSAGE_CONFIG)) {
                 buildResponseMessage = Boolean.parseBoolean(configs.get(Constants.BUILD_RESPONSE_MESSAGE_CONFIG));
             } else {
@@ -523,7 +546,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             }
         }
         Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
-        if (headers != null  && headers.get(HttpHeaders.CONTENT_LENGTH) != null) {
+        if (headers != null && headers.get(HttpHeaders.CONTENT_LENGTH) != null) {
             responseSize = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH).toString());
         }
         if (responseSize == 0 && buildResponseMessage) {
@@ -543,7 +566,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                 SOAPBody soapbody = env.getBody();
                 if (soapbody != null) {
                     byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
-                    responseSize =  size.length;
+                    responseSize = size.length;
                 }
             }
         }

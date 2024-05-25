@@ -34,9 +34,14 @@ public class Constants {
     public static final String API_USER_NAME_KEY = "userName";
     public static final String API_CONTEXT_KEY = "apiContext";
     public static final String RESPONSE_SIZE = "responseSize";
+    public static final String OPERATION_NAME = "operationName";
+
+    public static final String OPERATION_INFO = "operationInfo";
+    public static final String QUERY_NAME = "queryName";
     public static final String RESPONSE_CONTENT_TYPE = "responseContentType";
     public static final String API_ANALYTICS_CUSTOM_DATA_PROVIDER_CLASS = "publisher.custom.data.provider.class";
-
+    public static final String ACCESSED_FIELDS = "accessedFields";
+    public static final String MUTATED_FIELDS = "mutatedFields";
     public static final String REGION_ID_PROP = "apim.gw.region";
     public static final String DEFAULT_REGION_ID = "default";
     public static final String SUCCESS_EVENT_TYPE = "response";

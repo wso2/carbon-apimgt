@@ -324,9 +324,25 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         customProperties.put(Constants.RESPONSE_SIZE,
                 WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx));
+        if (WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) != null) {
+            customProperties.put(Constants.OPERATION_INFO, getOperationInfo());
+            customProperties.put(Constants.ACCESSED_FIELDS, getAccessedFields());
+            customProperties.put(Constants.QUERY_NAME, WebSocketUtils
+                    .getPropertyFromChannel(APIConstants.QUERY_NAME, ctx));
+        }
         return customProperties;
     }
-    
+
+    private Map<String, Object> getOperationInfo() {
+        Object fieldUsage =   WebSocketUtils.getPropertyFromChannel(APIConstants.OPERATION_INFO, ctx);
+        return (Map<String, Object>) fieldUsage;
+    }
+
+    private Object getAccessedFields() {
+        Object accessedFields =  WebSocketUtils.getPropertyFromChannel(APIConstants.ACCESSED_FIELDS, ctx);
+        return accessedFields;
+    }
+
     @Override
     public String getUserName() {
 

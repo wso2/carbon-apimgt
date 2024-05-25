@@ -131,7 +131,7 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                             System.currentTimeMillis());
                     if (msg instanceof TextWebSocketFrame) {
                         WebSocketUtils.setApiPropertyToChannel(ctx, Constants.RESPONSE_SIZE,
-                                ((TextWebSocketFrame) msg).text().length());
+                                    ((TextWebSocketFrame) msg).text().length());
                     }
                 }
                 // publish analytics events if analytics is enabled
