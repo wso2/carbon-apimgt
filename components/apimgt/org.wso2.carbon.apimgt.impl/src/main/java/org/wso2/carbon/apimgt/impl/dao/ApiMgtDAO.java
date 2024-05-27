@@ -16935,6 +16935,10 @@ public class ApiMgtDAO {
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getRevisionedURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                if (connection.getMetaData().getDriverName().contains("MySQL")) {
+                    getRevisionedURLMappingsStatement = connection.prepareStatement(
+                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                }
                 PreparedStatement insertScopeResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
@@ -18139,6 +18143,10 @@ public class ApiMgtDAO {
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getRevisionedURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                if (connection.getMetaData().getDriverName().contains("MySQL")) {
+                    getRevisionedURLMappingsStatement = connection.prepareStatement(
+                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                }
                 PreparedStatement insertScopeResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
@@ -18372,6 +18380,10 @@ public class ApiMgtDAO {
                 //Insert Scope Mappings and operation policy mappings
                 PreparedStatement getRevisionedURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                if (connection.getMetaData().getDriverName().contains("MySQL")) {
+                    getRevisionedURLMappingsStatement = connection.prepareStatement(
+                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                }
                 PreparedStatement addResourceScopeMapping = connection.prepareStatement(
                         SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING);
                 PreparedStatement addOperationPolicyStatement = connection
