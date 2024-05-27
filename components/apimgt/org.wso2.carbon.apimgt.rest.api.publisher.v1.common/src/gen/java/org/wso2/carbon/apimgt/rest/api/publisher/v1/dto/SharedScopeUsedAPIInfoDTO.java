@@ -27,6 +27,7 @@ public class SharedScopeUsedAPIInfoDTO   {
     private String context = null;
     private String version = null;
     private String provider = null;
+    private String revisionID = null;
     private List<SharedScopeUsedAPIResourceInfoDTO> usedResourceList = new ArrayList<SharedScopeUsedAPIResourceInfoDTO>();
 
   /**
@@ -102,6 +103,23 @@ public class SharedScopeUsedAPIInfoDTO   {
   }
 
   /**
+   **/
+  public SharedScopeUsedAPIInfoDTO revisionID(String revisionID) {
+    this.revisionID = revisionID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Revision 1", value = "")
+  @JsonProperty("revisionID")
+  public String getRevisionID() {
+    return revisionID;
+  }
+  public void setRevisionID(String revisionID) {
+    this.revisionID = revisionID;
+  }
+
+  /**
    * Resource list which have used the shared scope within this API 
    **/
   public SharedScopeUsedAPIInfoDTO usedResourceList(List<SharedScopeUsedAPIResourceInfoDTO> usedResourceList) {
@@ -134,12 +152,13 @@ public class SharedScopeUsedAPIInfoDTO   {
         Objects.equals(context, sharedScopeUsedAPIInfo.context) &&
         Objects.equals(version, sharedScopeUsedAPIInfo.version) &&
         Objects.equals(provider, sharedScopeUsedAPIInfo.provider) &&
+        Objects.equals(revisionID, sharedScopeUsedAPIInfo.revisionID) &&
         Objects.equals(usedResourceList, sharedScopeUsedAPIInfo.usedResourceList);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, context, version, provider, usedResourceList);
+    return Objects.hash(name, context, version, provider, revisionID, usedResourceList);
   }
 
   @Override
@@ -151,6 +170,7 @@ public class SharedScopeUsedAPIInfoDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    revisionID: ").append(toIndentedString(revisionID)).append("\n");
     sb.append("    usedResourceList: ").append(toIndentedString(usedResourceList)).append("\n");
     sb.append("}");
     return sb.toString();
