@@ -80,13 +80,16 @@ import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -1715,5 +1718,69 @@ public class GatewayUtils {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
         return gatewayArtifactSynchronizerProperties.isOnDemandLoading();
+    }
+
+    /**
+     * This method return the carbon.xml config value for tenant eager loading
+     *
+     * @return config string
+     */
+    public static String getEagerLoadingEnabledTenantsConfig() {
+        ServerConfiguration carbonConfig = CarbonUtils.getServerConfiguration();
+        return carbonConfig.getFirstProperty(APIConstants.EAGER_LOADING_ENABLED_TENANTS);
+    }
+
+    /**
+     * This method returns the list of tenants for which eager loading is enabled
+     *
+     * @return List of eager loading enabled tenants
+     */
+    public static List<String> getTenantsToBeDeployed() throws APIManagementException {
+        List<String> tenantsToBeDeployed = new ArrayList<>();
+        tenantsToBeDeployed.add(APIConstants.SUPER_TENANT_DOMAIN);
+
+        //Read eager loading config from carbon server config, and extract include and exclude tenant lists
+        String eagerLoadingConfig = getEagerLoadingEnabledTenantsConfig();
+        if (StringUtils.isNotEmpty(eagerLoadingConfig)) {
+            boolean includeAllTenants = false;
+            List<String> includeTenantList = new ArrayList<>();
+            List<String> excludeTenantList = new ArrayList<>();
+
+
+            if (StringUtils.isNotEmpty(eagerLoadingConfig)) {
+                String[] tenants = eagerLoadingConfig.split(",");
+                for (String tenant : tenants) {
+                    tenant = tenant.trim();
+                    if (tenant.equals("*")) {
+                        includeAllTenants = true;
+                    } else if (tenant.contains("!")) {
+                        if (tenant.contains("*")) {
+                            // "!*" is not a valid config
+                            throw new IllegalArgumentException(tenant + " is not a valid tenant domain");
+                        }
+                        excludeTenantList.add(tenant.replace("!", ""));
+                    } else {
+                        includeTenantList.add(tenant);
+                    }
+                }
+            }
+
+            //Fetch all active tenant domains
+            try {
+                Set<String> allTenants = APIUtil.getTenantDomainsByState(APIConstants.TENANT_STATE_ACTIVE);
+                if (includeAllTenants) {
+                    tenantsToBeDeployed.addAll(allTenants);
+                    // Now that we have included  all tenants, let's see whether any tenant have been excluded
+                    if (!excludeTenantList.isEmpty()) {
+                        tenantsToBeDeployed.removeAll(excludeTenantList);
+                    }
+                } else {
+                    tenantsToBeDeployed.addAll(includeTenantList);
+                }
+            } catch (UserStoreException e) {
+                throw new APIManagementException("Error while fetching active tenants list.", e);
+            }
+        }
+        return tenantsToBeDeployed;
     }
 }

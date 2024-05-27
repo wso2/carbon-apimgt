@@ -3144,6 +3144,7 @@ public final class APIConstants {
 
     // Constants related to basic health check APIs
     public static final String WEB_SOCKET_HEALTH_CHECK_PATH = "/health";
+    public static final String EAGER_LOADING_ENABLED_TENANTS = "Tenant.LoadingPolicy.EagerLoading.Include";
 
     public static final String CASE_SENSITIVE_CHECK_PATH =    "caseSensitiveRoleValidation";
     public static final String SOAP_TO_REST_PRESERVE_ELEMENT_ORDER = "soapToRestPreserveElementOrder";
