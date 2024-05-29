@@ -2874,8 +2874,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryHolder holder = getRegistry(tenantDomain);
             registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
-
-            GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
             if (apiArtifact == null) {
                 throw new ThumbnailPersistenceException("API not found for id " + apiId, ExceptionCodes.API_NOT_FOUND);
             }
@@ -2892,13 +2893,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             String oldThumbPath = artifactOldPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
             String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
-
+            // Remove thumbnail from registry
             if (registry.resourceExists(thumbPath)) {
                 registry.delete(thumbPath);
             }
             if (registry.resourceExists(oldThumbPath)) {
                 registry.delete(oldThumbPath);
             }
+            // Remove thumbnail path from overview thumbnail of artifact's attributes
+            apiArtifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, null);
+            apiArtifactManager.updateGenericArtifact(apiArtifact);
         } catch (RegistryException | APIPersistenceException e) {
             String msg = "Error while loading API icon of API " + apiId + " from the registry";
             throw new ThumbnailPersistenceException(msg, e);
