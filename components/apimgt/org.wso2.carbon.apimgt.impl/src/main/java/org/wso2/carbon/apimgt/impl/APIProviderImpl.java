@@ -5625,7 +5625,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException("Error while saving thumbnail ", e);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new APIManagementException("Error while reading input stream ", e);
         }
     }
 
