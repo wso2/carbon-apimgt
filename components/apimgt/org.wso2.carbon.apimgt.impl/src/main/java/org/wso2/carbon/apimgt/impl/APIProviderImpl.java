@@ -5612,8 +5612,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Thumbnail deletion from publisher originally handled through the same PUT call
                 // It was decided after discussion to fix the deletion (U2 update) through the same originally used PUT
                 apiPersistenceInstance.deleteThumbnail(new Organization(organization), apiId);
-            }
-            else {
+            } else {
                 // Content will be reset to re-read the stream from the beginning
                 content.reset();
                 apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
