@@ -184,9 +184,12 @@ public class TemplateBuilderUtil {
         if (clientCertificateDTOS != null) {
             clientCertificateObject = new HashMap<>();
             for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                /* appending the values without using a data structure to store them separately to avoid conflicts
+                 when reading from certificatesDetails string at MutualSSLAuthenticator */
                 clientCertificateObject.put(certificateMgtUtils
                                 .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
-                        clientCertificateDTO.getTierName());
+                        clientCertificateDTO.getTierName().concat(APIConstants.DELEM_COLON)
+                                .concat(clientCertificateDTO.getKeyType()));
             }
         }
 
@@ -369,9 +372,13 @@ public class TemplateBuilderUtil {
         if (clientCertificateDTOS != null) {
             clientCertificateObject = new HashMap<>();
             for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
-                clientCertificateObject.put(certificateMgtUtils
-                                .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
-                        clientCertificateDTO.getTierName());
+                /* appending the values without using a data structure to store them separately to avoid conflicts
+                 when reading from certificatesDetails string at MutualSSLAuthenticator */
+                clientCertificateObject.put(certificateMgtUtils.
+                                getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
+                        clientCertificateDTO.getTierName().concat(APIConstants.DELEM_COLON)
+                                .concat(clientCertificateDTO.getKeyType()));
+
             }
         }
 

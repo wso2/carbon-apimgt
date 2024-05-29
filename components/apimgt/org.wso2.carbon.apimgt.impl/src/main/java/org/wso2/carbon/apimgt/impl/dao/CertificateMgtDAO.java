@@ -126,7 +126,7 @@ public class CertificateMgtDAO {
         if (StringUtils.isNotEmpty(tier)) {
             clientCertificateDTO.setTierName(tier);
         }
-        if (StringUtils.isNotEmpty(tier)) {
+        if (StringUtils.isNotEmpty(keyType)) {
             clientCertificateDTO.setKeyType(keyType);
         }
         try (Connection connection = APIMgtDBUtil.getConnection()) {

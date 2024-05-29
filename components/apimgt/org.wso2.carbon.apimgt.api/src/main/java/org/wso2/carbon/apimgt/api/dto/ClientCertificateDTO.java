@@ -70,17 +70,17 @@ public class ClientCertificateDTO {
     }
 
     /**
-     * To get the endpoint type of the certificate.
-     * @return endpoint type.
+     * To get the key type of the certificate.
+     * @return key type.
      */
     public String getKeyType() {
         return keyType;
     }
 
     /**
-     * To set the endpoint type for the current certificate.
+     * To set the key type for the current certificate.
      *
-     * @param keyType endpoint type (whether PRODUCTION or SANDBOX).
+     * @param keyType key type (whether PRODUCTION or SANDBOX).
      */
     public void setKeyType(String keyType) {
         this.keyType = keyType;
