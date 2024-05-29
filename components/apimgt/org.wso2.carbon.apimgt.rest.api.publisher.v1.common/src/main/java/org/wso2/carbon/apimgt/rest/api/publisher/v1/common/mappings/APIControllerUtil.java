@@ -991,6 +991,7 @@ public class APIControllerUtil {
             ClientCertificateDTO cert = new ClientCertificateDTO();
             cert.setApiIdentifier(apiIdentifier);
             cert.setAlias(alias);
+            cert.setKeyType(certObject.get(ImportExportConstants.KEY_TYPE_JSON_KEY).getAsString());
             cert.setTierName(certObject.get(ImportExportConstants.CERTIFICATE_TIER_NAME_PROPERTY).getAsString());
             String certName = certObject.get(ImportExportConstants.CERTIFICATE_PATH_PROPERTY).getAsString();
             cert.setCertificate(certName);

@@ -97,6 +97,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String apiKeyHeader;
     private String apiSecurity;
     private String apiLevelPolicy;
+    private String environmentType;
     private String certificateInformation;
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
@@ -149,6 +150,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      */
     public void setAPILevelPolicy(String apiLevelPolicy) {
         this.apiLevelPolicy = apiLevelPolicy;
+    }
+
+    /**
+     * To get the environment type (whether production or sandbox).
+     *
+     * @return the environment type.
+     */
+    public String getEnvironmentType() {
+        return environmentType;
+    }
+
+    /**
+     * To set the environment type (whether production or sandbox).
+     *
+     * @param environmentType the environment type.
+     */
+    public void setEnvironmentType(String environmentType) {
+        this.environmentType = environmentType;
     }
 
     /**
@@ -525,6 +544,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         authContext.setStopOnQuotaReach(true);
         //Requests are throttled by the ApiKey that is set here. In an unauthenticated scenario, we will use the client's IP address for throttling.
         authContext.setApiKey(clientIP);
+        //TODO: verify the key type
         authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         //This name is hardcoded as anonymous because there is no associated user token
         authContext.setUsername(APIConstants.END_USER_ANONYMOUS);

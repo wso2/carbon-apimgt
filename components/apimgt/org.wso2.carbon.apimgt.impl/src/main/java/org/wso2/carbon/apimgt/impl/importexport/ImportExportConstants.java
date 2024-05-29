@@ -166,6 +166,7 @@ public final class ImportExportConstants {
     public static final String ALIAS_JSON_KEY = "alias";
 
     public static final String ENDPOINT_JSON_KEY = "endpoint";
+    public static final String KEY_TYPE_JSON_KEY = "keyType";
 
     public static final int REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM = 1;
 
