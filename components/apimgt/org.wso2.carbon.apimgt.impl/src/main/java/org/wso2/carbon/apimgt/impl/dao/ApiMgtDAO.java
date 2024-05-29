@@ -19840,10 +19840,15 @@ public class ApiMgtDAO {
                                                                         String apiUUID,
                                                                         String organization,
                                                                         boolean isWithPolicyDefinition)
-            throws SQLException {
+            throws SQLException, APIManagementException {
 
-        String dbQuery =
-                SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_ID;
+        String dbQuery;
+        boolean isAPIRevision = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
+        if (isAPIRevision) {
+            dbQuery = SQLConstants.OperationPolicyConstants.GET_REVISION_SPECIFIC_OPERATION_POLICY_FROM_POLICY_ID;
+        } else {
+            dbQuery = SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_ID;
+        }
         OperationPolicyData policyData = null;
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyId);
@@ -19852,8 +19857,8 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
                     policyData = new OperationPolicyData();
-                    policyData.setPolicyId(policyId);
-                    policyData.setApiUUID(apiUUID);
+                    policyData.setPolicyId(rs.getString("POLICY_UUID"));
+                    policyData.setApiUUID(rs.getString("API_UUID"));
                     policyData.setOrganization(organization);
                     policyData.setMd5Hash(rs.getString("POLICY_MD5"));
                     policyData.setRevisionUUID(rs.getString("REVISION_UUID"));
@@ -20617,7 +20622,7 @@ public class ApiMgtDAO {
 
     private void handlePolicyCloning(OperationPolicy policy, String apiUUID, String tenantDomain, Connection connection,
             Map<String, String> updatedPoliciesMap, Set<String> usedClonedPolicies,
-            List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException {
+            List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException, APIManagementException {
 
         if (!updatedPoliciesMap.keySet().contains(policy.getPolicyId())) {
             //Check whether API specific policies available
