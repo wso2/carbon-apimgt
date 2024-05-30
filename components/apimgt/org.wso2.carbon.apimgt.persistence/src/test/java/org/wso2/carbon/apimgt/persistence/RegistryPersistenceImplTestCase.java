@@ -392,7 +392,7 @@ public class RegistryPersistenceImplTestCase {
 
         apiPersistenceInstance.deleteThumbnail(org, apiUUID);
         Mockito.verify(registry, times(1)).delete(thumbPath);
-
+        Mockito.verify(manager, times(1)).updateGenericArtifact(artifact);
     }
 
     @Test
