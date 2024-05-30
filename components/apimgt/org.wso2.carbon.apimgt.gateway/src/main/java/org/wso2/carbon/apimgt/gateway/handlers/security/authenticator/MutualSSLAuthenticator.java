@@ -71,10 +71,10 @@ public class MutualSSLAuthenticator implements Authenticator {
     public MutualSSLAuthenticator(String apiLevelPolicy, boolean isMandatory, String certificateDetails) {
         this.apiLevelPolicy = apiLevelPolicy;
         certificates = new HashMap<>();
-        HashMap<String, String> certificateData = new HashMap<>();
         if (StringUtils.isNotEmpty(certificateDetails)) {
             String[] certificateParts = certificateDetails.substring(1, certificateDetails.length() - 1).split(",");
             for (String certificatePart : certificateParts) {
+                HashMap<String, String> certificateData = new HashMap<>();
                 int tierDivisionIndex = certificatePart.lastIndexOf("=");
                 if (tierDivisionIndex > 0) {
                     String uniqueIdentifier = certificatePart.substring(0, tierDivisionIndex).trim();
@@ -181,6 +181,12 @@ public class MutualSSLAuthenticator implements Authenticator {
         String subjectDN = x509Certificate.getSubjectDN().getName();
         String uniqueIdentifier = (x509Certificate.getSerialNumber() + "_" + x509Certificate.getSubjectDN()).replaceAll(",",
                         "#").replaceAll("\"", "'").trim();
+        /* Since there can be previously deleted certificates persisted in the trust store that matches with the
+        certificate object but not in the certificates list for the particular API.
+        */
+        if (certificates.get(uniqueIdentifier) == null ) {
+            handleCertificateNotAssociatedToAPIFailure(messageContext);
+        }
         String tier = certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_TIER);
         String keyType = certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_KEY_TYPE);
         if (StringUtils.isEmpty(tier)) {
@@ -236,13 +242,10 @@ public class MutualSSLAuthenticator implements Authenticator {
         }
         if (StringUtils.isEmpty(tier) || StringUtils.isEmpty(keyType)) {
             subjectDNIdentifiers = getUniqueIdentifierFromCompleteCertificateChain(x509Certificates, subjectDNIdentifiers);
-        }
-        if (StringUtils.isEmpty(tier)) {
             tier = getTierFromCompleteCertificateChain(subjectDNIdentifiers);
-        }
-        if (StringUtils.isEmpty(keyType)) {
             keyType = getKeyTypeFromCompleteCertificateChain(subjectDNIdentifiers);
         }
+
         if (StringUtils.isEmpty(tier) || StringUtils.isEmpty(keyType)) {
             handleCertificateNotAssociatedToAPIFailure(messageContext);
         }
@@ -292,7 +295,8 @@ public class MutualSSLAuthenticator implements Authenticator {
 
         String tier = null;
         for (String uniqueIdentifier : uniqueIdentifiers) {
-            tier = certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_TIER);
+            tier = certificates.get(uniqueIdentifier) == null ? null :
+                    certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_TIER);
             if (StringUtils.isNotEmpty(tier)) {
                 break;
             }
@@ -311,7 +315,8 @@ public class MutualSSLAuthenticator implements Authenticator {
 
         String keyType = null;
         for (String uniqueIdentifier : uniqueIdentifiers) {
-            keyType = certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_KEY_TYPE);
+            keyType = certificates.get(uniqueIdentifier) == null ? null :
+                    certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_KEY_TYPE);
             if (StringUtils.isNotEmpty(keyType)) {
                 break;
             }

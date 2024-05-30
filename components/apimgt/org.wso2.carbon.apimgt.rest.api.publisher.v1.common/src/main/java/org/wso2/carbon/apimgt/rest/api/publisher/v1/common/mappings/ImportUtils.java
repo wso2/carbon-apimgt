@@ -2263,7 +2263,7 @@ public class ImportUtils {
             for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
                 if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == (apiProvider.addClientCertificate(
                         APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()), apiTypeWrapper,
-                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(),certDTO.getKeyType(),
+                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), certDTO.getKeyType(),
                         organization)) && isOverwrite) {
                     apiProvider.updateClientCertificate(certDTO.getCertificate(), certDTO.getAlias(), apiTypeWrapper,
                             certDTO.getTierName(), certDTO.getKeyType(), tenantId, organization);

@@ -544,7 +544,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         authContext.setStopOnQuotaReach(true);
         //Requests are throttled by the ApiKey that is set here. In an unauthenticated scenario, we will use the client's IP address for throttling.
         authContext.setApiKey(clientIP);
-        //TODO: verify the key type
         authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         //This name is hardcoded as anonymous because there is no associated user token
         authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
