@@ -7255,5 +7255,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return gatewayPolicyDeploymentMapForResponse;
+    
+    @Override
+    public void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
+            throws APIManagementException {
+        Organization org = new Organization(organization);
+        try {
+            apiPersistenceInstance.updateSoapToRestSequences(org, apiId, sequences);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while sequences to the api  " + apiId, e);
+        }        
     }
 }

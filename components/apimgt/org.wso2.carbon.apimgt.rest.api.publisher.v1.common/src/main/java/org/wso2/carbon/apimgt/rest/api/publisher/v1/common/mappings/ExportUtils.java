@@ -194,11 +194,11 @@ public class ExportUtils {
             addThumbnailToArchive(archivePath, apiIdentifier, apiProvider);
             addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider,
                     APIConstants.API_IDENTIFIER_TYPE);
-        } else {
-            if (StringUtils.equals(apiDtoToReturn.getType().toString().toLowerCase(),
-                    APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
-                addSOAPToRESTMediationToArchive(archivePath, api);
-            }
+        } 
+        
+        if (StringUtils.equals(apiDtoToReturn.getType().toString().toLowerCase(),
+                APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
+            addSOAPToRESTMediationToArchive(archivePath, api);
         }
 
         if (StringUtils
