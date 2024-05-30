@@ -228,6 +228,21 @@ public class OAS3ParserTest extends OASTestBase {
     }
 
     @Test
+    public void testOpenAPIValidatorWithMultiplePathsHavingSameNameWithAndWithoutTrailingSlash() throws Exception {
+        String faultySwagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
+                        + File.separator + "oas3_paths_with_trailing_slash.json"),
+                "UTF-8");
+
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+        Assert.assertFalse(response.isValid());
+        Assert.assertEquals(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode(),
+                response.getErrorItems().get(0).getErrorCode());
+        Assert.assertEquals("Multiple GET operations with the same resource path /test found in " +
+                "the openapi definition", response.getErrorItems().get(0).getErrorDescription());
+    }
+
+    @Test
     public void testRootLevelApplicationSecurity() throws Exception {
         String apiSecurity = "oauth_basic_auth_api_key_mandatory,oauth2,api_key";
         String oasDefinition = IOUtils.toString(
