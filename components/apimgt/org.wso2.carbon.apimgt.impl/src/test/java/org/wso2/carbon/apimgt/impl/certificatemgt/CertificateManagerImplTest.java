@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.TestUtils;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
@@ -421,7 +422,8 @@ public class CertificateManagerImplTest {
                 .stub(PowerMockito.method(CertificateMgtUtils.class, "validateCertificate"))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
         ResponseCode responseCode = certificateManager
-                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID, "org1");
+                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null,
+                        APIConstants.API_KEY_TYPE_PRODUCTION, MultitenantConstants.SUPER_TENANT_ID, "org1");
         Assert.assertEquals("Response code was wrong while trying add a client certificate with an existing alias",
                 ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode(), responseCode.getResponseCode());
         PowerMockito
@@ -429,15 +431,17 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.SUCCESS);
         Mockito.when(certificateMgtDAO.checkWhetherAliasExist(ALIAS, TENANT_ID)).thenReturn(true);
         responseCode = certificateManager
-                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID, "org1");
+                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null,
+                        APIConstants.API_KEY_TYPE_PRODUCTION, MultitenantConstants.SUPER_TENANT_ID, "org1");
         Assert.assertEquals("Response code was wrong while trying add a client certificate with an existing alias",
                 ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode(), responseCode.getResponseCode());
         Mockito.when(certificateMgtDAO.checkWhetherAliasExist(ALIAS, TENANT_ID)).thenReturn(false);
         Mockito.when(certificateMgtDAO
                 .addClientCertificate(Mockito.anyString(), Mockito.any(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyInt(), Mockito.anyString())).thenReturn(true);
+                        Mockito.anyString(), Mockito.anyInt(), Mockito.anyString())).thenReturn(true);
         responseCode = certificateManager
-                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID, "org1");
+                .addClientCertificate(null, BASE64_ENCODED_CERT, ALIAS, null,
+                        APIConstants.API_KEY_TYPE_PRODUCTION, MultitenantConstants.SUPER_TENANT_ID, "org1");
         Assert.assertEquals("Response code was wrong while trying add a client certificate",
                 ResponseCode.SUCCESS.getResponseCode(), responseCode.getResponseCode());
     }
@@ -452,8 +456,8 @@ public class CertificateManagerImplTest {
                 .stub(PowerMockito.method(CertificateMgtUtils.class, "validateCertificate"))
                 .toReturn(ResponseCode.CERTIFICATE_EXPIRED);
         ResponseCode responseCode = certificateManager
-                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID,
-                        organization);
+                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null,
+                        APIConstants.API_KEY_TYPE_PRODUCTION, MultitenantConstants.SUPER_TENANT_ID, organization);
         Assert.assertEquals("Response code was wrong while trying add a expired client certificate",
                 ResponseCode.CERTIFICATE_EXPIRED.getResponseCode(), responseCode.getResponseCode());
         PowerMockito
@@ -461,7 +465,8 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.SUCCESS);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "updateClientCertificate")).toReturn(false);
         responseCode = certificateManager
-                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null, MultitenantConstants.SUPER_TENANT_ID,
+                .updateClientCertificate(BASE64_ENCODED_CERT, ALIAS, null, APIConstants.API_KEY_TYPE_PRODUCTION,
+                        MultitenantConstants.SUPER_TENANT_ID,
                         organization);
         Assert.assertEquals("Response code was wrong, for a failure in update",
                 ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode(), responseCode.getResponseCode());

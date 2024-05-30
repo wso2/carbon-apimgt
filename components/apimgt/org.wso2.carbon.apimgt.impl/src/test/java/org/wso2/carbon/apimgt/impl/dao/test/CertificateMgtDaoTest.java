@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
@@ -208,7 +209,21 @@ public class CertificateMgtDaoTest {
     @Test
     public void testUpdateClientCertificateOfNonExistingAlias() throws CertificateManagementException {
         Assert.assertFalse("Update of client certificate for a non existing alias succeeded",
-                certificateMgtDAO.updateClientCertificate(certificate, "test1", "test", TENANT_ID, "org1"));
+                certificateMgtDAO.updateClientCertificate(certificate, "test1", "test",
+                        APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID, "org1"));
+    }
+
+    /**
+     * This method tests the behaviour of updateClientCertificate method when trying to update keyType of an
+     * existing client certificate entry.
+     *
+     * @throws CertificateManagementException Certificate Management Exception.
+     */
+    @Test
+    public void testUpdateKeyTypeOfExistingAlias() throws CertificateManagementException {
+        Assert.assertFalse("Update of key type for an existing client certificate entry succeeded",
+                certificateMgtDAO.updateClientCertificate(certificate, "test1", "test",
+                        APIConstants.API_KEY_TYPE_SANDBOX, TENANT_ID, "org1"));
     }
 
     /**
@@ -221,7 +236,8 @@ public class CertificateMgtDaoTest {
         try {
             addClientCertificate();
             Assert.assertTrue("Update of client certificate for an existing alias failed",
-                    certificateMgtDAO.updateClientCertificate(null, "test", "test", TENANT_ID, "org1"));
+                    certificateMgtDAO.updateClientCertificate(null, "test", "test",
+                            APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID, "org1"));
         } finally {
             deleteClientCertificate();
         }
@@ -293,6 +309,8 @@ public class CertificateMgtDaoTest {
         clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test", apiIdentifier, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
+        Assert.assertNotNull("The key type of a client certificate cannot be null",
+                clientCertificateDTOS.get(0).getKeyType());
         clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, null, apiIdentifier, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
@@ -324,7 +342,8 @@ public class CertificateMgtDaoTest {
      * @throws CertificateManagementException Certificate Management Exception.
      */
     private boolean addClientCertificate() throws CertificateManagementException {
-        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold", TENANT_ID, "org1");
+        return certificateMgtDAO.addClientCertificate(certificate, apiIdentifier, "test", "Gold",
+                APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID, "org1");
     }
 
     /**
