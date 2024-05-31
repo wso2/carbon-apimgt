@@ -133,12 +133,34 @@ public class PublisherCommonUtils {
                                              String[] tokenScopes, APIDefinitionValidationResponse response)
             throws APIManagementException, ParseException, CryptoException, FaultGatewaysException {
 
+        return updateApiAndDefinition(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes, response, true);
+    }
+    
+    /**
+     * Update API and API definition. Soap to rest sequence is updated on demand.
+     *
+     * @param originalAPI       existing API
+     * @param apiDtoToUpdate    DTO object with updated API data
+     * @param apiProvider       API Provider
+     * @param tokenScopes       token scopes
+     * @param generateSoapToRestSequences Option to generate soap to rest sequences.
+     * @param response          response of the API definition validation
+     * @return                  updated API
+     * @throws APIManagementException   If an error occurs while updating the API and API definition
+     * @throws ParseException           If an error occurs while parsing the endpoint configuration
+     * @throws CryptoException          If an error occurs while encrypting the secret key of API
+     * @throws FaultGatewaysException   If an error occurs while updating manage of an existing API
+     */
+    public static API updateApiAndDefinition(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider,
+            String[] tokenScopes, APIDefinitionValidationResponse response, boolean generateSoapToRestSequences)
+            throws APIManagementException, ParseException, CryptoException, FaultGatewaysException {
+
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
         String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (!PublisherCommonUtils.isStreamingAPI(apiDtoToUpdate) && !APIConstants.APITransportType.GRAPHQL.toString()
                 .equalsIgnoreCase(apiDtoToUpdate.getType().toString())) {
             prepareForUpdateSwagger(originalAPI.getUuid(), response, false, apiProvider, organization,
-                    response.getParser(), apiToUpdate);
+                    response.getParser(), apiToUpdate, generateSoapToRestSequences);
         }
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
@@ -1405,11 +1427,30 @@ public class PublisherCommonUtils {
                                        String organization)
             throws APIManagementException, FaultGatewaysException {
 
+        return updateSwagger(apiId, response, isServiceAPI, organization, true);
+    }
+    
+    /**
+     * update swagger definition of the given api. For Soap To Rest APIs, sequences are generated on demand.
+     * 
+     * @param apiId    API Id
+     * @param response response of a swagger definition validation call
+     * @param organization  Organization Identifier
+     * @param generateSoapToRestSequences Option to generate soap to rest sequences.
+     * @return updated swagger definition
+     * @throws APIManagementException when error occurred updating swagger
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI,
+            String organization, boolean generateSoapToRestSequences)
+            throws APIManagementException, FaultGatewaysException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         APIDefinition oasParser = response.getParser();
-        prepareForUpdateSwagger(apiId, response, isServiceAPI, apiProvider, organization, oasParser, existingAPI);
+        prepareForUpdateSwagger(apiId, response, isServiceAPI, apiProvider, organization, oasParser, existingAPI,
+                generateSoapToRestSequences);
 
         //Update API is called to update URITemplates and scopes of the API
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
@@ -1418,7 +1459,7 @@ public class PublisherCommonUtils {
 
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
-        // instead of passing same
+        //instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
@@ -1436,7 +1477,7 @@ public class PublisherCommonUtils {
      */
     private static void prepareForUpdateSwagger(String apiId, APIDefinitionValidationResponse response,
                                                 boolean isServiceAPI, APIProvider apiProvider, String organization,
-                                                APIDefinition oasParser, API existingAPI)
+                                                APIDefinition oasParser, API existingAPI, boolean genSoapToRestSequence)
             throws APIManagementException {
 
         String apiDefinition = response.getJsonContent();
@@ -1445,7 +1486,7 @@ public class PublisherCommonUtils {
         } else {
             apiDefinition = OASParserUtil.preProcess(apiDefinition);
         }
-        if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType())) {
+        if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType()) && genSoapToRestSequence) {
             List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition);
             existingAPI.setSoapToRestSequences(sequenceList);
         }

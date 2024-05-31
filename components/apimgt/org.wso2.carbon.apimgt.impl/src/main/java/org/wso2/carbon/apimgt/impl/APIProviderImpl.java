@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -7255,5 +7256,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return gatewayPolicyDeploymentMapForResponse;
+    }
+    
+    @Override
+    public void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
+            throws APIManagementException {
+        Organization org = new Organization(organization);
+        try {
+            apiPersistenceInstance.updateSoapToRestSequences(org, apiId, sequences);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while sequences to the api  " + apiId, e);
+        }        
     }
 }

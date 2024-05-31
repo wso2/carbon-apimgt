@@ -59,6 +59,8 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -330,7 +332,7 @@ public class ImportUtils {
                 }
                 importedApi = PublisherCommonUtils.updateApiAndDefinition(targetApi, importedApiDTO,
                         RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes,
-                        validationResponse);
+                        validationResponse, false);
             } else {
                 if (targetApi == null && Boolean.TRUE.equals(overwrite)) {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
@@ -348,7 +350,7 @@ public class ImportUtils {
                             && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                         // Add the validated swagger separately since the UI does the same procedure
                         PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false,
-                                organization);
+                                organization, false);
                         importedApi = apiProvider.getAPIbyUUID(importedApi.getUuid(), currentTenantDomain);
                     }
                 } else {
@@ -400,7 +402,11 @@ public class ImportUtils {
             }
             if (StringUtils
                     .equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
-                addSOAPToREST(importedApi, validationResponse.getContent(), apiProvider);
+                List<SOAPToRestSequence> sequences = getSOAPToRESTSequences(extractedFolderPath);
+                if (sequences != null && !sequences.isEmpty()) {
+                    String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                    apiProvider.updateSoapToRestSequences(tenantDomain, importedApi.getUuid(), sequences);
+                }
             }
 
             if (!isAdvertiseOnlyAPI(importedApiDTO)) {
@@ -2321,7 +2327,58 @@ public class ImportUtils {
         PublisherCommonUtils
                 .updateAPIBySettingGenerateSequencesFromSwagger(swaggerContent, importedApi, apiProvider, tenantDomain);
     }
+    
+    /**
+     * This method retrieve soap to rest sequences from the exported zip file.
+     * 
+     * @param extractedFolderPath folder path.
+     * @return List<SOAPToRestSequence> list of soap to rest sequences
+     * @throws APIManagementException
+     */
+    private static List<SOAPToRestSequence> getSOAPToRESTSequences(String extractedFolderPath)
+            throws APIManagementException {
 
+        List<SOAPToRestSequence> list = new ArrayList<SOAPToRestSequence>();
+        try {
+            String folderName = extractedFolderPath + File.separator + SOAPTOREST;
+            String[] directions = { IN, OUT };
+            if (APIUtil.checkFileExistence(folderName)) {
+                for (int i = 0; i < directions.length; i++) {
+                    String sequenceFolderName = folderName + File.separator + directions[i];
+                    if (APIUtil.checkFileExistence(sequenceFolderName)) {
+                        File sequenceFolder = new File(sequenceFolderName);
+                        File[] listOfFiles = sequenceFolder.listFiles();
+                        if (listOfFiles != null) {
+                            for (File file : listOfFiles) {
+                                if (file.isFile() && file.getName().endsWith(".xml")) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Found sequence " + file.getName() + " in " + sequenceFolder);
+                                    }
+                                    String operation = file.getName().replace(".xml", "");
+                                    // Find the last underscore in the string
+                                    int lastUnderscoreIndex = operation.lastIndexOf('_');
+                                    // Split the string from the last underscore
+                                    //String path = "/" + operation.substring(0, lastUnderscoreIndex);
+                                    String path = operation.substring(0, lastUnderscoreIndex);
+                                    String method = operation.substring(lastUnderscoreIndex + 1);
+                                    String content = FileUtils.readFileToString(file);
+                                    Direction direction = IN.equals(directions[i]) ? Direction.IN : Direction.OUT;
+                                    SOAPToRestSequence seq = new SOAPToRestSequence(method, path, content, direction);
+                                    list.add(seq);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading sequences from path: " + extractedFolderPath, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
+        }
+        return list;
+    }
+    
     public static List<SoapToRestMediationDto> retrieveSoapToRestFlowMediations(String pathToArchive, String type)
             throws APIManagementException {
 

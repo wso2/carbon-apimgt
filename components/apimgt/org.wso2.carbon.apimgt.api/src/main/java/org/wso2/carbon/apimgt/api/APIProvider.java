@@ -1908,4 +1908,14 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     int getPolicyUsageByPolicyUUIDInGatewayPolicies(String commonPolicyUUID) throws APIManagementException;
+    
+    /**
+     * Update SoapToRest Sequences for the given API.
+     * @param organization    Organization
+     * @param apiId  API ID
+     * @param sequences list of SOAPToRestSequence.
+     * @throws APIPersistenceException
+     */
+    void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
+            throws APIManagementException;
 }

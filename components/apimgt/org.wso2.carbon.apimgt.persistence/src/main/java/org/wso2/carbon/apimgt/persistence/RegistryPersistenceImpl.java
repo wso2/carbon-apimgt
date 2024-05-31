@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
@@ -3920,4 +3919,77 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
     }
 
+    public void updateSoapToRestSequences(Organization org, String apiId, List<SOAPToRestSequence> sequences)
+            throws APIPersistenceException {
+
+        boolean transactionCommitted = false;
+        boolean tenantFlowStarted = false;
+        Registry registry = null;
+        try {
+            RegistryHolder holder = getRegistry(org.getName());
+            registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
+            registry.beginTransaction();
+            GenericArtifact artifact = getAPIArtifact(apiId, registry);
+
+            for (SOAPToRestSequence soapToRestSequence : sequences) {
+
+                String apiResourceName = soapToRestSequence.getPath();
+                if (apiResourceName.startsWith("/")) {
+                    apiResourceName = apiResourceName.substring(1);
+                }
+                String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + RegistryPersistenceUtil
+                                .replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER))
+                        + RegistryConstants.PATH_SEPARATOR + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)
+                        + RegistryConstants.PATH_SEPARATOR + artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)
+                        + RegistryConstants.PATH_SEPARATOR;
+                if (soapToRestSequence.getDirection() == Direction.OUT) {
+                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "out"
+                            + RegistryConstants.PATH_SEPARATOR;
+                } else {
+                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "in"
+                            + RegistryConstants.PATH_SEPARATOR;
+                }
+                resourcePath = resourcePath + apiResourceName + "_" + soapToRestSequence.getMethod() + ".xml";
+
+                Resource regResource;
+                if (!registry.resourceExists(resourcePath)) {
+                    regResource = registry.newResource();
+                } else {
+                    regResource = registry.get(resourcePath);
+                }
+                regResource.setContent(soapToRestSequence.getContent());
+                regResource.addProperty("method", soapToRestSequence.getMethod());
+                if (regResource.getProperty("resourcePath") != null) {
+                    regResource.removeProperty("resourcePath");
+                }
+                regResource.addProperty("resourcePath", apiResourceName);
+                regResource.setMediaType("text/xml");
+                registry.put(resourcePath, regResource);
+            }
+            registry.commitTransaction();
+            transactionCommitted = true;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error from this level will mask the original exception
+                log.error("Error while rolling back the transaction for API: " + apiId, re);
+            }
+            throw new APIPersistenceException("Error while performing registry transaction operation ", e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+            try {
+                if (registry != null && !transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                log.error("Error occurred while rolling back the transaction.", ex);
+            }
+        }
+
+    }
 }
