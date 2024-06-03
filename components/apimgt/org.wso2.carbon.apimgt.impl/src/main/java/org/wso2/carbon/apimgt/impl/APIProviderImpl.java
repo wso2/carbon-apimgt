@@ -206,6 +206,7 @@ import javax.cache.Cache;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -5607,13 +5608,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
-            apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
+            InputStream content = iconResourceFile.getContent();
+            content.mark(1);
+            if (content.read() == -1) {
+                // Thumbnail deletion from publisher originally handled through the same PUT call
+                // It was decided after discussion to fix the deletion (U2 update) through the same originally used PUT
+                apiPersistenceInstance.deleteThumbnail(new Organization(organization), apiId);
+            } else {
+                // Content will be reset to re-read the stream from the beginning
+                content.reset();
+                apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
+            }
         } catch (ThumbnailPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
             } else {
                 throw new APIManagementException("Error while saving thumbnail ", e);
             }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading input stream ", e);
         }
     }
 
