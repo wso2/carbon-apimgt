@@ -331,8 +331,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 
             SubscriptionResponse subscriptionResponse = apiConsumer
-                    .updateSubscription(apiTypeWrapper, username, application, subscriptionId,
-                            currentThrottlingPolicy, requestedThrottlingPolicy);
+                    .updateSubscription(apiTypeWrapper, username, application, subscriptionId, requestedThrottlingPolicy);
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,

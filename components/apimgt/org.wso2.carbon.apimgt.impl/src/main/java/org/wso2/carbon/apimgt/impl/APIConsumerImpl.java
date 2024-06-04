@@ -120,6 +120,7 @@ import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
+import org.wso2.carbon.apimgt.impl.workflow.SubscriptionUpdateApprovalWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -1025,190 +1026,263 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId,
-                                                   Application application, String inputSubscriptionId,
-                                                   String currentThrottlingPolicy, String requestedThrottlingPolicy)
+    public SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userName, Application application,
+                                                   String subscriptionUUID, String requestedThrottlingPolicy)
             throws APIManagementException {
 
-        API api = null;
-        APIProduct product = null;
-        Identifier identifier = null;
-        int apiId;
-        String apiUUId;
-        final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
-        String state;
-        String apiContext;
-        String apiOrgId;
-
-        if (isApiProduct) {
-            product = apiTypeWrapper.getApiProduct();
-            state = product.getState();
-            apiId = product.getProductId();
-            apiUUId = product.getUuid();
-            identifier = product.getId();
-            apiContext = product.getContext();
-            apiOrgId = product.getOrganization();
-        } else {
-            api = apiTypeWrapper.getApi();
-            state = api.getStatus();
-            identifier = api.getId();
-            apiId = identifier.getId();
-            apiUUId = api.getUuid();
-            apiContext = api.getContext();
-            apiOrgId = api.getOrganization();
-        }
         checkSubscriptionAllowed(apiTypeWrapper);
-        WorkflowResponse workflowResponse = null;
-        int subscriptionId;
-        if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
-            subscriptionId = apiMgtDAO.updateSubscription(apiTypeWrapper, inputSubscriptionId,
-                    APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
 
-            boolean isTenantFlowStarted = false;
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-            }
-
-            try {
-                WorkflowExecutor updateSubscriptionWFExecutor =
-                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-
-                SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
-                workflowDTO.setStatus(WorkflowStatus.CREATED);
-                workflowDTO.setCreatedTime(System.currentTimeMillis());
-                workflowDTO.setTenantDomain(tenantDomain);
-                workflowDTO.setTenantId(tenantId);
-                workflowDTO.setExternalWorkflowReference(updateSubscriptionWFExecutor.generateUUID());
-                workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
-                workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-                workflowDTO.setCallbackUrl(updateSubscriptionWFExecutor.getCallbackURL());
-                workflowDTO.setApiName(identifier.getName());
-                workflowDTO.setApiContext(apiContext);
-                workflowDTO.setApiVersion(identifier.getVersion());
-                workflowDTO.setApiProvider(identifier.getProviderName());
-                workflowDTO.setTierName(identifier.getTier());
-                workflowDTO.setRequestedTierName(requestedThrottlingPolicy);
-                workflowDTO.setApplicationName(application.getName());
-                workflowDTO.setApplicationId(application.getId());
-                workflowDTO.setSubscriber(userId);
-
-                Tier tier = null;
-                Set<Tier> policies = Collections.emptySet();
-                if (!isApiProduct) {
-                    policies = api.getAvailableTiers();
-                } else {
-                    policies = product.getAvailableTiers();
-                }
-
-                for (Tier policy : policies) {
-                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
-                        tier = policy;
-                    }
-                }
-                boolean isMonetizationEnabled = false;
-
-                if (api != null) {
-                    isMonetizationEnabled = api.getMonetizationStatus();
-                    //check whether monetization is enabled for API and tier plan is commercial
-                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
-                    } else {
-                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
-                    }
-                } else {
-                    isMonetizationEnabled = product.getMonetizationStatus();
-                    //check whether monetization is enabled for API and tier plan is commercial
-                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, product);
-                    } else {
-                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
-                    }
-                }
-            } catch (WorkflowException e) {
-                throw new APIManagementException("Could not execute Workflow", e);
-            } finally {
-                if (isTenantFlowStarted) {
-                    endTenantFlow();
-                }
-            }
-
-            //to handle on-the-fly subscription rejection (and removal of subscription entry from the database)
-            //the response should have {"Status":"REJECTED"} in the json payload for this to work.
-            boolean subscriptionRejected = false;
-            String subscriptionStatus = null;
-            String subscriptionUUID = "";
-            SubscribedAPI updatedSubscription = getSubscriptionById(subscriptionId);
-
-            if (workflowResponse != null && workflowResponse.getJSONPayload() != null
-                    && !workflowResponse.getJSONPayload().isEmpty()) {
-                try {
-                    JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
-                    if (APIConstants.SubscriptionStatus.REJECTED.equals(wfResponseJson.get("Status"))) {
-                        subscriptionRejected = true;
-                        subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
-                    }
-                } catch (ParseException e) {
-                    log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
-                }
-            }
-
-            if (!subscriptionRejected) {
-                subscriptionStatus = updatedSubscription.getSubStatus();
-                subscriptionUUID = updatedSubscription.getUUID();
-
-                JSONObject subsLogObject = new JSONObject();
-                subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
-                subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
-                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, application.getId());
-                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, application.getName());
-                subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
-                subsLogObject.put(APIConstants.AuditLogConstants.REQUESTED_TIER, requestedThrottlingPolicy);
-
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
-                        APIConstants.AuditLogConstants.UPDATED, this.username);
-
-                if (workflowResponse == null) {
-                    workflowResponse = new GeneralWorkflowResponse();
-                }
-
-            }
-
-            // get the workflow state once the executor is executed.
-            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(subscriptionId),
-                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-            // only send the notification if approved
-            // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always
-            // approved.
-            if (wfDTO != null) {
-                if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                    SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                            apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId,
-                            application.getId(), application.getUUID(), requestedThrottlingPolicy, subscriptionStatus
-                            , identifier.getName(), identifier.getVersion());
-                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                }
-            } else {
-                SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                        apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId, application.getId(),
-                        application.getUUID(), requestedThrottlingPolicy, subscriptionStatus, identifier.getName(),
-                        identifier.getVersion());
-                APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-            }
-
-            if (log.isDebugEnabled()) {
-                String logMessage = "API Name: " + identifier.getName() + ", API Version " + identifier.getVersion()
-                        + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userId + " for app "
-                        + application.getName();
-                log.debug(logMessage);
-            }
-
-            return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
-        } else {
-            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs/API Products in the state: " +
-                    state);
+        String state = apiTypeWrapper.getLifecycleState();
+        if (!(APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state))) {
+            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs/API Products in the state: " + state);
         }
+
+        int subscriptionId = apiMgtDAO.updateSubscription(apiTypeWrapper, subscriptionUUID,
+                APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
+        boolean isTenantFlowStarted = initiateTenantFlow(tenantDomain);
+
+        try {
+            WorkflowExecutor updateSubscriptionWFExecutor =
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+            SubscriptionWorkflowDTO workflowDTO = createSubscriptionUpdateWorkflowDTO(application, apiTypeWrapper,
+                    subscriptionId, requestedThrottlingPolicy, userName, updateSubscriptionWFExecutor);
+            WorkflowResponse workflowResponse = executeSubscriptionUpdateWorkflow(apiTypeWrapper, workflowDTO, userName,
+                    updateSubscriptionWFExecutor);
+
+            SubscribedAPI updatedSubscription = getSubscriptionByUUID(subscriptionUUID);
+            String subscriptionStatus =  getSubscriptionStatus(workflowResponse, application, userName,
+                    requestedThrottlingPolicy, updatedSubscription.getSubStatus(), apiTypeWrapper);
+            sendSubscriptionUpdateNotification(apiTypeWrapper, requestedThrottlingPolicy, application,
+                    updatedSubscription, subscriptionStatus);
+            return createSubscriptionUpdateResponse(workflowResponse, subscriptionUUID, subscriptionStatus);
+        } catch (WorkflowException e) {
+            String errorMessage = "Error while while getting WorkflowExecutor for Subscription update";
+            handleException(errorMessage, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Initiates the tenant flow for the specified tenant domain.
+     *
+     * @param tenantDomain The tenant domain for which to initiate the flow.
+     * @return true if the tenant flow was initiated, false otherwise.
+     */
+    private boolean initiateTenantFlow(String tenantDomain) {
+
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            startTenantFlowForTenantDomain(tenantDomain);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Creates a SubscriptionWorkflowDTO for a subscription update workflow.
+     *
+     * @param application The application associated with the subscription.
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @param subscriptionId The ID of the subscription.
+     * @param requestedThrottlingPolicy The requested throttling policy for the subscription.
+     * @param userName The username of the executing user.
+     * @param updateSubscriptionWFExecutor The workflow executor for updating the subscription.
+     * @return A populated SubscriptionWorkflowDTO object.
+     */
+    private SubscriptionWorkflowDTO createSubscriptionUpdateWorkflowDTO(Application application, ApiTypeWrapper apiTypeWrapper,
+                                                      int subscriptionId, String requestedThrottlingPolicy,
+                                                      String userName, WorkflowExecutor updateSubscriptionWFExecutor) {
+
+        SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+        workflowDTO.setStatus(WorkflowStatus.CREATED);
+        workflowDTO.setCreatedTime(System.currentTimeMillis());
+        workflowDTO.setTenantDomain(tenantDomain);
+        workflowDTO.setTenantId(tenantId);
+        workflowDTO.setExternalWorkflowReference(updateSubscriptionWFExecutor.generateUUID());
+        workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
+        workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+        workflowDTO.setCallbackUrl(updateSubscriptionWFExecutor.getCallbackURL());
+        workflowDTO.setApiName(apiTypeWrapper.getId().getName());
+        workflowDTO.setApiContext(apiTypeWrapper.getContext());
+        workflowDTO.setApiVersion(apiTypeWrapper.getId().getVersion());
+        workflowDTO.setApiProvider(apiTypeWrapper.getId().getProviderName());
+        workflowDTO.setTierName(apiTypeWrapper.getId().getTier());
+        workflowDTO.setRequestedTierName(requestedThrottlingPolicy);
+        workflowDTO.setApplicationName(application.getName());
+        workflowDTO.setApplicationId(application.getId());
+        workflowDTO.setSubscriber(userName);
+        return workflowDTO;
+    }
+
+    /**
+     * Executes the subscription update workflow.
+     *
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @param workflowDTO The SubscriptionWorkflowDTO object containing workflow details.
+     * @param userName The username of the executing user.
+     * @param updateSubscriptionWFExecutor The workflow executor for updating the subscription.
+     * @return A WorkflowResponse object representing the result of the workflow execution.
+     * @throws APIManagementException If an error occurs during workflow execution.
+     */
+    private WorkflowResponse executeSubscriptionUpdateWorkflow(ApiTypeWrapper apiTypeWrapper, SubscriptionWorkflowDTO workflowDTO,
+                                             String userName, WorkflowExecutor updateSubscriptionWFExecutor)
+            throws APIManagementException {
+
+        Set<Tier> policies = apiTypeWrapper.isAPIProduct() ? apiTypeWrapper.getApiProduct().getAvailableTiers() :
+                apiTypeWrapper.getApi().getAvailableTiers();
+
+        Tier tier = null;
+        for (Tier policy : policies) {
+            if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
+                tier = policy;
+                break;
+            }
+        }
+
+        boolean isMonetizationEnabled = apiTypeWrapper.isAPIProduct() ?
+                apiTypeWrapper.getApiProduct().getMonetizationStatus() :
+                apiTypeWrapper.getApi().getMonetizationStatus();
+        boolean isUserHasAdminPermission = APIUtil.hasPermission(userName, APIConstants.Permissions.APIM_ADMIN);
+
+        try {
+            if (isMonetizationEnabled && tier != null && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                return apiTypeWrapper.isAPIProduct() ? updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO,
+                        apiTypeWrapper.getApiProduct()) :
+                        updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, apiTypeWrapper.getApi());
+            } else {
+                WorkflowResponse workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
+                if (isUserHasAdminPermission && updateSubscriptionWFExecutor instanceof SubscriptionUpdateApprovalWorkflowExecutor) {
+                    workflowDTO.setStatus(WorkflowStatus.APPROVED);
+                    workflowResponse = updateSubscriptionWFExecutor.complete(workflowDTO);
+                }
+                return workflowResponse;
+            }
+        } catch (WorkflowException e) {
+            throw new APIManagementException("Could not execute the Workflow", e);
+        }
+    }
+
+    /**
+     * Determines the subscription status based on the workflow response.
+     *
+     * @param workflowResponse The response from the workflow execution.
+     * @param application The application associated with the subscription.
+     * @param userName The username of the executing user.
+     * @param requestedThrottlingPolicy The requested throttling policy for the subscription.
+     * @param currentSubscriptionStatus The current status of the subscription.
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @return The determined subscription status.
+     */
+    private String getSubscriptionStatus(WorkflowResponse workflowResponse, Application application, String userName,
+                                         String requestedThrottlingPolicy, String currentSubscriptionStatus,
+                                         ApiTypeWrapper apiTypeWrapper) {
+
+        // To handle on-the-fly subscription rejection (and removal of subscription entry from the database)
+        // the response should have {"Status":"REJECTED"} in the json payload for this to work.
+        boolean subscriptionRejected = false;
+        String subscriptionStatus = null;
+
+        if (workflowResponse != null && workflowResponse.getJSONPayload() != null
+                && !workflowResponse.getJSONPayload().isEmpty()) {
+            try {
+                JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
+                if (APIConstants.SubscriptionStatus.REJECTED.equals(wfResponseJson.get("Status"))) {
+                    subscriptionRejected = true;
+                    subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                }
+            } catch (ParseException e) {
+                log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
+            }
+        }
+
+        if (!subscriptionRejected) {
+            subscriptionStatus = currentSubscriptionStatus;
+            logSubscriptionUpdate(apiTypeWrapper, application, userName, requestedThrottlingPolicy, subscriptionStatus);
+        }
+        return subscriptionStatus;
+    }
+
+    /**
+     * Logs the subscription update details.
+     *
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @param application The application associated with the subscription.
+     * @param userName The username of the executing user.
+     * @param requestedThrottlingPolicy The requested throttling policy for the subscription.
+     * @param subscriptionStatus The status of the subscription.
+     */
+    private void logSubscriptionUpdate(ApiTypeWrapper apiTypeWrapper, Application application, String userName,
+                                       String requestedThrottlingPolicy, String subscriptionStatus) {
+
+        JSONObject subsLogObject = new JSONObject();
+        subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, apiTypeWrapper.getId().getName());
+        subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, apiTypeWrapper.getId().getProviderName());
+        subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, application.getId());
+        subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, application.getName());
+        subsLogObject.put(APIConstants.AuditLogConstants.TIER, apiTypeWrapper.getId().getTier());
+        subsLogObject.put(APIConstants.AuditLogConstants.REQUESTED_TIER, requestedThrottlingPolicy);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                APIConstants.AuditLogConstants.UPDATED, this.username);
+
+        if (log.isDebugEnabled()) {
+            String logMessage = "API Name: " + apiTypeWrapper.getId().getName() + ", API Version " +
+                    apiTypeWrapper.getId().getVersion() + ", Subscription Status: " + subscriptionStatus
+                    + " subscribe by " + userName + " for app " + application.getName();
+            log.debug(logMessage);
+        }
+    }
+
+    /**
+     * Sends a notification for the subscription update.
+     *
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @param requestedThrottlingPolicy The requested throttling policy for the subscription.
+     * @param application The application associated with the subscription.
+     * @param updatedSubscription The updated subscription details.
+     * @param subscriptionStatus The status of the subscription.
+     * @throws APIManagementException If an error occurs while sending the notification.
+     */
+    private void sendSubscriptionUpdateNotification(ApiTypeWrapper apiTypeWrapper, String requestedThrottlingPolicy,
+                                                    Application application, SubscribedAPI updatedSubscription,
+                                                    String subscriptionStatus) throws APIManagementException {
+
+        // Get the workflow state once the executor is executed.
+        WorkflowDTO wfDTO =
+                apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(updatedSubscription.getSubscriptionId()),
+                        WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+
+        // Only send the notification if approved wfDTO is null when simple wf executor is used because wf state is
+        // not stored in the db and is always approved.
+        if (wfDTO == null || WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+            SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
+                    apiTypeWrapper.getOrganization(), updatedSubscription.getSubscriptionId(), updatedSubscription.getUUID(),
+                    apiTypeWrapper.getApiId(), apiTypeWrapper.getUuid(), application.getId(), application.getUUID(),
+                    requestedThrottlingPolicy, subscriptionStatus, apiTypeWrapper.getId().getName(),
+                    apiTypeWrapper.getId().getVersion());
+            APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+        }
+    }
+
+    /**
+     * Creates a SubscriptionResponse based on the provided parameters.
+     *
+     * @param workflowResponse The WorkflowResponse to include in the SubscriptionResponse.
+     * @param subscriptionUUID The UUID of the subscription.
+     * @param subscriptionStatus The status of the subscription.
+     * @return A SubscriptionResponse object.
+     */
+    private SubscriptionResponse createSubscriptionUpdateResponse(WorkflowResponse workflowResponse, String subscriptionUUID,
+                                                            String subscriptionStatus) {
+
+        if (workflowResponse == null) {
+            workflowResponse = new GeneralWorkflowResponse();
+        }
+        return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
     }
 
     /**
