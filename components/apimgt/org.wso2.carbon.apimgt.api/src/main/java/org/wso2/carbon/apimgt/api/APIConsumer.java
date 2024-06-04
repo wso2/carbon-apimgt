@@ -216,8 +216,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to add subscription details to database
      */
     SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application applicationId,
-                                            String subscriptionId, String currentThrottlingPolicy,
-                                            String requestedThrottlingPolicy) throws APIManagementException;
+                                            String subscriptionId, String requestedThrottlingPolicy) throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application
