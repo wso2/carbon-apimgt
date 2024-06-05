@@ -5319,6 +5319,7 @@ components:
           enum:
             - DOC
             - API
+            - APIProduct
         transportType:
           type: string
           description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
