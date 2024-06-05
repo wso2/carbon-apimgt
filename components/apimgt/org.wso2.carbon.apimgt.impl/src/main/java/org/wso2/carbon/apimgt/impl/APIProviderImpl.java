@@ -3678,6 +3678,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public List<BlockConditionsDTO> getLightweightBlockConditions(String conditionType, String conditionValue)
+            throws APIManagementException {
+        return apiMgtDAO.getBlockConditionsByConditionTypeAndValue(conditionType, conditionValue, tenantDomain);
+    }
+
+    @Override
     public boolean updateBlockCondition(int conditionId, String state) throws APIManagementException {
         boolean updateState = apiMgtDAO.updateBlockConditionState(conditionId, state);
         BlockConditionsDTO blockConditionsDTO = apiMgtDAO.getBlockCondition(conditionId);

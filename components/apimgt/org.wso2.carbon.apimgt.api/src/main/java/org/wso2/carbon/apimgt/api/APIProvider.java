@@ -691,6 +691,17 @@ public interface APIProvider extends APIManager {
     List<BlockConditionsDTO> getBlockConditions() throws APIManagementException;
 
     /**
+     * Get a lightweight version of list of block Conditions.
+     *
+     * @param conditionType  type of the condition
+     * @param conditionValue condition value
+     * @return list of block conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditionsDTO> getLightweightBlockConditions(String conditionType, String conditionValue)
+            throws APIManagementException;
+
+    /**
      *
      * @return Retrieve a block Condition
      * @throws APIManagementException
