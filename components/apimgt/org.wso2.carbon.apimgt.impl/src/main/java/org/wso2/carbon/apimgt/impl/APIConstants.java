@@ -1968,6 +1968,8 @@ public final class APIConstants {
     public static final String BLOCK_CONDITION_ENDING_IP = "endingIp";
     public static final String BLOCK_CONDITION_INVERT = "invert";
     public static final String BLOCK_CONDITION_IP_TYPE = "type";
+    public static final String BLOCK_CONDITION_TYPE = "conditionType";
+    public static final String BLOCK_CONDITION_VALUE = "conditionValue";
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";
     public static final String EVENT_TYPE = "eventType";

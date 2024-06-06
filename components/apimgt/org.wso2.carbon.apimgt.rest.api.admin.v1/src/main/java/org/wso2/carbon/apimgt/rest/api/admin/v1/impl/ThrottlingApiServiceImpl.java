@@ -1397,18 +1397,26 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return All matched block conditions to the given request
      */
     @Override
-    public Response throttlingDenyPoliciesGet(String accept, MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            List<BlockConditionsDTO> blockConditions = apiProvider.getBlockConditions();
-            BlockingConditionListDTO listDTO =
-                    BlockingConditionMappingUtil.fromBlockConditionListToListDTO(blockConditions);
-            return Response.ok().entity(listDTO).build();
-        } catch (APIManagementException | ParseException e) {
-            String errorMessage = "Error while retrieving Block Conditions";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+    public Response throttlingDenyPoliciesGet(String accept, String query, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<BlockConditionsDTO> blockConditions = new ArrayList<>();
+        // If conditionType and conditionValue are provided, retrieve the block conditions list for the given values.
+        if (StringUtils.isNotEmpty(query)) {
+            Map<String, String> parametersMap = BlockingConditionMappingUtil.getQueryParams(query);
+            if (parametersMap != null && !parametersMap.isEmpty()) {
+                blockConditions = apiProvider.getLightweightBlockConditions(
+                        parametersMap.get(APIConstants.BLOCK_CONDITION_TYPE),
+                        parametersMap.get(APIConstants.BLOCK_CONDITION_VALUE));
+            } else {
+                throw new APIManagementException(ExceptionCodes.BLOCK_CONDITION_RETRIEVE_PARAMS_EXCEPTION);
+            }
+        } else {
+            blockConditions = apiProvider.getBlockConditions();
         }
-        return null;
+        BlockingConditionListDTO listDTO = BlockingConditionMappingUtil.fromBlockConditionListToListDTO(
+                blockConditions);
+        return Response.ok().entity(listDTO).build();
     }
 
     /**
@@ -1465,7 +1473,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                         + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (URISyntaxException | ParseException e) {
+        } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving Blocking Condition resource location: Condition type: "
                     + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1499,9 +1507,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 String errorMessage = "Error while retrieving Block Condition. Id : " + conditionId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (ParseException e) {
-            String errorMessage = "Error while retrieving Blocking Conditions";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -1568,7 +1573,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DENY_POLICIES, new Gson().toJson(dto),
                     APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().entity(dto).build();
-        } catch (APIManagementException | ParseException e) {
+        } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId, e, log);
             } else {

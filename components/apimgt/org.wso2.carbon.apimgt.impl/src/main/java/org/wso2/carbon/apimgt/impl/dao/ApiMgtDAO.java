@@ -13736,13 +13736,7 @@ public class ApiMgtDAO {
             selectPreparedStatement.setString(1, tenantDomain);
             resultSet = selectPreparedStatement.executeQuery();
             while (resultSet.next()) {
-                BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
-                blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
-                blockConditionsDTO.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
-                blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
-                blockConditionsDTO.setUUID(resultSet.getString("UUID"));
-                blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
+                BlockConditionsDTO blockConditionsDTO = populateBlockConditionsDataWithRS(resultSet);
                 blockConditionsDTOList.add(blockConditionsDTO);
             }
         } catch (SQLException e) {
@@ -13750,10 +13744,52 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to rollback getting Block conditions ", ex);
+                    throw new APIManagementException("Failed to rollback getting Block conditions.",
+                            ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
                 }
             }
-            handleException("Failed to get Block conditions", e);
+            throw new APIManagementException("Failed to retrieve all block conditions for the tenant " + tenantDomain,
+                    ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return blockConditionsDTOList;
+    }
+
+    /**
+     * Retrieves block conditions based on the specified condition type and condition value.
+     *
+     * @param conditionType     type of the condition
+     * @param conditionValue    condition value
+     * @param tenantDomain      tenant domain
+     * @return list of block conditions
+     * @throws APIManagementException
+     */
+    public List<BlockConditionsDTO> getBlockConditionsByConditionTypeAndValue(String conditionType,
+            String conditionValue, String tenantDomain) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        List<BlockConditionsDTO> blockConditionsDTOList = new ArrayList<>();
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            selectPreparedStatement = connection.prepareStatement(query);
+            String conditionTypeUpper = conditionType != null ? conditionType.toUpperCase() : null;
+            selectPreparedStatement.setString(1, conditionTypeUpper);
+            selectPreparedStatement.setString(2, conditionTypeUpper);
+            selectPreparedStatement.setString(3, conditionValue);
+            selectPreparedStatement.setString(4, conditionValue);
+            selectPreparedStatement.setString(5, tenantDomain);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                BlockConditionsDTO blockConditionsDTO = populateBlockConditionsDataWithRS(resultSet);
+                blockConditionsDTOList.add(blockConditionsDTO);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Failed to get Block conditions by condition type: " + conditionType + " and condition value: "
+                            + conditionValue, ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
@@ -21693,5 +21729,17 @@ public class ApiMgtDAO {
             handleException("Error while inserting consumer key event token revocation rule to AM db."
                     + e.getMessage(), e);
         }
+    }
+
+    private BlockConditionsDTO populateBlockConditionsDataWithRS(ResultSet resultSet) throws SQLException {
+
+        BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+        blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+        blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
+        blockConditionsDTO.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
+        blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
+        blockConditionsDTO.setUUID(resultSet.getString("UUID"));
+        blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
+        return blockConditionsDTO;
     }
 }
