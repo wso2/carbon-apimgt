@@ -1031,7 +1031,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
 
         String state = apiTypeWrapper.getLifecycleState();
-        if (!(APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state))) {
+        if ((APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state))) {
             throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs/API Products in the state: " + state);
         }
 
