@@ -1108,7 +1108,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         for (Tier policy : policies) {
             if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
                 tier = policy;
-                break;// Place a debug point and check thi place
+                break;
             }
         }
 
