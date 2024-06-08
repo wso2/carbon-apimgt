@@ -1044,9 +1044,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             WorkflowExecutor updateSubscriptionWFExecutor =
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-            SubscriptionWorkflowDTO workflowDTO = createWorkflowDTO(application, apiTypeWrapper, subscriptionId,
-                    requestedThrottlingPolicy, userName, updateSubscriptionWFExecutor);
-            WorkflowResponse workflowResponse = executeWorkflow(apiTypeWrapper, workflowDTO, userName,
+            SubscriptionWorkflowDTO workflowDTO = createSubscriptionUpdateWorkflowDTO(application, apiTypeWrapper,
+                    subscriptionId, requestedThrottlingPolicy, userName, updateSubscriptionWFExecutor);
+            WorkflowResponse workflowResponse = executeSubscriptionUpdateWorkflow(apiTypeWrapper, workflowDTO, userName,
                     updateSubscriptionWFExecutor);
 
             SubscribedAPI updatedSubscription = getSubscriptionByUUID(subscriptionUUID);
@@ -1054,7 +1054,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     requestedThrottlingPolicy, updatedSubscription.getSubStatus(), apiTypeWrapper);
             sendSubscriptionUpdateNotification(apiTypeWrapper, requestedThrottlingPolicy, application,
                     updatedSubscription, subscriptionStatus);
-            return createSubscriptionResponse(workflowResponse, subscriptionUUID, subscriptionStatus);
+            return createSubscriptionUpdateResponse(workflowResponse, subscriptionUUID, subscriptionStatus);
         } catch (WorkflowException e) {
             String errorMessage = "Error while while getting WorkflowExecutor for Subscription update";
             handleException(errorMessage, e);
@@ -1066,7 +1066,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return null;
     }
 
+    /**
+     * Initiates the tenant flow for the specified tenant domain.
+     *
+     * @param tenantDomain The tenant domain for which to initiate the flow.
+     * @return true if the tenant flow was initiated, false otherwise.
+     */
     private boolean initiateTenantFlow(String tenantDomain) {
+
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             startTenantFlowForTenantDomain(tenantDomain);
             return true;
@@ -1074,9 +1081,21 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return false;
     }
 
-    private SubscriptionWorkflowDTO createWorkflowDTO(Application application, ApiTypeWrapper apiTypeWrapper,
+    /**
+     * Creates a SubscriptionWorkflowDTO for a subscription update workflow.
+     *
+     * @param application The application associated with the subscription.
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @param subscriptionId The ID of the subscription.
+     * @param requestedThrottlingPolicy The requested throttling policy for the subscription.
+     * @param userName The username of the executing user.
+     * @param updateSubscriptionWFExecutor The workflow executor for updating the subscription.
+     * @return A populated SubscriptionWorkflowDTO object.
+     */
+    private SubscriptionWorkflowDTO createSubscriptionUpdateWorkflowDTO(Application application, ApiTypeWrapper apiTypeWrapper,
                                                       int subscriptionId, String requestedThrottlingPolicy,
                                                       String userName, WorkflowExecutor updateSubscriptionWFExecutor) {
+
         SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
         workflowDTO.setStatus(WorkflowStatus.CREATED);
         workflowDTO.setCreatedTime(System.currentTimeMillis());
@@ -1098,9 +1117,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return workflowDTO;
     }
 
-    private WorkflowResponse executeWorkflow(ApiTypeWrapper apiTypeWrapper, SubscriptionWorkflowDTO workflowDTO,
+    /**
+     * Executes the subscription update workflow.
+     *
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @param workflowDTO The SubscriptionWorkflowDTO object containing workflow details.
+     * @param userName The username of the executing user.
+     * @param updateSubscriptionWFExecutor The workflow executor for updating the subscription.
+     * @return A WorkflowResponse object representing the result of the workflow execution.
+     * @throws APIManagementException If an error occurs during workflow execution.
+     */
+    private WorkflowResponse executeSubscriptionUpdateWorkflow(ApiTypeWrapper apiTypeWrapper, SubscriptionWorkflowDTO workflowDTO,
                                              String userName, WorkflowExecutor updateSubscriptionWFExecutor)
             throws APIManagementException {
+
         Set<Tier> policies = apiTypeWrapper.isAPIProduct() ? apiTypeWrapper.getApiProduct().getAvailableTiers() :
                 apiTypeWrapper.getApi().getAvailableTiers();
 
@@ -1131,22 +1161,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 return workflowResponse;
             }
         } catch (WorkflowException e) {
-            throw new APIManagementException("Could not execute Workflow", e);
+            throw new APIManagementException("Could not execute the Workflow", e);
         }
     }
 
-    private SubscriptionResponse createSubscriptionResponse(WorkflowResponse workflowResponse, String subscriptionUUID,
-                                                            String subscriptionStatus) {
-
-        if (workflowResponse == null) {
-            workflowResponse = new GeneralWorkflowResponse();
-        }
-        return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
-    }
-
+    /**
+     * Determines the subscription status based on the workflow response.
+     *
+     * @param workflowResponse The response from the workflow execution.
+     * @param application The application associated with the subscription.
+     * @param userName The username of the executing user.
+     * @param requestedThrottlingPolicy The requested throttling policy for the subscription.
+     * @param currentSubscriptionStatus The current status of the subscription.
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @return The determined subscription status.
+     */
     private String getSubscriptionStatus(WorkflowResponse workflowResponse, Application application, String userName,
                                          String requestedThrottlingPolicy, String currentSubscriptionStatus,
                                          ApiTypeWrapper apiTypeWrapper) {
+
         // To handle on-the-fly subscription rejection (and removal of subscription entry from the database)
         // the response should have {"Status":"REJECTED"} in the json payload for this to work.
         boolean subscriptionRejected = false;
@@ -1172,8 +1205,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscriptionStatus;
     }
 
+    /**
+     * Logs the subscription update details.
+     *
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @param application The application associated with the subscription.
+     * @param userName The username of the executing user.
+     * @param requestedThrottlingPolicy The requested throttling policy for the subscription.
+     * @param subscriptionStatus The status of the subscription.
+     */
     private void logSubscriptionUpdate(ApiTypeWrapper apiTypeWrapper, Application application, String userName,
                                        String requestedThrottlingPolicy, String subscriptionStatus) {
+
         JSONObject subsLogObject = new JSONObject();
         subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, apiTypeWrapper.getId().getName());
         subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, apiTypeWrapper.getId().getProviderName());
@@ -1193,6 +1236,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
+    /**
+     * Sends a notification for the subscription update.
+     *
+     * @param apiTypeWrapper The API details wrapped in an ApiTypeWrapper object.
+     * @param requestedThrottlingPolicy The requested throttling policy for the subscription.
+     * @param application The application associated with the subscription.
+     * @param updatedSubscription The updated subscription details.
+     * @param subscriptionStatus The status of the subscription.
+     * @throws APIManagementException If an error occurs while sending the notification.
+     */
     private void sendSubscriptionUpdateNotification(ApiTypeWrapper apiTypeWrapper, String requestedThrottlingPolicy,
                                                     Application application, SubscribedAPI updatedSubscription,
                                                     String subscriptionStatus) throws APIManagementException {
@@ -1213,6 +1266,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     apiTypeWrapper.getId().getVersion());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         }
+    }
+
+    /**
+     * Creates a SubscriptionResponse based on the provided parameters.
+     *
+     * @param workflowResponse The WorkflowResponse to include in the SubscriptionResponse.
+     * @param subscriptionUUID The UUID of the subscription.
+     * @param subscriptionStatus The status of the subscription.
+     * @return A SubscriptionResponse object.
+     */
+    private SubscriptionResponse createSubscriptionUpdateResponse(WorkflowResponse workflowResponse, String subscriptionUUID,
+                                                            String subscriptionStatus) {
+
+        if (workflowResponse == null) {
+            workflowResponse = new GeneralWorkflowResponse();
+        }
+        return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
     }
 
     /**
