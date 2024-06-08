@@ -1050,15 +1050,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     updateSubscriptionWFExecutor);
 
             SubscribedAPI updatedSubscription = getSubscriptionByUUID(subscriptionUUID);
-
             String subscriptionStatus =  getSubscriptionStatus(workflowResponse, application, userName,
                     requestedThrottlingPolicy, updatedSubscription.getSubStatus(), apiTypeWrapper);
-
-            sendSubscriptionUpdateNotification(apiTypeWrapper, requestedThrottlingPolicy, application, updatedSubscription, subscriptionStatus);
-
+            sendSubscriptionUpdateNotification(apiTypeWrapper, requestedThrottlingPolicy, application,
+                    updatedSubscription, subscriptionStatus);
             return createSubscriptionResponse(workflowResponse, subscriptionUUID, subscriptionStatus);
         } catch (WorkflowException e) {
-            String errorMessage = "Error while executing Subscription update workflow for subscriptionId: " + subscriptionId;
+            String errorMessage = "Error while while getting WorkflowExecutor for Subscription update";
             handleException(errorMessage, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -1188,10 +1186,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 APIConstants.AuditLogConstants.UPDATED, this.username);
 
         if (log.isDebugEnabled()) {
-            String logMessage =
-                    "API Name: " + apiTypeWrapper.getId().getName() + ", API Version " + apiTypeWrapper.getId().getVersion()
-                    + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userName + " for app "
-                    + application.getName();
+            String logMessage = "API Name: " + apiTypeWrapper.getId().getName() + ", API Version " +
+                    apiTypeWrapper.getId().getVersion() + ", Subscription Status: " + subscriptionStatus
+                    + " subscribe by " + userName + " for app " + application.getName();
             log.debug(logMessage);
         }
     }
