@@ -2012,9 +2012,9 @@ public abstract class AbstractAPIManager implements APIManager {
             allowedTierList.add(t.getName());
         }
         if (!isTierAllowed) {
-            String msg =
-                    "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
-                            + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
+            String msg = "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product " +
+                            apiTypeWrapper.getName() + ". Only " + Arrays.toString(allowedTierList.toArray()) +
+                            " Tiers are allowed.";
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
                     apiTypeWrapper.getTier(), username));
         }
