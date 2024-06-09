@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
@@ -533,4 +534,16 @@ public interface APIManager {
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end)
             throws APIManagementException;
+
+    /**
+     * Update Existing Subscription
+     *
+     * @param apiTypeWrapper    Identifier
+     * @param userId        id of the user
+     * @param applicationId Application Id
+     * @return SubscriptionResponse subscription response object
+     * @throws APIManagementException if failed to add subscription details to database
+     */
+    SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application applicationId,
+                                            String subscriptionId, String requestedThrottlingPolicy) throws APIManagementException;
 }
