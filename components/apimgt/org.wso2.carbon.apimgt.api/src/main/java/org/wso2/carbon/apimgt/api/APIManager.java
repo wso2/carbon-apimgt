@@ -536,13 +536,15 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
-     * Update Existing Subscription
+     * Updates the subscription for a user with the specified details.
      *
-     * @param apiTypeWrapper    Identifier
-     * @param userId        id of the user
-     * @param applicationId Application Id
-     * @return SubscriptionResponse subscription response object
-     * @throws APIManagementException if failed to add subscription details to database
+     * @param apiTypeWrapper            The wrapper containing API details.
+     * @param userId                    The ID of the user whose subscription is being updated.
+     * @param applicationId             The ID of the application associated with the subscription.
+     * @param subscriptionId            The ID of the subscription to be updated.
+     * @param requestedThrottlingPolicy The new throttling policy requested for the subscription.
+     * @return SubscriptionResponse     A SubscriptionResponse object containing the details of the updated subscription.
+     * @throws APIManagementException If an error occurs while updating the subscription.
      */
     SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application applicationId,
                                             String subscriptionId, String requestedThrottlingPolicy) throws APIManagementException;

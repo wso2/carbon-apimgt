@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.MonetizationException;
@@ -263,8 +262,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             SubscriptionResponse subscriptionResponse = apiProvider.updateSubscription(apiTypeWrapper, username,
                     currentSubscription.getApplication(), subscriptionId, businessPlan);
-            SubscribedAPI updatedSubscription = apiProvider
-                    .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
+            SubscribedAPI updatedSubscription = apiProvider.getSubscriptionByUUID(subscriptionResponse.
+                    getSubscriptionUUID());
             SubscriptionDTO updatedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscription);
 
             return Response.ok().entity(updatedSubscriptionDTO).build();

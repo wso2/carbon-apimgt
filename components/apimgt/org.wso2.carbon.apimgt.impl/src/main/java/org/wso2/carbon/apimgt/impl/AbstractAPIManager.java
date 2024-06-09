@@ -1690,7 +1690,7 @@ public abstract class AbstractAPIManager implements APIManager {
                                                    String subscriptionUUID, String requestedThrottlingPolicy)
             throws APIManagementException {
 
-        checkSubscriptionAllowed(apiTypeWrapper, userName);
+        checkSubscriptionAllowed(apiTypeWrapper);
 
         String state = apiTypeWrapper.getLifecycleState();
         if (!(APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state))) {
@@ -1949,7 +1949,7 @@ public abstract class AbstractAPIManager implements APIManager {
      *                                subscription, this will throw an instance of APIMgtAuthorizationFailedException
      *                                with the reason as the message
      */
-    protected void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper, String userName) throws APIManagementException {
+    protected void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
 
         Set<Tier> tiers;
         String subscriptionAvailability;
@@ -1962,61 +1962,78 @@ public abstract class AbstractAPIManager implements APIManager {
             subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();
         } else {
             API api = apiTypeWrapper.getApi();
-            String apiSecurity = api.getApiSecurity();
-            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
-                    !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-                String msg = "Subscription is not allowed for API " + apiTypeWrapper.toString() + ". To access the " +
-                        "API, "
-                        + "please use the client certificate";
-                throw new APIMgtAuthorizationFailedException(msg);
-            }
+            validateApiSecurity(api, apiTypeWrapper.getName());
             tiers = api.getAvailableTiers();
             subscriptionAvailability = api.getSubscriptionAvailability();
             subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
         }
 
         String apiOrganization = apiTypeWrapper.getOrganization();
+        validateTenantBasedSubscription(apiOrganization, subscriptionAvailability, subscriptionAllowedTenants);
+        validateTier(tiers, apiTypeWrapper.getTier(), apiTypeWrapper.getName());
+    }
 
-        //Tenant based validation for subscription
+    private void validateApiSecurity(API api, String apiName) throws APIMgtAuthorizationFailedException {
+
+        String apiSecurity = api.getApiSecurity();
+        if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+            String msg = "Subscription is not allowed for API " + apiName + ". To access the API, please use the " +
+                    "client certificate";
+            throw new APIMgtAuthorizationFailedException(msg);
+        }
+    }
+
+    private void validateTenantBasedSubscription(String apiOrganization, String subscriptionAvailability,
+                                                 String subscriptionAllowedTenants) throws APIMgtAuthorizationFailedException {
+
         boolean subscriptionAllowed = false;
+
         if (!organization.equals(apiOrganization)) {
             if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
                 subscriptionAllowed = true;
             } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
-                if (subscriptionAllowedTenants != null) {
-                    String[] allowedTenants = subscriptionAllowedTenants.split(",");
-                    for (String tenant : allowedTenants) {
-                        if (tenant != null && tenantDomain.equals(tenant.trim())) {
-                            subscriptionAllowed = true;
-                            break;
-                        }
-                    }
-                }
+                subscriptionAllowed = isTenantAllowed(subscriptionAllowedTenants);
             }
         } else {
             subscriptionAllowed = true;
         }
-        if (!subscriptionAllowed) {
-            throw new APIMgtAuthorizationFailedException("Subscription is not allowed for " + userName);
-        }
 
-        //check whether the specified tier is within the allowed tiers for the API
-        Iterator<Tier> iterator = tiers.iterator();
+        if (!subscriptionAllowed) {
+            throw new APIMgtAuthorizationFailedException("Subscription is not allowed for " + username);
+        }
+    }
+
+    private boolean isTenantAllowed(String subscriptionAllowedTenants) {
+
+        if (subscriptionAllowedTenants != null) {
+            String[] allowedTenants = subscriptionAllowedTenants.split(",");
+            for (String tenant : allowedTenants) {
+                if (tenant != null && tenantDomain.equals(tenant.trim())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void validateTier(Set<Tier> tiers, String tierName, String apiName) throws APIManagementException {
+
         boolean isTierAllowed = false;
         List<String> allowedTierList = new ArrayList<>();
-        while (iterator.hasNext()) {
-            Tier t = iterator.next();
-            if (t.getName() != null && (t.getName()).equals(apiTypeWrapper.getTier())) {
+
+        for (Tier tier : tiers) {
+            if (tier.getName() != null && tier.getName().equals(tierName)) {
                 isTierAllowed = true;
             }
-            allowedTierList.add(t.getName());
+            allowedTierList.add(tier.getName());
         }
+
         if (!isTierAllowed) {
-            String msg = "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product " +
-                            apiTypeWrapper.getName() + ". Only " + Arrays.toString(allowedTierList.toArray()) +
-                            " Tiers are allowed.";
+            String msg = "Tier " + tierName + " is not allowed for API/API Product " + apiName + ". Only " +
+                    allowedTierList + " Tiers are allowed.";
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
-                    apiTypeWrapper.getTier(), username));
+                    tierName, username));
         }
     }
 
