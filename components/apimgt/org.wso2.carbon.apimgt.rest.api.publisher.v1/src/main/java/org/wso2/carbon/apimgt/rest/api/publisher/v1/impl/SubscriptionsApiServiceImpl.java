@@ -241,6 +241,16 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         return Response.ok().entity(subscriberInfoDTO).build();
     }
 
+    /**
+     * Updates the business plan for a given subscription.
+     *
+     * @param subscriptionId the ID of the subscription to be changed
+     * @param businessPlan   the new business plan to be applied to the subscription
+     * @param ifMatch        the ETag value
+     * @param messageContext the message context for the current request
+     * @return a Response indicating the result of the operation
+     * @throws APIManagementException if an error occurs while changing the business plan
+     */
     @Override
     public Response changeSubscriptionBusinessPlan(String subscriptionId, String businessPlan, String ifMatch,
                                                    MessageContext messageContext) throws APIManagementException {
@@ -248,7 +258,12 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
+
         try {
+            if (currentSubscription == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            }
+
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Set<String> invalidStatuses = new HashSet<>(Arrays.asList("BLOCKED", "ON_HOLD", "REJECTED"));
             if (invalidStatuses.contains(currentSubscription.getSubStatus())) {
@@ -260,8 +275,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     organization);
             apiTypeWrapper.setTier(businessPlan);
 
+            // Update the subscription with the new business plan
             SubscriptionResponse subscriptionResponse = apiProvider.updateSubscription(apiTypeWrapper, username,
                     currentSubscription.getApplication(), subscriptionId, businessPlan);
+
+            // Retrieve the updated subscription and return as the response
             SubscribedAPI updatedSubscription = apiProvider.getSubscriptionByUUID(subscriptionResponse.
                     getSubscriptionUUID());
             SubscriptionDTO updatedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscription);
