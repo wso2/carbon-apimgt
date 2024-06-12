@@ -61,20 +61,20 @@ public class APIEndpointPasswordRegistryHandler extends Handler {
                 Object childObj = mainChildIt.next();
                 if ((childObj instanceof OMElement) && ((APIConstants.OVERVIEW_ELEMENT)
                         .equals(((OMElement) childObj).getLocalName()))) {
-                    Iterator childIt = ((OMElement) childObj)
+                    // On this flow, only the endpointPpassword can have a value.
+                    Iterator endpointPpasswordIt = ((OMElement) childObj)
                             .getChildrenWithLocalName(APIConstants.ENDPOINT_PASSWORD_ELEMENT);
-                    //There is only one ep-password, hence no iteration
-                    if (childIt.hasNext()) {
-                        OMElement child = (OMElement) childIt.next();
+                    if (endpointPpasswordIt.hasNext()) {
+                        OMElement child = (OMElement) endpointPpasswordIt.next();
                         String pswd = child.getText();
-                        //Password has been edited on put
+                        // Password has been edited on put
                         if (!"".equals(pswd) && !((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD).equals(pswd))) {
                             resource.setProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY, pswd);
                             child.setText(pswd);
-                        } else if ((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
-                                .equals(pswd)) { //Password not being changed
-                            String actualPassword = resource
-                                    .getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY);
+                        } else if ((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD).equals(pswd)) {
+                            // Password not being changed
+                            String actualPassword =
+                                    resource.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY);
                             child.setText(actualPassword);
                         }
                     }
@@ -107,16 +107,31 @@ public class APIEndpointPasswordRegistryHandler extends Handler {
                     Object childObj = mainChildIt.next();
                     if ((childObj instanceof OMElement) && ((APIConstants.OVERVIEW_ELEMENT)
                             .equals(((OMElement) childObj).getLocalName()))) {
-                        Iterator childIt = ((OMElement) childObj)
-                                .getChildrenWithLocalName(APIConstants.ENDPOINT_PASSWORD_ELEMENT);
-                        //There is only one ep-password, hence no iteration
-                        if (childIt.hasNext()) {
-                            OMElement child = (OMElement) childIt.next();
+                        OMElement child = null;
+                        // If the endpointPpassword exist and has a value, store it in the hidden field and mask
+                        Iterator endpointPpasswordIt = ((OMElement) childObj).getChildrenWithLocalName(
+                                APIConstants.ENDPOINT_PASSWORD_ELEMENT);
+                        // There is only one ep-password, hence no iteration
+                        if (endpointPpasswordIt.hasNext()) {
+                            child = (OMElement) endpointPpasswordIt.next();
+                        } else {
+                            // If the endpointPassword exist and has a value, store it in the hidden field and mask
+                            Iterator endpointPasswordIt = ((OMElement) childObj).getChildrenWithLocalName(
+                                    APIConstants.ENDPOINT_PASSWORD_ELEMENT_ALT);
+                            // There is only one ep-password, hence no iteration
+                            if (endpointPasswordIt.hasNext()) {
+                                child = (OMElement) endpointPasswordIt.next();
+                            }
+                        }
+                        if (child != null) {
                             String actualPassword = child.getText();
-                            //Store the password in a hidden property to access in the PUT method.
+                            // Store the password in a hidden property to access in the PUT method.
                             if (!actualPassword.isEmpty()) {
                                 resource.setProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY, actualPassword);
+                                // Mask the password
                                 child.setText(APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+                                // If only the endpointPassword exist, no need to update the endpointPpassword as it
+                                // handled while populating the api object from the registry resource down the line.
                             }
                         }
                     }
