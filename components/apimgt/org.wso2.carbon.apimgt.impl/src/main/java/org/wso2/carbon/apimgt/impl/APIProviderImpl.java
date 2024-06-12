@@ -545,7 +545,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setUuid(addedAPI.getId());
             api.setCreatedTime(addedAPI.getCreatedTime());
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while persisting API ", e);
+            throw new APIManagementException("Error while persisting API. " + e.getMessage(), e);
         }
 
         if (log.isDebugEnabled()) {
@@ -982,7 +982,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setCreatedTime(existingAPI.getCreatedTime());
             apiPersistenceInstance.updateAPI(new Organization(organization), APIMapper.INSTANCE.toPublisherApi(api));
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while updating API details", e);
+            throw new APIManagementException("Error while updating API details. " + e.getMessage(), e);
         }
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
@@ -4668,7 +4668,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             apiProductUUID = addedAPIProduct.getId();
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while creating API product ", e);
+            throw new APIManagementException("Error while creating API product. " + e.getMessage(), e);
         }
 
 
@@ -4701,7 +4701,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
                     publisherAPIProduct);
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while creating API product ");
+            throw new APIManagementException("Error while creating API product. " + e.getMessage());
         }
     }
 
