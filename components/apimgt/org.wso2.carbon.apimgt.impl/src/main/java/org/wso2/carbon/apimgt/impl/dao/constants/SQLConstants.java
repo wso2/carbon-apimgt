@@ -3525,17 +3525,28 @@ public class SQLConstants {
                     + "FROM AM_SHARED_SCOPE SS "
                     + "WHERE SS.TENANT_ID = ?";
     public static final String GET_SHARED_SCOPE_API_USAGE_BY_TENANT =
-            "SELECT AA.API_ID, AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER "
+            "SELECT AA.API_ID, AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER, AAUM.REVISION_UUID  "
                     + "FROM AM_SHARED_SCOPE ASSC, AM_API_RESOURCE_SCOPE_MAPPING AARSM, "
                     + "AM_API_URL_MAPPING AAUM, AM_API AA "
                     + "WHERE ASSC.NAME=AARSM.SCOPE_NAME AND "
                     + "AARSM.URL_MAPPING_ID=AAUM.URL_MAPPING_ID AND "
-                    + "AAUM.API_ID=AA.API_ID AND AAUM.REVISION_UUID IS NULL AND "
+                    + "AAUM.API_ID=AA.API_ID AND "
                     + "ASSC.UUID=? AND "
                     + "AARSM.TENANT_ID=? "
-                    + "GROUP BY AA.API_ID, AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER";
+                    + "GROUP BY AA.API_ID, AA.API_NAME, AA.CONTEXT, AA.API_VERSION, AA.API_PROVIDER, AAUM.REVISION_UUID";
 
-    public static final String GET_SHARED_SCOPE_URI_USAGE_BY_TENANT =
+    public static final String GET_SHARED_SCOPE_URI_USAGE_IN_REVISIONS_BY_TENANT =
+            "SELECT AAUM.URL_PATTERN, AAUM.HTTP_METHOD "
+                    + "FROM AM_SHARED_SCOPE ASSC, AM_API_RESOURCE_SCOPE_MAPPING AARSM, "
+                    + "AM_API_URL_MAPPING AAUM, AM_API AA "
+                    + "WHERE ASSC.NAME=AARSM.SCOPE_NAME AND "
+                    + "AARSM.URL_MAPPING_ID=AAUM.URL_MAPPING_ID AND "
+                    + "AAUM.API_ID=AA.API_ID AND "
+                    + "ASSC.UUID=? AND "
+                    + "AARSM.TENANT_ID=? AND "
+                    + "AA.API_ID=? AND AAUM.REVISION_UUID=?";
+
+    public static final String GET_SHARED_SCOPE_URI_USAGE_IN_CURRENT_APIS_BY_TENANT =
             "SELECT AAUM.URL_PATTERN, AAUM.HTTP_METHOD "
                     + "FROM AM_SHARED_SCOPE ASSC, AM_API_RESOURCE_SCOPE_MAPPING AARSM, "
                     + "AM_API_URL_MAPPING AAUM, AM_API AA "

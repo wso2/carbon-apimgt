@@ -16434,19 +16434,37 @@ public class ApiMgtDAO {
                     API usedApi = new API(apiIdentifier);
                     usedApi.setContext(apiUsageResultSet.getString("CONTEXT"));
 
+                    //in case the record is for an API revision set isRevision to true
+                    String revisionUuid = apiUsageResultSet.getString("REVISION_UUID");
+                    String GET_SHARED_SCOPE_URI_USAGE_BY_TENANT = SQLConstants.GET_SHARED_SCOPE_URI_USAGE_IN_CURRENT_APIS_BY_TENANT;
+                    if (StringUtils.isNotEmpty(revisionUuid)) {
+                        usedApi.setRevision(true);
+                        GET_SHARED_SCOPE_URI_USAGE_BY_TENANT = SQLConstants.GET_SHARED_SCOPE_URI_USAGE_IN_REVISIONS_BY_TENANT;
+                    }
+
                     try (PreparedStatement psForUriUsage = connection
-                            .prepareStatement(SQLConstants.GET_SHARED_SCOPE_URI_USAGE_BY_TENANT)) {
+                            .prepareStatement(GET_SHARED_SCOPE_URI_USAGE_BY_TENANT)) {
                         int apiId = apiUsageResultSet.getInt("API_ID");
                         Set<URITemplate> usedUriTemplates = new LinkedHashSet<>();
                         psForUriUsage.setString(1, uuid);
                         psForUriUsage.setInt(2, tenantId);
                         psForUriUsage.setInt(3, apiId);
+
+                        if (usedApi.isRevision()) {
+                            psForUriUsage.setString(4, revisionUuid);
+                        }
+
                         try (ResultSet uriUsageResultSet = psForUriUsage.executeQuery()) {
                             while (uriUsageResultSet.next()) {
                                 URITemplate usedUriTemplate = new URITemplate();
                                 usedUriTemplate.setUriTemplate(uriUsageResultSet.getString("URL_PATTERN"));
                                 usedUriTemplate.setHTTPVerb(uriUsageResultSet.getString("HTTP_METHOD"));
                                 usedUriTemplates.add(usedUriTemplate);
+
+                                if (usedApi.isRevision()) {
+                                    APIRevision revision = getRevisionByRevisionUUID(connection, revisionUuid);
+                                    usedApi.setRevisionId(revision.getId());
+                                }
                             }
                         }
                         usedApi.setUriTemplates(usedUriTemplates);
