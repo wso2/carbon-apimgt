@@ -23,11 +23,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -40,8 +43,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.Subscription
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
@@ -233,5 +239,69 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         SubscriberInfoDTO subscriberInfoDTO = SubscriptionMappingUtil.fromSubscriberClaimsToDTO(subscriberClaims,
                 subscriberName);
         return Response.ok().entity(subscriberInfoDTO).build();
+    }
+
+    /**
+     * Updates the business plan for a given subscription.
+     *
+     * @param subscriptionId the ID of the subscription to be changed
+     * @param businessPlan   the new business plan to be applied to the subscription
+     * @param ifMatch        the ETag value
+     * @param messageContext the message context for the current request
+     * @return a Response indicating the result of the operation
+     * @throws APIManagementException if an error occurs while changing the business plan
+     */
+    @Override
+    public Response changeSubscriptionBusinessPlan(String subscriptionId, String businessPlan, String ifMatch,
+                                                   MessageContext messageContext) throws APIManagementException {
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+        SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
+
+        try {
+            if (currentSubscription == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            }
+
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            Set<String> invalidStatuses = new HashSet<>(Arrays.asList("BLOCKED", "ON_HOLD", "REJECTED"));
+            if (invalidStatuses.contains(currentSubscription.getSubStatus())) {
+                RestApiUtil.handleBadRequest("Cannot change business plan for subscriptions with status BLOCKED," +
+                        " ON_HOLD, or REJECTED", log);
+            }
+
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(currentSubscription.getAPIUUId(),
+                    organization);
+            apiTypeWrapper.setTier(businessPlan);
+
+            // Update the subscription with the new business plan
+            SubscriptionResponse subscriptionResponse = apiProvider.updateSubscription(apiTypeWrapper, username,
+                    currentSubscription.getApplication(), subscriptionId, businessPlan);
+
+            // Retrieve the updated subscription and return as the response
+            SubscribedAPI updatedSubscription = apiProvider.getSubscriptionByUUID(subscriptionResponse.
+                    getSubscriptionUUID());
+            SubscriptionDTO updatedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscription);
+
+            return Response.ok().entity(updatedSubscriptionDTO).build();
+
+        } catch (APIManagementException  e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                // This happens when the specified API identifier does not exist
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, currentSubscription.getAPIUUId(),
+                        e, log);
+            } else if (e.getErrorHandler().getErrorCode() == ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED.
+                    getErrorCode()) {
+                // This happens when the specified business plan is not allowed for the subscription
+                RestApiUtil.handleBadRequest(e.getMessage(), log);
+            }
+            else {
+                // Unhandled exception
+                RestApiUtil.handleInternalServerError(
+                        "Error while updating the business plan for the subscription " + subscriptionId, e, log);
+            }
+        }
+        return null;
     }
 }

@@ -1024,193 +1024,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    @Override
-    public SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId,
-                                                   Application application, String inputSubscriptionId,
-                                                   String currentThrottlingPolicy, String requestedThrottlingPolicy)
-            throws APIManagementException {
-
-        API api = null;
-        APIProduct product = null;
-        Identifier identifier = null;
-        int apiId;
-        String apiUUId;
-        final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
-        String state;
-        String apiContext;
-        String apiOrgId;
-
-        if (isApiProduct) {
-            product = apiTypeWrapper.getApiProduct();
-            state = product.getState();
-            apiId = product.getProductId();
-            apiUUId = product.getUuid();
-            identifier = product.getId();
-            apiContext = product.getContext();
-            apiOrgId = product.getOrganization();
-        } else {
-            api = apiTypeWrapper.getApi();
-            state = api.getStatus();
-            identifier = api.getId();
-            apiId = identifier.getId();
-            apiUUId = api.getUuid();
-            apiContext = api.getContext();
-            apiOrgId = api.getOrganization();
-        }
-        checkSubscriptionAllowed(apiTypeWrapper);
-        WorkflowResponse workflowResponse = null;
-        int subscriptionId;
-        if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
-            subscriptionId = apiMgtDAO.updateSubscription(apiTypeWrapper, inputSubscriptionId,
-                    APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, requestedThrottlingPolicy);
-
-            boolean isTenantFlowStarted = false;
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-            }
-
-            try {
-                WorkflowExecutor updateSubscriptionWFExecutor =
-                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-
-                SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
-                workflowDTO.setStatus(WorkflowStatus.CREATED);
-                workflowDTO.setCreatedTime(System.currentTimeMillis());
-                workflowDTO.setTenantDomain(tenantDomain);
-                workflowDTO.setTenantId(tenantId);
-                workflowDTO.setExternalWorkflowReference(updateSubscriptionWFExecutor.generateUUID());
-                workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
-                workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-                workflowDTO.setCallbackUrl(updateSubscriptionWFExecutor.getCallbackURL());
-                workflowDTO.setApiName(identifier.getName());
-                workflowDTO.setApiContext(apiContext);
-                workflowDTO.setApiVersion(identifier.getVersion());
-                workflowDTO.setApiProvider(identifier.getProviderName());
-                workflowDTO.setTierName(identifier.getTier());
-                workflowDTO.setRequestedTierName(requestedThrottlingPolicy);
-                workflowDTO.setApplicationName(application.getName());
-                workflowDTO.setApplicationId(application.getId());
-                workflowDTO.setSubscriber(userId);
-
-                Tier tier = null;
-                Set<Tier> policies = Collections.emptySet();
-                if (!isApiProduct) {
-                    policies = api.getAvailableTiers();
-                } else {
-                    policies = product.getAvailableTiers();
-                }
-
-                for (Tier policy : policies) {
-                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
-                        tier = policy;
-                    }
-                }
-                boolean isMonetizationEnabled = false;
-
-                if (api != null) {
-                    isMonetizationEnabled = api.getMonetizationStatus();
-                    //check whether monetization is enabled for API and tier plan is commercial
-                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
-                    } else {
-                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
-                    }
-                } else {
-                    isMonetizationEnabled = product.getMonetizationStatus();
-                    //check whether monetization is enabled for API and tier plan is commercial
-                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, product);
-                    } else {
-                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
-                    }
-                }
-            } catch (WorkflowException e) {
-                throw new APIManagementException("Could not execute Workflow", e);
-            } finally {
-                if (isTenantFlowStarted) {
-                    endTenantFlow();
-                }
-            }
-
-            //to handle on-the-fly subscription rejection (and removal of subscription entry from the database)
-            //the response should have {"Status":"REJECTED"} in the json payload for this to work.
-            boolean subscriptionRejected = false;
-            String subscriptionStatus = null;
-            String subscriptionUUID = "";
-            SubscribedAPI updatedSubscription = getSubscriptionById(subscriptionId);
-
-            if (workflowResponse != null && workflowResponse.getJSONPayload() != null
-                    && !workflowResponse.getJSONPayload().isEmpty()) {
-                try {
-                    JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
-                    if (APIConstants.SubscriptionStatus.REJECTED.equals(wfResponseJson.get("Status"))) {
-                        subscriptionRejected = true;
-                        subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
-                    }
-                } catch (ParseException e) {
-                    log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
-                }
-            }
-
-            if (!subscriptionRejected) {
-                subscriptionStatus = updatedSubscription.getSubStatus();
-                subscriptionUUID = updatedSubscription.getUUID();
-
-                JSONObject subsLogObject = new JSONObject();
-                subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
-                subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
-                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, application.getId());
-                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, application.getName());
-                subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
-                subsLogObject.put(APIConstants.AuditLogConstants.REQUESTED_TIER, requestedThrottlingPolicy);
-
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
-                        APIConstants.AuditLogConstants.UPDATED, this.username);
-
-                if (workflowResponse == null) {
-                    workflowResponse = new GeneralWorkflowResponse();
-                }
-
-            }
-
-            // get the workflow state once the executor is executed.
-            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(subscriptionId),
-                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-            // only send the notification if approved
-            // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always
-            // approved.
-            if (wfDTO != null) {
-                if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                    SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                            System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                            apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId,
-                            application.getId(), application.getUUID(), requestedThrottlingPolicy, subscriptionStatus
-                            , identifier.getName(), identifier.getVersion());
-                    APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-                }
-            } else {
-                SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
-                        System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                        apiOrgId, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId, application.getId(),
-                        application.getUUID(), requestedThrottlingPolicy, subscriptionStatus, identifier.getName(),
-                        identifier.getVersion());
-                APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-            }
-
-            if (log.isDebugEnabled()) {
-                String logMessage = "API Name: " + identifier.getName() + ", API Version " + identifier.getVersion()
-                        + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userId + " for app "
-                        + application.getName();
-                log.debug(logMessage);
-            }
-
-            return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
-        } else {
-            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs/API Products in the state: " +
-                    state);
-        }
-    }
-
     /**
      * Check whether the application is accessible to the specified user
      *
@@ -2133,61 +1946,57 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public void cleanupPendingTasksForApplicationDeletion(int applicationId) throws APIManagementException {
 
-        try {
-            WorkflowExecutor createApplicationWFExecutor =
- getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            WorkflowExecutor createSubscriptionWFExecutor =
-            getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            WorkflowExecutor deleteSubscriptionWFExecutor =
-            getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
-            WorkflowExecutor updateSubscriptionWFExecutor =
-            getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
-            WorkflowExecutor createProductionRegistrationWFExecutor =
-             getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-            WorkflowExecutor createSandboxRegistrationWFExecutor =
-             getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+        WorkflowExecutor createApplicationWFExecutor =
+getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        WorkflowExecutor createSubscriptionWFExecutor =
+        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+        WorkflowExecutor deleteSubscriptionWFExecutor =
+        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+        WorkflowExecutor updateSubscriptionWFExecutor =
+        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+        WorkflowExecutor createProductionRegistrationWFExecutor =
+         getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+        WorkflowExecutor createSandboxRegistrationWFExecutor =
+         getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
 
-            // clean up pending subscription tasks
-            Map<String, Set<Integer>> pendingSubscriptionsByStatus = apiMgtDAO
-                    .getPendingSubscriptionsByAppId(applicationId);
-            for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.ON_HOLD)) {
-                cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION,
-                        createSubscriptionWFExecutor);
-            }
+        // clean up pending subscription tasks
+        Map<String, Set<Integer>> pendingSubscriptionsByStatus = apiMgtDAO
+                .getPendingSubscriptionsByAppId(applicationId);
+        for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.ON_HOLD)) {
+            cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION,
+                    createSubscriptionWFExecutor);
+        }
 
-            for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.DELETE_PENDING)) {
-                cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION,
-                        deleteSubscriptionWFExecutor);
-            }
+        for (int subscription : pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.DELETE_PENDING)) {
+            cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION,
+                    deleteSubscriptionWFExecutor);
+        }
 
-            for (int subscription :
-            pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING)) {
-                cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE,
-                        updateSubscriptionWFExecutor);
-            }
+        for (int subscription :
+        pendingSubscriptionsByStatus.get(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING)) {
+            cleanupPendingSubscriptionTask(subscription, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE,
+                    updateSubscriptionWFExecutor);
+        }
 
-            // cleanup pending application registration tasks
-            Map<String, String> keyManagerWiseProductionKeyStatus = apiMgtDAO
-                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
-            Map<String, String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
-                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
-            keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) ->
-                    cleanupPendingApplicationRegistrationTask(state, applicationId,
-                     APIConstants.API_KEY_TYPE_PRODUCTION,
-                            keyManagerName, createProductionRegistrationWFExecutor));
+        // cleanup pending application registration tasks
+        Map<String, String> keyManagerWiseProductionKeyStatus = apiMgtDAO
+                .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+        Map<String, String> keyManagerWiseSandboxKeyStatus = apiMgtDAO
+                .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
+        keyManagerWiseProductionKeyStatus.forEach((keyManagerName, state) ->
+                cleanupPendingApplicationRegistrationTask(state, applicationId,
+                 APIConstants.API_KEY_TYPE_PRODUCTION,
+                        keyManagerName, createProductionRegistrationWFExecutor));
 
-            keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) ->
-                    cleanupPendingApplicationRegistrationTask(state, applicationId, APIConstants.API_KEY_TYPE_SANDBOX,
-                            keyManagerName, createSandboxRegistrationWFExecutor));
+        keyManagerWiseSandboxKeyStatus.forEach((keyManagerName, state) ->
+                cleanupPendingApplicationRegistrationTask(state, applicationId, APIConstants.API_KEY_TYPE_SANDBOX,
+                        keyManagerName, createSandboxRegistrationWFExecutor));
 
-            //cleanup pending application creation task
-            String appCreationWorkflowExtRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId,
-                    WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            if (appCreationWorkflowExtRef != null) {
-                cleanupAppCreationPendingTask(applicationId, createApplicationWFExecutor, appCreationWorkflowExtRef);
-            }
-        } catch (WorkflowException ex) {
-            log.warn("Failed to load workflow executors");
+        //cleanup pending application creation task
+        String appCreationWorkflowExtRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId,
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        if (appCreationWorkflowExtRef != null) {
+            cleanupAppCreationPendingTask(applicationId, createApplicationWFExecutor, appCreationWorkflowExtRef);
         }
     }
 
@@ -3077,31 +2886,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
         }
         return row;
-    }
-
-    protected void endTenantFlow() {
-
-        PrivilegedCarbonContext.endTenantFlow();
-    }
-
-    protected boolean startTenantFlowForTenantDomain(String tenantDomain) {
-
-        boolean isTenantFlowStarted = true;
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        return isTenantFlowStarted;
-    }
-
-    /**
-     * Returns a workflow executor
-     *
-     * @param workflowType Workflow executor type
-     * @return WorkflowExecutor of given type
-     * @throws WorkflowException if an error occurred while getting WorkflowExecutor
-     */
-    protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws WorkflowException {
-
-        return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
     }
 
     @Override
@@ -4453,86 +4237,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
         }
         return hostsWithSchemes;
-    }
-
-    /**
-     * Check if the specified subscription is allowed for the logged in user
-     *
-     * @param apiTypeWrapper Api Type wrapper that contains either an API or API Product
-     * @throws APIManagementException if the subscription allow check was failed. If the user is not allowed to add the
-     *                                subscription, this will throw an instance of APIMgtAuthorizationFailedException
-      *                                with the reason as the message
-     */
-    private void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper)
-            throws APIManagementException {
-
-        Set<Tier> tiers;
-        String subscriptionAvailability;
-        String subscriptionAllowedTenants;
-
-        if (apiTypeWrapper.isAPIProduct()) {
-            APIProduct product = apiTypeWrapper.getApiProduct();
-            tiers = product.getAvailableTiers();
-            subscriptionAvailability = product.getSubscriptionAvailability();
-            subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();
-        } else {
-            API api = apiTypeWrapper.getApi();
-            String apiSecurity = api.getApiSecurity();
-            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
-                    !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-                String msg = "Subscription is not allowed for API " + apiTypeWrapper.toString() + ". To access the " +
-"API, "
-                        + "please use the client certificate";
-                throw new APIMgtAuthorizationFailedException(msg);
-            }
-            tiers = api.getAvailableTiers();
-            subscriptionAvailability = api.getSubscriptionAvailability();
-            subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
-        }
-
-        String apiOrganization = apiTypeWrapper.getOrganization();
-
-        //Tenant based validation for subscription
-        boolean subscriptionAllowed = false;
-        if (!organization.equals(apiOrganization)) {
-            if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
-                subscriptionAllowed = true;
-            } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
-                if (subscriptionAllowedTenants != null) {
-                    String[] allowedTenants = subscriptionAllowedTenants.split(",");
-                    for (String tenant : allowedTenants) {
-                        if (tenant != null && tenantDomain.equals(tenant.trim())) {
-                            subscriptionAllowed = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        } else {
-            subscriptionAllowed = true;
-        }
-        if (!subscriptionAllowed) {
-            throw new APIMgtAuthorizationFailedException("Subscription is not allowed for " + userNameWithoutChange);
-        }
-
-        //check whether the specified tier is within the allowed tiers for the API
-        Iterator<Tier> iterator = tiers.iterator();
-        boolean isTierAllowed = false;
-        List<String> allowedTierList = new ArrayList<>();
-        while (iterator.hasNext()) {
-            Tier t = iterator.next();
-            if (t.getName() != null && (t.getName()).equals(apiTypeWrapper.getTier())) {
-                isTierAllowed = true;
-            }
-            allowedTierList.add(t.getName());
-        }
-        if (!isTierAllowed) {
-            String msg =
- "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
-                    + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
-            throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
-                    apiTypeWrapper.getTier(), username));
-        }
     }
 
     /**
