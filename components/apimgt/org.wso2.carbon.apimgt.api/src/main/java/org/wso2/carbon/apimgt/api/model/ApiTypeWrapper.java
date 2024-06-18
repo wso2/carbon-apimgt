@@ -121,14 +121,6 @@ public class ApiTypeWrapper {
         }
     }
 
-    public int getApiId() {
-        if (isAPIProduct) {
-            return apiProduct.getProductId();
-        } else {
-            return api.getId().getId();
-        }
-    }
-
     public void setThumbnailUrl(String thumbnailUrl) {
         if (isAPIProduct) {
             apiProduct.setThumbnailUrl(thumbnailUrl);

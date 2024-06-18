@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
@@ -534,18 +533,4 @@ public interface APIManager {
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end)
             throws APIManagementException;
-
-    /**
-     * Updates the subscription for a user with the specified details.
-     *
-     * @param apiTypeWrapper            The wrapper containing API details.
-     * @param userId                    The ID of the user whose subscription is being updated.
-     * @param applicationId             The ID of the application associated with the subscription.
-     * @param subscriptionId            The ID of the subscription to be updated.
-     * @param requestedThrottlingPolicy The new throttling policy requested for the subscription.
-     * @return SubscriptionResponse     A SubscriptionResponse object containing the details of the updated subscription.
-     * @throws APIManagementException If an error occurs while updating the subscription.
-     */
-    SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application applicationId,
-                                            String subscriptionId, String requestedThrottlingPolicy) throws APIManagementException;
 }
