@@ -25,6 +25,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -5611,11 +5612,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void setThumbnailToAPI(String apiId, ResourceFile resource, String organization) throws APIManagementException {
 
+        InputStream thumbnailImageContent = null;
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
-            InputStream content = iconResourceFile.getContent();
-            if (content.available() > 0) {
+            thumbnailImageContent = iconResourceFile.getContent();
+            if (thumbnailImageContent.available() > 0) {
                 apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
             } else {
                 // Thumbnail deletion from publisher originally handled through the same PUT call
@@ -5630,6 +5632,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (IOException e) {
             throw new APIManagementException("Error while reading input stream ", e);
+        } finally {
+            IOUtils.closeQuietly(thumbnailImageContent);
         }
     }
 
