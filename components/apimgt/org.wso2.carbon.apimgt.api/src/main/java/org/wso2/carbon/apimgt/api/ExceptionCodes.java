@@ -47,7 +47,8 @@ public enum ExceptionCodes implements ErrorHandler {
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
     API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
-    SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
+    SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404,
+            "The requested subscription with ID '%s' was not found."),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 409, "Document already exists"),
     COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
@@ -556,7 +557,18 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_INVALID_RESPONSE(903100, "Invalid response from AI service", 500, "Error while invoking AI service. %s", false),
     AI_SERVICE_INVALID_ACCESS_TOKEN(903101, "Invalid access token provided for AI service", 401, "Invalid access token provided for AI service"),
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
-    DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters");
+    DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
+
+    // Subscriptions related
+    SUBSCRIPTION_ID_NOT_SPECIFIED(902017, "Subscription ID not specified.", 400,
+            "Subscription ID not specified."),
+    BUSINESS_PLAN_NOT_SPECIFIED(902018, "Business plan not specified.", 400,
+            "Business plan not specified."),
+    BUSINESS_PLAN_NOT_ALLOWED(902019, "The Business plan is not allowed.", 403,
+            "Business plan '%s' is not allowed for the API.", false),
+    INVALID_STATE_FOR_BUSINESS_PLAN_CHANGE(902020, "Cannot change the business plan of the subscription.",
+            409, "Cannot change the business plan of the subscription with ID '%s' as the " +
+            "subscription is in '%s' state.", false);;
 
     private final long errorCode;
     private final String errorMessage;
