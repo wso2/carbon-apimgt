@@ -5615,15 +5615,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
             InputStream content = iconResourceFile.getContent();
-            content.mark(1);
-            if (content.read() == -1) {
+            if (content.available() > 0) {
+                apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
+            } else {
                 // Thumbnail deletion from publisher originally handled through the same PUT call
                 // It was decided after discussion to fix the deletion (U2 update) through the same originally used PUT
                 apiPersistenceInstance.deleteThumbnail(new Organization(organization), apiId);
-            } else {
-                // Content will be reset to re-read the stream from the beginning
-                content.reset();
-                apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
             }
         } catch (ThumbnailPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
