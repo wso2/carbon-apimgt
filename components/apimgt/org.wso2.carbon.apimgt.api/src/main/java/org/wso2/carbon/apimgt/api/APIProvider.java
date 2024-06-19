@@ -691,6 +691,17 @@ public interface APIProvider extends APIManager {
     List<BlockConditionsDTO> getBlockConditions() throws APIManagementException;
 
     /**
+     * Get a lightweight version of list of block Conditions.
+     *
+     * @param conditionType  type of the condition
+     * @param conditionValue condition value
+     * @return list of block conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditionsDTO> getLightweightBlockConditions(String conditionType, String conditionValue)
+            throws APIManagementException;
+
+    /**
      *
      * @return Retrieve a block Condition
      * @throws APIManagementException
@@ -1908,6 +1919,16 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     int getPolicyUsageByPolicyUUIDInGatewayPolicies(String commonPolicyUUID) throws APIManagementException;
+    
+    /**
+     * Update SoapToRest Sequences for the given API.
+     * @param organization    Organization
+     * @param apiId  API ID
+     * @param sequences list of SOAPToRestSequence.
+     * @throws APIPersistenceException
+     */
+    void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
+            throws APIManagementException;
 
     /**
      * Updates the subscription tier of a given subscription.

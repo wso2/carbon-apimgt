@@ -112,6 +112,7 @@ import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
@@ -1893,6 +1894,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         validateApplicationPolicy(application, existingApp.getOrganization());
         apiMgtDAO.updateApplication(application);
+        Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
         }
@@ -1918,9 +1920,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                existingApp.getOrganization(), application.getId(), application.getUUID(), application.getName(),
-                application.getTokenType(), application.getTier(), application.getGroupId(),
-                application.getApplicationAttributes(), existingApp.getSubscriber().getName());
+                existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
+                updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
+                updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
+                existingApp.getSubscriber().getName());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
@@ -4146,6 +4149,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
         Map<String, Object> result = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
         int totalLength = 0;
 
         String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
@@ -4173,7 +4177,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 docItem.getApiVersion()));
                         api.setUuid(docItem.getApiUUID());
                         docMap.put(doc, api);
-                    } else {
+                    } else if ("API".equals(item.getType())) {
                         DevPortalSearchContent publiserAPI = (DevPortalSearchContent) item;
                         API api = new API(new APIIdentifier(publiserAPI.getProvider(), publiserAPI.getName(),
                                 publiserAPI.getVersion()));
@@ -4191,10 +4195,27 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         api.setDescription(publiserAPI.getDescription());
                         api.setType(publiserAPI.getTransportType());
                         apiSet.add(api);
+                    } else if ("APIProduct".equals(item.getType())) {
+                        DevPortalSearchContent devAPIProduct = (DevPortalSearchContent) item;
+                        APIProduct apiProduct = new APIProduct(
+                                new APIProductIdentifier(devAPIProduct.getProvider(), devAPIProduct.getName(),
+                                        devAPIProduct.getVersion()));
+                        apiProduct.setUuid(devAPIProduct.getId());
+                        apiProduct.setContextTemplate(devAPIProduct.getContext());
+                        apiProduct.setState(devAPIProduct.getStatus());
+                        apiProduct.setType(devAPIProduct.getTransportType());
+                        apiProduct.setBusinessOwner(devAPIProduct.getBusinessOwner());
+                        apiProduct.setBusinessOwnerEmail(devAPIProduct.getBusinessOwnerEmail());
+                        apiProduct.setTechnicalOwner(devAPIProduct.getTechnicalOwner());
+                        apiProduct.setTechnicalOwnerEmail(devAPIProduct.getTechnicalOwnerEmail());
+                        apiProduct.setDescription(devAPIProduct.getDescription());
+                        apiProduct.setRating("0");// need to retrieve from db
+                        apiProductSet.add(apiProduct);
                     }
                 }
                 compoundResult.addAll(apiSet);
                 compoundResult.addAll(docMap.entrySet());
+                compoundResult.addAll(apiProductSet);
                 compoundResult.sort(new ContentSearchResultNameComparator());
                 result.put("length", sResults.getTotalCount());
             } else {

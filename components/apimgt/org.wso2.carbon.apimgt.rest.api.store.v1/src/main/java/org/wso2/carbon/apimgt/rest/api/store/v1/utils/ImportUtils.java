@@ -293,10 +293,14 @@ public class ImportUtils {
             JsonObject jsonObject = gson.fromJson(additionalProperties, JsonObject.class);
             Set<String> keysSet = jsonObject.keySet();
             for (String key : keysSet) {
-                if (jsonObject.getAsJsonPrimitive(key).isNumber()) {
-                    jsonObject.addProperty(key, String.valueOf(jsonObject.getAsJsonPrimitive(key).getAsLong()));
+                if (jsonObject.get(key).isJsonPrimitive()) {
+                    if (jsonObject.getAsJsonPrimitive(key).isNumber()) {
+                        jsonObject.addProperty(key, String.valueOf(jsonObject.getAsJsonPrimitive(key).getAsLong()));
+                    } else {
+                        jsonObject.addProperty(key, jsonObject.getAsJsonPrimitive(key).getAsString());
+                    }
                 } else {
-                    jsonObject.addProperty(key, jsonObject.getAsJsonPrimitive(key).getAsString());
+                    jsonObject.addProperty(key, jsonObject.get(key).toString());
                 }
             }
             jsonParamObj.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonObject.toString());
