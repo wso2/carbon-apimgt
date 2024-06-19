@@ -371,6 +371,12 @@ public enum ExceptionCodes implements ErrorHandler {
     SCOPE_VALIDATION_FAILED(900986, "Scope validation failed", 412, "Scope validation failed"),
     SHARED_SCOPE_DISPLAY_NAME_NOT_SPECIFIED(900987, "Shared Scope display name not specified", 400,
             "Shared Scope display name not specified"),
+    BLOCK_CONDITION_RETRIEVE_PARAMS_EXCEPTION(900254, "Block conditions retrieval error", 400,
+            "Provided query parameters are not valid"),
+    BLOCK_CONDITION_RETRIEVE_FAILED(900255, "Failed to get Block conditions", 500,
+            "Failed to retrieve Block conditions from the database"),
+    INVALID_BLOCK_CONDITION_VALUES(900256, "Error while retrieving Block Conditions", 500,
+            "Invalid format for condition values"),
     SCOPE_ALREADY_ASSIGNED(900988, "Scope already assigned locally by another API", 400,
             "Scope already assigned locally by another API"),
 

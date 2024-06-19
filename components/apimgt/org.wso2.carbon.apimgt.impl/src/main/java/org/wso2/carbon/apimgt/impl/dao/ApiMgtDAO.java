@@ -13736,13 +13736,7 @@ public class ApiMgtDAO {
             selectPreparedStatement.setString(1, tenantDomain);
             resultSet = selectPreparedStatement.executeQuery();
             while (resultSet.next()) {
-                BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
-                blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
-                blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
-                blockConditionsDTO.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
-                blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
-                blockConditionsDTO.setUUID(resultSet.getString("UUID"));
-                blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
+                BlockConditionsDTO blockConditionsDTO = populateBlockConditionsDataWithRS(resultSet);
                 blockConditionsDTOList.add(blockConditionsDTO);
             }
         } catch (SQLException e) {
@@ -13750,10 +13744,52 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    handleException("Failed to rollback getting Block conditions ", ex);
+                    throw new APIManagementException("Failed to rollback getting Block conditions.",
+                            ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
                 }
             }
-            handleException("Failed to get Block conditions", e);
+            throw new APIManagementException("Failed to retrieve all block conditions for the tenant " + tenantDomain,
+                    ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+        }
+        return blockConditionsDTOList;
+    }
+
+    /**
+     * Retrieves block conditions based on the specified condition type and condition value.
+     *
+     * @param conditionType     type of the condition
+     * @param conditionValue    condition value
+     * @param tenantDomain      tenant domain
+     * @return list of block conditions
+     * @throws APIManagementException
+     */
+    public List<BlockConditionsDTO> getBlockConditionsByConditionTypeAndValue(String conditionType,
+            String conditionValue, String tenantDomain) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement selectPreparedStatement = null;
+        ResultSet resultSet = null;
+        List<BlockConditionsDTO> blockConditionsDTOList = new ArrayList<>();
+        try {
+            String query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL;
+            connection = APIMgtDBUtil.getConnection();
+            selectPreparedStatement = connection.prepareStatement(query);
+            String conditionTypeUpper = conditionType != null ? conditionType.toUpperCase() : null;
+            selectPreparedStatement.setString(1, conditionTypeUpper);
+            selectPreparedStatement.setString(2, conditionTypeUpper);
+            selectPreparedStatement.setString(3, conditionValue);
+            selectPreparedStatement.setString(4, conditionValue);
+            selectPreparedStatement.setString(5, tenantDomain);
+            resultSet = selectPreparedStatement.executeQuery();
+            while (resultSet.next()) {
+                BlockConditionsDTO blockConditionsDTO = populateBlockConditionsDataWithRS(resultSet);
+                blockConditionsDTOList.add(blockConditionsDTO);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Failed to get Block conditions by condition type: " + conditionType + " and condition value: "
+                            + conditionValue, ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
@@ -16398,19 +16434,37 @@ public class ApiMgtDAO {
                     API usedApi = new API(apiIdentifier);
                     usedApi.setContext(apiUsageResultSet.getString("CONTEXT"));
 
+                    //in case the record is for an API revision set isRevision to true
+                    String revisionUuid = apiUsageResultSet.getString("REVISION_UUID");
+                    String GET_SHARED_SCOPE_URI_USAGE_BY_TENANT = SQLConstants.GET_SHARED_SCOPE_URI_USAGE_IN_CURRENT_APIS_BY_TENANT;
+                    if (StringUtils.isNotEmpty(revisionUuid)) {
+                        usedApi.setRevision(true);
+                        GET_SHARED_SCOPE_URI_USAGE_BY_TENANT = SQLConstants.GET_SHARED_SCOPE_URI_USAGE_IN_REVISIONS_BY_TENANT;
+                    }
+
                     try (PreparedStatement psForUriUsage = connection
-                            .prepareStatement(SQLConstants.GET_SHARED_SCOPE_URI_USAGE_BY_TENANT)) {
+                            .prepareStatement(GET_SHARED_SCOPE_URI_USAGE_BY_TENANT)) {
                         int apiId = apiUsageResultSet.getInt("API_ID");
                         Set<URITemplate> usedUriTemplates = new LinkedHashSet<>();
                         psForUriUsage.setString(1, uuid);
                         psForUriUsage.setInt(2, tenantId);
                         psForUriUsage.setInt(3, apiId);
+
+                        if (usedApi.isRevision()) {
+                            psForUriUsage.setString(4, revisionUuid);
+                        }
+
                         try (ResultSet uriUsageResultSet = psForUriUsage.executeQuery()) {
                             while (uriUsageResultSet.next()) {
                                 URITemplate usedUriTemplate = new URITemplate();
                                 usedUriTemplate.setUriTemplate(uriUsageResultSet.getString("URL_PATTERN"));
                                 usedUriTemplate.setHTTPVerb(uriUsageResultSet.getString("HTTP_METHOD"));
                                 usedUriTemplates.add(usedUriTemplate);
+
+                                if (usedApi.isRevision()) {
+                                    APIRevision revision = getRevisionByRevisionUUID(connection, revisionUuid);
+                                    usedApi.setRevisionId(revision.getId());
+                                }
                             }
                         }
                         usedApi.setUriTemplates(usedUriTemplates);
@@ -16935,6 +16989,10 @@ public class ApiMgtDAO {
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getRevisionedURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                if (connection.getMetaData().getDriverName().contains("MySQL")) {
+                    getRevisionedURLMappingsStatement = connection.prepareStatement(
+                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                }
                 PreparedStatement insertScopeResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
@@ -18139,6 +18197,10 @@ public class ApiMgtDAO {
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getRevisionedURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                if (connection.getMetaData().getDriverName().contains("MySQL")) {
+                    getRevisionedURLMappingsStatement = connection.prepareStatement(
+                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                }
                 PreparedStatement insertScopeResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
@@ -18372,6 +18434,10 @@ public class ApiMgtDAO {
                 //Insert Scope Mappings and operation policy mappings
                 PreparedStatement getRevisionedURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                if (connection.getMetaData().getDriverName().contains("MySQL")) {
+                    getRevisionedURLMappingsStatement = connection.prepareStatement(
+                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                }
                 PreparedStatement addResourceScopeMapping = connection.prepareStatement(
                         SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING);
                 PreparedStatement addOperationPolicyStatement = connection
@@ -19840,10 +19906,15 @@ public class ApiMgtDAO {
                                                                         String apiUUID,
                                                                         String organization,
                                                                         boolean isWithPolicyDefinition)
-            throws SQLException {
+            throws SQLException, APIManagementException {
 
-        String dbQuery =
-                SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_ID;
+        String dbQuery;
+        boolean isAPIRevision = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
+        if (isAPIRevision) {
+            dbQuery = SQLConstants.OperationPolicyConstants.GET_REVISION_SPECIFIC_OPERATION_POLICY_FROM_POLICY_ID;
+        } else {
+            dbQuery = SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_ID;
+        }
         OperationPolicyData policyData = null;
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyId);
@@ -19852,8 +19923,8 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
                     policyData = new OperationPolicyData();
-                    policyData.setPolicyId(policyId);
-                    policyData.setApiUUID(apiUUID);
+                    policyData.setPolicyId(rs.getString("POLICY_UUID"));
+                    policyData.setApiUUID(rs.getString("API_UUID"));
                     policyData.setOrganization(organization);
                     policyData.setMd5Hash(rs.getString("POLICY_MD5"));
                     policyData.setRevisionUUID(rs.getString("REVISION_UUID"));
@@ -20617,7 +20688,7 @@ public class ApiMgtDAO {
 
     private void handlePolicyCloning(OperationPolicy policy, String apiUUID, String tenantDomain, Connection connection,
             Map<String, String> updatedPoliciesMap, Set<String> usedClonedPolicies,
-            List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException {
+            List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException, APIManagementException {
 
         if (!updatedPoliciesMap.keySet().contains(policy.getPolicyId())) {
             //Check whether API specific policies available
@@ -21676,5 +21747,17 @@ public class ApiMgtDAO {
             handleException("Error while inserting consumer key event token revocation rule to AM db."
                     + e.getMessage(), e);
         }
+    }
+
+    private BlockConditionsDTO populateBlockConditionsDataWithRS(ResultSet resultSet) throws SQLException {
+
+        BlockConditionsDTO blockConditionsDTO = new BlockConditionsDTO();
+        blockConditionsDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+        blockConditionsDTO.setConditionType(resultSet.getString("TYPE"));
+        blockConditionsDTO.setConditionValue(resultSet.getString("BLOCK_CONDITION"));
+        blockConditionsDTO.setConditionId(resultSet.getInt("CONDITION_ID"));
+        blockConditionsDTO.setUUID(resultSet.getString("UUID"));
+        blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
+        return blockConditionsDTO;
     }
 }
