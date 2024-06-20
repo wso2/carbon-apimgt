@@ -228,12 +228,31 @@ public class API implements Serializable {
     
     private String audience;
 
+    private Set<String> audiences;
+
     public String getAudience() {
         return audience;
     }
 
     public void setAudience(String audience) {
         this.audience = audience;
+    }
+
+    /**
+     * To get the audiences for jwt validation
+     *
+     * @return audiences of the API
+     */
+    public Set<String> getAudiences() {
+        return audiences;
+    }
+
+    /**
+     * To set the audiences for jwt validation
+     *
+     */
+    public void setAudiences(Set<String> audiences) {
+        this.audiences = audiences;
     }
 
     public void setEnvironmentList(Set<String> environmentList) {
