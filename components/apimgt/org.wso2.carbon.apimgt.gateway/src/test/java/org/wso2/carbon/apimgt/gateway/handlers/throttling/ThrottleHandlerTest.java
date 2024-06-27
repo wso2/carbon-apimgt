@@ -592,7 +592,7 @@ public class ThrottleHandlerTest {
     @Test
     public void testHandleRequestForGraphQLSubscriptions() {
 
-        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, new ThrottleDataHolder(),
+        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, ThrottleDataHolder.getInstance(),
                 throttleEvaluator, accessInformation);
         Axis2MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         org.apache.axis2.context.MessageContext axis2MessageContext =
