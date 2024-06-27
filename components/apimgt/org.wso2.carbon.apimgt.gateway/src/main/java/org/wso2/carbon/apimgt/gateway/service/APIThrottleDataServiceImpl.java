@@ -32,12 +32,7 @@ import java.util.List;
  */
 public class APIThrottleDataServiceImpl implements APIThrottleDataService {
 
-    private ThrottleDataHolder throttleDataHolder;
-
-    public APIThrottleDataServiceImpl(ThrottleDataHolder throttleDataHolder) {
-
-        this.throttleDataHolder = throttleDataHolder;
-    }
+    private ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
 
     @Override
     public void addThrottledApiConditions(String resourceKey, String name,
