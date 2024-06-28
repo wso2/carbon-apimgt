@@ -341,11 +341,15 @@ public class APIMappingUtil {
         Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = dto.getAdditionalPropertiesMap();
         if (additionalPropertiesMap != null && !additionalPropertiesMap.isEmpty()) {
             for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : additionalPropertiesMap.entrySet()) {
+                String propertyKey = null;
                 if (entry.getValue().isDisplay()) {
-                    model.addProperty(entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX,
-                            entry.getValue().getValue());
+                    propertyKey = entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX;
                 } else {
-                    model.addProperty(entry.getKey(), entry.getValue().getValue());
+                    propertyKey = entry.getKey();
+                }
+                // If this property already added from the additional properties, avoid overriding it
+                if (propertyKey != null && !model.getAdditionalProperties().containsKey(propertyKey)) {
+                    model.addProperty(propertyKey, entry.getValue().getValue());
                 }
             }
         }
