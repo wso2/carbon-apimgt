@@ -570,11 +570,14 @@ public enum ExceptionCodes implements ErrorHandler {
             "Subscription ID not specified."),
     BUSINESS_PLAN_NOT_SPECIFIED(902018, "Business plan not specified.", 400,
             "Business plan not specified."),
-    BUSINESS_PLAN_NOT_ALLOWED(902019, "The Business plan is not allowed.", 403,
+    BUSINESS_PLAN_NOT_ALLOWED(902019, "The Business plan is not allowed.", 400,
             "Business plan '%s' is not allowed for the API.", false),
     INVALID_STATE_FOR_BUSINESS_PLAN_CHANGE(902020, "Cannot change the business plan of the subscription.",
             409, "Cannot change the business plan of the subscription with ID '%s' as the " +
-            "subscription is in '%s' state.", false);;
+            "subscription is in '%s' state.", false),
+    NOT_ALLOWED_TIER_FOR_SUBSCRIBER(902021, "Cannot change the business plan of the subscription.",
+            403, "Cannot change the business plan of the subscription with ID '%s' as the " +
+            "subscriber does not have permission to access the specified business plan.", false);
 
     private final long errorCode;
     private final String errorMessage;
