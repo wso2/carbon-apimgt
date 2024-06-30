@@ -865,6 +865,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIClientCertificateContentByAlias(String apiId, String alias,
                                                                MessageContext messageContext) {
+        return getAPIClientCertificateContentByKeyTypeAndAlias(apiId, alias, APIConstants.API_KEY_TYPE_PRODUCTION,
+                messageContext);
+    }
+
+    @Override
+    public Response getAPIClientCertificateContentByKeyTypeAndAlias(String apiId, String alias, String keyType,
+                                                                    MessageContext messageContext) {
+
         String organization = null;
         String certFileName = alias + ".crt";
         try {
@@ -893,6 +901,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deleteAPIClientCertificateByAlias(String alias, String apiId,
                                                            MessageContext messageContext) {
+        return deleteAPIClientCertificateByKeyTypeAndAlias(APIConstants.API_KEY_TYPE_PRODUCTION, alias, apiId,
+                messageContext);
+    }
+
+    @Override
+    public Response deleteAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId,
+                                                                MessageContext messageContext) {
         String organization = null;
         try {
             organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -935,6 +950,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIClientCertificateByAlias(String alias, String apiId,
                                                         MessageContext messageContext) {
+        return getAPIClientCertificateByKeyTypeAndAlias(APIConstants.API_KEY_TYPE_PRODUCTION, alias, apiId,
+                messageContext);
+    }
+
+    @Override
+    public Response getAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId,
+                                                             MessageContext messageContext) {
         String organization = null;
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
         try {
@@ -965,6 +987,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                       InputStream certificateInputStream,
                                                       Attachment certificateDetail, String tier,
                                                       String keyType, MessageContext messageContext) {
+        return updateAPIClientCertificateByKeyTypeAndAlias(APIConstants.API_KEY_TYPE_PRODUCTION, alias, apiId,
+                certificateInputStream, certificateDetail, tier, messageContext);
+    }
+
+    @Override
+    public Response updateAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId,
+        InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext) {
         try {
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
@@ -1037,6 +1066,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIClientCertificates(String apiId, Integer limit, Integer offset, String alias,
                                                    MessageContext messageContext) {
+        return getAPIClientCertificatesByKeyType(APIConstants.API_KEY_TYPE_PRODUCTION, apiId, limit,offset, alias,
+                messageContext);
+    }
+
+    @Override
+    public Response getAPIClientCertificatesByKeyType(String keyType, String apiId, Integer limit, Integer offset,
+                                                      String alias, MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         List<ClientCertificateDTO> certificates = new ArrayList<>();
@@ -1071,9 +1107,17 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-        public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream,
-                                                Attachment certificateDetail, String alias, String tier,
-                                                String keyType, MessageContext messageContext) {
+    public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream,
+                                            Attachment certificateDetail, String alias, String tier,
+                                            MessageContext messageContext) {
+        return addAPIClientCertificateOfGivenKeyType(APIConstants.API_KEY_TYPE_PRODUCTION, apiId,
+                certificateInputStream, certificateDetail, alias, tier, messageContext);
+    }
+
+    @Override
+    public Response addAPIClientCertificateOfGivenKeyType(String keyType, String apiId,
+      InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier,
+                                                          MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
