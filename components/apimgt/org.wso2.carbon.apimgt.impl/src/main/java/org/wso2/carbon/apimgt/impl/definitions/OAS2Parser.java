@@ -96,6 +96,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TY
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_RESTAPI_SECURITY;
+import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.isValidWithPathsWithTrailingSlashes;
 
 /**
  * Models API definition using OAS (swagger 2.0) parser
@@ -696,6 +697,15 @@ public class OAS2Parser extends APIDefinition {
                         return validationResponse;
                     }
                 }
+            }
+
+            // Check for multiple resource paths with and without trailing slashes.
+            // If there are two resource paths with the same name, one with and one without trailing slashes,
+            // it will be considered an error since those are considered as one resource in the API deployment.
+            if (parseAttemptForV2.getSwagger() != null) {
+                if (!isValidWithPathsWithTrailingSlashes(null, parseAttemptForV2.getSwagger(), validationResponse)) {
+                    validationResponse.setValid(false);
+                };
             }
         }
         if (validationResponse.isValid() && parseAttemptForV2.getSwagger() != null){

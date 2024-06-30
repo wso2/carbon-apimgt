@@ -87,6 +87,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.isValidWithPathsWithTrailingSlashes;
 
 /**
  * Models API definition using OAS (OpenAPI 3.0) parser
@@ -806,6 +807,15 @@ public class OAS3Parser extends APIDefinition {
             }
         } else {
             validationResponse.setValid(true);
+
+            // Check for multiple resource paths with and without trailing slashes.
+            // If there are two resource paths with the same name, one with and one without trailing slashes,
+            // it will be considered an error since those are considered as one resource in the API deployment.
+            if (parseAttemptForV3.getOpenAPI() != null) {
+                if (!isValidWithPathsWithTrailingSlashes(parseAttemptForV3.getOpenAPI(), null, validationResponse)) {
+                    validationResponse.setValid(false);
+                };
+            }
         }
         if (validationResponse.isValid()){
             OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
