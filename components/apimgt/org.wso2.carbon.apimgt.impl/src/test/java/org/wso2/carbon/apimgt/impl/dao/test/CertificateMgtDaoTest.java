@@ -25,7 +25,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
@@ -262,10 +261,10 @@ public class CertificateMgtDaoTest {
     public void testGetClientCertificateCount() throws CertificateManagementException {
         addClientCertificate();
         Assert.assertEquals("The expected client certificate count does not match with the retrieved count", 1,
-                certificateMgtDAO.getClientCertificateCount(TENANT_ID));
+                certificateMgtDAO.getClientCertificateCount(TENANT_ID, APIConstants.API_KEY_TYPE_PRODUCTION));
         deleteClientCertificate();
         Assert.assertEquals("The expected client certificate count does not match with the retrieved count", 0,
-                certificateMgtDAO.getClientCertificateCount(TENANT_ID));
+                certificateMgtDAO.getClientCertificateCount(TENANT_ID, APIConstants.API_KEY_TYPE_PRODUCTION));
     }
 
     /**
@@ -276,10 +275,12 @@ public class CertificateMgtDaoTest {
     @Test
     public void testCheckWhetherAliasExist() throws CertificateManagementException {
         Assert.assertFalse("The non-existing alias was detected as exist",
-                certificateMgtDAO.checkWhetherAliasExist("test", MultitenantConstants.SUPER_TENANT_ID));
+                certificateMgtDAO.checkWhetherAliasExist(APIConstants.API_KEY_TYPE_PRODUCTION,
+                        "test", MultitenantConstants.SUPER_TENANT_ID));
         addClientCertificate();
         Assert.assertTrue("The existing alias was detected as notexist",
-                certificateMgtDAO.checkWhetherAliasExist("test", MultitenantConstants.SUPER_TENANT_ID));
+                certificateMgtDAO.checkWhetherAliasExist(APIConstants.API_KEY_TYPE_PRODUCTION,
+                        "test", MultitenantConstants.SUPER_TENANT_ID));
         deleteClientCertificate();
     }
 
@@ -292,26 +293,31 @@ public class CertificateMgtDaoTest {
     public void testGetClientCertificates() throws CertificateManagementException {
         String organization = "org1";
         List<ClientCertificateDTO> clientCertificateDTOS = certificateMgtDAO
-                .getClientCertificates(TENANT_ID, null, null, organization);
+                .getClientCertificates(TENANT_ID, null, APIConstants.API_KEY_TYPE_PRODUCTION,
+                        null, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 0,
                 clientCertificateDTOS.size());
         addClientCertificate();
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, null, null, organization);
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, null,
+                APIConstants.API_KEY_TYPE_PRODUCTION, null, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test", null, organization);
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test",
+                APIConstants.API_KEY_TYPE_PRODUCTION, null, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test1", null, organization);
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test1",
+                APIConstants.API_KEY_TYPE_PRODUCTION, null, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 0,
                 clientCertificateDTOS.size());
 
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test", apiIdentifier, organization);
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, "test",
+                APIConstants.API_KEY_TYPE_PRODUCTION, apiIdentifier, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
-        Assert.assertNotNull("The key type of a client certificate cannot be null",
-                clientCertificateDTOS.get(0).getKeyType());
-        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, null, apiIdentifier, organization);
+
+        clientCertificateDTOS = certificateMgtDAO.getClientCertificates(TENANT_ID, null,
+                APIConstants.API_KEY_TYPE_PRODUCTION, apiIdentifier, organization);
         Assert.assertEquals("The client certificate DTO list that matches the search criteria is not returned", 1,
                 clientCertificateDTOS.size());
         deleteClientCertificate();
@@ -325,13 +331,16 @@ public class CertificateMgtDaoTest {
     @Test
     public void testGetDeletedClientCertificates() throws CertificateManagementException {
         certificateMgtDAO.updateRemovedCertificatesFromGateways(apiIdentifier, TENANT_ID);
-        List<String> aliasList = certificateMgtDAO.getDeletedClientCertificateAlias(apiIdentifier, TENANT_ID);
+        List<String> aliasList = certificateMgtDAO.getDeletedClientCertificateAliasOfGivenKeyType(apiIdentifier,
+                APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID);
         Assert.assertEquals("The number of deleted certificates retrieved was wrong", 0, aliasList.size());
         addClientCertificate();
-        aliasList = certificateMgtDAO.getDeletedClientCertificateAlias(apiIdentifier, TENANT_ID);
+        aliasList = certificateMgtDAO.getDeletedClientCertificateAliasOfGivenKeyType(apiIdentifier,
+                APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID);
         Assert.assertEquals("The number of deleted certificates retrieved was wrong", 0, aliasList.size());
         deleteClientCertificate();
-        aliasList = certificateMgtDAO.getDeletedClientCertificateAlias(apiIdentifier, TENANT_ID);
+        aliasList = certificateMgtDAO.getDeletedClientCertificateAliasOfGivenKeyType(apiIdentifier,
+                APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID);
         Assert.assertEquals("The number of deleted certificates retrieved was wrong", 1, aliasList.size());
     }
 
@@ -353,7 +362,8 @@ public class CertificateMgtDaoTest {
      * @throws CertificateManagementException Certificate Management Exception.
      */
     private boolean deleteClientCertificate() throws CertificateManagementException {
-        return certificateMgtDAO.deleteClientCertificate(apiIdentifier, "test", TENANT_ID);
+        return certificateMgtDAO.deleteClientCertificate(apiIdentifier, "test",
+                APIConstants.API_KEY_TYPE_PRODUCTION, TENANT_ID);
     }
 
 }

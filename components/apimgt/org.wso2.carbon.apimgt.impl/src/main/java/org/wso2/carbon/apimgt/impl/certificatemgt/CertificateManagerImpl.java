@@ -120,7 +120,7 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             responseCode = certificateMgtUtils.validateCertificate(alias, tenantId, certificate);
             if (responseCode == ResponseCode.SUCCESS) {
-                if (certificateMgtDAO.checkWhetherAliasExist(alias, tenantId)) {
+                if (certificateMgtDAO.checkWhetherAliasExist(keyType, alias, tenantId)) {
                     responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
                 } else {
                     certificateMgtDAO
@@ -175,10 +175,11 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, int tenantId) {
+    public ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, String keyType,
+                                                              int tenantId) {
 
         try {
-            boolean removeFromDB = certificateMgtDAO.deleteClientCertificate(apiIdentifier, alias, tenantId);
+            boolean removeFromDB = certificateMgtDAO.deleteClientCertificate(apiIdentifier, alias, keyType, tenantId);
             if (removeFromDB) {
                 return ResponseCode.SUCCESS;
             } else {
@@ -402,12 +403,12 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
                                                                Identifier apiIdentifier, String organization)
             throws APIManagementException {
 
         try {
-            return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, apiIdentifier, organization);
+            return CertificateMgtDAO.getInstance().getClientCertificates(tenantId, alias, keyType, apiIdentifier, organization);
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
                     "Error while retrieving client certificate information for the tenant : " + tenantId, e);
@@ -494,14 +495,14 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public int getClientCertificateCount(int tenantId) throws APIManagementException {
+    public int getClientCertificateCount(int tenantId, String keyType) throws APIManagementException {
 
         try {
-            return certificateMgtDAO.getClientCertificateCount(tenantId);
+            return certificateMgtDAO.getClientCertificateCount(tenantId, keyType);
         } catch (CertificateManagementException e) {
             throw new APIManagementException(
-                    "Certificate management exception while getting count of client certificates of the tenant "
-                            + tenantId, e);
+                    "Certificate management exception while getting count of " + keyType +
+                            " type client certificates of the tenant " + tenantId, e);
         }
     }
 

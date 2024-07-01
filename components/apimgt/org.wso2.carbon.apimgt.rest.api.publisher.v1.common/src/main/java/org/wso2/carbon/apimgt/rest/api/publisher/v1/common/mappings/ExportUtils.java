@@ -1023,10 +1023,12 @@ public class ExportUtils {
         try {
             if (identifier instanceof APIProductIdentifier) {
                 certificateMetadataDTOs = provider
-                        .searchClientCertificates(tenantId, null, (APIProductIdentifier) identifier, organization);
+                        .searchClientCertificates(tenantId, null, null,
+                                (APIProductIdentifier) identifier, organization);
             } else {
                 certificateMetadataDTOs = provider
-                        .searchClientCertificates(tenantId, null, (APIIdentifier) identifier, organization);
+                        .searchClientCertificates(tenantId, null, null,
+                                (APIIdentifier) identifier, organization);
             }
             if (!certificateMetadataDTOs.isEmpty()) {
                 String clientCertsDirectoryPath =

@@ -190,12 +190,14 @@ public interface CertificateManager {
      *
      * @param apiIdentifier : Identifier of the API which particular client certificate is added against.
      * @param alias         : Alias of the certificate which needs to be removed.
+     * @param keyType       : Key type of the certificate
      * @param tenantId      : The owner tenant id.
      * @return : SUCCESS: If operation success
      * INTERNAL_SERVER_ERROR: If any internal error occurred
      * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
-    ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, int tenantId);
+    ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, String keyType,
+                                                       int tenantId);
 
     /**
      * Method to add client certificate to gateway nodes.
@@ -224,7 +226,7 @@ public interface CertificateManager {
      * @return List of certificates that match the criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, Identifier apiIdentifier,
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType, Identifier apiIdentifier,
             String organization) throws APIManagementException;
 
     /**
@@ -248,7 +250,7 @@ public interface CertificateManager {
      * @return count of client certificates.
      * @throws APIManagementException API Management Exception.
      */
-    int getClientCertificateCount(int tenantId) throws APIManagementException;
+    int getClientCertificateCount(int tenantId, String keyType) throws APIManagementException;
 
     /**
      * Method to add the certificate to gateway nodes.

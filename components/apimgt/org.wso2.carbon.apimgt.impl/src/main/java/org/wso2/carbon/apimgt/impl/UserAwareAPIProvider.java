@@ -108,9 +108,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias)
+    public int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias, String keyType)
             throws APIManagementException {
-        return super.deleteClientCertificate(userName, apiTypeWrapper, alias);
+        return super.deleteClientCertificate(userName, apiTypeWrapper, alias, keyType);
     }
 
     @Override
@@ -140,9 +140,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(String alias, ApiTypeWrapper apiTypeWrapper, String organization)
-            throws APIManagementException {
-        return super.getClientCertificate(alias,apiTypeWrapper, organization);
+    public ClientCertificateDTO getClientCertificate(String alias, String keyType, ApiTypeWrapper apiTypeWrapper,
+                                                     String organization) throws APIManagementException {
+        return super.getClientCertificate(alias, keyType, apiTypeWrapper, organization);
     }
 
     @Override
