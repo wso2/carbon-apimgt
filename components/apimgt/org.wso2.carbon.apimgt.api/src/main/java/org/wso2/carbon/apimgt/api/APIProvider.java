@@ -836,7 +836,7 @@ public interface APIProvider extends APIManager {
      * 4 : If certificate is not found in the trust store.
      * @throws APIManagementException API Management Exception.
      */
-    int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias)
+    int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias, String keyTye)
             throws APIManagementException;
 
     /**
@@ -883,8 +883,8 @@ public interface APIProvider extends APIManager {
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
-            String organization) throws APIManagementException;
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
+                                    APIIdentifier apiIdentifier, String organization) throws APIManagementException;
 
     /**
      * Method to search the client certificates for the provided tenant id, alias and api product identifier.
@@ -896,7 +896,7 @@ public interface APIProvider extends APIManager {
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
             APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException;
 
     /**
@@ -914,7 +914,7 @@ public interface APIProvider extends APIManager {
      * @return count of client certificates that exists for a particular tenant.
      * @throws APIManagementException API Management Exception.
      */
-    int getClientCertificateCount(int tenantId) throws APIManagementException;
+    int getClientCertificateCount(int tenantId, String keyType) throws APIManagementException;
 
     /**
      * Method to check whether an certificate for the given alias is present in the trust store and the database.
@@ -930,13 +930,14 @@ public interface APIProvider extends APIManager {
      * be modified by current user.
      *
      * @param alias    : Relevant alias.
+     * @param keyType : Key type of the certificate
      * @param apiTypeWrapper : The identifier of the api.
      * @param organization : Organization
      * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
      * modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
-    ClientCertificateDTO getClientCertificate(String alias, ApiTypeWrapper apiTypeWrapper,
+    ClientCertificateDTO getClientCertificate(String alias, String keyType, ApiTypeWrapper apiTypeWrapper,
             String organization) throws APIManagementException;
 
 
