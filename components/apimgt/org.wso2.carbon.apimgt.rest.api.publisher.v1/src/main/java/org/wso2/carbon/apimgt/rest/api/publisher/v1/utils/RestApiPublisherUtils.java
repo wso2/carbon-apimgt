@@ -449,7 +449,7 @@ public class RestApiPublisherUtils {
          * If the resolved path does not start with the base directory path,
          * it indicates an attempt to escape the intended directory structure.
          */
-        if (!resolvedPath.startsWith(baseDirPath)) {
+        if (!resolvedPath.startsWith(baseDirPath.normalize())) {
             throw new APIManagementException("Error resolving path. The user path attempts" +
                     " to escape the base directory.");
         }
