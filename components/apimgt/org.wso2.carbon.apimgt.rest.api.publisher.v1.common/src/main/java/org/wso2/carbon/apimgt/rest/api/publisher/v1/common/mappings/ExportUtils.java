@@ -492,7 +492,7 @@ public class ExportUtils {
      */
     private static String cleanFolderName(String name) {
         // Replace everything but [a-zA-Z0-9.-]
-        return name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        return name.replaceAll("[^a-zA-Z0-9\\.\\- ]", "_");
     }
 
     /**
