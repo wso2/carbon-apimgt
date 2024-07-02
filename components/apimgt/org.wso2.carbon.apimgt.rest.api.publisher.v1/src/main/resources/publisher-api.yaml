@@ -4669,7 +4669,7 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates"'
       operationId: addAPIClientCertificate
 
-  /apis/{apiId}/client-certificates/{keyType}:
+  /apis/{apiId}/client-certificates/v2/{keyType}:
     parameters:
       - in: path
         name: keyType
@@ -4951,7 +4951,7 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
       operationId: deleteAPIClientCertificateByAlias
-  /apis/{apiId}/client-certificates/{keyType}/{alias}:
+  /apis/{apiId}/client-certificates/v2/{keyType}/{alias}:
     parameters:
       - in: path
         name: keyType
@@ -5160,7 +5160,7 @@ paths:
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon/content" > test.crt'
       operationId: getAPIClientCertificateContentByAlias
 
-  /apis/{apiId}/client-certificates/{keyType}/{alias}/content:
+  /apis/{apiId}/client-certificates/v2/{keyType}/{alias}/content:
     get:
       tags:
         - Client Certificates

@@ -44,8 +44,10 @@ public class GatewayAPIDTO implements Serializable {
     private String[] sequencesToBeRemove;
     private GatewayContentDTO[] localEntriesToBeAdd;
     private String[] localEntriesToBeRemove;
-    private GatewayContentDTO[] clientCertificatesToBeAdd;
-    private String[] clientCertificatesToBeRemove;
+    private GatewayContentDTO[] productionClientCertificatesToBeAdd;
+    private GatewayContentDTO[] sandboxClientCertificatesToBeAdd;
+    private String[] productionClientCertificatesToBeRemove;
+    private String[] sandboxClientCertificatesToBeRemove;
     private GatewayContentDTO[] endpointEntriesToBeAdd;
     private String[] endpointEntriesToBeRemove;
     private CredentialDto[] credentialsToBeAdd ;
@@ -151,24 +153,36 @@ public class GatewayAPIDTO implements Serializable {
         this.localEntriesToBeRemove = localEntriesToBeRemove;
     }
 
-    public GatewayContentDTO[] getClientCertificatesToBeAdd() {
-
-        return clientCertificatesToBeAdd;
+    public GatewayContentDTO[] getProductionClientCertificatesToBeAdd() {
+        return productionClientCertificatesToBeAdd;
     }
 
-    public void setClientCertificatesToBeAdd(GatewayContentDTO[] clientCertificatesToBeAdd) {
-
-        this.clientCertificatesToBeAdd = clientCertificatesToBeAdd;
+    public void setProductionClientCertificatesToBeAdd(GatewayContentDTO[] productionClientCertificatesToBeAdd) {
+        this.productionClientCertificatesToBeAdd = productionClientCertificatesToBeAdd;
     }
 
-    public String[] getClientCertificatesToBeRemove() {
-
-        return clientCertificatesToBeRemove;
+    public GatewayContentDTO[] getSandboxClientCertificatesToBeAdd() {
+        return sandboxClientCertificatesToBeAdd;
     }
 
-    public void setClientCertificatesToBeRemove(String[] clientCertificatesToBeRemove) {
+    public void setSandboxClientCertificatesToBeAdd(GatewayContentDTO[] sandboxClientCertificatesToBeAdd) {
+        this.sandboxClientCertificatesToBeAdd = sandboxClientCertificatesToBeAdd;
+    }
 
-        this.clientCertificatesToBeRemove = clientCertificatesToBeRemove;
+    public String[] getProductionClientCertificatesToBeRemove() {
+        return productionClientCertificatesToBeRemove;
+    }
+
+    public void setProductionClientCertificatesToBeRemove(String[] productionClientCertificatesToBeRemove) {
+        this.productionClientCertificatesToBeRemove = productionClientCertificatesToBeRemove;
+    }
+
+    public String[] getSandboxClientCertificatesToBeRemove() {
+        return sandboxClientCertificatesToBeRemove;
+    }
+
+    public void setSandboxClientCertificatesToBeRemove(String[] sandboxClientCertificatesToBeRemove) {
+        this.sandboxClientCertificatesToBeRemove = sandboxClientCertificatesToBeRemove;
     }
 
     public GatewayContentDTO[] getEndpointEntriesToBeAdd() {
