@@ -344,6 +344,10 @@ public class MutualSSLAuthenticator implements Authenticator {
         authContext.setStopOnQuotaReach(true);
         authContext.setApiKey(uniqueIdentifier + "_" + apiIdentifier.toString());
         authContext.setTier(tier);
+        authContext.setApplicationName(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_NAME);
+        authContext.setSubscriber(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_OWNER);
+        authContext.setApplicationId(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_NAME);
+        authContext.setApplicationUUID(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_NAME);
         /* For the mutual SSL based authenticated request, the resource level throttling is not considered, hence
         assigning the unlimited tier for that. */
         List<VerbInfoDTO> verbInfoList = new ArrayList<>(1);
