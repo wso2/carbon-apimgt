@@ -760,6 +760,11 @@ public class SQLConstants {
                     " , SUB_STATUS = ? " +
                     " WHERE SUBSCRIPTION_ID = ?";
 
+    public static final String UPDATE_SUBSCRIPTION_TIER_SQL =
+            " UPDATE AM_SUBSCRIPTION " +
+                    " SET TIER_ID = ? " +
+                    " WHERE SUBSCRIPTION_ID = ?";
+
     public static final String GET_REGISTRATION_APPROVAL_STATUS_SQL =
             " SELECT KEY_MANAGER,STATE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE =?";
 
