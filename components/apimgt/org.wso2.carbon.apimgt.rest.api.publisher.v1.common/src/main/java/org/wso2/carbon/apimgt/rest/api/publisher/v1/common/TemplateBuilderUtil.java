@@ -944,8 +944,8 @@ public class TemplateBuilderUtil {
                 clientCertificate.setName(APIConstants.API_KEY_TYPE_PRODUCTION + "_" + clientCertificateDTO.getAlias()
                         + "_" + tenantId);
                 clientCertificate.setContent(clientCertificateDTO.getCertificate());
-                gatewayAPIDTO.setProductionClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
-                        gatewayAPIDTO.getProductionClientCertificatesToBeAdd()));
+                gatewayAPIDTO.setClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
+                        gatewayAPIDTO.getClientCertificatesToBeAdd()));
             }
         }
         if (sandboxClientCertificatesDTOList != null) {
@@ -954,8 +954,8 @@ public class TemplateBuilderUtil {
                 clientCertificate.setName(APIConstants.API_KEY_TYPE_SANDBOX + "_" + clientCertificateDTO.getAlias()
                         + "_" + tenantId);
                 clientCertificate.setContent(clientCertificateDTO.getCertificate());
-                gatewayAPIDTO.setSandboxClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
-                        gatewayAPIDTO.getSandboxClientCertificatesToBeAdd()));
+                gatewayAPIDTO.setClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
+                        gatewayAPIDTO.getClientCertificatesToBeAdd()));
             }
         }
     }

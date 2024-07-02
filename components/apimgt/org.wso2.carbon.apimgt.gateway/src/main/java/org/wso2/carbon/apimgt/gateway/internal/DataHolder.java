@@ -39,8 +39,7 @@ import java.util.stream.Collectors;
 public class DataHolder {
     private static final Log log  = LogFactory.getLog(DataHolder.class);
     private static final DataHolder Instance = new DataHolder();
-    private Map<String, List<String>> apiToProductionCertificatesMap = new HashMap();
-    private Map<String, List<String>> apiToSandboxCertificatesMap = new HashMap();
+    private Map<String, List<String>> apiToCertificatesMap = new HashMap();
     private Map<String, String> googleAnalyticsConfigMap = new HashMap<>();
     private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
@@ -52,42 +51,24 @@ public class DataHolder {
         initializeTenantDeploymentStatusMap();
     }
 
-    public Map<String, List<String>> getApiToProductionCertificatesMap() {
-        return apiToProductionCertificatesMap;
-    }
-
-    public void setApiToProductionCertificatesMap(Map<String, List<String>> apiToProductionCertificatesMap) {
-        this.apiToProductionCertificatesMap = apiToProductionCertificatesMap;
-    }
-
-    public Map<String, List<String>> getApiToSandboxCertificatesMap() {
-        return apiToSandboxCertificatesMap;
-    }
-
-    public void setApiToSandboxCertificatesMap(Map<String, List<String>> apiToSandboxCertificatesMap) {
-        this.apiToSandboxCertificatesMap = apiToSandboxCertificatesMap;
-    }
-
     public static DataHolder getInstance() {
 
         return Instance;
     }
-    public void addApiToProductionAliasList(String apiId, List<String> aliasList) {
-
-        apiToProductionCertificatesMap.put(apiId, aliasList);
-    }
-    public void addApiToSandboxAliasList(String apiId, List<String> aliasList) {
-
-        apiToSandboxCertificatesMap.put(apiId, aliasList);
+    public void addApiToAliasList(String apiId, List<String> aliasList) {
+        apiToCertificatesMap.put(apiId, aliasList);
     }
 
-    public List<String> getProductionCertificateAliasListForAPI(String apiId) {
-
-        return apiToProductionCertificatesMap.getOrDefault(apiId, Collections.emptyList());
+    public List<String> getCertificateAliasListForAPI(String apiId) {
+        return apiToCertificatesMap.getOrDefault(apiId, Collections.emptyList());
     }
-    public List<String> getSandboxCertificateAliasListForAPI(String apiId) {
 
-        return apiToSandboxCertificatesMap.getOrDefault(apiId, Collections.emptyList());
+    public Map<String, List<String>> getApiToCertificatesMap() {
+        return apiToCertificatesMap;
+    }
+
+    public void setApiToCertificatesMap(Map<String, List<String>> apiToCertificatesMap) {
+        this.apiToCertificatesMap = apiToCertificatesMap;
     }
 
     public void addGoogleAnalyticsConfig(String tenantDomain, String config) {
