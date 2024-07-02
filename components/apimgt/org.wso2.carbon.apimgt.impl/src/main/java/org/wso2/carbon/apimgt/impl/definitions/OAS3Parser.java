@@ -1235,7 +1235,7 @@ public class OAS3Parser extends APIDefinition {
      */
     private void updateOperationManagedInfo(SwaggerData.Resource resource, Operation operation) {
         String authType = resource.getAuthType();
-        if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)) {
+        if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType) || authType == null) {
             authType = "Application & Application User";
         }
         if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authType)) {
