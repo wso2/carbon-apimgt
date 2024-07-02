@@ -38,6 +38,8 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,6 +60,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
+import org.wso2.carbon.apimgt.gateway.exception.OAuth2Exception;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -99,7 +102,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -1782,5 +1788,50 @@ public class GatewayUtils {
             }
         }
         return tenantsToBeDeployed;
+    }
+
+    /**
+     * Helper method to add public certificate to JWT_HEADER to signature verification.
+     * This creates thumbPrints directly from given certificates
+     *
+     * @param certificate
+     * @param alias
+     * @return
+     * @throws OAuth2Exception
+     */
+    public static String getThumbPrint(Certificate certificate, String alias) throws OAuth2Exception {
+        return getThumbPrint(certificate);
+    }
+
+    /**
+     * Method to obtain certificate thumbprint.
+     *
+     * @param certificate java.security.cert type certificate.
+     * @return Certificate thumbprint as a String.
+     * @throws OAuth2Exception When failed to obtain the thumbprint.
+     */
+    public static String getThumbPrint(Certificate certificate) throws OAuth2Exception {
+
+        try {
+            MessageDigest digestValue = MessageDigest.getInstance("SHA-256");
+            byte[] der = certificate.getEncoded();
+            digestValue.update(der);
+            byte[] digestInBytes = digestValue.digest();
+
+            String publicCertThumbprint = APIUtil.hexify(digestInBytes);
+            String thumbprint = new String(new Base64(0, null, true).
+                    encode(publicCertThumbprint.getBytes(Charsets.UTF_8)), Charsets.UTF_8);
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Thumbprint value: %s calculated for Certificate: %s using algorithm: %s",
+                        thumbprint, certificate, digestValue.getAlgorithm()));
+            }
+            return thumbprint;
+        } catch (CertificateEncodingException e) {
+            String error = "Error occurred while encoding thumbPrint from certificate.";
+            throw new OAuth2Exception(error, e);
+        } catch (NoSuchAlgorithmException e) {
+            String error = "Error in obtaining SHA-256 thumbprint from certificate.";
+            throw new OAuth2Exception(error, e);
+        }
     }
 }
