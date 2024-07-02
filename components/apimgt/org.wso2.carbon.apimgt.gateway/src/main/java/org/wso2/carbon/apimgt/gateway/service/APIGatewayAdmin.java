@@ -666,20 +666,14 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         }
 
         // Add Client Certificates
-        if (gatewayAPIDTO.getProductionClientCertificatesToBeAdd() != null) {
+        if (gatewayAPIDTO.getClientCertificatesToBeAdd() != null) {
             synchronized (certificateManager) {
-                for (GatewayContentDTO certificate : gatewayAPIDTO.getProductionClientCertificatesToBeAdd()) {
+                for (GatewayContentDTO certificate : gatewayAPIDTO.getClientCertificatesToBeAdd()) {
                     certificateManager.addClientCertificateToGateway(certificate.getContent(), certificate.getName());
                 }
             }
         }
-        if (gatewayAPIDTO.getSandboxClientCertificatesToBeAdd() != null) {
-            synchronized (certificateManager) {
-                for (GatewayContentDTO certificate : gatewayAPIDTO.getSandboxClientCertificatesToBeAdd()) {
-                    certificateManager.addClientCertificateToGateway(certificate.getContent(), certificate.getName());
-                }
-            }
-        }
+
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " client certificates deployed");
             log.debug("Start to add vault entries " + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
@@ -817,20 +811,14 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         }
 
         // Remove clientCertificates
-        if (gatewayAPIDTO.getProductionClientCertificatesToBeRemove() != null) {
+        if (gatewayAPIDTO.getClientCertificatesToBeRemove() != null) {
             synchronized (certificateManager) {
-                for (String alias : gatewayAPIDTO.getProductionClientCertificatesToBeRemove()) {
+                for (String alias : gatewayAPIDTO.getClientCertificatesToBeRemove()) {
                     certificateManager.deleteClientCertificateFromGateway(alias);
                 }
             }
         }
-        if (gatewayAPIDTO.getSandboxClientCertificatesToBeRemove() != null) {
-            synchronized (certificateManager) {
-                for (String alias : gatewayAPIDTO.getSandboxClientCertificatesToBeRemove()) {
-                    certificateManager.deleteClientCertificateFromGateway(alias);
-                }
-            }
-        }
+
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " client certificates undeployed " +
                     "successfully");
