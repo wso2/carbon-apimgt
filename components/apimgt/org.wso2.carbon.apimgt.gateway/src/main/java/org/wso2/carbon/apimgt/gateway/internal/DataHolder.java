@@ -51,24 +51,29 @@ public class DataHolder {
         initializeTenantDeploymentStatusMap();
     }
 
-    public static DataHolder getInstance() {
-
-        return Instance;
-    }
-    public void addApiToAliasList(String apiId, List<String> aliasList) {
-        apiToCertificatesMap.put(apiId, aliasList);
-    }
-
-    public List<String> getCertificateAliasListForAPI(String apiId) {
-        return apiToCertificatesMap.getOrDefault(apiId, Collections.emptyList());
-    }
-
     public Map<String, List<String>> getApiToCertificatesMap() {
+
         return apiToCertificatesMap;
     }
 
     public void setApiToCertificatesMap(Map<String, List<String>> apiToCertificatesMap) {
+
         this.apiToCertificatesMap = apiToCertificatesMap;
+    }
+
+    public static DataHolder getInstance() {
+
+        return Instance;
+    }
+
+    public void addApiToAliasList(String apiId, List<String> aliasList) {
+
+        apiToCertificatesMap.put(apiId, aliasList);
+    }
+
+    public List<String> getCertificateAliasListForAPI(String apiId) {
+
+        return apiToCertificatesMap.getOrDefault(apiId, Collections.emptyList());
     }
 
     public void addGoogleAnalyticsConfig(String tenantDomain, String config) {

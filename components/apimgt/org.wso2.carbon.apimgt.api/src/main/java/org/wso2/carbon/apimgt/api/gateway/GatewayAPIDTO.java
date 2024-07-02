@@ -152,18 +152,22 @@ public class GatewayAPIDTO implements Serializable {
     }
 
     public GatewayContentDTO[] getClientCertificatesToBeAdd() {
+
         return clientCertificatesToBeAdd;
     }
 
     public void setClientCertificatesToBeAdd(GatewayContentDTO[] clientCertificatesToBeAdd) {
+
         this.clientCertificatesToBeAdd = clientCertificatesToBeAdd;
     }
 
     public String[] getClientCertificatesToBeRemove() {
+
         return clientCertificatesToBeRemove;
     }
 
     public void setClientCertificatesToBeRemove(String[] clientCertificatesToBeRemove) {
+
         this.clientCertificatesToBeRemove = clientCertificatesToBeRemove;
     }
 
