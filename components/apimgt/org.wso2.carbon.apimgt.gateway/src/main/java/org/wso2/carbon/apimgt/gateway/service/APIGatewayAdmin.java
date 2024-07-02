@@ -715,6 +715,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 }
             }
         }
+
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " client certificates deployed");
             log.debug("Start to add vault entries " + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
@@ -859,6 +860,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 }
             }
         }
+
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " client certificates undeployed " +
                     "successfully");

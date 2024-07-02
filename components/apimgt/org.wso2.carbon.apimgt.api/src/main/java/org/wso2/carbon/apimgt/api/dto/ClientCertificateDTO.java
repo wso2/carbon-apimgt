@@ -30,6 +30,9 @@ public class ClientCertificateDTO {
     private String tierName;
     private APIIdentifier apiIdentifier;
 
+    public ClientCertificateDTO() {
+    }
+
     /**
      * To get the identifier of the API related with client certificate.
      *

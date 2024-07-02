@@ -476,7 +476,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "{apiName}#{apiVersion}#{tenantDomain}"),
     INVALID_API_NAME(900854, "Invalid API Name",400 ,"Invalid API Name"),
     ALIAS_CANNOT_BE_EMPTY(900855, "The alias cannot be empty", 400, "The alias cannot be empty"),
-
+    KEY_TYPE_CANNOT_BE_EMPTY(900856, "The key type cannot be empty", 400, "The key type cannot be empty"),
     // API import/export related codes
     ERROR_READING_META_DATA(900907, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
