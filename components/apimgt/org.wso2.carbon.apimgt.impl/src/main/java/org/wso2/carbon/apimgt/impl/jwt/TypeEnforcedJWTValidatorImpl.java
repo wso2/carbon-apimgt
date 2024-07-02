@@ -27,6 +27,17 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 public class TypeEnforcedJWTValidatorImpl extends JWTValidatorImpl {
     @Override
     public JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws APIManagementException {
+        // If this is a refresh token, return an error
+        String tokenTypeClaim = (String) signedJWTInfo.getJwtClaimsSet().getClaim(
+                APIConstants.JwtTokenConstants.TOKEN_TYPE);
+        if (APIConstants.OAuthConstants.REFRESH_TOKEN.equals(tokenTypeClaim)) {
+            // Invalid type header
+            JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
+            jwtValidationInfo.setValid(false);
+            jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+            return jwtValidationInfo;
+        }
+
         APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         if (apiManagerConfiguration.getTokenValidationDto().isEnforceTypeHeaderValidation()) {
