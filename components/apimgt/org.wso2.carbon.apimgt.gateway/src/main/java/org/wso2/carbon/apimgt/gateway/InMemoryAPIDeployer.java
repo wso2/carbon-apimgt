@@ -355,7 +355,9 @@ public class InMemoryAPIDeployer {
                         GatewayUtils
                                 .addStringToList(gatewayEvent.getUuid(), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
-                DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
+                DataHolder.getInstance().getApiToProductionCertificatesMap().remove(gatewayEvent.getUuid());
+                DataHolder.getInstance().getApiToSandboxCertificatesMap().remove(gatewayEvent.getUuid());
+
                 DataHolder.getInstance().removeKeyManagerToAPIMapping(gatewayAPIDTO.getApiId());
             }
     }
@@ -419,13 +421,21 @@ public class InMemoryAPIDeployer {
 
         if (gatewayAPIDTO != null) {
             String apiId = gatewayAPIDTO.getApiId();
-            List<String> aliasList = new ArrayList<>();
-            if (gatewayAPIDTO.getClientCertificatesToBeAdd() != null) {
-                for (GatewayContentDTO gatewayContentDTO : gatewayAPIDTO.getClientCertificatesToBeAdd()) {
-                    aliasList.add(gatewayContentDTO.getName());
+            List<String> productionAliasList = new ArrayList<>();
+            if (gatewayAPIDTO.getProductionClientCertificatesToBeAdd() != null) {
+                for (GatewayContentDTO gatewayContentDTO : gatewayAPIDTO.getProductionClientCertificatesToBeAdd()) {
+                    productionAliasList.add(gatewayContentDTO.getName());
                 }
             }
-            DataHolder.getInstance().addApiToAliasList(apiId, aliasList);
+            DataHolder.getInstance().addApiToProductionAliasList(apiId, productionAliasList);
+
+            List<String> sandboxAliasList = new ArrayList<>();
+            if (gatewayAPIDTO.getSandboxClientCertificatesToBeAdd() != null) {
+                for (GatewayContentDTO gatewayContentDTO : gatewayAPIDTO.getSandboxClientCertificatesToBeAdd()) {
+                    sandboxAliasList.add(gatewayContentDTO.getName());
+                }
+            }
+            DataHolder.getInstance().addApiToSandboxAliasList(apiId, sandboxAliasList);
         }
     }
 
@@ -450,9 +460,14 @@ public class InMemoryAPIDeployer {
 
         if (gatewayDTO != null) {
             if (StringUtils.isNotEmpty(gatewayDTO.getApiId())) {
-                List<String> certificateAliasListForAPI =
-                        DataHolder.getInstance().getCertificateAliasListForAPI(gatewayDTO.getApiId());
-                gatewayDTO.setClientCertificatesToBeRemove(certificateAliasListForAPI.toArray(new String[0]));
+                List<String> productionCertificateAliasListForAPI =
+                        DataHolder.getInstance().getProductionCertificateAliasListForAPI(gatewayDTO.getApiId());
+                gatewayDTO.setProductionClientCertificatesToBeRemove(productionCertificateAliasListForAPI.toArray(new String[0]));
+            }
+            if (StringUtils.isNotEmpty(gatewayDTO.getApiId())) {
+                List<String> sandboxCertificateAliasListForAPI =
+                        DataHolder.getInstance().getSandboxCertificateAliasListForAPI(gatewayDTO.getApiId());
+                gatewayDTO.setSandboxClientCertificatesToBeRemove(sandboxCertificateAliasListForAPI.toArray(new String[0]));
             }
         }
     }

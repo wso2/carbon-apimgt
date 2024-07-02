@@ -1185,8 +1185,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError(
                         "Internal server error while adding the client certificate to " + "API " + apiId, log);
             } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "The alias '" + alias + "' already exists in the trust store.", log);
+                RestApiUtil.handleResourceAlreadyExistsError("The alias '" + alias +
+                        "' already exists in the trust store for " + keyType + " key type.", log);
             } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
                 RestApiUtil.handleBadRequest(
                         "Error while adding the certificate to the API " + apiId + ". " + "Certificate Expired.", log);

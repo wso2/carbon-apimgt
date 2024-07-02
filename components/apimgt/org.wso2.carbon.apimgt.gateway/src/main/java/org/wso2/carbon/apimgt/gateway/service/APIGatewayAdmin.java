@@ -666,9 +666,16 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         }
 
         // Add Client Certificates
-        if (gatewayAPIDTO.getClientCertificatesToBeAdd() != null) {
+        if (gatewayAPIDTO.getProductionClientCertificatesToBeAdd() != null) {
             synchronized (certificateManager) {
-                for (GatewayContentDTO certificate : gatewayAPIDTO.getClientCertificatesToBeAdd()) {
+                for (GatewayContentDTO certificate : gatewayAPIDTO.getProductionClientCertificatesToBeAdd()) {
+                    certificateManager.addClientCertificateToGateway(certificate.getContent(), certificate.getName());
+                }
+            }
+        }
+        if (gatewayAPIDTO.getSandboxClientCertificatesToBeAdd() != null) {
+            synchronized (certificateManager) {
+                for (GatewayContentDTO certificate : gatewayAPIDTO.getSandboxClientCertificatesToBeAdd()) {
                     certificateManager.addClientCertificateToGateway(certificate.getContent(), certificate.getName());
                 }
             }
@@ -810,9 +817,16 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         }
 
         // Remove clientCertificates
-        if (gatewayAPIDTO.getClientCertificatesToBeRemove() != null) {
+        if (gatewayAPIDTO.getProductionClientCertificatesToBeRemove() != null) {
             synchronized (certificateManager) {
-                for (String alias : gatewayAPIDTO.getClientCertificatesToBeRemove()) {
+                for (String alias : gatewayAPIDTO.getProductionClientCertificatesToBeRemove()) {
+                    certificateManager.deleteClientCertificateFromGateway(alias);
+                }
+            }
+        }
+        if (gatewayAPIDTO.getSandboxClientCertificatesToBeRemove() != null) {
+            synchronized (certificateManager) {
+                for (String alias : gatewayAPIDTO.getSandboxClientCertificatesToBeRemove()) {
                     certificateManager.deleteClientCertificateFromGateway(alias);
                 }
             }

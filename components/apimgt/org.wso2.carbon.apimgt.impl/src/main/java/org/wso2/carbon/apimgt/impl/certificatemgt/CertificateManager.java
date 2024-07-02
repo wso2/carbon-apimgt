@@ -203,6 +203,7 @@ public interface CertificateManager {
      * Method to add client certificate to gateway nodes.
      *
      * @param certificate : The Base64 encoded certificate string.
+     * @param keyType     : Key type of the certificate.
      * @param alias       : Certificate alias.
      * @return : True if the certificate is added to gateway node successfully. False otherwise.
      */

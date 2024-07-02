@@ -90,7 +90,8 @@ public class TemplateBuilderUtil {
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
-                                                               List<ClientCertificateDTO> clientCertificateDTOS,
+                                                               List<ClientCertificateDTO> clientCertificateDTOSProduction,
+                                                               List<ClientCertificateDTO> clientCertificateDTOSSandbox,
                                                                List<SoapToRestMediationDto> soapToRestInMediationDtos,
                                                                List<SoapToRestMediationDto> soapToRestMediationDtos)
             throws APIManagementException {
@@ -179,17 +180,26 @@ public class TemplateBuilderUtil {
             }
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
         }
-        Map<String, String> clientCertificateObject = null;
+        Map<String, String> clientCertificateObject = new HashMap<>();
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
-        if (clientCertificateDTOS != null) {
-            clientCertificateObject = new HashMap<>();
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+        if (clientCertificateDTOSProduction != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOSProduction) {
                 /* appending the values without using a data structure to store them separately to avoid conflicts
                  when reading from certificatesDetails string at MutualSSLAuthenticator */
                 clientCertificateObject.put(certificateMgtUtils
                                 .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
                         clientCertificateDTO.getTierName().concat(APIConstants.DELEM_COLON)
-                                .concat(clientCertificateDTO.getKeyType()));
+                                .concat(APIConstants.API_KEY_TYPE_PRODUCTION));
+            }
+        }
+        if (clientCertificateDTOSSandbox != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOSSandbox) {
+                /* appending the values without using a data structure to store them separately to avoid conflicts
+                 when reading from certificatesDetails string at MutualSSLAuthenticator */
+                clientCertificateObject.put(certificateMgtUtils
+                                .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
+                        clientCertificateDTO.getTierName().concat(APIConstants.DELEM_COLON)
+                                .concat(APIConstants.API_KEY_TYPE_SANDBOX));
             }
         }
 
@@ -204,7 +214,7 @@ public class TemplateBuilderUtil {
         String apiLevelPolicy = api.getApiLevelPolicy();
         authProperties.put(APIConstants.API_SECURITY, apiSecurity);
         authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
-        if (clientCertificateObject != null) {
+        if (!clientCertificateObject.isEmpty()) {
             authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
         }
         //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
@@ -282,8 +292,8 @@ public class TemplateBuilderUtil {
     }
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(APIProduct apiProduct, String tenantDomain,
-                                                               List<ClientCertificateDTO> clientCertificateDTOS,
-                                                               Map<String, APIDTO> associatedAPIMap)
+                   List<ClientCertificateDTO> clientCertificateDTOSProduction,
+                   List<ClientCertificateDTO> clientCertificateDTOSSandbox, Map<String, APIDTO> associatedAPIMap)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -367,18 +377,26 @@ public class TemplateBuilderUtil {
         }
         vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
 
-        Map<String, String> clientCertificateObject = null;
+        Map<String, String> clientCertificateObject = new HashMap<>();
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
-        if (clientCertificateDTOS != null) {
-            clientCertificateObject = new HashMap<>();
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+        if (clientCertificateDTOSProduction != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOSProduction) {
                 /* appending the values without using a data structure to store them separately to avoid conflicts
                  when reading from certificatesDetails string at MutualSSLAuthenticator */
                 clientCertificateObject.put(certificateMgtUtils.
                                 getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
                         clientCertificateDTO.getTierName().concat(APIConstants.DELEM_COLON)
-                                .concat(clientCertificateDTO.getKeyType()));
-
+                                .concat(APIConstants.API_KEY_TYPE_PRODUCTION));
+            }
+        }
+        if (clientCertificateDTOSSandbox != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOSSandbox) {
+                /* appending the values without using a data structure to store them separately to avoid conflicts
+                 when reading from certificatesDetails string at MutualSSLAuthenticator */
+                clientCertificateObject.put(certificateMgtUtils.
+                                getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
+                        clientCertificateDTO.getTierName().concat(APIConstants.DELEM_COLON)
+                                .concat(APIConstants.API_KEY_TYPE_SANDBOX));
             }
         }
 
@@ -393,7 +411,7 @@ public class TemplateBuilderUtil {
         String apiLevelPolicy = apiProduct.getProductLevelPolicy();
         authProperties.put(APIConstants.API_SECURITY, apiSecurity);
         authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
-        if (clientCertificateObject != null) {
+        if (!clientCertificateObject.isEmpty()) {
             authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
         }
 
@@ -460,8 +478,10 @@ public class TemplateBuilderUtil {
                                                       APIDTO apidto, String extractedFolderPath)
             throws APIManagementException, XMLStreamException, APITemplateException {
 
-        List<ClientCertificateDTO> clientCertificatesDTOList =
-                ImportUtils.retrieveClientCertificates(extractedFolderPath);
+        List<ClientCertificateDTO> clientCertificatesDTOListProduction =
+                ImportUtils.retrieveClientCertificates(extractedFolderPath, APIConstants.API_KEY_TYPE_PRODUCTION);
+        List<ClientCertificateDTO> clientCertificatesDTOListSandbox =
+                ImportUtils.retrieveClientCertificates(extractedFolderPath, APIConstants.API_KEY_TYPE_SANDBOX);
         List<SoapToRestMediationDto> soapToRestInMediationDtoList =
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.IN);
         List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
@@ -472,10 +492,10 @@ public class TemplateBuilderUtil {
         JSONObject modifiedProperties = getModifiedProperties(originalProperties);
         api.setAdditionalProperties(modifiedProperties);
         APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil
-                .getAPITemplateBuilder(api, tenantDomain, clientCertificatesDTOList, soapToRestInMediationDtoList,
-                        soapToRestOutMediationDtoList);
+                .getAPITemplateBuilder(api, tenantDomain, clientCertificatesDTOListProduction,
+                        clientCertificatesDTOListSandbox, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
         GatewayAPIDTO gatewaAPIDto = createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
-                extractedFolderPath, apidto, clientCertificatesDTOList);
+                extractedFolderPath, apidto, clientCertificatesDTOListProduction, clientCertificatesDTOListSandbox);
         // Reset the additional properties to the original values
         if (originalProperties != null) {
             api.setAdditionalProperties(originalProperties);
@@ -523,8 +543,10 @@ public class TemplateBuilderUtil {
                                                       String tenantDomain, String extractedFolderPath)
             throws APIManagementException, XMLStreamException, APITemplateException {
 
-        List<ClientCertificateDTO> clientCertificatesDTOList =
-                ImportUtils.retrieveClientCertificates(extractedFolderPath);
+        List<ClientCertificateDTO> clientCertificatesDTOListProduction =
+                ImportUtils.retrieveClientCertificates(extractedFolderPath, APIConstants.API_KEY_TYPE_PRODUCTION);
+        List<ClientCertificateDTO> clientCertificatesDTOListSandbox =
+                ImportUtils.retrieveClientCertificates(extractedFolderPath, APIConstants.API_KEY_TYPE_SANDBOX);
         Map<String, APIDTO> apidtoMap = retrieveAssociatedApis(extractedFolderPath);
         Map<String, APIDTO> associatedAPIsMap = convertAPIIdToDto(apidtoMap.values());
         for (APIProductResource productResource : apiProduct.getProductResources()) {
@@ -562,16 +584,16 @@ public class TemplateBuilderUtil {
         }
         APITemplateBuilder
                 apiTemplateBuilder =
-                TemplateBuilderUtil.getAPITemplateBuilder(apiProduct, tenantDomain, clientCertificatesDTOList,
-                        convertAPIIdToDto(associatedAPIsMap.values()));
+                TemplateBuilderUtil.getAPITemplateBuilder(apiProduct, tenantDomain, clientCertificatesDTOListProduction,
+                        clientCertificatesDTOListSandbox, convertAPIIdToDto(associatedAPIsMap.values()));
         return createAPIGatewayDTOtoPublishAPI(environment, apiProduct, apiTemplateBuilder, tenantDomain,
-                apidtoMap, clientCertificatesDTOList);
+                apidtoMap, clientCertificatesDTOListProduction, clientCertificatesDTOListSandbox);
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, APIProduct apiProduct,
-                                                                 APITemplateBuilder builder, String tenantDomain,
-                                                                 Map<String, APIDTO> associatedAPIsMap,
-                                                                 List<ClientCertificateDTO> clientCertificatesDTOList)
+            APITemplateBuilder builder, String tenantDomain, Map<String, APIDTO> associatedAPIsMap,
+            List<ClientCertificateDTO> clientCertificatesDTOListProduction,
+            List<ClientCertificateDTO> clientCertificatesDTOListSandbox)
             throws APITemplateException, XMLStreamException, APIManagementException {
 
         APIProductIdentifier id = apiProduct.getId();
@@ -594,7 +616,8 @@ public class TemplateBuilderUtil {
                 + "</localEntry>");
         productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
                 productAPIDto.getLocalEntriesToBeAdd()));
-        setClientCertificatesToBeAdded(tenantDomain, productAPIDto, clientCertificatesDTOList);
+        setClientCertificatesToBeAdded(tenantDomain, productAPIDto, clientCertificatesDTOListProduction,
+                clientCertificatesDTOListSandbox);
         for (Map.Entry<String, APIDTO> apidtoEntry : associatedAPIsMap.entrySet()) {
             String apiExtractedPath = apidtoEntry.getKey();
             APIDTO apidto = apidtoEntry.getValue();
@@ -653,7 +676,8 @@ public class TemplateBuilderUtil {
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, API api,
                                                                  APITemplateBuilder builder, String tenantDomain,
                                                                  String extractedPath, APIDTO apidto,
-                                                                 List<ClientCertificateDTO> clientCertificatesDTOList)
+                                                                 List<ClientCertificateDTO> productionClientCertificatesDTOList,
+                                                                 List<ClientCertificateDTO> sandboxClientCertificatesDTOList)
             throws APIManagementException, APITemplateException, XMLStreamException {
 
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
@@ -754,7 +778,8 @@ public class TemplateBuilderUtil {
         GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
         setAPIFaultSequencesToBeAdded(api, gatewayAPIDTO, extractedPath, apidto);
         setCustomSequencesToBeAdded(api, gatewayAPIDTO, extractedPath, apidto);
-        setClientCertificatesToBeAdded(tenantDomain, gatewayAPIDTO, clientCertificatesDTOList);
+        setClientCertificatesToBeAdded(tenantDomain, gatewayAPIDTO, productionClientCertificatesDTOList,
+                sandboxClientCertificatesDTOList);
 
         boolean isWsApi = APIConstants.APITransportType.WS.toString().equals(api.getType());
         if (isWsApi) {
@@ -904,20 +929,33 @@ public class TemplateBuilderUtil {
      * To deploy client certificate in given API environment.
      *
      * @param tenantDomain              Tenant domain.
-     * @param clientCertificatesDTOList
+     * @param productionClientCertificatesDTOList
+     * @param sandboxClientCertificatesDTOList
      */
     private static void setClientCertificatesToBeAdded(String tenantDomain, GatewayAPIDTO gatewayAPIDTO,
-                                                       List<ClientCertificateDTO> clientCertificatesDTOList) {
+                                                       List<ClientCertificateDTO> productionClientCertificatesDTOList,
+                                                       List<ClientCertificateDTO> sandboxClientCertificatesDTOList) {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
-        if (clientCertificatesDTOList != null) {
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificatesDTOList) {
+        if (productionClientCertificatesDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : productionClientCertificatesDTOList) {
                 GatewayContentDTO clientCertificate = new GatewayContentDTO();
-                clientCertificate.setName(clientCertificateDTO.getAlias() + "_" + tenantId);
+                clientCertificate.setName(APIConstants.API_KEY_TYPE_PRODUCTION + "_" + clientCertificateDTO.getAlias()
+                        + "_" + tenantId);
                 clientCertificate.setContent(clientCertificateDTO.getCertificate());
-                gatewayAPIDTO.setClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
-                        gatewayAPIDTO.getClientCertificatesToBeAdd()));
+                gatewayAPIDTO.setProductionClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
+                        gatewayAPIDTO.getProductionClientCertificatesToBeAdd()));
+            }
+        }
+        if (sandboxClientCertificatesDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : sandboxClientCertificatesDTOList) {
+                GatewayContentDTO clientCertificate = new GatewayContentDTO();
+                clientCertificate.setName(APIConstants.API_KEY_TYPE_SANDBOX + "_" + clientCertificateDTO.getAlias()
+                        + "_" + tenantId);
+                clientCertificate.setContent(clientCertificateDTO.getCertificate());
+                gatewayAPIDTO.setSandboxClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
+                        gatewayAPIDTO.getSandboxClientCertificatesToBeAdd()));
             }
         }
     }
