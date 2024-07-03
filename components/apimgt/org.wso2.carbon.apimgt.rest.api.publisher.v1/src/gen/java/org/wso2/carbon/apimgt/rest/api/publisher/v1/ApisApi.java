@@ -100,7 +100,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
-    @Path("/{apiId}/client-certificates/v2/{keyType}")
+    @Path("/{apiId}/client-certs/{keyType}")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Upload a New Certificate of the given key type", notes = "This operation can be used to upload a new certificate for an endpoint of the given type. ", response = ClientCertMetadataDTO.class, authorizations = {
@@ -419,7 +419,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @DELETE
-    @Path("/{apiId}/client-certificates/v2/{keyType}/{alias}")
+    @Path("/{apiId}/client-certs/{keyType}/{alias}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Certificate of a Given Key Type", notes = "This operation can be used to delete an uploaded certificate of a given key type. ", response = Void.class, authorizations = {
@@ -699,7 +699,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiId}/client-certificates/v2/{keyType}/{alias}")
+    @Path("/{apiId}/client-certs/{keyType}/{alias}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Certificate Information of a Given Key Type", notes = "This operation can be used to get the information about a certificate of a given key type. ", response = CertificateInfoDTO.class, authorizations = {
@@ -741,7 +741,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiId}/client-certificates/v2/{keyType}/{alias}/content")
+    @Path("/{apiId}/client-certs/{keyType}/{alias}/content")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Download a Certificate of Given Key Type", notes = "This operation can be used to download a certificate which matches the given alias and key type. ", response = Void.class, authorizations = {
@@ -782,7 +782,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiId}/client-certificates/v2/{keyType}")
+    @Path("/{apiId}/client-certs/{keyType}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/ Search Uploaded Client Certificates of a given key type", notes = "This operation can be used to retrieve and search the uploaded client certificates of a given key type. ", response = ClientCertificatesDTO.class, authorizations = {
@@ -1654,7 +1654,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @PUT
-    @Path("/{apiId}/client-certificates/v2/{keyType}/{alias}")
+    @Path("/{apiId}/client-certs/{keyType}/{alias}")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a Certificate of a Given Key Type", notes = "This operation can be used to update an uploaded certificate of a given key type. ", response = ClientCertMetadataDTO.class, authorizations = {

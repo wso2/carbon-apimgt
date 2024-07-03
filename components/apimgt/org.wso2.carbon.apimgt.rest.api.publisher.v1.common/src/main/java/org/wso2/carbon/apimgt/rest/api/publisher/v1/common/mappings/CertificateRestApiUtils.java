@@ -201,7 +201,7 @@ public class CertificateRestApiUtils {
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, certCount);
         String paginatedPrevious = "";
         String paginatedNext = "";
-        //base path of pagination url -> deptecated api
+
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = getClientCertificatesPaginatedURL(RestApiConstants.CLIENT_CERTS_GET_PAGINATED_URL,
                     keyType, paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
