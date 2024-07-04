@@ -262,6 +262,8 @@ public class SearchResultMappingUtil {
             apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " GraphQL Definition");
         } else if (apiDefResult.getName().contains("async")) {
             apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " Async Definition");
+        } else if (apiDefResult.getName().contains("wsdl")) {
+            apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " WSDL Definition");
         }
         return apiDefSearchResultDTO;
     }
