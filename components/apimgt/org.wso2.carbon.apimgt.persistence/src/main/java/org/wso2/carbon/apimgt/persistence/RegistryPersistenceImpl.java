@@ -594,8 +594,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         visibleRoles, resourcePath, registry);
             }
 
-            // Update .graphgl and .asyncapi file permissions, required for API definition content search functionality
-            if (APIConstants.GRAPHQL_API_TYPE.equals(api.getType())) {
+            // Update api def file permissions, required for API definition content search functionality
+            if (APIConstants.API_TYPE_GRAPHQL.equals(api.getType())) {
                 String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
                         api.getId().getVersion(), api.getId().getProviderName());
                 resourcePath += api.getId().getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
@@ -610,6 +610,17 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
                         api.getId().getVersion(), api.getId().getProviderName());
                 resourcePath += APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
+                if (registry.resourceExists(resourcePath)) {
+                    RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
+                            ((UserRegistry) registry).getTenantId());
+                    RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                            visibleRoles, resourcePath, registry);
+                }
+            } else if (APIConstants.API_TYPE_SOAP.equals(api.getType())) {
+                String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
+                        api.getId().getVersion(), api.getId().getProviderName());
+                resourcePath += api.getId().getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR +
+                        api.getId().getName() + api.getId().getVersion() + APIConstants.WSDL_FILE_EXTENSION;
                 if (registry.resourceExists(resourcePath)) {
                     RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
                             ((UserRegistry) registry).getTenantId());
@@ -1596,7 +1607,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             }
 
                         } else if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.equals(resource.getMediaType()) ||
-                                APIConstants.GRAPHQL_DEFINITION_MEDIA_TYPE.equals(resource.getMediaType())) {
+                                APIConstants.GRAPHQL_DEFINITION_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.WSDL_XML_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.WSDL_FILE_MEDIA_TYPE.equals(resource.getMediaType())) {
 
                             addAPIDefinitionSearchContent(resourcePath, registry, apiArtifactManager, contentData);
                         } else {
@@ -1756,7 +1769,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             }
 
                         } else if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.equals(resource.getMediaType()) ||
-                                APIConstants.GRAPHQL_DEFINITION_MEDIA_TYPE.equals(resource.getMediaType())) {
+                                APIConstants.GRAPHQL_DEFINITION_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.WSDL_XML_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.WSDL_FILE_MEDIA_TYPE.equals(resource.getMediaType())) {
 
                             addAPIDefinitionSearchContent(resourcePath, registry, apiArtifactManager, contentData);
                         } else {
@@ -4092,6 +4107,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } else if (resourcePath.contains(APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION)) {
             index = resourcePath.lastIndexOf('/') + 1;
             content.setApiType(APIDefSearchContent.ApiType.GRAPHQL);
+        } else if (resourcePath.contains(APIConstants.WSDL_FILE_EXTENSION)) {
+            index = resourcePath.lastIndexOf('/') + 1;
+            content.setApiType(APIDefSearchContent.ApiType.SOAP);
         } else {
             index = resourcePath.indexOf(APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
             content.setApiType(APIDefSearchContent.ApiType.REST);

@@ -58,17 +58,23 @@ public class RegistrySearchUtil {
             ".RESTAsyncAPIDefinitionIndexer";
     public static final String GRAPHQL_DEFINITION_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer" +
             ".GraphQLAPIDefinitionIndexer";
+    public static final String SOAP_DEFINITION_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer" +
+            ".SOAPAPIDefinitionIndexer";
     public static final String STORE_VIEW_ROLES = "store_view_roles";
     public static final String PUBLISHER_ROLES = "publisher_roles";
     public static final String DOCUMENT_MEDIA_TYPE_KEY = "application/vnd.wso2-document\\+xml";
     public static final String API_DEF_MEDIA_TYPE_KEY = "application/json";
     public static final String GRAPHQL_DEF_MEDIA_TYPE_KEY = "text/plain(.)+charset=ISO-8859-1";
+    public static final String SOAP_DEF_MEDIA_TYPE_KEY = "application/wsdl\\+xml|application/octet-stream";
     public static final String SEARCH_MEDIA_TYPE_FIELD = "mediaType";
     public static final String DOCUMENTATION_INLINE_CONTENT_TYPE = "text/plain";
     public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
     public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
     public static final String GRAPHQL_DEFINITION_MEDIA_TYPE = "text/plain; charset=ISO-8859-1";
+    public static final String SOAP_DEFINITION_WSDL_XML_MEDIA_TYPE = "application/wsdl+xml";
+    public static final String SOAP_DEFINITION_WSDL_FILE_MEDIA_TYPE = "application/octet-stream";
+
     public static final String API_OVERVIEW_STATUS = "overview_status";
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
     public static final String API_RELATED_CUSTOM_PROPERTIES_DISPLAY_DEV = "__display";
@@ -259,6 +265,7 @@ public class RegistrySearchUtil {
         Indexer documentIndexer = indexerMap.get(DOCUMENT_MEDIA_TYPE_KEY);
         Indexer jsonIndexer = indexerMap.get(API_DEF_MEDIA_TYPE_KEY);
         Indexer graphqlIndexer = indexerMap.get(GRAPHQL_DEF_MEDIA_TYPE_KEY);
+        Indexer soapIndexer = indexerMap.get(SOAP_DEF_MEDIA_TYPE_KEY);
         String complexAttribute = ClientUtils.escapeQueryChars(API_RXT_MEDIA_TYPE);
         if (!StringUtils.isEmpty(publisherRoles)) {
             complexAttribute =
@@ -293,6 +300,20 @@ public class RegistrySearchUtil {
             } else {
                 complexAttribute += " OR mediaType_s:(" + ClientUtils
                         .escapeQueryChars(GRAPHQL_DEFINITION_MEDIA_TYPE) + " AND document_indexed_s:true)";
+            }
+        }
+
+        if (soapIndexer != null && SOAP_DEFINITION_INDEXER.equals(soapIndexer.getClass().getName())) {
+            if (!StringUtils.isEmpty(publisherRoles)) {
+                complexAttribute += " OR mediaType_s:((" + ClientUtils
+                        .escapeQueryChars(SOAP_DEFINITION_WSDL_XML_MEDIA_TYPE) +
+                        " OR " + ClientUtils.escapeQueryChars(SOAP_DEFINITION_WSDL_FILE_MEDIA_TYPE)
+                        + " ) AND publisher_roles_s:" + publisherRoles + ")";
+            } else {
+                complexAttribute += " OR mediaType_s:((" + ClientUtils
+                        .escapeQueryChars(SOAP_DEFINITION_WSDL_XML_MEDIA_TYPE) +
+                        " OR " + ClientUtils.escapeQueryChars(SOAP_DEFINITION_WSDL_FILE_MEDIA_TYPE)
+                        + " ) AND document_indexed_s:true)";
             }
         }
 
