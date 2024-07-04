@@ -363,14 +363,16 @@ public final class APIConstants {
     public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
     public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
     public static final String API = "API";
-    
+
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
-    
+
     public static final String GRAPHQL_SCHEMA_FILE_EXTENSION = ".graphql";
     public static final String GRAPHQL_LOCAL_ENTRY_EXTENSION = "_graphQL";
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
+    public static final String GRAPHQL_API_TYPE = "GRAPHQL";
+    public static final String GRAPHQL_DEFINITION_MEDIA_TYPE = "text/plain; charset=ISO-8859-1";
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
     public static final String ALLOW_MULTIPLE_VERSIONS = "allowMultipleVersions";
 

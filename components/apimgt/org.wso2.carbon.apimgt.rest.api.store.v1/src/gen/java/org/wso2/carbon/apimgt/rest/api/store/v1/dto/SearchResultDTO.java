@@ -30,7 +30,8 @@ public class SearchResultDTO   {
     public enum TypeEnum {
         DOC("DOC"),
         API("API"),
-        APIPRODUCT("APIProduct");
+        APIPRODUCT("APIProduct"),
+        DEFINITION("DEFINITION");
         private String value;
 
         TypeEnum (String v) {
