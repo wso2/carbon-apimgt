@@ -27,6 +27,8 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.Notification;
+import org.wso2.carbon.apimgt.api.model.NotificationList;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -533,4 +535,68 @@ public interface APIManager {
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end)
             throws APIManagementException;
+
+    /**
+     * Changes the status of a notification for a specific user in a given organization.
+     *
+     * @param username The username of the user.
+     * @param organization The organization to which the user belongs.
+     * @param notificationUUID The unique identifier of the notification.
+     * @param isMarkAsRead Whether the notification should be marked as read.
+     * @param portalToDisplay The portal where the notification is displayed.
+     * @return The updated Notification object.
+     * @throws APIManagementException If an error occurs while changing the notification status.
+     */
+    Notification changeNotificationStatus(String username, String organization, String notificationUUID,
+                                          boolean isMarkAsRead, String portalToDisplay) throws APIManagementException;
+
+    /**
+     * Deletes a notification for a specific user in a given organization.
+     *
+     * @param username The username of the user.
+     * @param organization The organization to which the user belongs.
+     * @param notificationUUID The unique identifier of the notification to be deleted.
+     * @param portalToDisplay The portal where the notification is displayed.
+     * @throws APIManagementException If an error occurs while deleting the notification.
+     */
+    void deleteNotification(String username, String organization, String notificationUUID, String portalToDisplay)
+            throws APIManagementException;
+
+    /**
+     * Retrieves a list of notifications for a given user.
+     *
+     * @param username the username of the user to retrieve notifications for
+     * @param organization the organization to which the user belongs
+     * @param portalToDisplay the portal where the notifications are to be displayed
+     * @param limit the maximum number of notifications to retrieve
+     * @param offset the starting point in the list of notifications to retrieve
+     * @return a list of notifications matching the criteria
+     * @throws APIManagementException if there is an error while retrieving notifications
+     */
+    NotificationList getNotifications(String username, String organization, String portalToDisplay, int limit,
+                                      int offset) throws APIManagementException;
+
+    /**
+     * Marks all notifications as read for a specific user in a given organization.
+     *
+     * @param username The username of the user.
+     * @param organization The organization to which the user belongs.
+     * @param portalToDisplay The portal where the notifications are displayed.
+     * @param limit The maximum number of notifications to return after marking as read.
+     * @param offset The starting point within the list of notifications.
+     * @return A NotificationList object containing the updated list of notifications.
+     * @throws APIManagementException If an error occurs while marking the notifications as read.
+     */
+    NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay, int limit,
+                                                int offset) throws APIManagementException;
+
+    /**
+     * Deletes all notifications for a specific user in a given organization.
+     *
+     * @param username The username of the user.
+     * @param organization The organization to which the user belongs.
+     * @param portalToDisplay The portal where the notifications are displayed.
+     * @throws APIManagementException If an error occurs while deleting the notifications.
+     */
+    void deleteAllNotifications(String username, String organization, String portalToDisplay) throws APIManagementException;
 }

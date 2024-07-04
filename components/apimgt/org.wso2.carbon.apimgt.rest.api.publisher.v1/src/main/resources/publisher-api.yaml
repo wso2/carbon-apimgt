@@ -8681,8 +8681,263 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPIProductLifecycleStatePendingTasks
 
+  ######################################################
+  # The "Portal Notifications" resource APIs
+  ######################################################
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: Retrieves all notifications for the user.
+      description: This operation can be used to retrieve all notifications for the user.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        200:
+          description: |
+            OK.
+            List of Notifications are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://localhost:9443/api/am/publisher/v4/notifications"'
+      operationId: getNotifications
+
+    patch:
+      tags:
+        - Notifications
+      summary: Mark all notifications as read
+      description: |
+        This operation can be used to mark all notifications as read.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Notifications.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_manage
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: |
+            curl -k -X PATCH -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+            -H "Content-Type: application/json" \
+            "https://localhost:9443/api/am/publisher/v4/notifications/update-status"
+      operationId: markAllNotificationsAsRead
+
+    delete:
+      tags:
+        - Notifications
+      summary: Delete all notifications
+      description: |
+        This operation can be used to delete all the notifications of a user.
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_manage
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: |
+            curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/publisher/v4/notifications"
+      operationId: deleteAllNotifications
+
+  /notifications/{notificationId}:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark a notification as read or unread
+      description: |
+        This operation can be used to mark a notification as read or unread.
+      parameters:
+        - $ref: '#/components/parameters/notificationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: Notification action request
+              type: object
+              properties:
+                markAsRead:
+                  type: boolean
+                  description: True to mark as read, false to mark as unread
+                  example: true
+              required:
+                - markAsRead
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Notification.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_manage
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: |
+            curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+            -H "Content-Type: application/json" -d @data.json \
+            "https://localhost:9443/api/am/publisher/v4/notifications/863aef13-dab4-48b4-bf58-7363cd29601a"
+      operationId: changeNotificationStatus
+
+    delete:
+      tags:
+        - Notifications
+      summary: Delete a Notification
+      description: |
+        This operation can be used to delete a notification.
+      parameters:
+        - $ref: '#/components/parameters/notificationId'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_manage
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: |
+            curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+            "https://localhost:9443/api/am/publisher/v4/notifications/863aef13-dab4-48b4-bf58-7363cd29601a"
+      operationId: deleteNotification
+
 components:
   schemas:
+    Notification:
+      title: Notification
+      description: Object with basic notification details.
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: 863aef13-dab4-48b4-bf58-7363cd29601a
+        type:
+          type: string
+          readOnly: true
+          example: APPLICATION_CREATION
+        content:
+          type: string
+          maxLength: 512
+          readOnly: true
+          example: Application creation is rejected due to some reason.
+        createdTime:
+          type: string
+          readOnly: true
+          example: 2021-02-11 09:57:25
+        isRead:
+          type: boolean
+          example: false
+    NotificationList:
+      title: Notification List
+      description: A list of notifications.
+      type: object
+      properties:
+        count:
+          type: integer
+          readOnly: true
+          description: Number of notifications returned.
+          example: 1
+        unreadCount:
+          type: integer
+          readOnly: true
+          description: Number of unread notifications returned.
+          example: 5
+        list:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Notification'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     Comment:
       title: Comment
       required:
@@ -12640,6 +12895,15 @@ components:
             moreInfo: ""
             error: []
   parameters:
+    notificationId:
+      name: notificationId
+      in: path
+      description: |
+        UUID of the notification.
+      required: true
+      schema:
+        type: string
+        example: 863aef13-dab4-48b4-bf58-7363cd29601a
     replyLimit:
       name: replyLimit
       in: query
@@ -13130,3 +13394,5 @@ components:
             apim:tier_manage: View, update and delete throttling policies
             apim:api_list_view: View, Retrieve API list
             apim:api_definition_view: View, Retrieve API definition
+            apim:notifications_manage: Manage notifications
+            apim:notifications_view: View notifications

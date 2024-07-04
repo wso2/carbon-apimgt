@@ -30,6 +30,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.MeApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.WebhooksApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.MarketplaceAssistantApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.NotificationsApi"/>
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>

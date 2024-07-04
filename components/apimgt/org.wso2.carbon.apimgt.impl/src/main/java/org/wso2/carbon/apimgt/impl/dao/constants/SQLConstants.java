@@ -3168,6 +3168,112 @@ public class SQLConstants {
                     "   AND API.ORGANIZATION = ?" +
                     "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'";
 
+    public static class PortalNotifications {
+
+        public static final String CHANGE_NOTIFICATION_STATUS =
+                "UPDATE AM_NOTIFICATION_END_USERS " +
+                        "SET IS_READ = ? " +
+                        "WHERE NOTIFICATION_ID = ? " +
+                        "  AND DESTINATION_USER = ? " +
+                        "  AND ORGANIZATION = ? " +
+                        "  AND PORTAL_TO_DISPLAY = ?";
+
+        public static final String GET_NOTIFICATION_BY_ID =
+                "SELECT " +
+                        "  NOTIF.NOTIFICATION_ID, " +
+                        "  NOTIF.NOTIFICATION_TYPE, " +
+                        "  NOTIF.CREATED_TIME, " +
+                        "  NOTIF.CONTENT, " +
+                        "  END_USER.IS_READ " +
+                        "FROM AM_NOTIFICATION NOTIF " +
+                        "INNER JOIN AM_NOTIFICATION_END_USERS END_USER ON NOTIF.NOTIFICATION_ID = END_USER.NOTIFICATION_ID " +
+                        "WHERE " +
+                        "  END_USER.NOTIFICATION_ID = ? " +
+                        "  AND END_USER.DESTINATION_USER = ? " +
+                        "  AND END_USER.ORGANIZATION = ? " +
+                        "  AND END_USER.PORTAL_TO_DISPLAY = ?";
+
+        public static final String DELETE_NOTIFICATION_BY_ID_FROM_AM_NOTIFICATION_END_USERS =
+                "DELETE FROM AM_NOTIFICATION_END_USERS " +
+                        "WHERE NOTIFICATION_ID = ? " +
+                        "AND DESTINATION_USER = ? " +
+                        "AND ORGANIZATION = ? " +
+                        "AND PORTAL_TO_DISPLAY = ?";
+
+        public static final String DELETE_NOTIFICATION_BY_ID_FROM_AM_NOTIFICATION =
+                "DELETE FROM AM_NOTIFICATION " +
+                        "WHERE NOTIFICATION_ID = ? " +
+                        "AND NOT EXISTS ( " +
+                        "    SELECT 1 FROM AM_NOTIFICATION_END_USERS " +
+                        "    WHERE NOTIFICATION_ID = ? " +
+                        ")";
+
+        public static final String GET_TOTAL_NOTIFICATIONS_COUNT_FOR_USER =
+                "SELECT COUNT(*) AS NOTIFICATION_COUNT " +
+                        "FROM AM_NOTIFICATION_END_USERS " +
+                        "WHERE DESTINATION_USER = ? " +
+                        "AND ORGANIZATION = ? " +
+                        "AND PORTAL_TO_DISPLAY = ?";
+
+        public static final String GET_UNREAD_NOTIFICATION_COUNT_FOR_USER =
+                "SELECT COUNT(*) AS UNREAD_NOTIFICATION_COUNT " +
+                        "FROM AM_NOTIFICATION_END_USERS " +
+                        "WHERE DESTINATION_USER = ? " +
+                        "AND ORGANIZATION = ? " +
+                        "AND PORTAL_TO_DISPLAY = ? " +
+                        "AND IS_READ = FALSE";
+
+        public static final String GET_NOTIFICATIONS =
+                "SELECT " +
+                        "    NOTIF.NOTIFICATION_ID, " +
+                        "    NOTIF.NOTIFICATION_TYPE, " +
+                        "    NOTIF.CREATED_TIME, " +
+                        "    NOTIF.CONTENT, " +
+                        "    END_USER.IS_READ " +
+                        "FROM AM_NOTIFICATION NOTIF " +
+                        "INNER JOIN AM_NOTIFICATION_END_USERS END_USER ON NOTIF.NOTIFICATION_ID = END_USER.NOTIFICATION_ID " +
+                        "WHERE " +
+                        "    END_USER.DESTINATION_USER = ? " +
+                        "    AND END_USER.ORGANIZATION = ? " +
+                        "    AND END_USER.PORTAL_TO_DISPLAY = ? " +
+                        "ORDER BY NOTIF.CREATED_TIME DESC " +
+                        "LIMIT ?, ?";
+
+        public static final String MARK_ALL_NOTIFICATIONS_AS_READ =
+                "UPDATE AM_NOTIFICATION_END_USERS SET IS_READ = TRUE " +
+                        "WHERE IS_READ = FALSE " +
+                        "AND DESTINATION_USER = ? " +
+                        "AND ORGANIZATION = ? " +
+                        "AND PORTAL_TO_DISPLAY = ?";
+
+        public static final String DELETE_ALL_NOTIFICATIONS_OF_USER_FROM_AM_NOTIFICATION_END_USERS =
+                "DELETE FROM AM_NOTIFICATION_END_USERS " +
+                        "WHERE DESTINATION_USER = ? " +
+                        "AND ORGANIZATION = ? " +
+                        "AND PORTAL_TO_DISPLAY = ?";
+
+        public static final String DELETE_ALL_UNUSED_NOTIFICATIONS_FROM_AM_NOTIFICATION =
+                "DELETE FROM AM_NOTIFICATION " +
+                        "WHERE NOTIFICATION_ID IN ( " +
+                        "    SELECT NOTIFICATION_ID " +
+                        "    FROM AM_NOTIFICATION " +
+                        "    EXCEPT " +
+                        "    SELECT NOTIFICATION_ID " +
+                        "    FROM AM_NOTIFICATION_END_USERS " +
+                        ")";
+
+        // Tentative
+        public static final String ADD_NOTIFICATION =
+                "INSERT INTO AM_NOTIFICATION " +
+                        "(NOTIFICATION_ID, NOTIFICATION_TYPE, CREATED_TIME, CONTENT) " +
+                        "VALUES (?, ?, ?, ?)";
+
+        public static final String ADD_NOTIFICATION_END_USER =
+                "INSERT INTO AM_NOTIFICATION_END_USERS " +
+                        "(NOTIFICATION_ID, DESTINATION_USER, ORGANIZATION, PORTAL_TO_DISPLAY) " +
+                        "VALUES (?, ?, ?, ?)";
+    }
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{
