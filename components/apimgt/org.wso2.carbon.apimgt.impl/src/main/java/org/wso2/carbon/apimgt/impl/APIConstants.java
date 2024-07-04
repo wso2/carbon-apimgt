@@ -1328,7 +1328,7 @@ public final class APIConstants {
     public static final String REST_METHOD = "REST_METHOD";
 
     // GraphQL related constants
-    public static final String API_TYPE = "API_TYPE";
+    public static final String API_TYPE = "ApiType";
     public static final String HTTP_VERB = "HTTP_VERB";
     public static final String GRAPHQL_API = "GRAPHQL";
     public static final String GRAPHQL_SUBSCRIPTION_REQUEST = "isGraphqlSubscriptionRequest";
@@ -1815,6 +1815,9 @@ public final class APIConstants {
     public static final String REGISTRY_RESOURCE_PREFIX = "/registry/resource";
     public static final String REGISTRY_RESOURCE_URL_PREFIX =
             "/registry/resource/_system/governance/apimgt/applicationdata/provider/";
+
+    public static final String APPLICATION_DATA_RESOURCE_URL_PREFIX =
+            "/apimgt/applicationdata/provider/";
 
     public enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
