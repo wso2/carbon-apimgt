@@ -60,7 +60,7 @@ public class MutualSSLAuthenticator implements Authenticator {
     private boolean isMandatory;
 
     // <UniqueIdentifierName,Tier> -Format
-    private HashMap<String, HashMap<String, String>> certificates;
+    private Map<String, Map<String, String>> certificates;
 
     /**
      * Initialized the mutual SSL authenticator.
@@ -217,7 +217,7 @@ public class MutualSSLAuthenticator implements Authenticator {
             String subjectDNIdentifier = (x509Certificate.getSerialNumber() + "_"
                     + x509Certificate.getSubjectDN()).replaceAll(",", "#").replaceAll("\"", "'").trim();
             subjectDNIdentifiers.add(subjectDNIdentifier);
-            for (Map.Entry<String, HashMap<String, String>> entry : certificates.entrySet()) {
+            for (Map.Entry<String, Map<String, String>> entry : certificates.entrySet()) {
                 String key = entry.getKey();
                 if (StringUtils.equals(subjectDNIdentifier, key)) {
                     uniqueIdentifier = key;
@@ -231,7 +231,7 @@ public class MutualSSLAuthenticator implements Authenticator {
             }
         }
         if (StringUtils.isEmpty(tier)) {
-            for (Map.Entry<String, HashMap<String, String>> entry : certificates.entrySet()) {
+            for (Map.Entry<String, Map<String, String>> entry : certificates.entrySet()) {
                 String key = entry.getKey();
                 if (key.contains(issuerDNIdentifier)) {
                     uniqueIdentifier = key;

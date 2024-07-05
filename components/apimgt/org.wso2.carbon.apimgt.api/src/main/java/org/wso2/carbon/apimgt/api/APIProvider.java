@@ -836,7 +836,7 @@ public interface APIProvider extends APIManager {
      * 4 : If certificate is not found in the trust store.
      * @throws APIManagementException API Management Exception.
      */
-    int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias, String keyTye)
+    int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias, String keyType)
             throws APIManagementException;
 
     /**

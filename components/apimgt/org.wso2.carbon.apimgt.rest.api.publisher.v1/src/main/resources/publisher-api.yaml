@@ -4748,10 +4748,6 @@ paths:
                 tier:
                   type: string
                   description: The tier of the certificate
-                keyType:
-                  type: string
-                  description: Whether the key type is PRODUCTION or SANDBOX
-                  default: PRODUCTION
       responses:
         200:
           description: |
@@ -5215,7 +5211,6 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certs/PRODUCTION/wso2carbon/content" > test.crt'
       operationId: getAPIClientCertificateContentByKeyTypeAndAlias
-
 
   ######################################################
   # The "Certificate Management" resource APIs

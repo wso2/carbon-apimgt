@@ -356,7 +356,6 @@ public class InMemoryAPIDeployer {
                                 .addStringToList(gatewayEvent.getUuid(), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
                 DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
-
                 DataHolder.getInstance().removeKeyManagerToAPIMapping(gatewayAPIDTO.getApiId());
             }
     }
@@ -453,9 +452,7 @@ public class InMemoryAPIDeployer {
             if (StringUtils.isNotEmpty(gatewayDTO.getApiId())) {
                 List<String> certificateAliasListForAPI =
                         DataHolder.getInstance().getCertificateAliasListForAPI(gatewayDTO.getApiId());
-                certificateAliasListForAPI.addAll(certificateAliasListForAPI);
                 gatewayDTO.setClientCertificatesToBeRemove(certificateAliasListForAPI.toArray(new String[0]));
-
             }
         }
     }

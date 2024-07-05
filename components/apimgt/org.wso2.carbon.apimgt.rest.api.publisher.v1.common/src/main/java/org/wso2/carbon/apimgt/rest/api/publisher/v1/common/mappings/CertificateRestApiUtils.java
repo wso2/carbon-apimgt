@@ -242,8 +242,8 @@ public class CertificateRestApiUtils {
      * @param query  : The provided query string
      * @return : Certificates paginated URL
      */
-    private static String getClientCertificatesPaginatedURL(String paginatedURL, String keyType, Integer offset, Integer limit,
-                                                      String query) {
+    private static String getClientCertificatesPaginatedURL(String paginatedURL, String keyType, Integer offset,
+                                                            Integer limit, String query) {
         paginatedURL = paginatedURL.replace(RestApiConstants.KEYTYPE_PARAM, keyType);
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));

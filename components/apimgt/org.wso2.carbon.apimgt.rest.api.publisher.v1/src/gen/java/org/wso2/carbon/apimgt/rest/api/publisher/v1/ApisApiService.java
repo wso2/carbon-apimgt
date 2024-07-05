@@ -143,7 +143,7 @@ public interface ApisApiService {
       public Response restoreAPIRevision(String apiId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response undeployAPIRevision(String apiId, String revisionId, String revisionNumber, Boolean allEnvironments, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPI(String apiId, APIDTO APIDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response updateAPIClientCertificateByAlias(String alias, String apiId, InputStream certificateInputStream, Attachment certificateDetail, String tier, String keyType, MessageContext messageContext) throws APIManagementException;
+      public Response updateAPIClientCertificateByAlias(String alias, String apiId, InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId, InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIDeployment(String apiId, String deploymentId, APIRevisionDeploymentDTO apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIDocument(String apiId, String documentId, DocumentDTO documentDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;

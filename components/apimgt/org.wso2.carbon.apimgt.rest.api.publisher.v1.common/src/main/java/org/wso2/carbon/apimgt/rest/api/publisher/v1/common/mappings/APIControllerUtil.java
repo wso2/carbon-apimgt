@@ -1030,7 +1030,8 @@ public class APIControllerUtil {
                     }
                 }
                 //copy certs file from certificates
-                userCertificatesTempDirectory = userCertificatesTempDirectoryPath + APIConstants.API_KEY_TYPE_PRODUCTION;
+                userCertificatesTempDirectory = userCertificatesTempDirectoryPath +
+                        APIConstants.API_KEY_TYPE_PRODUCTION;
             }
 
             String sourcePath = userCertificatesTempDirectory + File.separator + certName;
@@ -1062,8 +1063,8 @@ public class APIControllerUtil {
         }
     }
 
-    private static void verifyExistenceOfClientCertAndWriteToMetadataFile(String metadataFilePath, JsonElement jsonElement)
-            throws APIImportExportException, IOException {
+    private static void verifyExistenceOfClientCertAndWriteToMetadataFile(String metadataFilePath,
+                              JsonElement jsonElement) throws APIImportExportException, IOException {
         if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.YAML_EXTENSION)) {
             File oldFile = new File(metadataFilePath + ImportExportConstants.YAML_EXTENSION);
             oldFile.delete();

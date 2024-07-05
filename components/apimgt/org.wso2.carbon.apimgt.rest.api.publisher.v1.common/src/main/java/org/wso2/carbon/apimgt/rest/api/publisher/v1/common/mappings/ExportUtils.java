@@ -1043,7 +1043,8 @@ public class ExportUtils {
                             clientCertsDirectoryPath);
 
                     if (certificateList.size() > 0) {
-                        CommonUtil.writeDtoToFile(clientCertsDirectoryPath + ImportExportConstants.CLIENT_CERTIFICATE_FILE,
+                        CommonUtil.writeDtoToFile(
+                                clientCertsDirectoryPath + ImportExportConstants.CLIENT_CERTIFICATE_FILE,
                                 exportFormat, ImportExportConstants.TYPE_CLIENT_CERTIFICATES, certificateList);
                     }
                 }
@@ -1051,7 +1052,8 @@ public class ExportUtils {
                 throw new APIImportExportException("Error while saving as YAML or JSON", e);
             } catch (APIManagementException e) {
                 throw new APIImportExportException(
-                        "Error retrieving certificate meta data. tenantId [" + tenantId + "] api [" + tenantId + "]", e);
+                        "Error retrieving certificate meta data. tenantId [" + tenantId + "] api [" +
+                                tenantId + "]", e);
             }
         }
     }

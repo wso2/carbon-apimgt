@@ -999,7 +999,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIClientCertificateByAlias(String alias, String apiId,
                                                       InputStream certificateInputStream,
                                                       Attachment certificateDetail, String tier,
-                                                      String keyType, MessageContext messageContext) {
+                                                      MessageContext messageContext) {
         return updateAPIClientCertificateByKeyTypeAndAlias(APIConstants.API_KEY_TYPE_PRODUCTION, alias, apiId,
                 certificateInputStream, certificateDetail, tier, messageContext);
     }

@@ -97,7 +97,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String apiKeyHeader;
     private String apiSecurity;
     private String apiLevelPolicy;
-    private String environmentType;
     private String certificateInformation;
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
@@ -150,24 +149,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      */
     public void setAPILevelPolicy(String apiLevelPolicy) {
         this.apiLevelPolicy = apiLevelPolicy;
-    }
-
-    /**
-     * To get the environment type (whether production or sandbox).
-     *
-     * @return the environment type.
-     */
-    public String getEnvironmentType() {
-        return environmentType;
-    }
-
-    /**
-     * To set the environment type (whether production or sandbox).
-     *
-     * @param environmentType the environment type.
-     */
-    public void setEnvironmentType(String environmentType) {
-        this.environmentType = environmentType;
     }
 
     /**

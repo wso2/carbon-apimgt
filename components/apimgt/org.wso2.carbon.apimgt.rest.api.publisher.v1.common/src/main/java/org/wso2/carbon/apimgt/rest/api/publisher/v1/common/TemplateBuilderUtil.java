@@ -90,10 +90,10 @@ public class TemplateBuilderUtil {
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
-                                                               List<ClientCertificateDTO> clientCertificateDTOSProduction,
-                                                               List<ClientCertificateDTO> clientCertificateDTOSSandbox,
-                                                               List<SoapToRestMediationDto> soapToRestInMediationDtos,
-                                                               List<SoapToRestMediationDto> soapToRestMediationDtos)
+                                                           List<ClientCertificateDTO> clientCertificateDTOSProduction,
+                                                           List<ClientCertificateDTO> clientCertificateDTOSSandbox,
+                                                           List<SoapToRestMediationDto> soapToRestInMediationDtos,
+                                                           List<SoapToRestMediationDto> soapToRestMediationDtos)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -674,10 +674,10 @@ public class TemplateBuilderUtil {
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, API api,
-                                                                 APITemplateBuilder builder, String tenantDomain,
-                                                                 String extractedPath, APIDTO apidto,
-                                                                 List<ClientCertificateDTO> productionClientCertificatesDTOList,
-                                                                 List<ClientCertificateDTO> sandboxClientCertificatesDTOList)
+                                                         APITemplateBuilder builder, String tenantDomain,
+                                                         String extractedPath, APIDTO apidto,
+                                                         List<ClientCertificateDTO> productionClientCertificatesDTOList,
+                                                         List<ClientCertificateDTO> sandboxClientCertificatesDTOList)
             throws APIManagementException, APITemplateException, XMLStreamException {
 
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
