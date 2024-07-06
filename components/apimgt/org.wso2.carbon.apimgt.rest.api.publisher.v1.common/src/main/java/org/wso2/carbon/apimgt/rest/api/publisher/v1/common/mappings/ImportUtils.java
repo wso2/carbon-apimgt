@@ -1154,7 +1154,7 @@ public class ImportUtils {
             policySpecification = getOperationPolicySpecificationFromFile(pathToArchive, fileName);
             if (policySpecification == null) {
                 throw new APIManagementException("Policy Specification Cannot be null",
-                        ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS);
+                        ExceptionCodes.MISSING_OPERATION_POLICY_PARAMETERS);
             }
             OperationPolicyData operationPolicyData = new OperationPolicyData();
             operationPolicyData.setOrganization(organization);

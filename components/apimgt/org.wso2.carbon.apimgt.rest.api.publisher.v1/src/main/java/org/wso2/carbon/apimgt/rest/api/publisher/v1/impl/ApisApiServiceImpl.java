@@ -31,6 +31,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
+import org.apache.http.HttpStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
@@ -638,7 +640,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response updateAPI(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
+    public Response updateAPI(String apiId, APIDTO body, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
         String[] tokenScopes =
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
@@ -686,14 +689,16 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                if (e.getErrorHandler()
+                        .getErrorCode() == ExceptionCodes.GLOBAL_MEDIATION_POLICIES_NOT_FOUND.getErrorCode()) {
+                    RestApiUtil.handleResourceNotFoundError(e.getErrorHandler().getErrorDescription(), e, log);
+                } else {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                }
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : " + apiId, e, log);
-            } else if (e.getErrorHandler().getErrorCode() == ExceptionCodes.USER_ROLES_CANNOT_BE_NULL.getErrorCode()) {
-                RestApiUtil.handleBadRequest("Bad Request while updating API : " + apiId, e, log);
             } else {
-                String errorMessage = "Error while updating the API : " + apiId + " - " + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw e;
             }
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;

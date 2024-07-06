@@ -93,12 +93,12 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot remove the resource paths because they are used by one or more API Products",
             409, "Cannot update API: %s:%s, due to the resources to remove are used by one or more API Products"),
     API_CATEGORY_INVALID(
-            900345, "The API category is invalid.", 400, " The API category is invalid for API: %s:%s"),
+            900345, "The API category is invalid.", 400, " The API category is invalid for API: %s"),
     INVALID_ADDITIONAL_PROPERTIES(900346, "Invalid additional properties", 400,
             "Invalid additional properties for API: %s:%s"),
     INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
     INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
-    USER_ROLES_CANNOT_BE_NULL(900610, "User roles cannot be found", 400, "User roles cannot be found"),
+    USER_ROLES_CANNOT_BE_NULL(900610, "Access control roles cannot be empty", 400, "Access control roles cannot be empty when visibility is restricted"),
     API_REVISION_NOT_FOUND(900347, "API Revision Not Found", 404, "Requested API Revision with id %s not found"),
     EXISTING_API_REVISION_DEPLOYMENT_FOUND(900348, "Can not delete API Revision ", 400, "Couldn't delete API revision since API revision is currently deployed to a gateway. " +
             "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: %s "),
@@ -521,8 +521,8 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_OPERATION_POLICY_SPECIFICATION(902006, "Invalid api policy specification found", 400,
             "Invalid api policy specification. %s", false),
 
-    INVALID_OPERATION_POLICY_PARAMETERS(902007, "Missing required parameters for api policy specification", 400,
-            "Required parameter(s) %s for api policy specification %s are either missing or empty"),
+    MISSING_OPERATION_POLICY_PARAMETERS(902007, "Missing required parameters for policy specification", 400,
+            "Required parameter(s) %s for policy specification %s are either missing or empty"),
     OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(902008, "API policy is not allowed in the applied flow", 400,
             "%s policy is not allowed in response flow"),
     MISSING_MANDATORY_POLICY_ATTRIBUTES(902009, "Missing mandatory api policy attribute", 400,
@@ -562,8 +562,62 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_INVALID_RESPONSE(903100, "Invalid response from AI service", 500, "Error while invoking AI service. %s", false),
     AI_SERVICE_INVALID_ACCESS_TOKEN(903101, "Invalid access token provided for AI service", 401, "Invalid access token provided for AI service"),
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
-    DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters");
+    DOCUMENT_NAME_ILLEGAL_CHARACTERS(902015, "Document name cannot contain illegal characters", 400,
+            "Document name contains one or more illegal characters"),
 
+    HTTP_METHOD_INVALID(903201,
+            "Invalid HTTP method provided for API resource", 400,
+            "The HTTP method '%s' provided for resource '%s' is invalid", false),
+
+    OPERATION_TYPE_INVALID(903202, "Invalid operation type provided for API operation", 400,
+            "The '%s' API operation type '%s' provided for operation '%s' is invalid", false),
+
+    KEYMANAGERS_VALUE_NOT_ARRAY(903203, "KeyManagers value needs to be an array", 400,
+            "Value of the KeyManagers config should be an array", false),
+
+    SCOPE_ALREADY_ASSIGNED_FOR_DIFFERENT_API(903204, "Invalid scopes provided for API", 400,
+            "Error while adding local scopes for API %s. Scope: %s already assigned locally for a different API.",
+            false),
+
+    UNSUPPORTED_TRANSPORT(903205, "Unsupported transport", 400,
+            "Unsupported transport '%s' provided for the API", false),
+
+    OAS_DEFINITION_VERSION_NOT_FOUND(903206, "Invalid OAS definition", 400,
+            "Could not determine the OAS version as the version element of the definition is not found", false),
+
+    API_NAME_PROVIDER_ORG_EMPTY(903207, "API name, provider or organization cannot be empty", 400,
+            "API name, provider or organization cannot be empty. Provided values: name: %s, provider: %s, org: %s",
+            false),
+
+    ANONYMOUS_USER_NOT_PERMITTED(903208, "Anonymous user not permitted", 401,
+            "Attempt to execute privileged operation as the anonymous user", false),
+
+    GLOBAL_MEDIATION_POLICIES_NOT_FOUND(903209, "Global mediation policies not found", 404,
+            "Global mediation policies not found", false),
+
+    ENDPOINT_URL_NOT_PROVIDED(903210, "Endpoint url not provided", 400,
+            "Url is not provided for the endpoint type %s in the endpoint config", false),
+
+    OPERATION_POLICY_NAME_VERSION_INVALID(903211, "Invalid operation policy name or version", 400,
+            "policyName and/or policyVersion provided for the applied policy %s_%s does not match the policy " +
+            "specification identified by the given policyId %s",
+            false),
+
+    INVALID_OPERATION_POLICY_PARAMS(903212, "Invalid operation policy parameters", 400,
+            "Invalid value provided for the operation policy parameter %s", false),
+
+    INVALID_ENDPOINT_SECURITY_CONFIG(903213, "Invalid endpoint security configuration", 400,
+            "Invalid values provided for %s endpoint security configuration", false),
+
+    ENDPOINT_SECURITY_TYPE_NOT_DEFINED(903214, "Endpoint security type not defined", 400,
+            "Endpoint security type not defined for the %s endpoint", false),
+
+    OPERATION_OR_RESOURCE_TYPE_OR_METHOD_NOT_DEFINED(902031,
+            "Operation type/http method is not specified for the operation/resource", 400,
+            "Operation type/http method is not specified for the operation/resource: %s", false),
+
+    RESOURCE_URI_TEMPLATE_NOT_DEFINED(902032, "Resource URI template value not defined", 400,
+            "Resource URI template value (target) not defined", false);
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;
