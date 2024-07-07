@@ -31,11 +31,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class NotificationDAO {
 
@@ -47,53 +44,6 @@ public class NotificationDAO {
 
     public static NotificationDAO getInstance() {
         return INSTANCE;
-    }
-
-    // Tentative
-    public void addNotification(String comment) throws APIManagementException {
-
-        String addNotificationQuery = SQLConstants.PortalNotifications.ADD_NOTIFICATION;
-        String addEndUserQuery = SQLConstants.PortalNotifications.ADD_NOTIFICATION_END_USER;
-
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement ps = conn.prepareStatement(addNotificationQuery)) {
-
-                String notificationId = UUID.randomUUID().toString();
-                ps.setString(1, notificationId);
-                ps.setString(2, "SUBSCRIPTION_UPDATE");
-                ps.setTimestamp(3, Timestamp.from(Instant.now()));
-                ps.setString(4, comment);
-
-                int rowsAffected = ps.executeUpdate();
-
-                if (rowsAffected > 0) {
-                    addEndUser(conn, addEndUserQuery, notificationId, "admin", "carbon.super",
-                            "devportal");
-                    addEndUser(conn, addEndUserQuery, notificationId, "admin", "carbon.super",
-                            "publisher");
-                    conn.commit();
-                }
-            } catch (SQLException e) {
-                conn.rollback();
-                throw new APIManagementException("Error while adding notification", e);
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error while establishing database connection", e);
-        }
-    }
-
-    // Tentative
-    private void addEndUser(Connection conn, String addEndUserQuery, String notificationId, String destinationUser,
-                            String organization, String portalToDisplay) throws SQLException {
-
-        try (PreparedStatement ps = conn.prepareStatement(addEndUserQuery)) {
-            ps.setString(1, notificationId);
-            ps.setString(2, destinationUser);
-            ps.setString(3, organization);
-            ps.setString(4, portalToDisplay);
-            ps.executeUpdate();
-        }
     }
 
     /**
@@ -292,17 +242,6 @@ public class NotificationDAO {
             }
             notificationList.setUnreadCount(unreadNotificationCount);
             notificationList.setCount(notificationCount);
-
-            if (limit < 0) { // Tentative: Remove this else block
-                try {
-                    for (int i = 0; i < limit * -1; i++) {
-                        addNotification("Notification " + i);
-                        Thread.sleep(3000);
-                    }
-                } catch (InterruptedException e) {
-                    log.error("Error while adding notifications", e);
-                }
-            }
         } catch (SQLException e) {
             throw new APIManagementException("Failed to retrieve notifications of the user " + username, e);
         }

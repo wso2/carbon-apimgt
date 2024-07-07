@@ -3261,17 +3261,6 @@ public class SQLConstants {
                         "    SELECT NOTIFICATION_ID " +
                         "    FROM AM_NOTIFICATION_END_USERS " +
                         ")";
-
-        // Tentative
-        public static final String ADD_NOTIFICATION =
-                "INSERT INTO AM_NOTIFICATION " +
-                        "(NOTIFICATION_ID, NOTIFICATION_TYPE, CREATED_TIME, CONTENT) " +
-                        "VALUES (?, ?, ?, ?)";
-
-        public static final String ADD_NOTIFICATION_END_USER =
-                "INSERT INTO AM_NOTIFICATION_END_USERS " +
-                        "(NOTIFICATION_ID, DESTINATION_USER, ORGANIZATION, PORTAL_TO_DISPLAY) " +
-                        "VALUES (?, ?, ?, ?)";
     }
 
     /** Throttle related constants**/
