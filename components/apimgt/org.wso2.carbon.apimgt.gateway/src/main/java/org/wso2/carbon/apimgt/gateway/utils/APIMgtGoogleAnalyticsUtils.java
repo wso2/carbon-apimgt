@@ -22,6 +22,7 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
@@ -43,6 +44,8 @@ public class APIMgtGoogleAnalyticsUtils {
     private static final Log log = LogFactory.getLog(APIMgtGoogleAnalyticsUtils.class);
     private static final String ANONYMOUS_USER_ID = "anonymous";
     private static final String GOOGLE_ANALYTICS_TRACKER_VERSION = "1";
+    private static final String googleAnalyticsSecureHashingEnabled = System.getProperty(APIMgtGatewayConstants
+            .GOOGLE_ANALYTICS_SECURE_HASHING);
     private String configKey = null;
     private GoogleAnalyticsConfig gaConfig = null;
 
@@ -133,18 +136,22 @@ public class APIMgtGoogleAnalyticsUtils {
             message = ANONYMOUS_USER_ID;
         }
 
-        MessageDigest m = MessageDigest.getInstance("MD5");
+        String hashingAlgorithm = "MD5";
+        if (JavaUtils.isTrueExplicitly(googleAnalyticsSecureHashingEnabled)) {
+            hashingAlgorithm = "SHA-256";
+        }
+        MessageDigest m = MessageDigest.getInstance(hashingAlgorithm);
         m.update(message.getBytes("UTF-8"), 0, message.length());
         byte[] sum = m.digest();
         BigInteger messageAsNumber = new BigInteger(1, sum);
-        String md5String = messageAsNumber.toString(16);
+        String hashString = messageAsNumber.toString(16);
 
         // Pad to make sure id is 32 characters long.
-        while (md5String.length() < 32) {
-            md5String = "0" + md5String;
+        while (hashString.length() < 32) {
+            hashString = "0" + hashString;
         }
 
-        return "0x" + md5String.substring(0, 16);
+        return "0x" + hashString.substring(0, 16);
     }
 
     /**

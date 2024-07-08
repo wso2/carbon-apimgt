@@ -181,6 +181,8 @@ public class APIMgtGatewayConstants {
     public static final String VALIDATED_X509_CERT = "ValidatedX509Cert";
     public static final String RESOURCE_SPAN = "API:Resource";
 
+    public static final String GOOGLE_ANALYTICS_SECURE_HASHING = "googleAnalyticsSecureHashingEnabled";
+
     /**
      * Web-sub related properties
      */
