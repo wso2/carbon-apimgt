@@ -99,7 +99,6 @@
                             version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.event.output.adapter.core.*; version="${carbon.analytics.common.version}",
                             org.apache.commons.*,
                             org.apache.http.*,
                             org.wso2.carbon.apimgt.impl; version="${carbon.apimgt.version}",
