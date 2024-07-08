@@ -251,7 +251,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <configuration>
-                        <source>1.8</source>
+                        <source>17</source>
                     </configuration>
                     <executions>
                         <execution>
@@ -2015,23 +2015,23 @@
         <carbon.apimgt.version>9.29.160-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.3.11</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.3.14-SNAPSHOT</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.9.26</carbon.kernel.version>
+        <carbon.kernel.version>4.9.27-SNAPSHOT</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.9.11</carbon.commons.version>
+        <carbon.commons.version>4.9.12-SNAPSHOT</carbon.commons.version>
 
-        <carbon.registry.version>4.8.32</carbon.registry.version>
-        <carbon.mediation.version>4.7.204</carbon.mediation.version>
+        <carbon.registry.version>4.8.36-SNAPSHOT</carbon.registry.version>
+        <carbon.mediation.version>4.7.210-SNAPSHOT</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.25.705</carbon.identity.version>
+        <carbon.identity.version>5.25.707-SNAPSHOT</carbon.identity.version>
         <carbon.identity.governance.version>1.8.107</carbon.identity.governance.version>
-        <carbon.identity-inbound-auth-oauth.version>6.13.16</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-inbound-auth-oauth.version>6.13.18-SNAPSHOT</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-oauth2-grant-jwt.version>2.2.4</carbon.identity-oauth2-grant-jwt.version>
         <carbon.identity-user-ws.version>5.7.5</carbon.identity-user-ws.version>
         <carbon.identity-data-publisher-application-authentication.version>5.6.8</carbon.identity-data-publisher-application-authentication.version>
@@ -2043,7 +2043,7 @@
         <graphql.java.version>19.6.wso2v1</graphql.java.version>
         <graphql.java.version.range>[19.0,20.0)</graphql.java.version.range>
 
-        <carbon.governance.version>4.8.33</carbon.governance.version>
+        <carbon.governance.version>4.8.34-SNAPSHOT</carbon.governance.version>
         <carbon.deployment.version>4.11.14</carbon.deployment.version>
         <carbon.multitenancy.version>4.9.27</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
@@ -2055,7 +2055,7 @@
 
         <!-- Carbon Identity import version ranges -->
         <carbon.identity.imp.pkg.version>[5.14.0, 6.0.0)</carbon.identity.imp.pkg.version>
-        <carbon.identity.recovery.pkg.version>[1.6.0, 1.9.0)</carbon.identity.recovery.pkg.version>
+        <carbon.identity.recovery.pkg.version>[1.6.0, 3.0.0)</carbon.identity.recovery.pkg.version>
         <carbon.identity-inbound-auth-oauth.imp.pkg.version>[6.0.0, 7.0.0)
         </carbon.identity-inbound-auth-oauth.imp.pkg.version>
         <carbon.identity-user-ws.imp.pkg.version>[5.3.0, 6.0.0)</carbon.identity-user-ws.imp.pkg.version>
@@ -2073,14 +2073,14 @@
         <wsdl4j.version.range>[1.6.3.wso2v3, 1.7.0)</wsdl4j.version.range>
 
         <!-- P2 Plugin Version -->
-        <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
+        <carbon.p2.plugin.version>5.2.50-SNAPSHOT</carbon.p2.plugin.version>
 
         <maven-bundle-plugin.version>3.2.0</maven-bundle-plugin.version>
         <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
         <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
 
         <!-- Axis2 Version -->
-        <axis2.wso2.version>1.6.1-wso2v98</axis2.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v98-SNAPSHOT</axis2.wso2.version>
         <axis2.osgi.version.range>[1.6.1, 1.7.0)</axis2.osgi.version.range>
 
         <!-- Apache Axiom -->
@@ -2092,14 +2092,14 @@
 
         <!-- Servlet API -->
         <exp.pkg.version.javax.servlet>2.6.0</exp.pkg.version.javax.servlet>
-        <imp.pkg.version.javax.servlet>[2.6.0, 3.0.0)</imp.pkg.version.javax.servlet>
-        <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
+        <imp.pkg.version.javax.servlet>[2.6.0, 5.0.0)</imp.pkg.version.javax.servlet>
+        <javax.servlet.imp.pkg.version>[2.6.0, 5.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
         <jaggery.version>0.14.13</jaggery.version>
 
 	<!-- OSGi -->
-        <imp.package.version.osgi.service>[1.2.0,1.3.0)</imp.package.version.osgi.service>
+        <imp.package.version.osgi.service>[1.2.0,2.0.0)</imp.package.version.osgi.service>
         <imp.package.version.osgi.util>[1.2.0,2.0.0)</imp.package.version.osgi.util>
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
@@ -2143,8 +2143,8 @@
         <com.nimbusds.wso2.version>9.37.3.wso2v1</com.nimbusds.wso2.version>
         <json-smart.version>2.5.0</json-smart.version>
         <org.apache.velocity.version>2.3</org.apache.velocity.version>
-        <org.slf4j.version>2.0.12</org.slf4j.version>
-        <slf4j.api.version>2.0.12</slf4j.api.version>
+        <org.slf4j.version>2.0.13</org.slf4j.version>
+        <slf4j.api.version>2.0.13</slf4j.api.version>
         <spring-web.version>5.3.23</spring-web.version>
         <hibernate-validator.version>6.0.23.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
@@ -2172,7 +2172,7 @@
         <cxf.version>3.6.3</cxf.version>
         <carbon.metrics.version>1.3.12</carbon.metrics.version>
         <!-- apache pdfbox version -->
-        <event.processor.version>2.3.10</event.processor.version>
+        <event.processor.version>2.3.13-SNAPSHOT</event.processor.version>
         <pdfbox.version>3.0.1</pdfbox.version>
         <pdfbox.io.version>3.0.1.wso2v1</pdfbox.io.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
@@ -2194,7 +2194,7 @@
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
         <version.snake.yaml>2.2</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
-        <slf4j.test.version>2.0.12</slf4j.test.version>
+        <slf4j.test.version>2.0.13</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
         <jacoco.version>0.8.4</jacoco.version>
         <xml-apis.version>1.4.01</xml-apis.version>
