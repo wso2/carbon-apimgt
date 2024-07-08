@@ -80,6 +80,11 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                             apiRuntimeArtifactDto.getApiId().concat("-").concat(apiRuntimeArtifactDto.getRevision())
                             .concat(APIConstants.ZIP_FILE_EXTENSION);
                     Path path = Paths.get(tempDirectory.getAbsolutePath(), fileName);
+                    File file = new File(path.toString());
+                    String canonicalPath = file.getCanonicalPath();
+                    if (!canonicalPath.startsWith(new File(tempDirectory.getAbsolutePath()).getCanonicalPath())) {
+                        throw new IOException("File path is outside the root artifact directory");
+                    }
                     FileUtils.copyInputStreamToFile(artifact, path.toFile());
 
                     ApiProjectDto apiProjectDto = deploymentsMap.get(fileName);
