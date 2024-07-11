@@ -1,12 +1,16 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.google.gson.Gson;
+import edu.emory.mathcs.backport.java.util.Arrays;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -14,6 +18,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
@@ -26,6 +31,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
+import java.util.*;
+
 import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 public class WorkflowsApiServiceImpl implements WorkflowsApiService {
 
@@ -69,19 +76,50 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String query = "";
+        Map<String, Object> result;
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        boolean isMore = true;
+        int start = 0;
+        List<APIIdentifier> apiIdentifiers = null;
+        while(isMore) {
+            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, 0, start+100, RestApiConstants.DEFAULT_SORT_CRITERION, RestApiConstants.DESCENDING_SORT_ORDER );
+            apiIdentifiers  =  new ArrayList<>();
+            Set<API> apis = (Set<API>) result.get("apis");
+            for(API api : apis){
+                apiIdentifiers.add(api.getId());
+            }
+            isMore = Boolean.parseBoolean(result.get("isMore").toString());
+            if(isMore) {
+                start = start + 100;
+            }
+        }
         WorkflowListDTO workflowListDTO;
         try {
             Workflow[] workflows;
+            List<Workflow> workflowList;
             String status = "CREATED";
             APIAdmin apiAdmin = new APIAdminImpl();
             if(workflowType != null) {
                 if (workflowType.equals("SUBSCRIPTION_CREATION")) {
                     workflowType = "AM_SUBSCRIPTION_CREATION";
+                } else if (workflowType.equals("SUBSCRIPTION_UPDATE")) {
+                    workflowType = "AM_SUBSCRIPTION_UPDATE";
                 }
             }
-            if (workflowType.equals("AM_SUBSCRIPTION_CREATION")) {
+            if (workflowType.equals("AM_SUBSCRIPTION_CREATION") || workflowType.equals("AM_SUBSCRIPTION_UPDATE")) {
                 workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
-                workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
+                workflowList = new LinkedList<Workflow>(Arrays.asList(workflows));
+                for (Workflow workflow : workflowList) {
+                    String apiName = workflow.getProperties().get("apiName").toString();
+                    String apiVersion = workflow.getProperties().get("apiVersion").toString();
+                    String provider = workflow.getProperties().get("apiProvider").toString();
+                    APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+                    if(!apiIdentifiers.contains(apiIdentifier)) {
+                        workflowList.remove(workflow);
+                    }
+                }
+                workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflowList.toArray(new Workflow[workflowList.size()]), limit, offset);
                 WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset,
                     workflows.length);
                 return Response.ok().entity(workflowListDTO).build();
