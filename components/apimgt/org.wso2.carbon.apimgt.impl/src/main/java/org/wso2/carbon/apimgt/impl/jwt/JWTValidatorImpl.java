@@ -92,7 +92,7 @@ public class JWTValidatorImpl implements JWTValidator {
             throw new APIManagementException("Error while parsing JWT", e);
         }
     }
-    private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) { //Holder of Key token
+    private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) throws ParseException { //Holder of Key token
 
         if (isCertificateBoundAccessTokenEnabled()) {
             if (signedJWTInfo.getClientCertificate() == null ||

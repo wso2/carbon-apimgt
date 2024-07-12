@@ -29,6 +29,7 @@ public class EnvironmentDTO   {
     private String name = null;
     private String displayName = null;
     private String provider = null;
+    private String type = "hybrid";
     private String gatewayType = "Regular";
     private String description = null;
     private Boolean isReadOnly = null;
@@ -103,6 +104,23 @@ public class EnvironmentDTO   {
   }
   public void setProvider(String provider) {
     this.provider = provider;
+  }
+
+  /**
+   **/
+  public EnvironmentDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "hybrid", value = "")
+  @JsonProperty("type")
+  public String getType() {
+    return type;
+  }
+  public void setType(String type) {
+    this.type = type;
   }
 
   /**
@@ -225,6 +243,7 @@ public class EnvironmentDTO   {
         Objects.equals(name, environment.name) &&
         Objects.equals(displayName, environment.displayName) &&
         Objects.equals(provider, environment.provider) &&
+        Objects.equals(type, environment.type) &&
         Objects.equals(gatewayType, environment.gatewayType) &&
         Objects.equals(description, environment.description) &&
         Objects.equals(isReadOnly, environment.isReadOnly) &&
@@ -235,7 +254,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, gatewayType, description, isReadOnly, vhosts, endpointURIs, additionalProperties);
+    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, vhosts, endpointURIs, additionalProperties);
   }
 
   @Override
@@ -247,6 +266,7 @@ public class EnvironmentDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    isReadOnly: ").append(toIndentedString(isReadOnly)).append("\n");

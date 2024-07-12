@@ -100,6 +100,12 @@ public class OASTestBase {
         itemGet.setScope(sampleScope);
         itemGet.setScopes(sampleScope);
     }
+    public Scope getSampleScope() {
+        return sampleScope;
+    }
+    public Scope getExtensionScope() {
+        return extensionScope;
+    }
 
     public void testGetURITemplates(APIDefinition parser, String content) throws Exception {
         JSONObject jsonObject = new JSONObject(content);

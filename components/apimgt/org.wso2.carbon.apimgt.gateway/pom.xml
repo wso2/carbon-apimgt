@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.29.28-SNAPSHOT</version>
+        <version>9.29.161-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -85,7 +85,7 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.logging</groupId>
+            <groupId>org.wso2.org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
         </dependency>
         <dependency>
@@ -205,6 +205,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.wso2.orbit.com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <scope>test</scope>
@@ -250,9 +254,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>slf4j.wso2</groupId>
-            <artifactId>slf4j</artifactId>
-            <version>1.5.10.wso2v1</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -376,7 +379,7 @@
                         --add-exports java.base/sun.nio.cs=ALL-UNNAMED                 
                     </argLine>
                     <classpathDependencyExcludes>
-                        <classpathDependencyExclude>org.ops4j.pax.logging:pax-logging-api</classpathDependencyExclude>
+                        <classpathDependencyExclude>org.wso2.org.ops4j.pax.logging</classpathDependencyExclude>
                         <classpathDependencyExclude>org.wso2.orbit.com.fasterxml.jackson.core:jackson-core</classpathDependencyExclude>
                     </classpathDependencyExcludes>
                     <systemProperties>

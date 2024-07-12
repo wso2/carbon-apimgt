@@ -292,7 +292,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         }
         syncModeDeploymentCount++;
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup(tenantDomain);
-        DataHolder.getInstance().setAllApisDeployed(isAPIsDeployedInSyncMode);
         if (!isAPIsDeployedInSyncMode) {
             log.error("Deployment attempt : " + syncModeDeploymentCount + " was unsuccessful");
             if (!(syncModeDeploymentCount > retryCount)) {
@@ -301,6 +300,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 log.error("Maximum retry limit exceeded. Server is starting without deploying all synapse artifacts");
             }
         } else {
+            DataHolder.getInstance().setTenantDeployStatus(tenantDomain);
             log.info("Deployment attempt : " + syncModeDeploymentCount + " was successful");
         }
     }
@@ -370,8 +370,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         while (retry) {
             try {
                 boolean isArtifactsDeployed = deployArtifactsAtStartup(tenantDomain);
-                DataHolder.getInstance().setAllApisDeployed(isArtifactsDeployed);
                 if (isArtifactsDeployed) {
+                    DataHolder.getInstance().setTenantDeployStatus(tenantDomain);
                     log.info("Synapse Artifacts deployed Successfully in the Gateway");
                     retry = false;
                 } else {
@@ -416,7 +416,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         while (retry) {
             try {
                 boolean isArtifactsDeployed = deployGatewayPolicyArtifactsAtStartup(tenantDomain);
-                DataHolder.getInstance().setAllApisDeployed(isArtifactsDeployed);
+                DataHolder.getInstance().setAllGatewayPoliciesDeployed(isArtifactsDeployed);
                 if (isArtifactsDeployed) {
                     log.info("Gateway policy artifacts deployed Successfully in the Gateway");
                     retry = false;
@@ -457,7 +457,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             KeyTemplateRetriever webServiceBlockConditionsRetriever = new KeyTemplateRetriever();
             webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
 
-            // Start web service based revoked JWT tokens retriever.
+            // Start web service based revoke conditions retriever. Retrieve revoked token JTIs, users and client IDs.
             // Advanced throttle properties & blocking conditions have to be enabled for JWT token
             // retrieval due to the throttle config dependency for this feature.
             RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
@@ -480,7 +480,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         cleanDeployment(configContext.getAxisConfiguration().getRepository().getPath());
         new Thread(() -> {
             try {
-                new EndpointCertificateDeployer(tenantDomain).deployCertificatesAtStartup();
+                new EndpointCertificateDeployer(tenantDomain).deployAllTenantCertificatesAtStartup();
                 new GoogleAnalyticsConfigDeployer(tenantDomain).deploy();
             } catch (APIManagementException e) {
                 log.error(e);

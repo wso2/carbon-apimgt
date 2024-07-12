@@ -95,8 +95,12 @@ public class SubscriptionValidationDataUtil {
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
             apidto.setOrganization(model.getOrganization());
-            apidto.setSecurityScheme(RestApiCommonUtil.getLoggedInUserProvider().
-                    getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
+            // The security schema is necessary only for the websocket APIs. To prevent unnecessary registry calls,
+            // it has been excluded from other APIs, thus reducing operational costs.
+            if(model.getApiType() != null && model.getApiType().equals("WS")) {
+                apidto.setSecurityScheme(RestApiCommonUtil.getLoggedInUserProvider().
+                        getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
+            }
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -264,6 +268,8 @@ public class SubscriptionValidationDataUtil {
                 subscriptionDTO.setSubscriptionState(subsModel.getSubscriptionState());
                 subscriptionDTO.setApiName(subsModel.getApiName());
                 subscriptionDTO.setApiVersion(subsModel.getApiVersion());
+                subscriptionDTO.setApiOrganization(subsModel.getApiOrganization());
+                subscriptionDTO.setApplicationOrganization(subsModel.getAppOrganization());
                 subscriptionListDTO.getList().add(subscriptionDTO);
 
             }

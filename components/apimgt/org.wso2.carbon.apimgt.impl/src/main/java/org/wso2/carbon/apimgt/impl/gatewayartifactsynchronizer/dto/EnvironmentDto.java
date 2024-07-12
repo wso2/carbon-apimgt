@@ -31,6 +31,18 @@ public class EnvironmentDto {
 
     private long deployedTimeStamp;
 
+    private String type;
+
+    public String getType() {
+
+        return type;
+    }
+
+    public void setType(String type) {
+
+        this.type = type;
+    }
+
     public String getName() {
         return name;
     }

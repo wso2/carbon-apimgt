@@ -46,8 +46,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.security.cert.X509Certificate;
+import java.security.cert.X509Certificate;
 
 /**
  * This is a factory class.you have to use this when you need to initiate classes by reading config file.
@@ -211,7 +210,7 @@ public class KeyManagerHolder {
                         tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
                     } else {
                         X509Certificate x509Certificate =
-                                APIUtil.retrieveCertificateFromContent((String) certificateValue);
+                                APIUtil.retrieveCertificateFromURLEncodedContent((String) certificateValue);
                         if (x509Certificate != null) {
                             tokenIssuerDto.setCertificate(x509Certificate);
                         }

@@ -14,7 +14,7 @@
 ################################################################################
 openapi: 3.0.1
 info:
-  version: v0.1
+  version: v0.2
   title: WSO2 API Manager - DevOps
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - DevOps.
@@ -26,12 +26,12 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 paths:
-  "/tenant-logs/{tenantId}/apis/":
+  "/tenant-logs/{tenant}/apis/":
     get:
       summary: |
         GET log level of APIs
       parameters:
-        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/tenant'
         - $ref: '#/components/parameters/logLevel'
       responses:
         "200":
@@ -54,9 +54,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Basic YWRtaW46YWRtaW4="
+          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/carbon.super/apis?log-level=FULL"'
 
 
-  "/tenant-logs/{tenantId}/apis/{apiId}":
+  "/tenant-logs/{tenant}/apis/{apiId}":
     get:
       summary: |
         GET log enabled API data
@@ -82,8 +86,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       parameters:
-        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/tenant'
         - $ref: '#/components/parameters/apiId'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Basic YWRtaW46YWRtaW4="
+          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/carbon.super/apis/12d6e73c-778d-45ac-b57d-117c6c5092a4"'
     put:
       summary: |
         Set logging levels of the API with its api ID
@@ -92,7 +100,7 @@ paths:
         template(context/version) with the log level (OFF|BASIC|STANDARD|FULL).
         You should either provide the api ID and the api log level.
       parameters:
-        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/tenant'
         - $ref: '#/components/parameters/apiId'
       requestBody:
         content:
@@ -122,6 +130,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Basic YWRtaW46YWRtaW4="
+          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/carbon.super/apis/12d6e73c-778d-45ac-b57d-117c6c5092a4"'
 
   "/config/correlation/":
     get:
@@ -149,6 +161,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Basic YWRtaW46YWRtaW4="
+          "https://127.0.0.1:9443/api/am/devops/v0/config/correlation"'
 
     put:
       summary: |
@@ -186,6 +202,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Basic YWRtaW46YWRtaW4=" -d data.json
+          "https://127.0.0.1:9443/api/am/devops/v0/config/correlation"'
 
 servers:
   - url: https://apis.wso2.com/api/am/devops/v0
@@ -234,12 +254,24 @@ components:
 
     LoggingApiInput:
       title: API Info object with log details
+      required:
+        - logLevel
       properties:
         logLevel:
           type: string
           example: FULL
+        resourceMethod:
+          type: string
+          example: GET
+        resourcePath:
+          type: string
+          example: /v1.0.0/pizza
     LoggingApiOutput:
       title: API Info object with log details
+      required:
+        - context
+        - logLevel
+        - apiId
       properties:
         context:
           type: string
@@ -250,6 +282,12 @@ components:
         apiId:
           type: string
           example: 12d6e73c-778d-45ac-b57d-117c6c5092a4
+        resourceMethod:
+          type: string
+          example: GET
+        resourcePath:
+          type: string
+          example: /v1.0.0/pizza
     Error:
       title: Error object returned with 4XX HTTP Status
       required:
@@ -295,11 +333,11 @@ components:
             A detail description about the error message.
 
   parameters:
-    tenantId:
-      name: tenantId
+    tenant:
+      name: tenant
       in: path
       description: |
-        Tenant ID
+        Tenant (organization) name
       required: true
       schema:
         type: string

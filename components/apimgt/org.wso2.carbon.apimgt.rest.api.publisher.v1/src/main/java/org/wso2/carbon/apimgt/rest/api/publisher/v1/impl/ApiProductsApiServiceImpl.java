@@ -94,6 +94,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -435,6 +437,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String documentName = body.getName();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            Pattern pattern = Pattern.compile(APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
+            Matcher matcher = pattern.matcher(documentName);
+            if (matcher.find()) {
+                RestApiUtil.handleBadRequest("Document name cannot contain illegal characters  " +
+                        "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )", log);
+            }
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, organization);
             if (apiProvider.isDocumentationExist(apiProductId, documentName, organization)) {

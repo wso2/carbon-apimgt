@@ -36,14 +36,22 @@ public class APIEvent extends Event {
     private String apiType;
     private String apiStatus;
     private String logLevel;
+    private String resourceMethod;
+    private String resourcePath;
     private APIConstants.EventAction action;
     private String securityScheme;
+    private String currentStatus;
+    private String apiVisibility;
+    private String lifecycleEvent;
 
-    public APIEvent(String uuid, String logLevel, String type, String apiContext) {
+    public APIEvent(String uuid, String logLevel, String type, String apiContext, String resourceMethod,
+                    String resourcePath) {
         this.uuid = uuid;
         this.logLevel = logLevel;
         this.type = type;
         this.apiContext = apiContext;
+        this.resourceMethod = resourceMethod;
+        this.resourcePath = resourcePath;
     }
 
     public APIEvent(String uuid, String apiName, String apiVersion, String apiProvider, String apiType, String apiStatus,
@@ -79,6 +87,27 @@ public class APIEvent extends Event {
 
     public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName,
                     int apiId, String uuid, String apiVersion, String apiType, String apiContext, String apiProvider,
+                    String apiStatus, String securityScheme, String currentStatus, String apiVisibility) {
+        this.eventId = eventId;
+        this.timeStamp = timestamp;
+        this.type = type;
+        this.tenantId = tenantId;
+        this.apiId = apiId;
+        this.uuid = uuid;
+        this.apiVersion = apiVersion;
+        this.apiName = apiName;
+        this.apiType = apiType;
+        this.apiContext = apiContext;
+        this.apiProvider = apiProvider;
+        this.apiStatus = apiStatus;
+        this.tenantDomain = tenantDomain;
+        this.securityScheme = securityScheme;
+        this.currentStatus = currentStatus;
+        this.apiVisibility = apiVisibility;
+    }
+
+    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName,
+                    int apiId, String uuid, String apiVersion, String apiType, String apiContext, String apiProvider,
                     String apiStatus, APIConstants.EventAction action, String securityScheme) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -95,6 +124,50 @@ public class APIEvent extends Event {
         this.tenantDomain = tenantDomain;
         this.action = action;
         this.securityScheme = securityScheme;
+    }
+
+    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName,
+                    int apiId, String uuid, String apiVersion, String apiType, String apiContext, String apiProvider,
+                    String apiStatus, APIConstants.EventAction action, String securityScheme, String apiVisibility) {
+        this.eventId = eventId;
+        this.timeStamp = timestamp;
+        this.type = type;
+        this.tenantId = tenantId;
+        this.apiId = apiId;
+        this.uuid = uuid;
+        this.apiVersion = apiVersion;
+        this.apiName = apiName;
+        this.apiType = apiType;
+        this.apiContext = apiContext;
+        this.apiProvider = apiProvider;
+        this.apiStatus = apiStatus;
+        this.tenantDomain = tenantDomain;
+        this.action = action;
+        this.securityScheme = securityScheme;
+        this.currentStatus = apiStatus;
+        this.apiVisibility = apiVisibility;
+    }
+
+    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName,
+                    int apiId, String uuid, String apiVersion, String apiType, String apiContext, String apiProvider,
+                    String apiStatus, String securityScheme, String action, String currentStatus, String apiVisibility) {
+        this.eventId = eventId;
+        this.timeStamp = timestamp;
+        this.type = type;
+        this.tenantId = tenantId;
+        this.apiId = apiId;
+        this.uuid = uuid;
+        this.apiVersion = apiVersion;
+        this.apiName = apiName;
+        this.apiType = apiType;
+        this.apiContext = apiContext;
+        this.apiProvider = apiProvider;
+        this.apiStatus = apiStatus;
+        this.tenantDomain = tenantDomain;
+        this.securityScheme = securityScheme;
+        this.lifecycleEvent = action;
+        this.currentStatus = currentStatus;
+        this.apiVisibility = apiVisibility;
     }
 
     @Override
@@ -220,6 +293,14 @@ public class APIEvent extends Event {
         return logLevel;
     }
 
+    public String getResourceMethod() {
+        return resourceMethod;
+    }
+
+    public String getResourcePath() {
+        return resourcePath;
+    }
+
     public APIConstants.EventAction getAction() {
         return action;
     }
@@ -234,5 +315,31 @@ public class APIEvent extends Event {
 
     public void setSecurityScheme(String securityScheme) {
         this.securityScheme = securityScheme;
+    }
+
+    public String getCurrentStatus() {
+        return currentStatus;
+    }
+
+    public String getLifecycleEvent() {
+        return lifecycleEvent;
+    }
+
+    public void setLifecycleEvent(String lifecycleEvent) {
+        this.lifecycleEvent = lifecycleEvent;
+    }
+
+
+    public void setCurrentStatus(String currentStatus) {
+        this.currentStatus = currentStatus;
+    }
+
+
+    public String getApiVisibility() {
+        return apiVisibility;
+    }
+
+    public void setApiVisibility(String apiVisibility) {
+        this.apiVisibility = apiVisibility;
     }
 }

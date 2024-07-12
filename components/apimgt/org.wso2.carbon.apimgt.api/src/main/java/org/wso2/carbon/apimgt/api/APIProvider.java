@@ -691,6 +691,17 @@ public interface APIProvider extends APIManager {
     List<BlockConditionsDTO> getBlockConditions() throws APIManagementException;
 
     /**
+     * Get a lightweight version of list of block Conditions.
+     *
+     * @param conditionType  type of the condition
+     * @param conditionValue condition value
+     * @return list of block conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditionsDTO> getLightweightBlockConditions(String conditionType, String conditionValue)
+            throws APIManagementException;
+
+    /**
      *
      * @return Retrieve a block Condition
      * @throws APIManagementException
@@ -1681,6 +1692,17 @@ public interface APIProvider extends APIManager {
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
 
     /**
+     * Get API UUID by the API Identifier.
+     *
+     * @param identifier API Identifier
+     * @param organization identifier of the organization
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException;
+
+
+    /**
      * Returns API Search result based on fqdn of the provided endpoint.
      * Returns empty API Search result if endpoint is invalid.
      *
@@ -1859,6 +1881,17 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
+     * Get the list of gateway labels which the policy mapping is deployed.
+     *
+     * @param gatewayPolicyMappingId Policy mapping UUID
+     * @param tenantDomain           Tenant domain
+     * @return Set of gateway labels
+     * @throws APIManagementException
+     */
+    Set<String> getPolicyMappingDeployedGateways(String gatewayPolicyMappingId, String tenantDomain)
+            throws APIManagementException;
+
+    /**
      * Checks whether a policy mapping deployment exists for a given gateway label.
      *
      * @param gatewayLabel           Gateway label
@@ -1886,4 +1919,14 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     int getPolicyUsageByPolicyUUIDInGatewayPolicies(String commonPolicyUUID) throws APIManagementException;
+    
+    /**
+     * Update SoapToRest Sequences for the given API.
+     * @param organization    Organization
+     * @param apiId  API ID
+     * @param sequences list of SOAPToRestSequence.
+     * @throws APIPersistenceException
+     */
+    void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
+            throws APIManagementException;
 }

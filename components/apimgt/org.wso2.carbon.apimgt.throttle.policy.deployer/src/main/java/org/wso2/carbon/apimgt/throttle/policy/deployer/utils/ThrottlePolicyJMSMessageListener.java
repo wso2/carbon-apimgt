@@ -21,21 +21,29 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
+import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyResetEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.PolicyRetriever;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApiPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
@@ -53,14 +61,27 @@ import javax.jms.Topic;
 public class ThrottlePolicyJMSMessageListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(ThrottlePolicyJMSMessageListener.class);
+    private static String streamID = "org.wso2.throttle.request.stream:1.0.0";
 
     private final PolicyRetriever policyRetriever = new PolicyRetriever();
-    private final ScheduledExecutorService policyRetrievalScheduler = Executors.newScheduledThreadPool(10,
+    private final ScheduledExecutorService policyRetrievalScheduler = Executors.newSingleThreadScheduledExecutor(
             new PolicyRetrieverThreadFactory());
+    private final EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
+            .getAPIMConfiguration().getEventHubConfigurationDto();
 
     public void onMessage(Message message) {
 
         try {
+            if (eventHubConfigurationDto.hasEventWaitingTime()) {
+                long timeLeft = message.getJMSTimestamp() + eventHubConfigurationDto.getEventWaitingTime()
+                        - System.currentTimeMillis();
+                if (log.isDebugEnabled()) {
+                    log.debug("Event Hub waiting time: " + timeLeft);
+                }
+                if (timeLeft > 0) {
+                    Thread.sleep(timeLeft);
+                }
+            }
             if (message != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Event received in JMS Event Receiver - " + message);
@@ -94,6 +115,8 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             }
         } catch (JMSException | JsonProcessingException e) {
             log.error("JMSException occurred when processing the received message ", e);
+        } catch (InterruptedException e) {
+            log.error("Error occurred while waiting to retrieve artifacts from event hub", e);
         }
     }
 
@@ -193,6 +216,42 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             if (task != null) {
                 policyRetrievalScheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
             }
+        } else if (APIConstants.EventType.POLICY_RESET.toString().equals(eventType)) {
+            PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
+            String applicationLevelThrottleKey = null;
+            String applicationLevelTier = null;
+            String authorizedUser = null;
+            String subscriberTenantDomain = null;
+            String applicationId = null;
+
+            if (event.getPolicyType() == APIConstants.PolicyType.APPLICATION) {
+                ApplicationPolicyResetEvent applicationEvent = new Gson().fromJson(eventJson,
+                        ApplicationPolicyResetEvent.class);
+                applicationLevelThrottleKey = applicationEvent.getAppId() + ":" + applicationEvent.getUserId() + "@"
+                        + applicationEvent.getTenantDomain();
+                applicationLevelTier = applicationEvent.getAppTier();
+                authorizedUser = applicationEvent.getUserId();
+                subscriberTenantDomain = applicationEvent.getTenantDomain();
+                applicationId = applicationEvent.getAppId();
+            }
+
+            //Decoded event string to be logged in the case of failures and debugging
+            String loggingEvent = event.toString();
+            JSONObject jsonObMap = new JSONObject();
+            jsonObMap.put(APIConstants.POLICY_RESET, true);
+            Object[] objects = new Object[] { UIDGenerator.generateURNString(), applicationLevelThrottleKey,
+                    applicationLevelTier, null, null, null, null, null, null, authorizedUser, null, null,
+                    subscriberTenantDomain, null, applicationId, null, jsonObMap.toString() };
+            EventPublisherEvent resetEvent = new EventPublisherEvent(streamID,
+                    System.currentTimeMillis(), objects, loggingEvent);
+            resetEvent.setOrgId(event.getTenantDomain());
+
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Publishing Application Throttle Reset data to traffic-manager for the application with ID: "
+                                + applicationId);
+            }
+            APIUtil.publishEvent(EventPublisherType.NOTIFICATION, resetEvent, loggingEvent);
         }
     }
 }

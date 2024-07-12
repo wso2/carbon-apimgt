@@ -63,7 +63,19 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
@@ -368,37 +380,52 @@ public class ApisApiServiceImplUtils {
             httpGet.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
             httpGet.setHeader(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
             // Code block for the processing of the response
-            try (CloseableHttpResponse response = getHttpClient.execute(httpGet)) {
-                if (isDebugEnabled) {
-                    log.debug(HTTP_STATUS_LOG + response.getStatusLine().getStatusCode());
-                }
-                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    StringBuilder responseString = new StringBuilder();
-                    try (BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
-                        String inputLine;
-                        while ((inputLine = reader.readLine()) != null) {
-                            responseString.append(inputLine);
+            int retryCount = 0;
+            while (true) {
+                try (CloseableHttpResponse response = getHttpClient.execute(httpGet)) {
+                    if (isDebugEnabled) {
+                        log.debug(HTTP_STATUS_LOG + response.getStatusLine().getStatusCode());
+                    }
+                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        StringBuilder responseString = new StringBuilder();
+                        try (BufferedReader reader = new BufferedReader(
+                                new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
+                            String inputLine;
+                            while ((inputLine = reader.readLine()) != null) {
+                                responseString.append(inputLine);
+                            }
+                        }
+                        JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
+                        String report = responseJson.get(APIConstants.DATA).toString();
+                        String grade = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
+                                .get(APIConstants.DATA)).get(APIConstants.GRADE);
+                        Integer numErrors = Integer.valueOf(
+                                (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
+                                        .get(APIConstants.DATA)).get(APIConstants.NUM_ERRORS));
+                        String decodedReport = new String(Base64Utils.decode(report), StandardCharsets.UTF_8);
+                        JSONObject output = new JSONObject();
+                        output.put("decodedReport", decodedReport);
+                        output.put("grade", grade);
+                        output.put("numErrors", numErrors);
+                        output.put("auditUuid", auditUuid);
+                        return output;
+                    } else {
+                        retryCount++;
+                        if (retryCount <= 5) {
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                // Ignore
+                            }
+                        } else {
+                            throw new APIManagementException(
+                                    "Error while retrieving data from the API Definition Security Audit. "
+                                            + "Found http status " + response.getStatusLine());
                         }
                     }
-                    JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
-                    String report = responseJson.get(APIConstants.DATA).toString();
-                    String grade = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
-                            .get(APIConstants.DATA)).get(APIConstants.GRADE);
-                    Integer numErrors = Integer.valueOf(
-                            (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
-                                    .get(APIConstants.DATA)).get(APIConstants.NUM_ERRORS));
-                    String decodedReport = new String(Base64Utils.decode(report), StandardCharsets.UTF_8);
-                    JSONObject output = new JSONObject();
-                    output.put("decodedReport", decodedReport);
-                    output.put("grade", grade);
-                    output.put("numErrors", numErrors);
-                    output.put("auditUuid", auditUuid);
-                    return output;
                 }
             }
         }
-        return (JSONObject) Collections.emptyMap();
     }
 
     /**
@@ -657,6 +684,12 @@ public class ApisApiServiceImplUtils {
             apiToAdd.setServiceInfo("md5", service.getMd5());
             apiToAdd.setEndpointConfig(constructEndpointConfigForService(service
                     .getServiceUrl(), null));
+            if (APIConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE.equalsIgnoreCase(
+                    service.getSecurityType().toString())) {
+                apiToAdd.setApiSecurity(APIConstants.API_SECURITY_BASIC_AUTH);
+            } else {
+                apiToAdd.setApiSecurity(service.getSecurityType().toString());
+            }
         }
         APIDefinition apiDefinition = validationResponse.getParser();
         SwaggerData swaggerData;
@@ -674,6 +707,9 @@ public class ApisApiServiceImplUtils {
         for (URITemplate uriTemplate : uriTemplates) {
             if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
                 uriTemplate.setThrottlingTier(defaultAPILevelPolicy);
+            }
+            if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             }
         }
 

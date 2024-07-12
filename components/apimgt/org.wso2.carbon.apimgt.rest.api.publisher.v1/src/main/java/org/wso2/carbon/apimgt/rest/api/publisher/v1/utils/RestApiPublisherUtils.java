@@ -422,7 +422,8 @@ public class RestApiPublisherUtils {
      * @return Resolved Path
      * @throws APIManagementException if resolution fails.
      */
-    private static Path resolveFilePath(final String baseDirPathString, final String userPathString) throws APIManagementException {
+    private static Path resolveFilePath(final String baseDirPathString,
+                                        final String userPathString) throws APIManagementException {
         Path baseDirPath = Paths.get(baseDirPathString);
         Path userPath = Paths.get(userPathString);
         if (!baseDirPath.isAbsolute()) {
@@ -448,8 +449,9 @@ public class RestApiPublisherUtils {
          * If the resolved path does not start with the base directory path,
          * it indicates an attempt to escape the intended directory structure.
          */
-        if (!resolvedPath.startsWith(baseDirPath)) {
-            throw new APIManagementException("Error resolving path. The user path attempts to escape the base directory.");
+        if (!resolvedPath.startsWith(baseDirPath.normalize())) {
+            throw new APIManagementException("Error resolving path. The user path attempts" +
+                    " to escape the base directory.");
         }
 
         return resolvedPath;

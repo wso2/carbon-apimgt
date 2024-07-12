@@ -21,9 +21,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.language.FieldDefinition;
-import graphql.language.ObjectTypeDefinition;
-import graphql.language.TypeDefinition;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -44,6 +41,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
@@ -107,6 +105,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is a publisher rest api utility class.
@@ -134,12 +134,34 @@ public class PublisherCommonUtils {
                                              String[] tokenScopes, APIDefinitionValidationResponse response)
             throws APIManagementException, ParseException, CryptoException, FaultGatewaysException {
 
+        return updateApiAndDefinition(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes, response, true);
+    }
+    
+    /**
+     * Update API and API definition. Soap to rest sequence is updated on demand.
+     *
+     * @param originalAPI       existing API
+     * @param apiDtoToUpdate    DTO object with updated API data
+     * @param apiProvider       API Provider
+     * @param tokenScopes       token scopes
+     * @param generateSoapToRestSequences Option to generate soap to rest sequences.
+     * @param response          response of the API definition validation
+     * @return                  updated API
+     * @throws APIManagementException   If an error occurs while updating the API and API definition
+     * @throws ParseException           If an error occurs while parsing the endpoint configuration
+     * @throws CryptoException          If an error occurs while encrypting the secret key of API
+     * @throws FaultGatewaysException   If an error occurs while updating manage of an existing API
+     */
+    public static API updateApiAndDefinition(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider,
+            String[] tokenScopes, APIDefinitionValidationResponse response, boolean generateSoapToRestSequences)
+            throws APIManagementException, ParseException, CryptoException, FaultGatewaysException {
+
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
         String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (!PublisherCommonUtils.isStreamingAPI(apiDtoToUpdate) && !APIConstants.APITransportType.GRAPHQL.toString()
                 .equalsIgnoreCase(apiDtoToUpdate.getType().toString())) {
             prepareForUpdateSwagger(originalAPI.getUuid(), response, false, apiProvider, organization,
-                    response.getParser(), apiToUpdate);
+                    response.getParser(), apiToUpdate, generateSoapToRestSequences);
         }
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
@@ -392,6 +414,7 @@ public class PublisherCommonUtils {
                 }
 
                 apiToUpdate.setUriTemplates(uriTemplates);
+                apiToUpdate.setSwaggerDefinition(newDefinition);
             }
         } else {
             String oldDefinition = apiProvider
@@ -399,6 +422,7 @@ public class PublisherCommonUtils {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
+            apiToUpdate.setSwaggerDefinition(updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
@@ -414,7 +438,7 @@ public class PublisherCommonUtils {
         if (apiCategoriesList.size() > 0) {
             if (!APIUtil.validateAPICategories(apiCategoriesList, originalAPI.getOrganization())) {
                 throw new APIManagementException("Invalid API Category name(s) defined",
-                        ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
+                        ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID, originalAPI.getId().getName()));
             }
         }
 
@@ -753,6 +777,9 @@ public class PublisherCommonUtils {
 
         if (additionalProperties != null) {
             for (APIInfoAdditionalPropertiesDTO property : additionalProperties) {
+                if (property.getName() == null || property.getValue() == null || property.isDisplay() == null) {
+                    return "Property name, value or display status should not be null";
+                }
                 String propertyKey = property.getName();
                 String propertyValue = property.getValue();
                 if (propertyKey.contains(" ")) {
@@ -935,6 +962,8 @@ public class PublisherCommonUtils {
             APIDefinition oasParser;
             if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
                 oasParser = new OAS2Parser();
+            } else if (RestApiConstants.OAS_VERSION_31.equalsIgnoreCase(oasVersion)) {
+                oasParser = new OAS3Parser(RestApiConstants.OAS_VERSION_31);
             } else {
                 oasParser = new OAS3Parser();
             }
@@ -1039,7 +1068,7 @@ public class PublisherCommonUtils {
      * @param apiDto API DTO of the API
      * @return validity of URLs found within the endpoint configurations of the DTO
      */
-    public static boolean validateEndpoints(APIDTO apiDto) {
+    public static boolean validateEndpoints(APIDTO apiDto) throws APIManagementException {
 
         ArrayList<String> endpoints = new ArrayList<>();
         org.json.JSONObject endpointConfiguration = new org.json.JSONObject((Map) apiDto.getEndpointConfig());
@@ -1071,11 +1100,20 @@ public class PublisherCommonUtils {
      * @param endpoints         List of URLs. Extracted URL(s), if any, are added to this list.
      */
     private static void extractURLsFromEndpointConfig(org.json.JSONObject endpointConfigObj, String endpointType,
-            ArrayList<String> endpoints) {
+            ArrayList<String> endpoints) throws APIManagementException {
         if (!endpointConfigObj.isNull(endpointType)) {
             org.json.JSONObject endpointObj = endpointConfigObj.optJSONObject(endpointType);
             if (endpointObj != null) {
-                endpoints.add(endpointConfigObj.getJSONObject(endpointType).getString(APIConstants.API_DATA_URL));
+                if (endpointObj.has(APIConstants.API_DATA_URL)) {
+                    endpoints.add(endpointConfigObj.getJSONObject(endpointType).getString(APIConstants.API_DATA_URL));
+                } else {
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.ENDPOINT_URL_NOT_PROVIDED,
+                            endpointType);
+                    throw new APIManagementException(
+                            "Url is not provided for the endpoint type: " + endpointType + " in the endpoint " +
+                                    "config",
+                            errorHandler);
+                }
             } else {
                 org.json.JSONArray endpointArray = endpointConfigObj.getJSONArray(endpointType);
                 for (int i = 0; i < endpointArray.length(); i++) {
@@ -1200,7 +1238,7 @@ public class PublisherCommonUtils {
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         } else if (body.getContext().endsWith("/")) {
             throw new APIManagementException("Context cannot end with '/' character",
-                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT , body.getName(), body.getVersion()));
+                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT, body.getName(), body.getVersion()));
         }
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName(), organization)) {
             throw new APIManagementException(
@@ -1245,8 +1283,8 @@ public class PublisherCommonUtils {
                     } else {
                         throw new APIManagementException(
                                 "Error occurred while adding API. API with name " + body.getName()
-                                        + " already exists with different context" + context  + " in the organization" +
-                                        " : " + organization,  ExceptionCodes.API_ALREADY_EXISTS);
+                                        + " already exists with different context" + context + " in the organization" +
+                                        " : " + organization, ExceptionCodes.API_ALREADY_EXISTS);
                     }
                 }
             }
@@ -1323,7 +1361,9 @@ public class PublisherCommonUtils {
         } else if (body.getKeyManagers() == null) {
             apiToAdd.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         } else {
-            throw new APIManagementException("KeyManagers value need to be an array");
+            String errMsg = "KeyManagers value needs to be an array";
+            ExceptionCodes errorHandler = ExceptionCodes.KEYMANAGERS_VALUE_NOT_ARRAY;
+            throw new APIManagementException(errMsg, errorHandler);
         }
 
         // Set default gatewayVendor
@@ -1402,11 +1442,30 @@ public class PublisherCommonUtils {
                                        String organization)
             throws APIManagementException, FaultGatewaysException {
 
+        return updateSwagger(apiId, response, isServiceAPI, organization, true);
+    }
+    
+    /**
+     * update swagger definition of the given api. For Soap To Rest APIs, sequences are generated on demand.
+     * 
+     * @param apiId    API Id
+     * @param response response of a swagger definition validation call
+     * @param organization  Organization Identifier
+     * @param generateSoapToRestSequences Option to generate soap to rest sequences.
+     * @return updated swagger definition
+     * @throws APIManagementException when error occurred updating swagger
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI,
+            String organization, boolean generateSoapToRestSequences)
+            throws APIManagementException, FaultGatewaysException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         APIDefinition oasParser = response.getParser();
-        prepareForUpdateSwagger(apiId, response, isServiceAPI, apiProvider, organization, oasParser, existingAPI);
+        prepareForUpdateSwagger(apiId, response, isServiceAPI, apiProvider, organization, oasParser, existingAPI,
+                generateSoapToRestSequences);
 
         //Update API is called to update URITemplates and scopes of the API
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
@@ -1415,7 +1474,7 @@ public class PublisherCommonUtils {
 
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
-        // instead of passing same
+        //instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
@@ -1433,7 +1492,7 @@ public class PublisherCommonUtils {
      */
     private static void prepareForUpdateSwagger(String apiId, APIDefinitionValidationResponse response,
                                                 boolean isServiceAPI, APIProvider apiProvider, String organization,
-                                                APIDefinition oasParser, API existingAPI)
+                                                APIDefinition oasParser, API existingAPI, boolean genSoapToRestSequence)
             throws APIManagementException {
 
         String apiDefinition = response.getJsonContent();
@@ -1442,7 +1501,7 @@ public class PublisherCommonUtils {
         } else {
             apiDefinition = OASParserUtil.preProcess(apiDefinition);
         }
-        if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType())) {
+        if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType()) && genSoapToRestSequence) {
             List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition);
             existingAPI.setSoapToRestSequences(sequenceList);
         }
@@ -1602,9 +1661,12 @@ public class PublisherCommonUtils {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+        List<URITemplate> operationList = graphql.extractGraphQLOperationList(schemaDefinition);
+        List<APIOperationsDTO> operationArray = APIMappingUtil
+                .fromURITemplateListToOprationList(operationList);
         List<APIOperationsDTO> operationListWithOldData = APIMappingUtil
-                .getOperationListWithOldData(originalAPI.getUriTemplates(),
-                        extractGraphQLOperationList(schemaDefinition), tenantId);
+                .getOperationListWithOldData(originalAPI.getUriTemplates(), operationArray, tenantId);
 
         Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationListWithOldData);
         originalAPI.setUriTemplates(uriTemplates);
@@ -1613,33 +1675,6 @@ public class PublisherCommonUtils {
         apiProvider.updateAPI(originalAPI, oldApi);
 
         return originalAPI;
-    }
-
-    /**
-     * Extract GraphQL Operations from given schema.
-     *
-     * @param schema graphQL Schema
-     * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
-     */
-    public static List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
-
-        List<APIOperationsDTO> operationArray = new ArrayList<>();
-        SchemaParser schemaParser = new SchemaParser();
-        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
-        Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
-        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
-            if (entry.getValue().getName().equals(APIConstants.GRAPHQL_QUERY) || entry.getValue().getName()
-                    .equals(APIConstants.GRAPHQL_MUTATION) || entry.getValue().getName()
-                    .equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
-                for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
-                    APIOperationsDTO operation = new APIOperationsDTO();
-                    operation.setVerb(entry.getKey());
-                    operation.setTarget(fieldDef.getName());
-                    operationArray.add(operation);
-                }
-            }
-        }
-        return operationArray;
     }
 
     /**
@@ -1732,6 +1767,13 @@ public class PublisherCommonUtils {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDto);
         String documentName = documentDto.getName();
+        Pattern pattern = Pattern.compile(APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
+        Matcher matcher = pattern.matcher(documentName);
+        if (matcher.find()) {
+            throw new APIManagementException("Document name cannot contain illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )",
+                    ExceptionCodes.DOCUMENT_NAME_ILLEGAL_CHARACTERS);
+        }
         if (documentDto.getType() == null) {
             throw new APIManagementException("Documentation type cannot be empty",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
@@ -1973,6 +2015,28 @@ public class PublisherCommonUtils {
         }
 
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
+        List<APIProductResource> resources = productToBeAdded.getProductResources();
+
+        for (APIProductResource apiProductResource : resources) {
+            API api;
+            String apiUUID;
+            if (apiProductResource.getProductIdentifier() != null) {
+                APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
+                String emailReplacedAPIProviderName = APIUtil
+                        .replaceEmailDomain(productAPIIdentifier.getProviderName());
+                APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
+                        productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
+                apiUUID = apiProvider
+                        .getUUIDFromIdentifier(emailReplacedAPIIdentifier, productToBeAdded.getOrganization());
+                api = apiProvider.getAPIbyUUID(apiUUID, productToBeAdded.getOrganization());
+            } else {
+                apiUUID = apiProductResource.getApiId();
+                api = apiProvider.getAPIbyUUID(apiUUID, productToBeAdded.getOrganization());
+                // if API does not exist, getLightweightAPIByUUID() method throws exception.
+            }
+            validateApiLifeCycleForApiProducts(api);
+        }
+
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
@@ -1981,6 +2045,18 @@ public class PublisherCommonUtils {
 
         createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
+    }
+
+    private static void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {
+        String status = api.getStatus();
+
+        if (APIConstants.BLOCKED.equals(status) ||
+                APIConstants.PROTOTYPED.equals(status) ||
+                APIConstants.DEPRECATED.equals(status) ||
+                APIConstants.RETIRED.equals(status)) {
+            throw new APIManagementException("Cannot create API Product using API with following status: " + status,
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
+        }
     }
 
     private static void checkDuplicateContext(APIProvider apiProvider, APIProductDTO apiProductDTO, String username,
@@ -2243,8 +2319,16 @@ public class PublisherCommonUtils {
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
     }
 
-    public static boolean validateMandatoryProperties(org.json.simple.JSONArray customProperties, APIDTO apiDto) {
+    /**
+     * This method is used to validate the mandatory custom properties of an API
+     *
+     * @param customProperties custom properties of the API
+     * @param apiDto API DTO to validate
+     * @return list of erroneous property names. returns an empty array if there are no errors.
+     */
+    public static List<String> validateMandatoryProperties(org.json.simple.JSONArray customProperties, APIDTO apiDto) {
 
+        List<String> errorPropertyNames = new ArrayList<>();
         Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = apiDto.getAdditionalPropertiesMap();
 
         for (int i = 0; i < customProperties.size(); i++) {
@@ -2257,7 +2341,8 @@ public class PublisherCommonUtils {
                         additionalPropertiesMap.get(propertyName + "__display");
                 APIInfoAdditionalPropertiesMapDTO mapProperty = additionalPropertiesMap.get(propertyName);
                 if (mapProperty == null && mapPropertyDisplay == null) {
-                    return false;
+                    errorPropertyNames.add(propertyName);
+                    continue;
                 }
                 String propertyValue = "";
                 String propertyValueDisplay = "";
@@ -2269,10 +2354,10 @@ public class PublisherCommonUtils {
                 }
                 if ((propertyValue == null || propertyValue.isEmpty()) &&
                         (propertyValueDisplay == null || propertyValueDisplay.isEmpty())) {
-                    return false;
+                    errorPropertyNames.add(propertyName);
                 }
             }
         }
-        return true;
+        return errorPropertyNames;
     }
 }

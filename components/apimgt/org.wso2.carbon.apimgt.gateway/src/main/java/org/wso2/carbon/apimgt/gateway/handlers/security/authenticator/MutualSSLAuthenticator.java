@@ -44,6 +44,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
@@ -99,6 +100,9 @@ public class MutualSSLAuthenticator implements Authenticator {
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
+        if (Utils.isCertificateChainValidationEnabled()) {
+            return authenticateCertificateChain(messageContext);
+        }
         // try to retrieve the certificate
         Certificate sslCertObject;
         try {
@@ -115,20 +119,46 @@ public class MutualSSLAuthenticator implements Authenticator {
         /* If the certificate cannot be retrieved from the axis2Message context, then mutual SSL authentication has
          not happened in transport level.*/
         if (sslCertObject == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Mutual SSL authentication has not happened in the transport level for the API "
-                        + getAPIIdentifier(messageContext).toString() + ", hence API invocation is not allowed");
-            }
-            if (isMandatory) {
-                log.error("Mutual SSL authentication failure");
-            }
-            return new AuthenticationResponse(false, isMandatory, !isMandatory,
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            return handleMutualSSLAuthenticationFailure(messageContext);
         } else {
             try {
                 setAuthContext(messageContext, sslCertObject);
             } catch (APISecurityException ex) {
                 return new AuthenticationResponse(false, isMandatory, !isMandatory, ex.getErrorCode(), ex.getMessage());
+            }
+        }
+        return new AuthenticationResponse(true, isMandatory, true, 0, null);
+    }
+
+    /**
+     * Authenticate with checking the client certificate chain.
+     * @param messageContext    Message context
+     * @return                  Authentication response
+     */
+    private AuthenticationResponse authenticateCertificateChain(MessageContext messageContext) {
+
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        Certificate[] sslCerts;
+        try {
+            sslCerts = Utils.getClientCertificatesChain(axis2MessageContext);
+        } catch (APIManagementException e) {
+            return new AuthenticationResponse(false, isMandatory, !isMandatory,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+        }
+
+        /* If the certificates cannot be retrieved from the axis2Message context, then mutual SSL authentication has
+         not happened in transport level.*/
+        if (sslCerts == null) {
+            return handleMutualSSLAuthenticationFailure(messageContext);
+        } else {
+            try {
+                setAuthContext(messageContext, sslCerts);
+            } catch (APISecurityException ex) {
+                return new AuthenticationResponse(false, isMandatory, !isMandatory, ex.getErrorCode(), ex.getMessage());
+            } catch (APIManagementException ex) {
+                return new AuthenticationResponse(false, isMandatory, !isMandatory,
+                        (int) ex.getErrorHandler().getErrorCode(), ex.getMessage());
             }
         }
         return new AuthenticationResponse(true, isMandatory, true, 0, null);
@@ -145,20 +175,154 @@ public class MutualSSLAuthenticator implements Authenticator {
 
         X509Certificate x509Certificate = Utils.convertCertificateToX509Certificate(certificate);
         String subjectDN = x509Certificate.getSubjectDN().getName();
-        String uniqueIdentifier = (x509Certificate.getSerialNumber() + "_" + x509Certificate.getIssuerDN()).replaceAll(",",
+        String uniqueIdentifier = (x509Certificate.getSerialNumber() + "_" + x509Certificate.getSubjectDN()).replaceAll(",",
                         "#").replaceAll("\"", "'").trim();
         String tier = certificates.get(uniqueIdentifier);
         if (StringUtils.isEmpty(tier)) {
-            if (log.isDebugEnabled()) {
-                log.debug("The client certificate presented is available in gateway, however it was not added against "
-                        + "the API " + getAPIIdentifier(messageContext));
-            }
-            if (isMandatory) {
-                log.error("Mutual SSL authentication failure. API is not associated with the certificate");
-            }
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            handleCertificateNotAssociatedToAPIFailure(messageContext);
         }
+        setAuthenticationContext(messageContext, subjectDN, uniqueIdentifier, tier);
+    }
+
+    /**
+     * Sets the authentication context in current message context.
+     *
+     * @param messageContext    Relevant message context.
+     * @param certificatesArray SSL certificate chain.
+     * @throws APISecurityException API Security exception.
+     */
+    private void setAuthContext(MessageContext messageContext, Certificate[] certificatesArray)
+            throws APISecurityException, APIManagementException {
+
+        String tier = null;
+        List<X509Certificate> x509Certificates = Utils.convertCertificatesToX509Certificates(certificatesArray);
+        String subjectDN = x509Certificates.get(0).getSubjectDN().getName();
+        String issuerDNIdentifier = x509Certificates.get(x509Certificates.size() - 1).getIssuerDN().getName()
+                .replaceAll(",", "#").replaceAll("\"", "'").trim();
+        String uniqueIdentifier = null;
+        List<String> subjectDNIdentifiers = new ArrayList<>();
+        for (X509Certificate x509Certificate : x509Certificates) {
+            String subjectDNIdentifier = (x509Certificate.getSerialNumber() + "_"
+                    + x509Certificate.getSubjectDN()).replaceAll(",", "#").replaceAll("\"", "'").trim();
+            subjectDNIdentifiers.add(subjectDNIdentifier);
+            for (Map.Entry<String, String> entry : certificates.entrySet()) {
+                String key = entry.getKey();
+                if (StringUtils.equals(subjectDNIdentifier, key)) {
+                    uniqueIdentifier = key;
+                    tier = entry.getValue();
+                    break;
+                }
+            }
+            if (StringUtils.isNoneEmpty(tier)) {
+                break;
+            }
+        }
+        if (StringUtils.isEmpty(tier)) {
+            for (Map.Entry<String, String> entry : certificates.entrySet()) {
+                String key = entry.getKey();
+                if (key.contains(issuerDNIdentifier)) {
+                    uniqueIdentifier = key;
+                    tier = entry.getValue();
+                }
+            }
+        }
+        if (StringUtils.isEmpty(tier)) {
+            tier = getTierFromCompleteCertificateChain(x509Certificates, subjectDNIdentifiers);
+        }
+        if (StringUtils.isEmpty(tier)) {
+            handleCertificateNotAssociatedToAPIFailure(messageContext);
+        }
+        setAuthenticationContext(messageContext, subjectDN, uniqueIdentifier, tier);
+    }
+
+    /**
+     * Fetches tier assigned to the client certificate after making the complete certificate chain using certificates
+     * in truststore.
+     *
+     * @param x509Certificates  Client certificate chain
+     * @param uniqueIdentifiers Unique identifiers list for client certificate chain
+     * @return Tier
+     * @throws APIManagementException
+     */
+    private String getTierFromCompleteCertificateChain(List<X509Certificate> x509Certificates,
+            List<String> uniqueIdentifiers) throws APIManagementException {
+
+        String tier = null;
+        X509Certificate certificate = x509Certificates.get(x509Certificates.size() - 1);
+        String subjectDN = certificate.getSubjectDN().getName();
+        String issuerDN = certificate.getIssuerDN().getName();
+        boolean isIssuerCertificateUpdated = !StringUtils.equals(subjectDN, issuerDN);
+
+        while (isIssuerCertificateUpdated) {
+            X509Certificate issuerCertificate = Utils.getCertificateFromListenerTrustStore(issuerDN);
+            if (issuerCertificate == null) {
+                isIssuerCertificateUpdated = false;
+            } else {
+                issuerDN = issuerCertificate.getIssuerDN().getName();
+                subjectDN = issuerCertificate.getSubjectDN().getName();
+                String uniqueIdentifier = (issuerCertificate.getSerialNumber() + "_"
+                        + issuerCertificate.getSubjectDN()).replaceAll(",", "#").replaceAll("\"", "'").trim();
+                uniqueIdentifiers.add(uniqueIdentifier);
+                isIssuerCertificateUpdated = !StringUtils.equals(subjectDN, issuerDN);
+            }
+        }
+
+        for (String uniqueIdentifier : uniqueIdentifiers) {
+            tier = certificates.get(uniqueIdentifier);
+            if (StringUtils.isNotEmpty(tier)) {
+                break;
+            }
+        }
+        return tier;
+    }
+
+    /**
+     * Handles failures where message context does not contain client certificates.
+     * @param messageContext    Relevant message context
+     * @return                  Authentication response
+     */
+    private AuthenticationResponse handleMutualSSLAuthenticationFailure(MessageContext messageContext) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Mutual SSL authentication has not happened in the transport level for the API "
+                    + getAPIIdentifier(messageContext).toString() + ", hence API invocation is not allowed");
+        }
+        if (isMandatory) {
+            log.error("Mutual SSL authentication failure");
+        }
+        return new AuthenticationResponse(false, isMandatory, !isMandatory,
+                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+    }
+
+    /**
+     * Handles failures where certificates in the message context not associated with the API.
+     * @param messageContext            Relevant message context
+     * @throws APISecurityException     API security exception
+     */
+    private void handleCertificateNotAssociatedToAPIFailure(MessageContext messageContext) throws APISecurityException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("The client certificate presented is available in gateway, however it was not added against "
+                    + "the API " + getAPIIdentifier(messageContext));
+        }
+        if (isMandatory) {
+            log.error("Mutual SSL authentication failure. API is not associated with the certificate");
+        }
+        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+    }
+
+    /**
+     * Set AuthenticationContext to message context.
+     * @param messageContext    Relevant message context
+     * @param subjectDN         SubjectDN of the client certificate
+     * @param uniqueIdentifier  Unique Identifier of the stored certificate
+     * @param tier              Throttling policy tier
+     */
+    private void setAuthenticationContext(MessageContext messageContext, String subjectDN, String uniqueIdentifier,
+            String tier) {
+
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
         authContext.setUsername(subjectDN);
@@ -180,6 +344,10 @@ public class MutualSSLAuthenticator implements Authenticator {
         authContext.setStopOnQuotaReach(true);
         authContext.setApiKey(uniqueIdentifier + "_" + apiIdentifier.toString());
         authContext.setTier(tier);
+        authContext.setApplicationName(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_NAME);
+        authContext.setSubscriber(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_OWNER);
+        authContext.setApplicationId(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_NAME);
+        authContext.setApplicationUUID(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_NAME);
         /* For the mutual SSL based authenticated request, the resource level throttling is not considered, hence
         assigning the unlimited tier for that. */
         List<VerbInfoDTO> verbInfoList = new ArrayList<>(1);
@@ -188,8 +356,9 @@ public class MutualSSLAuthenticator implements Authenticator {
         verbInfoList.add(verbInfoDTO);
         messageContext.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
         if (log.isDebugEnabled()) {
-            log.debug("Auth context for the API " + getAPIIdentifier(messageContext) + ": Username[" + authContext
-                    .getUsername() + "APIKey[(" + authContext.getApiKey() + "] Tier[" + authContext.getTier() + "]");
+            log.debug("Auth context for the API " + getAPIIdentifier(messageContext) + ": Username["
+                    + authContext.getUsername() + "APIKey[(" + authContext.getApiKey() + "] Tier["
+                    + authContext.getTier() + "]");
         }
         messageContext.setProperty(APIMgtGatewayConstants.END_USER_NAME, authContext.getUsername());
         APISecurityUtils.setAuthenticationContext(messageContext, authContext, null);

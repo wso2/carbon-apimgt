@@ -20,10 +20,10 @@ package org.wso2.carbon.apimgt.common.gateway.jwtgenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
+import net.minidev.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
@@ -57,6 +57,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
 
     private String signatureAlgorithm;
 
+    private boolean useSHA256Hash = false;
+
     public AbstractAPIMgtGatewayJWTGenerator() {
     }
 
@@ -71,6 +73,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
         }
+        useSHA256Hash = jwtConfigurationDto.useSHA256Hash();
 
     }
 
@@ -117,7 +120,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 if (jwtConfigurationDto.useKid()) {
                     jwtHeaderBuilder.put("kid", JWTUtil.getKID(x509Certificate));
                 }
-                jwtHeader = jwtHeaderBuilder.toString();
+                jwtHeader = jwtHeaderBuilder.toJSONString();
             } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
                 jwtHeader = addCertToHeader();
             }
@@ -146,7 +149,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
 
         try {
             Certificate publicCert = jwtConfigurationDto.getPublicCert();
-            return JWTUtil.generateHeader(publicCert, signatureAlgorithm, jwtConfigurationDto.useKid());
+            return JWTUtil.generateHeader(publicCert, signatureAlgorithm, jwtConfigurationDto.useKid(),
+                    useSHA256Hash);
         } catch (Exception e) {
             String error = "Error in obtaining keystore";
             throw new JWTGeneratorException(error, e);
@@ -204,7 +208,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         //Adding JWT standard claim
         jwtClaimSetBuilder.jwtID(UUID.randomUUID().toString());
         JWTClaimsSet jwtClaimsSet = jwtClaimSetBuilder.build();
-        return jwtClaimsSet.toJSONObject().toString();
+        Map<String, Object> claimMap = jwtClaimsSet.toJSONObject();
+        return new JSONObject(claimMap).toJSONString();
     }
 
     public String encode(byte[] stringToBeEncoded) throws JWTGeneratorException {

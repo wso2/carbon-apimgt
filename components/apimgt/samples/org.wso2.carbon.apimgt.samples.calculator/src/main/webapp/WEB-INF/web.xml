@@ -20,18 +20,27 @@
     version="3.0" metadata-complete="true">
     <absolute-ordering />
     <display-name>Calculator API</display-name>
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>WEB-INF/rest-servlet.xml</param-value>
-    </context-param>
 
     <servlet>
         <servlet-name>CXFServlet</servlet-name>
-        <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
+        <servlet-class>org.apache.cxf.jaxrs.servlet.CXFNonSpringJaxrsServlet</servlet-class>
+
+        <init-param>
+            <param-name>jaxrs.serviceClasses</param-name>
+            <param-value>
+                org.wso2.carbon.apimgt.sample.api.CalculatorService
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>jaxrs.address</param-name>
+            <param-value>/</param-value>
+        </init-param>
+        <init-param>
+            <param-name>jaxrs.providers</param-name>
+            <param-value>
+                com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider
+            </param-value>
+        </init-param>
     </servlet>
 
     <servlet-mapping>

@@ -53,7 +53,7 @@ public class AbstractKeyManagerEventHandlerTest {
         PowerMockito.mockStatic(RevocationRequestPublisher.class);
         PowerMockito.when(RevocationRequestPublisher.getInstance()).thenReturn(revocationRequestPublisher);
         doNothing().when(revocationRequestPublisher)
-                .publishRevocationEvents(Mockito.anyString(), Mockito.anyLong(), Mockito.anyObject());
+                .publishRevocationEvents(Mockito.anyString(), Mockito.any());
 
         Properties properties = Mockito.mock(Properties.class);
         whenNew(Properties.class).withNoArguments().thenReturn(properties);

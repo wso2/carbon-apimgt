@@ -45,7 +45,7 @@ import java.util.Map;
  */
 public class APILoggerManager {
     private static final Log log = LogFactory.getLog(APILoggerManager.class);
-    private static final Map<String, String> logProperties = new HashMap<>();
+    private Map<Map<String, String>, String> logProperties = new HashMap<>();
     private static final APILoggerManager apiLoggerManager = new APILoggerManager();
     private final EventHubConfigurationDto eventHubConfigurationDto;
     public static final String UTF8 = "UTF-8";
@@ -58,7 +58,19 @@ public class APILoggerManager {
             JSONArray apiLogArray = responseJson.getJSONArray("apis");
             for (int i = 0; i < apiLogArray.length(); i++) {
                 JSONObject apiLoggerObject = apiLogArray.getJSONObject(i);
-                logProperties.put(apiLoggerObject.getString("context"), apiLoggerObject.getString("logLevel"));
+                String resourceMethod = null;
+                String resourcePath = null;
+                if (!apiLoggerObject.isNull(APIConstants.METHOD_FOR_RESOURCE) && !apiLoggerObject.isNull(
+                        APIConstants.PATH_FOR_RESOURCE)) {
+                    resourceMethod = apiLoggerObject.getString(APIConstants.METHOD_FOR_RESOURCE);
+                    resourcePath = apiLoggerObject.getString(APIConstants.PATH_FOR_RESOURCE);
+                }
+                Map<String, String> properties = new HashMap<>();
+                properties.put(APIConstants.API_CONTEXT_FOR_RESOURCE,
+                        apiLoggerObject.getString(APIConstants.API_CONTEXT_FOR_RESOURCE));
+                properties.put(APIConstants.METHOD_FOR_RESOURCE, resourceMethod);
+                properties.put(APIConstants.PATH_FOR_RESOURCE, resourcePath);
+                logProperties.put(properties, apiLoggerObject.getString("logLevel"));
             }
             if (log.isDebugEnabled()) {
                 log.debug("Response : " + responseString);
@@ -68,11 +80,15 @@ public class APILoggerManager {
         }
     }
 
-    public void updateLoggerMap(String apiContext, String logLevel) {
-        logProperties.put(apiContext, logLevel);
+    public void updateLoggerMap(String apiContext, String logLevel, String resourceMethod, String resourcePath) {
+        Map<String, String> properties = new HashMap<>();
+        properties.put(APIConstants.API_CONTEXT_FOR_RESOURCE, apiContext);
+        properties.put(APIConstants.PATH_FOR_RESOURCE, resourcePath);
+        properties.put(APIConstants.METHOD_FOR_RESOURCE, resourceMethod);
+        logProperties.put(properties, logLevel);
     }
 
-    public Map<String, String> getPerAPILoggerList() {
+    public Map<Map<String, String>, String> getPerAPILoggerList() {
         return logProperties;
     }
 

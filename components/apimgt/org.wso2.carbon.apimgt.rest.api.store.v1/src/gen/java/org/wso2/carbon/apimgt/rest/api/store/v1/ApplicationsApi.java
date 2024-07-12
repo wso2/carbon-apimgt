@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyReGenerateResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
@@ -319,6 +320,25 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         return delegate.applicationsApplicationIdOauthKeysKeyMappingIdCleanUpPost(applicationId, keyMappingId, ifMatch, securityContext);
     }
 
+    @DELETE
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Remove Generated Application Keys", notes = "Remove generated application keys from dev portal rest api ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+        })
+    }, tags={ "Application Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Key removed successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.applicationsApplicationIdOauthKeysKeyMappingIdDelete(applicationId, keyMappingId, xWSO2Tenant, securityContext);
+    }
+
     @POST
     @Path("/{applicationId}/oauth-keys/{keyMappingId}/generate-token")
     @Consumes({ "application/json" })
@@ -412,6 +432,27 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response applicationsApplicationIdPut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application object that needs to be updated " ,required=true) ApplicationDTO applicationDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.applicationsApplicationIdPut(applicationId, applicationDTO, ifMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{applicationId}/reset-throttle-policy")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Reset Application-Level Throttle Policy", notes = "This operation can be used to reset the application-level throttle policy for a specific user. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "Applications",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Application-level throttle policy reset successfully", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdResetThrottlePolicyPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Payload for which the application-level throttle policy needs to be reset " ,required=true) ApplicationThrottleResetDTO applicationThrottleResetDTO) throws APIManagementException{
+        return delegate.applicationsApplicationIdResetThrottlePolicyPost(applicationId, applicationThrottleResetDTO, securityContext);
     }
 
     @GET

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.throttling;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +68,16 @@ public class ThrottleDataHolder {
 
     public void addThrottledAPIKey(String key, Long value){
         throttledAPIKeysMap.put(key,value);
+    }
+
+    private static final ThrottleDataHolder instance = new ThrottleDataHolder();
+
+    private ThrottleDataHolder() {
+
+    }
+
+    public static ThrottleDataHolder getInstance() {
+        return instance;
     }
 
     public void addThrottledApiConditions(String key, String conditionKey, List<ConditionDto> conditionValue) {
@@ -169,7 +180,24 @@ public class ThrottleDataHolder {
         IPRange ipRange = new IPRange();
         ipRange.setId(conditionId);
         ipRange.setTenantDomain(tenantDomain);
-        JsonObject ipLevelJson = (JsonObject) new JsonParser().parse(value);
+        JsonObject ipLevelJson = new JsonObject();
+        try {
+            ipLevelJson = (JsonObject) new JsonParser().parse(value);
+        } catch (JsonSyntaxException e) {
+            // Handle migrated Fixed IP blocking conditions
+            String[] conditionsArray = value.split(":");
+            if (conditionsArray.length == 2) {
+                String fixedIp = conditionsArray[1];
+                ipLevelJson.addProperty(APIConstants.BLOCK_CONDITION_FIXED_IP, fixedIp);
+                // Invert condition is set to false for migrated Fixed IP conditions as it is false always
+                ipLevelJson.addProperty(APIConstants.BLOCK_CONDITION_INVERT, Boolean.FALSE);
+            } else {
+                // This is a true parsing exception. Hence, it will be thrown
+                // without handling
+                log.error("Error parsing IP blocking condition", e);
+                throw new JsonSyntaxException(e);
+            }
+        }
         if (APIConstants.BLOCKING_CONDITIONS_IP.equals(type)) {
             ipRange.setType(APIConstants.BLOCKING_CONDITIONS_IP);
             JsonElement fixedIpElement = ipLevelJson.get(APIConstants.BLOCK_CONDITION_FIXED_IP);

@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.persistence.utils;
 
 import com.google.gson.Gson;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -53,7 +52,6 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
@@ -76,7 +74,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -89,8 +86,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 
 
 public class RegistryPersistenceUtil {
@@ -609,9 +604,12 @@ public class RegistryPersistenceUtil {
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
-                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
-                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            String password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD);
+            if (password == null) {
+                password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD_ALT);
+            }
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD).equals(password))) {
+                api.setEndpointUTPassword(password);
             } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
                 api.setEndpointUTPassword(apiResource.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY));
             }
@@ -1816,31 +1814,6 @@ public class RegistryPersistenceUtil {
         return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
     }
 
-    public static void addLifecycleIfNotExists(int tenantId) throws APIPersistenceException {
-        //Add default API LC if it is not there
-        try {
-            if (!CommonUtil.lifeCycleExists(APIConstants.API_LIFE_CYCLE,
-                    getRegistryService().getConfigSystemRegistry(tenantId))) {
-                String defaultLifecyclePath = CommonUtil.getDefaltLifecycleConfigLocation() + File.separator
-                        + APIConstants.API_LIFE_CYCLE + APIConstants.XML_EXTENSION;
-                File file = new File(defaultLifecyclePath);
-                String content = null;
-                if (file != null && file.exists()) {
-                    content = FileUtils.readFileToString(file);
-                }
-                if (content != null) {
-                    CommonUtil.addLifecycle(content, getRegistryService().getConfigSystemRegistry(tenantId),
-                            CommonUtil.getRootSystemRegistry(tenantId));
-                }
-            }
-        } catch (RegistryException e) {
-            throw new APIPersistenceException("Error occurred while adding default APILifeCycle.", e);
-        } catch (IOException e) {
-            throw new APIPersistenceException("Error occurred while loading APILifeCycle.xml.", e);
-        } catch (XMLStreamException e) {
-            throw new APIPersistenceException("Error occurred while adding default API LifeCycle.", e);
-        }
-    }
 
     public static String extractProvider(String apiPath, String apiName) {
         int startIndex = apiPath.indexOf(APIConstants.API_PROVIDER_SUFFIX_SLASH) +

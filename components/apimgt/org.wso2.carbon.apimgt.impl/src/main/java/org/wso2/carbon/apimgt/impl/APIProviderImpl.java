@@ -25,10 +25,9 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,17 +35,79 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ErrorItem;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.dto.*;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
+import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIPublisher;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.APISearchResult;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
-import org.wso2.carbon.apimgt.api.model.policy.*;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
+import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.ResourcePath;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Usage;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
@@ -57,8 +118,13 @@ import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.*;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -66,16 +132,22 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
+import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
-import org.wso2.carbon.apimgt.impl.notifier.events.KeyTemplateEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.*;
-import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.KeyTemplateEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ScopesEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
@@ -83,21 +155,51 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
+import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
+import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
-import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
-import org.wso2.carbon.apimgt.persistence.dto.*;
-import org.wso2.carbon.apimgt.persistence.exceptions.*;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
-import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
-import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -106,16 +208,32 @@ import javax.cache.Cache;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.COMMERCIAL_TIER_PLAN;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -597,8 +715,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (!isScopeKeyAssignedLocally(apiName, scope.getKey(), organization)) {
                     scopesToRegister.add(scope);
                 } else {
-                    throw new APIManagementException("Error while adding local scopes for API " + apiName
-                            + ". Scope: " + scopeKey + " already assigned locally for a different API.");
+                    String errMsg = "Error while adding local scopes for API " + apiName + ". Scope: " + scopeKey +
+                            " already assigned locally for a different API.";
+                    throw new APIManagementException(errMsg,
+                            ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_ASSIGNED_FOR_DIFFERENT_API, apiName,
+                                    scopeKey));
                 }
             } else if (log.isDebugEnabled()) {
                 log.debug("Scope " + scopeKey + " exists as a shared scope. Skip adding as a local scope.");
@@ -891,7 +1012,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action, api.getApiSecurity());
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action, api.getApiSecurity(), api.getVisibility());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         // Extracting API details for the recommendation system
@@ -921,15 +1042,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void validateKeyManagers(API api) throws APIManagementException {
 
-        List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
-                apiMgtDAO.getKeyManagerConfigurationsByOrganization(tenantDomain);
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
+
         List<String> configuredMissingKeyManagers = new ArrayList<>();
         for (String keyManager : api.getKeyManagers()) {
             if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
-                KeyManagerConfigurationDTO selectedKeyManager = null;
-                for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
-                    if (keyManager.equals(keyManagerConfigurationDTO.getName())) {
-                        selectedKeyManager = keyManagerConfigurationDTO;
+                KeyManagerDto selectedKeyManager = null;
+
+                for (String kmName: tenantKeyManagers.keySet()) {
+                    if (keyManager.equals(tenantKeyManagers.get(kmName).getName())) {
+                        selectedKeyManager = tenantKeyManagers.get(kmName);
                         break;
                     }
                 }
@@ -1052,9 +1174,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 (JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
                         if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
                             if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                                EndpointSecurity endpointSecurity = new ObjectMapper().convertValue(
-                                        endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
-                                        EndpointSecurity.class);
+                                EndpointSecurity endpointSecurity;
+                                try {
+                                    endpointSecurity = new ObjectMapper().convertValue(
+                                            endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
+                                            EndpointSecurity.class);
+                                } catch (IllegalArgumentException e) {
+                                    ErrorHandler errorHandler = ExceptionCodes.from(
+                                            ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
+                                            APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                                    throw new APIManagementException(
+                                            "Error while processing " + APIConstants.ENDPOINT_SECURITY_PRODUCTION +
+                                                    " endpoint security configuration related values provided for API " + api.getId()
+                                                    .toString(), errorHandler);
+                                }
+
                                 EndpointSecurity oldEndpointSecurity = new ObjectMapper().convertValue(
                                         oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
                                         EndpointSecurity.class);
@@ -1062,6 +1196,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
                                     endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                                    if (StringUtils.isBlank(endpointSecurity.getType())) {
+                                        ErrorHandler errorHandler = ExceptionCodes.from(
+                                                ExceptionCodes.ENDPOINT_SECURITY_TYPE_NOT_DEFINED,
+                                                APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                                        throw new APIManagementException(
+                                                "Endpoint security type is not defined " + "for the endpoint type " + APIConstants.ENDPOINT_SECURITY_PRODUCTION,
+                                                errorHandler);
+                                    }
+
                                     if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
                                         endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
                                         endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
@@ -1077,9 +1220,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                         if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
                             if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                                EndpointSecurity endpointSecurity = new ObjectMapper()
-                                        .convertValue(endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
-                                                EndpointSecurity.class);
+                                EndpointSecurity endpointSecurity;
+                                try {
+                                    endpointSecurity = new ObjectMapper().convertValue(
+                                            endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
+                                            EndpointSecurity.class);
+                                } catch (IllegalArgumentException e) {
+                                    ErrorHandler errorHandler = ExceptionCodes.from(
+                                            ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
+                                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                                    throw new APIManagementException(
+                                            "Error while processing " + APIConstants.ENDPOINT_SECURITY_SANDBOX + " " +
+                                                    "endpoint security configuration related values provided for API " + api.getId()
+                                                    .toString(), errorHandler);
+                                }
+
                                 EndpointSecurity oldEndpointSecurity = new ObjectMapper()
                                         .convertValue(oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
                                                 EndpointSecurity.class);
@@ -1087,6 +1242,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
                                     endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                                    if (StringUtils.isBlank(endpointSecurity.getType())) {
+                                        ErrorHandler errorHandler = ExceptionCodes.from(
+                                                ExceptionCodes.ENDPOINT_SECURITY_TYPE_NOT_DEFINED,
+                                                APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                                        throw new APIManagementException(
+                                                "Endpoint security type is not defined " + "for the endpoint type " + APIConstants.ENDPOINT_SECURITY_SANDBOX,
+                                                errorHandler);
+                                    }
+
                                     if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
                                         endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
                                         endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
@@ -1595,10 +1759,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     "A common policy is found for " + policyId + ". Validating the policy");
                         }
 
-                        if (!commonPolicyData.getSpecification().getName().equals(policy.getPolicyName()) ||
-                                !commonPolicyData.getSpecification().getVersion().equals(policy.getPolicyVersion())) {
-                            throw new APIManagementException("Applied policy for uriTemplate " + policy.getPolicyName()
-                                    + "_" + policy.getPolicyVersion() + " does not match the specification");
+                        if (!commonPolicyData.getSpecification().getName()
+                                .equals(policy.getPolicyName()) || !commonPolicyData.getSpecification().getVersion()
+                                .equals(policy.getPolicyVersion())) {
+                            String errMsg =
+                                    "policyName and/or policyVersion provided for the applied policy "
+                                            + policy.getPolicyName() + "_" + policy.getPolicyVersion()
+                                            + " does not match the policy specification identified by the given policyId "
+                                            + policyId;
+                            ErrorHandler errorHandler = ExceptionCodes.from(
+                                    ExceptionCodes.OPERATION_POLICY_NAME_VERSION_INVALID, policy.getPolicyName(),
+                                    policy.getPolicyVersion(), policyId);
+                            throw new APIManagementException(errMsg, errorHandler);
                         }
 
                         OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
@@ -1681,11 +1853,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (appliedPolicyAttribute != null) {
                         if (attribute.getValidationRegex() != null) {
                             Pattern pattern = Pattern.compile(attribute.getValidationRegex(), Pattern.CASE_INSENSITIVE);
-                            Matcher matcher = pattern.matcher((String) appliedPolicyAttribute);
+                            Matcher matcher;
+                            try {
+                                matcher = pattern.matcher((String) appliedPolicyAttribute);
+                            } catch (ClassCastException e) {
+                                ErrorHandler errorHandler = ExceptionCodes.from(
+                                        ExceptionCodes.INVALID_OPERATION_POLICY_PARAMS, attribute.getName());
+                                throw new APIManagementException(
+                                        "Value with invalid data type provided for the operation policy " +
+                                                "parameter " + attribute.getName(),
+                                        errorHandler);
+                            }
+
                             if (!matcher.matches()) {
-                                throw new APIManagementException("Policy attribute " + attribute.getName()
-                                        + " regex validation error.",
-                                        ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS);
+                                ErrorHandler errorHandler = ExceptionCodes.from(
+                                        ExceptionCodes.INVALID_OPERATION_POLICY_PARAMS, attribute.getName());
+                                throw new APIManagementException(
+                                        "Invalid value provided for the operation policy parameter " + attribute.getName(),
+                                        errorHandler);
                             }
                         }
                     } else {
@@ -1706,7 +1891,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return
      */
     private ArrayList<String> selectSecurityLevels(String apiSecurity) {
-        ArrayList<String> securityLevels = new ArrayList<>();
+        Set<String> securityLevels = new HashSet<>();
         String[] apiSecurityLevels = apiSecurity.split(",");
         boolean isOauth2 = false;
         boolean isMutualSSL = false;
@@ -1714,6 +1899,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean isApiKey = false;
         boolean isMutualSSLMandatory = false;
         boolean isOauthBasicAuthMandatory = false;
+        boolean isMutualSSLOptional = false;
+        boolean isOauthBasicAuthOptional = false;
 
         boolean securitySchemeFound = false;
 
@@ -1741,10 +1928,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
                 isMutualSSLMandatory = true;
                 securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+            } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_OPTIONAL)) {
+                isMutualSSLOptional = true;
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_OPTIONAL);
             }
-            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
+            if (apiSecurityLevel.trim()
+                    .equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                 isOauthBasicAuthMandatory = true;
                 securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+            } else if (apiSecurityLevel.trim()
+                    .equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_OPTIONAL)) {
+                isOauthBasicAuthOptional = true;
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_OPTIONAL);
             }
         }
 
@@ -1763,10 +1958,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
         // set OAuth2/Basic-Auth as mandatory
-        if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
+        if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory
+                && !isMutualSSLOptional && !isOauthBasicAuthOptional) {
             securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
         }
-        return securityLevels;
+        return new ArrayList<>(securityLevels);
     }
 
     /**
@@ -1811,7 +2007,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void checkIfValidTransport(String transport) throws APIManagementException {
         if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)
                 && !APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
-            handleException("Unsupported Transport [" + transport + ']');
+            String errMsg = "Unsupported Transport [" + transport + ']';
+            throw new APIManagementException(errMsg, ExceptionCodes
+                    .from(ExceptionCodes.UNSUPPORTED_TRANSPORT, transport));
         }
     }
 
@@ -2325,7 +2523,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                     APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                    api.getStatus(), api.getApiSecurity());
+                    api.getStatus(), api.getApiSecurity(), api.getStatus(), api.getVisibility());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else {
             log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
@@ -3180,10 +3378,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
             }
             apiMgtDAO.addSubscriptionPolicy(subPolicy);
-            String monetizationPlan = subPolicy.getMonetizationPlan();
-            Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
-            if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
-                createMonetizationPlan(subPolicy);
+            if (subPolicy.getBillingPlan().equalsIgnoreCase(COMMERCIAL_TIER_PLAN)) {
+                String monetizationPlan = subPolicy.getMonetizationPlan();
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
+                    createMonetizationPlan(subPolicy);
+                }
             }
             //policy id is not set. retrieving policy to get the id.
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
@@ -3547,6 +3747,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleBlockConditionNotFoundException("Block condition: " + uuid + " was not found.");
         }
         return blockCondition;
+    }
+
+    @Override
+    public List<BlockConditionsDTO> getLightweightBlockConditions(String conditionType, String conditionValue)
+            throws APIManagementException {
+        return apiMgtDAO.getBlockConditionsByConditionTypeAndValue(conditionType, conditionValue, tenantDomain);
     }
 
     @Override
@@ -4446,7 +4652,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, product.getId().getName(), productId,
                 product.getId().getUUID(), product.getId().getVersion(), product.getType(), product.getContext(),
-                product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE, product.getApiSecurity());
+                product.getId().getProviderName(), APIConstants.LC_PUBLISH_LC_STATE, product.getApiSecurity(), product.getState(), product.getVisibility());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         return apiToProductResourceMapping;
@@ -4469,7 +4675,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (APIConstants.BLOCKED.equals(status) ||
             APIConstants.PROTOTYPED.equals(status) ||
-            APIConstants.DEPRECATED.equals(status) ||
             APIConstants.RETIRED.equals(status)) {
             throw new APIManagementException("Cannot create API Product using API with following status: " + status,
                     ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
@@ -5014,6 +5219,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIIdentifier apiIdentifier = api.getId();
                 apiIdentifier.setUuid(uuid);
                 api.setId(apiIdentifier);
+                //Gateway type is obtained considering the gateway vendor.
+                api.setGatewayType(APIUtil.getGatewayType(publisherAPI.getGatewayVendor()));
+                api.setGatewayVendor(APIUtil.handleGatewayVendorRetrieval(publisherAPI.getGatewayVendor()));
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
                 populateRevisionInformation(api, uuid);
@@ -5043,6 +5251,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e);
         }
+    }
+
+    @Override
+    public String getUUIDFromIdentifier(APIIdentifier identifier, String organization) throws APIManagementException {
+
+        return apiMgtDAO.getUUIDFromIdentifier(identifier, organization);
     }
 
     /**
@@ -5094,6 +5308,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
                     populateAPIStatus(mappedAPI);
                     populateDefaultVersion(mappedAPI);
+                    populateGatewayVendor(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 result.setApis(apiList);
@@ -5162,7 +5377,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIProductInformation(uuid, organization, product);
                 populateAPIStatus(product);
                 populateAPITier(product);
-                populateDefaultVersion(product);
+                if (migrationEnabled == null) {
+                    populateDefaultVersion(product);
+                }
                 return product;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
@@ -5201,6 +5418,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
                     populateAPIStatus(mappedAPI);
                     populateDefaultVersion(mappedAPI);
+                    populateGatewayVendor(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -5463,16 +5681,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void setThumbnailToAPI(String apiId, ResourceFile resource, String organization) throws APIManagementException {
 
+        InputStream thumbnailImageContent = null;
         try {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
-            apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
+            thumbnailImageContent = iconResourceFile.getContent();
+            if (thumbnailImageContent.available() > 0) {
+                apiPersistenceInstance.saveThumbnail(new Organization(organization), apiId, iconResourceFile);
+            } else {
+                // Thumbnail deletion from publisher originally handled through the same PUT call
+                // It was decided after discussion to fix the deletion (U2 update) through the same originally used PUT
+                apiPersistenceInstance.deleteThumbnail(new Organization(organization), apiId);
+            }
         } catch (ThumbnailPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
             } else {
                 throw new APIManagementException("Error while saving thumbnail ", e);
             }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading input stream ", e);
+        } finally {
+            IOUtils.closeQuietly(thumbnailImageContent);
         }
     }
 
@@ -5793,6 +6023,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (APIRevisionDeployment pendingRevision : apiRevisionDeployments) {
             // Set the displayOnDevportal to false for the pending revisions
             pendingRevision.setDisplayOnDevportal(false);
+            if (StringUtils.isEmpty(pendingRevision.getRevisionUUID())) {
+                pendingRevision.setRevisionUUID(apiRevisionUUID);
+            }
             for (APIRevisionDeployment currentRevision : currentPendingDeployments) {
                 if (pendingRevision.getDeployment().equals(currentRevision.getDeployment())) {
                     matchingRevisions.add(currentRevision);
@@ -6485,6 +6718,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
         jwtTokenInfoDTO.setExpirationTime(60000l);
+        jwtTokenInfoDTO.setAudience(Arrays.asList(apiId));
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }
@@ -6836,10 +7070,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Check whether the gateway policy is to be deployed or undeployed
             if (isDeployment) {
                 gatewayPolicyDeploymentList = gatewayPolicyDeploymentMap.get(true);
-                gatewaysToAdd = getGatewayPolicyDeploymentMap(gatewayPolicyDeploymentList);
+                gatewaysToAdd = getGatewayPolicyDeploymentMap(gatewayPolicyDeploymentList, true, orgId);
             } else {
                 gatewayPolicyUndeploymentList = gatewayPolicyDeploymentMap.get(false);
-                gatewaysToRemove = getGatewayPolicyDeploymentMap(gatewayPolicyUndeploymentList);
+                gatewaysToRemove = getGatewayPolicyDeploymentMap(gatewayPolicyUndeploymentList, false, orgId);
             }
         }
         Set<String> activeGatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(
@@ -7032,12 +7266,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return isPolicyMappingDeploymentExists;
     }
 
+    /**
+     * Get the list of gateway labels which the policy mapping is deployed.
+     *
+     * @param gatewayPolicyMappingId Policy mapping UUID
+     * @param tenantDomain           Tenant domain
+     * @return Set of gateway labels
+     * @throws APIManagementException
+     */
+    public Set<String> getPolicyMappingDeployedGateways(String gatewayPolicyMappingId, String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(
+                gatewayPolicyMappingId, tenantDomain);
+    }
+
+    /**
+     * Checks whether a policy mapping deployment exists for a given gateway label.
+     *
+     * @param gatewayLabel           Gateway label
+     * @param tenantDomain           Tenant domain
+     * @return true if a policy mapping deployment exists for a given policy mapping ID and gateway label
+     * @throws APIManagementException
+     */
     @Override
     public boolean hasExistingDeployments(String tenantDomain, String gatewayLabel) throws APIManagementException {
         return !StringUtils.isBlank(
                 apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(gatewayLabel, tenantDomain));
     }
 
+    /**
+     * Checks whether a policy mapping metadata exists for a given policy mapping ID.
+     *
+     * @param gatewayPolicyMappingId Policy mapping UUID
+     * @return true if a policy mapping metadata exists for a given policy mapping ID
+     * @throws APIManagementException
+     */
     @Override
     public boolean isPolicyMetadataExists(String gatewayPolicyMappingId)
             throws APIManagementException {
@@ -7046,6 +7309,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return metadata != null && metadata.getPolicyMappingId().equals(gatewayPolicyMappingId);
     }
 
+    /**
+     * Checks whether a common policy exists based on the provided common policy UUID within gateway policy mappings.
+     *
+     * @param commonPolicyUUID Common policy UUID
+     * @return count of the common policy usage
+     * @throws APIManagementException
+     */
     @Override
     public int getPolicyUsageByPolicyUUIDInGatewayPolicies(String commonPolicyUUID)
             throws APIManagementException {
@@ -7056,18 +7326,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * To get the hashmap of what mappingId is deployed or undeployed in which gateway.
      */
     private Map<String, Set<String>> getGatewayPolicyDeploymentMap(List<GatewayPolicyDeployment>
-            gatewayPolicyDeploymentList) {
+            gatewayPolicyDeploymentList, boolean toAdd, String tenantDomain) throws APIManagementException {
         Map<String, Set<String>> gatewayPolicyDeploymentMapForResponse = new HashMap<>();
         for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentList) {
-            if (gatewayPolicyDeploymentMapForResponse.containsKey(gatewayPolicyDeployment.getMappingUuid())) {
-                gatewayPolicyDeploymentMapForResponse.get(gatewayPolicyDeployment.getMappingUuid())
-                        .add(gatewayPolicyDeployment.getGatewayLabel());
+            String mappingUuid = gatewayPolicyDeployment.getMappingUuid();
+            String gatewayLabel = gatewayPolicyDeployment.getGatewayLabel();
+
+            if (gatewayPolicyDeploymentMapForResponse.containsKey(mappingUuid)) {
+                gatewayPolicyDeploymentMapForResponse.get(mappingUuid).add(gatewayLabel);
             } else {
                 Set<String> gatewayLabels = new HashSet<>();
-                gatewayLabels.add(gatewayPolicyDeployment.getGatewayLabel());
-                gatewayPolicyDeploymentMapForResponse.put(gatewayPolicyDeployment.getMappingUuid(), gatewayLabels);
+
+                if ((toAdd && !getPolicyMappingDeployedGateways(mappingUuid, tenantDomain).contains(gatewayLabel)) ||
+                        (!toAdd && getPolicyMappingDeployedGateways(mappingUuid, tenantDomain).contains(gatewayLabel))) {
+                    gatewayLabels.add(gatewayLabel);
+                    gatewayPolicyDeploymentMapForResponse.put(mappingUuid, gatewayLabels);
+                }
             }
         }
         return gatewayPolicyDeploymentMapForResponse;
+    }
+    
+    @Override
+    public void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
+            throws APIManagementException {
+        Organization org = new Organization(organization);
+        try {
+            apiPersistenceInstance.updateSoapToRestSequences(org, apiId, sequences);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while sequences to the api  " + apiId, e);
+        }        
     }
 }

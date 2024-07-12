@@ -54,7 +54,8 @@ public class LogsHandler extends AbstractSynapseHandler {
     private static final String UUID_HEADER = "UUID_HEADER";
     private static final String CORRELATION_ID_HEADER = "CORRELATION_ID_HEADER";
     protected static final String LOG_LEVEL = "LOG_LEVEL";
-
+    protected static final String RESOURCE_PATH = "RESOURCE_PATH";
+    protected static final String RESOURCE_METHOD = "RESOURCE_METHOD";
     private static final String REQUEST_BODY_SIZE_ERROR = "Error occurred while building the message to calculate" +
             " the response body size";
     private static final String REQUEST_EVENT_PUBLICATION_ERROR = "Cannot publish request event. ";
@@ -278,7 +279,7 @@ public class LogsHandler extends AbstractSynapseHandler {
      *
      * @param map Map containing API context and logLevel
      */
-    public static Map<String, String> syncAPILogData(Map<String, Object> map) {
+    public static Map<Map<String, String>, String> syncAPILogData(Map<String, Object> map) {
         String apictx = (String) map.get("context");
         String logLevel = (String) map.get("value");
         log.debug("Log level for " + apictx + " is changed to " + logLevel);
@@ -288,7 +289,7 @@ public class LogsHandler extends AbstractSynapseHandler {
         return APILoggerManager.getInstance().getPerAPILoggerList().get(context);
     }
 
-    public static Map<String, String> getLogData() {
+    public static Map<Map<String, String>, String> getLogData() {
         return APILoggerManager.getInstance().getPerAPILoggerList();
     }
 
@@ -299,7 +300,7 @@ public class LogsHandler extends AbstractSynapseHandler {
      * @return log level of the API or null if not
      */
     private String getAPILogLevel(MessageContext ctx) {
-        Map<String, String> logProperties = APILoggerManager.getInstance().getPerAPILoggerList();
+        Map<Map<String, String>, String> logProperties = APILoggerManager.getInstance().getPerAPILoggerList();
         // if the logging API data holder is empty or null return null
         if (!logProperties.isEmpty()) {
             return LogUtils.getMatchingLogLevel(ctx, logProperties);

@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
+import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -247,6 +248,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             RestApiUtil.handleResourceAlreadyExistsError(
                     "Specified subscription already exists for API " + body.getApiId() + ", for application "
                             + body.getApplicationId(), e, log);
+        } catch (SubscriptionBlockedException e) {
+            RestApiUtil.handleOperationBlockedError("Subscription blocked. " + e.getMessage()
+                    + ". Please contact the API publisher.", e, log);
         } catch (URISyntaxException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 //this happens when the specified API identifier does not exist
@@ -350,6 +354,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             RestApiUtil.handleResourceAlreadyExistsError(
                     "Specified subscription already exists for API " + body.getApiId() + ", for application "
                             + body.getApplicationId(), e, log);
+        } catch (SubscriptionBlockedException e) {
+            RestApiUtil.handleOperationBlockedError("Subscription blocked. " + e.getMessage()
+                    + ". Please contact the API publisher.", e, log);
         } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 //this happens when the specified API identifier does not exist

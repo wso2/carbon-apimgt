@@ -30,7 +30,7 @@ public class ThrottleDataHolderTest {
     public void addThrottleDataFromMap() throws Exception {
         Map<String,Long> map = new HashMap<>();
         map.put("/api/1.0.0",System.currentTimeMillis());
-        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+        ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
         throttleDataHolder.addThrottleDataFromMap(map);
         throttleDataHolder.removeThrottleData("/api/1.0.0");
     }
@@ -38,7 +38,7 @@ public class ThrottleDataHolderTest {
 
     @Test
     public void removeThrottledAPIKey() throws Exception {
-        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+        ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
         throttleDataHolder.addThrottledAPIKey("/api/1.0.0",System.currentTimeMillis());
         throttleDataHolder.removeThrottledAPIKey("/api/1.0.0");
     }
@@ -46,7 +46,7 @@ public class ThrottleDataHolderTest {
 
     @Test
     public void addBlockingCondition() throws Exception {
-        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+        ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
         throttleDataHolder.addAPIBlockingCondition("/api1/1.0.0","enabled");
         throttleDataHolder.removeAPIBlockingCondition("/api1/1.0.0");
         throttleDataHolder.addApplicationBlockingCondition("admin:DefaultApplication","enabled");

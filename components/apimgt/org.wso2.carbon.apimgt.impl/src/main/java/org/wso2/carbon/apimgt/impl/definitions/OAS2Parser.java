@@ -902,6 +902,14 @@ public class OAS2Parser extends APIDefinition {
      */
     private void updateSwaggerSecurityDefinition(Swagger swagger, SwaggerData swaggerData, String authUrl) {
 
+        // Check if there is an authorization URL defined in the Swagger data for the implicit flow named 'default'
+        if (swagger.getSecurityDefinitions() != null && swagger.getSecurityDefinitions().containsKey("default")) {
+            OAuth2Definition defaultSecurityDefinition = (OAuth2Definition) swagger.getSecurityDefinitions().get("default");
+            if (defaultSecurityDefinition.getFlow() != null && defaultSecurityDefinition.getFlow().equals("implicit")) {
+                authUrl = defaultSecurityDefinition.getAuthorizationUrl();
+            }
+        }
+
         OAuth2Definition oAuth2Definition = new OAuth2Definition().implicit(authUrl);
         OASParserUtil.setScopesFromAPIToSecurityScheme(swaggerData, oAuth2Definition);
         swagger.addSecurityDefinition(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, oAuth2Definition);

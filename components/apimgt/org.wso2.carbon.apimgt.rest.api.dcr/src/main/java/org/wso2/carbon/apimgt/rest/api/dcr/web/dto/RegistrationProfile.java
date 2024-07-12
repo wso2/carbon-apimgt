@@ -43,6 +43,7 @@ public class RegistrationProfile {
     private boolean saasApp;
     private String audience;
     private String tokenType;
+    private boolean userstoreDomainInSubject;
 
     public String getRecepientValidationURL() {
         return recepientValidationURL;
@@ -213,6 +214,14 @@ public class RegistrationProfile {
 
     public void setTokenType(String tokenType) {
         this.tokenType = tokenType;
+    }
+
+    public boolean isUserStoreDomainInSubject() {
+        return userstoreDomainInSubject;
+    }
+
+    public void setUserStoreDomainInSubject(boolean setUserStoreDomainInSubject) {
+        this.userstoreDomainInSubject = setUserStoreDomainInSubject;
     }
 
 }

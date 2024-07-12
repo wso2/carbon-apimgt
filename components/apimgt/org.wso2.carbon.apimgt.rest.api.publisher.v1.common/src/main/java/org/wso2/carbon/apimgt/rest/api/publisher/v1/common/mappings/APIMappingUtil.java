@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -121,7 +122,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfig
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -137,6 +137,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -190,10 +191,14 @@ public class APIMappingUtil {
         model.setContext(context);
         model.setDescription(dto.getDescription());
 
-        if (dto.getEndpointConfig() != null) {
+        Object endpointConfig = dto.getEndpointConfig();
+        if (endpointConfig != null) {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                model.setEndpointConfig(mapper.writeValueAsString(dto.getEndpointConfig()));
+                if (endpointConfig instanceof LinkedHashMap) {
+                    ((LinkedHashMap) endpointConfig).remove(APIConstants.IMPLEMENTATION_STATUS);
+                }
+                model.setEndpointConfig(mapper.writeValueAsString(endpointConfig));
             } catch (IOException e) {
                 handleException("Error while converting endpointConfig to json", e);
             }
@@ -336,11 +341,15 @@ public class APIMappingUtil {
         Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = dto.getAdditionalPropertiesMap();
         if (additionalPropertiesMap != null && !additionalPropertiesMap.isEmpty()) {
             for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : additionalPropertiesMap.entrySet()) {
+                String propertyKey = null;
                 if (entry.getValue().isDisplay()) {
-                    model.addProperty(entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX,
-                            entry.getValue().getValue());
+                    propertyKey = entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX;
                 } else {
-                    model.addProperty(entry.getKey(), entry.getValue().getValue());
+                    propertyKey = entry.getKey();
+                }
+                // If this property already added from the additional properties, avoid overriding it
+                if (propertyKey != null && !model.getAdditionalProperties().containsKey(propertyKey)) {
+                    model.addProperty(propertyKey, entry.getValue().getValue());
                 }
             }
         }
@@ -399,7 +408,9 @@ public class APIMappingUtil {
         } else if (dto.getKeyManagers() == null) {
             model.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         } else {
-            throw new APIManagementException("KeyManagers value need to be an array");
+            String errMsg = "KeyManagers value needs to be an array";
+            ExceptionCodes errorHandler = ExceptionCodes.KEYMANAGERS_VALUE_NOT_ARRAY;
+            throw new APIManagementException(errMsg, errorHandler);
         }
 
         APIServiceInfoDTO serviceInfoDTO = dto.getServiceInfo();
@@ -714,6 +725,8 @@ public class APIMappingUtil {
         apiInfoDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
         apiInfoDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiInfoDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
+        apiInfoDTO.setGatewayType(api.getGatewayType());
+        apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         return apiInfoDTO;
     }
 
@@ -1667,6 +1680,11 @@ public class APIMappingUtil {
 
             String uriTempVal = operation.getTarget();
 
+            if (StringUtils.isEmpty(uriTempVal)) {
+                String errMsg = "Resource URI template value (target) is not specified for the operation/resource";
+                throw new APIManagementException(errMsg, ExceptionCodes.RESOURCE_URI_TEMPLATE_NOT_DEFINED);
+            }
+
             String httpVerb = operation.getVerb();
             List<String> scopeList = operation.getScopes();
             if (scopeList != null) {
@@ -1686,6 +1704,14 @@ public class APIMappingUtil {
             if (amznResourceName != null) {
                 template.setAmznResourceName(amznResourceName);
             }
+
+            if (StringUtils.isEmpty(httpVerb)) {
+                String errMsg = "Operation type/http method is not specified for the operation/resource " + uriTempVal;
+                throw new APIManagementException(errMsg,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_OR_RESOURCE_TYPE_OR_METHOD_NOT_DEFINED,
+                                uriTempVal));
+            }
+
             //Only continue for supported operations
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())
                     || (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
@@ -1718,23 +1744,33 @@ public class APIMappingUtil {
                 }
                 uriTemplates.add(template);
             } else {
+                final String errorMessageEndClause = " operation Type  '" + httpVerb + "' provided" + " for operation" +
+                        " '" + uriTempVal + "' is invalid";
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
-                    handleException(
-                            "The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                                    + "' is invalid");
+                    String errMsg = "The " + APIConstants.GRAPHQL_API + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.GRAPHQL_API, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType())) {
-                    handleException("The WEBSUB operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                            + "' is invalid");
+                    String errMsg = "The " + APIConstants.API_TYPE_WEBSUB + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.API_TYPE_WEBSUB, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else if (APIConstants.API_TYPE_SSE.equals(model.getType())) {
-                    handleException("The SSE operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                            + "' is invalid");
+                    String errMsg = "The " + APIConstants.API_TYPE_SSE + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.API_TYPE_SSE, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else if (APIConstants.API_TYPE_WS.equals(model.getType())) {
-                    handleException(
-                            "The WEBSOCKET operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                                    + "' is invalid");
+                    String errMsg = "The " + APIConstants.API_TYPE_WS + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.API_TYPE_WS, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else {
-                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                            + "' is invalid");
+                    String errMsg = "The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal + "' " +
+                            "is invalid";
+                    throw new APIManagementException(errMsg,
+                            ExceptionCodes.from(ExceptionCodes.HTTP_METHOD_INVALID, httpVerb, uriTempVal));
                 }
             }
 
@@ -2101,6 +2137,7 @@ public class APIMappingUtil {
             workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.CREATED);
         }
 
+        workflowResponseDTO.setJsonPayload(stateChangeResponse.getWorkflowResponse().getJSONPayload());
         workflowResponseDTO.setLifecycleState(lifecycleStateDTO);
         return workflowResponseDTO;
     }
@@ -3094,25 +3131,23 @@ public class APIMappingUtil {
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
             JSONObject sandboxEndpointSecurity =
                     (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+            if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) sandboxEndpointSecurity
+                    .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
+            }
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
-                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, EMPTY_STRING);
-                if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
-                        .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
-                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, EMPTY_STRING);
-                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, EMPTY_STRING);
-                }
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
             }
         }
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
             JSONObject productionEndpointSecurity =
                     (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+            if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) productionEndpointSecurity
+                    .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
+            }
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
-                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, EMPTY_STRING);
-                if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE)
-                        .equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
-                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_ID, EMPTY_STRING);
-                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, EMPTY_STRING);
-                }
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
             }
         }
         return endpointSecurityElement;

@@ -17,9 +17,9 @@
 package org.wso2.carbon.apimgt.impl.token;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import net.minidev.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
@@ -40,6 +40,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -106,8 +107,9 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
         if (jwtTokenInfoDTO.getPermittedReferer() != null) {
             jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.PERMITTED_REFERER, jwtTokenInfoDTO.getPermittedReferer());
         }
+        Map<String, Object> claimSet = jwtClaimsSetBuilder.build().toJSONObject();
 
-        return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
+        return new JSONObject(claimSet).toJSONString();
     }
 
     protected String buildHeader() throws APIManagementException {
@@ -116,10 +118,8 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
         try {
             KeyStoreManager tenantKSM = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
             publicCert = tenantKSM.getDefaultPrimaryCertificate();
-            String headerWithoutKid = generateHeader(publicCert, APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA);
-            headerWithKid = new JSONObject(headerWithoutKid);
+            headerWithKid = generateHeader(publicCert, APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA);
             headerWithKid.put("kid", APIUtil.getApiKeyAlias());
-
         } catch (Exception e) {
             throw new APIManagementException("Error while building Api key header", e);
         }
@@ -132,10 +132,10 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
      * @param publicCert         The public certificate which needs to include in the header as thumbprint
      * @param signatureAlgorithm signature algorithm which needs to include in the header
      */
-    private String generateHeader(Certificate publicCert, String signatureAlgorithm) throws APIManagementException {
+    private JSONObject generateHeader(Certificate publicCert, String signatureAlgorithm) throws APIManagementException {
         try {
-            //generate the SHA-1 thumbprint of the certificate
-            MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
+            //generate the SHA-256 thumbprint of the certificate
+            MessageDigest digestValue = MessageDigest.getInstance("SHA-256");
             byte[] der = publicCert.getEncoded();
             digestValue.update(der);
             byte[] digestInBytes = digestValue.digest();
@@ -146,15 +146,15 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
 
             /*
              * Sample header
-             * {"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10",
+             * {"typ":"JWT", "alg":"SHA256withRSA", "x5t#S256":"a_jhNus21KVuoFx65LmkW2O_l10",
              * "kid":"a_jhNus21KVuoFx65LmkW2O_l10_RS256"}
-             * {"typ":"JWT", "alg":"[2]", "x5t":"[1]", "x5t":"[1]"}
+             * {"typ":"JWT", "alg":"[2]", "x5t#S256":"[1]", "kid":"gateway_certificate_alias"}
              * */
             JSONObject jwtHeader = new JSONObject();
             jwtHeader.put("typ", "JWT");
             jwtHeader.put("alg", APIUtil.getJWSCompliantAlgorithmCode(signatureAlgorithm));
-            jwtHeader.put("x5t", base64UrlEncodedThumbPrint);
-            return jwtHeader.toString();
+            jwtHeader.put("x5t#S256", base64UrlEncodedThumbPrint);
+            return jwtHeader;
 
         } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
             throw new APIManagementException("Error in generating public certificate thumbprint", e);

@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import com.google.gson.Gson;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
@@ -28,6 +29,7 @@ import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
@@ -36,6 +38,8 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,6 +60,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
+import org.wso2.carbon.apimgt.gateway.exception.OAuth2Exception;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -78,13 +83,16 @@ import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetrySpan;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryTracer;
 import org.wso2.carbon.apimgt.tracing.telemetry.TelemetryUtil;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -94,8 +102,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -114,6 +126,7 @@ public class GatewayUtils {
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
     private static final String HTTP_SC = "HTTP_SC";
     private static final String HTTP_SC_DESC = "HTTP_SC_DESC";
+    private static final Gson gson = new Gson();
 
     public static boolean isClusteringEnabled() {
 
@@ -140,6 +153,13 @@ public class GatewayUtils {
             }
         } else {
             clientIp = (String) axis2MsgContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+        }
+        if (StringUtils.isEmpty(clientIp)) {
+            return null;
+        }
+        if (clientIp.contains(":") && clientIp.split(":").length == 2) {
+            log.debug("Port will be ignored and only the IP address will be picked from " + clientIp);
+            clientIp = clientIp.split(":")[0];
         }
         return clientIp;
     }
@@ -680,9 +700,9 @@ public class GatewayUtils {
         authContext.setApiTier(apiLevelPolicy);
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
-            JSONObject
-                    applicationObj = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
-
+            Map<String, Object> applicationObjMap =
+                    payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+            JSONObject applicationObj = new JSONObject(applicationObjMap);
             authContext
                     .setApplicationId(
                             String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
@@ -705,11 +725,13 @@ public class GatewayUtils {
             authContext.setTier(subscriptionTier);
             authContext.setSubscriberTenantDomain(
                     api.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN));
-            JSONObject tierInfo = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.TIER_INFO);
+            Map<String, Object> tierInfoObj = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.TIER_INFO);
+            JSONObject tierInfo = new JSONObject(tierInfoObj);
             authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
             authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
             if (tierInfo.get(subscriptionTier) != null) {
-                JSONObject subscriptionTierObj = (JSONObject) tierInfo.get(subscriptionTier);
+                String jsonString = gson.toJson(tierInfo.get(subscriptionTier));
+                JSONObject subscriptionTierObj = JSONValue.parse(jsonString, JSONObject.class);
                 authContext.setStopOnQuotaReach(
                         Boolean.parseBoolean(
                                 subscriptionTierObj.getAsString(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH)));
@@ -728,9 +750,18 @@ public class GatewayUtils {
                     ;
                 }
                 if (synCtx != null && APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
-                    Integer graphQLMaxDepth = (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_DEPTH);
-                    Integer graphQLMaxComplexity =
-                            (int) (long) subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_COMPLEXITY);
+                    Integer graphQLMaxDepth = 0;
+                    if (subscriptionTierObj != null
+                            && subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_DEPTH) != null) {
+                        graphQLMaxDepth = ((Number) subscriptionTierObj.get(
+                                GraphQLConstants.GRAPHQL_MAX_DEPTH)).intValue();
+                    }
+                    Integer graphQLMaxComplexity = 0;
+                    if (subscriptionTierObj != null
+                            && subscriptionTierObj.get(GraphQLConstants.GRAPHQL_MAX_COMPLEXITY) != null) {
+                        graphQLMaxComplexity = ((Number) subscriptionTierObj.get(
+                                GraphQLConstants.GRAPHQL_MAX_COMPLEXITY)).intValue();
+                    }
                     synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH, graphQLMaxDepth);
                     synCtx.setProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY, graphQLMaxComplexity);
                 }
@@ -827,8 +858,16 @@ public class GatewayUtils {
         JSONObject application;
         int appId = 0;
         if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
-            application = (JSONObject) payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION);
-            appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            try {
+                Map<String, Object> applicationObjMap =
+                        payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+                application = new JSONObject(applicationObjMap);
+                appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            } catch (ParseException e) {
+                log.error("Error while parsing the application object from the JWT token.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            }
         }
         // validate subscription
         // if the appId is equal to 0 then it's a internal key
@@ -839,10 +878,10 @@ public class GatewayUtils {
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS) != null) {
             // Subscription validation
-            JSONArray subscribedAPIs =
-                    (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
+            ArrayList subscribedAPIs = (ArrayList) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
             for (Object subscribedAPI : subscribedAPIs) {
-                JSONObject subscribedAPIsJSONObject = (JSONObject) subscribedAPI;
+                String subscribedAPIsJSONString = gson.toJson(subscribedAPI);
+                JSONObject subscribedAPIsJSONObject = JSONValue.parse(subscribedAPIsJSONString, JSONObject.class);
                 if (apiContext
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
@@ -913,8 +952,16 @@ public class GatewayUtils {
         JSONObject application;
         int appId = 0;
         if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
-            application = (JSONObject) payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION);
-            appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            try {
+                Map<String, Object> applicationObjMap =
+                        payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+                application = new JSONObject(applicationObjMap);
+                appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            } catch (ParseException e) {
+                log.error("Error while parsing the application object from the JWT token.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            }
         }
         // validate subscription
         // if the appId is equal to 0 then it's a internal key
@@ -925,10 +972,11 @@ public class GatewayUtils {
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS) != null) {
             // Subscription validation
-            JSONArray subscribedAPIs =
-                    (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
+            ArrayList subscribedAPIs =
+                    (ArrayList) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
             for (Object subscribedAPI : subscribedAPIs) {
-                JSONObject subscribedAPIsJSONObject = (JSONObject) subscribedAPI;
+                String subscribedAPIsJSONString = gson.toJson(subscribedAPI);
+                JSONObject subscribedAPIsJSONObject = JSONValue.parse(subscribedAPIsJSONString, JSONObject.class);
                 if (apiContext
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
@@ -1145,8 +1193,9 @@ public class GatewayUtils {
 
             Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
             if (claims.get(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+                String applicationString = gson.toJson(claims.get(APIConstants.JwtTokenConstants.APPLICATION));
                 JSONObject
-                        applicationObj = (JSONObject) claims.get(APIConstants.JwtTokenConstants.APPLICATION);
+                        applicationObj = JSONValue.parse(applicationString, JSONObject.class);
                 jwtInfoDto.setApplicationId(
                         String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
                 jwtInfoDto
@@ -1599,7 +1648,7 @@ public class GatewayUtils {
         DefaultJWTClaimsVerifier jwtClaimsSetVerifier = new DefaultJWTClaimsVerifier();
         jwtClaimsSetVerifier.setMaxClockSkew(timestampSkew);
         try {
-            jwtClaimsSetVerifier.verify(payload);
+            jwtClaimsSetVerifier.verify(payload, null);
             if (log.isDebugEnabled()) {
                 log.debug("Token is not expired. User: " + payload.getSubject());
             }
@@ -1675,5 +1724,114 @@ public class GatewayUtils {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
         return gatewayArtifactSynchronizerProperties.isOnDemandLoading();
+    }
+
+    /**
+     * This method return the carbon.xml config value for tenant eager loading
+     *
+     * @return config string
+     */
+    public static String getEagerLoadingEnabledTenantsConfig() {
+        ServerConfiguration carbonConfig = CarbonUtils.getServerConfiguration();
+        return carbonConfig.getFirstProperty(APIConstants.EAGER_LOADING_ENABLED_TENANTS);
+    }
+
+    /**
+     * This method returns the list of tenants for which eager loading is enabled
+     *
+     * @return List of eager loading enabled tenants
+     */
+    public static List<String> getTenantsToBeDeployed() throws APIManagementException {
+        List<String> tenantsToBeDeployed = new ArrayList<>();
+        tenantsToBeDeployed.add(APIConstants.SUPER_TENANT_DOMAIN);
+
+        //Read eager loading config from carbon server config, and extract include and exclude tenant lists
+        String eagerLoadingConfig = getEagerLoadingEnabledTenantsConfig();
+        if (StringUtils.isNotEmpty(eagerLoadingConfig)) {
+            boolean includeAllTenants = false;
+            List<String> includeTenantList = new ArrayList<>();
+            List<String> excludeTenantList = new ArrayList<>();
+
+
+            if (StringUtils.isNotEmpty(eagerLoadingConfig)) {
+                String[] tenants = eagerLoadingConfig.split(",");
+                for (String tenant : tenants) {
+                    tenant = tenant.trim();
+                    if (tenant.equals("*")) {
+                        includeAllTenants = true;
+                    } else if (tenant.contains("!")) {
+                        if (tenant.contains("*")) {
+                            // "!*" is not a valid config
+                            throw new IllegalArgumentException(tenant + " is not a valid tenant domain");
+                        }
+                        excludeTenantList.add(tenant.replace("!", ""));
+                    } else {
+                        includeTenantList.add(tenant);
+                    }
+                }
+            }
+
+            //Fetch all active tenant domains
+            try {
+                Set<String> allTenants = APIUtil.getTenantDomainsByState(APIConstants.TENANT_STATE_ACTIVE);
+                if (includeAllTenants) {
+                    tenantsToBeDeployed.addAll(allTenants);
+                    // Now that we have included  all tenants, let's see whether any tenant have been excluded
+                    if (!excludeTenantList.isEmpty()) {
+                        tenantsToBeDeployed.removeAll(excludeTenantList);
+                    }
+                } else {
+                    tenantsToBeDeployed.addAll(includeTenantList);
+                }
+            } catch (UserStoreException e) {
+                throw new APIManagementException("Error while fetching active tenants list.", e);
+            }
+        }
+        return tenantsToBeDeployed;
+    }
+
+    /**
+     * Helper method to add public certificate to JWT_HEADER to signature verification.
+     * This creates thumbPrints directly from given certificates
+     *
+     * @param certificate
+     * @param alias
+     * @return
+     * @throws OAuth2Exception
+     */
+    public static String getThumbPrint(Certificate certificate, String alias) throws OAuth2Exception {
+        return getThumbPrint(certificate);
+    }
+
+    /**
+     * Method to obtain certificate thumbprint.
+     *
+     * @param certificate java.security.cert type certificate.
+     * @return Certificate thumbprint as a String.
+     * @throws OAuth2Exception When failed to obtain the thumbprint.
+     */
+    public static String getThumbPrint(Certificate certificate) throws OAuth2Exception {
+
+        try {
+            MessageDigest digestValue = MessageDigest.getInstance("SHA-256");
+            byte[] der = certificate.getEncoded();
+            digestValue.update(der);
+            byte[] digestInBytes = digestValue.digest();
+
+            String publicCertThumbprint = APIUtil.hexify(digestInBytes);
+            String thumbprint = new String(new Base64(0, null, true).
+                    encode(publicCertThumbprint.getBytes(Charsets.UTF_8)), Charsets.UTF_8);
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Thumbprint value: %s calculated for Certificate: %s using algorithm: %s",
+                        thumbprint, certificate, digestValue.getAlgorithm()));
+            }
+            return thumbprint;
+        } catch (CertificateEncodingException e) {
+            String error = "Error occurred while encoding thumbPrint from certificate.";
+            throw new OAuth2Exception(error, e);
+        } catch (NoSuchAlgorithmException e) {
+            String error = "Error in obtaining SHA-256 thumbprint from certificate.";
+            throw new OAuth2Exception(error, e);
+        }
     }
 }

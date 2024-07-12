@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.29.28-SNAPSHOT</version>
+        <version>9.29.161-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -145,7 +145,7 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-core</artifactId>
         </dependency>
         <dependency>
@@ -269,7 +269,7 @@
                                 </bundleDef>
                                 <bundleDef>javax.validation:validation-api</bundleDef>
                                 <bundleDef>com.google.guava:guava:${google.guava.version}</bundleDef>
-                                <bundleDef>io.swagger:swagger-core</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-core</bundleDef>
                                 <bundleDef>io.swagger:swagger-models</bundleDef>
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
                                 <bundleDef>com.samskivert:jmustache</bundleDef>
@@ -328,6 +328,9 @@
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:xmpbox:${pdfbox.version}</importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.orbit.org.apache.pdfbox:pdfbox-io:${pdfbox.io.version}
+                                </importBundleDef>
                                 <importBundleDef>
                                     org.wso2.orbit.com.github.dblock.waffle:waffle-jna:${waffle-jna.version}
                                 </importBundleDef>

@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import com.nimbusds.jose.util.StandardCharset;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +67,7 @@ public class CertificateRestApiUtils {
 
         byte[] certificateBytes = IOUtils.toByteArray(certificateInputStream);
         byte[] encodedCert = Base64.encodeBase64(certificateBytes);
-        return new String(encodedCert, StandardCharset.UTF_8);
+        return new String(encodedCert, StandardCharsets.UTF_8);
     }
 
     /**

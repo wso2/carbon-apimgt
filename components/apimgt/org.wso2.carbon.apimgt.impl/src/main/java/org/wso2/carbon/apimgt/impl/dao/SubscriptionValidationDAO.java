@@ -162,7 +162,7 @@ public class SubscriptionValidationDAO {
                 }
                 String attributeName = resultSet.getString("ATTRIBUTE_NAME");
                 String attributeValue = resultSet.getString("ATTRIBUTE_VALUE");
-                if (StringUtils.isNotEmpty(attributeName) && StringUtils.isNotEmpty(attributeValue)) {
+                if (StringUtils.isNotEmpty(attributeName)) {
                     application.addAttribute(attributeName, attributeValue);
                 }
                 //read from the application_group_mapping table and make it a set
@@ -497,6 +497,8 @@ public class SubscriptionValidationDAO {
                 subscription.setSubscriptionState(resultSet.getString("STATUS"));
                 subscription.setApiName(resultSet.getString("API_NAME"));
                 subscription.setApiVersion(resultSet.getString("API_VERSION"));
+                subscription.setApiOrganization(resultSet.getString("API_ORGANIZATION"));
+                subscription.setAppOrganization(resultSet.getString("APP_ORGANIZATION"));
                 subscriptions.add(subscription);
             }
         }
@@ -790,6 +792,8 @@ public class SubscriptionValidationDAO {
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
                     subscription.setApiName(resultSet.getString("API_NAME"));
                     subscription.setApiVersion(resultSet.getString("API_VERSION"));
+                    subscription.setAppOrganization(resultSet.getString("API_ORGANIZATION"));
+                    subscription.setAppOrganization(resultSet.getString("APP_ORGANIZATION"));
                     return subscription;
                 }
 
@@ -825,6 +829,8 @@ public class SubscriptionValidationDAO {
                     subscription.setSubscriptionState(resultSet.getString("STATUS"));
                     subscription.setApiName(resultSet.getString("API_NAME"));
                     subscription.setApiVersion(resultSet.getString("API_VERSION"));
+                    subscription.setApiOrganization(resultSet.getString("API_ORGANIZATION"));
+                    subscription.setAppOrganization(resultSet.getString("APP_ORGANIZATION"));
                     return subscription;
                 }
 

@@ -56,7 +56,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
-import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
@@ -89,6 +88,7 @@ import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.KeyTemplateNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.MarketplaceAssistantApiPublisherNotifier;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
@@ -216,6 +216,9 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
+            if (configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
+                bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
+            }
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             APIMgtDBUtil.initialize();
@@ -332,6 +335,9 @@ public class APIManagerComponent {
             CacheProvider.createGatewayBasicAuthResourceCache();
             CacheProvider.createGatewayUsernameCache();
             CacheProvider.createIntrospectionCache();
+            if(configuration.isJWTClaimCacheEnabled()){
+                CacheProvider.createJWTClaimCache();
+            }
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
@@ -1097,4 +1103,3 @@ public class APIManagerComponent {
         ServiceReferenceHolder.getInstance().setWorkflowTaskService(null);
     }
 }
-

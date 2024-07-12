@@ -70,6 +70,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
+    public static final String API_OVERVIEW_ENDPOINT_PASSWORD_ALT = "overview_endpointPassword";
     public static final String API_OVERVIEW_ENDPOINT_OAUTH = "overview_endpointOAuth";
     public static final String API_OVERVIEW_ENDPOINT_GRANT_TYPE = "overview_grantType";
     public static final String API_OVERVIEW_ENDPOINT_HTTP_METHOD = "overview_httpMethod";
@@ -139,6 +140,7 @@ public final class APIConstants {
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
     public static final String API_OVERVIEW_WS_URI_MAPPING = "overview_wsUriMapping";
+    public static final String CHAR_ASTERIX = "*";
 
     public static class Monetization {
         public static final String API_MONETIZATION_PROPERTIES = "monetizationProperties";

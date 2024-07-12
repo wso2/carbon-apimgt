@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,8 +35,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIAdmin;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -64,6 +68,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -81,6 +86,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -95,6 +101,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyResetEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
@@ -105,12 +112,14 @@ import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -494,6 +503,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public long getSubscriptionCountOfAPI(String apiId, String organization) throws APIManagementException {
+
+        return apiMgtDAO.getNoOfSubscriptionsOfAPI(apiId, organization);
+    }
+
+    @Override
     public float getAverageAPIRating(String apiId) throws APIManagementException {
 
         return apiMgtDAO.getAverageRating(apiId);
@@ -852,7 +867,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         WorkflowResponse workflowResponse = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
-        checkSubscriptionAllowed(apiTypeWrapper);
+        checkSubscriptionAllowed(apiTypeWrapper, apiTypeWrapper.getTier());
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
@@ -1043,7 +1058,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiContext = api.getContext();
             apiOrgId = api.getOrganization();
         }
-        checkSubscriptionAllowed(apiTypeWrapper);
+        checkSubscriptionAllowed(apiTypeWrapper, requestedThrottlingPolicy);
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
@@ -1627,6 +1642,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                      * an extension to populate it.
                      */
                     applicationAttributes.remove(attributeName);
+                } else if (BooleanUtils.isFalse(required) && BooleanUtils.isFalse(hidden)) {
+                    /*
+                     * If an optional attribute is not provided, we add it with an empty value.
+                     */
+                    applicationAttributes.putIfAbsent(attributeName, StringUtils.EMPTY);
                 }
             }
             application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes,
@@ -1644,6 +1664,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setCallbackUrl(null);
         }
         int applicationId = apiMgtDAO.addApplication(application, userId, organization);
+        Application createdApplication = apiMgtDAO.getApplicationById(applicationId);
 
         JSONObject appLogObject = new JSONObject();
         appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
@@ -1709,18 +1730,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                 ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                        organization, applicationId, application.getUUID(), application.getName(),
-                        application.getTokenType(),
-                        application.getTier(), application.getGroupId(), application.getApplicationAttributes(),
+                        organization, applicationId, createdApplication.getUUID(), createdApplication.getName(),
+                        createdApplication.getTokenType(),
+                        createdApplication.getTier(), createdApplication.getGroupId(), createdApplication.getApplicationAttributes(),
                          userId);
                 APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
             }
         } else {
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
-                    organization, applicationId, application.getUUID(), application.getName(),
-                    application.getTokenType(), application.getTier(), application.getGroupId(),
-                    application.getApplicationAttributes(), userId);
+                    organization, applicationId, createdApplication.getUUID(), createdApplication.getName(),
+                    createdApplication.getTokenType(), createdApplication.getTier(), createdApplication.getGroupId(),
+                    createdApplication.getApplicationAttributes(), userId);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         return applicationId;
@@ -1873,6 +1894,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         validateApplicationPolicy(application, existingApp.getOrganization());
         apiMgtDAO.updateApplication(application);
+        Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
         }
@@ -1898,9 +1920,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                existingApp.getOrganization(), application.getId(), application.getUUID(), application.getName(),
-                application.getTokenType(), application.getTier(), application.getGroupId(),
-                application.getApplicationAttributes(), existingApp.getSubscriber().getName());
+                existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
+                updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
+                updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
+                existingApp.getSubscriber().getName());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
@@ -2356,6 +2379,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
             } else {
                 throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
+            }
+            
+            if (appRegistrationWorkflow == null ) {
+                appRegistrationWorkflow = new ApplicationRegistrationSimpleWorkflowExecutor();
             }
 
             //check whether callback url is empty and set null
@@ -3304,6 +3331,35 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
+    public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
+        ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getApiChatConfigurationDto();
+        return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+                configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+    }
+
+    @Override
+    public String invokeApiChatPrepare(String apiId, String apiChatRequestId, String organization)
+            throws APIManagementException {
+        try {
+            // Generate the payload for prepare call
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
+            ObjectNode payload = objectMapper.createObjectNode();
+            payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
+
+            ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration().getApiChatConfigurationDto();
+            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+        } catch (JsonProcessingException e) {
+            String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
+            log.error(error, e);
+            throw new APIManagementException(error, e);
+        }
+    }
+
+    @Override
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
 
@@ -3317,13 +3373,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         String eventID = UUID.randomUUID().toString();
         properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
+        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
         properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
+        properties.setProperty(APIConstants.NotificationEvent.EXPIRY_TIME, Long.toString(expiryTime));
         ApiMgtDAO.getInstance().addRevokedJWTSignature(eventID,
                 apiKey, APIConstants.API_KEY_AUTH_TYPE,
                 expiryTime, tenantId);
-        revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
+        revocationRequestPublisher.publishRevocationEvents(apiKey, properties);
     }
 
     /**
@@ -3591,6 +3650,56 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
     }
 
+    public boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant)
+            throws APIManagementException {
+
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(this.username);
+
+            if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+                int tenantId = APIUtil.getInternalOrganizationId(xWSO2Tenant);
+                // To handle choreo scenario. due to key managers are not per organization atm. using ST
+                if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+                    xWSO2Tenant = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                }
+            }
+            String tenantDomain = this.tenantDomain;
+            if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+                tenantDomain = xWSO2Tenant;
+            }
+
+            String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            KeyManagerApplicationInfo KeyManagerApplicationInfo =
+                    apiMgtDAO.getKeyManagerNameAndConsumerKeyByAppIdAndKeyMappingId(application.getId(), keyMappingId);
+            String keyManagerNameResult = KeyManagerApplicationInfo.getKeyManagerName();
+            if (!StringUtils.isEmpty(keyManagerNameResult)) {
+                keyManagerName = keyManagerNameResult;
+            }
+            String consumerKey = KeyManagerApplicationInfo.getConsumerKey();
+
+            //Removed the key manager entry from the key manager if it is not a mapped key.xxx
+            if (KeyManagerApplicationInfo.getMode().equals(APIConstants.OAuthAppMode.CREATED.name())) {
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                keyManager.deleteApplication(consumerKey);
+            }
+
+            apiConsumer.cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(application.getId(), keyMappingId);
+
+            //publishing event for application key cleanup in gateway.
+            ApplicationRegistrationEvent removeEntryTrigger = new ApplicationRegistrationEvent(
+                    UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(),
+                    APIUtil.getTenantIdFromTenantDomain(tenantDomain), application.getOrganization(),
+                    application.getId(), application.getUUID(), consumerKey, application.getKeyType(), keyManagerName);
+            APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+            return true;
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error occurred while application key cleanup process",
+                    ExceptionCodes.KEYS_DELETE_FAILED);
+        }
+    }
+
     @Override
     public APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
             throws APIManagementException {
@@ -3739,6 +3848,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 APIUtil.getAvailableTiers(definedTiers, tiers, mappedAPI.getId().getApiName());
                         mappedAPI.removeAllTiers();
                         mappedAPI.setAvailableTiers(availableTiers);
+                        populateGatewayVendor(mappedAPI);
                         apiList.add(mappedAPI);
                     } catch (APIManagementException e) {
                         log.warn("Retrieving API details from DB failed for API: " + mappedAPI.getUuid() + " " + e);
@@ -3784,6 +3894,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
                     populateAPIStatus(api);
+                    populateGatewayVendor(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
@@ -3932,6 +4043,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 api.removeAllTiers();
                 api.setAvailableTiers(availableTiers);
                 api.setOrganization(organization);
+                populateGatewayVendor(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -4037,6 +4149,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
         Map<String, Object> result = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
         int totalLength = 0;
 
         String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
@@ -4064,7 +4177,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 docItem.getApiVersion()));
                         api.setUuid(docItem.getApiUUID());
                         docMap.put(doc, api);
-                    } else {
+                    } else if ("API".equals(item.getType())) {
                         DevPortalSearchContent publiserAPI = (DevPortalSearchContent) item;
                         API api = new API(new APIIdentifier(publiserAPI.getProvider(), publiserAPI.getName(),
                                 publiserAPI.getVersion()));
@@ -4078,12 +4191,31 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
                         api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
                         api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
-                        api.setRating(0);// need to retrieve from db
+                        api.setRating(APIUtil.getAverageRating(publiserAPI.getId()));
+                        api.setDescription(publiserAPI.getDescription());
+                        api.setType(publiserAPI.getTransportType());
                         apiSet.add(api);
+                    } else if ("APIProduct".equals(item.getType())) {
+                        DevPortalSearchContent devAPIProduct = (DevPortalSearchContent) item;
+                        APIProduct apiProduct = new APIProduct(
+                                new APIProductIdentifier(devAPIProduct.getProvider(), devAPIProduct.getName(),
+                                        devAPIProduct.getVersion()));
+                        apiProduct.setUuid(devAPIProduct.getId());
+                        apiProduct.setContextTemplate(devAPIProduct.getContext());
+                        apiProduct.setState(devAPIProduct.getStatus());
+                        apiProduct.setType(devAPIProduct.getTransportType());
+                        apiProduct.setBusinessOwner(devAPIProduct.getBusinessOwner());
+                        apiProduct.setBusinessOwnerEmail(devAPIProduct.getBusinessOwnerEmail());
+                        apiProduct.setTechnicalOwner(devAPIProduct.getTechnicalOwner());
+                        apiProduct.setTechnicalOwnerEmail(devAPIProduct.getTechnicalOwnerEmail());
+                        apiProduct.setDescription(devAPIProduct.getDescription());
+                        apiProduct.setRating("0");// need to retrieve from db
+                        apiProductSet.add(apiProduct);
                     }
                 }
                 compoundResult.addAll(apiSet);
                 compoundResult.addAll(docMap.entrySet());
+                compoundResult.addAll(apiProductSet);
                 compoundResult.sort(new ContentSearchResultNameComparator());
                 result.put("length", sResults.getTotalCount());
             } else {
@@ -4235,6 +4367,34 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     /**
+     * Send Application Policy Reset Event to Eventhub
+     *
+     * @param applicationId Application Identifier used by traffic manager
+     * @param userId        Username for which the policy should be reset
+     * @param organization  Tenant which application owner belongs to
+     */
+    @Override
+    public void resetApplicationThrottlePolicy(String applicationId, String userId, String organization)
+            throws APIManagementException {
+        // Get the application
+        Application application = getApplicationByUUID(applicationId, organization);
+        String groupId = application.getGroupId();
+        int appId = application.getId();
+        String appTier = application.getTier();
+        // Check whether the application is accessible to the logged-in user
+        String loggedInUser = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+        if (!validateApplication(loggedInUser, appId, groupId)) {
+            log.error("Application " + applicationId + " is not accessible to user " + loggedInUser);
+            throw new APIMgtAuthorizationFailedException("Application is not accessible to user  " + loggedInUser);
+        }
+
+        ApplicationPolicyResetEvent applicationPolicyResetEvent = new ApplicationPolicyResetEvent(
+                UUID.randomUUID().toString(), System.currentTimeMillis(), APIConstants.EventType.POLICY_RESET.name(),
+                tenantId, organization, UUID.randomUUID().toString(), String.valueOf(appId), userId, appTier);
+        APIUtil.sendNotification(applicationPolicyResetEvent, APIConstants.NotifierType.POLICY.name());
+    }
+
+    /**
      * Get host names with transport scheme mapping from Gateway Environments in api-manager.xml or from the tenant
      * custom url config in registry. (For WebSockets)
      *
@@ -4324,7 +4484,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      *                                subscription, this will throw an instance of APIMgtAuthorizationFailedException
       *                                with the reason as the message
      */
-    private void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper)
+    private void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper, String requestedThrottlingPolicy)
             throws APIManagementException {
 
         Set<Tier> tiers;
@@ -4382,17 +4542,17 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         List<String> allowedTierList = new ArrayList<>();
         while (iterator.hasNext()) {
             Tier t = iterator.next();
-            if (t.getName() != null && (t.getName()).equals(apiTypeWrapper.getTier())) {
+            if (t.getName() != null && (t.getName()).equals(requestedThrottlingPolicy)) {
                 isTierAllowed = true;
             }
             allowedTierList.add(t.getName());
         }
         if (!isTierAllowed) {
             String msg =
- "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
+ "Tier " + requestedThrottlingPolicy + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
                     + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
-                    apiTypeWrapper.getTier(), username));
+                    requestedThrottlingPolicy, username));
         }
     }
 
@@ -4410,7 +4570,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
-                apiAdmin.getKeyManagerConfigurationsByOrganization(organization);
+                apiAdmin.getKeyManagerConfigurationsByOrganization(organization, false);
         List<KeyManagerConfigurationDTO> permittedKeyManagerConfigurations = new ArrayList<>();
         if (keyManagerConfigurations.size() > 0) {
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {

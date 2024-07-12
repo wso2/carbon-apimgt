@@ -108,6 +108,9 @@ public class CacheProvider {
         return getCache(APIConstants.GATEWAY_JWT_TOKEN_CACHE);
     }
 
+    public static Cache getJWTClaimCache() {
+        return getCache(APIConstants.CLAIMS_APIM_CACHE);
+    }
     /**
      *
      * @return SignedJWT ParsedCache
@@ -508,6 +511,25 @@ public class CacheProvider {
                     defaultCacheTimeout, defaultCacheTimeout);
         }
     }
+
+    /**
+     * Create and return the JWT Claim Cache
+     */
+    public static Cache createJWTClaimCache() {
+
+        String jwtClaimCacheExpiry =
+                getApiManagerConfiguration().getFirstProperty(APIConstants.JWT_CLAIM_CACHE_EXPIRY);
+        if (jwtClaimCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.CLAIMS_APIM_CACHE,
+                    Long.parseLong(jwtClaimCacheExpiry), Long.parseLong(jwtClaimCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.CLAIMS_APIM_CACHE,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+
 
     /**
      * Create and return the Tenant Config Cache

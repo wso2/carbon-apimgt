@@ -61,6 +61,7 @@ public class SettingsMappingUtil {
         }
         settingsDTO.setScopes(getScopeList());
         settingsDTO.setGatewayTypes(APIUtil.getGatewayTypes());
+        settingsDTO.setIsJWTEnabledForLoginTokens(APIUtil.isJWTEnabledForPortals());
         return settingsDTO;
     }
 

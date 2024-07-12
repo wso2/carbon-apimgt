@@ -259,6 +259,14 @@ public interface CertificateManager {
     boolean addAllCertificateToGateway(String certificate, String alias, int tenantId);
 
     /**
+     * Method to add the all tenant's certificate to gateway nodes.
+     *
+     * @param certificateMetadataDTOList : The list of all certificates of a tenant
+     */
+    void addAllTenantCertificatesToGateway(List<CertificateMetadataDTO> certificateMetadataDTOList);
+
+
+    /**
      * This method is used to retrieve all the certificates.
      *
      * @return : List of Certificate metadata objects.

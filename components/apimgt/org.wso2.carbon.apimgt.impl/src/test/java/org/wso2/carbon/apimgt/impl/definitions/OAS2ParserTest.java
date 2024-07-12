@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
@@ -230,6 +231,22 @@ public class OAS2ParserTest extends OASTestBase {
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
                         + File.separator + "publisher" + File.separator + "oas2_with_default_oauth_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
+        Assert.assertEquals(oasDefinitionEdited, response);
+
+        // Testing if the different default implicit authorizationUrl is replaced with the default value.
+        // This is a test for the fix 9620. Earlier value was replaced with the default 'https;//test.com value.
+        // Now it should not be the case.
+        swagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2" + File.separator
+                        + "publisher" + File.separator + "oas2_with_default_implicit_authorization_url.json"),
+                "UTF-8");
+        APIIdentifier identifier = new APIIdentifier("admin", "simple", "1.0.0");
+        API api2 = new API(identifier);
+        response = parser.generateAPIDefinition(new SwaggerData(api2), swagger);
+        oasDefinitionEdited= IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2" + File.separator
+                        + "publisher" + File.separator + "oas2_with_default_implicit_authorization_url_response.json"),
+                "UTF-8");
         Assert.assertEquals(oasDefinitionEdited, response);
     }
 

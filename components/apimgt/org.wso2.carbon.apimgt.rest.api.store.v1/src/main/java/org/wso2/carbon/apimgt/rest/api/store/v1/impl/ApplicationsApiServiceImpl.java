@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateReques
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
@@ -98,6 +99,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -316,6 +318,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
+            /* When new applications are created, we do not honor tokenType sent in the body
+            and all the applications created will be of 'JWT' token type */
+            body.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
+
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Application createdApplication = preProcessAndAddApplication(username, body, organization);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
@@ -366,10 +372,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         if (applicationAttributes != null) {
             applicationDto.setAttributes(applicationAttributes);
         }
-
-        //we do not honor tokenType sent in the body and
-        //all the applications created will of 'JWT' token type
-        applicationDto.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
 
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
@@ -482,6 +484,39 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Reset Application Level Throttle Policy
+     *
+     * @param applicationId               application Identifier
+     * @param applicationThrottleResetDTO request DTO containing the username
+     * @return response with status code 200 if successful
+     */
+    @Override
+    public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId,
+            ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) {
+        try {
+            if (applicationThrottleResetDTO == null) {
+                RestApiUtil.handleBadRequest("Username cannot be null", log);
+            }
+
+            String userId = applicationThrottleResetDTO.getUserName();
+            String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
+            String organization = RestApiUtil.getOrganization(messageContext);
+
+            if (StringUtils.isBlank(userId)) {
+                RestApiUtil.handleBadRequest("Username cannot be empty", log);
+            }
+
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUsername);
+            //send the reset request as an event to the eventhub
+            apiConsumer.resetApplicationThrottlePolicy(applicationId, userId, organization);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while resetting application " + applicationId, e, log);
         }
         return null;
     }
@@ -1196,6 +1231,27 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             return Response.ok().build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while application key cleanup process", e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdDelete(String applicationId, String keyMappingId,
+            String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+            boolean result = apiConsumer.removalKeys(application, keyMappingId, xWSO2Tenant);
+            if (result) {
+                return Response.ok().build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(ExceptionCodes.KEYS_DELETE_FAILED.getErrorMessage(),
+                        keyMappingId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while application key delete process", e, log);
         }
         return null;
     }
