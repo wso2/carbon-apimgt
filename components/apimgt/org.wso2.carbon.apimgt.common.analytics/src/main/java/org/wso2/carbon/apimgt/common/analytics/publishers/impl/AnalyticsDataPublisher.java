@@ -117,6 +117,12 @@ public class AnalyticsDataPublisher {
                 metricReporter = MetricReporterFactory.getInstance().createLogMetricReporter(configs);
                 metricReporters.add(metricReporter);
             } else {
+                String authEndpoint = configs.get(Constants.AUTH_API_URL);
+
+                if (authEndpoint == null || authEndpoint.isEmpty()) {
+                    throw new MetricCreationException("Analytics Config Endpoint is not provided.");
+                }
+
                 metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
                 metricReporters.add(metricReporter);
             }
