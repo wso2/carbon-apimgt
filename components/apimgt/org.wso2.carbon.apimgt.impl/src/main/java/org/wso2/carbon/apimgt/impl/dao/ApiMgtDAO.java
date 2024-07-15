@@ -6251,18 +6251,16 @@ public class ApiMgtDAO {
                             + " AND LOWER(SUB.USER_ID) = LOWER(?))) AND "
                             + "APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
 
-            String whereClauseWithMultiGroupId = "  WHERE  ((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                    "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR   SUB.USER_ID = ? " +
+            String whereClauseWithMultiGroupId = "  WHERE  (((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
+                    "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
                     "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) " +
-                    "AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+                    "AND SUB.USER_ID = ?) AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
             String whereClauseWithMultiGroupIdCaseInSensitive =
-                    "  WHERE  ((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM "
-                            + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  "
-                            + "OR   LOWER(SUB.USER_ID) = LOWER(?)  "
-                            + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = " +
-                            "?))) "
-                            + "AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
-
+                    "  WHERE  (((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM "
+                    + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) "
+                    + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) "
+                    + "AND LOWER(SUB.USER_ID) = LOWER(?)) AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+            
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
@@ -6277,8 +6275,8 @@ public class ApiMgtDAO {
 
                     prepStmt = fillQueryParams(connection, query, groupIds, 1);
                     prepStmt.setString(++parameterIndex, tenantDomain);
-                    prepStmt.setString(++parameterIndex, userId);
                     prepStmt.setString(++parameterIndex, tenantDomain + '/' + groupId);
+                    prepStmt.setString(++parameterIndex, userId);
                     prepStmt.setString(++parameterIndex, applicationName);
                 } else {
                     if (forceCaseInsensitiveComparisons) {
