@@ -80,6 +80,11 @@ public class ThrottlePolicyTemplateBuilder {
         StringBuilder conditionString = new StringBuilder();
         int i = 0;
         for (Condition condition : conditions) {
+            if ("Header".equals(
+                    condition.getConditionType())) {
+                // set the header name of header based conditions, to lower case to make the condition case-insensitive
+                condition.setName(condition.getName().toLowerCase(Locale.ENGLISH));
+            }
             org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
                     PolicyMappingUtil.mapCondition(condition);
             if (i == 0) {

@@ -148,7 +148,13 @@ public class DataProcessAndPublishingAgent implements Runnable {
         Map<String, String> transportHeaderMap = (Map<String, String>) axis2MessageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (transportHeaderMap != null) {
-            this.headersMap = new HashMap<>(transportHeaderMap);
+            // convert all transport headers to lower case in order to make the header condition based throttling
+            // case-insensitive
+            Map<String, String> lowerCaseTransportHeaderMap = new HashMap<>();
+            for (Map.Entry<String, String> entry : transportHeaderMap.entrySet()) {
+                lowerCaseTransportHeaderMap.put(entry.getKey().toLowerCase(), String.valueOf(entry.getValue()));
+            }
+            this.headersMap = new HashMap<>(lowerCaseTransportHeaderMap);
         }
 
         if (messageContext.getProperty(APIThrottleConstants.CUSTOM_PROPERTY) != null) {
