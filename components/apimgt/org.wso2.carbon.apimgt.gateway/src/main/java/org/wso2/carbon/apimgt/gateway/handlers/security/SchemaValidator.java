@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.model.OpenAPIResponse;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
 import java.util.HashMap;
+
 /**
  * This SchemaValidator handler validates the request/response messages against schema defined in the swagger.
  */
@@ -74,17 +75,8 @@ public class SchemaValidator extends AbstractHandler {
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
         Object openAPIStringObject = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING);
         if (openAPI != null && openAPIStringObject != null) {
-            OpenApiInteractionValidator validator;
-            String openAPIIdentifier = DigestUtils.md5Hex(openAPIStringObject.toString());
-            // Use existing validator if present
-            if (validatorMap.containsKey(openAPIIdentifier)) {
-                validator = validatorMap.get(openAPIIdentifier);
-            } else {
-                validator = getOpenAPIValidator(openAPI);
-                validatorMap.put(openAPIIdentifier, validator);
-            }
+            OpenApiInteractionValidator validator = getOpenApiValidator(openAPI, openAPIStringObject.toString());
             OpenAPIRequest request = new OpenAPIRequest(messageContext);
-
             ValidationReport validationReport = validator.validateRequest(request);
             messageContext.setProperty(APIMgtGatewayConstants.SCHEMA_VALIDATION_REPORT, validationReport);
             if (validationReport.hasErrors()) {
@@ -106,17 +98,8 @@ public class SchemaValidator extends AbstractHandler {
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
         Object openAPIStringObject = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING);
         if (openAPI != null && openAPIStringObject != null) {
-            // Use existing validator if present
-            OpenApiInteractionValidator validator;
-            String openAPIIdentifier = DigestUtils.md5Hex(openAPIStringObject.toString());
-            if (validatorMap.containsKey(openAPIIdentifier)) {
-                validator = validatorMap.get(openAPIIdentifier);
-            } else {
-                validator = getOpenAPIValidator(openAPI);
-                validatorMap.put(openAPIIdentifier, validator);
-            }
+            OpenApiInteractionValidator validator = getOpenApiValidator(openAPI, openAPIStringObject.toString());
             OpenAPIResponse response = new OpenAPIResponse(messageContext);
-
             ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
                     response);
             if (validationReport.hasErrors()) {
@@ -130,5 +113,27 @@ public class SchemaValidator extends AbstractHandler {
             }
         }
         return true;
+    }
+
+    /**
+     * Method to get OpenApiInteractionValidator for the given openAPI.
+     * If the validator is already created for the given openAPI, it will return the existing one.
+     * Created validators are mapped against the hash of the yaml.
+     *
+     * @param openAPI       - OpenAPI object
+     * @param openAPIString - OpenAPI string (yaml)
+     * @return OpenApiInteractionValidator
+     */
+    private OpenApiInteractionValidator getOpenApiValidator(OpenAPI openAPI, String openAPIString) {
+
+        OpenApiInteractionValidator validator;
+        String apiIdentifier = DigestUtils.md5Hex(openAPIString);
+        if (validatorMap.containsKey(apiIdentifier)) {
+            validator = validatorMap.get(apiIdentifier);
+        } else {
+            validator = getOpenAPIValidator(openAPI);
+            validatorMap.put(apiIdentifier, validator);
+        }
+        return validator;
     }
 }
