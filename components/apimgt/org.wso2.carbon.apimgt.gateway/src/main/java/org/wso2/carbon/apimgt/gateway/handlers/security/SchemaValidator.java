@@ -22,6 +22,7 @@ import com.atlassian.oai.validator.report.ValidationReport;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -30,6 +31,8 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.model.OpenAPIRequest;
 import org.wso2.carbon.apimgt.gateway.handlers.security.model.OpenAPIResponse;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+
+import java.util.HashMap;
 
 /**
  * This SchemaValidator handler validates the request/response messages against schema defined in the swagger.
@@ -40,6 +43,7 @@ public class SchemaValidator extends AbstractHandler {
     private static final Log logger = LogFactory.getLog(SchemaValidator.class);
     private static final String HTTP_SC_CODE = "400";
     public static final String REG_TIME_MODULE = "register.timeModule";
+    public static HashMap<String, OpenApiInteractionValidator> validatorMap = new HashMap<>();
 
     /**
      * Method to generate OpenApiInteractionValidator when the openAPI is provided.
@@ -69,8 +73,16 @@ public class SchemaValidator extends AbstractHandler {
         }
         logger.debug("Validating the API request Body content..");
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
-        if (openAPI != null) {
-            OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
+        Object openAPIStringObject = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING);
+        if (openAPI != null && openAPIStringObject != null) {
+            OpenApiInteractionValidator validator;
+            String openAPIIdentifier = DigestUtils.md5Hex(openAPIStringObject.toString());
+            if (validatorMap.containsKey(openAPIIdentifier)) {
+                validator = validatorMap.get(openAPIIdentifier);
+            } else {
+                validator = getOpenAPIValidator(openAPI);
+                validatorMap.put(openAPIIdentifier, validator);
+            }
             OpenAPIRequest request = new OpenAPIRequest(messageContext);
 
             ValidationReport validationReport = validator.validateRequest(request);
@@ -92,8 +104,16 @@ public class SchemaValidator extends AbstractHandler {
     public boolean handleResponse(MessageContext messageContext) {
 
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
-        if (openAPI != null) {
-            OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
+        Object openAPIStringObject = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING);
+        if (openAPI != null && openAPIStringObject != null) {
+            OpenApiInteractionValidator validator;
+            String openAPIIdentifier = DigestUtils.md5Hex(openAPIStringObject.toString());
+            if (validatorMap.containsKey(openAPIIdentifier)) {
+                validator = validatorMap.get(openAPIIdentifier);
+            } else {
+                validator = getOpenAPIValidator(openAPI);
+                validatorMap.put(openAPIIdentifier, validator);
+            }
             OpenAPIResponse response = new OpenAPIResponse(messageContext);
 
             ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
