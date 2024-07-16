@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.model.OpenAPIResponse;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
 import java.util.HashMap;
-
 /**
  * This SchemaValidator handler validates the request/response messages against schema defined in the swagger.
  */
@@ -77,6 +76,7 @@ public class SchemaValidator extends AbstractHandler {
         if (openAPI != null && openAPIStringObject != null) {
             OpenApiInteractionValidator validator;
             String openAPIIdentifier = DigestUtils.md5Hex(openAPIStringObject.toString());
+            // Use existing validator if present
             if (validatorMap.containsKey(openAPIIdentifier)) {
                 validator = validatorMap.get(openAPIIdentifier);
             } else {
@@ -106,6 +106,7 @@ public class SchemaValidator extends AbstractHandler {
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
         Object openAPIStringObject = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING);
         if (openAPI != null && openAPIStringObject != null) {
+            // Use existing validator if present
             OpenApiInteractionValidator validator;
             String openAPIIdentifier = DigestUtils.md5Hex(openAPIStringObject.toString());
             if (validatorMap.containsKey(openAPIIdentifier)) {
