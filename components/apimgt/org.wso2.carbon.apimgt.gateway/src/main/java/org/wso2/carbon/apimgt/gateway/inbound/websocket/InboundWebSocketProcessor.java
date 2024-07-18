@@ -156,7 +156,11 @@ public class InboundWebSocketProcessor {
             log.error(e.getMessage());
             inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
                     WebSocketApiConstants.HandshakeErrorConstants.RESOURCE_NOT_FOUND_ERROR, e.getMessage());
-            publishResourceNotFoundEvent(ctx);
+
+            boolean isResourceNotFoundErrorCodeExist = WebSocketUtils.getApiProperties(ctx).containsKey(SynapseConstants.ERROR_CODE);
+            if (isResourceNotFoundErrorCodeExist) {
+                publishResourceNotFoundEvent(ctx);
+            }
         }
         return inboundProcessorResponseDTO;
     }
@@ -336,6 +340,8 @@ public class InboundWebSocketProcessor {
             }
             setApiPropertiesToChannel(ctx, inboundMessageContext);
             if (selectedResource == null) {
+                WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                        org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESOURCE_NOT_FOUND_ERROR_CODE);
                 throw new ResourceNotFoundException("No matching resource found to dispatch the request");
             }
             if (APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType())) {
@@ -422,8 +428,6 @@ public class InboundWebSocketProcessor {
     private void publishResourceNotFoundEvent(ChannelHandlerContext ctx) {
 
         if (APIUtil.isAnalyticsEnabled()) {
-            WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
-                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESOURCE_NOT_FOUND_ERROR_CODE);
             WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE,
                     "No matching resource found to dispatch the request");
             metricsHandler.handleHandshake(ctx);
