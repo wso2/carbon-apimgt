@@ -572,12 +572,12 @@ public enum ExceptionCodes implements ErrorHandler {
             "Business plan not specified."),
     BUSINESS_PLAN_NOT_ALLOWED(902019, "The Business plan is not allowed.", 400,
             "Business plan '%s' is not allowed for the API.", false),
-    INVALID_STATE_FOR_BUSINESS_PLAN_CHANGE(902020, "Cannot change the business plan of the subscription.",
+    INVALID_STATE_FOR_BUSINESS_PLAN_CHANGE(902022, "Cannot change the business plan of the subscription.",
             409, "Cannot change the business plan of the subscription with ID '%s' as the " +
             "subscription is in '%s' state.", false),
-    NOT_ALLOWED_TIER_FOR_SUBSCRIBER(902021, "Cannot change the business plan of the subscription.",
+    NOT_ALLOWED_TIER_FOR_SUBSCRIBER(902023, "Cannot change the business plan of the subscription.",
             403, "Cannot change the business plan of the subscription with ID '%s' as the " +
-            "subscriber does not have permission to access the specified business plan.", false);
+            "subscriber does not have permission to access the specified business plan.", false),
 
     HTTP_METHOD_INVALID(903201,
             "Invalid HTTP method provided for API resource", 400,
