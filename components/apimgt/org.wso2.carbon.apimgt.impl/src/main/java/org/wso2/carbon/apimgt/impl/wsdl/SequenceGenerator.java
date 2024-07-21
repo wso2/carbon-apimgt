@@ -198,7 +198,7 @@ public class SequenceGenerator {
                     sequenceMap.put("sequence", payloadSequence.get(operationId));
                     RESTToSOAPMsgTemplate template = new RESTToSOAPMsgTemplate();
                     String inSequence = template.getMappingInSequence(sequenceMap, operationId, soapAction,
-                            namespace, soapNamespace, arraySequenceElements);
+                            namespace, soapNamespace, soapVersion, arraySequenceElements);
                     String outSequence = template.getMappingOutSequence();
                     if (isResourceFromWSDL) {
                         SOAPToRestSequence inSeq = new SOAPToRestSequence(httpMethod.toString().toLowerCase(), pathName,

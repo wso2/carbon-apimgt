@@ -341,11 +341,15 @@ public class APIMappingUtil {
         Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = dto.getAdditionalPropertiesMap();
         if (additionalPropertiesMap != null && !additionalPropertiesMap.isEmpty()) {
             for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : additionalPropertiesMap.entrySet()) {
+                String propertyKey = null;
                 if (entry.getValue().isDisplay()) {
-                    model.addProperty(entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX,
-                            entry.getValue().getValue());
+                    propertyKey = entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX;
                 } else {
-                    model.addProperty(entry.getKey(), entry.getValue().getValue());
+                    propertyKey = entry.getKey();
+                }
+                // If this property already added from the additional properties, avoid overriding it
+                if (propertyKey != null && !model.getAdditionalProperties().containsKey(propertyKey)) {
+                    model.addProperty(propertyKey, entry.getValue().getValue());
                 }
             }
         }
@@ -404,7 +408,9 @@ public class APIMappingUtil {
         } else if (dto.getKeyManagers() == null) {
             model.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         } else {
-            throw new APIManagementException("KeyManagers value need to be an array");
+            String errMsg = "KeyManagers value needs to be an array";
+            ExceptionCodes errorHandler = ExceptionCodes.KEYMANAGERS_VALUE_NOT_ARRAY;
+            throw new APIManagementException(errMsg, errorHandler);
         }
 
         APIServiceInfoDTO serviceInfoDTO = dto.getServiceInfo();
@@ -1674,6 +1680,11 @@ public class APIMappingUtil {
 
             String uriTempVal = operation.getTarget();
 
+            if (StringUtils.isEmpty(uriTempVal)) {
+                String errMsg = "Resource URI template value (target) is not specified for the operation/resource";
+                throw new APIManagementException(errMsg, ExceptionCodes.RESOURCE_URI_TEMPLATE_NOT_DEFINED);
+            }
+
             String httpVerb = operation.getVerb();
             List<String> scopeList = operation.getScopes();
             if (scopeList != null) {
@@ -1693,6 +1704,14 @@ public class APIMappingUtil {
             if (amznResourceName != null) {
                 template.setAmznResourceName(amznResourceName);
             }
+
+            if (StringUtils.isEmpty(httpVerb)) {
+                String errMsg = "Operation type/http method is not specified for the operation/resource " + uriTempVal;
+                throw new APIManagementException(errMsg,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_OR_RESOURCE_TYPE_OR_METHOD_NOT_DEFINED,
+                                uriTempVal));
+            }
+
             //Only continue for supported operations
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())
                     || (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
@@ -1725,23 +1744,33 @@ public class APIMappingUtil {
                 }
                 uriTemplates.add(template);
             } else {
+                final String errorMessageEndClause = " operation Type  '" + httpVerb + "' provided" + " for operation" +
+                        " '" + uriTempVal + "' is invalid";
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
-                    handleException(
-                            "The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                                    + "' is invalid");
+                    String errMsg = "The " + APIConstants.GRAPHQL_API + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.GRAPHQL_API, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType())) {
-                    handleException("The WEBSUB operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                            + "' is invalid");
+                    String errMsg = "The " + APIConstants.API_TYPE_WEBSUB + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.API_TYPE_WEBSUB, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else if (APIConstants.API_TYPE_SSE.equals(model.getType())) {
-                    handleException("The SSE operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                            + "' is invalid");
+                    String errMsg = "The " + APIConstants.API_TYPE_SSE + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.API_TYPE_SSE, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else if (APIConstants.API_TYPE_WS.equals(model.getType())) {
-                    handleException(
-                            "The WEBSOCKET operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                                    + "' is invalid");
+                    String errMsg = "The " + APIConstants.API_TYPE_WS + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.API_TYPE_WS, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else {
-                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                            + "' is invalid");
+                    String errMsg = "The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal + "' " +
+                            "is invalid";
+                    throw new APIManagementException(errMsg,
+                            ExceptionCodes.from(ExceptionCodes.HTTP_METHOD_INVALID, httpVerb, uriTempVal));
                 }
             }
 
