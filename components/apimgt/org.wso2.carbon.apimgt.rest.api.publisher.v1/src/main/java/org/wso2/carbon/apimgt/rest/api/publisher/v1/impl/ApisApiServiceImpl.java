@@ -865,14 +865,25 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIClientCertificateContentByAlias(String apiId, String alias,
                                                                MessageContext messageContext) {
+        return getAPIClientCertificateContentByKeyTypeAndAlias(apiId, alias, APIConstants.API_KEY_TYPE_PRODUCTION,
+                messageContext);
+    }
+
+    @Override
+    public Response getAPIClientCertificateContentByKeyTypeAndAlias(String apiId, String alias, String keyType,
+                                                                    MessageContext messageContext) {
         String organization = null;
         String certFileName = alias + ".crt";
+
+        //validate the input for key type
+        validateKeyType(keyType);
+
         try {
             organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    apiTypeWrapper, organization);
+                    keyType, apiTypeWrapper, organization);
             if (clientCertificateDTO != null) {
                 Object certificate = CertificateRestApiUtils
                         .getDecodedCertificate(clientCertificateDTO.getCertificate());
@@ -893,7 +904,18 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deleteAPIClientCertificateByAlias(String alias, String apiId,
                                                            MessageContext messageContext) {
+        return deleteAPIClientCertificateByKeyTypeAndAlias(APIConstants.API_KEY_TYPE_PRODUCTION, alias, apiId,
+                messageContext);
+    }
+
+    @Override
+    public Response deleteAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId,
+                                                                MessageContext messageContext) {
         String organization = null;
+
+        //validate the input for key type
+        validateKeyType(keyType);
+
         try {
             organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
@@ -906,28 +928,30 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIOperationsPerLC(apiTypeWrapper.getStatus());
 
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    apiTypeWrapper, organization);
+                    keyType, apiTypeWrapper, organization);
             int responseCode = apiProvider
-                    .deleteClientCertificate(RestApiCommonUtil.getLoggedInUsername(), apiTypeWrapper, alias);
+                    .deleteClientCertificate(RestApiCommonUtil.getLoggedInUsername(), apiTypeWrapper, alias, keyType);
             if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
 
                 if (log.isDebugEnabled()) {
-                    log.debug(String.format("The client certificate which belongs to tenant : %s represented by the "
-                            + "alias : %s is deleted successfully", organization, alias));
+                    log.debug(String.format("The client certificate of type %s which belongs to tenant : %s represented by the "
+                            + "alias : %s is deleted successfully", keyType, organization, alias));
                 }
-                return Response.ok().entity("The certificate for alias '" + alias + "' deleted successfully.").build();
+                return Response.ok().entity("The " + keyType + " type certificate for alias '" + alias
+                        + "' deleted successfully.").build();
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug(String.format("Failed to delete the client certificate which belongs to tenant : %s "
-                            + "represented by the alias : %s.", organization, alias));
+                    log.debug(String.format("Failed to delete the %s type client certificate which belongs to tenant :"
+                            + " %s represented by the alias : %s.", keyType, organization, alias));
                 }
                 RestApiUtil.handleInternalServerError(
-                        "Error while deleting the client certificate for alias '" + alias + "'.", log);
+                        "Error while deleting the " + keyType + " type client certificate for alias '"
+                                + alias + "'.", log);
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
-                    "Error while deleting the client certificate with alias " + alias + " for the tenant "
-                            + organization, e, log);
+                    "Error while deleting the " + keyType + " type client certificate with alias "
+                            + alias + " for the tenant " + organization, e, log);
         }
         return null;
     }
@@ -935,14 +959,25 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIClientCertificateByAlias(String alias, String apiId,
                                                         MessageContext messageContext) {
+        return getAPIClientCertificateByKeyTypeAndAlias(APIConstants.API_KEY_TYPE_PRODUCTION, alias, apiId,
+                messageContext);
+    }
+
+    @Override
+    public Response getAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId,
+                                                             MessageContext messageContext) {
         String organization = null;
+
+        //validate the input for key type
+        validateKeyType(keyType);
+
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
         try {
             organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    apiTypeWrapper, organization);
+                    keyType, apiTypeWrapper, organization);
             CertificateInformationDTO certificateInformationDTO = certificateMgtUtils
                     .getCertificateInfo(clientCertificateDTO.getCertificate());
             if (certificateInformationDTO != null) {
@@ -965,7 +1000,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                       InputStream certificateInputStream,
                                                       Attachment certificateDetail, String tier,
                                                       MessageContext messageContext) {
+        return updateAPIClientCertificateByKeyTypeAndAlias(APIConstants.API_KEY_TYPE_PRODUCTION, alias, apiId,
+                certificateInputStream, certificateDetail, tier, messageContext);
+    }
+
+    @Override
+    public Response updateAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId,
+        InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext) {
         try {
+            //validate the input for key type
+            validateKeyType(keyType);
+
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
 
@@ -980,7 +1025,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getInternalOrganizationId(organization);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
-                    apiTypeWrapper, organization);
+                    keyType, apiTypeWrapper, organization);
             if (certificateDetail != null) {
                 contentDisposition = certificateDetail.getContentDisposition();
                 fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
@@ -992,7 +1037,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 return Response.ok().entity("Client Certificate is not updated for alias " + alias).build();
             }
             int responseCode = apiProvider
-                    .updateClientCertificate(base64EncodedCert, alias, apiTypeWrapper, tier,
+                    .updateClientCertificate(base64EncodedCert, alias, apiTypeWrapper, tier, keyType.toUpperCase(),
                             tenantId, organization);
 
             if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
@@ -1000,7 +1045,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 clientCertMetadataDTO.setAlias(alias);
                 clientCertMetadataDTO.setApiId(apiTypeWrapper.getUuid());
                 clientCertMetadataDTO.setTier(clientCertificateDTO.getTierName());
-                URI updatedCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + "?alias=" + alias);
+                URI updatedCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + keyType + "?alias=" + alias);
 
                 return Response.ok(updatedCertUri).entity(clientCertMetadataDTO).build();
             } else if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
@@ -1032,27 +1077,39 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIClientCertificates(String apiId, Integer limit, Integer offset, String alias,
                                                    MessageContext messageContext) {
+        return getAPIClientCertificatesByKeyType(APIConstants.API_KEY_TYPE_PRODUCTION, apiId, limit,offset, alias,
+                messageContext);
+    }
+
+    @Override
+    public Response getAPIClientCertificatesByKeyType(String keyType, String apiId, Integer limit, Integer offset,
+                                                      String alias, MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         List<ClientCertificateDTO> certificates = new ArrayList<>();
+
+        //validate the input for key type
+        validateKeyType(keyType);
+
         String query = CertificateRestApiUtils.buildQueryString("alias", alias, "apiId", apiId);
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             int tenantId = APIUtil.getInternalOrganizationId(organization);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            int totalCount = apiProvider.getClientCertificateCount(tenantId);
+            int totalCount = apiProvider.getClientCertificateCount(tenantId, keyType);
             if (totalCount > 0) {
                 APIIdentifier apiIdentifier = null;
                 if (StringUtils.isNotEmpty(apiId)) {
                     API api = apiProvider.getAPIbyUUID(apiId, organization);
                     apiIdentifier = api.getId();
                 }
-                certificates = apiProvider.searchClientCertificates(tenantId, alias, apiIdentifier, organization);
+                certificates = apiProvider.searchClientCertificates(tenantId, alias, keyType,
+                        apiIdentifier, organization);
             }
 
             ClientCertificatesDTO certificatesDTO = CertificateRestApiUtils
-                    .getPaginatedClientCertificates(certificates, limit, offset, query);
+                    .getPaginatedClientCertificates(certificates, limit, offset, keyType, query);
             PaginationDTO paginationDTO = new PaginationDTO();
             paginationDTO.setLimit(limit);
             paginationDTO.setOffset(offset);
@@ -1065,15 +1122,35 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    private void validateKeyType(String keyType) {
+        if (!(keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION) ||
+                keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX))) {
+            RestApiUtil.handleBadRequest("The key type is invalid. It should be either PRODUCTION or SANDBOX",
+                    log);
+        }
+    }
+
     @Override
-        public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream,
-                                                Attachment certificateDetail, String alias, String tier,
-                                                MessageContext messageContext) {
+    public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream,
+                                            Attachment certificateDetail, String alias, String tier,
+                                            MessageContext messageContext) {
+        return addAPIClientCertificateOfGivenKeyType(APIConstants.API_KEY_TYPE_PRODUCTION, apiId,
+                certificateInputStream, certificateDetail, alias, tier, messageContext);
+    }
+
+    @Override
+    public Response addAPIClientCertificateOfGivenKeyType(String keyType, String apiId,
+      InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier,
+                                                          MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+
+            //validate the input for key type
+            validateKeyType(keyType);
+
             if (StringUtils.isEmpty(alias) || StringUtils.isEmpty(apiId)) {
                 RestApiUtil.handleBadRequest("The alias and/ or apiId should not be empty", log);
             }
@@ -1092,7 +1169,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider
-                    .addClientCertificate(userName, apiTypeWrapper, base64EncodedCert, alias, tier, organization);
+                    .addClientCertificate(userName, apiTypeWrapper, base64EncodedCert, alias, tier,
+                            keyType.toUpperCase(), organization);
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Add certificate operation response code : %d", responseCode));
             }
@@ -1101,14 +1179,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                 certificateDTO.setAlias(alias);
                 certificateDTO.setApiId(apiId);
                 certificateDTO.setTier(tier);
-                URI createdCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + "?alias=" + alias);
+                URI createdCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + keyType + "?alias=" + alias);
                 return Response.created(createdCertUri).entity(certificateDTO).build();
             } else if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
                 RestApiUtil.handleInternalServerError(
                         "Internal server error while adding the client certificate to " + "API " + apiId, log);
             } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
-                RestApiUtil.handleResourceAlreadyExistsError(
-                        "The alias '" + alias + "' already exists in the trust store.", log);
+                RestApiUtil.handleResourceAlreadyExistsError("The alias '" + alias +
+                        "' already exists in the trust store for " + keyType + " key type.", log);
             } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
                 RestApiUtil.handleBadRequest(
                         "Error while adding the certificate to the API " + apiId + ". " + "Certificate Expired.", log);

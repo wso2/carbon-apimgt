@@ -100,6 +100,26 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
+    @Path("/{apiId}/client-certs/{keyType}")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Upload a New Certificate of the given key type", notes = "This operation can be used to upload a new certificate for an endpoint of the given type. ", response = ClientCertMetadataDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_add", description = "Add client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = ClientCertMetadataDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response addAPIClientCertificateOfGivenKeyType(@ApiParam(value = "Key type for the certificate",required=true) @PathParam("keyType") String keyType, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "tier")  String tier) throws APIManagementException{
+        return delegate.addAPIClientCertificateOfGivenKeyType(keyType, apiId, certificateInputStream, certificateDetail, alias, tier, securityContext);
+    }
+
+    @POST
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -399,6 +419,26 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @DELETE
+    @Path("/{apiId}/client-certs/{keyType}/{alias}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete a Certificate of a Given Key Type", notes = "This operation can be used to delete an uploaded certificate of a given key type. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Certificate deleted successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response deleteAPIClientCertificateByKeyTypeAndAlias(@ApiParam(value = "Key type for the certificate",required=true) @PathParam("keyType") String keyType, @ApiParam(value = "The alias of the certificate that should be deleted. ",required=true) @PathParam("alias") String alias, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.deleteAPIClientCertificateByKeyTypeAndAlias(keyType, alias, apiId, securityContext);
+    }
+
+    @DELETE
     @Path("/{apiId}/documents/{documentId}")
     
     @Produces({ "application/json" })
@@ -659,6 +699,27 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
+    @Path("/{apiId}/client-certs/{keyType}/{alias}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the Certificate Information of a Given Key Type", notes = "This operation can be used to get the information about a certificate of a given key type. ", response = CertificateInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. ", response = CertificateInfoDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getAPIClientCertificateByKeyTypeAndAlias(@ApiParam(value = "Key type for the certificate",required=true) @PathParam("keyType") String keyType, @ApiParam(value = "",required=true) @PathParam("alias") String alias, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getAPIClientCertificateByKeyTypeAndAlias(keyType, alias, apiId, securityContext);
+    }
+
+    @GET
     @Path("/{apiId}/client-certificates/{alias}/content")
     
     @Produces({ "application/json" })
@@ -680,6 +741,27 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
+    @Path("/{apiId}/client-certs/{keyType}/{alias}/content")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Download a Certificate of Given Key Type", notes = "This operation can be used to download a certificate which matches the given alias and key type. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getAPIClientCertificateContentByKeyTypeAndAlias(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "",required=true) @PathParam("alias") String alias, @ApiParam(value = "The key type of the certificate that should be deleted. ",required=true) @PathParam("keyType") String keyType) throws APIManagementException{
+        return delegate.getAPIClientCertificateContentByKeyTypeAndAlias(apiId, alias, keyType, securityContext);
+    }
+
+    @GET
     @Path("/{apiId}/client-certificates")
     
     @Produces({ "application/json" })
@@ -697,6 +779,26 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getAPIClientCertificates(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the client certificate")  @QueryParam("alias") String alias) throws APIManagementException{
         return delegate.getAPIClientCertificates(apiId, limit, offset, alias, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/client-certs/{keyType}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve/ Search Uploaded Client Certificates of a given key type", notes = "This operation can be used to retrieve and search the uploaded client certificates of a given key type. ", response = ClientCertificatesDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body. ", response = ClientCertificatesDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getAPIClientCertificatesByKeyType(@ApiParam(value = "Key type for the certificate",required=true) @PathParam("keyType") String keyType, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the client certificate")  @QueryParam("alias") String alias) throws APIManagementException{
+        return delegate.getAPIClientCertificatesByKeyType(keyType, apiId, limit, offset, alias, securityContext);
     }
 
     @GET
@@ -1549,6 +1651,27 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response updateAPIClientCertificateByAlias( @Size(min=1,max=30)@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "certificate", required = false) InputStream certificateInputStream, @Multipart(value = "certificate" , required = false) Attachment certificateDetail, @Multipart(value = "tier", required = false)  String tier) throws APIManagementException{
         return delegate.updateAPIClientCertificateByAlias(alias, apiId, certificateInputStream, certificateDetail, tier, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/client-certs/{keyType}/{alias}")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update a Certificate of a Given Key Type", notes = "This operation can be used to update an uploaded certificate of a given key type. ", response = ClientCertMetadataDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates"),
+            @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Certificate updated successfully. ", response = ClientCertMetadataDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response updateAPIClientCertificateByKeyTypeAndAlias(@ApiParam(value = "Key type for the certificate",required=true) @PathParam("keyType") String keyType,  @Size(min=1,max=30)@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "certificate", required = false) InputStream certificateInputStream, @Multipart(value = "certificate" , required = false) Attachment certificateDetail, @Multipart(value = "tier", required = false)  String tier) throws APIManagementException{
+        return delegate.updateAPIClientCertificateByKeyTypeAndAlias(keyType, alias, apiId, certificateInputStream, certificateDetail, tier, securityContext);
     }
 
     @PUT

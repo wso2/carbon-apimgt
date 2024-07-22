@@ -792,6 +792,9 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
     public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
+    public static  final String CLIENT_CERTIFICATE_TIER = "TIER";
+    public static final String CLIENT_CERTIFICATE_KEY_TYPE = "KEY_TYPE";
+
     public static final String ENABLE_DEFAULT_KEY_MANAGER_REGISTRATION = API_KEY_VALIDATOR +
             "EnableDefaultKeyManagerRegistration";
     public static final String ENABLE_KEY_MANAGER_RETRIVAL = API_KEY_VALIDATOR +

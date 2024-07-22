@@ -415,8 +415,10 @@ public class ImportUtils {
                 if (log.isDebugEnabled()) {
                     log.debug("Mutual SSL enabled. Importing client certificates.");
                 }
-                addClientCertificates(extractedFolderPath, apiProvider, new ApiTypeWrapper(importedApi), organization,
-                        overwrite, tenantId);
+                addClientCertificates(extractedFolderPath, apiProvider, new ApiTypeWrapper(importedApi),
+                        APIConstants.API_KEY_TYPE_PRODUCTION, organization, overwrite, tenantId);
+                addClientCertificates(extractedFolderPath, apiProvider, new ApiTypeWrapper(importedApi),
+                        APIConstants.API_KEY_TYPE_SANDBOX, organization, overwrite, tenantId);
             }
 
             // Change API lifecycle if state transition is required
@@ -2249,24 +2251,24 @@ public class ImportUtils {
      *
      * @param pathToArchive Location of the extracted folder of the API
      * @param apiProvider   API Provider
+     * @param keyType       Key type of the certificate
      * @param organization  Identifier of the organization
      * @throws APIImportExportException
      */
     private static void addClientCertificates(String pathToArchive, APIProvider apiProvider,
-                                              ApiTypeWrapper apiTypeWrapper, String organization, boolean isOverwrite
-            , int tenantId)
-            throws APIManagementException {
+                                              ApiTypeWrapper apiTypeWrapper, String keyType, String organization,
+                                              boolean isOverwrite, int tenantId) throws APIManagementException {
 
         try {
             Identifier apiIdentifier = apiTypeWrapper.getId();
-            List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive);
+            List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive, keyType);
             for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
                 if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == (apiProvider.addClientCertificate(
                         APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()), apiTypeWrapper,
-                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), organization))
-                        && isOverwrite) {
+                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), keyType,
+                        organization)) && isOverwrite) {
                     apiProvider.updateClientCertificate(certDTO.getCertificate(), certDTO.getAlias(), apiTypeWrapper,
-                            certDTO.getTierName(), tenantId, organization);
+                            certDTO.getTierName(), keyType, tenantId, organization);
                 }
             }
         } catch (APIManagementException e) {
@@ -2274,12 +2276,16 @@ public class ImportUtils {
         }
     }
 
-    public static List<ClientCertificateDTO> retrieveClientCertificates(String pathToArchive)
+    public static List<ClientCertificateDTO> retrieveClientCertificates(String pathToArchive, String keyType)
             throws APIManagementException {
 
         String jsonContent = null;
-        String pathToClientCertificatesDirectory =
-                pathToArchive + File.separator + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY;
+        /*
+         since the certificate file is named by the alias, this also need to store in two separate directories
+         considering the key type, to support same alias for production and sandbox
+         */
+        String pathToClientCertificatesDirectory = pathToArchive + File.separator +
+                ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY + File.separator + keyType;
         String pathToYamlFile = pathToClientCertificatesDirectory + ImportExportConstants.CLIENT_CERTIFICATE_FILE
                 + ImportExportConstants.YAML_EXTENSION;
         String pathToJsonFile = pathToClientCertificatesDirectory + ImportExportConstants.CLIENT_CERTIFICATE_FILE
@@ -2611,8 +2617,10 @@ public class ImportUtils {
                 log.debug("Mutual SSL enabled. Importing client certificates.");
             }
             int tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());
-            addClientCertificates(extractedFolderPath, apiProvider, apiTypeWrapperWithUpdatedApiProduct, organization,
-                    overwriteAPIProduct, tenantId);
+            addClientCertificates(extractedFolderPath, apiProvider, apiTypeWrapperWithUpdatedApiProduct,
+                    APIConstants.API_KEY_TYPE_PRODUCTION, organization, overwriteAPIProduct, tenantId);
+            addClientCertificates(extractedFolderPath, apiProvider, apiTypeWrapperWithUpdatedApiProduct,
+                    APIConstants.API_KEY_TYPE_SANDBOX, organization, overwriteAPIProduct, tenantId);
 
             // Change API Product lifecycle if state transition is required
             if (!lifecycleActions.isEmpty()) {

@@ -3985,14 +3985,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public int addClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String certificate, String alias,
-                                    String tierName, String organization) throws APIManagementException {
+                                    String tierName, String keyType, String organization)
+            throws APIManagementException {
         checkAccessControlPermission(userNameWithoutChange, apiTypeWrapper.getAccessControl(),
                 apiTypeWrapper.getAccessControlRoles());
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
-        responseCode = certificateManager
-                .addClientCertificate(apiTypeWrapper.getId(), certificate, alias, tierName, tenantId, organization);
+        responseCode = certificateManager.addClientCertificate(apiTypeWrapper.getId(), certificate,
+                alias, tierName, keyType, tenantId, organization);
         return responseCode.getResponseCode();
     }
 
@@ -4017,7 +4018,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias)
+    public int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias, String keyType)
             throws APIManagementException {
         checkAccessControlPermission(userNameWithoutChange, apiTypeWrapper.getAccessControl(),
                 apiTypeWrapper.getAccessControlRoles());
@@ -4025,7 +4026,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
 
         int tenantId = APIUtil.getInternalOrganizationId(apiTypeWrapper.getOrganization());
-        responseCode = certificateManager.deleteClientCertificateFromParentNode(apiTypeWrapper.getId(), alias, tenantId);
+        responseCode = certificateManager.deleteClientCertificateFromParentNode(apiTypeWrapper.getId(), alias, keyType,
+                tenantId);
         return responseCode.getResponseCode();
     }
 
@@ -4066,18 +4068,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
             APIIdentifier apiIdentifier, String organization) throws APIManagementException {
-        return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier, organization);
+        return certificateManager.searchClientCertificates(tenantId, alias, keyType, apiIdentifier, organization);
     }
 
     @Override
-    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+    public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
             APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException {
         APIIdentifier apiIdentifier = new APIIdentifier(apiProductIdentifier.getProviderName(),
                 apiProductIdentifier.getName(), apiProductIdentifier.getVersion());
         apiIdentifier.setUuid(apiMgtDAO.getUUIDFromIdentifier(apiIdentifier));
-        return certificateManager.searchClientCertificates(tenantId, alias, apiIdentifier, organization);
+        return certificateManager.searchClientCertificates(tenantId, alias, keyType, apiIdentifier, organization);
     }
 
     @Override
@@ -4085,10 +4087,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return certificateManager.isCertificatePresent(tenantId, alias);
     }
 
-    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, String organization)
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, String keyType, String organization)
             throws APIManagementException {
         List<ClientCertificateDTO> clientCertificateDTOS = certificateManager
-                .searchClientCertificates(tenantId, alias, null, organization);
+                .searchClientCertificates(tenantId, alias, keyType, null, organization);
         if (clientCertificateDTOS != null && clientCertificateDTOS.size() > 0) {
             return clientCertificateDTOS.get(0);
         }
@@ -4096,13 +4098,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(String alias, ApiTypeWrapper apiTypeWrapper,
+    public ClientCertificateDTO getClientCertificate(String alias, String keyType, ApiTypeWrapper apiTypeWrapper,
                                                      String organization) throws APIManagementException {
         checkAccessControlPermission(userNameWithoutChange, apiTypeWrapper.getAccessControl(),
                 apiTypeWrapper.getAccessControlRoles());
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         List<ClientCertificateDTO> clientCertificateDTOS = certificateManager
-                .searchClientCertificates(tenantId, alias, apiTypeWrapper.getId(), organization);
+                .searchClientCertificates(tenantId, alias, keyType, apiTypeWrapper.getId(), organization);
         if (clientCertificateDTOS != null && clientCertificateDTOS.size() > 0) {
             return clientCertificateDTOS.get(0);
         }
@@ -4136,11 +4138,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public int updateClientCertificate(String certificate, String alias, ApiTypeWrapper apiTypeWrapper,
-                                       String tier, int tenantId, String organization) throws APIManagementException {
+                                       String tier, String keyType, int tenantId, String organization)
+            throws APIManagementException {
         checkAccessControlPermission(userNameWithoutChange, apiTypeWrapper.getAccessControl(),
                 apiTypeWrapper.getAccessControlRoles());
         ResponseCode responseCode = certificateManager
-                .updateClientCertificate(certificate, alias, tier, tenantId, organization);
+                .updateClientCertificate(certificate, alias, tier, keyType, tenantId, organization);
         return responseCode != null ?
                 responseCode.getResponseCode() :
                 ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
@@ -4152,8 +4155,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public int getClientCertificateCount(int tenantId) throws APIManagementException {
-        return certificateManager.getClientCertificateCount(tenantId);
+    public int getClientCertificateCount(int tenantId, String keyType) throws APIManagementException {
+        return certificateManager.getClientCertificateCount(tenantId, keyType);
     }
 
     @Override
