@@ -7326,6 +7326,151 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Updates the subscription tier of a given subscription.
+     *
+     * @param subscriptionUUID The UUID of the subscription to be updated
+     * @param subscriptionTier The new subscription tier to be assigned
+     * @return The updated subscription
+     * @throws APIManagementException If the subscription is not found, status is TIER_UPDATE_PENDING, the specified
+     *                                tier is not allowed for the API or an error occurs while updating the subscription
+     */
+    @Override
+    public SubscribedAPI updateSubscriptionTier(String subscriptionUUID, String subscriptionTier) throws APIManagementException {
+
+        // Check whether the subscription exists for the given subscription ID
+        SubscribedAPI currentSubscription = getSubscriptionByUUID(subscriptionUUID);
+        if (currentSubscription == null) {
+            throw new APIManagementException("Subscription not found for ID: " + subscriptionUUID,
+                    ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_NOT_FOUND, subscriptionUUID));
+        }
+
+        // Check whether the subscription is not in TIER_UPDATE_PENDING status
+        if (APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING.equals(currentSubscription.getSubStatus())) {
+            throw new APIManagementException("Cannot change the business plan of the subscription with ID " +
+                    subscriptionUUID + " as the status of the subscription is " +
+                    APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING + ".",
+                    ExceptionCodes.from(ExceptionCodes.INVALID_STATE_FOR_BUSINESS_PLAN_CHANGE, subscriptionUUID,
+                            APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING));
+        }
+
+        Identifier identifier = currentSubscription.getAPIIdentifier() != null ?
+                currentSubscription.getAPIIdentifier() : currentSubscription.getProductId();
+
+        // Check whether the specified tier is within the allowed tiers for the API
+        Set<String> allowedTiersForTheAPI = getAvailableTiersForTheAPI(identifier);
+        if (!allowedTiersForTheAPI.contains(subscriptionTier)) {
+            throw new APIManagementException("Specified business plan is not allowed for the API. Allowed business " +
+                    "plans: " + allowedTiersForTheAPI, ExceptionCodes.from(ExceptionCodes.BUSINESS_PLAN_NOT_ALLOWED,
+                    subscriptionTier));
+        }
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+
+        // Check whether the subscriber has permission to access the specified business plan
+        if (isTierDeniedForCurrentSubscriber(subscriptionTier, currentSubscription.getSubscriber().getName(), tenantId)) {
+            throw new APIManagementException("Cannot change the business plan of the subscription with ID " +
+                    subscriptionUUID + " as the subscriber does not have permission to access the specified business " +
+                    "plan.", ExceptionCodes.from(ExceptionCodes.NOT_ALLOWED_TIER_FOR_SUBSCRIBER,
+                    subscriptionUUID, subscriptionTier));
+        }
+
+        // Update the subscription tier of the subscription
+        apiMgtDAO.updateSubscriptionTier(currentSubscription.getSubscriptionId(), subscriptionTier);
+
+        // Get the updated subscription and send a notification
+        SubscribedAPI updatedSubscription = getSubscriptionByUUID(subscriptionUUID);
+        SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
+                updatedSubscription.getOrganization(), updatedSubscription.getSubscriptionId(),
+                updatedSubscription.getUUID(), identifier.getId(), identifier.getUUID(),
+                updatedSubscription.getApplication().getId(), updatedSubscription.getApplication().getUUID(),
+                updatedSubscription.getTier().getName(), updatedSubscription.getSubStatus(), identifier.getName(),
+                identifier.getVersion());
+        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+
+        String logMessage = "Subscription tier for the subscription with ID " + subscriptionUUID + " has been updated to " +
+                subscriptionTier + " for the API " + identifier.getName() + " and the application " +
+                updatedSubscription.getApplication().getName() + ". Subscription status: " +
+                updatedSubscription.getSubStatus() + ".";
+
+        if (log.isDebugEnabled()) {
+            log.debug(logMessage);
+        }
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, logMessage,
+                APIConstants.AuditLogConstants.UPDATED, this.username);
+
+        return updatedSubscription;
+    }
+
+    /**
+     * This method is to get all the available tiers for the given API/API Product.
+     *
+     * @param identifier API Identifier
+     * @return Set of available tiers
+     * @throws APIManagementException If an error occurs while retrieving the available tiers
+     */
+    private Set<String> getAvailableTiersForTheAPI(Identifier identifier) throws APIManagementException {
+
+        Set<Tier> availableTiers = null;
+        if (identifier instanceof APIIdentifier) {
+            availableTiers = getAPIbyUUID(identifier.getUUID(), identifier.getOrganization()).getAvailableTiers();
+        } else if (identifier instanceof APIProductIdentifier) {
+            availableTiers = getAPIProductbyUUID(identifier.getUUID(), identifier.getOrganization()).getAvailableTiers();
+        }
+
+        Set<String> tierNames = new HashSet<>();
+        if (availableTiers != null) {
+            for (Tier tier : availableTiers) {
+                String tierName = tier.getName();
+                if (tierName != null) {
+                    tierNames.add(tierName);
+                }
+            }
+        }
+        return tierNames;
+    }
+
+    /**
+     * Checks if the specified tier is denied for the current subscriber based on their roles.
+     *
+     * @param tierName The name of the tier to check
+     * @param userName The name of the user whose roles are to be verified
+     * @return True if the tier is denied for the user, False otherwise
+     * @throws APIManagementException If an error occurs while fetching roles or tier permissions
+     */
+    private boolean isTierDeniedForCurrentSubscriber(String tierName, String userName, int tenantId) throws APIManagementException {
+
+        if (tenantId != 0) {
+            // Get the list of roles for the given user
+            String[] userRolesOfTheSubscriber = APIUtil.getListOfRoles(userName);
+
+            // Fetch tier permission details
+            TierPermissionDTO tierPermission = apiMgtDAO.getThrottleTierPermission(tierName, tenantId);
+
+            // If no permission is found, tier is not denied
+            if (tierPermission == null) {
+                return false;
+            } else {
+                List<String> userRolesListOfTheSubscriber = new ArrayList<>(Arrays.asList(userRolesOfTheSubscriber));
+                List<String> roles = new ArrayList<>(Arrays.asList(tierPermission.getRoles()));
+
+                // Find common roles between user roles and tier roles
+                userRolesListOfTheSubscriber.retainAll(roles);
+
+                // Determine if access is denied based on permission type
+                if (APIConstants.TIER_PERMISSION_ALLOW.equals(tierPermission.getPermissionType())) {
+                    return userRolesListOfTheSubscriber.isEmpty();
+                } else {
+                    return !userRolesListOfTheSubscriber.isEmpty();
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * To get the hashmap of what mappingId is deployed or undeployed in which gateway.
      */
     private Map<String, Set<String>> getGatewayPolicyDeploymentMap(List<GatewayPolicyDeployment>

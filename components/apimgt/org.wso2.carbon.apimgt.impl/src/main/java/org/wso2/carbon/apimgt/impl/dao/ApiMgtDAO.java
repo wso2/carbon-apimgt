@@ -2298,6 +2298,36 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Updates the subscription tier of a given subscription.
+     *
+     * @param subscriptionId   The ID of the subscription to be updated
+     * @param subscriptionTier The new subscription tier to be assigned
+     * @throws APIManagementException If there is an error updating the subscription tier
+     */
+    public void updateSubscriptionTier(int subscriptionId, String subscriptionTier) throws APIManagementException {
+
+        String sqlQuery = SQLConstants.UPDATE_SUBSCRIPTION_TIER_SQL;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                ps.setString(1, subscriptionTier);
+                ps.setInt(2, subscriptionId);
+                ps.execute();
+                conn.commit();
+            } catch (SQLException e) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback subscription tier update ", e1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to update the subscription tier of the subscription with ID " +
+                    subscriptionId + " to tier " + subscriptionTier + " in the AM_SUBSCRIPTION table.", e);
+        }
+    }
+
     public Map<String, String> getRegistrationApprovalState(int appId, String keyType) throws APIManagementException {
 
         Map<String, String> keyManagerWiseApprovalState = new HashMap<>();
