@@ -365,12 +365,10 @@ public class ImportUtils {
                 }
             }
 
-            if (!extractedPoliciesMap.isEmpty() || !extractedAPIPolicies.isEmpty()) {
-                populateAPIWithPolicies(importedApi, apiProvider, extractedFolderPath, extractedPoliciesMap,
-                        extractedAPIPolicies, currentTenantDomain);
-                API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
-                apiProvider.updateAPI(importedApi, oldAPI);
-            }
+            populateAPIWithPolicies(importedApi, apiProvider, extractedFolderPath, extractedPoliciesMap,
+                    extractedAPIPolicies, currentTenantDomain);
+            API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
+            apiProvider.updateAPI(importedApi, oldAPI);
 
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -675,20 +673,22 @@ public class ImportUtils {
 
         String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
         Map<String, String> importedPolicies = new HashMap<>();
-        if (!operationLevelPoliciesMap.isEmpty()) {
-            Set<URITemplate> uriTemplates = api.getUriTemplates();
-            for (URITemplate uriTemplate : uriTemplates) {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                if (operationLevelPoliciesMap.containsKey(key)) {
-                    List<OperationPolicy> operationPolicies = operationLevelPoliciesMap.get(key);
-                    if (operationPolicies != null && !operationPolicies.isEmpty()) {
-                        uriTemplate.setOperationPolicies(findOrImportPolicy(operationPolicies, importedPolicies,
-                                policyDirectory, tenantDomain, api, provider));
-                    }
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+            if (operationLevelPoliciesMap.containsKey(key)) {
+                List<OperationPolicy> operationPolicies = operationLevelPoliciesMap.get(key);
+                if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                    uriTemplate.setOperationPolicies(findOrImportPolicy(operationPolicies, importedPolicies,
+                            policyDirectory, tenantDomain, api, provider));
                 }
+            } else {
+                // If the imported API does not contain operation policies attached to this uriTemplate, we have to
+                // remove any existing policies
+                uriTemplate.setOperationPolicies(null);
             }
-            api.setUriTemplates(uriTemplates);
         }
+        api.setUriTemplates(uriTemplates);
 
         if (!apiLevelPoliciesList.isEmpty()) {
             api.setApiPolicies(findOrImportPolicy(apiLevelPoliciesList, importedPolicies, policyDirectory,
