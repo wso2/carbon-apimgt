@@ -157,8 +157,7 @@ public class InboundWebSocketProcessor {
             inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
                     WebSocketApiConstants.HandshakeErrorConstants.RESOURCE_NOT_FOUND_ERROR, e.getMessage());
 
-            boolean isResourceNotFoundErrorCodeExist = WebSocketUtils.getApiProperties(ctx).containsKey(SynapseConstants.ERROR_CODE);
-            if (isResourceNotFoundErrorCodeExist) {
+            if (WebSocketUtils.getApiProperties(ctx).containsKey(SynapseConstants.ERROR_CODE)) {
                 publishResourceNotFoundEvent(ctx);
             }
         }
