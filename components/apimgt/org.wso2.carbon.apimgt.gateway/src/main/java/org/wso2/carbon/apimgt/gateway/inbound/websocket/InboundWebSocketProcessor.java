@@ -157,7 +157,9 @@ public class InboundWebSocketProcessor {
             inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.getHandshakeErrorDTO(
                     WebSocketApiConstants.HandshakeErrorConstants.RESOURCE_NOT_FOUND_ERROR, e.getMessage());
 
-            if (WebSocketUtils.getApiProperties(ctx).containsKey(SynapseConstants.ERROR_CODE)) {
+            Object errorCode = WebSocketUtils.getPropertyFromChannel(SynapseConstants.ERROR_CODE, ctx);
+            if (errorCode != null && (int) errorCode ==
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESOURCE_NOT_FOUND_ERROR_CODE) {
                 publishResourceNotFoundEvent(ctx);
             }
         }
