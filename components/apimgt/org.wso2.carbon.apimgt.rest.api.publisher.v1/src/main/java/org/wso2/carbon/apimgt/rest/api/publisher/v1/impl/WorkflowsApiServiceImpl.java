@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.google.gson.Gson;
-import edu.emory.mathcs.backport.java.util.Arrays;
-import io.swagger.models.auth.In;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
@@ -221,11 +219,9 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                 RestApiUtil.handleBadRequest("Invalid Workflow Type", log);
             }
         } catch (APIManagementException e) {
-            String msg = "Error while resuming workflow " + workflowReferenceId;
-            RestApiUtil.handleInternalServerError(msg, e, log);
+            RestApiUtil.handleInternalServerError("Error while resuming workflow " + workflowReferenceId, e, log);
         } catch (WorkflowException e) {
-            String msg = "Error while resuming workflow " + workflowReferenceId;
-            RestApiUtil.handleInternalServerError(msg, e, log);
+            RestApiUtil.handleInternalServerError("Error while resuming workflow " + workflowReferenceId, e, log);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
