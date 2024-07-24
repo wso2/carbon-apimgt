@@ -44,8 +44,7 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Pending Workflow Details by External Workflow Reference ", notes = "Using this operation, you can retrieve complete details of a pending workflow request that either belongs to application creation, application subscription, application registration, api state change, user self sign up.. You need to provide the External_Workflow_Reference of the workflow Request to retrive it. ", response = WorkflowInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:subscription_approval_view", description = "Approve subscription creation requests")
         })
     }, tags={ "Workflows (Individual)",  })
     @ApiResponses(value = { 
@@ -63,8 +62,7 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve All Pending Workflow Processes ", notes = "This operation can be used to retrieve list of workflow pending processes. ", response = WorkflowListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:subscription_approval_view", description = "Approve subscription creation requests")
         })
     }, tags={ "Workflow (Collection)",  })
     @ApiResponses(value = { 
@@ -82,8 +80,8 @@ WorkflowsApiService delegate = new WorkflowsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update Workflow Status", notes = "This operation can be used to approve or reject a workflow task. ", response = WorkflowDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:subscription_approval_view", description = "Approve subscription creation requests"),
+            @AuthorizationScope(scope = "apim:subscription_approval_manage", description = "Approve subscription update requests")
         })
     }, tags={ "Workflows (Individual)" })
     @ApiResponses(value = { 

@@ -8737,8 +8737,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
+            - apim:subscription_approval_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8779,8 +8778,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
+            - apim:subscription_approval_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8824,8 +8822,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
+            - apim:subscription_approval_view
+            - apim:subscription_approval_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -13386,3 +13384,5 @@ components:
             apim:tier_manage: View, update and delete throttling policies
             apim:api_list_view: View, Retrieve API list
             apim:api_definition_view: View, Retrieve API definition
+            apim:subscription_approval_view: Approve subscription creation requests
+            apim:subscription_approval_manage: Approve subscription update requests

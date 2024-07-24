@@ -363,8 +363,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return subscribedAPIs;
     }
 
-
-
     /**
      * Returns usage details of a particular API
      *
