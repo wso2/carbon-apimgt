@@ -130,7 +130,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             }
             int length = Integer.parseInt(result.get("length").toString());
             if (length > start) {
-                start = start + 100;
+                start = start + 101;
             } else {
                 start = -1;
             }

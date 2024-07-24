@@ -41,7 +41,7 @@ public class WorkflowMappingUtil {
         }
         //identifying the proper start and end indexes
         int start = offset < workflows.length && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= workflows.length - 1 ? offset + limit - 1 : workflows.length - 1;
+        int end = offset + limit <= workflows.length ? offset + limit - 1 : workflows.length - 1;
 
         for (int i = start; i <= end; i++) {
             workflowInfoDTOs.add(fromWorkflowsToInfoDTO(workflows[i]));
