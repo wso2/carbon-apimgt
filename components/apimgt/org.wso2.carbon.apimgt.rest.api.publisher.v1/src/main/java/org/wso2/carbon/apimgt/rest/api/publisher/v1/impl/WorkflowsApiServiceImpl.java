@@ -38,9 +38,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.WorkflowsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.WorkflowMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -53,9 +51,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-
 import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.TENANT_DOMAIN;
 
 public class WorkflowsApiServiceImpl implements WorkflowsApiService {
 
