@@ -111,13 +111,13 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             return Response.ok().entity(workflowListDTO).build();
         }
         while (start >= 0) {
-            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, 0, start + 100,
+            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, start, start + 100,
                     RestApiConstants.DEFAULT_SORT_CRITERION, RestApiConstants.DESCENDING_SORT_ORDER);
             Set<API> apis = (Set<API>) result.get("apis");
             nameVersionList = new ArrayList<>();
             for (API api : apis) {
-                String organization = (api.getId().getOrganization() != null) ?
-                        api.getId().getOrganization() : SUPER_TENANT_DOMAIN_NAME;
+                String organization = (RestApiUtil.getOrganization(messageContext) != null) ?
+                        RestApiUtil.getOrganization(messageContext) : SUPER_TENANT_DOMAIN_NAME;
                 String apiNameWithVersion = api.getId().getApiName() + ":" + api.getId().getVersion()
                         + ":" + organization;
                 nameVersionList.add(apiNameWithVersion);
