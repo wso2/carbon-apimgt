@@ -98,6 +98,12 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                     fileContentType = policySpecFileDetail.getContentType().toString();
                 }
+
+                if (!(APIConstants.YAML_CONTENT_TYPE.equals(fileContentType) || APIConstants.J2_CONTENT_TYPE.equals(
+                        fileContentType))) {
+                    throw new APIManagementException("Unsupported file type for Operation Policy");
+                }
+
                 if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
                     jsonContent = CommonUtil.yamlToJson(jsonContent);
                 }
