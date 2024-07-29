@@ -19,11 +19,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.model;
 import com.atlassian.oai.validator.model.Request;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.parser.core.models.ParseOptions;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -33,7 +30,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.utils.SchemaValidationUtils;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
@@ -73,12 +69,8 @@ public class OpenAPIRequest implements Request {
         //Set Request path
         path = SchemaValidationUtils.getRestSubRequestPath(
                 messageContext.getProperty(REST_SUB_REQUEST_PATH).toString());
-        String swagger = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING).toString();
-        if (swagger != null) {
-            OpenAPIParser openAPIParser = new OpenAPIParser();
-            SwaggerParseResult swaggerParseResult =
-                    openAPIParser.readContents(swagger, new ArrayList<>(), new ParseOptions());
-            OpenAPI openAPI = swaggerParseResult.getOpenAPI();
+        OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
+        if (openAPI != null) {
             validatePath(openAPI);
         }
         //extract transport headers
