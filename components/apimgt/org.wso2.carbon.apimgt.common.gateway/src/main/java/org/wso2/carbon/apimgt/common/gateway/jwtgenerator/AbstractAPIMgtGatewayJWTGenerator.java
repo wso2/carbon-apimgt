@@ -174,7 +174,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         ObjectMapper mapper = new ObjectMapper();
         for (Map.Entry<String, Object> claimEntry : claims.entrySet()) {
             Object claimVal = claimEntry.getValue();
-            if (claimVal instanceof String && claimEntry.toString().contains("{")) {
+            if (claimVal instanceof String && claimVal.toString().startsWith("{") &&
+                    claimVal.toString().endsWith("}")) {
                 try {
                     Map<String, String> map = mapper.readValue(claimVal.toString(), Map.class);
                     jwtClaimSetBuilder.claim(claimEntry.getKey(), map);
