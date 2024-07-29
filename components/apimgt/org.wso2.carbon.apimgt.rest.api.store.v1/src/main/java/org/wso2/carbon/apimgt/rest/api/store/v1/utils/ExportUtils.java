@@ -21,6 +21,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -95,8 +96,8 @@ public class ExportUtils {
             // Creates a temporary directory to store the exported application artifact
             File exportFolder = createTempApplicationDirectory(appName, appOwner);
             exportApplicationBasePath = exportFolder.toString();
-            archivePath = exportApplicationBasePath
-                    .concat(File.separator + appOwner.replace(File.separator, "#") + "-" + appName);
+            archivePath = exportApplicationBasePath.concat(
+                    File.separator + appOwner.replace(CarbonConstants.DOMAIN_SEPARATOR, "#") + "-" + appName);
         } catch (APIImportExportException e) {
             throw new APIManagementException("Unable to create the temporary directory to export the Application", e);
         }
