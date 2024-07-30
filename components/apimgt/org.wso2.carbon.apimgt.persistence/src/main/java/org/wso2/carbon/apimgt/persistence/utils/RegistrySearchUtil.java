@@ -99,31 +99,65 @@ public class RegistrySearchUtil {
      * @throws APIManagementException If there is an error in the search query
      */
     private static String constructQueryWithProvidedCriterias(String inputSearchQuery) throws APIPersistenceException {
-
         String newSearchQuery = "";
-        // sub context and doc content doesn't support AND search
-        if (inputSearchQuery != null && inputSearchQuery.contains(" ")
-                && !inputSearchQuery.contains(TAG_COLON_SEARCH_TYPE_PREFIX)
-                && (!inputSearchQuery.contains(CONTENT_SEARCH_TYPE_PREFIX) || inputSearchQuery.split(":").length > 2)) {
-            if (inputSearchQuery.split(" ").length > 1) {
-                String[] searchCriterias = inputSearchQuery.split(" ");
-                for (int i = 0; i < searchCriterias.length; i++) {
-                    if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
-                        if (DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
-                            throw new APIPersistenceException("Invalid query. AND based search is not supported for "
-                                    + "doc prefix");
-                        }
-                    }
-                    if (i == 0) {
-                        newSearchQuery = getSingleSearchCriteria(searchCriterias[i]);
-                    } else {
-                        newSearchQuery = newSearchQuery + SEARCH_AND_TAG + getSingleSearchCriteria(searchCriterias[i]);
-                    }
+
+        // for empty search query this method should return name=* as the new search query
+        // or if it is a content search query, we should not split in spaces, but return as content=*search query*
+        // for example.
+        if (StringUtils.isEmpty(inputSearchQuery) || (inputSearchQuery.contains(
+                CONTENT_SEARCH_TYPE_PREFIX) && inputSearchQuery.split(":").length == 2)) {
+            newSearchQuery = getSingleSearchCriteria(inputSearchQuery);
+        } else {
+            String[] criterea = inputSearchQuery.split(" ");
+            Map<String, List<String>> critereaMap = new HashMap<>();
+            List<String> untaggedContent = new ArrayList();
+            for (int i = 0; i < criterea.length; i++) {
+                if (criterea[i].contains(":") && criterea[i].split(":").length > 1) {
+                    String searchPrefix = criterea[i].split(":")[0];
+                    String searchValue = criterea[i].split(":")[1];
+
+                    List<String> values = critereaMap.containsKey(searchPrefix) ?
+                            critereaMap.get(searchPrefix) :
+                            new ArrayList<>();
+                    values.add(searchValue);
+                    critereaMap.put(searchPrefix, values);
+                } else {
+                    untaggedContent.add(criterea[i]);
                 }
             }
-        } else {
-            newSearchQuery = getSingleSearchCriteria(inputSearchQuery);
+
+            // doc content doesn't support AND search
+            if (critereaMap.size() > 1 && critereaMap.containsKey(DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+                throw new APIPersistenceException(
+                        "Invalid query. AND based search is not supported for " + "doc prefix");
+            }
+
+            // When multiple values are present for the same search key those are considered as an OR based search.
+            // ex: tags:sales tags:dev -> tags=(sales OR dev)
+            // When multiple search keys are present those are considered as an AND based search.
+            // ex: name:pizzashack version:1.0 -> name=pizzashack AND version=1.0
+            for (Map.Entry<String, List<String>> entry : critereaMap.entrySet()) {
+                String nextCriterea = "";
+                if (entry.getValue().size() > 1) {
+                    nextCriterea = entry.getKey() + "=" + getORBasedSearchCriteria(
+                            entry.getValue().toArray(new String[0]));
+                } else {
+                    nextCriterea = getSingleSearchCriteria(entry.getKey() + ":" + entry.getValue().get(0));
+                }
+
+                newSearchQuery = StringUtils.isNotEmpty(newSearchQuery) ?
+                        (newSearchQuery + SEARCH_AND_TAG + nextCriterea) :
+                        nextCriterea;
+            }
+            if (!untaggedContent.isEmpty()) {
+                for (String searchCriteria : untaggedContent) {
+                    newSearchQuery = StringUtils.isNotEmpty(newSearchQuery) ?
+                            (newSearchQuery + SEARCH_AND_TAG + getSingleSearchCriteria(searchCriteria)) :
+                            getSingleSearchCriteria(searchCriteria);
+                }
+            }
         }
+
         return newSearchQuery;
     }
 

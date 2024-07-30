@@ -165,11 +165,12 @@ public class CertificateRestApiUtils {
      * @param clientCertificateDTOList Client certificate list.
      * @param limit                    Limit
      * @param offset                   Offset
+     * @param keyType                  Key type
      * @param query                    query
      * @return paginated list of client certificates.
      */
     public static ClientCertificatesDTO getPaginatedClientCertificates(
-            List<ClientCertificateDTO> clientCertificateDTOList, int limit, int offset, String query) {
+            List<ClientCertificateDTO> clientCertificateDTOList, int limit, int offset, String keyType, String query) {
         if (log.isDebugEnabled()) {
             log.debug(String.format(
                     "Filter the client certificates based on the pagination parameters, limit = %d and" + "offset = %d",
@@ -200,14 +201,15 @@ public class CertificateRestApiUtils {
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, certCount);
         String paginatedPrevious = "";
         String paginatedNext = "";
+
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = getCertificatesPaginatedURL(RestApiConstants.CLIENT_CERTS_GET_PAGINATED_URL,
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+            paginatedPrevious = getClientCertificatesPaginatedURL(RestApiConstants.CLIENT_CERTS_GET_PAGINATED_URL,
+                    keyType, paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = getCertificatesPaginatedURL(RestApiConstants.CLIENT_CERTS_GET_PAGINATED_URL,
-                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+            paginatedNext = getClientCertificatesPaginatedURL(RestApiConstants.CLIENT_CERTS_GET_PAGINATED_URL,
+                    keyType, paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
         certificatesDTO.setCount(clientCertificateList.size());
@@ -225,6 +227,24 @@ public class CertificateRestApiUtils {
      */
     private static String getCertificatesPaginatedURL(String paginatedURL, Integer offset, Integer limit,
                                                       String query) {
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
+        return paginatedURL;
+    }
+
+    /**
+     * Get the paginated client certificate urls.
+     *
+     * @param keyType : The key type of the client certificate
+     * @param offset : The offset
+     * @param limit  : The limit parameter.
+     * @param query  : The provided query string
+     * @return : Certificates paginated URL
+     */
+    private static String getClientCertificatesPaginatedURL(String paginatedURL, String keyType, Integer offset,
+                                                            Integer limit, String query) {
+        paginatedURL = paginatedURL.replace(RestApiConstants.KEYTYPE_PARAM, keyType);
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
@@ -257,22 +277,26 @@ public class CertificateRestApiUtils {
     }
 
     /**
-     * To pre validate client certificate given for an alias
+     * To pre validate client certificate given for an alias and key type
      *
      * @param alias        Alias of the certificate.
+     * @param keyType      Key type of the certificate
      * @param organization Identifier of the organization.
      * @return Client certificate
      * @throws APIManagementException API Management Exception.
      */
-    public static ClientCertificateDTO preValidateClientCertificate(String alias, ApiTypeWrapper apiTypeWrapper,
-                                                                    String organization) throws APIManagementException {
+    public static ClientCertificateDTO preValidateClientCertificate(String alias, String keyType,
+                            ApiTypeWrapper apiTypeWrapper, String organization) throws APIManagementException {
 
         if (StringUtils.isEmpty(alias)) {
             throw new APIManagementException("The alias cannot be empty", ExceptionCodes.ALIAS_CANNOT_BE_EMPTY);
         }
+        if (StringUtils.isEmpty(keyType)) {
+            throw new APIManagementException("The key type cannot be empty", ExceptionCodes.KEY_TYPE_CANNOT_BE_EMPTY);
+        }
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         ClientCertificateDTO clientCertificate = apiProvider
-                .getClientCertificate(alias, apiTypeWrapper, organization);
+                .getClientCertificate(alias, keyType, apiTypeWrapper, organization);
         if (clientCertificate == null) {
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Could not find a client certificate in truststore which belongs to " +

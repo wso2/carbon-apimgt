@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.certificatemgt.TrustStoreUtils;
@@ -38,6 +39,8 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUt
 import org.wso2.carbon.apimgt.impl.dto.TrustStoreDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
@@ -68,6 +71,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -953,5 +957,98 @@ public class CertificateMgtUtils {
             }
         }
         return Optional.ofNullable(null);
+    }
+
+    public void deployTenantCertsToGatewaySenderInABatch(List<CertificateMetadataDTO> certificateMetadataDTOList) {
+        //add cert to sender profile truststore
+        try {
+            TrustStoreDTO trustStoreDTO = getSenderProfileTrustStore();
+            addCertificatesToTrustStore(trustStoreDTO, certificateMetadataDTOList);
+        } catch (FileNotFoundException | XMLStreamException e) {
+            log.error("Error reading/writing to the truststore file.", e);
+        } catch (CertificateManagementException e) {
+            log.error("Error while storing certificates to the truststore file.", e);
+        }
+    }
+
+    private void addCertificatesToTrustStore(TrustStoreDTO trustStoreDTO,
+                                             List<CertificateMetadataDTO> certificateMetadataDTOList) throws CertificateManagementException {
+        //Read the client-truststore.jks into a KeyStore.
+        File trustStoreFile = new File(trustStoreDTO.getLocation());
+        int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
+            KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
+            trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
+
+            String base64Cert, alias;
+            for (CertificateMetadataDTO dto : certificateMetadataDTOList) {
+                base64Cert = dto.getCertificate();
+                alias = dto.getAlias();
+                if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                    alias = alias + "_" + loggedInTenantId;
+                }
+
+                byte[] cert = (Base64.decodeBase64(base64Cert.getBytes(StandardCharsets.UTF_8)));
+                try (InputStream serverCert = new ByteArrayInputStream(cert)) {
+                    if (serverCert.available() == 0) {
+                        log.error("Certificate is empty for the provided alias " + alias + ". Hence skipping it. ");
+                    }
+
+                    CertificateFactory cf = CertificateFactory.getInstance(certificateType);
+                    while (serverCert.available() > 0) {
+                        Certificate certificate = cf.generateCertificate(serverCert);
+                        //Check whether the Alias exists in the trust store.
+                        if (trustStore.containsAlias(alias)) {
+                            log.info("Provided certificate alias: " + alias + " already exists in the " +
+                                    "truststore.");
+                        } else {
+                            /*
+                             * If alias is not exists, check whether the certificate is expired or not. If expired
+                             * set the
+                             * expired flag.
+                             * */
+                            X509Certificate x509Certificate = (X509Certificate) certificate;
+                            if (x509Certificate.getNotAfter().getTime() <= System.currentTimeMillis()) {
+                                log.info("Provided certificate " + alias + " is expired.");
+                            } else {
+                                //If not expired add the certificate to trust store.
+                                trustStore.setCertificateEntry(alias, certificate);
+                            }
+                        }
+                    }
+                } catch (CertificateException | KeyStoreException e) {
+                    String msg = "Error loading certificate.";
+                    log.error(msg, e);
+                }
+            }
+
+            try (OutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
+                trustStore.store(fileOutputStream, trustStoreDTO.getPassword());
+            }
+        } catch (CertificateException e) {
+            String msg = "Error storing certificate.";
+            log.error(msg, e);
+            throw new CertificateManagementException(msg);
+        } catch (FileNotFoundException e) {
+            String msg = "Error reading/ writing to the certificate file.";
+            log.error(msg, e);
+            throw new CertificateManagementException(msg);
+        } catch (NoSuchAlgorithmException e) {
+            String msg = "Could not find the algorithm to load the certificate.";
+            log.error(msg, e);
+            throw new CertificateManagementException(msg);
+        } catch (UnsupportedEncodingException e) {
+            String msg = "Error retrieving certificate from String.";
+            log.error(msg, e);
+            throw new CertificateManagementException(msg);
+        } catch (KeyStoreException e) {
+            String msg = "Error loading certificate.";
+            log.error(msg, e);
+            throw new CertificateManagementException(msg);
+        } catch (IOException e) {
+            String msg = "Error in loading the certificate.";
+            log.error(msg, e);
+            throw new CertificateManagementException(msg);
+        }
     }
 }

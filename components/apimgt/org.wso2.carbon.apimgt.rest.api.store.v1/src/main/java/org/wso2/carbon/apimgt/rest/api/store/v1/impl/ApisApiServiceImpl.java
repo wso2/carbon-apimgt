@@ -303,13 +303,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
                         return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
                     } else {
-                        String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
-                                "service. Cause: " + e.getCause().getMessage();
+                        String errorMessage = "Error encountered while executing the prepare statement of API Chat.";
                         RestApiUtil.handleInternalServerError(errorMessage, e, log);
                     }
                 } catch (IOException e) {
-                    String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
-                            "service. Cause: " + e.getCause().getMessage();
+                    String errorMessage = "Error encountered while executing the prepare statement of API Chat.";
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
 
@@ -330,7 +328,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     boolean isTestInitializationRequest = !StringUtils.isEmpty(
                             apiChatRequestDTO.getCommand()) && apiChatRequestDTO.getApiSpec() != null;
                     boolean isTestExecutionRequest = apiChatRequestDTO.getResponse() != null;
-                    String requestPayload = ""; // Request payload for Choreo deployed API Chat Agent
+                    String requestPayload; // Request payload for Choreo deployed API Chat Agent
 
                     if (isTestInitializationRequest) {
                         ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
@@ -379,12 +377,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                         return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
                     } else {
                         String errorMessage = "Error encountered while executing the API Chat service to " +
-                                "accommodate the specified testing requirement. Cause: " + e.getCause().getMessage();
+                                "accommodate the specified testing requirement.";
                         RestApiUtil.handleInternalServerError(errorMessage, e, log);
                     }
                 } catch (IOException e) {
                     String errorMessage = "Error encountered while executing the API Chat service to accommodate the " +
-                            "specified testing requirement. Cause: " + e.getCause().getMessage();
+                            "specified testing requirement.";
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
             } else {

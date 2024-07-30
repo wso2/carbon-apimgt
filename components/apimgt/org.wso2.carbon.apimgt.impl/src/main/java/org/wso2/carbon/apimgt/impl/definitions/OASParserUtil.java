@@ -50,6 +50,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -94,6 +95,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -143,6 +145,7 @@ public class OASParserUtil {
     private static final String PARAMETERS = "parameters";
     private static final String RESPONSES = "responses";
     private static final String HEADERS = "headers";
+    private static final String EXAMPLES = "examples";
 
     private static final String REF_PREFIX = "#/components/";
     private static final String ARRAY_DATA_TYPE = "array";
@@ -162,6 +165,7 @@ public class OASParserUtil {
             referenceObjectMap.put(PARAMETERS, new HashSet<>());
             referenceObjectMap.put(RESPONSES, new HashSet<>());
             referenceObjectMap.put(HEADERS, new HashSet<>());
+            referenceObjectMap.put(EXAMPLES, new HashSet<>());
         }
 
 
@@ -224,7 +228,9 @@ public class OASParserUtil {
             return SwaggerVersion.SWAGGER;
         }
 
-        throw new APIManagementException("Invalid OAS definition provided.");
+        String errMsg = "Could not determine the OAS version as the version element of the definition is not found.";
+        ExceptionCodes errorHandler = ExceptionCodes.OAS_DEFINITION_VERSION_NOT_FOUND;
+        throw new APIManagementException(errMsg, errorHandler);
     }
 
     public static Map<String, Object> generateExamples(String apiDefinition) throws APIManagementException {
@@ -386,6 +392,19 @@ public class OASParserUtil {
                         }
                     }
                 }
+
+                if (EXAMPLES.equalsIgnoreCase(category)) {
+                    Map<String, Example> examples = sourceComponents.getExamples();
+
+                    if (examples != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Example example = examples.get(refKey);
+                            if (example != null) {
+                                components.addExamples(refKey, example);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -431,18 +450,7 @@ public class OASParserUtil {
                     if (parameters != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Parameter parameter = parameters.get(refKey);
-                            //Extract the parameter reference only if it exists in the source definition
-                            if(parameter != null) {
-                                Content content = parameter.getContent();
-                                if (content != null) {
-                                    extractReferenceFromContent(content, context);
-                                } else {
-                                    String ref = parameter.get$ref();
-                                    if (ref != null) {
-                                        extractReferenceWithoutSchema(ref, context);
-                                    }
-                                }
-                            }
+                            setRefOfParameter(parameter, context);
                         }
                     }
                 }
@@ -453,11 +461,7 @@ public class OASParserUtil {
                     if (responses != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             ApiResponse response = responses.get(refKey);
-                            //Extract the response reference only if it exists in the source definition
-                            if(response != null) {
-                                Content content = response.getContent();
-                                extractReferenceFromContent(content, context);
-                            }
+                            setRefOfApiResponse(response, context);
                         }
                     }
                 }
@@ -468,8 +472,18 @@ public class OASParserUtil {
                     if (headers != null) {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Header header = headers.get(refKey);
-                            Content content = header.getContent();
-                            extractReferenceFromContent(content, context);
+                            setRefOfApiResponseHeader(header, context);
+                        }
+                    }
+                }
+
+                if (EXAMPLES.equalsIgnoreCase(category)) {
+                    Map<String, Example> examples = sourceComponents.getExamples();
+
+                    if (examples != null) {
+                        for (String refKey : refCategoryEntry.getValue()) {
+                            Example example = examples.get(refKey);
+                            setRefOfExample(example, context);
                         }
                     }
                 }
@@ -616,15 +630,26 @@ public class OASParserUtil {
     private static void setRefOfApiResponses(ApiResponses responses, SwaggerUpdateContext context) {
         if (responses != null) {
             for (ApiResponse response : responses.values()) {
-                Content content = response.getContent();
+                setRefOfApiResponse(response, context);
+            }
+        }
+    }
 
-                if (content != null) {
-                    extractReferenceFromContent(content, context);
-                } else {
-                    String ref = response.get$ref();
-                    if (ref != null) {
-                        extractReferenceWithoutSchema(ref, context);
-                    }
+    /**
+     * Process a given response entry of the API definition.
+     *
+     * @param response  The response object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
+     */
+    private static void setRefOfApiResponse(ApiResponse response, SwaggerUpdateContext context) {
+        if (response != null) {
+            Content content = response.getContent();
+            if (content != null) {
+                extractReferenceFromContent(content, context);
+            } else {
+                String ref = response.get$ref();
+                if (ref != null) {
+                    addToReferenceObjectMap(ref, context);
                 }
             }
         }
@@ -637,13 +662,28 @@ public class OASParserUtil {
 
                 if (headers != null) {
                     for (Header header : headers.values()) {
-                        Content content = header.getContent();
-                        extractReferenceFromContent(content, context);
-                        String ref = header.get$ref();
-                        if (ref != null) {
-                            addToReferenceObjectMap(ref, context);
-                        }
+                        setRefOfApiResponseHeader(header, context);
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Process a given response header entry of the API definition.
+     *
+     * @param header  The header object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
+     */
+    private static void setRefOfApiResponseHeader(Header header, SwaggerUpdateContext context) {
+        if (header != null) {
+            Content content = header.getContent();
+            if (content != null) {
+                extractReferenceFromContent(content, context);
+            } else {
+                String ref = header.get$ref();
+                if (ref != null) {
+                    addToReferenceObjectMap(ref, context);
                 }
             }
         }
@@ -652,6 +692,23 @@ public class OASParserUtil {
     private static void setRefOfParameters(List<Parameter> parameters, SwaggerUpdateContext context) {
         if (parameters != null) {
             for (Parameter parameter : parameters) {
+                setRefOfParameter(parameter, context);
+            }
+        }
+    }
+
+    /**
+     * Process a given parameter entry of the API definition.
+     *
+     * @param parameter  The parameter object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
+     */
+    private static void setRefOfParameter(Parameter parameter, SwaggerUpdateContext context) {
+        if (parameter != null) {
+            Content content = parameter.getContent();
+            if (content != null) {
+                extractReferenceFromContent(content, context);
+            } else {
                 Schema schema = parameter.getSchema();
                 if (schema != null) {
                     String ref = schema.get$ref();
@@ -668,12 +725,35 @@ public class OASParserUtil {
         }
     }
 
+    /**
+     * Process a given example entry of the API definition.
+     *
+     * @param example  The example object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
+     */
+    private static void setRefOfExample(Example example, SwaggerUpdateContext context) {
+        if (example != null) {
+            String ref = example.get$ref();
+            if (ref != null) {
+                addToReferenceObjectMap(ref, context);
+            }
+        }
+    }
+
     private static void extractReferenceFromContent(Content content, SwaggerUpdateContext context) {
         if (content != null) {
             for (MediaType mediaType : content.values()) {
                 Schema schema = mediaType.getSchema();
 
                 extractReferenceFromSchema(schema, context);
+
+                Map<String, Example> examples = mediaType.getExamples();
+                if (examples != null) {
+                    for (Map.Entry<String, Example> exampleEntry : examples.entrySet()) {
+                        Example example = exampleEntry.getValue();
+                        setRefOfExample(example, context);
+                    }
+                }
             }
         }
     }
@@ -703,7 +783,12 @@ public class OASParserUtil {
                             if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
                                 references.addAll(addSchemaOfSchema(sc));
                             } else {
-                                references.add(sc.get$ref());
+                                String schemaRef = sc.get$ref();
+                                if (schemaRef != null) {
+                                    references.add(sc.get$ref());
+                                } else {
+                                    processSchemaProperties(sc, context);
+                                }
                             }
                         }
                     } else if (((ComposedSchema) schema).getAnyOf() != null) {
@@ -711,7 +796,12 @@ public class OASParserUtil {
                             if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
                                 references.addAll(addSchemaOfSchema(sc));
                             } else {
-                                references.add(sc.get$ref());
+                                String schemaRef = sc.get$ref();
+                                if (schemaRef != null) {
+                                    references.add(sc.get$ref());
+                                } else {
+                                    processSchemaProperties(sc, context);
+                                }
                             }
                         }
                     } else if (((ComposedSchema) schema).getOneOf() != null) {
@@ -719,7 +809,12 @@ public class OASParserUtil {
                             if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
                                 references.addAll(addSchemaOfSchema(sc));
                             } else {
-                                references.add(sc.get$ref());
+                                String schemaRef = sc.get$ref();
+                                if (schemaRef != null) {
+                                    references.add(sc.get$ref());
+                                } else {
+                                    processSchemaProperties(sc, context);
+                                }
                             }
                         }
                     } else {
@@ -738,13 +833,22 @@ public class OASParserUtil {
                 }
             }
 
-            // Process schema properties if present
-            Map properties = schema.getProperties();
+            processSchemaProperties(schema, context);
+        }
+    }
 
-            if (properties != null) {
-                for (Object propertySchema : properties.values()) {
-                    extractReferenceFromSchema((Schema) propertySchema, context);
-                }
+    /**
+     * Process properties of a schema object of the API definition.
+     *
+     * @param schema  The schema object which contains the properties which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
+     */
+    private static void processSchemaProperties(Schema schema, SwaggerUpdateContext context) {
+        // Process schema properties if present
+        Map properties = schema.getProperties();
+        if (properties != null) {
+            for (Object propertySchema : properties.values()) {
+                extractReferenceFromSchema((Schema) propertySchema, context);
             }
         }
     }

@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
@@ -492,7 +491,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST));
             String userName = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME);
             String password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD);
-
+            if (password == null) {
+                password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD_ALT);
+            }
             if (!isSecured && !isDigestSecured && userName != null) {
                 api.setEndpointUTUsername(userName);
                 api.setEndpointUTPassword(password);
@@ -1702,7 +1703,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 devAPI.setVisibility(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
                                 DevPortalSearchContent content = new DevPortalSearchContent();
                                 content.setContext(devAPI.getContext());
+                                String associatedType;
+                                if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
+                                        .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                                    associatedType = APIConstants.API_PRODUCT;
+                                } else {
+                                    associatedType = APIConstants.API;
+                                }
                                 content.setDescription(devAPI.getDescription());
+                                content.setType(associatedType);
                                 content.setId(devAPI.getId());
                                 content.setName(devAPI.getApiName());
                                 content.setProvider(
@@ -2874,8 +2883,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryHolder holder = getRegistry(tenantDomain);
             registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
-
-            GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
             if (apiArtifact == null) {
                 throw new ThumbnailPersistenceException("API not found for id " + apiId, ExceptionCodes.API_NOT_FOUND);
             }
@@ -2892,13 +2902,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             String oldThumbPath = artifactOldPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
             String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
-
+            // Remove thumbnail from registry
             if (registry.resourceExists(thumbPath)) {
                 registry.delete(thumbPath);
             }
             if (registry.resourceExists(oldThumbPath)) {
                 registry.delete(oldThumbPath);
             }
+            // Remove thumbnail path from overview thumbnail of artifact's attributes
+            apiArtifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, null);
+            apiArtifactManager.updateGenericArtifact(apiArtifact);
         } catch (RegistryException | APIPersistenceException e) {
             String msg = "Error while loading API icon of API " + apiId + " from the registry";
             throw new ThumbnailPersistenceException(msg, e);
@@ -3920,4 +3933,77 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
     }
 
+    public void updateSoapToRestSequences(Organization org, String apiId, List<SOAPToRestSequence> sequences)
+            throws APIPersistenceException {
+
+        boolean transactionCommitted = false;
+        boolean tenantFlowStarted = false;
+        Registry registry = null;
+        try {
+            RegistryHolder holder = getRegistry(org.getName());
+            registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
+            registry.beginTransaction();
+            GenericArtifact artifact = getAPIArtifact(apiId, registry);
+
+            for (SOAPToRestSequence soapToRestSequence : sequences) {
+
+                String apiResourceName = soapToRestSequence.getPath();
+                if (apiResourceName.startsWith("/")) {
+                    apiResourceName = apiResourceName.substring(1);
+                }
+                String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + RegistryPersistenceUtil
+                                .replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER))
+                        + RegistryConstants.PATH_SEPARATOR + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)
+                        + RegistryConstants.PATH_SEPARATOR + artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)
+                        + RegistryConstants.PATH_SEPARATOR;
+                if (soapToRestSequence.getDirection() == Direction.OUT) {
+                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "out"
+                            + RegistryConstants.PATH_SEPARATOR;
+                } else {
+                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "in"
+                            + RegistryConstants.PATH_SEPARATOR;
+                }
+                resourcePath = resourcePath + apiResourceName + "_" + soapToRestSequence.getMethod() + ".xml";
+
+                Resource regResource;
+                if (!registry.resourceExists(resourcePath)) {
+                    regResource = registry.newResource();
+                } else {
+                    regResource = registry.get(resourcePath);
+                }
+                regResource.setContent(soapToRestSequence.getContent());
+                regResource.addProperty("method", soapToRestSequence.getMethod());
+                if (regResource.getProperty("resourcePath") != null) {
+                    regResource.removeProperty("resourcePath");
+                }
+                regResource.addProperty("resourcePath", apiResourceName);
+                regResource.setMediaType("text/xml");
+                registry.put(resourcePath, regResource);
+            }
+            registry.commitTransaction();
+            transactionCommitted = true;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error from this level will mask the original exception
+                log.error("Error while rolling back the transaction for API: " + apiId, re);
+            }
+            throw new APIPersistenceException("Error while performing registry transaction operation ", e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+            try {
+                if (registry != null && !transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                log.error("Error occurred while rolling back the transaction.", ex);
+            }
+        }
+
+    }
 }

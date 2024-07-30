@@ -443,6 +443,15 @@ public class APIProviderImplTest {
     }
 
     @Test
+    public void testGetBlockConditionsByConditionTypeAndValue() throws APIManagementException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
+        List<BlockConditionsDTO> list = new ArrayList<>();
+        Mockito.when(apimgtDAO.getBlockConditionsByConditionTypeAndValue(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString())).thenReturn(list);
+        assertNotNull(apiProvider.getLightweightBlockConditions("conditionType", "conditionValue"));
+    }
+
+    @Test
     public void testUpdateBlockCondition() throws APIManagementException {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO);
         Mockito.when(apimgtDAO.updateBlockConditionState(1, "testState")).thenReturn(false, true);

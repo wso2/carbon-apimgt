@@ -30,13 +30,16 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
 
 public class JWTUtil {
 
@@ -127,4 +130,16 @@ public class JWTUtil {
         }
     }
 
+    public static boolean isJWTValid(String token, String jwtDecoding, long timestampSkew) {
+
+        String[] splitToken = token.split("\\.");
+        JSONObject payload;
+        if (APIConstants.JwtTokenConstants.DECODING_ALGORITHM_BASE64URL.equals(jwtDecoding)) {
+            payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
+        } else {
+            payload = new JSONObject(new String(Base64.getDecoder().decode(splitToken[1])));
+        }
+        long exp = payload.getLong("exp") * 1000L;
+        return (exp - System.currentTimeMillis() > timestampSkew);
+    }
 }

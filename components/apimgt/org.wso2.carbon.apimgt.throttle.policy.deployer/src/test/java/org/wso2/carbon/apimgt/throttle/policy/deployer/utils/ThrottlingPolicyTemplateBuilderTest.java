@@ -66,6 +66,12 @@ public class ThrottlingPolicyTemplateBuilderTest {
 
         String defaultPolicyString = templateBuilder.getThrottlePolicyForAPILevelDefault(policy);
         Assert.assertNotNull(defaultPolicyString);
+
+        // Test that execution plans are deployed with lower-case header names even though the header condition of the
+        // policy had the header name in upper-case (or mix-case)
+        boolean isPolicyStringContainsLowerCasedHeader =
+                defaultPolicyString.contains(TestUtil.HEADER_CONDITION_HEADER_NAME.toLowerCase());
+        Assert.assertTrue(isPolicyStringContainsLowerCasedHeader);
     }
 
     @Test
