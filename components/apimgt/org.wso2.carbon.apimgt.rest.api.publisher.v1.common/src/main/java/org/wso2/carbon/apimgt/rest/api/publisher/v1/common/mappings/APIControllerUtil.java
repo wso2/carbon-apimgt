@@ -983,7 +983,8 @@ public class APIControllerUtil {
 
         APIIdentifier apiIdentifier = new APIIdentifier(identifier.getProviderName(), identifier.getName(),
                 identifier.getVersion());
-        List<ClientCertificateDTO> certs = new ArrayList<>();
+        List<ClientCertificateDTO> productionCerts = new ArrayList<>();
+        List<ClientCertificateDTO> sandboxCerts = new ArrayList<>();
 
         for (JsonElement certificate : certificates) {
             JsonObject certObject = certificate.getAsJsonObject();
@@ -994,48 +995,86 @@ public class APIControllerUtil {
             cert.setTierName(certObject.get(ImportExportConstants.CERTIFICATE_TIER_NAME_PROPERTY).getAsString());
             String certName = certObject.get(ImportExportConstants.CERTIFICATE_PATH_PROPERTY).getAsString();
             cert.setCertificate(certName);
-            certs.add(cert);
 
-            //check and create a directory
-            String clientCertificatesDirectory =
-                    pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY_PATH;
-            if (!CommonUtil.checkFileExistence(clientCertificatesDirectory)) {
-                try {
-                    CommonUtil.createDirectory(clientCertificatesDirectory);
-                } catch (APIImportExportException e) {
-                    throw new APIManagementException(e);
+            String clientCertificatesDirectory;
+            String userCertificatesTempDirectoryPath = pathToArchive + ImportExportConstants.DEPLOYMENT_DIRECTORY
+                    + ImportExportConstants.CERTIFICATE_DIRECTORY + File.separator;
+            String userCertificatesTempDirectory;
+
+            if (certObject.get(ImportExportConstants.KEY_TYPE_JSON_KEY).getAsString().
+                    equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
+
+                sandboxCerts.add(cert);
+                clientCertificatesDirectory = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY_PATH
+                        + File.separator + APIConstants.API_KEY_TYPE_SANDBOX;
+                if (!CommonUtil.checkFileExistence(clientCertificatesDirectory)) {
+                    try {
+                        CommonUtil.createDirectory(clientCertificatesDirectory);
+                    } catch (APIImportExportException e) {
+                        throw new APIManagementException(e);
+                    }
                 }
+
+                //copy certs file from certificates
+                userCertificatesTempDirectory = userCertificatesTempDirectoryPath + APIConstants.API_KEY_TYPE_SANDBOX;
+
+            } else {
+                productionCerts.add(cert);
+                clientCertificatesDirectory = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY_PATH
+                        + File.separator + APIConstants.API_KEY_TYPE_PRODUCTION;
+                if (!CommonUtil.checkFileExistence(clientCertificatesDirectory)) {
+                    try {
+                        CommonUtil.createDirectory(clientCertificatesDirectory);
+                    } catch (APIImportExportException e) {
+                        throw new APIManagementException(e);
+                    }
+                }
+                //copy certs file from certificates
+                userCertificatesTempDirectory = userCertificatesTempDirectoryPath +
+                        APIConstants.API_KEY_TYPE_PRODUCTION;
             }
-            //copy certs file from certificates
-            String userCertificatesTempDirectory = pathToArchive + ImportExportConstants.DEPLOYMENT_DIRECTORY
-                    + ImportExportConstants.CERTIFICATE_DIRECTORY;
+
             String sourcePath = userCertificatesTempDirectory + File.separator + certName;
             String destinationPath = clientCertificatesDirectory + File.separator + certName;
             if (Files.notExists(Paths.get(sourcePath))) {
                 String errorMessage =
-                        "The mentioned certificate file " + certName + " is not in the certificates directory";
+                        "The mentioned certificate file " + certName + "of" + certObject.get(ImportExportConstants
+                        .KEY_TYPE_JSON_KEY).getAsString() + " key type is not in the " + "certificates directory";
                 throw new APIManagementException(errorMessage, ExceptionCodes.ERROR_READING_PARAMS_FILE);
             }
             CommonUtil.moveFile(sourcePath, destinationPath);
         }
+        JsonElement productionJsonElement = new Gson().toJsonTree(productionCerts);
+        JsonElement sandboxJsonElement = new Gson().toJsonTree(sandboxCerts);
 
-        JsonElement jsonElement = new Gson().toJsonTree(certs);
+        String metadataFilePath;
         //generate meta-data yaml file
-        String metadataFilePath = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
+        metadataFilePath = pathToArchive + ImportExportConstants.PRODUCTION_CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
-            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.YAML_EXTENSION)) {
-                File oldFile = new File(metadataFilePath + ImportExportConstants.YAML_EXTENSION);
-                oldFile.delete();
-            }
-            if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.JSON_EXTENSION)) {
-                File oldFile = new File(metadataFilePath + ImportExportConstants.JSON_EXTENSION);
-                oldFile.delete();
-            }
-            CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
-                    ImportExportConstants.TYPE_CLIENT_CERTIFICATES, jsonElement);
+            verifyExistenceOfClientCertAndWriteToMetadataFile(metadataFilePath, productionJsonElement);
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
+        metadataFilePath = pathToArchive + ImportExportConstants.SANDBOX_CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
+        try {
+            verifyExistenceOfClientCertAndWriteToMetadataFile(metadataFilePath, sandboxJsonElement);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(e);
+        }
+    }
+
+    private static void verifyExistenceOfClientCertAndWriteToMetadataFile(String metadataFilePath,
+                              JsonElement jsonElement) throws APIImportExportException, IOException {
+        if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.YAML_EXTENSION)) {
+            File oldFile = new File(metadataFilePath + ImportExportConstants.YAML_EXTENSION);
+            oldFile.delete();
+        }
+        if (CommonUtil.checkFileExistence(metadataFilePath + ImportExportConstants.JSON_EXTENSION)) {
+            File oldFile = new File(metadataFilePath + ImportExportConstants.JSON_EXTENSION);
+            oldFile.delete();
+        }
+        CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
+                ImportExportConstants.TYPE_CLIENT_CERTIFICATES, jsonElement);
     }
 
     /**

@@ -492,7 +492,7 @@ public class ExportUtils {
      */
     private static String cleanFolderName(String name) {
         // Replace everything but [a-zA-Z0-9.-]
-        return name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+        return name.replaceAll("[^a-zA-Z0-9\\.\\- ]", "_");
     }
 
     /**
@@ -1019,33 +1019,42 @@ public class ExportUtils {
             APIProvider provider, ExportFormat exportFormat, String organization)
             throws APIImportExportException {
 
-        List<ClientCertificateDTO> certificateMetadataDTOs;
-        try {
-            if (identifier instanceof APIProductIdentifier) {
-                certificateMetadataDTOs = provider
-                        .searchClientCertificates(tenantId, null, (APIProductIdentifier) identifier, organization);
-            } else {
-                certificateMetadataDTOs = provider
-                        .searchClientCertificates(tenantId, null, (APIIdentifier) identifier, organization);
-            }
-            if (!certificateMetadataDTOs.isEmpty()) {
-                String clientCertsDirectoryPath =
-                        archivePath + File.separator + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY;
-                CommonUtil.createDirectory(clientCertsDirectoryPath);
+        String[] keyTypes = new String[] {APIConstants.API_KEY_TYPE_PRODUCTION, APIConstants.API_KEY_TYPE_SANDBOX};
 
-                JsonArray certificateList = getClientCertificateContentAndMetaData(certificateMetadataDTOs,
-                        clientCertsDirectoryPath);
+        for (String keyType : keyTypes) {
 
-                if (certificateList.size() > 0) {
-                    CommonUtil.writeDtoToFile(clientCertsDirectoryPath + ImportExportConstants.CLIENT_CERTIFICATE_FILE,
-                            exportFormat, ImportExportConstants.TYPE_CLIENT_CERTIFICATES, certificateList);
+            List<ClientCertificateDTO> certificateMetadataDTOs;
+            try {
+                if (identifier instanceof APIProductIdentifier) {
+                    certificateMetadataDTOs = provider
+                            .searchClientCertificates(tenantId, null, keyType,
+                                    (APIProductIdentifier) identifier, organization);
+                } else {
+                    certificateMetadataDTOs = provider
+                            .searchClientCertificates(tenantId, null, keyType,
+                                    (APIIdentifier) identifier, organization);
                 }
+                if (!certificateMetadataDTOs.isEmpty()) {
+                    String clientCertsDirectoryPath = archivePath + File.separator +
+                            ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY + File.separator + keyType;
+                    CommonUtil.createDirectory(clientCertsDirectoryPath);
+
+                    JsonArray certificateList = getClientCertificateContentAndMetaData(certificateMetadataDTOs,
+                            clientCertsDirectoryPath);
+
+                    if (certificateList.size() > 0) {
+                        CommonUtil.writeDtoToFile(
+                                clientCertsDirectoryPath + ImportExportConstants.CLIENT_CERTIFICATE_FILE,
+                                exportFormat, ImportExportConstants.TYPE_CLIENT_CERTIFICATES, certificateList);
+                    }
+                }
+            } catch (IOException e) {
+                throw new APIImportExportException("Error while saving as YAML or JSON", e);
+            } catch (APIManagementException e) {
+                throw new APIImportExportException(
+                        "Error retrieving certificate meta data. tenantId [" + tenantId + "] api [" +
+                                tenantId + "]", e);
             }
-        } catch (IOException e) {
-            throw new APIImportExportException("Error while saving as YAML or JSON", e);
-        } catch (APIManagementException e) {
-            throw new APIImportExportException(
-                    "Error retrieving certificate meta data. tenantId [" + tenantId + "] api [" + tenantId + "]", e);
         }
     }
 

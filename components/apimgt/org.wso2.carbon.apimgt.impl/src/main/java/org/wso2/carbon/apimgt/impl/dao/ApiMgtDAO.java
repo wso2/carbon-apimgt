@@ -178,6 +178,8 @@ public class ApiMgtDAO {
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
     private String KeyManagerAccessPublic = "PUBLIC";
+    private static final String[] keyTypes =
+            new String[]{APIConstants.API_KEY_TYPE_PRODUCTION, APIConstants.API_KEY_TYPE_SANDBOX};
     String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
     private ApiMgtDAO() {
@@ -2293,6 +2295,36 @@ public class ApiMgtDAO {
             handleException("Failed to update subscription status ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    /**
+     * Updates the subscription tier of a given subscription.
+     *
+     * @param subscriptionId   The ID of the subscription to be updated
+     * @param subscriptionTier The new subscription tier to be assigned
+     * @throws APIManagementException If there is an error updating the subscription tier
+     */
+    public void updateSubscriptionTier(int subscriptionId, String subscriptionTier) throws APIManagementException {
+
+        String sqlQuery = SQLConstants.UPDATE_SUBSCRIPTION_TIER_SQL;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                ps.setString(1, subscriptionTier);
+                ps.setInt(2, subscriptionId);
+                ps.execute();
+                conn.commit();
+            } catch (SQLException e) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback subscription tier update ", e1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to update the subscription tier of the subscription with ID " +
+                    subscriptionId + " to tier " + subscriptionTier + " in the AM_SUBSCRIPTION table.", e);
         }
     }
 
@@ -6251,18 +6283,16 @@ public class ApiMgtDAO {
                             + " AND LOWER(SUB.USER_ID) = LOWER(?))) AND "
                             + "APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
 
-            String whereClauseWithMultiGroupId = "  WHERE  ((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                    "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR   SUB.USER_ID = ? " +
+            String whereClauseWithMultiGroupId = "  WHERE  (((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
+                    "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
                     "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) " +
-                    "AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+                    "AND SUB.USER_ID = ?) AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
             String whereClauseWithMultiGroupIdCaseInSensitive =
-                    "  WHERE  ((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM "
-                            + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  "
-                            + "OR   LOWER(SUB.USER_ID) = LOWER(?)  "
-                            + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = " +
-                            "?))) "
-                            + "AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
-
+                    "  WHERE  (((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM "
+                    + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) "
+                    + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) "
+                    + "AND LOWER(SUB.USER_ID) = LOWER(?)) AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+            
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
@@ -6277,8 +6307,8 @@ public class ApiMgtDAO {
 
                     prepStmt = fillQueryParams(connection, query, groupIds, 1);
                     prepStmt.setString(++parameterIndex, tenantDomain);
-                    prepStmt.setString(++parameterIndex, userId);
                     prepStmt.setString(++parameterIndex, tenantDomain + '/' + groupId);
+                    prepStmt.setString(++parameterIndex, userId);
                     prepStmt.setString(++parameterIndex, applicationName);
                 } else {
                     if (forceCaseInsensitiveComparisons) {
@@ -17031,40 +17061,45 @@ public class ApiMgtDAO {
                 revisionAPIPolicies(apiRevision, tenantDomain, uriTemplateMap, connection);
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
-                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES;
+                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
                 String driverName = connection.getMetaData().getDriverName();
                 if (driverName.contains("Oracle")) {
-                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_ORACLE_SQL;
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_ORACLE_SQL;
                 } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_MSSQL;
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_MSSQL;
                 }
 
-                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
-                getClientCertificatesStatement.setInt(1, apiId);
-                List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
-                try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
-                    while (rs.next()) {
-                        ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
-                        clientCertificateDTO.setAlias(rs.getString(1));
-                        clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
-                        clientCertificateDTO.setTierName(rs.getString(3));
-                        clientCertificateDTOS.add(clientCertificateDTO);
+                //get production and sandbox certificates lists separately
+                for (String keyType : keyTypes) {
+                    PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
+                    getClientCertificatesStatement.setInt(1, apiId);
+                    getClientCertificatesStatement.setString(2, keyType);
+                    List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+                    try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
+                        while (rs.next()) {
+                            ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                            clientCertificateDTO.setAlias(rs.getString(1));
+                            clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                            clientCertificateDTO.setTierName(rs.getString(3));
+                            clientCertificateDTOS.add(clientCertificateDTO);
+                        }
                     }
+                    PreparedStatement insertClientCertificateStatement = connection
+                            .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
+                    for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                        insertClientCertificateStatement.setInt(1, tenantId);
+                        insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
+                        insertClientCertificateStatement.setInt(3, apiId);
+                        insertClientCertificateStatement.setBinaryStream(4,
+                                getInputStream(clientCertificateDTO.getCertificate()));
+                        insertClientCertificateStatement.setBoolean(5, false);
+                        insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
+                        insertClientCertificateStatement.setString(7, keyType);
+                        insertClientCertificateStatement.setString(8, apiRevision.getRevisionUUID());
+                        insertClientCertificateStatement.addBatch();
+                    }
+                    insertClientCertificateStatement.executeBatch();
                 }
-                PreparedStatement insertClientCertificateStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
-                    insertClientCertificateStatement.setInt(1, tenantId);
-                    insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
-                    insertClientCertificateStatement.setInt(3, apiId);
-                    insertClientCertificateStatement.setBinaryStream(4,
-                            getInputStream(clientCertificateDTO.getCertificate()));
-                    insertClientCertificateStatement.setBoolean(5, false);
-                    insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
-                    insertClientCertificateStatement.setString(7, apiRevision.getRevisionUUID());
-                    insertClientCertificateStatement.addBatch();
-                }
-                insertClientCertificateStatement.executeBatch();
 
                 // Adding to AM_GRAPHQL_COMPLEXITY table
                 PreparedStatement getGraphQLComplexityStatement = connection
@@ -17954,35 +17989,40 @@ public class ApiMgtDAO {
                         .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
                 removeClientCertificatesStatement.setInt(1, apiId);
                 removeClientCertificatesStatement.executeUpdate();
+                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(SQLConstants.
+                        APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID_AND_KEY_TYPE);
 
-                PreparedStatement getClientCertificatesStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID);
-                getClientCertificatesStatement.setInt(1, apiId);
-                getClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
-                List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
-                try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
-                    while (rs.next()) {
-                        ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
-                        clientCertificateDTO.setAlias(rs.getString(1));
-                        clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
-                        clientCertificateDTO.setTierName(rs.getString(3));
-                        clientCertificateDTOS.add(clientCertificateDTO);
+                //get production and sandbox certificates lists separately
+                for (String keyType : keyTypes) {
+                    getClientCertificatesStatement.setInt(1, apiId);
+                    getClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
+                    getClientCertificatesStatement.setString(3, keyType);
+                    List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+                    try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
+                        while (rs.next()) {
+                            ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                            clientCertificateDTO.setAlias(rs.getString(1));
+                            clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                            clientCertificateDTO.setTierName(rs.getString(3));
+                            clientCertificateDTOS.add(clientCertificateDTO);
+                        }
                     }
+                    PreparedStatement insertClientCertificateStatement = connection
+                            .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
+                    for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                        insertClientCertificateStatement.setInt(1, tenantId);
+                        insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
+                        insertClientCertificateStatement.setInt(3, apiId);
+                        insertClientCertificateStatement.setBinaryStream(4,
+                                getInputStream(clientCertificateDTO.getCertificate()));
+                        insertClientCertificateStatement.setBoolean(5, false);
+                        insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
+                        insertClientCertificateStatement.setString(7, keyType);
+                        insertClientCertificateStatement.setString(8, "Current API");
+                        insertClientCertificateStatement.addBatch();
+                    }
+                    insertClientCertificateStatement.executeBatch();
                 }
-                PreparedStatement insertClientCertificateStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
-                    insertClientCertificateStatement.setInt(1, tenantId);
-                    insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
-                    insertClientCertificateStatement.setInt(3, apiId);
-                    insertClientCertificateStatement.setBinaryStream(4,
-                            getInputStream(clientCertificateDTO.getCertificate()));
-                    insertClientCertificateStatement.setBoolean(5, false);
-                    insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
-                    insertClientCertificateStatement.setString(7, "Current API");
-                    insertClientCertificateStatement.addBatch();
-                }
-                insertClientCertificateStatement.executeBatch();
 
                 // Restoring AM_GRAPHQL_COMPLEXITY table
                 PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
@@ -18267,40 +18307,48 @@ public class ApiMgtDAO {
                 insertOperationPolicyMappingStatement.executeBatch();
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
-                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES;
+                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
                 String driverName = connection.getMetaData().getDriverName();
                 if (driverName.contains("Oracle")) {
-                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_ORACLE_SQL;
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_ORACLE_SQL;
                 } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_MSSQL;
+                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_MSSQL;
                 }
                 
                 PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
-                getClientCertificatesStatement.setInt(1, apiId);
-                List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
-                try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
-                    while (rs.next()) {
-                        ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
-                        clientCertificateDTO.setAlias(rs.getString(1));
-                        clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
-                        clientCertificateDTO.setTierName(rs.getString(3));
-                        clientCertificateDTOS.add(clientCertificateDTO);
+
+                //get production and sandbox certificates lists separately
+
+                for (String keyType : keyTypes) {
+                    getClientCertificatesStatement.setInt(1, apiId);
+                    getClientCertificatesStatement.setString(2, keyType);
+
+                    List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+                    try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
+                        while (rs.next()) {
+                            ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                            clientCertificateDTO.setAlias(rs.getString(1));
+                            clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                            clientCertificateDTO.setTierName(rs.getString(3));
+                            clientCertificateDTOS.add(clientCertificateDTO);
+                        }
                     }
+                    PreparedStatement insertClientCertificateStatement = connection
+                            .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
+                    for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                        insertClientCertificateStatement.setInt(1, tenantId);
+                        insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
+                        insertClientCertificateStatement.setInt(3, apiId);
+                        insertClientCertificateStatement.setBinaryStream(4,
+                                getInputStream(clientCertificateDTO.getCertificate()));
+                        insertClientCertificateStatement.setBoolean(5, false);
+                        insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
+                        insertClientCertificateStatement.setString(7, keyType);
+                        insertClientCertificateStatement.setString(8, apiRevision.getRevisionUUID());
+                        insertClientCertificateStatement.addBatch();
+                    }
+                    insertClientCertificateStatement.executeBatch();
                 }
-                PreparedStatement insertClientCertificateStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
-                    insertClientCertificateStatement.setInt(1, tenantId);
-                    insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
-                    insertClientCertificateStatement.setInt(3, apiId);
-                    insertClientCertificateStatement.setBinaryStream(4,
-                            getInputStream(clientCertificateDTO.getCertificate()));
-                    insertClientCertificateStatement.setBoolean(5, false);
-                    insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
-                    insertClientCertificateStatement.setString(7, apiRevision.getRevisionUUID());
-                    insertClientCertificateStatement.addBatch();
-                }
-                insertClientCertificateStatement.executeBatch();
 
                 // Adding to AM_GRAPHQL_COMPLEXITY table
                 PreparedStatement getGraphQLComplexityStatement = connection
@@ -18513,34 +18561,40 @@ public class ApiMgtDAO {
                 removeClientCertificatesStatement.setInt(1, apiId);
                 removeClientCertificatesStatement.executeUpdate();
 
-                PreparedStatement getClientCertificatesStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID);
-                getClientCertificatesStatement.setInt(1, apiId);
-                getClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
-                List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
-                try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
-                    while (rs.next()) {
-                        ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
-                        clientCertificateDTO.setAlias(rs.getString(1));
-                        clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
-                        clientCertificateDTO.setTierName(rs.getString(3));
-                        clientCertificateDTOS.add(clientCertificateDTO);
+                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID_AND_KEY_TYPE);
+
+                //get production and sandbox certificates lists separately
+                for (String keyType : keyTypes) {
+                    getClientCertificatesStatement.setInt(1, apiId);
+                    getClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
+                    getClientCertificatesStatement.setString(3, keyType);
+                    List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+                    try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
+                        while (rs.next()) {
+                            ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                            clientCertificateDTO.setAlias(rs.getString(1));
+                            clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                            clientCertificateDTO.setTierName(rs.getString(3));
+                            clientCertificateDTOS.add(clientCertificateDTO);
+                        }
                     }
+                    PreparedStatement insertClientCertificateStatement = connection
+                            .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
+                    for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                        insertClientCertificateStatement.setInt(1, tenantId);
+                        insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
+                        insertClientCertificateStatement.setInt(3, apiId);
+                        insertClientCertificateStatement.setBinaryStream(4,
+                                getInputStream(clientCertificateDTO.getCertificate()));
+                        insertClientCertificateStatement.setBoolean(5, false);
+                        insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
+                        insertClientCertificateStatement.setString(7, keyType);
+                        insertClientCertificateStatement.setString(8, "Current API");
+                        insertClientCertificateStatement.addBatch();
+                    }
+                    insertClientCertificateStatement.executeBatch();
                 }
-                PreparedStatement insertClientCertificateStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
-                    insertClientCertificateStatement.setInt(1, tenantId);
-                    insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
-                    insertClientCertificateStatement.setInt(3, apiId);
-                    insertClientCertificateStatement.setBinaryStream(4,
-                            getInputStream(clientCertificateDTO.getCertificate()));
-                    insertClientCertificateStatement.setBoolean(5, false);
-                    insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
-                    insertClientCertificateStatement.setString(7, "Current API");
-                    insertClientCertificateStatement.addBatch();
-                }
-                insertClientCertificateStatement.executeBatch();
 
                 // Restoring AM_GRAPHQL_COMPLEXITY table
                 PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants

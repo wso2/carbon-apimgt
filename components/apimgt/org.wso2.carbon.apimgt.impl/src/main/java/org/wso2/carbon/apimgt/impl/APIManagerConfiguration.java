@@ -1725,6 +1725,12 @@ public class APIManagerConfiguration {
                         }
                     }
                 }
+                OMElement enableBase64PaddingElement = gatewayJWTConfigurationElement.getFirstChildWithName(
+                        new QName(APIConstants.ENABLE_BASE64_PADDING));
+                if (enableBase64PaddingElement != null) {
+                    jwtConfigurationDto.setEnableBase64Padding(
+                            JavaUtils.isTrueExplicitly(enableBase64PaddingElement.getText()));
+                }
             }
         }
     }

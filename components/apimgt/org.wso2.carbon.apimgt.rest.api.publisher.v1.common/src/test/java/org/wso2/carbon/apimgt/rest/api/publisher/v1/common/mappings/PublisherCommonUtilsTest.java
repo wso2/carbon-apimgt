@@ -134,7 +134,7 @@ public class PublisherCommonUtilsTest {
     }
 
     @Test
-    public void testValidateEndpointsDefaultType() {
+    public void testValidateEndpointsDefaultType() throws APIManagementException {
 
         // endpointConfig
         APIDTO apiDto = Mockito.mock(APIDTO.class);
@@ -154,7 +154,7 @@ public class PublisherCommonUtilsTest {
     }
 
     @Test
-    public void testValidateValidEndpoints() {
+    public void testValidateValidEndpoints() throws APIManagementException {
 
         // endpointConfig
         APIDTO apiDto = Mockito.mock(APIDTO.class);
@@ -185,7 +185,7 @@ public class PublisherCommonUtilsTest {
     }
 
     @Test
-    public void testValidateInvalidProductionEndpoint() {
+    public void testValidateInvalidProductionEndpoint() throws APIManagementException {
 
         // endpointConfig
         APIDTO apiDto = Mockito.mock(APIDTO.class);
@@ -216,7 +216,7 @@ public class PublisherCommonUtilsTest {
     }
 
     @Test
-    public void testValidateInvalidSandboxEndpoint() {
+    public void testValidateInvalidSandboxEndpoint() throws APIManagementException {
 
         // endpointConfig
         APIDTO apiDto = Mockito.mock(APIDTO.class);
@@ -247,7 +247,7 @@ public class PublisherCommonUtilsTest {
     }
 
     @Test
-    public void testValidateValidExternalEndpoints() {
+    public void testValidateValidExternalEndpoints() throws APIManagementException {
 
         // endpointConfig
         APIDTO apiDto = Mockito.mock(APIDTO.class);
@@ -288,7 +288,7 @@ public class PublisherCommonUtilsTest {
     }
 
     @Test
-    public void testValidateInvalidExternalEndpoints() {
+    public void testValidateInvalidExternalEndpoints() throws APIManagementException {
 
         // endpointConfig
         APIDTO apiDto = Mockito.mock(APIDTO.class);
@@ -329,7 +329,7 @@ public class PublisherCommonUtilsTest {
     }
 
     @Test
-    public void testValidateEndpointsNullEndpointConfig() {
+    public void testValidateEndpointsNullEndpointConfig() throws APIManagementException {
 
         APIDTO apiDto = Mockito.mock(APIDTO.class);
 
@@ -351,7 +351,7 @@ public class PublisherCommonUtilsTest {
     }
 
     @Test
-    public void testValidateEndpointsNullAdvertiseInfo() {
+    public void testValidateEndpointsNullAdvertiseInfo() throws APIManagementException {
 
         // endpointConfig
         APIDTO apiDto = Mockito.mock(APIDTO.class);
@@ -379,7 +379,7 @@ public class PublisherCommonUtilsTest {
     }
 
     @Test
-    public void testValidateEndpointsNullExternalEndpoint() {
+    public void testValidateEndpointsNullExternalEndpoint() throws APIManagementException {
 
         // endpointConfig
         APIDTO apiDto = Mockito.mock(APIDTO.class);

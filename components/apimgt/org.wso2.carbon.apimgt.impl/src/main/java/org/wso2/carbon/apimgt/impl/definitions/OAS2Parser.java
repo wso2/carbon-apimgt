@@ -1265,7 +1265,7 @@ public class OAS2Parser extends APIDefinition {
     private void updateEndpoints(APIProduct product, Map<String, String> hostsWithSchemes, Swagger swagger) {
         String basePath = product.getContext();
         String transports = product.getTransports();
-        updateEndpoints(swagger, basePath, transports, hostsWithSchemes);
+        updateEndpoints(swagger, basePath, transports, hostsWithSchemes, null);
     }
 
     /**
@@ -1278,7 +1278,7 @@ public class OAS2Parser extends APIDefinition {
     private void updateEndpoints(API api, Map<String,String> hostsWithSchemes, Swagger swagger) {
         String basePath = api.getContext();
         String transports = api.getTransports();
-        updateEndpoints(swagger, basePath, transports, hostsWithSchemes);
+        updateEndpoints(swagger, basePath, transports, hostsWithSchemes, api);
     }
 
     /**
@@ -1288,30 +1288,49 @@ public class OAS2Parser extends APIDefinition {
      * @param basePath       API context
      * @param transports     transports types
      * @param hostsWithSchemes GW hosts with protocol mapping
+     * @param api              API
      */
     private void updateEndpoints(Swagger swagger, String basePath, String transports,
-                                 Map<String, String> hostsWithSchemes) {
-
-        String host = StringUtils.EMPTY;
-        String[] apiTransports = transports.split(",");
+                                 Map<String, String> hostsWithSchemes, API api) {
         List<Scheme> schemes = new ArrayList<>();
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)
-                && hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL) != null) {
-            schemes.add(Scheme.HTTPS);
-            host = hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL).trim()
-                    .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
-        }
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)
-                && hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL) != null) {
-            schemes.add(Scheme.HTTP);
-            if (StringUtils.isEmpty(host)) {
-                host = hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL).trim()
-                        .replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "");
+        if (api != null && api.isAdvertiseOnly()) {
+            String externalProductionEndpoint = api.getApiExternalProductionEndpoint();
+            if (externalProductionEndpoint != null) {
+                if (externalProductionEndpoint.split("://")[0].contains("https")) {
+                    schemes.add(Scheme.HTTPS);
+                } else {
+                    schemes.add(Scheme.HTTP);
+                }
+                String host = externalProductionEndpoint.split("://")[1].split("/")[0];
+                if (externalProductionEndpoint.split("://")[1].split("/").length > 1) {
+                    swagger.setBasePath(externalProductionEndpoint.split("://")[1].split(host)[1]);
+                } else {
+                    swagger.setBasePath("");
+                }
+                swagger.setHost(host);
+                swagger.setSchemes(schemes);
             }
+        } else {
+            String host = StringUtils.EMPTY;
+            String[] apiTransports = transports.split(",");
+            if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)
+                    && hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL) != null) {
+                schemes.add(Scheme.HTTPS);
+                host = hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL).trim()
+                        .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+            }
+            if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)
+                    && hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL) != null) {
+                schemes.add(Scheme.HTTP);
+                if (StringUtils.isEmpty(host)) {
+                    host = hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL).trim()
+                            .replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "");
+                }
+            }
+            swagger.setSchemes(schemes);
+            swagger.setBasePath(basePath);
+            swagger.setHost(host);
         }
-        swagger.setSchemes(schemes);
-        swagger.setBasePath(basePath);
-        swagger.setHost(host);
     }
 
     /**

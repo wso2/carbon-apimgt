@@ -1460,7 +1460,7 @@ public class OAS3Parser extends APIDefinition {
 
         String basePath = product.getContext();
         String transports = product.getTransports();
-        updateEndpoints(openAPI, basePath, transports, hostsWithSchemes);
+        updateEndpoints(openAPI, basePath, transports, hostsWithSchemes, null);
     }
 
     /**
@@ -1474,7 +1474,7 @@ public class OAS3Parser extends APIDefinition {
 
         String basePath = api.getContext();
         String transports = api.getTransports();
-        updateEndpoints(openAPI, basePath, transports, hostsWithSchemes);
+        updateEndpoints(openAPI, basePath, transports, hostsWithSchemes, api);
     }
 
     /**
@@ -1484,31 +1484,47 @@ public class OAS3Parser extends APIDefinition {
      * @param basePath         API context
      * @param transports       transports types
      * @param hostsWithSchemes GW hosts with protocol mapping
+     * @param api              API
      */
     private void updateEndpoints(OpenAPI openAPI, String basePath, String transports,
-                                 Map<String, String> hostsWithSchemes) {
-
-        String[] apiTransports = transports.split(",");
+                                 Map<String, String> hostsWithSchemes, API api) {
         List<Server> servers = new ArrayList<>();
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL) && hostsWithSchemes
-                .containsKey(APIConstants.HTTPS_PROTOCOL)) {
-            String host = hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL).trim()
-                    .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
-            String httpsURL = APIConstants.HTTPS_PROTOCOL + "://" + host + basePath;
-            Server httpsServer = new Server();
-            httpsServer.setUrl(httpsURL);
-            servers.add(httpsServer);
+        if (api != null && api.isAdvertiseOnly()) {
+            String externalProductionEndpoint = api.getApiExternalProductionEndpoint();
+            String externalSandboxEndpoint = api.getApiExternalSandboxEndpoint();
+            if (externalProductionEndpoint != null) {
+                Server externalProductionServer = new Server();
+                externalProductionServer.setUrl(externalProductionEndpoint);
+                servers.add(externalProductionServer);
+            }
+            if (externalSandboxEndpoint != null) {
+                Server externalSandboxServer = new Server();
+                externalSandboxServer.setUrl(externalSandboxEndpoint);
+                servers.add(externalSandboxServer);
+            }
+            openAPI.setServers(servers);
+        } else {
+            String[] apiTransports = transports.split(",");
+            if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL) && hostsWithSchemes
+                    .containsKey(APIConstants.HTTPS_PROTOCOL)) {
+                String host = hostsWithSchemes.get(APIConstants.HTTPS_PROTOCOL).trim()
+                        .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+                String httpsURL = APIConstants.HTTPS_PROTOCOL + "://" + host + basePath;
+                Server httpsServer = new Server();
+                httpsServer.setUrl(httpsURL);
+                servers.add(httpsServer);
+            }
+            if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL) && hostsWithSchemes
+                    .containsKey(APIConstants.HTTP_PROTOCOL)) {
+                String host = hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL).trim()
+                        .replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "");
+                String httpURL = APIConstants.HTTP_PROTOCOL + "://" + host + basePath;
+                Server httpsServer = new Server();
+                httpsServer.setUrl(httpURL);
+                servers.add(httpsServer);
+            }
+            openAPI.setServers(servers);
         }
-        if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL) && hostsWithSchemes
-                .containsKey(APIConstants.HTTP_PROTOCOL)) {
-            String host = hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL).trim()
-                    .replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "");
-            String httpURL = APIConstants.HTTP_PROTOCOL + "://" + host + basePath;
-            Server httpsServer = new Server();
-            httpsServer.setUrl(httpURL);
-            servers.add(httpsServer);
-        }
-        openAPI.setServers(servers);
     }
 
     /**

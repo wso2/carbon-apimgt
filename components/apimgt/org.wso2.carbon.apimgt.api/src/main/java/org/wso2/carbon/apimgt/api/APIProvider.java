@@ -805,6 +805,7 @@ public interface APIProvider extends APIManager {
      * @param apiTypeWrapper : API Type Wrapper.
      * @param certificate   : Relevant public certificate.
      * @param alias         : Alias of the certificate.
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param organization  : Organization
      * @return SUCCESS : If operation succeeded,
      * INTERNAL_SERVER_ERROR : If any internal error occurred,
@@ -813,7 +814,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int addClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String certificate, String alias,
-                             String tierName, String organization) throws APIManagementException;
+                             String tierName, String keyType, String organization) throws APIManagementException;
 
     /**
      * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.
@@ -835,7 +836,7 @@ public interface APIProvider extends APIManager {
      * 4 : If certificate is not found in the trust store.
      * @throws APIManagementException API Management Exception.
      */
-    int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias)
+    int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias, String keyType)
             throws APIManagementException;
 
     /**
@@ -882,8 +883,8 @@ public interface APIProvider extends APIManager {
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
-            String organization) throws APIManagementException;
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
+                                    APIIdentifier apiIdentifier, String organization) throws APIManagementException;
 
     /**
      * Method to search the client certificates for the provided tenant id, alias and api product identifier.
@@ -895,7 +896,7 @@ public interface APIProvider extends APIManager {
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
             APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException;
 
     /**
@@ -913,7 +914,7 @@ public interface APIProvider extends APIManager {
      * @return count of client certificates that exists for a particular tenant.
      * @throws APIManagementException API Management Exception.
      */
-    int getClientCertificateCount(int tenantId) throws APIManagementException;
+    int getClientCertificateCount(int tenantId, String keyType) throws APIManagementException;
 
     /**
      * Method to check whether an certificate for the given alias is present in the trust store and the database.
@@ -929,13 +930,14 @@ public interface APIProvider extends APIManager {
      * be modified by current user.
      *
      * @param alias    : Relevant alias.
+     * @param keyType : Key type of the certificate
      * @param apiTypeWrapper : The identifier of the api.
      * @param organization : Organization
      * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
      * modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
-    ClientCertificateDTO getClientCertificate(String alias, ApiTypeWrapper apiTypeWrapper,
+    ClientCertificateDTO getClientCertificate(String alias, String keyType, ApiTypeWrapper apiTypeWrapper,
             String organization) throws APIManagementException;
 
 
@@ -967,6 +969,7 @@ public interface APIProvider extends APIManager {
      * @param alias         : Alias of the certificate.
      * @param apiTypeWrapper : API Identifier of the certificate.
      * @param tier          : tier name.
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param tenantId      : Id of tenant.
      * @param organization  : organization
      * @return : 1 : If client certificate update is successful,
@@ -976,7 +979,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int updateClientCertificate(String certificate, String alias, ApiTypeWrapper apiTypeWrapper, String tier,
-                                int tenantId, String organization) throws APIManagementException;
+                                String keyType, int tenantId, String organization) throws APIManagementException;
 
     /**
      * Retrieve the certificate which matches the given alias.
@@ -1929,4 +1932,15 @@ public interface APIProvider extends APIManager {
      */
     void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
             throws APIManagementException;
+
+    /**
+     * Updates the subscription tier of a given subscription.
+     *
+     * @param subscriptionUUID The UUID of the subscription to be updated
+     * @param subscriptionTier The new subscription tier to be assigned
+     * @return The updated subscription
+     * @throws APIManagementException If the subscription is not found, status is TIER_UPDATE_PENDING, the specified
+     *                                tier is not allowed for the API or an error occurs while updating the subscription
+     */
+    SubscribedAPI updateSubscriptionTier(String subscriptionUUID, String subscriptionTier) throws APIManagementException;
 }

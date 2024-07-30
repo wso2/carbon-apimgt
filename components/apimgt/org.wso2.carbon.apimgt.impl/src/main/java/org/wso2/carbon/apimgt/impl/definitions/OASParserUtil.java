@@ -95,6 +95,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -227,7 +228,9 @@ public class OASParserUtil {
             return SwaggerVersion.SWAGGER;
         }
 
-        throw new APIManagementException("Invalid OAS definition provided.");
+        String errMsg = "Could not determine the OAS version as the version element of the definition is not found.";
+        ExceptionCodes errorHandler = ExceptionCodes.OAS_DEFINITION_VERSION_NOT_FOUND;
+        throw new APIManagementException(errMsg, errorHandler);
     }
 
     public static Map<String, Object> generateExamples(String apiDefinition) throws APIManagementException {
