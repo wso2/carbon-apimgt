@@ -810,6 +810,16 @@ public interface APIConsumer extends APIManager {
     Tier getThrottlePolicyByName(String name, int policyType, String organization) throws APIManagementException;
 
     /**
+     * Send Application Policy Reset Event to Eventhub
+     *
+     * @param applicationId Application Identifier used by traffic manager
+     * @param userId Username for which the policy should be reset
+     * @param organization Tenant which application owner belongs to
+     */
+    void resetApplicationThrottlePolicy(String applicationId, String userId, String organization)
+            throws APIManagementException;
+
+    /**
      * Returns the API Chat execute call response as a string
      *
      * @param apiChatRequestId Request UUID

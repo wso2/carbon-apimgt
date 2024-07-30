@@ -85,6 +85,7 @@ import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -2065,6 +2066,19 @@ public final class APIUtil {
     }
 
     /**
+     * Check if an issuer for internal keys has been defined
+     *
+     * @return String internalKeyIssuer
+     */
+    public static String getInternalKeyIssuer() {
+        // checking if an issuer for internal keys has been configured in api-manager.xml
+        String internalKeyIssuer = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(
+                        APIConstants.API_PUBLISHER_INTERNAL_KEY_ISSUER);
+        return internalKeyIssuer;
+    }
+
+    /**
      * Returns the External API Store Configuration with the given Store Name
      *
      * @param apiStoreName
@@ -2350,8 +2364,9 @@ public final class APIUtil {
 
         boolean authorized = false;
         if (userNameWithoutChange == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as" +
-                    " the anonymous user");
+            String errMsg = "Attempt to execute privileged operation as the anonymous user";
+            ExceptionCodes errorHandler = ExceptionCodes.ANONYMOUS_USER_NOT_PERMITTED;
+            throw new APIManagementException(errMsg, errorHandler);
         }
 
         if (isPermissionCheckDisabled()) {
@@ -2444,8 +2459,9 @@ public final class APIUtil {
     public static String[] getListOfRoles(String username) throws APIManagementException {
 
         if (username == null) {
-            throw new APIManagementException("Attempt to execute privileged operation as" +
-                    " the anonymous user");
+            String errMsg = "Attempt to execute privileged operation as the anonymous user";
+            ExceptionCodes errorHandler = ExceptionCodes.ANONYMOUS_USER_NOT_PERMITTED;
+            throw new APIManagementException(errMsg, errorHandler);
         }
 
         String[] roles = getValueFromCache(APIConstants.API_USER_ROLE_CACHE, username);
@@ -2616,9 +2632,12 @@ public final class APIUtil {
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
-                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
-                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            String password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD);
+            if (password == null) {
+                password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD_ALT);
+            }
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD).equals(password))) {
+                api.setEndpointUTPassword(password);
             } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
                 api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
             }
@@ -9498,9 +9517,12 @@ public final class APIUtil {
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
-                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
-                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            String password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD);
+            if (password == null) {
+                password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD_ALT);
+            }
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD).equals(password))) {
+                api.setEndpointUTPassword(password);
             } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
                 api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
             }
@@ -10486,7 +10508,7 @@ public final class APIUtil {
      * @param uuid      UUID of the API to be deleted
      * @throws APIManagementException if an error occurs while deleting the API
      */
-    public static void deleteApi(String endpoint, String authToken, String resource, String uuid)
+    public static void marketplaceAssistantDeleteService(String endpoint, String authToken, String resource, String uuid)
             throws APIManagementException {
 
         try {

@@ -526,7 +526,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             IntrospectInfo introspectInfo = introspectionClient.introspect(accessToken);
             tokenInfo.setAccessToken(accessToken);
             boolean isActive = introspectInfo.isActive();
-            if (!isActive) {
+            if (!isActive || APIConstants.REFRESH_TOKEN_TYPE.equalsIgnoreCase(introspectInfo.getTokenType())    ) {
                 tokenInfo.setTokenValid(false);
                 tokenInfo.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return tokenInfo;

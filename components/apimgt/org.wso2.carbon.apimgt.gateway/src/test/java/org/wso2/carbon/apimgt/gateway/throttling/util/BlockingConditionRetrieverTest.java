@@ -63,7 +63,7 @@ public class BlockingConditionRetrieverTest {
         eventHubConfigurationDto.setPassword("admin".toCharArray());
         eventHubConfigurationDto.setEnabled(true);
         eventHubConfigurationDto.setServiceUrl("http://localhost:18083/internal/data/v1");
-        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+        ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
         BlockingConditionRetriever blockingConditionRetriever =
                 new BlockingConditionRetrieverWrapper(eventHubConfigurationDto, throttleDataHolder);
         blockingConditionRetriever.run();

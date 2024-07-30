@@ -264,7 +264,7 @@ CREATE TABLE UM_ROLE (
                     UM_ID INTEGER,
                     UM_ROLE_NAME VARCHAR2(255) NOT NULL,
                     UM_TENANT_ID INTEGER DEFAULT 0,
-		            UM_SHARED_ROLE BOOLEAN DEFAULT 0,
+		            UM_SHARED_ROLE BOOLEAN DEFAULT FALSE,
                     PRIMARY KEY (UM_ID, UM_TENANT_ID),
                     UNIQUE(UM_ROLE_NAME, UM_TENANT_ID))
 /

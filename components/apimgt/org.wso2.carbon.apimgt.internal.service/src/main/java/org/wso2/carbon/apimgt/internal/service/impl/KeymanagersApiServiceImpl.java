@@ -23,14 +23,13 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
 
     Log log = LogFactory.getLog(KeymanagersApiServiceImpl.class);
 
-    public static KeyManagerDTO toKeyManagerDTO(String tenantDomain,
-                                                KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+    public static KeyManagerDTO toKeyManagerDTO(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         KeyManagerDTO keyManagerDTO = new KeyManagerDTO();
         keyManagerDTO.setUuid(keyManagerConfigurationDTO.getUuid());
         keyManagerDTO.setEnabled(keyManagerConfigurationDTO.isEnabled());
         keyManagerDTO.setName(keyManagerConfigurationDTO.getName());
-        keyManagerDTO.setOrganization(tenantDomain);
+        keyManagerDTO.setOrganization(keyManagerConfigurationDTO.getOrganization());
         keyManagerDTO.setType(keyManagerConfigurationDTO.getType());
         keyManagerDTO.setTokenType(KeyManagerDTO.TokenTypeEnum.fromValue(keyManagerConfigurationDTO.getTokenType()));
         keyManagerDTO.setAdditionalProperties(keyManagerConfigurationDTO.getAdditionalProperties());
@@ -51,7 +50,7 @@ public class KeymanagersApiServiceImpl implements KeymanagersApiService {
             keyManagerConfigurations.addAll(globalKeyManagerConfigurations);
             List<KeyManagerDTO> keyManagerDTOList = new ArrayList<>();
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
-                keyManagerDTOList.add(toKeyManagerDTO(xWSO2Tenant, keyManagerConfiguration));
+                keyManagerDTOList.add(toKeyManagerDTO(keyManagerConfiguration));
             }
             return Response.ok(keyManagerDTOList).build();
         } catch (APIManagementException e) {

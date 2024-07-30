@@ -110,7 +110,7 @@ public class SearchResultMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
         apiResultDTO.setBusinessInformation(apiBusinessInformationDTO);
-        apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
+        apiResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
         apiResultDTO.setTransportType(apiProduct.getType());
         apiResultDTO.setDescription(apiProduct.getDescription());
         apiResultDTO.setStatus(apiProduct.getState());

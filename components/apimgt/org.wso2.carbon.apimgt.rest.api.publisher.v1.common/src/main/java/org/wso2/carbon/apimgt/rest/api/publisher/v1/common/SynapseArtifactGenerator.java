@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUt
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -112,12 +113,15 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     String apiDefinition = parser.generateAPIDefinition(swaggerData);
                                     api.setSwaggerDefinition(apiDefinition);
                                     GraphqlComplexityInfo graphqlComplexityInfo = APIUtil.getComplexityDetails(api);
-                                    String graphqlSchema =
+                                    GraphQLValidationResponseDTO graphqlSchemaGraphQLValidationResponseDTO =
                                             ImportUtils.retrieveValidatedGraphqlSchemaFromArchive(extractedFolderPath);
+                                    String graphqlSchema =
+                                            graphqlSchemaGraphQLValidationResponseDTO.getGraphQLInfo()
+                                                    .getGraphQLSchema().getSchemaDefinition();
                                     api.setGraphQLSchema(graphqlSchema);
                                     GraphQLSchemaDefinition graphQLSchemaDefinition = new GraphQLSchemaDefinition();
-                                    graphqlSchema = graphQLSchemaDefinition
-                                            .buildSchemaWithAdditionalInfo(api, graphqlComplexityInfo);
+                                    graphqlSchema = graphQLSchemaDefinition.buildSchemaWithAdditionalInfo(api,
+                                            graphqlComplexityInfo);
                                     api.setGraphQLSchema(graphqlSchema);
                                     gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
                                             tenantDomain, apidto, extractedFolderPath);

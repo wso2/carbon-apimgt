@@ -175,6 +175,7 @@ public interface CertificateManager {
      * @param apiIdentifier : Identifier of the relevant API, which the client certificate is added against.
      * @param certificate   : Base64 encoded certificate string.
      * @param alias         : Alias of the certificate.
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param tenantId      : The tenant which the client certificate is added against
      * @param organization  : Organization
      * @return SUCCESS : If Operation succeeded, INTERNAL_SERVER_ERROR : If any internal error occurred,
@@ -182,24 +183,27 @@ public interface CertificateManager {
      * certificate is expired.
      */
     ResponseCode addClientCertificate(Identifier apiIdentifier, String certificate, String alias, String tierName,
-                                      int tenantId, String organization);
+                                      String keyType, int tenantId, String organization);
 
     /**
      * Method to delete the client certificate from publisher node.
      *
      * @param apiIdentifier : Identifier of the API which particular client certificate is added against.
      * @param alias         : Alias of the certificate which needs to be removed.
+     * @param keyType       : Key type of the certificate
      * @param tenantId      : The owner tenant id.
      * @return : SUCCESS: If operation success
      * INTERNAL_SERVER_ERROR: If any internal error occurred
      * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
-    ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, int tenantId);
+    ResponseCode deleteClientCertificateFromParentNode(Identifier apiIdentifier, String alias, String keyType,
+                                                       int tenantId);
 
     /**
      * Method to add client certificate to gateway nodes.
      *
      * @param certificate : The Base64 encoded certificate string.
+     * @param keyType     : Key type of the certificate.
      * @param alias       : Certificate alias.
      * @return : True if the certificate is added to gateway node successfully. False otherwise.
      */
@@ -223,7 +227,7 @@ public interface CertificateManager {
      * @return List of certificates that match the criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, Identifier apiIdentifier,
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType, Identifier apiIdentifier,
             String organization) throws APIManagementException;
 
     /**
@@ -233,11 +237,12 @@ public interface CertificateManager {
      * @param alias       : The alias of the certificate that should be updated.
      * @param tenantId    : Id of the tenant.
      * @param tier        : Name of the tier
+     * @param keyType       : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param organization : Organization
      * @return : true if update succeeds, false if fails
      */
-    ResponseCode updateClientCertificate(String certificate, String alias, String tier, int tenantId,
-            String organization) throws APIManagementException;
+    ResponseCode updateClientCertificate(String certificate, String alias, String tier, String keyType,
+                                         int tenantId, String organization) throws APIManagementException;
 
     /**
      * To get the count of the client certificates updated for the particular tenant.
@@ -246,7 +251,7 @@ public interface CertificateManager {
      * @return count of client certificates.
      * @throws APIManagementException API Management Exception.
      */
-    int getClientCertificateCount(int tenantId) throws APIManagementException;
+    int getClientCertificateCount(int tenantId, String keyType) throws APIManagementException;
 
     /**
      * Method to add the certificate to gateway nodes.
@@ -257,6 +262,14 @@ public interface CertificateManager {
      * @return : True if the certificate is added to gateway node successfully. False otherwise.
      */
     boolean addAllCertificateToGateway(String certificate, String alias, int tenantId);
+
+    /**
+     * Method to add the all tenant's certificate to gateway nodes.
+     *
+     * @param certificateMetadataDTOList : The list of all certificates of a tenant
+     */
+    void addAllTenantCertificatesToGateway(List<CertificateMetadataDTO> certificateMetadataDTOList);
+
 
     /**
      * This method is used to retrieve all the certificates.

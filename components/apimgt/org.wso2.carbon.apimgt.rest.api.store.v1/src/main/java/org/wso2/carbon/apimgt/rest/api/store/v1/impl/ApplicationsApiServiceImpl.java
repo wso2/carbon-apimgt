@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateReques
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
@@ -98,6 +99,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -482,6 +484,39 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Reset Application Level Throttle Policy
+     *
+     * @param applicationId               application Identifier
+     * @param applicationThrottleResetDTO request DTO containing the username
+     * @return response with status code 200 if successful
+     */
+    @Override
+    public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId,
+            ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) {
+        try {
+            if (applicationThrottleResetDTO == null) {
+                RestApiUtil.handleBadRequest("Username cannot be null", log);
+            }
+
+            String userId = applicationThrottleResetDTO.getUserName();
+            String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
+            String organization = RestApiUtil.getOrganization(messageContext);
+
+            if (StringUtils.isBlank(userId)) {
+                RestApiUtil.handleBadRequest("Username cannot be empty", log);
+            }
+
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUsername);
+            //send the reset request as an event to the eventhub
+            apiConsumer.resetApplicationThrottlePolicy(applicationId, userId, organization);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while resetting application " + applicationId, e, log);
         }
         return null;
     }

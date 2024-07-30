@@ -213,7 +213,11 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     }
 
     public String encode(byte[] stringToBeEncoded) throws JWTGeneratorException {
-        return java.util.Base64.getEncoder().withoutPadding().encodeToString(stringToBeEncoded);
+        if (jwtConfigurationDto.isEnableBase64Padding()) {
+            return java.util.Base64.getEncoder().encodeToString(stringToBeEncoded);
+        } else {
+            return java.util.Base64.getEncoder().withoutPadding().encodeToString(stringToBeEncoded);
+        }
     }
 
     public String getDialectURI() {

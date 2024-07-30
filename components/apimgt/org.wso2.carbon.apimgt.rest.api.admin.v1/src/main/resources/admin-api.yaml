@@ -60,6 +60,9 @@ info:
     "tokenType": null
     }
     ```
+    Note that in a distributed deployment or IS as KM separated environment to invoke RESTful APIs (product APIs), users must generate tokens through API-M Control Plane's token endpoint.
+    The tokens generated using third party key managers, are to manage end-user authentication when accessing APIs.
+    
     Next you must use the above client id and secret to obtain the access token.
     We will be using the password grant type for this, you can use any grant type you desire.
     You also need to add the proper **scope** when getting the access token. All possible scopes for Admin REST API can be viewed in **OAuth2 Security** section
@@ -96,7 +99,7 @@ info:
     * Make sure you have an API Manager instance up and running.
     * Update the `basepath` parameter to match the hostname and port of the APIM instance.
 
-    [![Run in Postman](https://run.pstmn.io/button.svg)](https://god.gw.postman.com/run-collection/17491134-b263aa69-7494-4fc5-90fa-daa2f63880ae)
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/32294946-71bea2bc-f808-4208-a4f6-861ede6f0434)
   contact:
     name: WSO2
     url: https://wso2.com/api-manager/
@@ -1327,6 +1330,18 @@ paths:
         Retrieves all existing deny policies.
       parameters:
         - $ref: '#/components/parameters/Accept'
+        - name: query
+          in: query
+          description: |
+            **Search condition**.
+            You can search in attributes by using **"conditionType:"** modifier and **"conditionValue:"** modifier.
+            Eg.
+            The entry "conditionType:API" will result in a match with blocking conditions only if the conditionType is "API". Similarly, "conditionValue:test/1.0.0" will result in a match with blocking conditions only if the conditionValue is "test/1.0.0".
+            When you use "conditionType:API & conditionValue:test/1.0.0" as a combination, it will result in a match with blocking conditions only if both the conditionType is "API" and the conditionValue is "test/1.0.0".
+            If query attribute is provided, this returns the blocking conditions that match the specified attributes.
+            Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl)
+          schema:
+            type: string
       responses:
         200:
           description: |
@@ -3576,7 +3591,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-              -H "Content-Type: application/json" "https://127.0.0.1:9443/api/am/admin/v4/provider/admin/apis/33662a62-8db1-4d75-af08-afd63c6bd0b4"'
+              -H "Content-Type: application/json" "https://127.0.0.1:9443/api/am/admin/v4/provider/admin/apis/33662a62-8db1-4d75-af08-afd63c6bd0b4/change-provider?provider=user1"'
 components:
   schemas:
     Error:
