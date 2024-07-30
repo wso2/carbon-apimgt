@@ -40,6 +40,7 @@ public class APIProductDTO   {
     private Boolean hasThumbnail = null;
     private String state = "CREATED";
     private Boolean enableSchemaValidation = null;
+    private Boolean disableSubscriptionValidation = false;
     private Boolean isDefaultVersion = null;
     private Boolean isRevision = null;
     private String revisionedApiProductId = null;
@@ -361,6 +362,23 @@ return null;
   }
   public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
     this.enableSchemaValidation = enableSchemaValidation;
+  }
+
+  /**
+   **/
+  public APIProductDTO disableSubscriptionValidation(Boolean disableSubscriptionValidation) {
+    this.disableSubscriptionValidation = disableSubscriptionValidation;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("disableSubscriptionValidation")
+  public Boolean isDisableSubscriptionValidation() {
+    return disableSubscriptionValidation;
+  }
+  public void setDisableSubscriptionValidation(Boolean disableSubscriptionValidation) {
+    this.disableSubscriptionValidation = disableSubscriptionValidation;
   }
 
   /**
@@ -971,7 +989,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "The audiences of the API for jwt validation. Accepted values are any String values")
   @JsonProperty("audiences")
   public List<String> getAudiences() {
@@ -1000,6 +1018,7 @@ return null;
         Objects.equals(hasThumbnail, apIProduct.hasThumbnail) &&
         Objects.equals(state, apIProduct.state) &&
         Objects.equals(enableSchemaValidation, apIProduct.enableSchemaValidation) &&
+        Objects.equals(disableSubscriptionValidation, apIProduct.disableSubscriptionValidation) &&
         Objects.equals(isDefaultVersion, apIProduct.isDefaultVersion) &&
         Objects.equals(isRevision, apIProduct.isRevision) &&
         Objects.equals(revisionedApiProductId, apIProduct.revisionedApiProductId) &&
@@ -1056,6 +1075,7 @@ return null;
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
+    sb.append("    disableSubscriptionValidation: ").append(toIndentedString(disableSubscriptionValidation)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
     sb.append("    revisionedApiProductId: ").append(toIndentedString(revisionedApiProductId)).append("\n");

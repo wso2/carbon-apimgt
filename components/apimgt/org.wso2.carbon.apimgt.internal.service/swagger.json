@@ -1222,6 +1222,12 @@
           "type" : "string",
           "example" : "Oauth2,api_key",
           "description" : "Available authentication methods of the API."
+        },
+        "disableSubscriptionValidation" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Whether subscription validation is disabled.",
+          "default" : false
         }
       }
     },
@@ -1354,8 +1360,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
-          "default" : "DIRECT"
+          "default" : "DIRECT",
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
         }
       }
     },

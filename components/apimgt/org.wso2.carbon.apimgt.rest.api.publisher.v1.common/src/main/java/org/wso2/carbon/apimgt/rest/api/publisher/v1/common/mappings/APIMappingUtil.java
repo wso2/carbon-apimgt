@@ -354,6 +354,13 @@ public class APIMappingUtil {
             }
         }
 
+        // Disable subscription validation
+        if (dto.isDisableSubscriptionValidation()) {
+            model.addProperty(APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY, Boolean.TRUE.toString());
+        } else {
+            model.addProperty(APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY, Boolean.FALSE.toString());
+        }
+
         ObjectMapper objectMapper = new ObjectMapper();
         APIBusinessInformationDTO apiBusinessInformationDTO = objectMapper.convertValue(dto.getBusinessInformation(),
                 APIBusinessInformationDTO.class);
@@ -1289,6 +1296,9 @@ public class APIMappingUtil {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
 
+        // Set subscription validation to false by default to cater APIs that were created before migration.
+        dto.disableSubscriptionValidation(false);
+
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
@@ -1298,21 +1308,27 @@ public class APIMappingUtil {
                 APIInfoAdditionalPropertiesMapDTO apiInfoAdditionalPropertiesMapDTO =
                         new APIInfoAdditionalPropertiesMapDTO();
                 String key = (String) propertyKey;
-                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
-                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
-                apiInfoAdditionalPropertiesMapDTO.setValue((String) additionalProperties.get(key));
-                if (index > 0) {
-                    additionalPropertiesDTO.setName(key.substring(0, index));
-                    apiInfoAdditionalPropertiesMapDTO.setName(key.substring(0, index));
-                    additionalPropertiesDTO.setDisplay(true);
+                // Skip the disable_sub_validation property as it is not a custom property
+                // but an internal property used to disable subscription validation
+                if (APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                    dto.disableSubscriptionValidation(Boolean.parseBoolean(additionalProperties.get(key).toString()));
                 } else {
-                    additionalPropertiesDTO.setName(key);
-                    apiInfoAdditionalPropertiesMapDTO.setName(key);
-                    additionalPropertiesDTO.setDisplay(false);
+                    int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                    additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                    apiInfoAdditionalPropertiesMapDTO.setValue((String) additionalProperties.get(key));
+                    if (index > 0) {
+                        additionalPropertiesDTO.setName(key.substring(0, index));
+                        apiInfoAdditionalPropertiesMapDTO.setName(key.substring(0, index));
+                        additionalPropertiesDTO.setDisplay(true);
+                    } else {
+                        additionalPropertiesDTO.setName(key);
+                        apiInfoAdditionalPropertiesMapDTO.setName(key);
+                        additionalPropertiesDTO.setDisplay(false);
+                    }
+                    apiInfoAdditionalPropertiesMapDTO.setDisplay(false);
+                    additionalPropertiesMap.put(key, apiInfoAdditionalPropertiesMapDTO);
+                    additionalPropertiesList.add(additionalPropertiesDTO);
                 }
-                apiInfoAdditionalPropertiesMapDTO.setDisplay(false);
-                additionalPropertiesMap.put(key, apiInfoAdditionalPropertiesMapDTO);
-                additionalPropertiesList.add(additionalPropertiesDTO);
             }
             dto.setAdditionalProperties(additionalPropertiesList);
             dto.setAdditionalPropertiesMap(additionalPropertiesMap);
@@ -2525,6 +2541,9 @@ public class APIMappingUtil {
             productDto.setTransport(Arrays.asList(product.getTransports().split(",")));
         }
 
+        // Set subscription validation to false by default to cater products that were created before migration.
+        productDto.disableSubscriptionValidation(false);
+
         if (product.getAdditionalProperties() != null) {
             JSONObject additionalProperties = product.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
@@ -2534,21 +2553,28 @@ public class APIMappingUtil {
                 APIInfoAdditionalPropertiesMapDTO apiInfoAdditionalPropertiesMapDTO =
                         new APIInfoAdditionalPropertiesMapDTO();
                 String key = (String) propertyKey;
-                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
-                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
-                apiInfoAdditionalPropertiesMapDTO.setValue((String) additionalProperties.get(key));
-                if (index > 0) {
-                    additionalPropertiesDTO.setName(key.substring(0, index));
-                    apiInfoAdditionalPropertiesMapDTO.setName(key.substring(0, index));
-                    additionalPropertiesDTO.setDisplay(true);
+                // Skip the disable_sub_validation property as it is not a custom property
+                // but an internal property used to disable subscription validation
+                if (APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                    productDto.disableSubscriptionValidation(
+                            Boolean.parseBoolean(additionalProperties.get(key).toString()));
                 } else {
-                    additionalPropertiesDTO.setName(key);
-                    apiInfoAdditionalPropertiesMapDTO.setName(key);
-                    additionalPropertiesDTO.setDisplay(false);
+                    int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                    additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                    apiInfoAdditionalPropertiesMapDTO.setValue((String) additionalProperties.get(key));
+                    if (index > 0) {
+                        additionalPropertiesDTO.setName(key.substring(0, index));
+                        apiInfoAdditionalPropertiesMapDTO.setName(key.substring(0, index));
+                        additionalPropertiesDTO.setDisplay(true);
+                    } else {
+                        additionalPropertiesDTO.setName(key);
+                        apiInfoAdditionalPropertiesMapDTO.setName(key);
+                        additionalPropertiesDTO.setDisplay(false);
+                    }
+                    apiInfoAdditionalPropertiesMapDTO.setDisplay(false);
+                    additionalPropertiesMap.put(key, apiInfoAdditionalPropertiesMapDTO);
+                    additionalPropertiesList.add(additionalPropertiesDTO);
                 }
-                apiInfoAdditionalPropertiesMapDTO.setDisplay(false);
-                additionalPropertiesMap.put(key, apiInfoAdditionalPropertiesMapDTO);
-                additionalPropertiesList.add(additionalPropertiesDTO);
             }
             productDto.setAdditionalPropertiesMap(additionalPropertiesMap);
             productDto.setAdditionalProperties(additionalPropertiesList);
@@ -2732,6 +2758,14 @@ public class APIMappingUtil {
                 }
             }
         }
+
+        // Disable subscription validation
+        if (dto.isDisableSubscriptionValidation()) {
+            product.addProperty(APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY, Boolean.TRUE.toString());
+        } else {
+            product.addProperty(APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY, Boolean.FALSE.toString());
+        }
+
         if (dto.getSubscriptionAvailableTenants() != null) {
             product.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }

@@ -34,6 +34,7 @@ public class APIDTO   {
     private List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
     private String securityScheme = null;
+    private Boolean disableSubscriptionValidation = false;
 
   /**
    * UUID of API
@@ -284,6 +285,24 @@ public class APIDTO   {
     this.securityScheme = securityScheme;
   }
 
+  /**
+   * Whether subscription validation is disabled.
+   **/
+  public APIDTO disableSubscriptionValidation(Boolean disableSubscriptionValidation) {
+    this.disableSubscriptionValidation = disableSubscriptionValidation;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether subscription validation is disabled.")
+  @JsonProperty("disableSubscriptionValidation")
+  public Boolean isDisableSubscriptionValidation() {
+    return disableSubscriptionValidation;
+  }
+  public void setDisableSubscriptionValidation(Boolean disableSubscriptionValidation) {
+    this.disableSubscriptionValidation = disableSubscriptionValidation;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -307,12 +326,13 @@ public class APIDTO   {
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(apiPolicies, API.apiPolicies) &&
         Objects.equals(urlMappings, API.urlMappings) &&
-        Objects.equals(securityScheme, API.securityScheme);
+        Objects.equals(securityScheme, API.securityScheme) &&
+        Objects.equals(disableSubscriptionValidation, API.disableSubscriptionValidation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, disableSubscriptionValidation);
   }
 
   @Override
@@ -334,6 +354,7 @@ public class APIDTO   {
     sb.append("    apiPolicies: ").append(toIndentedString(apiPolicies)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("    disableSubscriptionValidation: ").append(toIndentedString(disableSubscriptionValidation)).append("\n");
     sb.append("}");
     return sb.toString();
   }

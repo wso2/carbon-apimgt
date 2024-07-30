@@ -2304,6 +2304,8 @@ public final class APIConstants {
             CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase()};
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
+    // API Property name for disabling subscription validation
+    public static final String DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY = "disable_sub_validation";
     /**
      * Parameter for enabling tenant load notifications to members in the same HZ cluster
      */

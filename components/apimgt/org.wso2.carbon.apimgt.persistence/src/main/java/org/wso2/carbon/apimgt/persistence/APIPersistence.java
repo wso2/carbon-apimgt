@@ -127,6 +127,16 @@ public interface APIPersistence {
     String getSecuritySchemeOfAPI(Organization org, String apiId) throws APIPersistenceException;
 
     /**
+     * Get security scheme of API
+     *
+     * @param org   Organization the API is owned by
+     * @param apiId API ID
+     * @return A String containing the value of the API property
+     * @throws APIPersistenceException if failed to get the property of the API
+     */
+    boolean getSubscriptionValidationDisabled(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
      * Get the API information stored in persistence layer, that is used for publisher operations
      *
      * @param org   Organization the API is owned by

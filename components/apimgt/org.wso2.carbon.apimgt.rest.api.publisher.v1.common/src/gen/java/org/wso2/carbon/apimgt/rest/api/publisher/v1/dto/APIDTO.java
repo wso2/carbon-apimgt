@@ -62,6 +62,7 @@ public class APIDTO   {
     private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
     private Boolean enableSubscriberVerification = null;
+    private Boolean disableSubscriptionValidation = false;
 
     @XmlType(name="TypeEnum")
     @XmlEnum(String.class)
@@ -636,6 +637,23 @@ return null;
   }
 
   /**
+   **/
+  public APIDTO disableSubscriptionValidation(Boolean disableSubscriptionValidation) {
+    this.disableSubscriptionValidation = disableSubscriptionValidation;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("disableSubscriptionValidation")
+  public Boolean isDisableSubscriptionValidation() {
+    return disableSubscriptionValidation;
+  }
+  public void setDisableSubscriptionValidation(Boolean disableSubscriptionValidation) {
+    this.disableSubscriptionValidation = disableSubscriptionValidation;
+  }
+
+  /**
    * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
    **/
   public APIDTO type(TypeEnum type) {
@@ -679,7 +697,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "The audiences of the API for jwt validation. Accepted values are any String values")
   @JsonProperty("audiences")
   public List<String> getAudiences() {
@@ -1412,6 +1430,7 @@ return null;
         Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(enableSubscriberVerification, API.enableSubscriberVerification) &&
+        Objects.equals(disableSubscriptionValidation, API.disableSubscriptionValidation) &&
         Objects.equals(type, API.type) &&
         Objects.equals(audience, API.audience) &&
         Objects.equals(audiences, API.audiences) &&
@@ -1484,6 +1503,7 @@ return null;
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    enableSubscriberVerification: ").append(toIndentedString(enableSubscriberVerification)).append("\n");
+    sb.append("    disableSubscriptionValidation: ").append(toIndentedString(disableSubscriptionValidation)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
     sb.append("    audiences: ").append(toIndentedString(audiences)).append("\n");

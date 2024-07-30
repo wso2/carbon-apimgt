@@ -9426,6 +9426,10 @@ components:
         enableSubscriberVerification:
           type: boolean
           example: false
+        disableSubscriptionValidation:
+          type: boolean
+          example: false
+          default: false
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
@@ -10119,6 +10123,10 @@ components:
         enableSchemaValidation:
           type: boolean
           example: false
+        disableSubscriptionValidation:
+          type: boolean
+          example: false
+          default: false
         isDefaultVersion:
           type: boolean
           example: false

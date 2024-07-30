@@ -673,6 +673,41 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
+    public boolean getSubscriptionValidationDisabled(Organization org, String apiId) throws APIPersistenceException {
+        boolean tenantFlowStarted = false;
+        try {
+            RegistryHolder holder = getRegistry(org.getName());
+            tenantFlowStarted = holder.isTenantFlowStarted();
+            Registry registry = holder.getRegistry();
+            GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
+            if (apiArtifact != null) {
+                String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
+                Resource apiResource = registry.get(artifactPath);
+                Properties properties = apiResource.getProperties();
+                if (properties != null) {
+                    if (properties.containsKey(APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY)) {
+                        return Boolean.parseBoolean(
+                                properties.get(APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY).toString());
+                    } else {
+                        return false;
+                    }
+                }
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + apiId + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (RegistryException | APIManagementException e) {
+            String msg = "Failed to get subscription validation disabled status of API";
+            log.error(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
+        return false;
+    }
+
+    @Override
     public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
 
         boolean tenantFlowStarted = false;
