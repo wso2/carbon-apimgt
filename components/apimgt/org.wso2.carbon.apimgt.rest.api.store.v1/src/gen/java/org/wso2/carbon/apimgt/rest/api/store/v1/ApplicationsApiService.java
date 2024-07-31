@@ -60,6 +60,6 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId, ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format, MessageContext messageContext) throws APIManagementException;
       public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys, Boolean update, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys, Boolean update, Boolean ignoreTier, MessageContext messageContext) throws APIManagementException;
       public Response applicationsPost(ApplicationDTO applicationDTO, MessageContext messageContext) throws APIManagementException;
 }

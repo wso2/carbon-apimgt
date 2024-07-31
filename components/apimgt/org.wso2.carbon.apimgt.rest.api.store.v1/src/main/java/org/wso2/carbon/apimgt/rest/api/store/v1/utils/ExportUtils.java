@@ -151,7 +151,7 @@ public class ExportUtils {
         Set<ExportedSubscribedAPI> exportedSubscribedAPIs = new HashSet<>();
         for (SubscribedAPI subscribedAPI : subscribedAPIs) {
             ExportedSubscribedAPI exportedSubscribedAPI = new ExportedSubscribedAPI(subscribedAPI.getAPIIdentifier(),
-                    subscribedAPI.getSubscriber(), subscribedAPI.getTier().getName());
+                    subscribedAPI.getSubscriber(), subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
             exportedSubscribedAPIs.add(exportedSubscribedAPI);
         }
 
