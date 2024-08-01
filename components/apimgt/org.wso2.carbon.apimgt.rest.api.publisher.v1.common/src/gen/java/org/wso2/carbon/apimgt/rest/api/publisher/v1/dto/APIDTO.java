@@ -63,6 +63,7 @@ public class APIDTO   {
     private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
     private Boolean enableSubscriberVerification = null;
+    private String sequence = null;
 
     @XmlType(name="TypeEnum")
     @XmlEnum(String.class)
@@ -637,6 +638,23 @@ return null;
   }
   public void setEnableSubscriberVerification(Boolean enableSubscriberVerification) {
     this.enableSubscriberVerification = enableSubscriberVerification;
+  }
+
+  /**
+   **/
+  public APIDTO sequence(String sequence) {
+    this.sequence = sequence;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "in sequence", value = "")
+  @JsonProperty("sequence")
+  public String getSequence() {
+    return sequence;
+  }
+  public void setSequence(String sequence) {
+    this.sequence = sequence;
   }
 
   /**
@@ -1470,6 +1488,7 @@ return null;
         Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(enableSubscriberVerification, API.enableSubscriberVerification) &&
+        Objects.equals(sequence, API.sequence) &&
         Objects.equals(type, API.type) &&
         Objects.equals(subtype, API.subtype) &&
         Objects.equals(audience, API.audience) &&
@@ -1519,7 +1538,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, subtype, audience, audiences, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, endpointImplementationType, aiConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols, egress);
+    return Objects.hash(id, name, description, context, version, sequence, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, subtype, audience, audiences, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, endpointImplementationType, aiConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols, egress);
   }
 
   @Override
@@ -1545,6 +1564,7 @@ return null;
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    enableSubscriberVerification: ").append(toIndentedString(enableSubscriberVerification)).append("\n");
+    sb.append("    sequence: ").append(toIndentedString(sequence)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    subtype: ").append(toIndentedString(subtype)).append("\n");
     sb.append("    audience: ").append(toIndentedString(audience)).append("\n");

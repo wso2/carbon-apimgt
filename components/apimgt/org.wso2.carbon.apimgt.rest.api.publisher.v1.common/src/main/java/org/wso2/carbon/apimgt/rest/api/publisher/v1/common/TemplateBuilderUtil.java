@@ -859,7 +859,8 @@ public class TemplateBuilderUtil {
             String apiConfig = builder.getConfigStringForTemplate(environment);
             gatewayAPIDTO.setApiDefinition(apiConfig);
             if (endpointConfig != null && !endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                    .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
+                    .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA) && !endpointConfig.get(
+                    APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).equals(APIConstants.ENDPOINT_TYPE_SEQUENCE)) {
                 if (!isWsApi) {
                     addEndpoints(api, builder, gatewayAPIDTO);
                 }

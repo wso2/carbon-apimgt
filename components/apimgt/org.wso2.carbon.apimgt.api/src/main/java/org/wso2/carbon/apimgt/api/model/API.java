@@ -86,6 +86,7 @@ public class API implements Serializable {
     private boolean apiResourcePatternsChanged;
 
     private String status;
+    private String sequence;
 
     private String technicalOwner;
     private String technicalOwnerEmail;
@@ -784,6 +785,14 @@ public class API implements Serializable {
 
     public void setRating(float rating) {
         this.rating = rating;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
+    }
+
+    public String getSequence() {
+        return sequence;
     }
 
     public void setLatest(boolean latest) {

@@ -9831,6 +9831,9 @@ components:
         enableSubscriberVerification:
           type: boolean
           example: false
+        sequence:
+          type: string
+          example: in sequence
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,

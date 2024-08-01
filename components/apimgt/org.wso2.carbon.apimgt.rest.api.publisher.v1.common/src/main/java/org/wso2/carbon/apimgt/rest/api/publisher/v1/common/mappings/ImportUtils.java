@@ -111,6 +111,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -1305,6 +1306,10 @@ public class ImportUtils {
         JsonObject jsonObject = retrievedAPIProductDtoJson(pathToArchive);
 
         return new Gson().fromJson(jsonObject, APIProductDTO.class);
+    }
+
+    public static String retrieveXMLContent(String pathToArchive) throws IOException, APIManagementException {
+        return FileUtils.readFileToString(new File(pathToArchive), Charset.defaultCharset());
     }
 
     /**

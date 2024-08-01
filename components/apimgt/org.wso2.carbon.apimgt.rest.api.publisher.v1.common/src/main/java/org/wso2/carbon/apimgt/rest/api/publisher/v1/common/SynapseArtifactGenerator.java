@@ -23,6 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
@@ -105,6 +106,22 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                         tenantDomain, extractedFolderPath);
                             } else {
                                 APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
+                                if (apidto.getEndpointConfig() != null) {
+                                    // convert sequence to string
+                                    JSONObject endpointObject = (JSONObject) apidto.getEndpointConfig();
+                                    if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                                            endpointObject.get(APIConstants.ENDPOINT_TYPE_SEQUENCE))) {
+                                        try (InputStream sequence = (InputStream) endpointObject.get(
+                                                APIConstants.SEQUENCE_DATA)) {
+                                            File dir = CommonUtil.createTempDirectory(null);
+                                            String path = ImportUtils.getArchivePathOfExtractedDirectory(
+                                                    dir.getAbsolutePath(), sequence);
+                                            String content = ImportUtils.retrieveXMLContent(path);
+                                            endpointObject.put("sequence", content);
+                                            apidto.setEndpointConfig(endpointObject);
+                                        }
+                                    }
+                                }
                                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
                                 api.setUUID(apidto.getId());
                                 if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
@@ -125,6 +142,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     api.setGraphQLSchema(graphqlSchema);
                                     gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
                                             tenantDomain, apidto, extractedFolderPath);
+//                                    // if sequence is passed, then override the existing config
+//                                    gatewayAPIDTO.setApiDefinition(api.getAsyncApiDefinition());
                                 } else if (api.getType() != null &&
                                         (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
