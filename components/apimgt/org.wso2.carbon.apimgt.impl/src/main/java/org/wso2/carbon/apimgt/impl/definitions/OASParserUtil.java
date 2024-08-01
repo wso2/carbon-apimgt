@@ -45,6 +45,7 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -999,7 +1000,7 @@ public class OASParserUtil {
         String jsonString = null;
         //Custom json mapper to parse OAS 3.1 definitions as the default parser drops mandatory licence.identifier field
         if (isOpenAPIVersion31(oasDefinition)) {
-            ObjectMapper mapper = Json.mapper().copy();
+            ObjectMapper mapper = Json31.mapper().copy();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             //Custom Mixin for License object in OAS 3.1
