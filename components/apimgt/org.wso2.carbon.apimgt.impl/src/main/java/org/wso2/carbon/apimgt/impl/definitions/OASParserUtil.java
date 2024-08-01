@@ -2188,4 +2188,118 @@ public class OASParserUtil {
             operation.setVendorExtension(APIConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
         }
     }
+
+    /**
+     * This method will validate the OAS definition against the resource paths with trailing slashes.
+     *
+     * @param openAPI            OpenAPI object
+     * @param swagger         Swagger object
+     * @param validationResponse validation response
+     * @return isSwaggerValid boolean
+     */
+    public static boolean isValidWithPathsWithTrailingSlashes(OpenAPI openAPI, Swagger swagger,
+                                                              APIDefinitionValidationResponse validationResponse) {
+        Map<String, ?> pathItems = null;
+        if (openAPI != null) {
+            pathItems = openAPI.getPaths();
+        } else if (swagger != null) {
+            pathItems = swagger.getPaths();
+        }
+        if (pathItems != null) {
+            for (String path : pathItems.keySet()) {
+                if (path.endsWith("/")) {
+                    String newPath = path.substring(0, path.length() - 1);
+                    if (pathItems.containsKey(newPath)) {
+                        Object pathItem = pathItems.get(newPath);
+                        Object newPathItem = pathItems.get(path);
+
+                        if (pathItem instanceof PathItem && newPathItem instanceof PathItem) {
+                            if (!validateOAS3Paths((PathItem) pathItem, (PathItem) newPathItem, newPath, validationResponse)) {
+                                return false;
+                            }
+                        } else if (pathItem instanceof Path && newPathItem instanceof Path) {
+                            if (!validateOAS2Paths((Path) pathItem, (Path) newPathItem, newPath, validationResponse)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean validateOAS3Paths(PathItem pathItem, PathItem newPathItem, String newPath,
+                                             APIDefinitionValidationResponse validationResponse) {
+        if (pathItem.getGet() != null && newPathItem.getGet() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.GET.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getPost() != null && newPathItem.getPost() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.POST.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getPut() != null && newPathItem.getPut() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PUT.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getPatch() != null && newPathItem.getPatch() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PATCH.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getDelete() != null && newPathItem.getDelete() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.DELETE.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getHead() != null && newPathItem.getHead() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.HEAD.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getOptions() != null && newPathItem.getOptions() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.OPTIONS.name(),
+                    APIConstants.OPEN_API);
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean validateOAS2Paths(Path pathItem, Path newPathItem, String newPath,
+                                             APIDefinitionValidationResponse validationResponse) {
+        if (pathItem.getGet() != null && newPathItem.getGet() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.GET.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getPost() != null && newPathItem.getPost() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.POST.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getPut() != null && newPathItem.getPut() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PUT.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getPatch() != null && newPathItem.getPatch() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PATCH.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getDelete() != null && newPathItem.getDelete() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.DELETE.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getHead() != null && newPathItem.getHead() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.HEAD.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getOptions() != null && newPathItem.getOptions() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.OPTIONS.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        return true;
+    }
+
+    private static void addError(APIDefinitionValidationResponse validationResponse, String path, String operation,
+                                 String definitionType) {
+        OASParserUtil.addErrorToValidationResponse(validationResponse,
+                "Multiple " + operation + " operations with the same resource path " + path +
+                        " found in the " + definitionType + " definition");
+    }
 }
