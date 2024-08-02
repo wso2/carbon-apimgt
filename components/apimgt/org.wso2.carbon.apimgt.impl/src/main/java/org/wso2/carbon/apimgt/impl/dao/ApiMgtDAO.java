@@ -17022,6 +17022,10 @@ public class ApiMgtDAO {
                 if (connection.getMetaData().getDriverName().contains("MySQL")) {
                     getRevisionedURLMappingsStatement = connection.prepareStatement(
                             SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                } else if ((connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
+                        .getDriverName().contains("Microsoft"))) {
+                    getRevisionedURLMappingsStatement = connection.prepareStatement(
+                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL);
                 }
                 PreparedStatement insertScopeResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
@@ -18240,6 +18244,10 @@ public class ApiMgtDAO {
                 if (connection.getMetaData().getDriverName().contains("MySQL")) {
                     getRevisionedURLMappingsStatement = connection.prepareStatement(
                             SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                } else if ((connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
+                        .getDriverName().contains("Microsoft"))) {
+                    getRevisionedURLMappingsStatement = connection.prepareStatement(
+                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL);
                 }
                 PreparedStatement insertScopeResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
@@ -18485,6 +18493,10 @@ public class ApiMgtDAO {
                 if (connection.getMetaData().getDriverName().contains("MySQL")) {
                     getRevisionedURLMappingsStatement = connection.prepareStatement(
                             SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                } else if ((connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
+                        .getDriverName().contains("Microsoft"))) {
+                    getRevisionedURLMappingsStatement = connection.prepareStatement(
+                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL);
                 }
                 PreparedStatement addResourceScopeMapping = connection.prepareStatement(
                         SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING);
