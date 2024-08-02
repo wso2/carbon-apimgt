@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -1833,5 +1834,36 @@ public class GatewayUtils {
             String error = "Error in obtaining SHA-256 thumbprint from certificate.";
             throw new OAuth2Exception(error, e);
         }
+    }
+
+    /**
+     * Util method to populate validation data through the datastore when subscription validation is disabled.
+     *
+     * @param api API object
+     * @return APIKeyValidationInfoDTO validation info object
+     */
+    public static APIKeyValidationInfoDTO populateDTOWhenSubscriptionDisabled(API api) {
+        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
+        String apiTenantDomain = getTenantDomain();
+        SubscriptionDataStore datastore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(apiTenantDomain);
+
+        infoDTO.setApiName(api.getApiName());
+        infoDTO.setApiVersion(api.getApiVersion());
+        infoDTO.setApiPublisher(api.getApiProvider());
+
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
+        ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
+        boolean isContentAware = apiPolicy != null && apiPolicy.isContentAware();
+        infoDTO.setContentAware(isContentAware);
+        if (api.getApiTier() != null && !api.getApiTier().trim().isEmpty()) {
+            infoDTO.setApiTier(api.getApiTier());
+        }
+
+        String apiLevelThrottlingKey = "api_level_throttling_key";
+        List<String> list = new ArrayList<>();
+        list.add(apiLevelThrottlingKey);
+        infoDTO.setThrottlingDataList(list);
+        return infoDTO;
     }
 }

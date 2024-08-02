@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
@@ -261,9 +262,18 @@ public class JWTValidator {
 
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO;
-
-                log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
-                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(synCtx, jwtValidationInfo);
+                API api = GatewayUtils.getAPI(synCtx);
+                if (api == null) {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                            APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                }
+                if (api.isDisableSubscriptionValidation()) {
+                    log.debug("API Subscription validation is disabled");
+                    apiKeyValidationInfoDTO = populateValidationInfoWhenValidationDisabled(api, jwtValidationInfo);
+                } else {
+                    log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
+                    apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(synCtx, jwtValidationInfo);
+                }
                 synCtx.setProperty(
                         APIMgtGatewayConstants.APPLICATION_NAME, apiKeyValidationInfoDTO.getApplicationName()
                 );
@@ -462,6 +472,56 @@ public class JWTValidator {
                 "issued");
         throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                 APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+    }
+
+
+    /**
+     * Populates the validation information when subscription validation is disabled.
+     *
+     * @param api               API object
+     * @param jwtValidationInfo JWT validation information
+     * @return an APIKeyValidationInfoDTO object which contains the validation information
+     */
+    public APIKeyValidationInfoDTO populateValidationInfoWhenValidationDisabled(API api,
+                                                                                JWTValidationInfo jwtValidationInfo) {
+
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.populateDTOWhenSubscriptionDisabled(api);
+        // Setting the 'sub' claim value as the end user details
+        apiKeyValidationInfoDTO.setEndUserName(jwtValidationInfo.getUser());
+        apiKeyValidationInfoDTO.setSubscriber(jwtValidationInfo.getUser());
+        // Add properties required for analytics
+        apiKeyValidationInfoDTO.setConsumerKey(jwtValidationInfo.getConsumerKey());
+        Map<String, Object> claims = jwtValidationInfo.getClaims();
+        if (claims != null) {
+            if (claims.containsKey(APIConstants.Subscriptionless.APPLICATION_CLAIM)) {
+                apiKeyValidationInfoDTO.setApplicationId(
+                        (String) claims.get(APIConstants.Subscriptionless.APPLICATION_CLAIM));
+                apiKeyValidationInfoDTO.setApplicationUUID(
+                        (String) claims.get(APIConstants.Subscriptionless.APPLICATION_CLAIM));
+                apiKeyValidationInfoDTO.setApplicationName((String)
+                        claims.get(APIConstants.Subscriptionless.APPLICATION_CLAIM));
+            } else {
+                apiKeyValidationInfoDTO.setApplicationId(APIConstants.Subscriptionless.APPLICATION_NAME);
+                apiKeyValidationInfoDTO.setApplicationUUID(APIConstants.Subscriptionless.APPLICATION_NAME);
+                apiKeyValidationInfoDTO.setApplicationName(APIConstants.Subscriptionless.APPLICATION_NAME);
+            }
+
+            if (claims.containsKey(APIConstants.Subscriptionless.TIER_CLAIM)) {
+                apiKeyValidationInfoDTO.setSubscriber((String) claims.get(APIConstants.Subscriptionless.TIER_CLAIM));
+            } else {
+                apiKeyValidationInfoDTO.setTier(APIConstants.Subscriptionless.DEFAULT_SUBSCRIPTION_TIER);
+            }
+
+        } else {
+            apiKeyValidationInfoDTO.setApplicationId(APIConstants.Subscriptionless.APPLICATION_NAME);
+            apiKeyValidationInfoDTO.setApplicationUUID(APIConstants.Subscriptionless.APPLICATION_NAME);
+            apiKeyValidationInfoDTO.setApplicationName(APIConstants.Subscriptionless.APPLICATION_NAME);
+            apiKeyValidationInfoDTO.setTier(APIConstants.Subscriptionless.DEFAULT_SUBSCRIPTION_TIER);
+        }
+
+        apiKeyValidationInfoDTO.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        apiKeyValidationInfoDTO.setAuthorized(true);
+        return apiKeyValidationInfoDTO;
     }
 
     /**

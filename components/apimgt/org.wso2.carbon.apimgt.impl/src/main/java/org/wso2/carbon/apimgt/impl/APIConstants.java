@@ -2635,6 +2635,15 @@ public final class APIConstants {
         }
     }
 
+    public static class Subscriptionless {
+        public static final String APPLICATION_NAME = "SubscriptionlessApplication";
+        public static final String APPLICATION_OWNER = "SubscriptionlessOwner";
+        public static final String DEFAULT_SUBSCRIPTION_TIER = "Unlimited";
+        public static final String APPLICATION_CLAIM = "app_name";
+        public static final String TIER_CLAIM = "business_plan";
+        public static final String SUBSCRIBER_CLAIM = "sub";
+    }
+
     public static class KeyManager {
 
         public static final String SERVICE_URL = "ServiceURL";

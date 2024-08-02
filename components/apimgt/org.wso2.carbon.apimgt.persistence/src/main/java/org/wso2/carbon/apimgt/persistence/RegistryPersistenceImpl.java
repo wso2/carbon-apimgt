@@ -685,9 +685,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 Resource apiResource = registry.get(artifactPath);
                 Properties properties = apiResource.getProperties();
                 if (properties != null) {
-                    if (properties.containsKey(APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY)) {
-                        return Boolean.parseBoolean(
-                                properties.get(APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY).toString());
+                    String propName = APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX +
+                            APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY;
+                    if (properties.containsKey(propName)) {
+                        return Boolean.parseBoolean(apiResource.getProperty(propName));
                     } else {
                         return false;
                     }
