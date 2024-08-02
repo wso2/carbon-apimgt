@@ -573,7 +573,42 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
                         ((UserRegistry) registry).getTenantId());
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
-                        visibleRoles, resourcePath);
+                        visibleRoles, resourcePath, registry);
+            }
+
+            // Update api def file permissions, required for API definition content search functionality
+            if (APIConstants.API_TYPE_GRAPHQL.equals(api.getType())) {
+                String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
+                        api.getId().getVersion(), api.getId().getProviderName());
+                resourcePath += api.getId().getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                        api.getId().getName() + api.getId().getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+                if (registry.resourceExists(resourcePath)) {
+                    RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
+                            ((UserRegistry) registry).getTenantId());
+                    RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                            visibleRoles, resourcePath, registry);
+                }
+            } else if (api.isAsync()) {
+                String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
+                        api.getId().getVersion(), api.getId().getProviderName());
+                resourcePath += APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
+                if (registry.resourceExists(resourcePath)) {
+                    RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
+                            ((UserRegistry) registry).getTenantId());
+                    RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                            visibleRoles, resourcePath, registry);
+                }
+            } else if (APIConstants.API_TYPE_SOAP.equals(api.getType())) {
+                String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
+                        api.getId().getVersion(), api.getId().getProviderName());
+                resourcePath += api.getId().getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR +
+                        api.getId().getName() + api.getId().getVersion() + APIConstants.WSDL_FILE_EXTENSION;
+                if (registry.resourceExists(resourcePath)) {
+                    RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
+                            ((UserRegistry) registry).getTenantId());
+                    RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                            visibleRoles, resourcePath, registry);
+                }
             }
 
             // doc visibility change
@@ -1539,6 +1574,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 throw new GovernanceException("artifact id is null of " + apiPath);
                             }
 
+                        } else if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.GRAPHQL_DEFINITION_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.WSDL_XML_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.WSDL_FILE_MEDIA_TYPE.equals(resource.getMediaType())) {
+
+                            addAPIDefinitionSearchContent(resourcePath, registry, apiArtifactManager, contentData);
                         } else {
                             String apiArtifactId = resource.getUUID();
                             //API api;
@@ -1695,6 +1736,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 throw new GovernanceException("artifact id is null of " + apiPath);
                             }
 
+                        } else if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.GRAPHQL_DEFINITION_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.WSDL_XML_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.WSDL_FILE_MEDIA_TYPE.equals(resource.getMediaType())) {
+
+                            addAPIDefinitionSearchContent(resourcePath, registry, apiArtifactManager, contentData);
                         } else {
                             String apiArtifactId = resource.getUUID();
                             if (apiArtifactId != null) {
@@ -1803,7 +1850,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
             }
-            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRoles, wsdlResourcePath);
+            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRoles,
+                    wsdlResourcePath, registry);
 
             if (isZip) {
                 //Delete any WSDL file if exists
@@ -1954,7 +2002,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             // Need to set anonymous if the visibility is public
             RegistryPersistenceUtil.clearResourcePermissions(resourcePath,
                     new APIIdentifier(apiProviderName, apiName, apiVersion), ((UserRegistry) registry).getTenantId());
-            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath);
+            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr,
+                    resourcePath, registry);
 
         } catch (RegistryException | APIPersistenceException | APIManagementException e) {
             throw new OASPersistenceException("Error while adding OSA Definition for " + apiId, e);
@@ -2051,7 +2100,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryPersistenceUtil
                     .clearResourcePermissions(resourcePath, new APIIdentifier(apiProviderName, apiName, apiVersion),
                             ((UserRegistry) registry).getTenantId());
-            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath);
+            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath
+                    , registry);
 
         } catch (RegistryException | APIPersistenceException | APIManagementException e) {
             throw new AsyncSpecPersistenceException("Error while adding AsyncApi Definition for " + apiId, e);
@@ -2142,7 +2192,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     new APIIdentifier(api.apiProvider, api.apiName, api.apiVersion),
                     ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(api.apiProvider, api.visibility, api.visibleRoles,
-                    saveResourcePath);
+                    saveResourcePath, registry);
 
         } catch (RegistryException | APIManagementException | APIPersistenceException e) {
             throw new GraphQLPersistenceException("Error while adding Graphql Definition for api " + apiId, e);
@@ -3954,7 +4004,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
                         + RegistryPersistenceUtil
-                                .replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER))
+                        .replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER))
                         + RegistryConstants.PATH_SEPARATOR + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)
                         + RegistryConstants.PATH_SEPARATOR + artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)
                         + RegistryConstants.PATH_SEPARATOR;
@@ -4003,6 +4053,68 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } catch (RegistryException ex) {
                 log.error("Error occurred while rolling back the transaction.", ex);
             }
+        }
+
+    }
+
+    /**
+     * This method handles the API definition content search in both publisher and devportal.
+     *
+     * @param resourcePath       String
+     * @param registry           Registry
+     * @param apiArtifactManager GenericArtifactManager
+     * @param contentData        SearchContent List
+     * @throws APIPersistenceException on failure
+     * @throws RegistryException       on failure
+     */
+    private void addAPIDefinitionSearchContent(String resourcePath, Registry registry,
+                                               GenericArtifactManager apiArtifactManager,
+                                               List<SearchContent> contentData)
+            throws APIPersistenceException, RegistryException {
+        APIDefSearchContent content = new APIDefSearchContent();
+        int index;
+
+        if (resourcePath.contains(APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME)) {
+            index = resourcePath.indexOf(APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME);
+            content.setApiType(APIDefSearchContent.ApiType.ASYNC);
+        } else if (resourcePath.contains(APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION)) {
+            index = resourcePath.lastIndexOf('/') + 1;
+            content.setApiType(APIDefSearchContent.ApiType.GRAPHQL);
+        } else if (resourcePath.contains(APIConstants.WSDL_FILE_EXTENSION)) {
+            index = resourcePath.lastIndexOf('/') + 1;
+            content.setApiType(APIDefSearchContent.ApiType.SOAP);
+        } else {
+            index = resourcePath.indexOf(APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
+            content.setApiType(APIDefSearchContent.ApiType.REST);
+        }
+
+        String apiPath = resourcePath.substring(0, index) + APIConstants.API_KEY;
+        Resource apiResource = registry.get(apiPath);
+        Resource defResource = registry.get(resourcePath);
+        String apiArtifactId = apiResource.getUUID();
+        String defResourceId = defResource.getUUID();
+        String defResourceName = defResource.getId().substring(defResource.getId().lastIndexOf('/') + 1);
+        DevPortalAPI devAPI;
+
+        if (apiArtifactId != null) {
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+            devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
+            content.setId(defResourceId);
+            content.setName(defResourceName);
+            content.setApiUUID(devAPI.getId());
+            content.setApiName(devAPI.getApiName());
+            content.setApiContext(devAPI.getContext());
+            content.setApiProvider(devAPI.getProviderName());
+            content.setApiVersion(devAPI.getVersion());
+            if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
+                    .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                content.setAssociatedType(APIConstants.API_PRODUCT);
+            } else {
+                content.setAssociatedType(APIConstants.API);
+            }
+            contentData.add(content);
+        } else {
+            throw new GovernanceException("artifact id is null of " + apiPath);
         }
 
     }

@@ -24,6 +24,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -104,6 +105,11 @@ public class SearchApiServiceImpl implements SearchApiService {
                     APIProduct apiProduct = (APIProduct) searchResult;
                     SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIToAPIResultDTO(apiProduct);
                     allmatchedResults.add(apiResult);
+                } else if (searchResult instanceof APIDefinitionContentSearchResult) {
+                    APIDefinitionContentSearchResult apiDefResult = (APIDefinitionContentSearchResult) searchResult;
+                    SearchResultDTO definitionResultDTO =
+                            SearchResultMappingUtil.fromAPIDefSearchResultToAPIDefSearchResultDTO(apiDefResult);
+                    allmatchedResults.add(definitionResultDTO);
                 }
             }
 
