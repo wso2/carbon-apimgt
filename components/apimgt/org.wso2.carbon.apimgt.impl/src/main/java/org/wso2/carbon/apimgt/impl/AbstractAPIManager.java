@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
+import org.wso2.carbon.apimgt.impl.dao.NotificationDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -82,6 +83,7 @@ public abstract class AbstractAPIManager implements APIManager {
     // API definitions from swagger v2.0
     protected Log log = LogFactory.getLog(getClass());
     protected ApiMgtDAO apiMgtDAO;
+    protected NotificationDAO notificationDAO;
     protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
@@ -105,6 +107,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public AbstractAPIManager(String username, String organization) throws APIManagementException {
 
         apiMgtDAO = ApiMgtDAO.getInstance();
+        notificationDAO = NotificationDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
         environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
 
@@ -1672,5 +1675,87 @@ public abstract class AbstractAPIManager implements APIManager {
             return Boolean.parseBoolean(oauthAppValidation);
         }
         return true;
+    }
+
+    /**
+     * Changes the status of a notification for a specific user in a given organization.
+     *
+     * @param username The username of the user.
+     * @param organization The organization to which the user belongs.
+     * @param notificationUUID The unique identifier of the notification.
+     * @param isMarkAsRead Whether the notification should be marked as read.
+     * @param portalToDisplay The portal where the notification is displayed.
+     * @return The updated Notification object.
+     * @throws APIManagementException If an error occurs while changing the notification status.
+     */
+    @Override
+    public Notification changeNotificationStatus(String username, String organization, String notificationUUID,
+                                                 boolean isMarkAsRead, String portalToDisplay) throws APIManagementException {
+        notificationDAO.changeNotificationStatus(username, organization, notificationUUID, isMarkAsRead, portalToDisplay);
+        return notificationDAO.getNotification(notificationUUID, username, organization, portalToDisplay);
+    }
+
+    /**
+     * Deletes a notification for a specific user in a given organization.
+     *
+     * @param username The username of the user.
+     * @param organization The organization to which the user belongs.
+     * @param notificationUUID The unique identifier of the notification to be deleted.
+     * @param portalToDisplay The portal where the notification is displayed.
+     * @throws APIManagementException If an error occurs while deleting the notification.
+     */
+    @Override
+    public void deleteNotification(String username, String organization, String notificationUUID, String portalToDisplay)
+            throws APIManagementException {
+        notificationDAO.deleteNotification(username, organization, notificationUUID, portalToDisplay);
+    }
+
+    /**
+     * Retrieves a list of notifications for a given user.
+     *
+     * @param username the username of the user to retrieve notifications for
+     * @param organization the organization to which the user belongs
+     * @param portalToDisplay the portal where the notifications are to be displayed
+     * @param limit the maximum number of notifications to retrieve
+     * @param offset the starting point in the list of notifications to retrieve
+     * @return a list of notifications matching the criteria
+     * @throws APIManagementException if there is an error while retrieving notifications
+     */
+    @Override
+    public NotificationList getNotifications(String username, String organization, String portalToDisplay, int limit,
+                                             int offset) throws APIManagementException {
+        return notificationDAO.getNotifications(username, organization, portalToDisplay, limit, offset);
+    }
+
+    /**
+     * Marks all notifications as read for a specific user in a given organization.
+     *
+     * @param username The username of the user.
+     * @param organization The organization to which the user belongs.
+     * @param portalToDisplay The portal where the notifications are displayed.
+     * @param limit The maximum number of notifications to return after marking as read.
+     * @param offset The starting point within the list of notifications.
+     * @return A NotificationList object containing the updated list of notifications.
+     * @throws APIManagementException If an error occurs while marking the notifications as read.
+     */
+    @Override
+    public NotificationList markAllNotificationsAsRead(String username, String organization, String portalToDisplay,
+                                                       int limit, int offset) throws APIManagementException {
+        notificationDAO.markAllNotificationsAsRead(username, organization, portalToDisplay);
+        return notificationDAO.getNotifications(username, organization, portalToDisplay, limit, offset);
+    }
+
+    /**
+     * Deletes all notifications for a specific user in a given organization.
+     *
+     * @param username The username of the user.
+     * @param organization The organization to which the user belongs.
+     * @param portalToDisplay The portal where the notifications are displayed.
+     * @throws APIManagementException If an error occurs while deleting the notifications.
+     */
+    @Override
+    public void deleteAllNotifications(String username, String organization, String portalToDisplay)
+            throws APIManagementException {
+        notificationDAO.deleteAllNotifications(username, organization, portalToDisplay);
     }
 }
