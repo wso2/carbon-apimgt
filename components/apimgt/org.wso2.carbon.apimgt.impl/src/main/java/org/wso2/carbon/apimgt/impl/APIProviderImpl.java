@@ -5866,7 +5866,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
         apiRevision.setRevisionUUID(revisionUUID);
-        apiMgtDAO.addAPIRevision(apiRevision);
+        try {
+            apiMgtDAO.addAPIRevision(apiRevision);
+        } catch (APIManagementException e) {
+            try {
+                    apiPersistenceInstance.deleteAPIRevision(new Organization(organization), apiId.getUUID(), revisionUUID,
+                                    revisionId);
+                } catch (APIPersistenceException e1) {
+                    String errorMessage = "Failed to remove revision registry artifacts";
+                    throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                                    ERROR_DELETING_API_REVISION, apiRevision.getApiUUID()));
+                }
+            throw new APIManagementException("Failed to add API Revision entry of API UUID "
+                            + apiRevision.getApiUUID(), e);
+        }
         if (importExportAPI != null) {
             try {
                 File artifact = importExportAPI
