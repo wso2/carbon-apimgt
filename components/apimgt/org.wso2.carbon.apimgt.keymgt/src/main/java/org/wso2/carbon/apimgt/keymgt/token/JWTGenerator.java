@@ -85,14 +85,20 @@ public class JWTGenerator extends AbstractJWTGenerator {
         String applicationTier = validationContext.getValidationInfoDTO().getApplicationTier();
         String enduserTenantId = String.valueOf(APIUtil.getTenantId(endUserName));
         String apiName = validationContext.getValidationInfoDTO().getApiName();
-        Application application =
-                getApplicationById(validationContext.getValidationInfoDTO().getSubscriberTenantDomain(),
-                        Integer.parseInt(applicationId));
+
         String uuid = null;
         Map<String, String> appAttributes = null;
-        if (application != null) {
-            appAttributes = application.getAttributes();
-            uuid = application.getUUID();
+        // Skipping the application lookup if subscription validation is disabled
+        if (!validationContext.getValidationInfoDTO().isDisableSubscription()) {
+            Application application =
+                    getApplicationById(validationContext.getValidationInfoDTO().getSubscriberTenantDomain(),
+                            Integer.parseInt(applicationId));
+            if (application != null) {
+                appAttributes = application.getAttributes();
+                uuid = application.getUUID();
+            }
+        } else {
+            uuid = validationContext.getValidationInfoDTO().getApplicationUUID();
         }
         Map<String, String> claims = new LinkedHashMap<String, String>(20);
 

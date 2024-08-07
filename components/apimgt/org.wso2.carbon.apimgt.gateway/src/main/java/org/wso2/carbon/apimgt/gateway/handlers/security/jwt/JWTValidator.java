@@ -486,6 +486,7 @@ public class JWTValidator {
                                                                                 JWTValidationInfo jwtValidationInfo) {
 
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.populateDTOWhenSubscriptionDisabled(api);
+        apiKeyValidationInfoDTO.setDisableSubscription(true);
         // Setting the 'sub' claim value as the end user details
         apiKeyValidationInfoDTO.setEndUserName(jwtValidationInfo.getUser());
         apiKeyValidationInfoDTO.setSubscriber(jwtValidationInfo.getUser());

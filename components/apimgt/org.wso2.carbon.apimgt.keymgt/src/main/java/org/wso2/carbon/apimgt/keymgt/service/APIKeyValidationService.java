@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
@@ -154,12 +155,23 @@ public class APIKeyValidationService {
         timerContext2.stop();
         log.debug("State after calling validateToken ... " + state);
 
-        if (state) {
+        API api = retrieveAPI(tenantDomain, context, version);
+        if (api == null) {
+            log.error("API not found for context: " + context + " and version: " + version);
+            throw new APIKeyMgtException("API not found for context: " + context + " and version: " + version);
+        }
+        boolean subValidationDisabled = api.isDisableSubscriptionValidation();
+        if (state && !subValidationDisabled) {
             Timer timer3 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SUBSCRIPTION"));
             Timer.Context timerContext3 = timer3.start();
             state = keyValidationHandler.validateSubscription(validationContext);
             timerContext3.stop();
+        } else if (subValidationDisabled) {
+            log.debug("Subscription validation is disabled for the API");
+            APIKeyValidationInfoDTO validationInfoDTO = populateDTOWhenSubscriptionDisabled(api, tenantDomain,
+                    validationContext);
+            validationContext.setValidationInfoDTO(validationInfoDTO);
         }
         log.debug("State after calling validateSubscription... " + state);
 
@@ -522,5 +534,61 @@ public class APIKeyValidationService {
             return new HashMap<>();
         }
         return subscriptionDataStore.getScopesByTenant(tenantDomain);
+    }
+
+    public API retrieveAPI(String tenantDomain, String context, String version) {
+        SubscriptionDataStore subscriptionDataStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (subscriptionDataStore == null) {
+            return null;
+        }
+        return subscriptionDataStore.getApiByContextAndVersion(context, version);
+    }
+
+    /**
+     * Util method to populate validation data through the datastore when subscription validation is disabled.
+     *
+     * @param api API object
+     * @param apiTenantDomain API tenant domain
+     * @param tokenContext TokenValidationContext object
+     * @return APIKeyValidationInfoDTO validation info object
+     */
+    public static APIKeyValidationInfoDTO populateDTOWhenSubscriptionDisabled(API api, String apiTenantDomain,
+                                                                              TokenValidationContext tokenContext) {
+        APIKeyValidationInfoDTO infoDTO = tokenContext.getValidationInfoDTO();
+        infoDTO.setDisableSubscription(true);
+        SubscriptionDataStore datastore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(apiTenantDomain);
+
+        infoDTO.setApiName(api.getApiName());
+        infoDTO.setApiVersion(api.getApiVersion());
+        infoDTO.setApiPublisher(api.getApiProvider());
+
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
+        ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
+        boolean isContentAware = apiPolicy != null && apiPolicy.isContentAware();
+        infoDTO.setContentAware(isContentAware);
+        if (api.getApiTier() != null && !api.getApiTier().trim().isEmpty()) {
+            infoDTO.setApiTier(api.getApiTier());
+        }
+
+        String apiLevelThrottlingKey = "api_level_throttling_key";
+        List<String> list = new ArrayList<>();
+        list.add(apiLevelThrottlingKey);
+        infoDTO.setThrottlingDataList(list);
+
+        AccessTokenInfo tokenInfo = tokenContext.getTokenInfo();
+        // Setting the 'sub' claim value as the end user details
+        infoDTO.setEndUserName(tokenInfo.getEndUserName());
+        infoDTO.setSubscriber(tokenInfo.getEndUserName());
+        // Add properties required for analytics
+        infoDTO.setConsumerKey(tokenInfo.getConsumerKey());
+        infoDTO.setApplicationId(APIConstants.Subscriptionless.APPLICATION_NAME);
+        infoDTO.setApplicationUUID(APIConstants.Subscriptionless.APPLICATION_NAME);
+        infoDTO.setApplicationName(APIConstants.Subscriptionless.APPLICATION_NAME);
+        infoDTO.setTier(APIConstants.Subscriptionless.DEFAULT_SUBSCRIPTION_TIER);
+        infoDTO.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        infoDTO.setAuthorized(true);
+        return infoDTO;
     }
 }
