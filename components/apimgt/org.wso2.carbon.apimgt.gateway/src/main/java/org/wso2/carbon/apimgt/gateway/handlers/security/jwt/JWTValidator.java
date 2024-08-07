@@ -642,8 +642,19 @@ public class JWTValidator {
         JWTValidationInfo jwtValidationInfo = validateTokenForWS(signedJWTInfo, jti);
 
         if (jwtValidationInfo != null && jwtValidationInfo.isValid()) {
-            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validateSubscriptionsForWS(jwtValidationInfo, apiContext,
-                    apiVersion);
+            APIKeyValidationInfoDTO apiKeyValidationInfoDTO;
+            API api = GatewayUtils.getAPIByContextAndVersion(apiContext, apiVersion);
+            if (api == null) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+            }
+            if (api.isDisableSubscriptionValidation()) {
+                log.debug("API Subscription validation is disabled");
+                apiKeyValidationInfoDTO = populateValidationInfoWhenValidationDisabled(api, jwtValidationInfo);
+            } else {
+                apiKeyValidationInfoDTO = validateSubscriptionsForWS(jwtValidationInfo, apiContext,
+                        apiVersion);
+            }
             if (apiKeyValidationInfoDTO.isAuthorized()) {
                 if (validateScopes) {
                     validateScopes(apiContext, apiVersion, matchingResource,

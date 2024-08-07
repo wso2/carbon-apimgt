@@ -1569,17 +1569,22 @@ public class GatewayUtils {
             }
             String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
             String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-            SubscriptionDataStore tenantSubscriptionStore =
-                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
-            if (tenantSubscriptionStore != null) {
-                API api1 = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
-                if (api1 != null) {
-                    messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, api1);
-                    return api1;
-                }
+            API api1 = getAPIByContextAndVersion(context, version);
+            if (api1 != null) {
+                messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, api1);
+                return api1;
             }
             return null;
         }
+    }
+
+    public static API getAPIByContextAndVersion(String context, String version) {
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
+        if (tenantSubscriptionStore != null) {
+            return tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+        }
+        return null;
     }
 
     public static String getStatus(org.apache.synapse.MessageContext messageContext) {

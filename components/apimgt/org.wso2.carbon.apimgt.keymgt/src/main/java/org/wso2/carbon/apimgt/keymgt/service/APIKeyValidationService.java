@@ -167,7 +167,7 @@ public class APIKeyValidationService {
             Timer.Context timerContext3 = timer3.start();
             state = keyValidationHandler.validateSubscription(validationContext);
             timerContext3.stop();
-        } else if (subValidationDisabled) {
+        } else if (state) {
             log.debug("Subscription validation is disabled for the API");
             APIKeyValidationInfoDTO validationInfoDTO = populateDTOWhenSubscriptionDisabled(api, tenantDomain,
                     validationContext);
@@ -452,7 +452,13 @@ public class APIKeyValidationService {
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
-        if (state) {
+        API api = retrieveAPI(tenantDomain, context, version);
+        if (api == null) {
+            log.error("API not found for context: " + context + " and version: " + version);
+            throw new APIKeyMgtException("API not found for context: " + context + " and version: " + version);
+        }
+        boolean subValidationDisabled = api.isDisableSubscriptionValidation();
+        if (state && !subValidationDisabled) {
             state = keyValidationHandler.validateSubscription(validationContext);
             if (state) {
                 if (APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
@@ -465,6 +471,18 @@ public class APIKeyValidationService {
                     keyValidationHandler.generateConsumerToken(validationContext);
                     info.setEndUserToken(validationContext.getValidationInfoDTO().getEndUserToken());
                 }
+            }
+            return validationContext.getValidationInfoDTO();
+        } else if (state) {
+            log.debug("Subscription validation is disabled for the API");
+
+            APIKeyValidationInfoDTO validationInfoDTO = populateDTOWhenSubscriptionDisabled(api, tenantDomain,
+                    validationContext);
+            validationContext.setValidationInfoDTO(validationInfoDTO);
+            if (APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
+                    validationContext.getValidationInfoDTO().getEndUserName() != null
+                    && !validationContext.isCacheHit()) {
+                keyValidationHandler.generateConsumerToken(validationContext);
             }
             return validationContext.getValidationInfoDTO();
         }
