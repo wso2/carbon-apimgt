@@ -3956,6 +3956,10 @@ components:
         isSubscriptionAvailable:
           type: boolean
           example: false
+        disableSubscriptionValidation:
+          type: boolean
+          example: false
+          default: false
         monetizationLabel:
           type: string
           example: Free
@@ -4217,6 +4221,10 @@ components:
             format: int64
             description: The number of subscriptions for the API
             example: 10
+        disableSubscriptionValidation:
+          type: boolean
+          example: false
+          default: false
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
         isSubscriptionAvailable:

@@ -4127,6 +4127,10 @@ definitions:
       isSubscriptionAvailable:
         type: boolean
         example: false
+      disableSubscriptionValidation:
+        type: boolean
+        example: false
+        default: false
       monetizationLabel:
         type: string
         example: Free
@@ -4361,6 +4365,10 @@ definitions:
       isSubscriptionAvailable:
         type: boolean
         example: false
+      disableSubscriptionValidation:
+        type: boolean
+        example: false
+        default: false
       categories:
         description: |
           API categories

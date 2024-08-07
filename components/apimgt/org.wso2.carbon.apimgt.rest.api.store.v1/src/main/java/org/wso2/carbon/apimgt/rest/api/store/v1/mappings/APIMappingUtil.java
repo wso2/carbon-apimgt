@@ -217,18 +217,28 @@ public class APIMappingUtil {
             dto.setHasThumbnail(true);
         }
 
+        // Set subscription validation to false by default to cater products that were created before migration.
+        dto.disableSubscriptionValidation(false);
+
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
                 APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
-                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
-                if (index > 0) {
-                    additionalPropertiesDTO.setName(key.substring(0, index));
-                    additionalPropertiesDTO.setDisplay(true);
-                    additionalPropertiesList.add(additionalPropertiesDTO);
+                // Skip the disable_sub_validation property as it is not a custom property
+                // but an internal property used to disable subscription validation
+                if (APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                    dto.disableSubscriptionValidation(
+                            Boolean.parseBoolean(additionalProperties.get(key).toString()));
+                } else {
+                    int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                    additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                    if (index > 0) {
+                        additionalPropertiesDTO.setName(key.substring(0, index));
+                        additionalPropertiesDTO.setDisplay(true);
+                        additionalPropertiesList.add(additionalPropertiesDTO);
+                    }
                 }
             }
             dto.setAdditionalProperties(additionalPropertiesList);
@@ -408,19 +418,30 @@ public class APIMappingUtil {
             dto.setHasThumbnail(true);
         }
 
+        // Set subscription validation to false by default to cater products that were created before migration.
+        dto.disableSubscriptionValidation(false);
+
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
                 APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
-                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
-                if (index > 0) {
-                    additionalPropertiesDTO.setName(key.substring(0, index));
-                    additionalPropertiesDTO.setDisplay(true);
-                    additionalPropertiesList.add(additionalPropertiesDTO);
+                // Skip the disable_sub_validation property as it is not a custom property
+                // but an internal property used to disable subscription validation
+                if (APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                    dto.disableSubscriptionValidation(
+                            Boolean.parseBoolean(additionalProperties.get(key).toString()));
+                } else {
+                    int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                    additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                    if (index > 0) {
+                        additionalPropertiesDTO.setName(key.substring(0, index));
+                        additionalPropertiesDTO.setDisplay(true);
+                        additionalPropertiesList.add(additionalPropertiesDTO);
+                    }
                 }
+
             }
             dto.setAdditionalProperties(additionalPropertiesList);
         }
@@ -790,18 +811,28 @@ public class APIMappingUtil {
         String providerName = apiId.getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
 
+        // Set subscription validation to false by default to cater products that were created before migration.
+        apiInfoDTO.disableSubscriptionValidation(false);
+
         if (apiProduct.getAdditionalProperties() != null) {
             JSONObject additionalProperties = apiProduct.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
                 APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
-                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
-                if (index > 0) {
-                    additionalPropertiesDTO.setName(key.substring(0, index));
-                    additionalPropertiesDTO.setDisplay(true);
-                    additionalPropertiesList.add(additionalPropertiesDTO);
+                // Skip the disable_sub_validation property as it is not a custom property
+                // but an internal property used to disable subscription validation
+                if (APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                    apiInfoDTO.disableSubscriptionValidation(
+                            Boolean.parseBoolean(additionalProperties.get(key).toString()));
+                } else {
+                    int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                    additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                    if (index > 0) {
+                        additionalPropertiesDTO.setName(key.substring(0, index));
+                        additionalPropertiesDTO.setDisplay(true);
+                        additionalPropertiesList.add(additionalPropertiesDTO);
+                    }
                 }
             }
             apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
@@ -852,18 +883,28 @@ public class APIMappingUtil {
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
 
+        // Set subscription validation to false by default to cater products that were created before migration.
+        apiInfoDTO.disableSubscriptionValidation(false);
+
         if (api.getAdditionalProperties() != null) {
             JSONObject additionalProperties = api.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
                 APIInfoAdditionalPropertiesDTO additionalPropertiesDTO = new APIInfoAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
-                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
-                if (index > 0) {
-                    additionalPropertiesDTO.setName(key.substring(0, index));
-                    additionalPropertiesDTO.setDisplay(true);
-                    additionalPropertiesList.add(additionalPropertiesDTO);
+                // Skip the disable_sub_validation property as it is not a custom property
+                // but an internal property used to disable subscription validation
+                if (APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                    apiInfoDTO.disableSubscriptionValidation(
+                            Boolean.parseBoolean(additionalProperties.get(key).toString()));
+                } else {
+                    int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                    additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                    if (index > 0) {
+                        additionalPropertiesDTO.setName(key.substring(0, index));
+                        additionalPropertiesDTO.setDisplay(true);
+                        additionalPropertiesList.add(additionalPropertiesDTO);
+                    }
                 }
             }
             apiInfoDTO.setAdditionalProperties(additionalPropertiesList);
