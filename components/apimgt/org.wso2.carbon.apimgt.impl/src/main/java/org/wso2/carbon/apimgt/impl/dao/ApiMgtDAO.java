@@ -20156,7 +20156,11 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            return getCommonOperationPolicyByPolicyName(connection, policyName, policyVersion, organization,
+            if (!StringUtils.isEmpty(policyVersion)) {
+                return getCommonOperationPolicyByPolicyNameAndVersion(connection, policyName, policyVersion,
+                        organization, isWithPolicyDefinition);
+            }
+            return getCommonOperationPolicyByPolicyName(connection, policyName, organization,
                     isWithPolicyDefinition);
         } catch (SQLException e) {
             handleException("Failed to get common operation policy for name " + policyName + "for organization "
@@ -20166,12 +20170,43 @@ public class ApiMgtDAO {
     }
 
     private OperationPolicyData getCommonOperationPolicyByPolicyName(Connection connection, String policyName,
-                                                                     String policyVersion, String tenantDomain,
+                                                                     String tenantDomain,
                                                                      boolean isWithPolicyDefinition)
             throws SQLException {
 
         String dbQuery =
                 SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME;
+
+        OperationPolicyData policyData = null;
+        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, policyName);
+            statement.setString(2, tenantDomain);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    policyData = new OperationPolicyData();
+                    policyData.setOrganization(tenantDomain);
+                    policyData.setPolicyId(rs.getString("POLICY_UUID"));
+                    policyData.setMd5Hash(rs.getString("POLICY_MD5"));
+                    policyData.setSpecification(populatePolicySpecificationFromRS(rs));
+
+                    if (isWithPolicyDefinition && policyData != null) {
+                        if (isWithPolicyDefinition && policyData != null) {
+                            populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
+                        }
+                    }
+                }
+            }
+        }
+        return policyData;
+    }
+
+    private OperationPolicyData getCommonOperationPolicyByPolicyNameAndVersion(Connection connection, String policyName,
+                                                                     String policyVersion, String tenantDomain,
+                                                                     boolean isWithPolicyDefinition)
+            throws SQLException {
+
+        String dbQuery =
+                SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME_AND_VERSION;
 
         OperationPolicyData policyData = null;
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
@@ -20196,6 +20231,7 @@ public class ApiMgtDAO {
         }
         return policyData;
     }
+
 
     /**
      * Retrieve an API Specific operation policy by providing the policy name. In order to narrow down the specific policy
