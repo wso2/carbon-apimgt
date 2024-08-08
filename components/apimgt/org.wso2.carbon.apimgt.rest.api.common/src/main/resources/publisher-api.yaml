@@ -8681,6 +8681,145 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPIProductLifecycleStatePendingTasks
 
+  ######################################################
+  # The "Workflow Collection" resource APIs
+  ######################################################
+  /workflows:
+    get:
+      tags:
+        - Workflow (Collection)
+      summary: |
+        Retrieve All Pending Workflow Processes
+      description: |
+        This operation can be used to retrieve list of workflow pending processes.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/Accept'
+        - name: workflowType
+          in: query
+          description: |
+            We need to show the values of each workflow process separately .for that we use workflow type.
+            Workflow type can be AM_SUBSCRIPTION_CREATION, AM_SUBSCRIPTION_UPDATE.
+          schema:
+            type: string
+            enum:
+              - AM_SUBSCRIPTION_CREATION
+              - AM_SUBSCRIPTION_UPDATE
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow pendding process list returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:subscription_approval_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/workflows"'
+  /workflows/{externalWorkflowRef}:
+    get:
+      tags:
+        - Workflows (Individual)
+      summary: |
+        Get Pending Workflow Details by External Workflow Reference
+      description: |
+        Using this operation, you can retrieve complete details of a pending workflow request that either belongs to application creation, application subscription, application registration, api state change, user self sign up.. You need to provide the External_Workflow_Reference of the workflow Request to retrive it.
+      parameters:
+        - name: externalWorkflowRef
+          in: path
+          description: |
+            from the externel workflow reference we decide what is the the pending request that the are requesting.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Requested Workflow Pending is returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowInfo'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:subscription_approval_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"'
+
+  /workflows/update-workflow-status:
+    post:
+      tags:
+        - Workflows (Individual)
+      summary: Update Workflow Status
+      description: |
+        This operation can be used to approve or reject a workflow task.
+      parameters:
+        - $ref: '#/components/parameters/workflowReferenceId-Q'
+      requestBody:
+        description: |
+          Workflow event that need to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workflow'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:subscription_approval_view
+            - apim:subscription_approval_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
 components:
   schemas:
     Comment:
@@ -8955,6 +9094,108 @@ components:
             $ref: '#/components/schemas/Topic'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    Workflow:
+      title: workflow
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+          description: |
+            This attribute declares whether this workflow task is approved or rejected.
+          example: APPROVED
+          enum:
+            - APPROVED
+            - REJECTED
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+          description: |
+            Custom attributes to complete the workflow task
+          example: {}
+        description:
+          type: string
+          example: Approve workflow request.
+    WorkflowList:
+      title: WorkflowList
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of workflow processes returned.
+          example: 1
+        next:
+          type: string
+          description: |
+            Link to the next subset of resources qualified.
+            Empty if no more resources are to be returned.
+          example: /workflows?limit=1&offset=2&user=
+        previous:
+          type: string
+          description: |
+            Link to the previous subset of resources qualified.
+            Empty if current subset is the first subset returned.
+          example: /workflows?limit=1&offset=0&user=
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowInfo'
+    WorkflowInfo:
+      title: Workflow info object with basic workflow details
+      type: object
+      properties:
+        workflowType:
+          type: string
+          description: |
+            Type of the Workflow Request. It shows which type of request is it.
+          example: APPLICATION_CREATION
+          enum:
+            - APPLICATION_CREATION
+            - SUBSCRIPTION_CREATION
+            - USER_SIGNUP
+            - APPLICATION_REGISTRATION_PRODUCTION
+            - APPLICATION_REGISTRATION_SANDBOX
+            - APPLICATION_DELETION
+            - API_STATE
+            - API_PRODUCT_STATE
+            - SUBSCRIPTION_DELETION
+            - SUBSCRIPTION_UPDATE
+            - REVISION_DEPLOYMENT
+        workflowStatus:
+          type: string
+          description: |
+            Show the Status of the the workflow request whether it is approved or created.
+          example: APPROVED
+          enum:
+            - APPROVED
+            - CREATED
+        createdTime:
+          type: string
+          description: |
+            Time of the the workflow request created.
+          example: 2020-02-10 10:10:19.704
+        updatedTime:
+          type: string
+          description: |
+            Time of the the workflow request updated.
+          example: 2020-02-10 10:10:19.704
+        referenceId:
+          type: string
+          description: |
+            Workflow external reference is used to identify the workflow requests uniquely.
+          example: 5871244b-d6f3-466e-8995-8accd1e64303
+        properties:
+          type: object
+          properties: { }
+        description:
+          type: string
+          description: |
+            description is a message with basic details about the workflow request.
+          example: Approve application [APP1] creation request from application creator
+            - admin with throttling tier - 10MinPer
     API:
       title: API object
       required:
@@ -12845,6 +13086,14 @@ components:
         Revision ID of an API
       schema:
         type: string
+    workflowReferenceId-Q:
+      name: workflowReferenceId
+      in: query
+      description: |
+        Workflow reference id
+      required: true
+      schema:
+        type: string
     revisionNum-Q:
       name: revisionNumber
       in: query
@@ -13127,3 +13376,5 @@ components:
             apim:tier_manage: View, update and delete throttling policies
             apim:api_list_view: View, Retrieve API list
             apim:api_definition_view: View, Retrieve API definition
+            apim:subscription_approval_view: Approve subscription creation requests
+            apim:subscription_approval_manage: Approve subscription update requests

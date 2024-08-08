@@ -28,9 +28,13 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -169,15 +173,16 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
     @Override
     public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body,
                                                       MessageContext messageContext) {
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         boolean isTenantFlowStarted = false;
         String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomainOfUser = MultitenantUtils.getTenantDomain(username);
         try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (workflowReferenceId == null) {
                 RestApiUtil.handleBadRequest("workflowReferenceId is empty", log);
             }
-            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReferenceId);
+            org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO = (org.wso2.carbon.apimgt.impl.dto.WorkflowDTO)
+                    apiProvider.retrieveWorkflow(workflowReferenceId);
             if (workflowDTO == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_WORKFLOW, workflowReferenceId, log);
             }

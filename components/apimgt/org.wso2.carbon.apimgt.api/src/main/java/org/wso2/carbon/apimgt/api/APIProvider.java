@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
@@ -1929,4 +1930,13 @@ public interface APIProvider extends APIManager {
      */
     void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
             throws APIManagementException;
+
+    /**
+     * Get WorkflowDTO from the workflow reference ID
+     *
+     * @param workflowReferenceID
+     * @return
+     * @throws APIManagementException
+     */
+    WorkflowDTO retrieveWorkflow(String workflowReferenceID) throws APIManagementException;
 }

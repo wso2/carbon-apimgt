@@ -7287,4 +7287,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while sequences to the api  " + apiId, e);
         }        
     }
+
+    @Override
+    public org.wso2.carbon.apimgt.api.dto.WorkflowDTO retrieveWorkflow(
+            String workflowReferenceID) throws APIManagementException {
+        try {
+            org.wso2.carbon.apimgt.api.dto.WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReferenceID);
+            return workflowDTO;
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while resuming workflow " + workflowReferenceID, e);
+        }
+    }
+
 }
