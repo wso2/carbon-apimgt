@@ -3804,6 +3804,10 @@ public class SQLConstants {
                 "FROM AM_API_URL_MAPPING " + "WHERE API_ID = ? AND REVISION_UUID = ? AND HTTP_METHOD = ? AND " +
                 "AUTH_SCHEME = ? AND URL_PATTERN = CONVERT(? USING utf8mb4) COLLATE utf8mb4_bin " +
                 "AND THROTTLING_TIER = ? ";
+        public static final String GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL = "SELECT URL_MAPPING_ID " +
+                "FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID = ? AND HTTP_METHOD = ? AND " +
+                "AUTH_SCHEME = ? AND URL_PATTERN = CONVERT(nvarchar(max), ?) COLLATE Latin1_General_CS_AS " +
+                "AND THROTTLING_TIER = ?";
 
         public static final String GET_URL_MAPPINGS_ID = "SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING " +
                 "WHERE API_ID = ? AND HTTP_METHOD = ? AND AUTH_SCHEME = ? AND URL_PATTERN = ? " +
