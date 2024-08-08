@@ -79,6 +79,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private WebSocketAnalyticsMetricsHandler metricsHandler;
     private InboundWebSocketProcessor webSocketProcessor;
     private final String API_PROPERTIES = "API_PROPERTIES";
+    private final String API_CONTEXT_URI = "API_CONTEXT_URI";
     private final String WEB_SC_API_UT = "api.ut.WS_SC";
 
     public WebsocketInboundHandler() {
@@ -161,6 +162,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (!responseDTO.isError()) {
                     setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
                     setApiPropertiesMapToChannel(ctx, inboundMessageContext);
+                    setApiContextUriToChannel(ctx, inboundMessageContext);
                     if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
                         String backendJwtHeader = null;
                         JWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
@@ -419,6 +421,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         ctx.channel().attr(AttributeKey.valueOf(API_PROPERTIES)).set(createApiPropertiesMap(inboundMessageContext));
     }
 
+    private void setApiContextUriToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
+
+        Map<String, String> apiContextUriMap = new HashMap<>();
+        apiContextUriMap.put("apiContextUri", inboundMessageContext.getRequestPath());
+        ctx.channel().attr(AttributeKey.valueOf(API_CONTEXT_URI)).set(apiContextUriMap);
+    }
+
     private Map<String, Object> createApiPropertiesMap(InboundMessageContext inboundMessageContext) {
 
         Map<String, Object> apiPropertiesMap = new HashMap<>();
@@ -452,6 +461,18 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             CorruptedWebSocketFrameException corruptedWebSocketFrameException = ((CorruptedWebSocketFrameException) cause);
             apiProperties.put(WEB_SC_API_UT, corruptedWebSocketFrameException.closeStatus().code());
         }
-        super.exceptionCaught(ctx, cause);
+
+        // Improve Websocket logging by adding API URI into log
+        Attribute<Object> apiContextUriAttributes = ctx.channel().attr(AttributeKey.valueOf(API_CONTEXT_URI));
+        HashMap apiContextUris = (HashMap) apiContextUriAttributes.get();
+        String apiContextUri = (String) apiContextUris.get("apiContextUri");
+
+        if (apiContextUri != null) {
+            Throwable newCause = new Throwable(cause.getMessage() + " For the URI: " + apiContextUri);
+            newCause.initCause(cause);
+            super.exceptionCaught(ctx, newCause);
+        } else {
+            super.exceptionCaught(ctx, cause);
+        }
     }
 }
