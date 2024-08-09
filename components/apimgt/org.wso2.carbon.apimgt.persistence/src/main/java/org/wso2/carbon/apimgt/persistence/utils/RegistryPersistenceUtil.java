@@ -81,6 +81,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -870,6 +871,20 @@ public class RegistryPersistenceUtil {
 
         apiProduct.setAccessControlRoles(accessControlRoles);
         return apiProduct;
+    }
+
+    public static  Map<String, String> getSubscriptionValidationDisabledProperty(Resource apiResource) {
+        Properties properties = apiResource.getProperties();
+        Map<String, String> apiProperties = new HashMap<String, String>();
+        if (properties != null) {
+            String propName = APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX +
+                    APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY;
+            if (properties.containsKey(propName)) {
+                apiProperties.put(APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY,
+                        apiResource.getProperty(propName));
+            }
+        }
+        return apiProperties;
     }
     protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType)
                                     throws APIPersistenceException {

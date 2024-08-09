@@ -1161,6 +1161,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             int tempLength = 0;
             for (GovernanceArtifact artifact : governanceArtifacts) {
 
+                String artifactPath = GovernanceUtils.getArtifactPath(userRegistry, artifact.getId());
+                Resource apiResource = userRegistry.get(artifactPath);
+
                 DevPortalAPIInfo apiInfo = new DevPortalAPIInfo();
                 //devPortalAPIInfoList apiInfo = new devPortalAPIInfoList();
                 apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
@@ -1194,6 +1197,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
                 apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
                         .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+                apiInfo.setAdditionalProperties(RegistryPersistenceUtil
+                        .getSubscriptionValidationDisabledProperty(apiResource));
                 devPortalAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
