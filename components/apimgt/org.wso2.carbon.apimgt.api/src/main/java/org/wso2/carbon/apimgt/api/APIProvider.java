@@ -19,12 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
-import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
-import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
-import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.api.dto.*;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
@@ -136,7 +131,8 @@ public interface APIProvider extends APIManager {
      * @param uuid         API uuid
      * @param organization
      * @return UserApplicationAPIUsages for given provider
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to get UserApplicationAPIUsage
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to get UserApplicationAPIUsage
      */
     List<SubscribedAPI> getAPIUsageByAPIId(String uuid, String organization) throws APIManagementException;
 
@@ -145,7 +141,8 @@ public interface APIProvider extends APIManager {
      *
      * @param apiProductId API Product identifier
      * @return UserApplicationAPIUsages for given provider
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to get UserApplicationAPIUsage
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to get UserApplicationAPIUsage
      */
     List<SubscribedAPI> getAPIProductUsageByAPIProductId(APIProductIdentifier apiProductId) throws APIManagementException;
 
@@ -210,7 +207,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get api throttling policy by name
-     *
      * @param username   name of the user
      * @param policyName name of the policy
      * @throws APIManagementException
@@ -219,7 +215,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get api throttling policy by uuid
-     *
      * @param uuid UUID of the policy
      * @throws APIManagementException
      */
@@ -228,7 +223,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get application throttling policy by name
-     *
      * @param username   name of the user
      * @param policyName name of the policy
      * @throws APIManagementException
@@ -237,7 +231,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get application throttling policy by uuid
-     *
      * @param uuid UUID of the policy
      * @throws APIManagementException
      */
@@ -245,7 +238,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get subscription throttling policy by name
-     *
      * @param username   name of the user
      * @param policyName name of the policy
      * @throws APIManagementException
@@ -254,7 +246,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get subscription throttling policy by uuid
-     *
      * @param uuid UUID of the policy
      * @throws APIManagementException
      */
@@ -262,7 +253,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get global throttling policy by name
-     *
      * @param policyName name of the policy
      * @throws APIManagementException
      */
@@ -270,7 +260,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get global throttling policy by uuid
-     *
      * @param uuid UUID of the policy
      * @throws APIManagementException
      */
@@ -315,9 +304,9 @@ public interface APIProvider extends APIManager {
      *
      * @param api         API
      * @param existingAPI existing api
-     * @return updated API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update API
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
+     * @return updated API
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
 
@@ -348,10 +337,8 @@ public interface APIProvider extends APIManager {
      */
     APIProduct createNewAPIProductVersion(String apiProductId, String newVersion, Boolean defaultVersion,
                                           String organization) throws APIManagementException;
-
     /**
      * Retrieve the Key of the Service used in the API
-     *
      * @param apiId    Unique Identifier of the API
      * @param tenantId Logged-in tenant domain
      * @return Unique key of the service
@@ -421,7 +408,8 @@ public interface APIProvider extends APIManager {
      * @param appId        Application Id
      * @param organization organization
      * @return int value with subscription id
-     * @throws APIManagementException If failed to update subscription status
+     * @throws APIManagementException
+     *          If failed to update subscription status
      */
     void updateSubscription(APIIdentifier apiId, String subStatus, int appId, String organization)
             throws APIManagementException;
@@ -441,13 +429,13 @@ public interface APIProvider extends APIManager {
      * @param tierName       Tier Name
      * @param permissionType Permission Type
      * @param roles          Roles
-     * @throws APIManagementException If failed to update subscription status
+     * @throws APIManagementException
+     *          If failed to update subscription status
      */
     void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException;
 
     /**
      * Delete the Tier Permissions
-     *
      * @param tierName Tier Name
      * @throws APIManagementException
      */
@@ -457,7 +445,8 @@ public interface APIProvider extends APIManager {
      * Get the list of Tier Permissions
      *
      * @return Tier Permission Set
-     * @throws APIManagementException If failed to update subscription status
+     * @throws APIManagementException
+     *          If failed to update subscription status
      */
     Set getTierPermissions() throws APIManagementException;
 
@@ -482,7 +471,8 @@ public interface APIProvider extends APIManager {
      * @param tierName       Tier Name
      * @param permissionType Permission Type
      * @param roles          Roles
-     * @throws APIManagementException If failed to update subscription status
+     * @throws APIManagementException
+     *          If failed to update subscription status
      */
     void updateThrottleTierPermissions(String tierName, String permissionType, String roles) throws
             APIManagementException;
@@ -491,7 +481,8 @@ public interface APIProvider extends APIManager {
      * Get the list of Throttle Tier Permissions
      *
      * @return Tier Permission Set
-     * @throws APIManagementException If failed to update subscription status
+     * @throws APIManagementException
+     *          If failed to update subscription status
      */
     Set getThrottleTierPermissions() throws APIManagementException;
 
@@ -549,6 +540,7 @@ public interface APIProvider extends APIManager {
      *
      * @return True if gateway is Synpase
      * @throws APIManagementException
+     *
      */
     boolean isSynapseGateway() throws APIManagementException;
 
@@ -653,7 +645,7 @@ public interface APIProvider extends APIManager {
      * @param action         Action which need to execute from registry lifecycle
      * @param checklist      checklist items
      * @return APIStateChangeResponse API workflow state and WorkflowResponse
-     */
+     * */
     APIStateChangeResponse changeLifeCycleStatus(String orgId, ApiTypeWrapper apiTypeWrapper, String action,
                                                  Map<String, Boolean> checklist) throws APIManagementException;
 
@@ -669,7 +661,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get a policy names for given policy level and user name
-     *
      * @param username
      * @param level
      * @return
@@ -679,7 +670,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Delete throttling policy
-     *
      * @param username
      * @param policyLevel
      * @param policyName
@@ -690,6 +680,7 @@ public interface APIProvider extends APIManager {
     boolean hasAttachments(String username, String policyName, String policyLevel, String organization) throws APIManagementException;
 
     /**
+     *
      * @return List of block Conditions
      * @throws APIManagementException
      */
@@ -707,6 +698,7 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
+     *
      * @return Retrieve a block Condition
      * @throws APIManagementException
      */
@@ -809,7 +801,6 @@ public interface APIProvider extends APIManager {
      * @param apiTypeWrapper : API Type Wrapper.
      * @param certificate    : Relevant public certificate.
      * @param alias          : Alias of the certificate.
-     * @param keyType        : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param organization   : Organization
      * @return SUCCESS : If operation succeeded,
      * INTERNAL_SERVER_ERROR : If any internal error occurred,
@@ -818,11 +809,10 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int addClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String certificate, String alias,
-                             String tierName, String keyType, String organization) throws APIManagementException;
+                             String tierName, String organization) throws APIManagementException;
 
     /**
      * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.
-     *
      * @param userName : UserName of the logged in user.
      * @param alias    : Alias of the certificate which needs to be deleted.
      * @param endpoint : Endpoint which the certificate is mapped to.
@@ -841,19 +831,17 @@ public interface APIProvider extends APIManager {
      * 4 : If certificate is not found in the trust store.
      * @throws APIManagementException API Management Exception.
      */
-    int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias, String keyType)
+    int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias)
             throws APIManagementException;
 
     /**
      * Method to get the server is configured to Dynamic SSL Profile feature.
-     *
      * @return : TRUE if all the configurations are met, FALSE otherwise.
      */
     boolean isConfigured();
 
     /**
      * Method to retrieve certificate metadata uploaded for the tenant represent by the user.
-     *
      * @param alias : The alias of the certificate.
      * @return : CertificateMetadata
      * @throws APIManagementException
@@ -862,7 +850,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Method to retrieve all the certificates uploaded for the tenant represent by the user.
-     *
      * @param userName : User name of the logged in user.
      * @return : List of CertificateMetadata
      * @throws APIManagementException
@@ -891,8 +878,8 @@ public interface APIProvider extends APIManager {
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
-                                                        APIIdentifier apiIdentifier, String organization) throws APIManagementException;
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier,
+            String organization) throws APIManagementException;
 
     /**
      * Method to search the client certificates for the provided tenant id, alias and api product identifier.
@@ -904,7 +891,7 @@ public interface APIProvider extends APIManager {
      * @return list of client certificates that match search criteria.
      * @throws APIManagementException API Management Exception.
      */
-    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias,
                                                         APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException;
 
     /**
@@ -922,7 +909,7 @@ public interface APIProvider extends APIManager {
      * @return count of client certificates that exists for a particular tenant.
      * @throws APIManagementException API Management Exception.
      */
-    int getClientCertificateCount(int tenantId, String keyType) throws APIManagementException;
+    int getClientCertificateCount(int tenantId) throws APIManagementException;
 
     /**
      * Method to check whether an certificate for the given alias is present in the trust store and the database.
@@ -938,14 +925,13 @@ public interface APIProvider extends APIManager {
      * be modified by current user.
      *
      * @param alias          : Relevant alias.
-     * @param keyType        : Key type of the certificate
      * @param apiTypeWrapper : The identifier of the api.
      * @param organization   : Organization
      * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
      * modifiable by current user.
      * @throws APIManagementException API Management Exception.
      */
-    ClientCertificateDTO getClientCertificate(String alias, String keyType, ApiTypeWrapper apiTypeWrapper,
+    ClientCertificateDTO getClientCertificate(String alias, ApiTypeWrapper apiTypeWrapper,
                                               String organization) throws APIManagementException;
 
 
@@ -977,7 +963,6 @@ public interface APIProvider extends APIManager {
      * @param alias          : Alias of the certificate.
      * @param apiTypeWrapper : API Identifier of the certificate.
      * @param tier           : tier name.
-     * @param keyType        : Key type for the certificate (PRODUCTION or SANDBOX).
      * @param tenantId       : Id of tenant.
      * @param organization   : organization
      * @return : 1 : If client certificate update is successful,
@@ -987,7 +972,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException API Management Exception.
      */
     int updateClientCertificate(String certificate, String alias, ApiTypeWrapper apiTypeWrapper, String tier,
-                                String keyType, int tenantId, String organization) throws APIManagementException;
+                                int tenantId, String organization) throws APIManagementException;
 
     /**
      * Retrieve the certificate which matches the given alias.
@@ -1001,7 +986,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Create API product
-     *
      * @param product product object containing details of the product
      * @return Map of APIs as keys and respective APIProductResources as values
      * @throws APIManagementException exception
@@ -1010,7 +994,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Publish API Product to Gateway
-     *
      * @param product product object containing details of the product
      * @throws FaultGatewaysException
      */
@@ -1029,7 +1012,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Update API Product
-     *
      * @param product
      * @return Map of APIs as keys and respective APIProductResources as values
      * @throws APIManagementException
@@ -1151,7 +1133,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Retrieve list of resources of the provided api that are used in other API products
-     *
      * @param uuid UUID of the API
      * @return APIResource list of resources
      * @throws APIManagementException
@@ -1160,13 +1141,11 @@ public interface APIProvider extends APIManager {
 
     /**
      * Delete API
-     *
      * @param apiUuid      API uuid to delete
      * @param organization organization id of the deleting API
      * @throws APIManagementException
      */
     void deleteAPI(String apiUuid, String organization) throws APIManagementException;
-
     /**
      * Checks whether the given document already exists for the given api/product
      *
@@ -1180,7 +1159,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file
-     *
      * @param apiId        ID of the API
      * @param resource     Resource
      * @param organization Identifier of an organization
@@ -1191,7 +1169,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Add or update thumbnail image of an api
-     *
      * @param apiId    ID of the API
      * @param resource Image resource
      * @param orgId    Identifier of an organization
@@ -1201,7 +1178,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Add or update graphql definition
-     *
      * @param apiId      ID of the API
      * @param definition API Definition
      * @param orgId      Identifier of an organization
@@ -1211,17 +1187,14 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get API product by uuid
-     *
      * @param uuid                  Id of the api product
      * @param requestedTenantDomain tenant domain requested
      * @return APIProduct product
      * @throws APIManagementException
      */
     APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
-
     /**
      * Delete API Product
-     *
      * @param apiProduct
      */
     void deleteAPIProduct(APIProduct apiProduct) throws APIManagementException;
@@ -1412,7 +1385,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException;
-
     /**
      * Adds a new APIRevision to an existing API Product
      *
@@ -1454,7 +1426,6 @@ public interface APIProvider extends APIManager {
      */
     void restoreAPIProductRevision(String apiProductId, String apiRevisionId, String organization)
             throws APIManagementException;
-
     /**
      * Delete an API Product Revision
      *
@@ -1709,7 +1680,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Returns details of an API
-     *
      * @param uuid         UUID of the API's registry artifact
      * @param organization Identifier of an organization
      * @return An API object related to the given artifact id or null
@@ -1755,7 +1725,6 @@ public interface APIProvider extends APIManager {
      */
     boolean isValidContext(String providerName, String apiName, String contextTemplate, String userName,
                            String organization) throws APIManagementException;
-
     /***
      * Validate the policies with spec
      * @param policySpecification policy spec
@@ -1949,7 +1918,6 @@ public interface APIProvider extends APIManager {
 
     /**
      * Update SoapToRest Sequences for the given API.
-     *
      * @param organization Organization
      * @param apiId        API ID
      * @param sequences    list of SOAPToRestSequence.
@@ -1965,15 +1933,5 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     WorkflowDTO retrieveWorkflow(String workflowReferenceID) throws APIManagementException;
-
-     /* Updates the subscription tier of a given subscription.
-     *
-     * @param subscriptionUUID The UUID of the subscription to be updated
-     * @param subscriptionTier The new subscription tier to be assigned
-     * @return The updated subscription
-     * @throws APIManagementException If the subscription is not found, status is TIER_UPDATE_PENDING, the specified
-     *                                tier is not allowed for the API or an error occurs while updating the subscription
-     */
-    SubscribedAPI updateSubscriptionTier(String subscriptionUUID, String subscriptionTier) throws APIManagementException;
 
 }
