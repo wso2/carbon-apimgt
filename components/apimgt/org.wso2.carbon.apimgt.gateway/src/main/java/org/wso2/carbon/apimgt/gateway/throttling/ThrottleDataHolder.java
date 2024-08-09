@@ -70,6 +70,16 @@ public class ThrottleDataHolder {
         throttledAPIKeysMap.put(key,value);
     }
 
+    private static final ThrottleDataHolder instance = new ThrottleDataHolder();
+
+    private ThrottleDataHolder() {
+
+    }
+
+    public static ThrottleDataHolder getInstance() {
+        return instance;
+    }
+
     public void addThrottledApiConditions(String key, String conditionKey, List<ConditionDto> conditionValue) {
 
         Map<String, List<ConditionDto>> conditionMap;
@@ -112,20 +122,19 @@ public class ThrottleDataHolder {
         throttledAPIKeysMap.remove(key);
     }
 
-    public boolean isAPIThrottled(String apiKey){
-        boolean isThrottled = this.throttledAPIKeysMap.containsKey(apiKey);
-        if(isThrottled) {
+    public boolean isAPIThrottled(String apiKey) {
+        Long timestamp = this.throttledAPIKeysMap.get(apiKey);
+        if (timestamp != null) {
             long currentTime = System.currentTimeMillis();
-            long timestamp = this.throttledAPIKeysMap.get(apiKey);
-            if(timestamp >= currentTime) {
-                return isThrottled;
+            if (timestamp >= currentTime) {
+                return true;
             } else {
                 this.throttledAPIKeysMap.remove(apiKey);
                 this.conditionDtoMap.remove(apiKey);
                 return false;
             }
         } else {
-            return isThrottled;
+            return false;
         }
     }
 

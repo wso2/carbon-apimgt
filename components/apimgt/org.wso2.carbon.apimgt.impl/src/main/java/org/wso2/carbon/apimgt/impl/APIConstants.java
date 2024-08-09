@@ -332,6 +332,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
+    public static final String API_OVERVIEW_ENDPOINT_PASSWORD_ALT = "overview_endpointPassword";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
     public static final String API_OVERVIEW_INSEQUENCE = "overview_inSequence";
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
@@ -467,6 +468,7 @@ public final class APIConstants {
     public static final String TOKEN_ISSUERS = "TokenIssuers";
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
     public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "ExcludedClaims";
+    public static final String ENABLE_BASE64_PADDING = "EnableBase64Padding";
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
     public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + ".ConvertClaimsToConsumerDialect";
 
@@ -498,6 +500,7 @@ public final class APIConstants {
     public static final String REGISTRY_HIDDEN_ENDPOINT_PROPERTY = "registry.HiddenEpProperty";
     public static final String OVERVIEW_ELEMENT = "overview";
     public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
+    public static final String ENDPOINT_PASSWORD_ELEMENT_ALT = "endpointPassword";
     public static final String FEDERATED_USER = "FEDERATED";
     public static final String ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN = OAUTH_CONFIGS + "EnableCertificateBoundAccessToken";
     public static final String DIGEST = "x5t#S256";
@@ -790,6 +793,9 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
     public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
+    public static  final String CLIENT_CERTIFICATE_TIER = "TIER";
+    public static final String CLIENT_CERTIFICATE_KEY_TYPE = "KEY_TYPE";
+
     public static final String ENABLE_DEFAULT_KEY_MANAGER_REGISTRATION = API_KEY_VALIDATOR +
             "EnableDefaultKeyManagerRegistration";
     public static final String ENABLE_KEY_MANAGER_RETRIVAL = API_KEY_VALIDATOR +
@@ -890,8 +896,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS = API_PUBLISHER
             + "EnableAPIDocVisibilityLevels";
     public static final String API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE = API_PUBLISHER + "EnablePortalConfigurationOnlyMode";
-    public static final String API_PUBLISHER_INTERNAL_KEY_ISSUER = API_PUBLISHER +
-            "InternalKeyIssuer";
+    public static final String API_PUBLISHER_INTERNAL_KEY_ISSUER = API_PUBLISHER + "InternalKeyIssuer";
     // Configuration that need to enable to add access control to APIs in publisher
     public static final String API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS = API_PUBLISHER
             + "EnableAccessControl";
@@ -964,7 +969,9 @@ public final class APIConstants {
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
     public static final String DEFAULT_APPLICATION_DESCRIPTION = "This is the default application";
     public static final String BASIC_AUTH_APPLICATION_NAME = "BasicAuthApplication";
-    public static final String BASIC_AUTH_APPLICATION_OWNER = "BasicAuthApplicationOwner";
+    public static final String BASIC_AUTH_APPLICATION_OWNER = " BasicAuthApplicationOwner";
+    public static final String MUTUAL_SSL_AUTH_APPLICATION_NAME = "MutualSSLAuthApplication";
+    public static final String MUTUAL_SSL_AUTH_APPLICATION_OWNER = "MutualSSLAuthApplicationOwner";
 
     public static final QName POLICY_ELEMENT = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy",
             "Policy");

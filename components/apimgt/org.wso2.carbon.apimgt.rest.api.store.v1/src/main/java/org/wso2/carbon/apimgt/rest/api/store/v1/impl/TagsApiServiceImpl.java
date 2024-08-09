@@ -57,7 +57,9 @@ public class TagsApiServiceImpl implements TagsApiService {
             if (tagSet != null) {
                 tagList.addAll(tagSet);
             }
-            TagListDTO tagListDTO = TagMappingUtil.fromTagListToDTO(tagList, limit, offset);
+            TagListDTO tagListDTO = limit == -1 ?
+                    TagMappingUtil.fromTagListToDTO(tagList, tagList.size(), offset) :
+                    TagMappingUtil.fromTagListToDTO(tagList, limit, offset);
             TagMappingUtil.setPaginationParams(tagListDTO, limit, offset, tagList.size());
             return Response.ok().entity(tagListDTO).build();
         } catch (APIManagementException e) {

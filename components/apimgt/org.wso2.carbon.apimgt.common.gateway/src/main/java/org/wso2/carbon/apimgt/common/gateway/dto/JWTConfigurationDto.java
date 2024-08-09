@@ -44,6 +44,7 @@ public class JWTConfigurationDto {
     private Certificate publicCert;
     private PrivateKey privateKey;
     private long ttl;
+    private boolean enableBase64Padding = false;
 
     private boolean useKid;
 
@@ -199,5 +200,13 @@ public class JWTConfigurationDto {
 
     public void setUseSHA256Hash(boolean useSHA256Hash) {
         this.useSHA256Hash = useSHA256Hash;
+    }
+
+    public void setEnableBase64Padding(boolean enableBase64Padding) {
+        this.enableBase64Padding = enableBase64Padding;
+    }
+
+    public boolean isEnableBase64Padding() {
+        return enableBase64Padding;
     }
 }
