@@ -309,6 +309,9 @@ public class PublisherCommonUtils {
         apiDtoToUpdate.setLifeCycleStatus(originalAPI.getStatus());
         apiDtoToUpdate.setType(APIDTO.TypeEnum.fromValue(originalAPI.getType()));
 
+        // Throw an error if the subscription validation is enabled/disabled when the API is published
+        validateSubscriptionValidationDisabled(originalAPI, apiDtoToUpdate);
+
         List<APIResource> removedProductResources = getRemovedProductResources(apiDtoToUpdate, originalAPI);
 
         if (!removedProductResources.isEmpty()) {
@@ -599,6 +602,57 @@ public class PublisherCommonUtils {
         throw new APIManagementException("User is not authorized to update one or more API fields. None of the "
                 + "required scopes found in user token to update the field. So the request will be failed.",
                 ExceptionCodes.INVALID_SCOPE);
+    }
+
+    /**
+     * Validate subscription validation disable property.
+     * @param oldAPI existing API
+     * @param newAPIDTO new API DTO
+     * @throws APIManagementException if the subscription validation disable property is not allowed to update
+     */
+    private static void validateSubscriptionValidationDisabled(API oldAPI, APIDTO newAPIDTO)
+            throws APIManagementException {
+        boolean isSubscriptionValidationDisabled = false;
+        if (APIConstants.PUBLISHED.equals(oldAPI.getStatus())) {
+            if (oldAPI.getAdditionalProperties() != null) {
+                for (Object key : oldAPI.getAdditionalProperties().keySet()) {
+                    if (APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                        isSubscriptionValidationDisabled = Boolean.parseBoolean(
+                                oldAPI.getAdditionalProperties().get(key).toString());
+                        break;
+                    }
+                }
+            }
+        }
+        if (isSubscriptionValidationDisabled != newAPIDTO.isDisableSubscriptionValidation()) {
+            throw new APIManagementException(ExceptionCodes.SUB_VALIDATION_DISABLE_NOT_ALLOWED);
+        }
+    }
+
+
+    /**
+     * Validate subscription validation disable property for API Products
+     * @param oldAPIProduct existing API Product
+     * @param apiProductDTO new API Product DTO
+     * @throws APIManagementException if the subscription validation disable property is not allowed to update
+     */
+    private static void validateSubscriptionValidationDisabled(APIProduct oldAPIProduct, APIProductDTO apiProductDTO)
+            throws APIManagementException {
+        boolean isSubscriptionValidationDisabled = false;
+        if (APIConstants.PUBLISHED.equals(oldAPIProduct.getState())) {
+            if (oldAPIProduct.getAdditionalProperties() != null) {
+                for (Object key : oldAPIProduct.getAdditionalProperties().keySet()) {
+                    if (APIConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                        isSubscriptionValidationDisabled = Boolean.parseBoolean(
+                                oldAPIProduct.getAdditionalProperties().get(key).toString());
+                        break;
+                    }
+                }
+            }
+        }
+        if (isSubscriptionValidationDisabled != apiProductDTO.isDisableSubscriptionValidation()) {
+            throw new APIManagementException(ExceptionCodes.SUB_VALIDATION_DISABLE_NOT_ALLOWED);
+        }
     }
 
     /**
@@ -1911,6 +1965,9 @@ public class PublisherCommonUtils {
                                 originalAPIProduct.getId().getVersion()));
             }
         }
+
+        // Throw an error if the subscription validation is enabled/disabled when the API is published
+        validateSubscriptionValidationDisabled(originalAPIProduct, apiProductDtoToUpdate);
 
         APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToUpdate, username);
         product.setState(originalAPIProduct.getState());

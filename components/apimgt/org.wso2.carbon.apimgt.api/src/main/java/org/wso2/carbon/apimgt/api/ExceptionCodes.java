@@ -579,6 +579,13 @@ public enum ExceptionCodes implements ErrorHandler {
             403, "Cannot change the business plan of the subscription with ID '%s' as the " +
             "subscriber does not have permission to access the specified business plan.", false),
 
+    SUBSCRIPTION_NOT_REQUIRED(902024, "Subscription not required.", 400,
+            "Subscriptions are not required to consume this API", false),
+    SUB_VALIDATION_DISABLE_NOT_ALLOWED(902025, "Subscription validation enable/disable is not allowed.",
+            400,
+            "Subscription validation enable/disable is not allowed for the API when in Published state",
+            false),
+
     HTTP_METHOD_INVALID(903201,
             "Invalid HTTP method provided for API resource", 400,
             "The HTTP method '%s' provided for resource '%s' is invalid", false),

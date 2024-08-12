@@ -225,4 +225,38 @@ public class SubscriptionMappingUtil {
         pagination.setTotal(size);
         subscriptionListDTO.setPagination(pagination);
     }
+
+    /**
+     * Check whether subscription validation is disabled for the given API or API Product
+     *
+     * @param apiTypeWrapper API or API Product
+     * @return true if subscription validation is disabled
+     */
+    public static boolean isSubValidationDisabled(ApiTypeWrapper apiTypeWrapper) {
+        boolean isSubscriptionValidationDisabled = false;
+        if (apiTypeWrapper.isAPIProduct()) {
+            APIProduct apiProduct = apiTypeWrapper.getApiProduct();
+            if (apiProduct.getAdditionalProperties() != null) {
+                for (Object key : apiProduct.getAdditionalProperties().keySet()) {
+                    if (RestApiConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                        isSubscriptionValidationDisabled = Boolean.parseBoolean(
+                                apiProduct.getAdditionalProperties().get(key).toString());
+                        break;
+                    }
+                }
+            }
+        } else {
+            API api = apiTypeWrapper.getApi();
+            if (api.getAdditionalProperties() != null) {
+                for (Object key : api.getAdditionalProperties().keySet()) {
+                    if (RestApiConstants.DISABLE_SUBSCRIPTION_VALIDATION_PROPERTY.equals(key)) {
+                        isSubscriptionValidationDisabled = Boolean.parseBoolean(
+                                api.getAdditionalProperties().get(key).toString());
+                        break;
+                    }
+                }
+            }
+        }
+        return isSubscriptionValidationDisabled;
+    }
 }

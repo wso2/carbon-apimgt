@@ -26,6 +26,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
@@ -221,7 +222,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             }
 
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), organization);
-
+            // Ignore subscriptions if subscription validation is disabled
+            if (SubscriptionMappingUtil.isSubValidationDisabled(apiTypeWrapper)) {
+                throw new APIManagementException(ExceptionCodes.SUBSCRIPTION_NOT_REQUIRED);
+            }
 
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 
