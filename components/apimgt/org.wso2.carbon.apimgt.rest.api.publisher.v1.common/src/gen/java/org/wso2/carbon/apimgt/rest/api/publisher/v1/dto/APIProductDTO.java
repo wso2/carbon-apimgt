@@ -371,7 +371,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "false", value = "")
   @JsonProperty("disableSubscriptionValidation")
   public Boolean isDisableSubscriptionValidation() {
@@ -989,7 +989,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "The audiences of the API for jwt validation. Accepted values are any String values")
   @JsonProperty("audiences")
   public List<String> getAudiences() {
@@ -1058,7 +1058,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, version, description, provider, hasThumbnail, state, enableSchemaValidation, isDefaultVersion, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus, audiences);
+    return Objects.hash(id, name, context, version, description, provider, hasThumbnail, state, enableSchemaValidation, disableSubscriptionValidation, isDefaultVersion, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus, audiences);
   }
 
   @Override
