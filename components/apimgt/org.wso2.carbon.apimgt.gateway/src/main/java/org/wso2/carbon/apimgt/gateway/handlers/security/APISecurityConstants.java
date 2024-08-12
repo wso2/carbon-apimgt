@@ -81,7 +81,8 @@ public class APISecurityConstants {
             "The configured resource access validation claim is not present in the token.";
 
     public static final int API_OAUTH_INVALID_AUDIENCES = 900914;
-    public static final String API_OAUTH_INVALID_AUDIENCES_MESSAGE = "The access token does not allow you to access the requested resource";
+    public static final String API_OAUTH_INVALID_AUDIENCES_MESSAGE = "Access Denied";
+    public static final String API_OAUTH_INVALID_AUDIENCES_DESCRIPTION = "The access token does not allow you to access the requested resource";
 
     public static final int OAUTH_TEMPORARY_SERVER_ERROR = 900424;
     public static final String OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE = "Temporary Server Error";
@@ -184,6 +185,9 @@ public class APISecurityConstants {
                 break;
             case API_AUTH_ACCESS_TOKEN_CLAIMS_INVALID:
                 errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_CLAIMS_INVALID_DESCRIPTION;
+                break;
+            case API_OAUTH_INVALID_AUDIENCES:
+                errorDescription += DESCRIPTION_SEPARATOR + API_OAUTH_INVALID_AUDIENCES_DESCRIPTION;
                 break;
             default:
                 // Do nothing since we are anyhow returning the original error description.

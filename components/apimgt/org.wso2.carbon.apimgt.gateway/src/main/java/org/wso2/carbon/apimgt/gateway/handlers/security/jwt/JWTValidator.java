@@ -373,16 +373,20 @@ public class JWTValidator {
         }
         List<String> jwtAudienceClaim = signedJWTInfo.getJwtClaimsSet().getAudience();
         if (jwtAudienceClaim == null) {
+            log.debug("User is NOT authorized to access the Resource. Audience validation failed.");
             throw new APISecurityException(APISecurityConstants.API_OAUTH_INVALID_AUDIENCES,
-                    APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_MESSAGE);
+                    APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_MESSAGE,
+                                           APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_DESCRIPTION);
         }
         for (String aud : this.getAudiences()) {
             if (jwtAudienceClaim.contains(aud)) {
                 return true;
             }
         }
+        log.debug("User is NOT authorized to access the Resource. Audience validation failed.");
         throw new APISecurityException(APISecurityConstants.API_OAUTH_INVALID_AUDIENCES,
-                APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_MESSAGE);
+                APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_MESSAGE,
+                                       APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_DESCRIPTION);
     }
 
     private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
