@@ -212,6 +212,14 @@ public class TemplateBuilderUtil {
         }
         String apiSecurity = api.getApiSecurity();
         String apiLevelPolicy = api.getApiLevelPolicy();
+        String audiences;
+        Set<String> audienceList = api.getAudiences();
+        if (audienceList != null) {
+            audiences = String.join(",", audienceList);
+        } else {
+            audiences = "";
+        }
+        authProperties.put(APIConstants.AUDIENCES, audiences);
         authProperties.put(APIConstants.API_SECURITY, apiSecurity);
         authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
         if (!clientCertificateObject.isEmpty()) {
@@ -411,6 +419,14 @@ public class TemplateBuilderUtil {
         String apiLevelPolicy = apiProduct.getProductLevelPolicy();
         authProperties.put(APIConstants.API_SECURITY, apiSecurity);
         authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
+        String audiences;
+        Set<String> audienceList = apiProduct.getAudiences();
+        if (audienceList != null) {
+            audiences = String.join(",", audienceList);
+        } else {
+            audiences = "";
+        }
+        authProperties.put(APIConstants.AUDIENCES, audiences);
         if (!clientCertificateObject.isEmpty()) {
             authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
         }
