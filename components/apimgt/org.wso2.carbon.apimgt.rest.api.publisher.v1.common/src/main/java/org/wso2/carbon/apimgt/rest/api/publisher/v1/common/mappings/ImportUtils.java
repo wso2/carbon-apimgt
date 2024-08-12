@@ -316,6 +316,7 @@ public class ImportUtils {
                     importedApiDTO.setSubscriptionAvailableTenants(convertedOldAPI.getSubscriptionAvailableTenants());
                     importedApiDTO.monetization(convertedOldAPI.getMonetization());
                     importedApiDTO.setTags(convertedOldAPI.getTags());
+                    importedApiDTO.setDisableSubscriptionValidation(convertedOldAPI.isDisableSubscriptionValidation());
                     List<APIInfoAdditionalPropertiesDTO> additionalProperties =
                             convertedOldAPI.getAdditionalProperties();
                     if (additionalProperties != null) {
