@@ -1559,6 +1559,21 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
+     * Get the common operation policy for a given policy name. This will only return the policy data if there is
+     * a matching policy created as a common policy. If not, it will return null
+     *
+     * @param policyName             Common Policy name
+     * @param organization           Organization
+     * @param isWithPolicyDefinition This will decide whether to return policy definition or not as policy definition
+     *                               is bit bulky
+     * @return Common Operation Policy List
+     * @throws APIManagementException
+     */
+    List<OperationPolicyData> getCommonOperationPolicyByPolicyName(String policyName, String organization,
+                                                             boolean isWithPolicyDefinition)
+            throws APIManagementException;
+
+    /**
      * Get API specific operation policy for a given Policy UUID. Even though a policy ID is provided, this will only
      * return policy if the policy is created for API. Otherwise it will return a null.
      *

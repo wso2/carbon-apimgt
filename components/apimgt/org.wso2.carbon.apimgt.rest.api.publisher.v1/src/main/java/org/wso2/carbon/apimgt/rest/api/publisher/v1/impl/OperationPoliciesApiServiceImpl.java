@@ -229,22 +229,37 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 version = queryParamMap.get(ImportExportConstants.VERSION_ELEMENT);
 
                 apiManagementExceptionErrorMessage = "Error while retrieving the policy by name & version.";
-                OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version,
-                        organization, false);
-
-                // if not found, throw not found error
-                if (policyData != null) {
-                    List<OperationPolicyData> commonOperationPolicyLIst = new ArrayList<>();
-                    commonOperationPolicyLIst.add(policyData);
-                    policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(
-                            commonOperationPolicyLIst, 0, 1);
+                if (StringUtils.isEmpty(version)) {
+                    List<OperationPolicyData> commonOperationPolicyLIst = apiProvider.getCommonOperationPolicyByPolicyName(name,
+                            organization, false);
+                    if (commonOperationPolicyLIst != null && commonOperationPolicyLIst.size() > 0) {
+                        limit = limit != null ? limit : commonOperationPolicyLIst.size();
+                        policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(
+                                commonOperationPolicyLIst, 0, limit);
+                    } else {
+                        apiManagementExceptionErrorMessage =
+                                "Couldn't retrieve an existing common policy with Name: " + name;
+                        throw new APIMgtResourceNotFoundException(apiManagementExceptionErrorMessage,
+                                ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME, name));
+                    }
                 } else {
-                    apiManagementExceptionErrorMessage =
-                            "Couldn't retrieve an existing common policy with Name: " + name + " and Version: "
-                                    + version;
-                    throw new APIMgtResourceNotFoundException(apiManagementExceptionErrorMessage,
-                            ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name,
-                                    version));
+                    OperationPolicyData policyData = apiProvider.getCommonOperationPolicyByPolicyName(name, version,
+                            organization, false);
+
+                    // if not found, throw not found error
+                    if (policyData != null) {
+                        List<OperationPolicyData> commonOperationPolicyLIst = new ArrayList<>();
+                        commonOperationPolicyLIst.add(policyData);
+                        policyListDTO = OperationPolicyMappingUtil.fromOperationPolicyDataListToDTO(
+                                commonOperationPolicyLIst, 0, 1);
+                    } else {
+                        apiManagementExceptionErrorMessage =
+                                "Couldn't retrieve an existing common policy with Name: " + name + " and Version: "
+                                        + version;
+                        throw new APIMgtResourceNotFoundException(apiManagementExceptionErrorMessage,
+                                ExceptionCodes.from(ExceptionCodes.OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION, name,
+                                        version));
+                    }
                 }
             } else {
                 offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
