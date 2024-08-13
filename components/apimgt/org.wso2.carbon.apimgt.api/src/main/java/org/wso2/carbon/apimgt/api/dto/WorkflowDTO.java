@@ -36,9 +36,6 @@ public class WorkflowDTO implements Serializable {
 
     private String workflowType;
 
-    //Used to hold the status of the workflow. When a workflow is initially executed, it will be in the CREATED state.
-    //It will then move to the APPROVED or REJECTED states depending on the output of the workflow execution.
-    private WorkflowStatus status;
 
     private long createdTime;
 
@@ -197,7 +194,6 @@ public class WorkflowDTO implements Serializable {
         return "WorkflowDTO{" +
                 "workflowReference='" + workflowReference + '\'' +
                 ", workflowType='" + workflowType + '\'' +
-                ", status=" + status +
                 ", createdTime=" + createdTime +
                 ", updatedTime=" + updatedTime +
                 ", workflowDescription='" + workflowDescription + '\'' +

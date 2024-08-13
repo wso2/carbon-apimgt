@@ -100,7 +100,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
         Map<String, Object> result;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         int start = 0;
-        List<String> nameVersionList = null;
+        List<String> nameVersionList = new ArrayList<>();
         APIAdmin apiAdmin = new APIAdminImpl();
         WorkflowListDTO workflowListDTO = null;
         Workflow[] workflows = null;
@@ -118,7 +118,6 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             result = apiProvider.searchPaginatedAPIs(query, tenantDomain, start, start + 100,
                     RestApiConstants.DEFAULT_SORT_CRITERION, RestApiConstants.DESCENDING_SORT_ORDER);
             Set<API> apis = (Set<API>) result.get("apis");
-            nameVersionList = new ArrayList<>();
             for (API api : apis) {
                 String organization = (RestApiUtil.getOrganization(messageContext) != null) ?
                         RestApiUtil.getOrganization(messageContext) : SUPER_TENANT_DOMAIN_NAME;
@@ -127,7 +126,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                 nameVersionList.add(apiNameWithVersion);
             }
             int length = Integer.parseInt(result.get("length").toString());
-            if (length > start) {
+            if (length > start + 100) {
                 start = start + 101;
             } else {
                 start = -1;
