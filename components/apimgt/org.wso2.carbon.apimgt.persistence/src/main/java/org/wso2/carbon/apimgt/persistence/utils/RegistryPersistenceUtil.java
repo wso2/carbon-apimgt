@@ -178,7 +178,13 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE, Boolean.toString(api.isEnableStore()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_TESTKEY, api.getTestKey());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, api.getVersionTimestamp());
-
+            if (APIConstants.API_RESTRICTED_BY_ORG.equals(api.getVisibility())) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS, api.getVisibleOrganizations());
+            } else {
+                // Set a default value if org visibility is not set. This is done to generate search query for public apis
+                artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS, APIConstants.DEFAULT_VISIBLE_ORG); 
+            }
+            
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
@@ -601,6 +607,7 @@ public class RegistryPersistenceUtil {
             api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
             api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
             api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
+            api.setVisibleOrganizations(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS));
             api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(

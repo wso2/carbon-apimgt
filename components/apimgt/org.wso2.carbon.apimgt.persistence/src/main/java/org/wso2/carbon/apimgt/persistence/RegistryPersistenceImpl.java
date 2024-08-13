@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.Mediation;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent.ContentSourceType;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
@@ -1077,8 +1078,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             log.debug("Requested query for devportal search: " + searchQuery);
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
                     isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayAPIsWithMultipleVersions());
+            modifiedQuery = modifiedQuery + "&visibleOrganizations=(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR *"
+                    + ctx.getOrganization().getName() + "*)";
             log.debug("Modified query for devportal search: " + modifiedQuery);
-
             String userNameLocal;
             if (holder.isAnonymousMode()) {
                 userNameLocal = APIConstants.WSO2_ANONYMOUS_USER;

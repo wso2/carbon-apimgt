@@ -117,6 +117,9 @@
 	<field type="text">
             <name>Visible Tenants</name>
         </field>
+        <field type="text">
+                <name label="Visible Organizations">visibleOrganizations</name>
+        </field>
         <field type="options">
             <name label="IsLatest">Is Latest</name>
             <values>

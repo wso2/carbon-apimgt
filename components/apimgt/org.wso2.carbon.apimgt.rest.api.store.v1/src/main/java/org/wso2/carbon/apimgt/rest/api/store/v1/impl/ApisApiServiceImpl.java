@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -94,7 +95,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         query = query == null ? "" : query;
         APIListDTO apiListDTO = new APIListDTO();
         try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            orgInfo.setSuperOrganization(superOrganization);
+            
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
@@ -104,14 +108,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
+            //Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset,
+            //        limit, null, null);
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset,
                     limit, null, null);
             
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, organization);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, superOrganization);
             //Add pagination section in the response
             Object totalLength = allMatchedApisMap.get("length");
             Integer totalAvailableAPis = 0;

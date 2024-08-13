@@ -1266,6 +1266,14 @@ public class PublisherCommonUtils {
                 throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
             }
         }
+        
+        if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED_BY_ORG
+                && body.getVisibleOrganizations().isEmpty()) {
+            throw new APIManagementException(
+                    "Valid organizations should be added under 'visibleOrganizations' to restrict " + "the visibility",
+                    ExceptionCodes.ORGS_CANNOT_BE_NULL);
+        }
+        
 
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(),

@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
@@ -1235,6 +1236,20 @@ public class RestApiUtil {
                     "Organization is not found in the request", ExceptionCodes.ORGANIZATION_NOT_FOUND);
         }
         return organization;
+    }
+    
+    /**
+     * Method to extract the User organization
+     * @param ctx MessageContext
+     * @return organization
+     */
+
+    public static OrganizationInfo getOrganizationInfo(MessageContext ctx) throws APIManagementException {
+        OrganizationInfo organizationInfo = new OrganizationInfo();
+        if (ctx.get(RestApiConstants.ORGANIZATION_INFO) != null) {
+            organizationInfo = (OrganizationInfo) ctx.get(RestApiConstants.ORGANIZATION_INFO);
+        }
+        return organizationInfo;
     }
 
 
