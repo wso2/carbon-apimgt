@@ -53,7 +53,7 @@ public interface APIMapper {
     @Mapping(source = "id", target = "uuid")
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "availableTierNames", target = "availableTiers")
-    @Mapping(source = "visibleOrganizations", target = "visibleTenants")
+    @Mapping(source = "visibleSuperOrganizations", target = "visibleTenants")
     @Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
     @Mapping(source = "gatewayVendor", target = "gatewayVendor")
     API toApi(PublisherAPI api);
@@ -64,7 +64,7 @@ public interface APIMapper {
     @Mapping(source = "thumbnailUrl", target = "thumbnail")
     @Mapping(source = "availableTiers", target = "availableTierNames")
     @Mapping(source = "uuid", target = "id")
-    @Mapping(source = "visibleTenants", target = "visibleOrganizations")
+    @Mapping(source = "visibleTenants", target = "visibleSuperOrganizations")
     @Mapping(source = "subscriptionAvailableTenants", target = "subscriptionAvailableOrgs")
     @Mapping(source = "gatewayVendor", target = "gatewayVendor")
     PublisherAPI toPublisherApi(API api);

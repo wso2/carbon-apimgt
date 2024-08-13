@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -3824,16 +3825,36 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
                                                    String sortBy, String sortOrder) throws APIManagementException {
-
-        Map<String, Object> result = new HashMap<String, Object>();
-        if (log.isDebugEnabled()) {
-            log.debug("Original search query received : " + searchQuery);
-        }
+    	
         Organization org = new Organization(organization);
         String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
+
+        return searchPaginatedAPIs(searchQuery, start, end, org, userCtx);
+    }
+    
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start, int end,
+                                                   String sortBy, String sortOrder) throws APIManagementException {
+        Organization org = new Organization(organizationInfo.getSuperOrganization());
+        String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+        String[] roles = APIUtil.getListOfRoles(userName);
+        Map<String, Object> properties = APIUtil.getUserProperties(userName);
+		UserContext userCtx = new UserContext(userNameWithoutChange, new Organization(organizationInfo.getName()),
+				properties, roles);
+    	
+    	return searchPaginatedAPIs(searchQuery, start, end, org, userCtx);
+    }
+
+	private Map<String, Object> searchPaginatedAPIs(String searchQuery, int start, int end, Organization org,
+			UserContext userCtx) throws APIManagementException {
+		Map<String, Object> result = new HashMap<String, Object>();
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+
         try {
             DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
                     start, end, userCtx);
@@ -3878,7 +3899,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throw new APIManagementException("Error while searching the api ", e);
         }
         return result;
-    }
+	}
 
     @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {

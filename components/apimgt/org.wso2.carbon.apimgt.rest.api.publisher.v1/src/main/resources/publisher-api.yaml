@@ -9525,6 +9525,7 @@ components:
             - PUBLIC
             - PRIVATE
             - RESTRICTED
+            - RESTRICTED_BY_ORG
           x-otherScopes:
             - apim:api_publish
             - apim:api_manage
@@ -9539,6 +9540,12 @@ components:
             - apim:api_manage
         visibleTenants:
           type: array
+          example: []
+          items:
+            type: string
+        visibleOrganizations:
+          type: array
+          description: The organizations that are able to access the API in Developer Portal
           example: []
           items:
             type: string

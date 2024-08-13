@@ -316,6 +316,15 @@ public class APIMappingUtil {
                 model.setVisibleTenants(visibleTenants);
             }
         }
+        
+        if (dto.getVisibleOrganizations() != null) {
+            String visibleOrgs = StringUtils.join(dto.getVisibleOrganizations(), ',');
+            model.setVisibleOrganizations(visibleOrgs);
+//            check if need to have a config
+//            if (APIUtil.isCrossTenantSubscriptionsEnabled()) {
+//
+//            }
+        }
 
         List<String> accessControlRoles = dto.getAccessControlRoles();
         if (accessControlRoles == null || accessControlRoles.isEmpty()) {
@@ -934,6 +943,8 @@ public class APIMappingUtil {
                 return APIConstants.API_PRIVATE_VISIBILITY;
             case RESTRICTED:
                 return APIConstants.API_RESTRICTED_VISIBILITY;
+            case RESTRICTED_BY_ORG:
+                return APIConstants.API_RESTRICTED_BY_ORG;
 //            case CONTROLLED: todo add to swagger
 //                return APIConstants.API_CONTROLLED_VISIBILITY;
             default:
@@ -1288,6 +1299,10 @@ public class APIMappingUtil {
         if (model.getVisibleTenants() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
+        
+        if (model.getVisibleOrganizations() != null) {
+            dto.setVisibleOrganizations(Arrays.asList(model.getVisibleOrganizations().split(",")));
+        }
 
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
@@ -1508,6 +1523,8 @@ public class APIMappingUtil {
                 return APIDTO.VisibilityEnum.PRIVATE;
             case APIConstants.API_RESTRICTED_VISIBILITY:
                 return APIDTO.VisibilityEnum.RESTRICTED;
+            case APIConstants.API_RESTRICTED_BY_ORG:
+                return APIDTO.VisibilityEnum.RESTRICTED_BY_ORG;
 //            case APIConstants.API_CONTROLLED_VISIBILITY : todo add this to swagger
 //                return APIDTO.VisibilityEnum.CONTROLLED;
             default:

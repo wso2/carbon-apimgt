@@ -52,6 +52,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_VISIBILITY = "overview_visibility";
     public static final String API_OVERVIEW_VISIBLE_ROLES = "overview_visibleRoles";
     public static final String API_OVERVIEW_VISIBLE_TENANTS = "overview_visibleTenants";
+    public static final String API_OVERVIEW_VISIBLE_ORGANIZATIONS = "overview_visibleOrganizations";
     public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
     public static final String API_OVERVIEW_AUDIENCE = "overview_audience";
     public static final String API_OVERVIEW_AUDIENCES = "overview_audiences";
@@ -206,6 +207,7 @@ public final class APIConstants {
     public static final String NULL_USER_ROLE_LIST = "null";
     public static final String API_RESTRICTED_VISIBILITY = "restricted";
     public static final String API_PRIVATE_VISIBILITY = "private";
+    public static final String API_RESTRICTED_BY_ORG = "restricted_by_org";
     public static final String API_CONTROLLED_VISIBILITY = "controlled";
     public static final String DOC_OWNER_VISIBILITY = "OWNER_ONLY";
     public static final String API_GLOBAL_VISIBILITY = "public";
@@ -384,4 +386,6 @@ public final class APIConstants {
 
     public static final String API_OVERVIEW_GATEWAY_VENDOR = "overview_gatewayVendor";
     public static final String ASYNC_API_TRANSPORT_PROTOCOLS = "overview_asyncTransportProtocols";
+    
+    public static final String DEFAULT_VISIBLE_ORG = "all";
 }

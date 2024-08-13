@@ -219,6 +219,7 @@ public final class APIConstants {
     public static final String VISIBILITY = "visibility";
 
     public static final String API_RESTRICTED_VISIBILITY = "restricted";
+    public static final String API_RESTRICTED_BY_ORG = "restricted_by_org";
 
     public static final String API_PRIVATE_VISIBILITY = "private";
 
