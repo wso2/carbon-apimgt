@@ -49,6 +49,9 @@ import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -66,12 +69,14 @@ import java.security.cert.X509Certificate;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({JWTValidator.class, GatewayUtils.class, MultitenantUtils.class, PrivilegedCarbonContext.class,
-        ServiceReferenceHolder.class, CertificateMgtUtils.class, RevokedJWTDataHolder.class})
+        ServiceReferenceHolder.class, CertificateMgtUtils.class, RevokedJWTDataHolder.class,
+        SubscriptionDataHolder.class})
 public class JWTValidatorTest {
 
     private static String PASSWORD = "wso2carbon";
     PrivilegedCarbonContext privilegedCarbonContext;
     ServiceReferenceHolder serviceReferenceHolder;
+    API api;
 
     @Before
     public void setup() {
@@ -89,6 +94,8 @@ public class JWTValidatorTest {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         System.setProperty("javax.net.ssl.trustStorePassword", PASSWORD);
         PowerMockito.mockStatic(CertificateMgtUtils.class);
+        api = new API("1111-2222-3333", 1, "admin", "api1", "1.0", "/api1",
+                "Unlimited", "HTTP", "PUBLISHED", false);
     }
 
     @Test
@@ -144,6 +151,7 @@ public class JWTValidatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -223,6 +231,7 @@ public class JWTValidatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -312,6 +321,7 @@ public class JWTValidatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -409,6 +419,7 @@ public class JWTValidatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -502,6 +513,7 @@ public class JWTValidatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -590,6 +602,7 @@ public class JWTValidatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -679,6 +692,7 @@ public class JWTValidatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -834,6 +848,7 @@ public class JWTValidatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -926,6 +941,14 @@ public class JWTValidatorTest {
         apiKeyValidationInfoDTO.setGraphQLMaxDepth(3);
         apiKeyValidationInfoDTO.setGraphQLMaxComplexity(4);
         // testing happy path
+        SubscriptionDataStore mockSubscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
+        SubscriptionDataHolder mockSubscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
+        PowerMockito.mockStatic(SubscriptionDataHolder.class);
+        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(mockSubscriptionDataHolder);
+        Mockito.when(mockSubscriptionDataHolder.getTenantSubscriptionStore(Mockito.anyString()))
+                .thenReturn(mockSubscriptionDataStore);
+        Mockito.when(mockSubscriptionDataStore
+                .getApiByContextAndVersion(Mockito.anyString(), Mockito.anyString())).thenReturn(api);
         Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
         JWTValidatorWrapper jwtValidator
                 = new JWTValidatorWrapper("Unlimited", true, apiKeyValidator, false, null, jwtConfigurationDto,
@@ -1091,6 +1114,7 @@ public class JWTValidatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -1195,6 +1219,7 @@ public class JWTValidatorTest {
             Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                     .thenReturn(headers);
             Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+            Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
             Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
             Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
             Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -1293,6 +1318,7 @@ public class JWTValidatorTest {
                 .thenReturn(headers);
         Mockito.when(axis2MsgCntxt.getProperty(APISecurityConstants.DISABLE_CNF_VALIDATION)).thenReturn(true);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
@@ -1329,6 +1355,100 @@ public class JWTValidatorTest {
         Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
         Mockito.verify(gatewayTokenCache, Mockito.atLeast(1)).get(signedJWT.getJWTClaimsSet()
                 .getJWTID());
+    }
+
+    @Test
+    public void testJWTValidatorWithSubscriptionValidationDisabled()
+            throws ParseException, APIManagementException, APISecurityException {
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn("carbon.super");
+        SignedJWT signedJWT =
+                SignedJWT.parse("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5UZG1aak00WkRrM05qWTBZemM1TW1abU9E" +
+                        "Z3dNVEUzTVdZd05ERTVNV1JsWkRnNE56YzRaQT09In0.eyJhdWQiOiJodHRwOlwvXC9vcmcud3NvMi5hcGltZ3RcL2d" +
+                        "hdGV3YXkiLCJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidG" +
+                        "llclF1b3RhVHlwZSI6InJlcXVlc3RDb3VudCIsInRpZXIiOiJVbmxpbWl0ZWQiLCJuYW1lIjoiRGVmYXVsdEFwcGxpY" +
+                        "2F0aW9uIiwiaWQiOjEsInV1aWQiOm51bGx9LCJzY29wZSI6ImFtX2FwcGxpY2F0aW9uX3Njb3BlIGRlZmF1bHQiLCJp" +
+                        "c3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNcL29hdXRoMlwvdG9rZW4iLCJ0aWVySW5mbyI6e30sImtleXR5cGU" +
+                        "iOiJQUk9EVUNUSU9OIiwic3Vic2NyaWJlZEFQSXMiOltdLCJjb25zdW1lcktleSI6IlhnTzM5NklIRks3ZUZZeWRycV" +
+                        "FlNEhLR3oxa2EiLCJleHAiOjE1OTAzNDIzMTMsImlhdCI6MTU5MDMzODcxMywianRpIjoiYjg5Mzg3NjgtMjNmZC00Z" +
+                        "GVjLThiNzAtYmVkNDVlYjdjMzNkIn0.sBgeoqJn0log5EZflj_G7ADvm6B3KQ9bdfFCEFVQS1U3oY9-cqPwAPyOLLh9" +
+                        "5pdfjYjakkf1UtjPZjeIupwXnzg0SffIc704RoVlZocAx9Ns2XihjU6Imx2MbXq9ARmQxQkyGVkJUMTwZ8-SfOnprfr" +
+                        "hX2cMQQS8m2Lp7hcsvWFRGKxAKIeyUrbY4ihRIA5vOUrMBWYUx9Di1N7qdKA4S3e8O4KQX2VaZPBzN594c9TGriiH8A" +
+                        "uuqnrftfvidSnlRLaFJmko8-QZo8jDepwacaFhtcaPVVJFG4uYP-_-N6sqfxLw3haazPN0_xU0T1zJLPRLC5HPfZMJD" +
+                        "MGpEuSe9w");
+        ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
+        JWTValidationService jwtValidationService = Mockito.mock(JWTValidationService.class);
+        APIKeyValidator apiKeyValidator = Mockito.mock(APIKeyValidator.class);
+        Cache gatewayTokenCache = Mockito.mock(Cache.class);
+        Cache invalidTokenCache = Mockito.mock(Cache.class);
+        Cache gatewayKeyCache = Mockito.mock(Cache.class);
+        Cache gatewayJWTTokenCache = Mockito.mock(Cache.class);
+        JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
+        jwtValidationInfo.setValid(true);
+        jwtValidationInfo.setIssuer("https://localhost");
+        jwtValidationInfo.setRawPayload(signedJWT.getParsedString());
+        jwtValidationInfo.setJti(UUID.randomUUID().toString());
+        jwtValidationInfo.setIssuedTime(System.currentTimeMillis());
+        jwtValidationInfo.setExpiryTime(System.currentTimeMillis() + 5000L);
+        jwtValidationInfo.setConsumerKey(UUID.randomUUID().toString());
+        jwtValidationInfo.setUser("user1");
+        jwtValidationInfo.setKeyManager("Default");
+        SignedJWTInfo signedJWTInfo = new SignedJWTInfo(signedJWT.getParsedString(), signedJWT,
+                signedJWT.getJWTClaimsSet());
+        Mockito.when(jwtValidationService.validateJWTToken(signedJWTInfo)).thenReturn(jwtValidationInfo);
+        JWTValidatorWrapper jwtValidator = new JWTValidatorWrapper("Unlimited",
+                true, apiKeyValidator, false, null, jwtConfigurationDto,
+                jwtValidationService, invalidTokenCache, gatewayTokenCache, gatewayKeyCache, gatewayJWTTokenCache);
+        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MsgCntxt =
+                Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
+        Map<String, String> headers = new HashMap<>();
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(headers);
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        API api1 = api;
+        api.setDisableSubscriptionValidation(true);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api1);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
+        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
+        Mockito.when(messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/pet/findByStatus");
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION))
+                .thenReturn("true");
+        jwtValidator.setApiManagerConfiguration(apiManagerConfiguration);
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        apiKeyValidationInfoDTO.setApiName("api1");
+        apiKeyValidationInfoDTO.setApiPublisher("admin");
+        apiKeyValidationInfoDTO.setApiTier("Unlimited");
+        apiKeyValidationInfoDTO.setAuthorized(true);
+        Mockito.when(apiKeyValidator.validateScopes(Mockito.any(TokenValidationContext.class), Mockito.anyString()))
+                .thenReturn(true);
+        SubscriptionDataStore mockSubscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
+        SubscriptionDataHolder mockSubscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
+        PowerMockito.mockStatic(SubscriptionDataHolder.class);
+        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(mockSubscriptionDataHolder);
+        Mockito.when(mockSubscriptionDataHolder.getTenantSubscriptionStore(Mockito.anyString()))
+                .thenReturn(mockSubscriptionDataStore);
+        Mockito.when(mockSubscriptionDataStore.getApiPolicyByName(Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn(null);
+        AuthenticationContext authenticate = jwtValidator.authenticate(signedJWTInfo, messageContext);
+        Mockito.verify(apiKeyValidator, Mockito.never()).validateSubscription(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        Assert.assertNotNull(authenticate);
+        Assert.assertEquals(authenticate.getApiName(), "api1");
+        Assert.assertEquals(authenticate.getApiPublisher(), "admin");
+        Assert.assertEquals(authenticate.getApplicationName(), APIConstants.Subscriptionless.APPLICATION_NAME);
+        Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
+        Mockito.when(gatewayTokenCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn("carbon.super");
+        Mockito.when(gatewayKeyCache.get(signedJWT.getJWTClaimsSet().getJWTID())).thenReturn(jwtValidationInfo);
+        authenticate = jwtValidator.authenticate(signedJWTInfo, messageContext);
+        Assert.assertNotNull(authenticate);
+        Assert.assertEquals(authenticate.getApiName(), "api1");
+        Assert.assertEquals(authenticate.getApiPublisher(), "admin");
+        Assert.assertEquals(authenticate.getConsumerKey(), jwtValidationInfo.getConsumerKey());
+        Mockito.verify(jwtValidationService, Mockito.only()).validateJWTToken(signedJWTInfo);
+        Mockito.verify(gatewayTokenCache, Mockito.atLeast(1))
+                .get(signedJWT.getJWTClaimsSet().getJWTID());
     }
 
     /**
