@@ -623,9 +623,9 @@ public class PublisherCommonUtils {
                     }
                 }
             }
-        }
-        if (isSubscriptionValidationDisabled != newAPIDTO.isDisableSubscriptionValidation()) {
-            throw new APIManagementException(ExceptionCodes.SUB_VALIDATION_DISABLE_NOT_ALLOWED);
+            if (isSubscriptionValidationDisabled != newAPIDTO.isDisableSubscriptionValidation()) {
+                throw new APIManagementException(ExceptionCodes.SUB_VALIDATION_DISABLE_NOT_ALLOWED);
+            }
         }
     }
 
@@ -649,9 +649,9 @@ public class PublisherCommonUtils {
                     }
                 }
             }
-        }
-        if (isSubscriptionValidationDisabled != apiProductDTO.isDisableSubscriptionValidation()) {
-            throw new APIManagementException(ExceptionCodes.SUB_VALIDATION_DISABLE_NOT_ALLOWED);
+            if (isSubscriptionValidationDisabled != apiProductDTO.isDisableSubscriptionValidation()) {
+                throw new APIManagementException(ExceptionCodes.SUB_VALIDATION_DISABLE_NOT_ALLOWED);
+            }
         }
     }
 

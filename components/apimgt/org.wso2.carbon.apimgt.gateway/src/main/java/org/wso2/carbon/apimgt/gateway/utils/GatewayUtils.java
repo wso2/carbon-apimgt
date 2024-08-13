@@ -645,8 +645,12 @@ public class GatewayUtils {
                     return endUsername;
                 }
             }
-            return endUsername + UserCoreConstants.TENANT_DOMAIN_COMBINER
-                    + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
+            if (apiKeyValidationInfoDTO.isDisableSubscription()) {
+                return endUsername;
+            } else {
+                return endUsername + UserCoreConstants.TENANT_DOMAIN_COMBINER
+                        + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
+            }
         }
         return endUsername;
     }
@@ -1869,6 +1873,8 @@ public class GatewayUtils {
         List<String> list = new ArrayList<>();
         list.add(apiLevelThrottlingKey);
         infoDTO.setThrottlingDataList(list);
+        infoDTO.setStopOnQuotaReach(true);
+
         return infoDTO;
     }
 }

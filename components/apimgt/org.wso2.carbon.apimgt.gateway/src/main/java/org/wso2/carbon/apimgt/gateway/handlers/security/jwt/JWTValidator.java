@@ -508,7 +508,7 @@ public class JWTValidator {
             }
 
             if (claims.containsKey(APIConstants.Subscriptionless.TIER_CLAIM)) {
-                apiKeyValidationInfoDTO.setSubscriber((String) claims.get(APIConstants.Subscriptionless.TIER_CLAIM));
+                apiKeyValidationInfoDTO.setTier((String) claims.get(APIConstants.Subscriptionless.TIER_CLAIM));
             } else {
                 apiKeyValidationInfoDTO.setTier(APIConstants.Subscriptionless.DEFAULT_SUBSCRIPTION_TIER);
             }
