@@ -20166,12 +20166,12 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Retrieve a common operation policy by providing the policy name and organization
+     * Retrieve a list of common operation policies by providing the policy name and organization
      *
      * @param policyName             Policy name
      * @param organization           Organization name
      * @param isWithPolicyDefinition Include the policy definition to the output or not
-     * @return operation policy
+     * @return List of operation policy data
      * @throws APIManagementException
      */
     public List<OperationPolicyData> getCommonOperationPolicyByPolicyName(String policyName,

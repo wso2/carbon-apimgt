@@ -1559,8 +1559,8 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
-     * Get the common operation policy for a given policy name. This will only return the policy data if there is
-     * a matching policy created as a common policy. If not, it will return null
+     * Get the list of common operation policies for a given policy name. This will only return the policy data if
+     * there is a matching policy created as a common policy. If not, it will return null
      *
      * @param policyName             Common Policy name
      * @param organization           Organization
