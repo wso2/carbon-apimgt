@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
@@ -65,10 +66,11 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      *
      * @param externalWorkflowRef is the unique identifier for workflow request
      * @param messageContext      Message context of the request
-     * @return
+     * @return Response
      */
     @Override
-    public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, MessageContext messageContext) {
+    public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, MessageContext messageContext)
+            throws APIManagementException {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIAdmin apiAdmin = new APIAdminImpl();
@@ -76,10 +78,9 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                     createdStatus, tenantDomain);
             return Response.ok().entity(WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow)).build();
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the " +
-                    "external workflow reference. ", e, log);
+            throw new APIManagementException("Error while retrieving workflow request by the " +
+                    "external workflow reference.", ExceptionCodes.FAILED_TO_RETRIEVE_WORKFLOW_BY_EXTERNAL_REFERENCE_ID);
         }
-        return null;
     }
 
     /*
@@ -102,12 +103,13 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
         int start = 0;
         List<String> nameVersionList = new ArrayList<>();
         APIAdmin apiAdmin = new APIAdminImpl();
-        WorkflowListDTO workflowListDTO = null;
-        Workflow[] workflows = null;
+        WorkflowListDTO workflowListDTO;
+        Workflow[] workflows;
         try {
             workflows = apiAdmin.getworkflows(workflowType, createdStatus, tenantDomain);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow requests. ", e, log);
+            throw new APIManagementException("Error while retrieving workflow requests. ",
+                    ExceptionCodes.FAILED_TO_RETRIEVE_WORKFLOWS);
         }
         if (workflows.length == 0) {
             workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
@@ -139,14 +141,14 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                 workflowType = WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE;
             }
         }
-        if (workflowType.equals(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION) ||
-                workflowType.equals(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE)) {
+        if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType) ||
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equals(workflowType)) {
             List<Workflow> workflowList = new LinkedList<>();
             for (Workflow workflow : workflows) {
                 String apiName = workflow.getProperties().get("apiName").toString();
                 String apiVersion = workflow.getProperties().get("apiVersion").toString();
-                String nameWithVerison = apiName + ":" + apiVersion + ":" + workflow.getTenantDomain();
-                if (nameVersionList.contains(nameWithVerison)) {
+                String nameWithVersion = apiName + ":" + apiVersion + ":" + workflow.getTenantDomain();
+                if (nameVersionList.contains(nameWithVersion)) {
                     workflowList.add(workflow);
                 }
             }
@@ -155,10 +157,8 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset, workflows.length);
             return Response.ok().entity(workflowListDTO).build();
         } else {
-            RestApiUtil.handleBadRequest("Invalid Workflow Type", log);
+            throw new APIManagementException("Invalid Workflow Type", ExceptionCodes.WORKFLOW_INVALID_WFTYPE);
         }
-
-        return null;
     }
 
     /**
@@ -167,11 +167,11 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * @param workflowReferenceId workflow reference id that is unique to each workflow
      * @param body                body should contain the status, optionally can contain a
      *                            description and an attributes object
-     * @return
+     * @return Response
      */
     @Override
     public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body,
-                                                      MessageContext messageContext) {
+                                                      MessageContext messageContext) throws APIManagementException {
         boolean isTenantFlowStarted = false;
         String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomainOfUser = MultitenantUtils.getTenantDomain(username);
@@ -183,7 +183,8 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             org.wso2.carbon.apimgt.impl.dto.WorkflowDTO workflowDTO = (org.wso2.carbon.apimgt.impl.dto.WorkflowDTO)
                     apiProvider.retrieveWorkflow(workflowReferenceId);
             if (workflowDTO == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_WORKFLOW, workflowReferenceId, log);
+                throw new APIManagementException("Workflow not found for : " + workflowReferenceId,
+                        ExceptionCodes.WORKFLOW_NOT_FOUND);
             }
             String tenantDomain = workflowDTO.getTenantDomain();
             if (tenantDomain != null && !tenantDomain.equals(tenantDomainOfUser)) {
@@ -195,13 +196,14 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             if (body == null) {
-                RestApiUtil.handleBadRequest("Request payload is missing", log);
+                throw new APIManagementException("Request payload is missing", ExceptionCodes.WORKFLOW_PAYLOAD_MISSING);
             }
             if (body.getDescription() != null) {
                 workflowDTO.setWorkflowDescription(body.getDescription());
             }
             if (body.getStatus() == null) {
-                RestApiUtil.handleBadRequest("Workflow status is not defined", log);
+                throw new APIManagementException("Workflow status not defined",
+                        ExceptionCodes.WORKFLOW_STATUS_NOT_DEFINED);
             } else {
                 workflowDTO.setStatus(WorkflowStatus.valueOf(body.getStatus().toString()));
             }
@@ -220,17 +222,16 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                         APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
                 return Response.ok().entity(body).build();
             } else {
-                RestApiUtil.handleBadRequest("Invalid Workflow Type", log);
+                throw new APIManagementException("Invalid Workflow Type", ExceptionCodes.WORKFLOW_INVALID_WFTYPE);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while resuming workflow " + workflowReferenceId, e, log);
+            throw new APIManagementException("Error while resuming workflow for " + workflowReferenceId, e);
         } catch (WorkflowException e) {
-            RestApiUtil.handleInternalServerError("Error while resuming workflow " + workflowReferenceId, e, log);
+            throw new APIManagementException("Error while resuming workflow " + workflowReferenceId, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return null;
     }
 }
