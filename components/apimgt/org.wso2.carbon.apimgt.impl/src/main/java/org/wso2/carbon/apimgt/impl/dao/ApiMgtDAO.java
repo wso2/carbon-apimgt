@@ -15946,7 +15946,6 @@ public class ApiMgtDAO {
                 APIProductResource productMapping = new APIProductResource();
                 productMapping.setProductIdentifier(apiProductIdentifier);
                 productMapping.setUriTemplate(uriTemplate);
-
                 productMappings.add(productMapping);
             }
         }
