@@ -79,6 +79,7 @@ public interface ApisApiService {
       public Response createAPI(APIDTO APIDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
       public Response createNewAPIVersion(String newVersion, String apiId, Boolean defaultVersion, String serviceVersion, MessageContext messageContext) throws APIManagementException;
+      public Response customSequenceUpdate(String apiId, String ifMatch, InputStream sequenceInputStream, Attachment sequenceDetail, String type, String apiData, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPI(String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId, MessageContext messageContext) throws APIManagementException;

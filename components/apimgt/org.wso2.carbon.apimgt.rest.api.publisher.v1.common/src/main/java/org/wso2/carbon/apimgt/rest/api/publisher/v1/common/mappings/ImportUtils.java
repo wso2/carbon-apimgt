@@ -103,6 +103,7 @@ import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -110,8 +111,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -263,6 +264,21 @@ public class ImportUtils {
 
             // validate the API context
             APIUtil.validateAPIContext(importedApiDTO.getContext(), importedApiDTO.getName());
+
+            // Get the endpoint config object updated
+            APIUtil.validateAPIEndpointConfig(importedApiDTO.getEndpointConfig(), importedApiDTO.getType().toString(),
+                    importedApiDTO.getName());
+
+            Map endpointConfig = (Map) importedApiDTO.getEndpointConfig();
+
+            // if a valid one then update the sequence file path
+            if (endpointConfig != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                String sequenceFileName = endpointConfig.get("sequence").toString();
+                String path = extractedFolderPath + File.separator + sequenceFileName;
+                endpointConfig.put("sequence", path);
+                importedApiDTO.setEndpointConfig(endpointConfig);
+            }
 
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE, organization);
@@ -1308,8 +1324,15 @@ public class ImportUtils {
         return new Gson().fromJson(jsonObject, APIProductDTO.class);
     }
 
-    public static String retrieveXMLContent(String pathToArchive) throws IOException, APIManagementException {
-        return FileUtils.readFileToString(new File(pathToArchive), Charset.defaultCharset());
+    public static String retrieveXMLContent(InputStream sequenceInputStream) throws IOException {
+        StringBuilder result = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(sequenceInputStream))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line).append("\n");
+            }
+        }
+        return result.toString();
     }
 
     /**

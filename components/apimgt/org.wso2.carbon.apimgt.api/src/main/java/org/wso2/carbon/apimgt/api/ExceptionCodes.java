@@ -482,6 +482,9 @@ public enum ExceptionCodes implements ErrorHandler {
     // API import/export related codes
     ERROR_READING_META_DATA(900907, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
+
+    ERROR_READING_CUSTOM_SEQUENCE(900908, "Error while reading Custom Sequence from the API Endpoint Configuration", 400,
+            "Error while reading Custom Sequence from the API Endpoint Configuration"),
     ERROR_READING_PARAMS_FILE(900908, "Error while reading meta information from the params file", 400,
             "Error while reading meta information from the params file"),
     ERROR_FETCHING_DEFINITION_FILE(900909, "Cannot find the definition file of the project", 400,

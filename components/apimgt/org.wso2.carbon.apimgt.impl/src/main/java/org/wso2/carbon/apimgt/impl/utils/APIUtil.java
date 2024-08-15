@@ -2921,6 +2921,17 @@ public final class APIUtil {
         }
     }
 
+    public static void validateAPIEndpointConfig(Object endpointConfigObject, String apiType, String apiName)
+            throws APIManagementException {
+        Map endpointConfigMap = (Map) endpointConfigObject;
+        if (endpointConfigMap.containsKey("endpoint_type") && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
+                && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)
+                && !APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiType)) {
+            throw new APIManagementException("Invalid endpoint configuration provided for the API " + apiName);
+        }
+    }
+
     /**
      * Check whether the parentheses are balanced
      *

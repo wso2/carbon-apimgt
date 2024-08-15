@@ -377,6 +377,28 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.createNewAPIVersion(newVersion, apiId, defaultVersion, serviceVersion, securityContext);
     }
 
+    @PUT
+    @Path("/{apiId}/custom-sequence")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Upload Custom Sequence as the Endpoint of the API", notes = "This operation can be used to change the endpoint of the API to Custom Sequence", response = APIDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with updated API object ", response = APIDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response customSequenceUpdate(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch,  @Multipart(value = "sequence", required = false) InputStream sequenceInputStream, @Multipart(value = "sequence" , required = false) Attachment sequenceDetail, @Multipart(value = "type", required = false)  String type, @Multipart(value = "apiData", required = false)  String apiData) throws APIManagementException{
+        return delegate.customSequenceUpdate(apiId, ifMatch, sequenceInputStream, sequenceDetail, type, apiData, securityContext);
+    }
+
     @DELETE
     @Path("/{apiId}")
     

@@ -21,6 +21,10 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import com.amazonaws.SdkClientException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.internal.LinkedTreeMap;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -200,6 +204,31 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
         return Response.ok().entity(apiToReturn).build();
+    }
+
+    @Override
+    public Response customSequenceUpdate(String apiId, String ifMatch, InputStream sequenceInputStream,
+            Attachment sequenceDetail, String type, String apiData, MessageContext messageContext)
+            throws APIManagementException {
+        APIDTO apidto =  new Gson().fromJson(apiData, APIDTO.class);
+        // Get the endpoint config object updated
+        APIUtil.validateAPIEndpointConfig(apidto.getEndpointConfig(), apidto.getType().toString(),
+                apidto.getName());
+        if (apidto.getEndpointConfig() != null) {
+            org.json.JSONObject endpointConfig = new org.json.JSONObject(new Gson().toJson(apidto.getEndpointConfig()));
+            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                try {
+                    String content = ImportUtils.retrieveXMLContent(sequenceInputStream);
+                    endpointConfig.put("sequence", content);
+                } catch (IOException ex) {
+                    RestApiUtil.handleInternalServerError("Failed to read Custom Sequence of " + apiId, ex, log);
+                }
+            }
+            apidto.setEndpointConfig(new Gson().fromJson(endpointConfig.toString(), Object.class));
+        }
+        updateAPI(apiId, apidto, ifMatch, messageContext);
+        return Response.ok().entity(null).build();
     }
 
     @Override
@@ -3892,6 +3921,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //validate whether the API is advertise only
         APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+
+        // Cannot deploy an API with custom sequence to the APK gateway
+        Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
+        if (APIConstants.WSO2_APK_GATEWAY.equals(apiDto.getGatewayType()) && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Cannot Deploy an API with a Custom Sequence to APK Gateway: " + apiId).build();
+        }
         // Reject the request if API lifecycle is 'RETIRED'.
         if (apiDto.getLifeCycleStatus().equals(APIConstants.RETIRED)) {
             String errorMessage = "Deploying API Revisions is not supported for retired APIs. ApiId: " + apiId;
