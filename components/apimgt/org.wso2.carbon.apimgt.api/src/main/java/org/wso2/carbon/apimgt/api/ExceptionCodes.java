@@ -630,6 +630,15 @@ public enum ExceptionCodes implements ErrorHandler {
             "Operation type/http method is not specified for the operation/resource", 400,
             "Operation type/http method is not specified for the operation/resource: %s", false),
 
+    FAILED_TO_RETRIEVE_WORKFLOW_BY_EXTERNAL_REFERENCE_ID(902033, "Failed to rettrieve workflow request by the " +
+            "external workflow reference", 500,
+            "Failed to retrieve workflow request by the external workflow reference"),
+    FAILED_TO_RETRIEVE_WORKFLOWS(902034, "Error while retrieving workflow requests.", 500,
+            "Error while retrieving workflow requests."),
+    WORKFLOW_PAYLOAD_MISSING(902035, "Payload is missing", 400,
+            "Payload is missing in the workflow request"),
+    WORKFLOW_STATUS_NOT_DEFINED(902036, "Workflow status not defined", 400,
+            "Workflow status is not defined"),
     RESOURCE_URI_TEMPLATE_NOT_DEFINED(902032, "Resource URI template value not defined", 400,
             "Resource URI template value (target) not defined", false);
     private final long errorCode;

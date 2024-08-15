@@ -16,29 +16,8 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.dto;
+package org.wso2.carbon.apimgt.api.model;
 
-import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
-/**
- * This is the DTO that will be used for storing workflow related contextual information.
- */
-public class WorkflowDTO extends org.wso2.carbon.apimgt.api.dto.WorkflowDTO {
-    public WorkflowDTO(){
-        super();
-    }
-    private WorkflowStatus status;
-
-    public WorkflowStatus getStatus() {
-        return status;
-    }
-    public void setStatus(WorkflowStatus status) {
-        this.status = status;
-    }
+public enum WorkflowStatus {
+    CREATED, APPROVED, REJECTED, REGISTERED
 }
