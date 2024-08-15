@@ -88,10 +88,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class RegistryPersistenceUtil {
     private static final Log log = LogFactory.getLog(RegistryPersistenceUtil.class);
+
+    //Stores <tenantId, isTenantRXTLoaded> to load RXTs only once
+    private static final ConcurrentHashMap<Integer, Boolean> tenantRxtLoaded = new ConcurrentHashMap<>();
 
     /**
      * When an input is having '-AT-',replace it with @ [This is required to persist API data between registry and database]
@@ -483,76 +487,84 @@ public class RegistryPersistenceUtil {
     }
 
     public static void loadloadTenantAPIRXT(String tenant, int tenantID) throws RegistryException, PersistenceException {
-
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        UserRegistry registry = null;
-        try {
-
-            registry = registryService.getGovernanceSystemRegistry(tenantID);
-        } catch (RegistryException e) {
-            throw new PersistenceException("Error when create registry instance ", e);
-        }
-
-        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                                        + File.separator + "rxts";
-        File file = new File(rxtDir);
-        FilenameFilter filenameFilter = new FilenameFilter() {
-            @Override public boolean accept(File dir, String name) {
-                // if the file extension is .rxt return true, else false
-                return name.endsWith(".rxt");
+        // Synchronize on the tenant specific lock
+        synchronized (tenantID + "_loadTenantAPIRXT") {
+            // Check if RXTs have already been loaded for this tenant
+            if (Boolean.TRUE.equals(tenantRxtLoaded.get(tenantID))) {
+                return; // RXTs already loaded, exit method
             }
-        };
-        String[] rxtFilePaths = file.list(filenameFilter);
-
-        if (rxtFilePaths == null) {
-            throw new PersistenceException("rxt files not found in directory " + rxtDir);
-        }
-
-        for (String rxtPath : rxtFilePaths) {
-            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH + RegistryConstants.PATH_SEPARATOR + rxtPath;
-
-            //This is  "registry" is a governance registry instance, therefore calculate the relative path to governance.
-            String govRelativePath = RegistryUtils.getRelativePathToOriginal(resourcePath,
-                                            RegistryPersistenceUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH));
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            UserRegistry registry = null;
             try {
-                // calculate resource path
-                UserRealm tenantUserRealm = (UserRealm) ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantID);
-                RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(tenantUserRealm);
-                resourcePath = authorizationManager.computePathOnMount(resourcePath);
 
-                org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
-                                                .getRealmService().
-                                                                                getTenantUserRealm(tenantID)
-                                                .getAuthorizationManager();
-
-                if (registry.resourceExists(govRelativePath)) {
-                    // set anonymous user permission to RXTs
-                    if (!authManager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET)) {
-                        authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                    }
-                    continue;
-                }
-
-                String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
-                Resource resource = registry.newResource();
-                resource.setContent(rxt.getBytes(Charset.defaultCharset()));
-                resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
-                registry.put(govRelativePath, resource);
-
-                authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-
-            } catch (UserStoreException e) {
-                throw new PersistenceException("Error while adding role permissions to API", e);
-            } catch (IOException e) {
-                String msg = "Failed to read rxt files";
-                throw new PersistenceException(msg, e);
+                registry = registryService.getGovernanceSystemRegistry(tenantID);
             } catch (RegistryException e) {
-                String msg = "Failed to add rxt to registry ";
-                throw new PersistenceException(msg, e);
+                throw new PersistenceException("Error when create registry instance ", e);
             }
-        }
 
+            String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                    + File.separator + "rxts";
+            File file = new File(rxtDir);
+            FilenameFilter filenameFilter = new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    // if the file extension is .rxt return true, else false
+                    return name.endsWith(".rxt");
+                }
+            };
+            String[] rxtFilePaths = file.list(filenameFilter);
+
+            if (rxtFilePaths == null) {
+                throw new PersistenceException("rxt files not found in directory " + rxtDir);
+            }
+
+            for (String rxtPath : rxtFilePaths) {
+                String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH + RegistryConstants.PATH_SEPARATOR + rxtPath;
+
+                //This is  "registry" is a governance registry instance, therefore calculate the relative path to governance.
+                String govRelativePath = RegistryUtils.getRelativePathToOriginal(resourcePath,
+                        RegistryPersistenceUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH));
+                try {
+                    // calculate resource path
+                    UserRealm tenantUserRealm = (UserRealm) ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantID);
+                    RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(tenantUserRealm);
+                    resourcePath = authorizationManager.computePathOnMount(resourcePath);
+
+                    org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
+                            .getRealmService().
+                            getTenantUserRealm(tenantID)
+                            .getAuthorizationManager();
+
+                    if (registry.resourceExists(govRelativePath)) {
+                        // set anonymous user permission to RXTs
+                        if (!authManager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET)) {
+                            authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+                        }
+                        continue;
+                    }
+
+                    String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
+                    Resource resource = registry.newResource();
+                    resource.setContent(rxt.getBytes(Charset.defaultCharset()));
+                    resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
+                    registry.put(govRelativePath, resource);
+
+                    authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
+
+                } catch (UserStoreException e) {
+                    throw new PersistenceException("Error while adding role permissions to API", e);
+                } catch (IOException e) {
+                    String msg = "Failed to read rxt files";
+                    throw new PersistenceException(msg, e);
+                } catch (RegistryException e) {
+                    String msg = "Failed to add rxt to registry ";
+                    throw new PersistenceException(msg, e);
+                }
+            }
+            // Mark RXTs as loaded for this tenant
+            tenantRxtLoaded.put(tenantID, Boolean.TRUE);
+        }
     }
 
     /**
