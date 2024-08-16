@@ -2205,7 +2205,7 @@
         <powermock.version>2.0.2</powermock.version>
         <mockserver.version>5.14.0</mockserver.version>
         <reflection.version>0.9.11</reflection.version>
-        <woodstox-core.version>6.2.1</woodstox-core.version>
+        <woodstox-core.version>6.4.0</woodstox-core.version>
         <apache.commons.version>2.8.0</apache.commons.version>
         <apache.commons.lang3.version>3.12.0</apache.commons.lang3.version>
         <io.swagger.codegen.version>2.4.11</io.swagger.codegen.version>
