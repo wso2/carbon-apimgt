@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
@@ -133,6 +134,7 @@ public class APIManagerConfiguration {
     private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
     private JSONObject subscriberAttributes = new JSONObject();
     private static Map<String, String> analyticsMaskProps;
+    private TokenValidationDto tokenValidationDto = new TokenValidationDto();
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -656,6 +658,8 @@ public class APIManagerConfiguration {
                 setMarketplaceAssistantConfiguration(element);
             } else if (APIConstants.AI.API_CHAT.equals(localName)) {
                 setApiChatConfiguration(element);
+            } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
+                setTokenValidation(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -691,6 +695,20 @@ public class APIManagerConfiguration {
             } else {
                 log.debug("Subscriber email delimiter field is set to default (,).");
             }
+        }
+    }
+
+    /**
+     * Set token validation configurations from the api-manager.xml file
+     *
+     * @param omElement OMElement of the TokenValidation configuration block
+     */
+    private void setTokenValidation(OMElement omElement) {
+        OMElement enforceTypeHeaderValidation = omElement.getFirstChildWithName(new QName(
+                APIConstants.TokenValidationConstants.ENFORCE_JWT_TYPE_HEADER_VALIDATION));
+        if (enforceTypeHeaderValidation != null) {
+            tokenValidationDto.setEnforceTypeHeaderValidation(Boolean.parseBoolean(
+                    enforceTypeHeaderValidation.getText()));
         }
     }
 
@@ -2483,5 +2501,9 @@ public class APIManagerConfiguration {
             return Boolean.parseBoolean(jwtClaimCacheExpiryEnabledString);
         }
         return false;
+    }
+
+    public TokenValidationDto getTokenValidationDto() {
+        return tokenValidationDto;
     }
 }
