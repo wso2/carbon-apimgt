@@ -4047,6 +4047,85 @@ paths:
           > exportAPI.zip'
       operationId: exportAPI
 
+  /apis/export/apis:
+    get:
+      tags:
+        - Import Export
+      summary: Export APIs for a given environment
+      description: |
+        This operation can be used to export the details of given APIs to a zip file.
+      parameters:
+        - name: apiId
+          in: query
+          description: UUID of the API
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: |
+            API Name
+          required: false
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: |
+            Version of the API
+          required: false
+          schema:
+            type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            Gateway environment name to export the APIs
+          required: false
+          schema:
+            type: string
+        - name: gatewayType
+          in: query
+          description: |
+            Gateway type for the exported APIs
+          schema:
+            type: string
+            enum:
+              - Synapse
+              - Envoy
+            default: Envoy
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_publish
+            - apim:api_create
+            - apim:api_import_export
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/export/apis?apiId=96077508-fd01-4fae-bc64-5de0e2baf43c&name=PizzaShackAPI&version=1.0&provider=admin&format=YAML&gatewayEnvironment=Default"
+          > exportAPIs.zip'
+      operationId: exportAPIs
+
   /apis/import:
     post:
       tags:
@@ -13172,6 +13251,23 @@ components:
           description: |
             Revision of the imported API
           example: 1
+    #-----------------------------------------------------
+    # The Synapse Artifacts  List resource
+    #-----------------------------------------------------
+    SynapseArtifactList:
+      title: SynapseArtifactList
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Synapse Artifacts returned.
+          example: 1
+        list:
+          type: array
+          items:
+            type: string
+        pagination:
+          $ref: '#/definitions/Pagination'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

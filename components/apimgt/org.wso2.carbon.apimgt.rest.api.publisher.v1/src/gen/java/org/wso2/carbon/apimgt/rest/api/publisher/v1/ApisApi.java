@@ -619,6 +619,27 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.exportAPI(apiId, name, version, revisionNumber, providerName, format, preserveStatus, latestRevision, securityContext);
     }
 
+    @GET
+    @Path("/export/apis")
+    
+    @Produces({ "application/zip", "application/json" })
+    @ApiOperation(value = "Export APIs for a given environment", notes = "This operation can be used to export the details of given APIs to a zip file. ", response = File.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Import Export",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response exportAPIs( @ApiParam(value = "UUID of the API")  @QueryParam("apiId") String apiId,  @ApiParam(value = "API Name ")  @QueryParam("name") String name,  @ApiParam(value = "Version of the API ")  @QueryParam("version") String version,  @ApiParam(value = "Gateway environment name to export the APIs ")  @QueryParam("gatewayLabel") String gatewayLabel,  @ApiParam(value = "Gateway type for the exported APIs ", allowableValues="Synapse, Envoy", defaultValue="Envoy") @DefaultValue("Envoy") @QueryParam("gatewayType") String gatewayType) throws APIManagementException{
+        return delegate.exportAPIs(apiId, name, version, gatewayLabel, gatewayType, securityContext);
+    }
+
     @POST
     @Path("/{apiId}/generate-key")
     

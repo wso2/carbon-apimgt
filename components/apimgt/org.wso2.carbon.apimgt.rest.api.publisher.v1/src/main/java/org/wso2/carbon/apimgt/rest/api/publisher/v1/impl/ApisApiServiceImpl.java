@@ -52,7 +52,9 @@ import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.*;
+import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -79,11 +81,14 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.util.*;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
@@ -3396,6 +3401,61 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
         }
     }
+
+    /**
+     * Exports APIs from API Manager for a given gateway environment.
+     *
+     * @param apiId        UUID of an API
+     * @param name         Name of the API that needs to be exported
+     * @param version      Version of the API that needs to be exported
+     * @param gatewayLabel Gateway environment of the APIs
+     * @param gatewayType  Gateway type
+     * @return ZIP file containing exported APIs
+     * @throws APIManagementException when error occurred while exporting the APIs
+     */
+    @Override
+    public Response exportAPIs(String apiId, String name, String version, String gatewayLabel, String gatewayType,
+                               MessageContext messageContext) throws APIManagementException {
+        RuntimeArtifactDto runtimeArtifactDto;
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        if (StringUtils.isNotEmpty(organization) && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                .equalsIgnoreCase(organization)) {
+            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(apiId, gatewayLabel,
+                    gatewayType);
+        } else {
+            runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId,
+                    gatewayLabel, gatewayType, organization);
+        }
+        if (runtimeArtifactDto != null) {
+            if (runtimeArtifactDto.isFile()) {
+                File artifact = (File) runtimeArtifactDto.getArtifact();
+                StreamingOutput streamingOutput = (outputStream) -> {
+                    try {
+                        Files.copy(artifact.toPath(), outputStream);
+                    } finally {
+                        Files.delete(artifact.toPath());
+                    }
+                };
+                return Response.ok(streamingOutput).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
+                        APIConstants.APPLICATION_ZIP).build();
+            } else {
+                SynapseArtifactListDTO synapseArtifactListDTO = new SynapseArtifactListDTO();
+                if (runtimeArtifactDto.getArtifact() instanceof List) {
+                    synapseArtifactListDTO.setList((List<String>) runtimeArtifactDto.getArtifact());
+                    synapseArtifactListDTO.setCount(((List<String>) runtimeArtifactDto.getArtifact()).size());
+                }
+                return Response.ok().entity(synapseArtifactListDTO)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
+            }
+        } else {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity(RestApiUtil.getErrorDTO(ExceptionCodes.NO_API_ARTIFACT_FOUND))
+                    .build();
+        }
+    }
+
 
     @Override
     public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException {
