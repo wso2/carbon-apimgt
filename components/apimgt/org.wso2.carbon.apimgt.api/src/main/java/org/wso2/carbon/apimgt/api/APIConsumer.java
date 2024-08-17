@@ -462,12 +462,13 @@ public interface APIConsumer extends APIManager {
      * @param offset
      * @param groupingId   the groupId to which the applications must belong.
      * @param organization Identifier of an organization
+     * @param sharedOrganization 
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
     Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset,
-                                                String search, String sortColumn, String sortOrder, String organization)
+            String search, String sortColumn, String sortOrder, String organization, String sharedOrganization)
             throws APIManagementException;
 
     /**

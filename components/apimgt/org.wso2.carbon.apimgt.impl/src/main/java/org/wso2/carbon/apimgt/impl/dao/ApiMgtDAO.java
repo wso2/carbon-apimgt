@@ -3497,6 +3497,7 @@ public class ApiMgtDAO {
             ps.setString(11, application.getUUID());
             ps.setString(12, String.valueOf(application.getTokenType()));
             ps.setString(13, organization);
+            ps.setString(14, application.getSharedOrganization());
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -3537,7 +3538,8 @@ public class ApiMgtDAO {
             ps.setString(5, null);
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             ps.setString(7, application.getTokenType());
-            ps.setInt(8, application.getId());
+            ps.setString(8, application.getSharedOrganization());
+            ps.setInt(9, application.getId());
 
             ps.executeUpdate();
 
@@ -4118,7 +4120,8 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start,
-                                                       int offset, String search, String sortColumn, String sortOrder, String organization)
+            int offset, String search, String sortColumn, String sortOrder, String organization,
+            String sharedOrganization)
             throws APIManagementException {
 
         Connection connection = null;
@@ -4126,7 +4129,7 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         Application[] applications = null;
         String sqlQuery = null;
-
+        boolean isOrgSharingEnabled = true; //TODO need to come from config or from user info
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
             if (multiGroupAppSharingEnabled) {
                 if (forceCaseInsensitiveComparisons) {
@@ -4147,9 +4150,19 @@ public class ApiMgtDAO {
             }
         } else {
             if (forceCaseInsensitiveComparisons) {
-                sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE");
+                if (isOrgSharingEnabled) {
+                    sqlQuery = SQLConstantManagerFactory
+                            .getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_ORGSHARING");
+                } else {
+                    sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE");
+                }
             } else {
-                sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE");
+                if (isOrgSharingEnabled) {
+                    sqlQuery = SQLConstantManagerFactory
+                            .getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_ORGSHARING");
+                } else {
+                    sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE");
+                }
             }
         }
 
@@ -4196,12 +4209,22 @@ public class ApiMgtDAO {
                     prepStmt.setInt(6, offset);
                 }
             } else {
-                prepStmt = connection.prepareStatement(sqlQuery);
-                prepStmt.setString(1, subscriber.getName());
-                prepStmt.setString(2, organization);
-                prepStmt.setString(3, "%" + search + "%");
-                prepStmt.setInt(4, start);
-                prepStmt.setInt(5, offset);
+                if (isOrgSharingEnabled) {
+                    prepStmt = connection.prepareStatement(sqlQuery);
+                    prepStmt.setString(1, subscriber.getName());
+                    prepStmt.setString(2, sharedOrganization);
+                    prepStmt.setString(3, organization);
+                    prepStmt.setString(4, "%" + search + "%");
+                    prepStmt.setInt(5, start);
+                    prepStmt.setInt(6, offset);
+                } else {
+                    prepStmt = connection.prepareStatement(sqlQuery);
+                    prepStmt.setString(1, subscriber.getName());
+                    prepStmt.setString(2, organization);
+                    prepStmt.setString(3, "%" + search + "%");
+                    prepStmt.setInt(4, start);
+                    prepStmt.setInt(5, offset);
+                }
             }
             if (log.isDebugEnabled()) {
                 log.debug("Query: " + sqlQuery);
@@ -4238,6 +4261,7 @@ public class ApiMgtDAO {
                 // Get custom attributes of application
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
                 application.setApplicationAttributes(applicationAttributes);
+                application.setSharedOrganization(rs.getString("SHARED_ORGANIZATION"));
 
                 applicationsList.add(application);
             }

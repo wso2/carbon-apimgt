@@ -1664,6 +1664,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (StringUtils.isBlank(application.getCallbackUrl())) {
             application.setCallbackUrl(null);
         }
+        if (StringUtils.isEmpty(application.getSharedOrganization())) {
+            application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
+        }
         int applicationId = apiMgtDAO.addApplication(application, userId, organization);
         Application createdApplication = apiMgtDAO.getApplicationById(applicationId);
 
@@ -1894,6 +1897,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setApplicationAttributes(null);
         }
         validateApplicationPolicy(application, existingApp.getOrganization());
+        if (StringUtils.isEmpty(application.getSharedOrganization())) {
+            application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
+        }
         apiMgtDAO.updateApplication(application);
         Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
         if (log.isDebugEnabled()) {
@@ -2786,19 +2792,20 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param sortColumn   The sort column.
      * @param sortOrder    The sort order.
      * @param organization Identifier of an Organization
+     * @param sharedOrganization 
      * @return Application[] The Applications.
      * @throws APIManagementException
      */
     @Override
     public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset
-            , String search, String sortColumn, String sortOrder, String organization)
+            , String search, String sortColumn, String sortOrder, String organization, String sharedOrganization)
             throws APIManagementException {
 
         if (APIUtil.isOnPremResolver()) {
             organization = tenantDomain;
         }
         return apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset,
-                search, sortColumn, sortOrder, organization);
+                search, sortColumn, sortOrder, organization, sharedOrganization);
     }
 
     /**

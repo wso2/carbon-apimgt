@@ -58,6 +58,8 @@ public class Application {
     private String keyType;
     private int subscriptionCount;
     private String keyManager;
+    private String sharedOrganization;
+    
     public String getCreatedTime() {
         return createdTime;
     }
@@ -319,5 +321,13 @@ public class Application {
     public void setOrganization(String organization) {
 
         this.organization = organization;
+    }
+
+    public String getSharedOrganization() {
+        return sharedOrganization;
+    }
+
+    public void setSharedOrganization(String sharedOrganization) {
+        this.sharedOrganization = sharedOrganization;
     }
 }
