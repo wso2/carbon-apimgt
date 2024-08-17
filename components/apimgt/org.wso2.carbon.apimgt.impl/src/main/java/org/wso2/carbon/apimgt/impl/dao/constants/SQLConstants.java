@@ -1009,8 +1009,8 @@ public class SQLConstants {
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
-                    "UUID, TOKEN_TYPE, ORGANIZATION)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "UUID, TOKEN_TYPE, ORGANIZATION, SHARED_ORGANIZATION)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_SQL =
             " UPDATE " +
@@ -1022,7 +1022,8 @@ public class SQLConstants {
             "   DESCRIPTION = ?, " +
             "   UPDATED_BY = ?, " +
             "   UPDATED_TIME = ?, " +
-            "   TOKEN_TYPE = ? " +
+            "   TOKEN_TYPE = ?, " +
+            "   SHARED_ORGANIZATION = ? " +
             " WHERE" +
             "   APPLICATION_ID = ?";
 

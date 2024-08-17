@@ -4363,6 +4363,11 @@ components:
           type: string
           readOnly: true
           example: 1651555310208
+        visibility:
+          type: string
+          enum:
+            - PRIVATE
+            - SHARED_WITH_ORG
     ApplicationInfo:
       title: Application info object with basic application details
       type: object
