@@ -302,8 +302,8 @@ public class PublisherCommonUtils {
             if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                     endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                 try {
-                    if (endpointConfig.get("sequence") != null) {
-                        String pathToSequence = endpointConfig.get("sequence").toString();
+                    if (endpointConfig.get("sequence_path") != null) {
+                        String pathToSequence = endpointConfig.get("sequence_path").toString();
                         String sequence = FileUtils.readFileToString(new File(pathToSequence),
                                 Charset.defaultCharset());
                         endpointConfig.put("sequence", sequence);
@@ -1098,8 +1098,8 @@ public class PublisherCommonUtils {
         if (endpointConfig != null) {
                     endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                 try {
-                    if (endpointConfig.get("sequence") != null) {
-                        String pathToSequence = endpointConfig.get("sequence").toString();
+                    if (endpointConfig.get("sequence_path") != null) {
+                        String pathToSequence = endpointConfig.get("sequence_path").toString();
                         String sequence = FileUtils.readFileToString(new File(pathToSequence),
                                 Charset.defaultCharset());
                         endpointConfig.put("sequence", sequence);

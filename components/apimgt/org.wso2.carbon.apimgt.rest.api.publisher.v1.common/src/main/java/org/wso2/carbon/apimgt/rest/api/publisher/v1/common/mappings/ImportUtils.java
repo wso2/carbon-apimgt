@@ -274,9 +274,9 @@ public class ImportUtils {
             // if a valid one then update the sequence file path
             if (endpointConfig != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                     endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                String sequenceFileName = endpointConfig.get("sequence").toString();
+                String sequenceFileName = endpointConfig.get("sequence_path").toString();
                 String path = extractedFolderPath + File.separator + sequenceFileName;
-                endpointConfig.put("sequence", path);
+                endpointConfig.put("sequence_path", path);
                 importedApiDTO.setEndpointConfig(endpointConfig);
             }
 
