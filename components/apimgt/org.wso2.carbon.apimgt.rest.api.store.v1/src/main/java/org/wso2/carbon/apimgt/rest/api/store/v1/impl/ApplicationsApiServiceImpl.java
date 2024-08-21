@@ -561,9 +561,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
 
         application.setSharedOrganization(oldApplication.getSharedOrganization()); // default
-        if ((applicationDto.getVisibility() != null)
-                && applicationDto.getVisibility() == VisibilityEnum.SHARED_WITH_ORG && sharedOrganization != null) {
-            application.setSharedOrganization(sharedOrganization);
+        if (applicationDto.getVisibility() != null) {
+            if (applicationDto.getVisibility() == VisibilityEnum.SHARED_WITH_ORG && sharedOrganization != null) {
+                application.setSharedOrganization(sharedOrganization);
+            } else if (applicationDto.getVisibility() == VisibilityEnum.PRIVATE) {
+                application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
+            }
+
         } 
         apiConsumer.updateApplication(application);
 
