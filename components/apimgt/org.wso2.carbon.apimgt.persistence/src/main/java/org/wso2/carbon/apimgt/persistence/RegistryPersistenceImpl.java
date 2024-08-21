@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
+import org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceDocUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
@@ -1078,8 +1079,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
             log.debug("Requested query for devportal search: " + searchQuery);
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
                     isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayAPIsWithMultipleVersions());
-            modifiedQuery = modifiedQuery + "&visibleOrganizations=(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR *"
-                    + ctx.getOrganization().getName() + "*)";
+            if (!PersistenceUtil.isAdminUser(ctx)) {
+                modifiedQuery = modifiedQuery + "&visibleOrganizations=(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR *"
+                        + ctx.getOrganization().getName() + "*)";
+            }
             log.debug("Modified query for devportal search: " + modifiedQuery);
             String userNameLocal;
             if (holder.isAnonymousMode()) {
