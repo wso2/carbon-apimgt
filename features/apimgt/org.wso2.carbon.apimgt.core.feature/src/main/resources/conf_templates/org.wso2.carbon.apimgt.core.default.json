@@ -55,6 +55,7 @@
   "apim.api_quota_limit.enable": false,
   "apim.http_client.max_total": "100",
   "apim.http_client.default_max_per_route": "50",
+  "apim.http_client.connection_timeout": "-1",
   "apim.key_manager.service_url": "https://localhost:${mgt.transport.https.port}${carbon.context}services/",
   "apim.key_manager.username": "${admin.username}",
   "apim.key_manager.password": "${admin.password}",
