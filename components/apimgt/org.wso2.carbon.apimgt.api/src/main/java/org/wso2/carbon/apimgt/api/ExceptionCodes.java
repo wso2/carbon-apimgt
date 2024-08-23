@@ -536,6 +536,9 @@ public enum ExceptionCodes implements ErrorHandler {
     OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "API Policy Not Found with given name and version", 404,
             "Requested api policy with name '%s' and version '%s not found"),
 
+    OPERATION_POLICY_NOT_FOUND_WITH_NAME(903007, "API Policy Not Found with given name", 404,
+            "Requested api policy with name '%s' not found"),
+
     OPERATION_POLICY_GATEWAY_ERROR(903008,
             "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
             "API Policy cannot be imported due to the missing Gateway files."),

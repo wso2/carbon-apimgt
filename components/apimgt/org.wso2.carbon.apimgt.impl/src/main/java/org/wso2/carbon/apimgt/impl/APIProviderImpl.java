@@ -6914,6 +6914,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public List<OperationPolicyData> getCommonOperationPolicyByPolicyName(String policyName, String tenantDomain,
+                                                                    boolean isWithPolicyDefinition)
+            throws APIManagementException {
+
+        return apiMgtDAO.getCommonOperationPolicyByPolicyName(policyName, tenantDomain, isWithPolicyDefinition);
+    }
+
+    @Override
     public OperationPolicyData getAPISpecificOperationPolicyByPolicyId(String policyId, String apiUUID,
                                                                        String organization,
                                                                        boolean isWithPolicyDefinition)

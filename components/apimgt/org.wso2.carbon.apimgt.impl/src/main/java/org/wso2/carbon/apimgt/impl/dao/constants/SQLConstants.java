@@ -4226,6 +4226,15 @@ public class SQLConstants {
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_COMMON_OPERATION_POLICY COP ON OP.POLICY_UUID = COP.POLICY_UUID " +
                         " WHERE " +
+                        " OP.POLICY_NAME = ? AND OP.ORGANIZATION = ?";
+
+        public static final String GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME_AND_VERSION =
+                "SELECT " +
+                        " OP.POLICY_UUID, OP.POLICY_NAME, OP.POLICY_VERSION, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
+                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.POLICY_MD5 " +
+                        " FROM " +
+                        " AM_OPERATION_POLICY OP INNER JOIN AM_COMMON_OPERATION_POLICY COP ON OP.POLICY_UUID = COP.POLICY_UUID " +
+                        " WHERE " +
                         " OP.POLICY_NAME = ? AND OP.POLICY_VERSION = ? AND OP.ORGANIZATION = ?";
 
         public static final String GET_ALL_COMMON_OPERATION_POLICIES =
