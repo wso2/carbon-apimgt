@@ -147,8 +147,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        return Response.ok().entity(getAPIByAPIId(apiId, organization)).build();
+        String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+        OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        userOrgInfo.setSuperOrganization(superOrganization);
+        return Response.ok().entity(getAPIByAPIId(apiId, superOrganization, userOrgInfo)).build();
     }
 
 
@@ -801,8 +803,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String message = "Error generating the SDK. API id or language should not be empty";
             RestApiUtil.handleBadRequest(message, log);
         }
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        APIDTO api = getAPIByAPIId(apiId, organization);
+        String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+        OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        userOrgInfo.setSuperOrganization(superOrganization);
+        APIDTO api = getAPIByAPIId(apiId, superOrganization, userOrgInfo);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
         String swaggerDefinition = api.getApiDefinition();
@@ -1135,10 +1139,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
                                                      MessageContext messageContext) throws APIManagementException {
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        APIDTO apiInfo = getAPIByAPIId(apiId, organization);
+        String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+        OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        userOrgInfo.setSuperOrganization(superOrganization);
+        APIDTO apiInfo = getAPIByAPIId(apiId, superOrganization, userOrgInfo);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), organization);
+                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), superOrganization);
 
         if (apiInfo != null ) {
             List<APITiersDTO> apiTiers = apiInfo.getTiers();
@@ -1157,7 +1163,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO getAPIByAPIId(String apiId, String organization) {
+    private APIDTO getAPIByAPIId(String apiId, String organization, OrganizationInfo userOrgInfo) {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
@@ -1169,6 +1175,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
+                if (!api.isAPIProduct()) {
+                    // Add only organization specific tiers
+                    Set<Tier> tiers = APIUtil.getAllowedTiersForTheOrganization(api.getApi().getAvailableTiers(),
+                            userOrgInfo.getName(), userOrgInfo.getSuperOrganization());
+                    api.getApi().removeAllTiers();
+                    api.getApi().setAvailableTiers(tiers);
+                }
 
                 APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, organization);
                 long subscriptionCountOfAPI = apiConsumer.getSubscriptionCountOfAPI(apiId, organization);

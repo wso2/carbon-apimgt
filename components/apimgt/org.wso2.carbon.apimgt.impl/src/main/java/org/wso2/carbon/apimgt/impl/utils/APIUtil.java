@@ -10559,4 +10559,21 @@ public final class APIUtil {
         }
         return applications.subList(offset, endIndex);
     }
+    
+    public static Set<Tier> getAllowedTiersForTheOrganization(Set<Tier> tiers, String organization,
+            String superOrganization) throws APIManagementException {
+        int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(superOrganization);
+        SubscriptionPolicy[] policies = ApiMgtDAO.getInstance().getSubscriptionPolicies(tenantId);
+        Set<Tier> allowedTiers = new HashSet<Tier>();
+        for (Tier tier : tiers) {
+            for (SubscriptionPolicy policy : policies) {
+                if (policy.getPolicyName().equals(tier.getName())
+                        && (policy.getAllowedOrganizations().contains(APIConstants.ALLOWED_ORGANIZATIONS_DEFAULT)
+                                || policy.getAllowedOrganizations().contains(organization))) {
+                    allowedTiers.add(tier);
+                }
+            }
+        }      
+        return allowedTiers;
+    }
 }

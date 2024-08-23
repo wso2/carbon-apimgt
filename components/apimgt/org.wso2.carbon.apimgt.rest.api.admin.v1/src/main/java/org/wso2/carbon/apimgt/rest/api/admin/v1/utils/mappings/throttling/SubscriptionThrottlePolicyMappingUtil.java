@@ -88,6 +88,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
         policyDTO.setGraphQLMaxComplexity(subscriptionPolicy.getGraphQLMaxComplexity());
         policyDTO.setGraphQLMaxDepth(subscriptionPolicy.getGraphQLMaxDepth());
         policyDTO.setSubscriberCount(subscriptionPolicy.getSubscriberCount());
+        policyDTO.setAllowedOrganizations(subscriptionPolicy.getAllowedOrganizations());
 
         byte[] customAttributes = subscriptionPolicy.getCustomAttributes();
         if (customAttributes != null) {
@@ -142,6 +143,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
         subscriptionPolicy.setRateLimitCount(dto.getRateLimitCount());
         subscriptionPolicy.setSubscriberCount(dto.getSubscriberCount());
         subscriptionPolicy.setStopOnQuotaReach(dto.isStopOnQuotaReach());
+        subscriptionPolicy.setAllowedOrganizations(dto.getAllowedOrganizations());
         if (dto.getGraphQLMaxComplexity() != null) {
             subscriptionPolicy.setGraphQLMaxComplexity(dto.getGraphQLMaxComplexity());
         }
