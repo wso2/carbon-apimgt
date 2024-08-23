@@ -18,8 +18,10 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SubscriptionPolicy extends Policy {
@@ -34,6 +36,7 @@ public class SubscriptionPolicy extends Policy {
     private String tierQuotaType;
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
+    private List<String> allowedOrganizations = new ArrayList<String>();
 
     public SubscriptionPolicy(String name) {
         super(name);
@@ -122,11 +125,11 @@ public class SubscriptionPolicy extends Policy {
     @Override
     public String toString() {
         return "SubscriptionPolicy [rateLimitCount=" + rateLimitCount + ", rateLimitTimeUnit=" + rateLimitTimeUnit
-                + ", customAttributes=" + Arrays.toString(customAttributes) + ", stopOnQuotaReach=" + stopOnQuotaReach
-                + ", billingPlan=" + billingPlan + ", monetizationPlan=" + monetizationPlan
-                + ", monetizationPlanProperties=" + monetizationPlanProperties + ", tierQuotaType=" + tierQuotaType
-                + ", maxDepth=" + graphQLMaxDepth + ", maxComplexity=" + graphQLMaxComplexity
-                + ", subscriberCount= " + subscriberCount + "]";
+                + ", subscriberCount=" + subscriberCount + ", customAttributes=" + Arrays.toString(customAttributes)
+                + ", stopOnQuotaReach=" + stopOnQuotaReach + ", billingPlan=" + billingPlan + ", monetizationPlan="
+                + monetizationPlan + ", monetizationPlanProperties=" + monetizationPlanProperties + ", tierQuotaType="
+                + tierQuotaType + ", graphQLMaxDepth=" + graphQLMaxDepth + ", graphQLMaxComplexity="
+                + graphQLMaxComplexity + ", allowedOrganizations=" + allowedOrganizations + "]";
     }
 
     public int getSubscriberCount() {
@@ -135,5 +138,13 @@ public class SubscriptionPolicy extends Policy {
 
     public void setSubscriberCount(int subscriberCount) {
         this.subscriberCount = subscriberCount;
+    }
+
+    public List<String> getAllowedOrganizations() {
+        return allowedOrganizations;
+    }
+
+    public void setAllowedOrganizations(List<String> allowedOrganizations) {
+        this.allowedOrganizations = allowedOrganizations;
     }
 }
