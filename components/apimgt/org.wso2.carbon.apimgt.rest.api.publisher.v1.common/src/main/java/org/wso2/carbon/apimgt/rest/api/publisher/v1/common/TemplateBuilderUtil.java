@@ -968,6 +968,18 @@ public class TemplateBuilderUtil {
                         addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
             }
         }
+        Map<String, Object> endpointConfigMap = (Map) apidto.getEndpointConfig();
+
+        if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
+                && endpointConfigMap.get("sequence") != null) {
+            GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
+                    APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, endpointConfigMap.get("sequence").toString());
+            if (gatewayCustomBackendSequenceDTO != null) {
+                gatewayAPIDTO.setSequenceToBeAdd(
+                        addGatewayContentToList(gatewayCustomBackendSequenceDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+        }
     }
 
     private static void setAPIFaultSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,
@@ -1396,17 +1408,49 @@ public class TemplateBuilderUtil {
                     operationPolicySequenceContentDto.setName(seqExt);
                     operationPolicySequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
                     switch (flow) {
-                        case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
-                            api.setInSequence(seqExt);
-                            break;
-                        case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
-                            api.setOutSequence(seqExt);
-                            break;
-                        case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
-                            api.setFaultSequence(seqExt);
-                            break;
+                    case APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST:
+                        api.setInSequence(seqExt);
+                        break;
+                    case APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE:
+                        api.setOutSequence(seqExt);
+                        break;
+                    case APIConstants.OPERATION_SEQUENCE_TYPE_FAULT:
+                        api.setFaultSequence(seqExt);
+                        break;
                     }
                     return operationPolicySequenceContentDto;
+                }
+            } catch (Exception e) {
+                throw new APIManagementException(e);
+            }
+        }
+        return null;
+    }
+
+    private static GatewayContentDTO retrieveCustomBackendSequence(API api, String flow, String sequence)
+            throws APIManagementException {
+        GatewayContentDTO customBackendSequenceContentDto = new GatewayContentDTO();
+
+        String customSequence = null;
+        String seqExt = APIUtil.getSequenceExtensionName(api) + SynapsePolicyAggregator.getSequenceExtensionFlow(flow)
+                + "-Custom-Backend";
+        try {
+            customSequence = SynapsePolicyAggregator.generateBackendSequenceForCustomSequence(api, seqExt, flow,
+                    sequence);
+        } catch (IOException e) {
+            throw new APIManagementException(e);
+        }
+
+        if (StringUtils.isNotEmpty(customSequence)) {
+            try {
+                OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(customSequence.getBytes()));
+                if (omElement != null) {
+                    if (omElement.getAttribute(new QName("name")) != null) {
+                        omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
+                    }
+                    customBackendSequenceContentDto.setName(seqExt);
+                    customBackendSequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+                    return customBackendSequenceContentDto;
                 }
             } catch (Exception e) {
                 throw new APIManagementException(e);

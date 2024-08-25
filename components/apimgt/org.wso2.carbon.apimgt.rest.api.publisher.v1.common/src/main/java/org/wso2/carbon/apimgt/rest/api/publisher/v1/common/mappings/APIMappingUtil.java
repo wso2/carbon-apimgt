@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SynapsePolicyAggregator;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -199,11 +200,22 @@ public class APIMappingUtil {
         }
 
         Object endpointConfig = dto.getEndpointConfig();
+
+        // update the sequence name generated
         if (endpointConfig != null) {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 if (endpointConfig instanceof LinkedHashMap) {
                     ((LinkedHashMap) endpointConfig).remove(APIConstants.IMPLEMENTATION_STATUS);
+                }
+                if (endpointConfig instanceof HashMap) {
+                    if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                            ((HashMap) endpointConfig).get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        String seqExt = APIUtil.getSequenceExtensionName(dto.getName(), dto.getVersion())
+                                + SynapsePolicyAggregator.getSequenceExtensionFlow(
+                                APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST) + "-Custom-Backend";
+                        ((HashMap) endpointConfig).put("sequence_name", seqExt);
+                    }
                 }
                 model.setEndpointConfig(mapper.writeValueAsString(endpointConfig));
             } catch (IOException e) {

@@ -105,17 +105,6 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                         tenantDomain, extractedFolderPath);
                             } else {
                                 APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
-//                                if (apidto.getEndpointConfig() != null) {
-//                                    org.json.JSONObject endpointConfig = new org.json.JSONObject(
-//                                            new Gson().toJson(apidto.getEndpointConfig()));
-//                                    if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-//                                            endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-//                                        String content = ImportUtils.retrieveXMLContent(
-//                                                (InputStream) endpointConfig.get(APIConstants.SEQUENCE_DATA));
-//                                        endpointConfig.put("sequence", content);
-//                                    }
-//                                    apidto.setEndpointConfig(endpointConfig);
-//                                }
                                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
                                 api.setUUID(apidto.getId());
                                 if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
@@ -136,8 +125,6 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     api.setGraphQLSchema(graphqlSchema);
                                     gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
                                             tenantDomain, apidto, extractedFolderPath);
-//                                    // if sequence is passed, then override the existing config
-//                                    gatewayAPIDTO.setApiDefinition(api.getAsyncApiDefinition());
                                 } else if (api.getType() != null &&
                                         (APIConstants.APITransportType.HTTP.toString ().equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAP.equals(api.getType())

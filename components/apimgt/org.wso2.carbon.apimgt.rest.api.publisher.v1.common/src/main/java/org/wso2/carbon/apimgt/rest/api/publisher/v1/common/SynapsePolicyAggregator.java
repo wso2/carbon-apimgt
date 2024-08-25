@@ -57,6 +57,9 @@ public class SynapsePolicyAggregator {
     private static final String POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
             + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
             + "operation_policy_template.j2";
+    private static final String CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
+            + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
+            + "custom_backend_sequence_template.j2";
     private static final String GATEWAY_POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
             + "repository" + File.separator + "resources" + File.separator + "templates" + File.separator
             + "gateway_policy_template.j2";
@@ -102,6 +105,27 @@ public class SynapsePolicyAggregator {
         } else {
             return "";
         }
+    }
+
+    public static String generateBackendSequenceForCustomSequence(API api, String sequenceName, String flow,
+            String sequence) throws APIManagementException, IOException {
+        Map<String, Object> configMap = new HashMap<>();
+        boolean render = false;
+        String customBackendTemplate = FileUtil.readFileToString(CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION)
+                .replace("\\", "");
+        configMap.put("sequence_name", sequenceName);
+        if (sequence != null || sequence.isEmpty()) {
+            String sanitizedSequence = renderCustomBackendSequence(sequence, sequenceName);
+            if (sanitizedSequence == null) {
+                throw new APIManagementException("Error when preparing the sequence: " + sequenceName);
+            }
+            configMap.put("custom_sequence", sanitizedSequence);
+            render = true;
+        }
+        if (render) {
+            return renderPolicyTemplate(customBackendTemplate, configMap);
+        }
+        return "";
     }
 
     /**
@@ -200,6 +224,13 @@ public class SynapsePolicyAggregator {
             }
         }
         return renderedPolicyMappingList;
+    }
+
+    private static String renderCustomBackendSequence(String sequence, String sequenceName) {
+        if (sequence != null) {
+            return renderPolicyTemplate(sequence, new HashMap<>());
+        }
+        return null;
     }
 
     /**

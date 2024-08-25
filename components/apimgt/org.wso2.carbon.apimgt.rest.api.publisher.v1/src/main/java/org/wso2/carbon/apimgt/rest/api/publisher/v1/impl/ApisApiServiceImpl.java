@@ -227,8 +227,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             apidto.setEndpointConfig(new Gson().fromJson(endpointConfig.toString(), Object.class));
         }
-        updateAPI(apiId, apidto, ifMatch, messageContext);
-        return Response.ok().entity(null).build();
+        return updateAPI(apiId, apidto, ifMatch, messageContext);
     }
 
     @Override
