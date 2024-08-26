@@ -30,6 +30,7 @@ public class HttpClientConfigurationDTO {
 
     private int connectionLimit;
     private int maximumConnectionsPerRoute;
+    private int connectionTimeout;
     private boolean proxyEnabled;
     private String proxyHost;
     private int proxyPort;
@@ -87,6 +88,10 @@ public class HttpClientConfigurationDTO {
         return sslContext;
     }
 
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
     /**
      * Builder class for @code{HTTPClientConfigurationDTO}
      */
@@ -94,6 +99,7 @@ public class HttpClientConfigurationDTO {
 
         private int connectionLimit;
         private int maximumConnectionsPerRoute;
+        private int connectionTimeout;
         private boolean proxyEnabled;
         private String proxyHost;
         private int proxyPort;
@@ -104,9 +110,11 @@ public class HttpClientConfigurationDTO {
         private SSLContext sslContext;
         private HostnameVerifier hostnameVerifier;
 
-        public Builder withConnectionParams(int connectionLimit, int maximumConnectionsPerRoute) {
+        public Builder withConnectionParams(int connectionLimit, int maximumConnectionsPerRoute,
+                                            int connectionTimeout) {
             this.connectionLimit = connectionLimit;
             this.maximumConnectionsPerRoute = maximumConnectionsPerRoute;
+            this.connectionTimeout = connectionTimeout;
             return this;
         }
 
@@ -138,6 +146,7 @@ public class HttpClientConfigurationDTO {
             HttpClientConfigurationDTO configuration = new HttpClientConfigurationDTO();
             configuration.connectionLimit = this.connectionLimit;
             configuration.maximumConnectionsPerRoute = this.maximumConnectionsPerRoute;
+            configuration.connectionTimeout = this.connectionTimeout;
             configuration.proxyEnabled = this.proxyEnabled;
             configuration.proxyHost = this.proxyHost;
             configuration.proxyPort = this.proxyPort;

@@ -38,6 +38,7 @@ public class CommonAPIUtilTestCase {
     private static ClientAndServer proxyServer;
     int connectionLimit = 100;
     int maximumConnectionsPerRoute = 10;
+    int connectionTimeout = -1;
     static String trustStorePath = Objects.requireNonNull(CommonAPIUtilTestCase.class.getClassLoader()
             .getResource("client-truststore.jks")).getPath();
     static String trustStorePassword = "wso2carbon";
@@ -91,7 +92,7 @@ public class CommonAPIUtilTestCase {
         // directly to the backend.
         HttpGet httpGetWithTLS = new HttpGet("http://localhost:" + mockServer.getPort() + "/hello");
         HttpClientConfigurationDTO nonProxyHostBasedProxyConfig = builder
-                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute)
+                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
                 .withSSLContext(sslContext)
                 // proxyProtocol here is https (due to existing limitation)
                 .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol,
@@ -109,7 +110,7 @@ public class CommonAPIUtilTestCase {
 
         // Given the proxy configuration, checks if the call is successfully routed via the proxy server.
         HttpClientConfigurationDTO configuration = builder
-                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute)
+                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
                 .withSSLContext(sslContext)
                 .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, proxyPassword, proxyProtocol, nonProxyHosts)
                 .build();
@@ -129,7 +130,7 @@ public class CommonAPIUtilTestCase {
 
         // Given the proxy configuration with wrong credentials, checks if the call fails at the proxy server.
         HttpClientConfigurationDTO configWithWrongProxyCredentials = builder
-                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute)
+                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
                 .withSSLContext(sslContext)
                 .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol, nonProxyHosts)
                 .build();
@@ -148,7 +149,7 @@ public class CommonAPIUtilTestCase {
         HttpGet httpsGet = new HttpGet("https://localhost:" + mockServer.getPort() + "/hello");
         HttpClientConfigurationDTO.Builder builder = new HttpClientConfigurationDTO.Builder();
         HttpClientConfigurationDTO configuration = builder
-                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute)
+                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
                 .withSSLContext(sslContext)
                 .build();
 
