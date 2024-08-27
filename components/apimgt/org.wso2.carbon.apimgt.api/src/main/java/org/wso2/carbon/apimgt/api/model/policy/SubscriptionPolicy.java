@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SubscriptionPolicy extends Policy {
+
+    private String policyType = PolicyConstants.DEFAULT_TYPE_SUBSCRIPTION_POLICY;
     private int rateLimitCount;
     private String rateLimitTimeUnit;
     private int subscriberCount;
@@ -34,9 +36,18 @@ public class SubscriptionPolicy extends Policy {
     private String tierQuotaType;
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
+    private TokenCountLimit tokenCountLimit = new TokenCountLimit();
 
     public SubscriptionPolicy(String name) {
         super(name);
+    }
+
+    public String getPolicyType() {
+        return policyType;
+    }
+
+    public void setPolicyType(String policyType) {
+        this.policyType = policyType;
     }
 
     public int getRateLimitCount() {
@@ -135,5 +146,13 @@ public class SubscriptionPolicy extends Policy {
 
     public void setSubscriberCount(int subscriberCount) {
         this.subscriberCount = subscriberCount;
+    }
+
+    public TokenCountLimit getTokenCountLimit() {
+        return tokenCountLimit;
+    }
+
+    public void setTokenCountLimit(TokenCountLimit tokenCountLimit) {
+        this.tokenCountLimit = tokenCountLimit;
     }
 }

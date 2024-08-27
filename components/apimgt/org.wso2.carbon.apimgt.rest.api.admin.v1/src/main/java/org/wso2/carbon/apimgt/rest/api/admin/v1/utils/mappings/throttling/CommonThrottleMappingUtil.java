@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.TokenCountLimit;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BandwidthLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConditionalGroupDTO;
@@ -46,6 +47,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RequestCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
@@ -353,6 +355,23 @@ public class CommonThrottleMappingUtil {
     }
 
     /**
+     * Converts a Token Count Limit model object into a Token Count Limit DTO object.
+     *
+     * @param tokenCountLimit TokenCountLimit model object
+     * @return TokenCountLimitDTO object
+     */
+    public static TokenCountLimitDTO fromTokenCountLimitToDTO(TokenCountLimit tokenCountLimit) {
+
+        TokenCountLimitDTO tokenCountLimitDTO = new TokenCountLimitDTO();
+        tokenCountLimitDTO.setTotalTokenCount(tokenCountLimit.getTotalTokenCount());
+        tokenCountLimitDTO.setRequestTokenCount(tokenCountLimit.getRequestTokenCount());
+        tokenCountLimitDTO.setResponseTokenCount(tokenCountLimit.getResponseTokenCount());
+        tokenCountLimitDTO.setTimeUnit(tokenCountLimit.getTimeUnit());
+        tokenCountLimitDTO.setUnitTime(tokenCountLimit.getUnitTime());
+        return tokenCountLimitDTO;
+    }
+
+    /**
      * Converts a Bandwidth Limit DTO object into a Bandwidth Limit model object
      *
      * @param dto Bandwidth Limit DTO object
@@ -379,6 +398,28 @@ public class CommonThrottleMappingUtil {
         requestCountLimit.setUnitTime(dto.getUnitTime());
         requestCountLimit.setRequestCount(dto.getRequestCount());
         return requestCountLimit;
+    }
+
+    /**
+     * Converts a Token Count Limit DTO object into a Token Count model object
+     *
+     * @param dto Token Count Limit DTO object
+     * @return Token Count Limit model object derived from DTO
+     */
+    public static TokenCountLimit fromDTOToTokenCountLimit(TokenCountLimitDTO dto) {
+        TokenCountLimit tokenCountLimit = new TokenCountLimit();
+        tokenCountLimit.setTimeUnit(dto.getTimeUnit());
+        tokenCountLimit.setUnitTime(dto.getUnitTime());
+        if (dto.getTotalTokenCount() != null) {
+            tokenCountLimit.setTotalTokenCount(dto.getTotalTokenCount());
+        }
+        if (dto.getRequestTokenCount() != null) {
+            tokenCountLimit.setRequestTokenCount(dto.getRequestTokenCount());
+        }
+        if (dto.getResponseTokenCount() != null) {
+            tokenCountLimit.setResponseTokenCount(dto.getResponseTokenCount());
+        }
+        return tokenCountLimit;
     }
 
     private static EventCountLimit fromDTOToEventCountLimit(EventCountLimitDTO dto) {

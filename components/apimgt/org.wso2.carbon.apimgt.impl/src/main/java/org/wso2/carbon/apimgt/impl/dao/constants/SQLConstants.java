@@ -2353,16 +2353,19 @@ public class SQLConstants {
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, \n" +
+                    " CONNECTIONS_COUNT, TOTAL_TOKEN_COUNT, REQUEST_TOKEN_COUNT, RESPONSE_TOKEN_COUNT, " +
+                    " TOKEN_UNIT_TIME, TOKEN_TIME_UNIT, POLICY_TYPE) \n" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
                     " BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
-                    " FIXED_RATE, BILLING_CYCLE, PRICE_PER_REQUEST, CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " FIXED_RATE, BILLING_CYCLE, PRICE_PER_REQUEST, CURRENCY, CONNECTIONS_COUNT, TOTAL_TOKEN_COUNT,\n" +
+                    " REQUEST_TOKEN_COUNT, RESPONSE_TOKEN_COUNT, TOKEN_UNIT_TIME, TOKEN_TIME_UNIT, POLICY_TYPE) \n" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -2578,6 +2581,11 @@ public class SQLConstants {
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, " +
+                    "REQUEST_TOKEN_COUNT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "RESPONSE_TOKEN_COUNT = ?, " +
+                    "TOKEN_UNIT_TIME = ?, " +
+                    "TOKEN_TIME_UNIT = ?," +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2601,7 +2609,12 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
+                    "BILLING_PLAN = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "REQUEST_TOKEN_COUNT = ?, " +
+                    "RESPONSE_TOKEN_COUNT = ?, " +
+                    "TOKEN_UNIT_TIME = ?, " +
+                    "TOKEN_TIME_UNIT = ?," +
                     "CUSTOM_ATTRIBUTES = ?, "+
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
@@ -2626,7 +2639,12 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
+                    "BILLING_PLAN = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "REQUEST_TOKEN_COUNT = ?, " +
+                    "RESPONSE_TOKEN_COUNT = ?, " +
+                    "TOKEN_UNIT_TIME = ?, " +
+                    "TOKEN_TIME_UNIT = ?," +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2650,8 +2668,13 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
-                    "CUSTOM_ATTRIBUTES = ?, "+
+                    "BILLING_PLAN = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "REQUEST_TOKEN_COUNT = ?, " +
+                    "RESPONSE_TOKEN_COUNT = ?, " +
+                    "TOKEN_UNIT_TIME = ?, " +
+                    "TOKEN_TIME_UNIT = ?," +
+                    "CUSTOM_ATTRIBUTES = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
