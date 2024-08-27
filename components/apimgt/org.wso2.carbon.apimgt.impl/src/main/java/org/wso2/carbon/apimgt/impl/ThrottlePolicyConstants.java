@@ -44,6 +44,8 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_QUOTA_POLICY_TYPE = "QUOTA_TYPE";
 
+    public static final String COLUMN_SUBSCRIPTION_POLICY_TYPE = "POLICY_TYPE";
+
     public static final String COLUMN_QUOTA = "QUOTA";
 
     public static final String COLUMN_QUOTA_UNIT = "QUOTA_UNIT";
@@ -51,6 +53,16 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_UNIT_TIME = "UNIT_TIME";
 
     public static final String COLUMN_TIME_UNIT = "TIME_UNIT";
+
+    public static final String COLUMN_TOTAL_TOKEN_COUNT = "TOTAL_TOKEN_COUNT";
+
+    public static final String COLUMN_REQUEST_TOKEN_COUNT = "REQUEST_TOKEN_COUNT";
+
+    public static final String COLUMN_RESPONSE_TOKEN_COUNT = "RESPONSE_TOKEN_COUNT";
+
+    public static final String COLUMN_TOKEN_UNIT_TIME = "TOKEN_UNIT_TIME";
+
+    public static final String COLUMN_TOKEN_TIME_UNIT = "TOKEN_TIME_UNIT";
 
     public static final String COLUMN_APPLICABLE_LEVEL = "APPLICABLE_LEVEL";
 

@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyAl
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenCountLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -31,7 +32,40 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   
     private Integer graphQLMaxComplexity = null;
     private Integer graphQLMaxDepth = null;
+
+    @XmlType(name="PolicyTypeEnum")
+    @XmlEnum(String.class)
+    public enum PolicyTypeEnum {
+        DEFAULT_POLICY("DEFAULT_POLICY"),
+        AI_POLICY("AI_POLICY");
+        private String value;
+
+        PolicyTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static PolicyTypeEnum fromValue(String v) {
+            for (PolicyTypeEnum b : PolicyTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private PolicyTypeEnum policyType = PolicyTypeEnum.DEFAULT_POLICY;
     private ThrottleLimitDTO defaultLimit = null;
+    private TokenCountLimitDTO tokenCountLimit = null;
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
@@ -78,6 +112,24 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   /**
+   * Type of the subscription policy
+   **/
+  public SubscriptionThrottlePolicyDTO policyType(PolicyTypeEnum policyType) {
+    this.policyType = policyType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "AI_POLICY", value = "Type of the subscription policy")
+  @JsonProperty("policyType")
+  public PolicyTypeEnum getPolicyType() {
+    return policyType;
+  }
+  public void setPolicyType(PolicyTypeEnum policyType) {
+    this.policyType = policyType;
+  }
+
+  /**
    **/
   public SubscriptionThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
@@ -94,6 +146,24 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
   public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
+  }
+
+  /**
+   **/
+  public SubscriptionThrottlePolicyDTO tokenCountLimit(TokenCountLimitDTO tokenCountLimit) {
+    this.tokenCountLimit = tokenCountLimit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("tokenCountLimit")
+  public TokenCountLimitDTO getTokenCountLimit() {
+    return tokenCountLimit;
+  }
+  public void setTokenCountLimit(TokenCountLimitDTO tokenCountLimit) {
+    this.tokenCountLimit = tokenCountLimit;
   }
 
   /**
@@ -253,7 +323,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     SubscriptionThrottlePolicyDTO subscriptionThrottlePolicy = (SubscriptionThrottlePolicyDTO) o;
     return Objects.equals(graphQLMaxComplexity, subscriptionThrottlePolicy.graphQLMaxComplexity) &&
         Objects.equals(graphQLMaxDepth, subscriptionThrottlePolicy.graphQLMaxDepth) &&
+        Objects.equals(policyType, subscriptionThrottlePolicy.policyType) &&
         Objects.equals(defaultLimit, subscriptionThrottlePolicy.defaultLimit) &&
+        Objects.equals(tokenCountLimit, subscriptionThrottlePolicy.tokenCountLimit) &&
         Objects.equals(monetization, subscriptionThrottlePolicy.monetization) &&
         Objects.equals(rateLimitCount, subscriptionThrottlePolicy.rateLimitCount) &&
         Objects.equals(rateLimitTimeUnit, subscriptionThrottlePolicy.rateLimitTimeUnit) &&
@@ -266,7 +338,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(graphQLMaxComplexity, graphQLMaxDepth, defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, subscriberCount, customAttributes, stopOnQuotaReach, billingPlan, permissions);
+    return Objects.hash(graphQLMaxComplexity, graphQLMaxDepth, policyType, defaultLimit, tokenCountLimit, monetization, rateLimitCount, rateLimitTimeUnit, subscriberCount, customAttributes, stopOnQuotaReach, billingPlan, permissions);
   }
 
   @Override
@@ -276,7 +348,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    graphQLMaxComplexity: ").append(toIndentedString(graphQLMaxComplexity)).append("\n");
     sb.append("    graphQLMaxDepth: ").append(toIndentedString(graphQLMaxDepth)).append("\n");
+    sb.append("    policyType: ").append(toIndentedString(policyType)).append("\n");
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
+    sb.append("    tokenCountLimit: ").append(toIndentedString(tokenCountLimit)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
     sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");

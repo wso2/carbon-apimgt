@@ -325,6 +325,9 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TOKEN_REQUEST(900965, "Key Management Error", 400, "Invalid access token request."),
     ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
+    AI_POLICY_INVALID_QUOTA_TYPE_ERROR(900971, "Invalid quota limit type for AI type", 400, "%s"),
+    AI_POLICY_INVALID_TYPE_ERROR(900972, "Bad Request", 400, "Subscription policyType should be equal to either DEFAULT_POLICY or AI_POLICY"),
+    SUBSCRIPTION_POLICY_UPDATE_TYPE_BAD_REQUEST(900974, "Bad Request", 400, "Subscription policyType can not be changed"),
     INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
 
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "

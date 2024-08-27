@@ -3823,8 +3823,18 @@ components:
             - defaultLimit
           type: object
           properties:
+            policyType:
+              type: string
+              description: Type of the subscription policy
+              default: DEFAULT_POLICY
+              example: AI_POLICY
+              enum:
+                - DEFAULT_POLICY
+                - AI_POLICY
             defaultLimit:
               $ref: '#/components/schemas/ThrottleLimit'
+            tokenCountLimit:
+              $ref: '#/components/schemas/TokenCountLimit'
             monetization:
               $ref: '#/components/schemas/MonetizationInfo'
             rateLimitCount:
@@ -4187,6 +4197,27 @@ components:
               description: Maximum number of requests allowed
               format: int64
               example: 30
+    TokenCountLimit:
+      title: Token Count Limit object
+      allOf:
+        - $ref: '#/components/schemas/ThrottleLimitBase'
+        - type: object
+          properties:
+            totalTokenCount:
+              type: integer
+              description: Maximum number of total tokens allowed
+              format: int64
+              example: 1000
+            requestTokenCount:
+              type: integer
+              description: Maximum number of request tokens allowed
+              format: int64
+              example: 300
+            responseTokenCount:
+              type: integer
+              description: Maximum number of response tokens allowed
+              format: int64
+              example: 300
     EventCountLimit:
       title: Event Count Limit object
       allOf:

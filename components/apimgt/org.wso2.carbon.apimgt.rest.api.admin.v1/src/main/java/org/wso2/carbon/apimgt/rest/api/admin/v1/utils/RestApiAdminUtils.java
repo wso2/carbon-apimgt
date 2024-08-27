@@ -26,12 +26,16 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.TokenCountLimit;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -379,5 +383,60 @@ public class RestApiAdminUtils {
         FileUtils.copyDirectory(backupDirectory, tenantThemeDirectory);
         FileUtils.deleteDirectory(backupDirectory);
         apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
+    }
+
+    /**
+     * Validate subscription quota types given in the SubscriptionThrottlePolicyDTO.
+     *
+     * @param dto SubscriptionThrottlePolicyDTO object that needs to be validated
+     * @throws APIManagementException Exception for validation failures
+     */
+    public static void validateSubscriptionPolicyQuotaTypes(SubscriptionThrottlePolicyDTO dto)
+            throws APIManagementException {
+
+        if (dto.getPolicyType() == null) {
+            throw new APIManagementException(
+                    "Subscription policyType should be equal to either DEFAULT_POLICY or AI_POLICY",
+                    ExceptionCodes.from(ExceptionCodes.AI_POLICY_INVALID_TYPE_ERROR));
+        }
+        String policyType = dto.getPolicyType().toString();
+        if ((PolicyConstants.AI_TYPE_SUBSCRIPTION_POLICY).equals(policyType)) {
+            if (dto.getTokenCountLimit() != null && (dto.getTokenCountLimit().getTotalTokenCount() == null
+                    && dto.getTokenCountLimit().getRequestTokenCount() == null
+                    && dto.getTokenCountLimit().getResponseTokenCount() == null)) {
+                String errorMsg = "Token count limit should contain either of following values; "
+                        + "totalTokenCount, requestTokenCount, responseTokenCount";
+                throw new APIManagementException(errorMsg,
+                        ExceptionCodes.from(ExceptionCodes.AI_POLICY_INVALID_QUOTA_TYPE_ERROR, errorMsg));
+            }
+            if (dto.getDefaultLimit().getType() != ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT) {
+                String errorMsg = "AI type subscription policies must be request-count based. "
+                        + "Event-based or bandwidth-based limits are not allowed.";
+                throw new APIManagementException(errorMsg,
+                        ExceptionCodes.from(ExceptionCodes.AI_POLICY_INVALID_QUOTA_TYPE_ERROR, errorMsg));
+            }
+        }
+    }
+
+    /**
+     * Override token based quota limits if they are null in the TokenCountLimitDTO.
+     *
+     * @param tokenCountLimitDTO TokenCountLimitDTO object
+     * @param tokenCountLimit    Token count limits of the existing subscription policy
+     * @return Overridden TokenCountLimitDTO object
+     */
+    public static TokenCountLimitDTO overrideTokenBasedQuotaLimits(TokenCountLimitDTO tokenCountLimitDTO,
+            TokenCountLimit tokenCountLimit) {
+
+        if (tokenCountLimitDTO.getTotalTokenCount() == null) {
+            tokenCountLimitDTO.setTotalTokenCount(tokenCountLimit.getTotalTokenCount());
+        }
+        if (tokenCountLimitDTO.getRequestTokenCount() == null) {
+            tokenCountLimitDTO.setRequestTokenCount(tokenCountLimit.getRequestTokenCount());
+        }
+        if (tokenCountLimitDTO.getResponseTokenCount() == null) {
+            tokenCountLimitDTO.setResponseTokenCount(tokenCountLimit.getResponseTokenCount());
+        }
+        return tokenCountLimitDTO;
     }
 }
