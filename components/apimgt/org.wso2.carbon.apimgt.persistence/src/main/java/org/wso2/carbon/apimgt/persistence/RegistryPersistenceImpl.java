@@ -173,10 +173,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
             }
+            
+            String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
+            if (APIConstants.API_RESTRICTED_BY_ORG.equals(api.getVisibility())){
+                visibleOrgs = api.getVisibleOrganizations();
+            }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, api.getAccessControl(),
-                    api.getAdditionalProperties());
+                    api.getAdditionalProperties(), visibleOrgs);
             RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                     visibleRoles, artifactPath, registry);
 
@@ -548,8 +553,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String[] visibleRoles = new String[0];
             String publisherAccessControlRoles = api.getAccessControlRoles();
 
+            String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
+            if (APIConstants.API_RESTRICTED_BY_ORG.equals(api.getVisibility())){
+                visibleOrgs = api.getVisibleOrganizations();
+            }
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, api.getAccessControl(),
-                    api.getAdditionalProperties());
+                    api.getAdditionalProperties(), visibleOrgs);
 
             //propagate api status change and access control roles change to document artifact
             String newStatus = updateApiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
@@ -1080,7 +1089,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
                     isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayAPIsWithMultipleVersions());
             if (!PersistenceUtil.isAdminUser(ctx)) {
-                modifiedQuery = modifiedQuery + "&visibleOrganizations=(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR *"
+                modifiedQuery = modifiedQuery + "&visible_organizations=(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR *"
                         + ctx.getOrganization().getName() + "*)";
             }
             log.debug("Modified query for devportal search: " + modifiedQuery);
@@ -1107,6 +1116,55 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return result;
     }
+    
+    private List<GovernanceArtifact> searchDevportalAPIs(String query, int tenantId, Registry reg, int start, int offset)
+            throws APIManagementException {
+        List<GovernanceArtifact> artifacts = new ArrayList<GovernanceArtifact>();
+        query = query.replace("PUBLISHED", "published").replace("PROTOTYPED", "prototyped");// convert to lowercase
+        Map<String, String> fields = RegistryPersistenceUtil.getFields(query);
+        //since store_view_roles and overview_visible_organizations are passed as property search value, remove this.
+        fields.remove("overview_store_view_roles"); 
+        fields.remove("overview_visible_organizations");
+        String filterQuery = RegistryPersistenceUtil.buildFQStringForProperties(query);
+        String modifiedQuery = "q=* TO *&" + filterQuery;
+        
+        try {
+            PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, getMaxPaginationLimit());
+            UserRegistry systemUserRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
+            ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
+            SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(modifiedQuery, fields, systemUserRegistry);
+            if (log.isDebugEnabled()) {
+                log.debug("Search Result: " + resultsBean);
+            }
+           
+            ResourceData[] resourceDataList = resultsBean.getResourceDataList();
+            int errorCount = 0; // We use this to check how many errors occurred.
+            for (ResourceData resourceData : resourceDataList) {
+                GovernanceArtifact governanceArtifact = null;
+                String path = resourceData.getResourcePath().substring(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH.length());
+                try {
+                    governanceArtifact = GovernanceUtils.retrieveGovernanceArtifactByPath(reg, path);
+                } catch (GovernanceException e) {
+                    // We do not through any exception here. Only logging is done.
+                    // We increase the error count for each error. If all the paths failed, then we throw an error
+                    errorCount++;
+                    log.error("Error occurred while retrieving governance artifact by path : " + path, e);
+                }
+                if (governanceArtifact != null) {
+                    artifacts.add(governanceArtifact);
+                }
+            }
+            if (errorCount != 0 && errorCount == resourceDataList.length) {
+                // This means that all the paths have failed. So we throw an error.
+                throw new APIManagementException("Error occurred while retrieving all the governance artifacts");
+            }
+        } catch (IndexerException | RegistryException e) {
+            String msg = "Failed to search APIs";
+            throw new APIManagementException(msg, e);
+        } 
+        return artifacts;
+    }
 
     private DevPortalAPISearchResult searchPaginatedDevPortalAPIs(Registry userRegistry, int tenantIDLocal,
                                                                   String searchQuery, int start, int offset) throws APIManagementException {
@@ -1118,9 +1176,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
             log.debug("Dev portal list apis query " + searchQuery);
-            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
-                    .findGovernanceArtifacts(searchQuery, userRegistry, APIConstants.API_RXT_MEDIA_TYPE,
-                            true);
+            //List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
+            //        .findGovernanceArtifacts(searchQuery, userRegistry, APIConstants.API_RXT_MEDIA_TYPE,
+            //                true);
+            List<GovernanceArtifact> governanceArtifacts = searchDevportalAPIs(searchQuery, tenantIDLocal, userRegistry, start, offset);
             totalLength = PaginationContext.getInstance().getLength();
             boolean isFound = true;
             if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
@@ -2984,7 +3043,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
      * @throws RegistryException Registry Exception.
      */
     private void updateRegistryResources(Registry registry, String artifactPath, String publisherAccessControlRoles,
-                                         String publisherAccessControl, Map<String, String> additionalProperties)
+            String publisherAccessControl, Map<String, String> additionalProperties, String visibleOrganizations)
             throws RegistryException {
         publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
                 .isEmpty()) ? APIConstants.NULL_USER_ROLE_LIST : publisherAccessControlRoles;
@@ -3017,6 +3076,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             // the roles that were specified can be maintained.
             apiResource.setProperty(APIConstants.DISPLAY_PUBLISHER_ROLES, publisherAccessControlRoles);
             apiResource.setProperty(APIConstants.ACCESS_CONTROL, publisherAccessControl);
+            apiResource.setProperty(APIConstants.VISIBLE_ORGANIZATIONS, visibleOrganizations);
             apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
             if (additionalProperties != null && additionalProperties.size() != 0) {
                 for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
@@ -3272,8 +3332,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
 
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
+            String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
+            if (APIConstants.API_RESTRICTED_BY_ORG.equals(apiProduct.getVisibility())){
+                //visibleOrgs = apiProduct.getVisibleOrganizations(); TODO fix for products
+            }
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
-                    apiProduct.getAdditionalProperties());
+                    apiProduct.getAdditionalProperties(), visibleOrgs);
             RegistryPersistenceUtil.setResourcePermissions(apiProduct.getId().getProviderName(),
                     apiProduct.getVisibility(), visibleRoles, artifactPath, registry);
 
@@ -3498,8 +3562,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             applyTags(apiProduct.getTags(), registry, artifactPath);
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
 
+            String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
+            if (APIConstants.API_RESTRICTED_BY_ORG.equals(apiProduct.getVisibility())){
+                //visibleOrgs = apiProduct.getVisibleOrganizations(); TODO fix for products
+            }
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
-                    apiProduct.getAdditionalProperties());
+                    apiProduct.getAdditionalProperties(), visibleOrgs);
             RegistryPersistenceUtil.setResourcePermissions(apiProduct.getId().getProviderName(),
                     apiProduct.getVisibility(), visibleRoles, artifactPath, registry);
             registry.commitTransaction();
