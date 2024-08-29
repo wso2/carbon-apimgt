@@ -504,7 +504,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                                                MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
-        RestApiAdminUtils.validateSubscriptionPolicyQuotaTypes(body);
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -791,7 +790,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, String contentType,
                       SubscriptionThrottlePolicyDTO body, MessageContext messageContext) throws APIManagementException{
         try {
-            RestApiAdminUtils.validateSubscriptionPolicyQuotaTypes(body);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
 
@@ -801,18 +799,21 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId, log);
             }
 
-            if (!existingPolicy.getPolicyType().equals(body.getPolicyType().toString())) {
-                throw new APIManagementException("Subscription policyType can not be changed.",
+            String existingPolicyQuotaType = existingPolicy.getDefaultQuotaPolicy().getType();
+            String dtoQuotaType = body.getDefaultLimit().getType().toString();
+            if (existingPolicyQuotaType.equals(PolicyConstants.AI_QUOTA_TYPE)
+                    != dtoQuotaType.equals(PolicyConstants.AI_QUOTA_TYPE_ENUM_VALUE)) {
+                throw new APIManagementException(
+                        "Subscription quota type can not be changed for AI Subscription policies.",
                         ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_POLICY_UPDATE_TYPE_BAD_REQUEST));
             }
 
             //overridden properties
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
-            if (PolicyConstants.AI_TYPE_SUBSCRIPTION_POLICY.equals(body.getPolicyType().toString())
-                    && body.getTokenCountLimit() != null) {
-                body.setTokenCountLimit(RestApiAdminUtils.overrideTokenBasedQuotaLimits(body.getTokenCountLimit(),
-                        existingPolicy.getTokenCountLimit()));
+            if (PolicyConstants.AI_QUOTA_TYPE_ENUM_VALUE.equals(body.getDefaultLimit().getType().toString())) {
+                body.setDefaultLimit(RestApiAdminUtils.overrideTokenBasedQuotaLimits(body.getDefaultLimit(),
+                        existingPolicy.getDefaultQuotaPolicy()));
             }
 
             // validate if permission info exists and halt the execution in case of an error

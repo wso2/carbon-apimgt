@@ -44,8 +44,6 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_QUOTA_POLICY_TYPE = "QUOTA_TYPE";
 
-    public static final String COLUMN_SUBSCRIPTION_POLICY_TYPE = "POLICY_TYPE";
-
     public static final String COLUMN_QUOTA = "QUOTA";
 
     public static final String COLUMN_QUOTA_UNIT = "QUOTA_UNIT";

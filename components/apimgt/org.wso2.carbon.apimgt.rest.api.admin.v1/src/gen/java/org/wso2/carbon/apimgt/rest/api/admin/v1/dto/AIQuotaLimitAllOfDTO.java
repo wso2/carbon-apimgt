@@ -18,16 +18,36 @@ import javax.validation.Valid;
 
 
 
-public class TokenCountLimitAllOfDTO   {
+public class AIQuotaLimitAllOfDTO   {
   
+    private Long requestCount = null;
     private Long totalTokenCount = null;
     private Long requestTokenCount = null;
     private Long responseTokenCount = null;
 
   /**
+   * Maximum number of requests allowed
+   **/
+  public AIQuotaLimitAllOfDTO requestCount(Long requestCount) {
+    this.requestCount = requestCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "30", required = true, value = "Maximum number of requests allowed")
+  @JsonProperty("requestCount")
+  @NotNull
+  public Long getRequestCount() {
+    return requestCount;
+  }
+  public void setRequestCount(Long requestCount) {
+    this.requestCount = requestCount;
+  }
+
+  /**
    * Maximum number of total tokens allowed
    **/
-  public TokenCountLimitAllOfDTO totalTokenCount(Long totalTokenCount) {
+  public AIQuotaLimitAllOfDTO totalTokenCount(Long totalTokenCount) {
     this.totalTokenCount = totalTokenCount;
     return this;
   }
@@ -45,7 +65,7 @@ public class TokenCountLimitAllOfDTO   {
   /**
    * Maximum number of request tokens allowed
    **/
-  public TokenCountLimitAllOfDTO requestTokenCount(Long requestTokenCount) {
+  public AIQuotaLimitAllOfDTO requestTokenCount(Long requestTokenCount) {
     this.requestTokenCount = requestTokenCount;
     return this;
   }
@@ -63,7 +83,7 @@ public class TokenCountLimitAllOfDTO   {
   /**
    * Maximum number of response tokens allowed
    **/
-  public TokenCountLimitAllOfDTO responseTokenCount(Long responseTokenCount) {
+  public AIQuotaLimitAllOfDTO responseTokenCount(Long responseTokenCount) {
     this.responseTokenCount = responseTokenCount;
     return this;
   }
@@ -87,22 +107,24 @@ public class TokenCountLimitAllOfDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TokenCountLimitAllOfDTO tokenCountLimitAllOf = (TokenCountLimitAllOfDTO) o;
-    return Objects.equals(totalTokenCount, tokenCountLimitAllOf.totalTokenCount) &&
-        Objects.equals(requestTokenCount, tokenCountLimitAllOf.requestTokenCount) &&
-        Objects.equals(responseTokenCount, tokenCountLimitAllOf.responseTokenCount);
+    AIQuotaLimitAllOfDTO aiQuotaLimitAllOf = (AIQuotaLimitAllOfDTO) o;
+    return Objects.equals(requestCount, aiQuotaLimitAllOf.requestCount) &&
+        Objects.equals(totalTokenCount, aiQuotaLimitAllOf.totalTokenCount) &&
+        Objects.equals(requestTokenCount, aiQuotaLimitAllOf.requestTokenCount) &&
+        Objects.equals(responseTokenCount, aiQuotaLimitAllOf.responseTokenCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(totalTokenCount, requestTokenCount, responseTokenCount);
+    return Objects.hash(requestCount, totalTokenCount, requestTokenCount, responseTokenCount);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TokenCountLimitAllOfDTO {\n");
+    sb.append("class AIQuotaLimitAllOfDTO {\n");
     
+    sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("    totalTokenCount: ").append(toIndentedString(totalTokenCount)).append("\n");
     sb.append("    requestTokenCount: ").append(toIndentedString(requestTokenCount)).append("\n");
     sb.append("    responseTokenCount: ").append(toIndentedString(responseTokenCount)).append("\n");
