@@ -1127,13 +1127,19 @@ public class RegistryPersistenceImpl implements APIPersistence {
         fields.remove("overview_visible_organizations");
         String filterQuery = RegistryPersistenceUtil.buildFQStringForProperties(query);
         String modifiedQuery = "q=* TO *&" + filterQuery;
-        
+
         try {
             PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, getMaxPaginationLimit());
             UserRegistry systemUserRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
             ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
-            SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(modifiedQuery, fields, systemUserRegistry);
+            SearchResultsBean resultsBean;
+            if(StringUtils.isEmpty(filterQuery)) {
+                resultsBean = contentBasedSearchService.searchByAttribute(fields, systemUserRegistry);
+            } else {
+                resultsBean = contentBasedSearchService.searchByAttribute(modifiedQuery, fields, systemUserRegistry);
+            }
+            
             if (log.isDebugEnabled()) {
                 log.debug("Search Result: " + resultsBean);
             }
