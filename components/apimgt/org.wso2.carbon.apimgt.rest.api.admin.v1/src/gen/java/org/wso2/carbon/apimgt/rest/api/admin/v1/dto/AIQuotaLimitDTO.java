@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIQuotaLimitAllOfDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitBaseDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenCountLimitAllOfDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,10 +20,11 @@ import javax.validation.Valid;
 
 
 
-public class TokenCountLimitDTO   {
+public class AIQuotaLimitDTO   {
   
     private String timeUnit = null;
     private Integer unitTime = null;
+    private Long requestCount = null;
     private Long totalTokenCount = null;
     private Long requestTokenCount = null;
     private Long responseTokenCount = null;
@@ -31,7 +32,7 @@ public class TokenCountLimitDTO   {
   /**
    * Unit of the time. Allowed values are \&quot;sec\&quot;, \&quot;min\&quot;, \&quot;hour\&quot;, \&quot;day\&quot;
    **/
-  public TokenCountLimitDTO timeUnit(String timeUnit) {
+  public AIQuotaLimitDTO timeUnit(String timeUnit) {
     this.timeUnit = timeUnit;
     return this;
   }
@@ -50,7 +51,7 @@ public class TokenCountLimitDTO   {
   /**
    * Time limit that the throttling limit applies.
    **/
-  public TokenCountLimitDTO unitTime(Integer unitTime) {
+  public AIQuotaLimitDTO unitTime(Integer unitTime) {
     this.unitTime = unitTime;
     return this;
   }
@@ -67,9 +68,28 @@ public class TokenCountLimitDTO   {
   }
 
   /**
+   * Maximum number of requests allowed
+   **/
+  public AIQuotaLimitDTO requestCount(Long requestCount) {
+    this.requestCount = requestCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "30", required = true, value = "Maximum number of requests allowed")
+  @JsonProperty("requestCount")
+  @NotNull
+  public Long getRequestCount() {
+    return requestCount;
+  }
+  public void setRequestCount(Long requestCount) {
+    this.requestCount = requestCount;
+  }
+
+  /**
    * Maximum number of total tokens allowed
    **/
-  public TokenCountLimitDTO totalTokenCount(Long totalTokenCount) {
+  public AIQuotaLimitDTO totalTokenCount(Long totalTokenCount) {
     this.totalTokenCount = totalTokenCount;
     return this;
   }
@@ -87,7 +107,7 @@ public class TokenCountLimitDTO   {
   /**
    * Maximum number of request tokens allowed
    **/
-  public TokenCountLimitDTO requestTokenCount(Long requestTokenCount) {
+  public AIQuotaLimitDTO requestTokenCount(Long requestTokenCount) {
     this.requestTokenCount = requestTokenCount;
     return this;
   }
@@ -105,7 +125,7 @@ public class TokenCountLimitDTO   {
   /**
    * Maximum number of response tokens allowed
    **/
-  public TokenCountLimitDTO responseTokenCount(Long responseTokenCount) {
+  public AIQuotaLimitDTO responseTokenCount(Long responseTokenCount) {
     this.responseTokenCount = responseTokenCount;
     return this;
   }
@@ -129,26 +149,28 @@ public class TokenCountLimitDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TokenCountLimitDTO tokenCountLimit = (TokenCountLimitDTO) o;
-    return Objects.equals(timeUnit, tokenCountLimit.timeUnit) &&
-        Objects.equals(unitTime, tokenCountLimit.unitTime) &&
-        Objects.equals(totalTokenCount, tokenCountLimit.totalTokenCount) &&
-        Objects.equals(requestTokenCount, tokenCountLimit.requestTokenCount) &&
-        Objects.equals(responseTokenCount, tokenCountLimit.responseTokenCount);
+    AIQuotaLimitDTO aiQuotaLimit = (AIQuotaLimitDTO) o;
+    return Objects.equals(timeUnit, aiQuotaLimit.timeUnit) &&
+        Objects.equals(unitTime, aiQuotaLimit.unitTime) &&
+        Objects.equals(requestCount, aiQuotaLimit.requestCount) &&
+        Objects.equals(totalTokenCount, aiQuotaLimit.totalTokenCount) &&
+        Objects.equals(requestTokenCount, aiQuotaLimit.requestTokenCount) &&
+        Objects.equals(responseTokenCount, aiQuotaLimit.responseTokenCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(timeUnit, unitTime, totalTokenCount, requestTokenCount, responseTokenCount);
+    return Objects.hash(timeUnit, unitTime, requestCount, totalTokenCount, requestTokenCount, responseTokenCount);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TokenCountLimitDTO {\n");
+    sb.append("class AIQuotaLimitDTO {\n");
     
     sb.append("    timeUnit: ").append(toIndentedString(timeUnit)).append("\n");
     sb.append("    unitTime: ").append(toIndentedString(unitTime)).append("\n");
+    sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("    totalTokenCount: ").append(toIndentedString(totalTokenCount)).append("\n");
     sb.append("    requestTokenCount: ").append(toIndentedString(requestTokenCount)).append("\n");
     sb.append("    responseTokenCount: ").append(toIndentedString(responseTokenCount)).append("\n");

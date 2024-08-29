@@ -83,8 +83,6 @@ public class SubscriptionThrottlePolicyMappingUtil {
         SubscriptionThrottlePolicyDTO policyDTO = new SubscriptionThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(subscriptionPolicy, policyDTO);
         policyDTO.setBillingPlan(subscriptionPolicy.getBillingPlan());
-        policyDTO.setPolicyType(
-                SubscriptionThrottlePolicyDTO.PolicyTypeEnum.valueOf(subscriptionPolicy.getPolicyType()));
         policyDTO.setRateLimitCount(subscriptionPolicy.getRateLimitCount());
         policyDTO.setRateLimitTimeUnit(subscriptionPolicy.getRateLimitTimeUnit());
         policyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
@@ -121,11 +119,6 @@ public class SubscriptionThrottlePolicyMappingUtil {
             monetizationInfoDTO.setProperties(subscriptionPolicy.getMonetizationPlanProperties());
             policyDTO.setMonetization(monetizationInfoDTO);
         }
-        if (subscriptionPolicy.getTokenCountLimit() != null && PolicyConstants.AI_TYPE_SUBSCRIPTION_POLICY.equals(
-                subscriptionPolicy.getPolicyType())) {
-            policyDTO.setTokenCountLimit(
-                    CommonThrottleMappingUtil.fromTokenCountLimitToDTO(subscriptionPolicy.getTokenCountLimit()));
-        }
         return policyDTO;
     }
 
@@ -142,20 +135,18 @@ public class SubscriptionThrottlePolicyMappingUtil {
 
         //update mandatory fields such as tenantDomain etc.
         dto = CommonThrottleMappingUtil.updateDefaultMandatoryFieldsOfThrottleDTO(dto);
-
+        String quotaType = dto.getDefaultLimit().getType().toString();
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(dto.getPolicyName());
-        String policyType = String.valueOf(dto.getPolicyType());
         subscriptionPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, subscriptionPolicy);
-        subscriptionPolicy.setPolicyType(policyType);
         subscriptionPolicy.setBillingPlan(dto.getBillingPlan());
         subscriptionPolicy.setRateLimitTimeUnit(dto.getRateLimitTimeUnit());
         subscriptionPolicy.setRateLimitCount(dto.getRateLimitCount());
         subscriptionPolicy.setSubscriberCount(dto.getSubscriberCount());
         subscriptionPolicy.setStopOnQuotaReach(dto.isStopOnQuotaReach());
-        if (dto.getGraphQLMaxComplexity() != null && !(PolicyConstants.AI_TYPE_SUBSCRIPTION_POLICY).equals(policyType)) {
+        if (dto.getGraphQLMaxComplexity() != null && !(PolicyConstants.AI_QUOTA_TYPE_ENUM_VALUE).equals(quotaType)) {
             subscriptionPolicy.setGraphQLMaxComplexity(dto.getGraphQLMaxComplexity());
         }
-        if (dto.getGraphQLMaxDepth() != null && !(PolicyConstants.AI_TYPE_SUBSCRIPTION_POLICY).equals(policyType)) {
+        if (dto.getGraphQLMaxDepth() != null && !(PolicyConstants.AI_QUOTA_TYPE_ENUM_VALUE).equals(quotaType)) {
             subscriptionPolicy.setGraphQLMaxDepth(dto.getGraphQLMaxDepth());
         }
         List<CustomAttributeDTO> customAttributes = dto.getCustomAttributes();
@@ -190,10 +181,6 @@ public class SubscriptionThrottlePolicyMappingUtil {
         if (dto.getDefaultLimit() != null) {
             subscriptionPolicy
                     .setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
-        }
-        if (dto.getTokenCountLimit() != null && PolicyConstants.AI_TYPE_SUBSCRIPTION_POLICY.equals(policyType)) {
-            subscriptionPolicy.setTokenCountLimit(
-                    CommonThrottleMappingUtil.fromDTOToTokenCountLimit(dto.getTokenCountLimit()));
         }
         return subscriptionPolicy;
     }

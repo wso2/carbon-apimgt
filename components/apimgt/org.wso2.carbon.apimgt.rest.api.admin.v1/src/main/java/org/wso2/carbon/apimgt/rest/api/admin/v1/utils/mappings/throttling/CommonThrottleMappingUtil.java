@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
+import org.wso2.carbon.apimgt.api.model.policy.AIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
@@ -33,8 +34,8 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.api.model.policy.TokenCountLimit;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIQuotaLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BandwidthLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConditionalGroupDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
@@ -47,7 +48,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RequestCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
@@ -315,6 +315,17 @@ public class CommonThrottleMappingUtil {
                    }
                    break;
                 }
+                case AIQUOTALIMIT: {
+                    if (dto.getAiQuota() != null) {
+                        quotaPolicy.setLimit(fromDTOToAIQuotaLimit(dto.getAiQuota()));
+                    } else {
+                        errorMessage =
+                                RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                        ThrottleLimitDTO.TypeEnum.AIQUOTALIMIT) + dto.toString();
+                        throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                    }
+                    break;
+                }
             }
             quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(dto.getType()));
         } else {
@@ -347,6 +358,10 @@ public class CommonThrottleMappingUtil {
             EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
             defaultLimitType.setType(ThrottleLimitDTO.TypeEnum.EVENTCOUNTLIMIT);
             defaultLimitType.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
+        } else if (PolicyConstants.AI_QUOTA_TYPE.equals(quotaPolicy.getType())) {
+            AIQuotaLimit aiQuotaLimit = (AIQuotaLimit) quotaPolicy.getLimit();
+            defaultLimitType.setType(ThrottleLimitDTO.TypeEnum.AIQUOTALIMIT);
+            defaultLimitType.setAiQuota(fromAIQuotaLimitToDTO(aiQuotaLimit));
         } else {
             String msg = "Throttle limit type " + quotaPolicy.getType() + " is not supported";
             throw new UnsupportedThrottleLimitTypeException(msg);
@@ -355,20 +370,20 @@ public class CommonThrottleMappingUtil {
     }
 
     /**
-     * Converts a Token Count Limit model object into a Token Count Limit DTO object.
+     * Converts a AI Quota Limit model object into a AI Quota Limit DTO object
      *
-     * @param tokenCountLimit TokenCountLimit model object
-     * @return TokenCountLimitDTO object
+     * @param aiQuotaLimit AI Quota Limit model object
+     * @return AI Quota Limit DTO object derived from model
      */
-    public static TokenCountLimitDTO fromTokenCountLimitToDTO(TokenCountLimit tokenCountLimit) {
-
-        TokenCountLimitDTO tokenCountLimitDTO = new TokenCountLimitDTO();
-        tokenCountLimitDTO.setTotalTokenCount(tokenCountLimit.getTotalTokenCount());
-        tokenCountLimitDTO.setRequestTokenCount(tokenCountLimit.getRequestTokenCount());
-        tokenCountLimitDTO.setResponseTokenCount(tokenCountLimit.getResponseTokenCount());
-        tokenCountLimitDTO.setTimeUnit(tokenCountLimit.getTimeUnit());
-        tokenCountLimitDTO.setUnitTime(tokenCountLimit.getUnitTime());
-        return tokenCountLimitDTO;
+    public static AIQuotaLimitDTO fromAIQuotaLimitToDTO(AIQuotaLimit aiQuotaLimit) {
+        AIQuotaLimitDTO dto = new AIQuotaLimitDTO();
+        dto.setTimeUnit(aiQuotaLimit.getTimeUnit());
+        dto.setUnitTime(aiQuotaLimit.getUnitTime());
+        dto.setRequestCount(aiQuotaLimit.getRequestCount());
+        dto.setTotalTokenCount(aiQuotaLimit.getTotalTokenCount());
+        dto.setRequestTokenCount(aiQuotaLimit.getRequestTokenCount());
+        dto.setResponseTokenCount(aiQuotaLimit.getResponseTokenCount());
+        return dto;
     }
 
     /**
@@ -401,25 +416,26 @@ public class CommonThrottleMappingUtil {
     }
 
     /**
-     * Converts a Token Count Limit DTO object into a Token Count model object
+     * Converts a AI Quota Limit DTO object into a AI Quota Limit model object
      *
-     * @param dto Token Count Limit DTO object
-     * @return Token Count Limit model object derived from DTO
+     * @param dto AI Quota Limit DTO object
+     * @return AI Quota Limit model object derived from DTO
      */
-    public static TokenCountLimit fromDTOToTokenCountLimit(TokenCountLimitDTO dto) {
-        TokenCountLimit tokenCountLimit = new TokenCountLimit();
-        tokenCountLimit.setTimeUnit(dto.getTimeUnit());
-        tokenCountLimit.setUnitTime(dto.getUnitTime());
+    public static AIQuotaLimit fromDTOToAIQuotaLimit(AIQuotaLimitDTO dto) {
+        AIQuotaLimit aiQuotaLimit = new AIQuotaLimit();
+        aiQuotaLimit.setTimeUnit(dto.getTimeUnit());
+        aiQuotaLimit.setUnitTime(dto.getUnitTime());
+        aiQuotaLimit.setRequestCount(dto.getRequestCount());
         if (dto.getTotalTokenCount() != null) {
-            tokenCountLimit.setTotalTokenCount(dto.getTotalTokenCount());
+            aiQuotaLimit.setTotalTokenCount(dto.getTotalTokenCount());
         }
         if (dto.getRequestTokenCount() != null) {
-            tokenCountLimit.setRequestTokenCount(dto.getRequestTokenCount());
+            aiQuotaLimit.setRequestTokenCount(dto.getRequestTokenCount());
         }
         if (dto.getResponseTokenCount() != null) {
-            tokenCountLimit.setResponseTokenCount(dto.getResponseTokenCount());
+            aiQuotaLimit.setResponseTokenCount(dto.getResponseTokenCount());
         }
-        return tokenCountLimit;
+        return aiQuotaLimit;
     }
 
     private static EventCountLimit fromDTOToEventCountLimit(EventCountLimitDTO dto) {
@@ -678,6 +694,8 @@ public class CommonThrottleMappingUtil {
                 return PolicyConstants.REQUEST_COUNT_TYPE;
             case EVENTCOUNTLIMIT:
                 return PolicyConstants.EVENT_COUNT_TYPE;
+            case AIQUOTALIMIT:
+                return PolicyConstants.AI_QUOTA_TYPE;
             default:
                 return null;
         }

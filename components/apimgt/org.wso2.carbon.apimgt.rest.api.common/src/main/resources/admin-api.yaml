@@ -3811,18 +3811,8 @@ components:
             - defaultLimit
           type: object
           properties:
-            policyType:
-              type: string
-              description: Type of the subscription policy
-              default: DEFAULT_POLICY
-              example: AI_POLICY
-              enum:
-                - DEFAULT_POLICY
-                - AI_POLICY
             defaultLimit:
               $ref: '#/components/schemas/ThrottleLimit'
-            tokenCountLimit:
-              $ref: '#/components/schemas/TokenCountLimit'
             monetization:
               $ref: '#/components/schemas/MonetizationInfo'
             rateLimitCount:
@@ -4117,12 +4107,15 @@ components:
             - REQUESTCOUNTLIMIT
             - BANDWIDTHLIMIT
             - EVENTCOUNTLIMIT
+            - AIQUOTALIMIT
         requestCount:
           $ref: '#/components/schemas/RequestCountLimit'
         bandwidth:
           $ref: '#/components/schemas/BandwidthLimit'
         eventCount:
           $ref: '#/components/schemas/EventCountLimit'
+        aiQuota:
+          $ref: '#/components/schemas/AIQuotaLimit'
     BurstLimit:
       title: Burst Limit object
       type: object
@@ -4185,12 +4178,19 @@ components:
               description: Maximum number of requests allowed
               format: int64
               example: 30
-    TokenCountLimit:
-      title: Token Count Limit object
+    AIQuotaLimit:
+      title: AI Quota Limit object
       allOf:
         - $ref: '#/components/schemas/ThrottleLimitBase'
-        - type: object
+        - required:
+            - requestCount
+          type: object
           properties:
+            requestCount:
+              type: integer
+              description: Maximum number of requests allowed
+              format: int64
+              example: 30
             totalTokenCount:
               type: integer
               description: Maximum number of total tokens allowed

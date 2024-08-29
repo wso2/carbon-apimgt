@@ -10,7 +10,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenCountLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -27,40 +26,7 @@ import javax.validation.Valid;
 
 public class SubscriptionThrottlePolicyAllOfDTO   {
   
-
-    @XmlType(name="PolicyTypeEnum")
-    @XmlEnum(String.class)
-    public enum PolicyTypeEnum {
-        DEFAULT_POLICY("DEFAULT_POLICY"),
-        AI_POLICY("AI_POLICY");
-        private String value;
-
-        PolicyTypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static PolicyTypeEnum fromValue(String v) {
-            for (PolicyTypeEnum b : PolicyTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private PolicyTypeEnum policyType = PolicyTypeEnum.DEFAULT_POLICY;
     private ThrottleLimitDTO defaultLimit = null;
-    private TokenCountLimitDTO tokenCountLimit = null;
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
@@ -69,24 +35,6 @@ return null;
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
     private SubscriptionThrottlePolicyPermissionDTO permissions = null;
-
-  /**
-   * Type of the subscription policy
-   **/
-  public SubscriptionThrottlePolicyAllOfDTO policyType(PolicyTypeEnum policyType) {
-    this.policyType = policyType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "AI_POLICY", value = "Type of the subscription policy")
-  @JsonProperty("policyType")
-  public PolicyTypeEnum getPolicyType() {
-    return policyType;
-  }
-  public void setPolicyType(PolicyTypeEnum policyType) {
-    this.policyType = policyType;
-  }
 
   /**
    **/
@@ -105,24 +53,6 @@ return null;
   }
   public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
-  }
-
-  /**
-   **/
-  public SubscriptionThrottlePolicyAllOfDTO tokenCountLimit(TokenCountLimitDTO tokenCountLimit) {
-    this.tokenCountLimit = tokenCountLimit;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("tokenCountLimit")
-  public TokenCountLimitDTO getTokenCountLimit() {
-    return tokenCountLimit;
-  }
-  public void setTokenCountLimit(TokenCountLimitDTO tokenCountLimit) {
-    this.tokenCountLimit = tokenCountLimit;
   }
 
   /**
@@ -280,9 +210,7 @@ return null;
       return false;
     }
     SubscriptionThrottlePolicyAllOfDTO subscriptionThrottlePolicyAllOf = (SubscriptionThrottlePolicyAllOfDTO) o;
-    return Objects.equals(policyType, subscriptionThrottlePolicyAllOf.policyType) &&
-        Objects.equals(defaultLimit, subscriptionThrottlePolicyAllOf.defaultLimit) &&
-        Objects.equals(tokenCountLimit, subscriptionThrottlePolicyAllOf.tokenCountLimit) &&
+    return Objects.equals(defaultLimit, subscriptionThrottlePolicyAllOf.defaultLimit) &&
         Objects.equals(monetization, subscriptionThrottlePolicyAllOf.monetization) &&
         Objects.equals(rateLimitCount, subscriptionThrottlePolicyAllOf.rateLimitCount) &&
         Objects.equals(rateLimitTimeUnit, subscriptionThrottlePolicyAllOf.rateLimitTimeUnit) &&
@@ -295,7 +223,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyType, defaultLimit, tokenCountLimit, monetization, rateLimitCount, rateLimitTimeUnit, subscriberCount, customAttributes, stopOnQuotaReach, billingPlan, permissions);
+    return Objects.hash(defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, subscriberCount, customAttributes, stopOnQuotaReach, billingPlan, permissions);
   }
 
   @Override
@@ -303,9 +231,7 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionThrottlePolicyAllOfDTO {\n");
     
-    sb.append("    policyType: ").append(toIndentedString(policyType)).append("\n");
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
-    sb.append("    tokenCountLimit: ").append(toIndentedString(tokenCountLimit)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
     sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");

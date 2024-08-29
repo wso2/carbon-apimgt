@@ -42,9 +42,9 @@ public class PolicyConstants {
 
     public static final String EVENT_COUNT_TYPE = "eventCount";
 
-    public static final String AI_TYPE_SUBSCRIPTION_POLICY = "AI_POLICY";
+    public static final String AI_QUOTA_TYPE = "aiQuota";
 
-    public static final String DEFAULT_TYPE_SUBSCRIPTION_POLICY = "DEFAULT_POLICY";
+    public static final String AI_QUOTA_TYPE_ENUM_VALUE = "AIQUOTALIMIT";
 
     public static final String DATE_QUERY = "date";
 
