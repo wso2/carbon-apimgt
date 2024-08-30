@@ -975,6 +975,10 @@ public final class APIConstants {
     public static final String BASIC_AUTH_APPLICATION_OWNER = " BasicAuthApplicationOwner";
     public static final String MUTUAL_SSL_AUTH_APPLICATION_NAME = "MutualSSLAuthApplication";
     public static final String MUTUAL_SSL_AUTH_APPLICATION_OWNER = "MutualSSLAuthApplicationOwner";
+    public static final String SUBSCRIPTIONLESS_APPLICATION_NAME = "SubscriptionLessApplication";
+    public static final String SUBSCRIPTIONLESS_APPLICATION_OWNER = "SubscriptionLessApplicationOwner";
+    public static final String SUBSCRIPTIONLESS_APPLICATION_DESCRIPTION = "This application is used to internally" +
+            " subscribe to APIs when subscription validation is disabled";
 
     public static final QName POLICY_ELEMENT = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy",
             "Policy");
@@ -1914,11 +1918,13 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_BRONZE = "Bronze";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
+    public static final String DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS = "Default_Subscriptionless";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "AsyncGold";
     public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "AsyncSilver";
     public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "AsyncBronze";
     public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "AsyncUnlimited";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS = "Async_Default_Subscriptionless";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "AsyncWHGold";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "AsyncWHSilver";
@@ -1930,11 +1936,15 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 500 request(s) per minute";
+    public static final String DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS_DESC =
+            "Allows 10000 requests per minute when subscription validation is disabled";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC = "Allows 50000 events per day";
     public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC = "Allows 25000 events per day";
     public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC = "Allows 5000 events per day";
     public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC = "Allows unlimited events";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS_DESC =
+            "Allows 10000 events per day when subscription validation is disabled";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC = "Allows 10000 events per month and " +
             "1000 active subscriptions";

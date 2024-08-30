@@ -950,6 +950,11 @@ definitions:
         type: string
         description: Available authentication methods of the API.
         example: Oauth2,api_key
+      isSubscriptionValidationDisabled:
+        type: boolean
+        description: Whether subscription validation is disabled.
+        default: false
+        example: false
 
   #-----------------------------------------------------
   # synapse Artifact resource

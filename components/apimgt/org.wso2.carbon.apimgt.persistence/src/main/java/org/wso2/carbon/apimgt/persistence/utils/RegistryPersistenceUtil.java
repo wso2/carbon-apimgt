@@ -557,6 +557,21 @@ public class RegistryPersistenceUtil {
         }
     }
 
+    public static boolean isSubscriptionValidationDisabled(GovernanceArtifact artifact) throws APIManagementException {
+        try {
+            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+            if (!tiers.isEmpty()) {
+                List<String> tierList = new ArrayList<>(Arrays.asList(tiers.split("\\|\\|")));
+                return tierList.size() == 1
+                        && StringUtils.contains(tierList.get(0), APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+            }
+            return false;
+        } catch (GovernanceException e) {
+            String msg = "Failed to get subscription validation status of API for the artifact ";
+            throw new APIManagementException(msg, e);
+        }
+    }
+
     /**
      * This Method is different from getAPI method, as this one returns
      * URLTemplates without aggregating duplicates. This is to be used for building synapse config.

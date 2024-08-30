@@ -1497,6 +1497,13 @@ public class APIManagerConfiguration {
                             defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
                                     Long.parseLong(unauthenticatedTierElement.getText()));
                         }
+
+                        OMElement subscriptionlessTierElement = subscriptionPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+                        if (subscriptionlessTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS,
+                                    Long.parseLong(subscriptionlessTierElement.getText()));
+                        }
                     }
 
                     OMElement applicationPolicyLimits = defaultTierLimits

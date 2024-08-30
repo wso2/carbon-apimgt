@@ -253,6 +253,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         ApplicationKeyMapping key = null;
         Application app = null;
         Subscription sub = null;
+        boolean isSubValidationDisabled = false;
 
         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(apiTenantDomain);
@@ -260,6 +261,14 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         if (datastore != null) {
             api = datastore.getApiByContextAndVersion(context, version);
             if (api != null) {
+                isSubValidationDisabled = api.isSubscriptionValidationDisabled();
+                if (isSubValidationDisabled) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Subscription validation is disabled for the API " + api.getApiName());
+                    }
+                    return validateSubscriptionDetailsWhenDisabled(infoDTO, apiTenantDomain, tenantId,
+                            datastore, api, consumerKey, keyManager);
+                }
                 key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
                 if (key != null) {
                     app = datastore.getApplicationById(key.getApplicationId());
@@ -367,6 +376,184 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
         }
 
+        return infoDTO;
+    }
+
+    private APIKeyValidationInfoDTO validateSubscriptionDetailsWhenDisabled(APIKeyValidationInfoDTO infoDTO,
+            String apiTenantDomain, int tenantId, SubscriptionDataStore datastore, API api, String consumerKey,
+            String keyManager) {
+        ApplicationKeyMapping key = null;
+        Application app = null;
+        Subscription sub = null;
+
+        // Create the default key, application, and subscription objects
+        ApplicationKeyMapping defaultKey = new ApplicationKeyMapping();
+        defaultKey.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        Application defaultApp = new Application();
+        defaultApp.setName(APIConstants.SUBSCRIPTIONLESS_APPLICATION_NAME);
+        defaultApp.setSubName(APIConstants.SUBSCRIPTIONLESS_APPLICATION_OWNER);
+        defaultApp.setPolicy(APIConstants.DEFAULT_APP_POLICY_UNLIMITED);
+        defaultApp.setOrganization(apiTenantDomain);
+        Subscription defaultSub = new Subscription();
+        defaultSub.setPolicyId(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+
+        if (consumerKey != null) {
+            key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
+            if (key != null) {
+                app = datastore.getApplicationById(key.getApplicationId());
+                if (app != null) {
+                    sub = datastore.getSubscriptionById(app.getId(), api.getApiId());
+                    if (sub != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("All information is retrieved from the inmemory data store.");
+                        }
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Valid subscription not found for appId " + app.getId() + " and apiId "
+                                    + api.getApiId());
+                        }
+                        // todo: Subscribe to the relevant application with the default business plan
+
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Application not found in the datastore for id " + key.getApplicationId());
+                    }
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Application keymapping not found in the datastore for id consumerKey " + consumerKey);
+                }
+
+            }
+        } else {
+            // If the consumer key is not available, this could be a request with a token directly from a 3rd party
+            // key manager without any involvement of the Devportal. We need to subscribe to the API using the default
+            // internal application in this scenario.
+            // todo: subscribe with the default app
+        }
+        if (key == null) {
+            key = defaultKey;
+        }
+        if (app == null) {
+            app = defaultApp;
+        }
+        if (sub == null) {
+            sub = defaultSub;
+        }
+
+        validateWhenDisabled(infoDTO, apiTenantDomain, tenantId, datastore, api, key, app, sub);
+
+        return infoDTO;
+    }
+
+    private APIKeyValidationInfoDTO validateWhenDisabled(APIKeyValidationInfoDTO infoDTO, String apiTenantDomain,
+            int tenantId, SubscriptionDataStore datastore, API api, ApplicationKeyMapping key, Application app,
+                                                         Subscription sub) {
+        String type = key.getKeyType();
+        infoDTO.setTier(sub.getPolicyId());
+        infoDTO.setSubscriber(app.getSubName());
+        infoDTO.setApplicationId(app.getId().toString());
+        infoDTO.setApiName(api.getApiName());
+        infoDTO.setApiVersion(api.getApiVersion());
+        infoDTO.setApiPublisher(api.getApiProvider());
+        infoDTO.setApplicationName(app.getName());
+        infoDTO.setApplicationTier(app.getPolicy());
+        infoDTO.setApplicationUUID(app.getUUID());
+        infoDTO.setApplicationGroupIds(app.getGroupIds().stream().map(GroupId::getGroupId).collect(Collectors.toSet()));
+        infoDTO.setAppAttributes(app.getAttributes());
+        infoDTO.setType(type);
+
+        // Advanced Level Throttling Related Properties
+        String apiTier = api.getApiTier();
+        String subscriberTenant = MultitenantUtils.getTenantDomain(app.getSubName());
+
+        ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
+                APIUtil.getTenantIdFromTenantDomain(app.getOrganization()));
+        if (appPolicy == null) {
+            try {
+                appPolicy = new SubscriptionDataLoaderImpl()
+                        .getApplicationPolicy(app.getPolicy(), app.getOrganization());
+                datastore.addOrUpdateApplicationPolicy(appPolicy);
+            } catch (DataLoadingException e) {
+                log.error("Error while loading ApplicationPolicy");
+            }
+        }
+        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(),
+                tenantId);
+        if (subPolicy == null) {
+            try {
+                subPolicy = new SubscriptionDataLoaderImpl()
+                        .getSubscriptionPolicy(sub.getPolicyId(), apiTenantDomain);
+                datastore.addOrUpdateSubscriptionPolicy(subPolicy);
+            } catch (DataLoadingException e) {
+                log.error("Error while loading SubscriptionPolicy");
+            }
+        }
+        ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
+
+        boolean isContentAware = false;
+        int spikeArrest = 0;
+        String spikeArrestUnit = null;
+        int applicationSpikeArrest = 0;
+        String applicationSpikeArrestUnit = null;
+        boolean stopOnQuotaReach = false;
+        int graphQLMaxDepth = 0;
+        int graphQLMaxComplexity = 0;
+
+        if (appPolicy != null && subPolicy != null) {
+            if (appPolicy.isContentAware() || subPolicy.isContentAware()
+                    || (apiPolicy != null && apiPolicy.isContentAware())) {
+                isContentAware = true;
+            }
+
+            if (subPolicy.getRateLimitCount() > 0) {
+                spikeArrest = subPolicy.getRateLimitCount();
+            }
+            if (subPolicy.getRateLimitTimeUnit() != null) {
+                spikeArrestUnit = subPolicy.getRateLimitTimeUnit();
+            }
+            if (appPolicy.getBurstLimit().getRateLimitCount() > 0) {
+                applicationSpikeArrest = appPolicy.getBurstLimit().getRateLimitCount();
+            }
+            if (appPolicy.getBurstLimit().getRateLimitTimeUnit() != null) {
+                applicationSpikeArrestUnit = appPolicy.getBurstLimit().getRateLimitTimeUnit();
+            }
+            stopOnQuotaReach = subPolicy.isStopOnQuotaReach();
+            if (subPolicy.getGraphQLMaxDepth() > 0) {
+                graphQLMaxDepth = subPolicy.getGraphQLMaxDepth();
+            }
+            if (subPolicy.getGraphQLMaxComplexity() > 0) {
+                graphQLMaxComplexity = subPolicy.getGraphQLMaxComplexity();
+            }
+        }
+
+        infoDTO.setContentAware(isContentAware);
+
+        // TODO this must implement as a part of throttling implementation.
+        String apiLevelThrottlingKey = "api_level_throttling_key";
+
+
+
+        List<String> list = new ArrayList<>();
+        list.add(apiLevelThrottlingKey);
+        infoDTO.setSpikeArrestLimit(spikeArrest);
+        infoDTO.setSpikeArrestUnit(spikeArrestUnit);
+        infoDTO.setApplicationSpikeArrestLimit(applicationSpikeArrest);
+        infoDTO.setApplicationSpikeArrestUnit(applicationSpikeArrestUnit);
+        infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
+        infoDTO.setSubscriberTenantDomain(subscriberTenant);
+        infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
+        infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
+        if (apiTier != null && apiTier.trim().length() > 0) {
+            infoDTO.setApiTier(apiTier);
+        }
+        // We also need to set throttling data list associated with given API. This need to have
+        // policy id and
+        // condition id list for all throttling tiers associated with this API.
+        infoDTO.setThrottlingDataList(list);
+        infoDTO.setAuthorized(true);
         return infoDTO;
     }
 

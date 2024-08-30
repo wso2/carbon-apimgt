@@ -22,6 +22,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -81,6 +82,7 @@ public class SubscriptionValidationDataUtil {
     private static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
         APIDTO apidto = null;
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (model != null) {
             apidto = new APIDTO();
             apidto.setUuid(model.getApiUUID());
@@ -98,9 +100,11 @@ public class SubscriptionValidationDataUtil {
             // The security schema is necessary only for the websocket APIs. To prevent unnecessary registry calls,
             // it has been excluded from other APIs, thus reducing operational costs.
             if(model.getApiType() != null && model.getApiType().equals("WS")) {
-                apidto.setSecurityScheme(RestApiCommonUtil.getLoggedInUserProvider().
+                apidto.setSecurityScheme(apiProvider.
                         getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
             }
+            apidto.setIsSubscriptionValidationDisabled(apiProvider
+                    .isSubscriptionValidationDisabled(model.getApiUUID(), model.getOrganization()));
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -144,6 +148,7 @@ public class SubscriptionValidationDataUtil {
     public static APIListDTO fromAPIToAPIListDTO(API model) throws APIManagementException {
 
         APIListDTO apiListdto = new APIListDTO();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (model != null) {
             APIDTO apidto = new APIDTO();
             apidto.setUuid(model.getApiUUID());
@@ -157,8 +162,9 @@ public class SubscriptionValidationDataUtil {
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
             apidto.setOrganization(model.getOrganization());
-            apidto.setSecurityScheme(RestApiCommonUtil.getLoggedInUserProvider().
-                    getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
+            apidto.setSecurityScheme(apiProvider.getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
+            apidto.setIsSubscriptionValidationDisabled(apiProvider
+                    .isSubscriptionValidationDisabled(model.getApiUUID(), model.getOrganization()));
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
