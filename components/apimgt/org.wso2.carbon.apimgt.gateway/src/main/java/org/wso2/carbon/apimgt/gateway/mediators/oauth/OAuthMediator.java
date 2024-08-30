@@ -92,41 +92,6 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
     @Override
     public boolean mediate(MessageContext messageContext) {
 
-        if (log.isDebugEnabled()) {
-            log.debug("OAuth Mediator is invoked...");
-        }
-
-        CountDownLatch latch = new CountDownLatch(1);
-
-        TokenResponse tokenResponse = null;
-        if (oAuthEndpoint != null) {
-            try {
-                oAuthEndpoint.setUsername(username);
-                if (clientSecret != null) {
-                    oAuthEndpoint.setClientSecret(clientSecret);
-                }
-                if (password != null) {
-                    oAuthEndpoint.setPassword(password.toCharArray());
-                }
-                tokenResponse = OAuthTokenGenerator.generateToken(oAuthEndpoint, latch);
-                latch.await();
-            } catch (InterruptedException | APISecurityException e) {
-                log.error("Could not generate access token...", e);
-            }
-        }
-
-        if (tokenResponse != null) {
-            String accessToken = tokenResponse.getAccessToken();
-            Map<String, Object> transportHeaders = (Map<String, Object>) ((Axis2MessageContext) messageContext)
-                    .getAxis2MessageContext().getProperty("TRANSPORT_HEADERS");
-            transportHeaders.put("Authorization", "Bearer " + accessToken);
-            if (log.isDebugEnabled()) {
-                log.debug("Access token set: " + GatewayUtils.getMaskedToken(accessToken));
-            }
-        } else {
-            log.debug("Token Response is empty...");
-        }
-        messageContext.setProperty(APIMgtGatewayConstants.OAUTH_ENDPOINT_INSTANCE, oAuthEndpoint);
         return true;
     }
 

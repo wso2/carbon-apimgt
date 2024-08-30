@@ -54,32 +54,6 @@ public class OAuthResponseMediator extends AbstractMediator implements ManagedLi
     @Override
     public boolean mediate(MessageContext messageContext) {
 
-        if (messageContext != null) {
-            TargetResponse targetResponse = (TargetResponse) ((Axis2MessageContext) messageContext)
-                    .getAxis2MessageContext().getProperty("pass-through.Target-Response");
-            int statusCode = targetResponse.getStatus();
-            if (statusCode == 401) {
-                Object oauthEndpointObject = messageContext.getProperty(APIMgtGatewayConstants.OAUTH_ENDPOINT_INSTANCE);
-                if (oauthEndpointObject instanceof OAuthEndpoint) {
-                    try {
-                        OAuthEndpoint oAuthEndpoint = (OAuthEndpoint) oauthEndpointObject;
-                        if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
-                             new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
-                                     .deleteKey(oAuthEndpoint.getId());
-                        } else {
-                            TokenCache.getInstance().getTokenMap().put(oAuthEndpoint.getId(), null);
-                        }
-
-                        OAuthTokenGenerator.generateToken(oAuthEndpoint, null);
-                        log.error("OAuth 2.0 access token has been rejected by the backend...");
-                        handleFailure(APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR, messageContext,
-                                APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE, "Please try again");
-                    } catch (APISecurityException e) {
-                        log.error("Error when generating oauth 2.0 access token...", e);
-                    }
-                }
-            }
-        }
         return true;
     }
 
