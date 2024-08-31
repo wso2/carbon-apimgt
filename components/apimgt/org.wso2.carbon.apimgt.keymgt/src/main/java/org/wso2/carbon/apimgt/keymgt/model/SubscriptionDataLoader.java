@@ -162,4 +162,12 @@ public interface SubscriptionDataLoader {
      * @throws DataLoadingException
      */
     public List<API> loadAllTenantApiMetadata() throws DataLoadingException ;
+
+    /**
+     * Internally subscribe to an API.
+     * @param api API to subscribe to
+     * @param app Application to subscribe from
+     * @param tenantDomain Tenant Domain
+     */
+    void subscribeToAPIInternally(API api, Application app, String tenantDomain);
     }

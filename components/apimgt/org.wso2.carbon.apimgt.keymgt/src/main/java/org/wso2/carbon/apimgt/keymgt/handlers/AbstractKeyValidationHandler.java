@@ -413,7 +413,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                     + api.getApiId());
                         }
                         // todo: Subscribe to the relevant application with the default business plan
-
+                        datastore.subscribeToAPIInternally(api, app, apiTenantDomain);
                     }
                 } else {
                     if (log.isDebugEnabled()) {

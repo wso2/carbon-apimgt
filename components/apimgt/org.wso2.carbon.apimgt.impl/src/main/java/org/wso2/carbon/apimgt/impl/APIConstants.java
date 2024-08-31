@@ -1240,6 +1240,7 @@ public final class APIConstants {
         public static final String APPLICATIONS = "/applications";
         public static final String SUBSCRIPTIONS = "/subscriptions";
         public static final String SUBSCRIBERS = "/subscribers";
+        public static final String SUBSCRIBE_INTERNAL = "/subscribe-internal";
         public static final String APPLICATION_KEY_MAPPINGS = "/application-key-mappings";
         public static final String APPLICATION_POLICIES = "/application-policies";
         public static final String API_POLICIES = "/api-policies";

@@ -21,9 +21,11 @@ package org.wso2.carbon.apimgt.internal.service.utils;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -577,5 +579,10 @@ public class SubscriptionValidationDataUtil {
             globalPolicyListDTO.setCount(0);
         }
         return globalPolicyListDTO;
+    }
+
+    public static ApiTypeWrapper getAPIOrAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        return apiConsumer.getAPIorAPIProductByUUID(uuid, tenantDomain);
     }
 }

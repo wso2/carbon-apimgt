@@ -196,6 +196,41 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /subscribe-internal:
+    post:
+      summary: Subscribe to a subscription validation disabled API
+      description: |
+        This will allow creating subscriptions from applications to APIs which have
+        subscription validation disabled.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: appId
+          in: query
+          type: integer
+          description: |
+            Application ID of the subscription
+        - name: appUuid
+          in: query
+          type: string
+          description: |
+            Application UUID
+        - name: api
+          in: body
+          description: The API object
+          schema:
+            $ref: '#/definitions/API'
+      tags:
+        - Subscription Validation
+      operationId: subscribeToAPI
+      responses:
+        201:
+          description: Subscription created successfully
+          schema:
+            $ref: '#/definitions/Subscription'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /subscription-policies:
     get:
       summary: Get all subscription throttling policies
@@ -410,7 +445,7 @@ paths:
         - name: type
           in: query
           description: |
-             type of gateway
+            type of gateway
           type: string
         - name: uuidList
           in: body
@@ -432,21 +467,21 @@ paths:
       description: |
         This will provide access to the deployment metadata in json format
       parameters:
-      - $ref: '#/parameters/requestedTenant'
-      - name: apiId
-        in: query
-        description: |
-          **Search condition**.
-            Api ID
-        type: string
-      - name: gatewayLabel
-        in: query
-        description: |
-          **Search condition**.
-           label associated with the APIs
-        type: string
+        - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the APIs
+          type: string
       tags:
-      - Retrieving Runtime artifacts
+        - Retrieving Runtime artifacts
       responses:
         200:
           description: Json file of runtime metadata

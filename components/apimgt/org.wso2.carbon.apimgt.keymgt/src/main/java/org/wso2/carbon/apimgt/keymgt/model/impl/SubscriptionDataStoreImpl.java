@@ -468,6 +468,21 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
+    public void subscribeToAPIInternally(API api, Application app, String tenantDomain) {
+        if (log.isDebugEnabled()) {
+            log.debug("Subscribing internally to API " + api.getApiName() + " with version " + api.getApiVersion() +
+                    " from application " + app.getName());
+        }
+        // Hand over the internal subscription to a separate thread to be carried out secretly
+        new Thread(() -> {
+            if (getSubscriptionById(app.getId(), api.getApiId()) != null) {
+                return;
+            }
+            new SubscriptionDataLoaderImpl().subscribeToAPIInternally(api, app, tenantDomain);
+        }).start();
+    }
+
+    @Override
     public void removeSubscription(Subscription subscription) {
 
         subscriptionMap.remove(subscription.getCacheKey());

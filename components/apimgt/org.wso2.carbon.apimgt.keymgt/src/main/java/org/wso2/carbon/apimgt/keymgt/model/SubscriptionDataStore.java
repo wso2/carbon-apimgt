@@ -122,6 +122,14 @@ public interface SubscriptionDataStore {
 
     void addOrUpdateSubscription(Subscription subscription);
 
+    /**
+     * Internally subscribe to an API.
+     * @param api API to subscribe to
+     * @param app Application to subscribe from
+     * @param tenantDomain Tenant Domain
+     */
+    void subscribeToAPIInternally(API api, Application app, String tenantDomain);
+
     void addOrUpdateAPI(API api);
     
     void addOrUpdateAPIWithUrlTemplates(API api);
