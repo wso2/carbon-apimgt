@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SubscriptionPolicy extends Policy {
-
     private int rateLimitCount;
     private String rateLimitTimeUnit;
     private int subscriberCount;
