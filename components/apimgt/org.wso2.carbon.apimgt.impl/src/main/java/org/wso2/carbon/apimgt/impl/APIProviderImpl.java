@@ -7004,7 +7004,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(uuid);
         if (apiInfo != null) {
             if (apiInfo.getOrganization().equals(requestedTenantDomain)) {
-                if (APIConstants.API_PRODUCT.equals(apiInfo.getApiType())) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiInfo.getApiType())) {
                     return new ApiTypeWrapper(getAPIProductbyUUID(uuid, requestedTenantDomain));
                 } else {
                     return new ApiTypeWrapper(getAPIbyUUID(uuid, requestedTenantDomain));

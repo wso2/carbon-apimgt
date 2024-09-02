@@ -928,7 +928,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 int applicationId = resultSet.getInt("APPLICATION_ID");
                 Application application = getLightweightApplicationById(conn, applicationId);
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(resultSet.getString("API_TYPE"))) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
@@ -983,7 +983,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 Identifier identifier;
 
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(resultSet.getString("API_TYPE"))) {
                     identifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
@@ -1544,7 +1544,7 @@ public class ApiMgtDAO {
             while (result.next()) {
                 String apiType = result.getString("TYPE");
 
-                if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                     APIProductIdentifier identifier =
                             new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
@@ -10004,7 +10004,7 @@ public class ApiMgtDAO {
                         String context = resultSet.getString("CONTEXT");
                         String apiType = resultSet.getString("API_TYPE");
                         String version = resultSet.getString("API_VERSION");
-                        if (APIConstants.API_PRODUCT.equals(apiType)
+                        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)
                                 && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(version)
                                 && StringUtils.isBlank(contextTemplate)) {
                             context = context + "/" + APIConstants.API_PRODUCT_VERSION_1_0_0;
@@ -16773,7 +16773,7 @@ public class ApiMgtDAO {
                 String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
                 String uuid = resultSet.getString("API_UUID");
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(resultSet.getString("API_TYPE"))) {
                     // skip api products
                     continue;
                 }
@@ -18962,7 +18962,7 @@ public class ApiMgtDAO {
             try (ResultSet result = ps.executeQuery()) {
                 while (result.next()) {
                     String apiType = result.getString("TYPE");
-                    if (!APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                    if (!APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                         APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
                                 ("API_PROVIDER")), result.getString("API_NAME"),
                                 result.getString("API_VERSION"));
@@ -18997,7 +18997,7 @@ public class ApiMgtDAO {
                     if (index >= offset && index < limit) {
                         String apiType = result.getString("TYPE");
 
-                        if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                             APIProductIdentifier identifier = new APIProductIdentifier(
                                     APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));

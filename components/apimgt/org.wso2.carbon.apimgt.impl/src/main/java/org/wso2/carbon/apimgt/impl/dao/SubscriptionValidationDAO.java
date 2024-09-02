@@ -431,7 +431,7 @@ public class SubscriptionValidationDAO {
                         if (isExpand) {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
@@ -1131,7 +1131,7 @@ public class SubscriptionValidationDAO {
                         if (isExpand) {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
@@ -1157,7 +1157,7 @@ public class SubscriptionValidationDAO {
             api.setIsDefaultVersion(true);
         }
 
-        if (APIConstants.API_PRODUCT.equals(apiType)
+        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)
                 && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(version)
                 && StringUtils.isBlank(contextTemplate)) {
             if (StringUtils.isBlank(publishedDefaultApiVersion)) {
@@ -1246,7 +1246,7 @@ public class SubscriptionValidationDAO {
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
@@ -1458,7 +1458,7 @@ public class SubscriptionValidationDAO {
                                 contextTemplate);
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
@@ -1547,7 +1547,7 @@ public class SubscriptionValidationDAO {
 
                         if (expand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
