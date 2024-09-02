@@ -6781,6 +6781,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates)
             throws APIManagementException {
+        //In case the mediation sequences are not migrated yet with an API update, force an API update to  make sure
+        // the existing API sequences are migrated to API Policies
+        API api = getAPIbyUUID(apiId, organization);
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
+                || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+            migrateMediationPoliciesOfAPI(api, tenantDomain, true);
+        }
 
         Set<URITemplate> uriTemplatesWithPolicies = apiMgtDAO.getURITemplatesWithOperationPolicies(apiId);
 
