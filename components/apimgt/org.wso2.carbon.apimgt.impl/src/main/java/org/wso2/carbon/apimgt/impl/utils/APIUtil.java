@@ -121,6 +121,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.policy.AIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -6484,6 +6485,11 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else if (limit instanceof AIQuotaLimit){
+                    // Todo: Need to implement this according to publisher and developer portals' requirements
+                    AIQuotaLimit aiQuotaLimit = (AIQuotaLimit) limit;
+                    tier.setRequestsPerMin(aiQuotaLimit.getRequestCount());
+                    tier.setRequestCount(aiQuotaLimit.getRequestCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());
@@ -6562,6 +6568,11 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else if (limit instanceof AIQuotaLimit) {
+                    // Todo: Need to implement this according to publisher and developer portals' requirements
+                    AIQuotaLimit aiQuotaLimit = (AIQuotaLimit) limit;
+                    tier.setRequestsPerMin(aiQuotaLimit.getRequestCount());
+                    tier.setRequestCount(aiQuotaLimit.getRequestCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());

@@ -15,10 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 
 /**
- * Entity for keeping details of a Request Count Limit
+ * Entity for keeping details of a AI Quota Limit
  */
 public class AIQuotaLimit extends Limit {
 

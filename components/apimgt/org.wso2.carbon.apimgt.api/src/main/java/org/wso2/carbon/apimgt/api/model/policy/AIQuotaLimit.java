@@ -16,7 +16,6 @@
 * under the License.
 */
 
-
 package org.wso2.carbon.apimgt.api.model.policy;
 
 public class AIQuotaLimit extends Limit {
@@ -63,5 +62,4 @@ public class AIQuotaLimit extends Limit {
                 + ", requestTokenCount=" + requestTokenCount + ", responseTokenCount=" + responseTokenCount
                 + ", toString()=" + super.toString() + "]";
     }
-    
 }
