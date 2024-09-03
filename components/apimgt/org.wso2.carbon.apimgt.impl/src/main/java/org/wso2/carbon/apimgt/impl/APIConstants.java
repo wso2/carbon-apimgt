@@ -3165,4 +3165,18 @@ public final class APIConstants {
 
     //Property for enabling tenant aware sub claims when invoking APIs with API key
     public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
+
+    public static class AIAPI {
+        public static final String PREDEFINED_PROVIDER_OPENAI = "carbon.super_OpenAI_1.0.0";
+        public static final String PREDEFINED_PROVIDER_MISTRAL = "carbon.super_Mistral_1.0.0";
+        public static final String PREDEFINED_PROVIDER_AZURE_OPENAI = "carbon.super_AzureOpenAI_1.0.0";
+        public static final String AI_API_DEFINITION_FILE_PATH = File.separator + "repository" + File.separator +
+                "resources" + File.separator + "ai_api_definitions" + File.separator;
+        public static final String DEFAULT_PAYLOAD_HANDLER = "org.wso2.carbon.apimgt.impl.DefaultLLMPayloadHandler";
+        public static final String AI_API_VERSION_1_0_0 = "1.0.0";
+        public static final String DEFAULT_MODEL_PATH = "$.model";
+        public static final String PROMPT_TOKENS_PATH = "$.usage.prompt_tokens";
+        public static final String COMPLETION_TOKENS_PATH = "$.usage.completion_tokens";
+        public static final String TOTAL_TOKENS_PATH = "$.usage.total_tokens";
+    }
 }

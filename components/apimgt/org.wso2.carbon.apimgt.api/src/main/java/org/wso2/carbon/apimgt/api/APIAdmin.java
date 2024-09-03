@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.LlmProvider;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -540,4 +541,52 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     void deleteGlobalKeyManagerConfigurationById(String id) throws APIManagementException;
+
+    /**
+     * Adds a new LLM Provider for the specified organization.
+     *
+     * @param provider     The LLM Provider object to be added.
+     * @return The added LLM Provider object.
+     * @throws APIManagementException If an error occurs while adding the LLM Provider.
+     */
+    LlmProvider addLlmProvider(LlmProvider provider) throws APIManagementException;
+
+    /**
+     * Retrieves all LLM Providers for the specified organization.
+     *
+     * @param organization The organization for which to retrieve all LLM Providers.
+     * @return A list of all LLM Providers for the specified organization.
+     * @throws APIManagementException If an error occurs while retrieving the LLM Providers.
+     */
+    List<LlmProvider> getLlmProvidersByOrg(String organization) throws APIManagementException;
+
+    List<LlmProvider> getLLMProviders() throws APIManagementException;
+
+    /**
+     * Deletes an LLM Provider by its ID for the specified organization.
+     *
+     * @param organization The organization to which the LLM Provider belongs.
+     * @param llmProviderId The ID of the LLM Provider to delete.
+     * @throws APIManagementException If an error occurs while deleting the LLM Provider.
+     */
+    void deleteLlmProvider(String organization, String llmProviderId) throws APIManagementException;
+
+    /**
+     * Updates an existing LLM Provider for the specified organization.
+     *
+     * @param provider     The LLM Provider object with updated information.
+     * @return The updated LLM Provider object.
+     * @throws APIManagementException If an error occurs while updating the LLM Provider.
+     */
+    LlmProvider updateLlmProvider(LlmProvider provider) throws APIManagementException;
+
+    /**
+     * Retrieves a specific LLM Provider by its ID for the specified organization.
+     *
+     * @param organization The organization to which the LLM Provider belongs.
+     * @param llmProviderId The ID of the LLM Provider to retrieve.
+     * @return The LLM Provider object corresponding to the specified ID.
+     * @throws APIManagementException If an error occurs while retrieving the LLM Provider.
+     */
+    LlmProvider getLlmProvider(String organization, String llmProviderId) throws APIManagementException;
 }

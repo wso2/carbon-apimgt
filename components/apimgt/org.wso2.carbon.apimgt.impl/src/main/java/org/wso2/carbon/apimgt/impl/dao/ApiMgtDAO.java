@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.LlmProvider;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -638,6 +639,7 @@ public class ApiMgtDAO {
 
     public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status, String subscriber)
             throws APIManagementException {
+
         int subscriptionId = -1;
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -1308,7 +1310,6 @@ public class ApiMgtDAO {
     public Set<String> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
             throws APIManagementException {
 
-
         Set<String> scopeKeysSet = new HashSet<>();
         int tenantId = APIUtil.getTenantId(subscriber.getName());
 
@@ -1431,7 +1432,6 @@ public class ApiMgtDAO {
         return subscriptionCount;
     }
 
-
     private String appendSubscriptionQueryWhereClause(final String groupingId, String sqlQuery) {
 
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
@@ -1521,7 +1521,7 @@ public class ApiMgtDAO {
      * This method returns the set of APIs for given subscriber
      *
      * @param organization identifier of the organization
-     * @param subscriber subscriber
+     * @param subscriber   subscriber
      * @return Set<API>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get SubscribedAPIs
      */
@@ -1560,7 +1560,7 @@ public class ApiMgtDAO {
                     identifier.setUuid(result.getString("API_UUID"));
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
-                    initSubscribedAPIDetailed(connection,subscribedAPI, subscriber, result);
+                    initSubscribedAPIDetailed(connection, subscribedAPI, subscriber, result);
                     subscribedAPIs.add(subscribedAPI);
                 }
             }
@@ -1920,6 +1920,7 @@ public class ApiMgtDAO {
     }
 
     public void deleteThrottlingPermissions(String tierName, int tenantId) throws APIManagementException {
+
         int tierPermissionId = -1;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_THROTTLE_TIER_PERMISSION_ID_SQL)) {
@@ -2055,12 +2056,12 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get subscribers for given provider
      */
     public Set<Subscriber> getSubscribersOfAPIWithoutDuplicates(Identifier identifier,
-            Map<Integer, Integer> subscriberMap) throws APIManagementException {
+                                                                Map<Integer, Integer> subscriberMap) throws APIManagementException {
 
         Set<Subscriber> subscribers = new HashSet<Subscriber>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_SUBSCRIBERS_OF_API_SQL);) {
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_SUBSCRIBERS_OF_API_SQL);) {
 
             ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             ps.setString(2, identifier.getName());
@@ -2404,11 +2405,11 @@ public class ApiMgtDAO {
      * This method will create a new client at key-manager side.further it will add new record to
      * the AM_APPLICATION_KEY_MAPPING table
      *
-     * @param keyType         key type.
-     * @param applicationId   apim application id.
-     * @param clientId        consumer key.
-     * @param keyMappingId    key mapping id.
-     * @throws APIManagementException   if an error occurs while creation key mappings.
+     * @param keyType       key type.
+     * @param applicationId apim application id.
+     * @param clientId      consumer key.
+     * @param keyMappingId  key mapping id.
+     * @throws APIManagementException if an error occurs while creation key mappings.
      */
     public void createApplicationKeyTypeMappingForManualClients(String keyType, int applicationId,
                                                                 String clientId, String keyManagerId,
@@ -2630,7 +2631,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param uuid API uuid
+     * @param uuid         API uuid
      * @param organization Organization of the API
      * @return UserApplicationAPIUsage of given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get
@@ -2800,26 +2801,26 @@ public class ApiMgtDAO {
     public long getNoOfSubscriptionsOfAPI(String apiUUID, String organization)
             throws APIManagementException {
 
-            String sqlQuery = SQLConstants.GET_SUBSCRIPTION_COUNT_OF_API_SQL;
-            try (Connection connection = APIMgtDBUtil.getConnection()) {
-                try (PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
-                    ps.setString(1, apiUUID);
-                    ps.setString(2, organization);
-                    try (ResultSet resultSet = ps.executeQuery()) {
-                        if (resultSet.next()) {
-                            return resultSet.getLong("SUBS_COUNT");
-                        }
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_COUNT_OF_API_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+                ps.setString(1, apiUUID);
+                ps.setString(2, organization);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getLong("SUBS_COUNT");
                     }
                 }
+            }
         } catch (SQLException e) {
-            handleException("Error occurred while reading subscriptions of API: " + apiUUID , e);
+            handleException("Error occurred while reading subscriptions of API: " + apiUUID, e);
         }
         return 0;
     }
 
-
     public int addApplication(Application application, String userId, String organization)
             throws APIManagementException {
+
         Connection conn = null;
         int applicationId = 0;
         String loginUserName = getLoginUserName(userId);
@@ -2873,9 +2874,9 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param uuid API uuid
-     * @param rating     Rating
-     * @param userId     User Id
+     * @param uuid   API uuid
+     * @param rating Rating
+     * @param userId User Id
      * @throws APIManagementException if failed to add Rating
      */
     public void addOrUpdateRating(String uuid, int rating, String userId, Connection conn)
@@ -2970,8 +2971,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param uuid API uuid
-     * @param userId     User Id
+     * @param uuid   API uuid
+     * @param userId User Id
      * @throws APIManagementException if failed to remove API user Rating
      */
     public void removeAPIRating(String uuid, String userId, Connection conn)
@@ -3055,8 +3056,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param uuid API uuid
-     * @param userId     User Id
+     * @param uuid   API uuid
+     * @param userId User Id
      * @throws APIManagementException if failed to get User API Rating
      */
     public int getUserRating(String uuid, String userId, Connection conn)
@@ -3106,7 +3107,7 @@ public class ApiMgtDAO {
 
     /**
      * @param uuid API uuid
-     * @param user       User name
+     * @param user User name
      * @throws APIManagementException if failed to get user API Ratings
      */
     public JSONObject getUserRatingInfo(String uuid, String user) throws APIManagementException {
@@ -3136,9 +3137,9 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param uuid API uuid
-     * @param userId     User Id
-     * @param conn       Database connection
+     * @param uuid   API uuid
+     * @param userId User Id
+     * @param conn   Database connection
      * @throws APIManagementException if failed to get user API Ratings
      */
     private JSONObject getUserRatingInfo(String uuid, String userId, Connection conn)
@@ -3225,7 +3226,7 @@ public class ApiMgtDAO {
 
     /**
      * @param uuid API uuid
-     * @param conn       Database connection
+     * @param conn Database connection
      * @throws APIManagementException if failed to get API Ratings
      */
     private JSONArray getAPIRatings(String uuid, Connection conn)
@@ -3675,9 +3676,9 @@ public class ApiMgtDAO {
     /**
      * Check whether given application name is available under current subscriber or group
      *
-     * @param appName  application name
-     * @param username subscriber
-     * @param groupId  group of the subscriber
+     * @param appName      application name
+     * @param username     subscriber
+     * @param groupId      group of the subscriber
      * @param organization identifier of the organization
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
@@ -3777,15 +3778,15 @@ public class ApiMgtDAO {
     }
 
     /**
-     *
      * @param applicationName application name
-     * @param username username
-     * @param groupId group id
+     * @param username        username
+     * @param groupId         group id
      * @return whether a certain application group combination exists or not
      * @throws APIManagementException if failed to assess whether a certain application group combination exists or not
      */
     public boolean isApplicationGroupCombinationExists(String applicationName, String username, String groupId)
             throws APIManagementException {
+
         if (username == null) {
             return false;
         }
@@ -4228,11 +4229,11 @@ public class ApiMgtDAO {
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("APP_CREATED_TIME").getTime()));
 
                 if (multiGroupAppSharingEnabled) {
-                    setGroupIdInApplication(connection,application);
+                    setGroupIdInApplication(connection, application);
                 }
 
                 //setting subscription count
-                int subscriptionCount = getSubscriptionCountByApplicationId(connection,application, organization);
+                int subscriptionCount = getSubscriptionCountByApplicationId(connection, application, organization);
                 application.setSubscriptionCount(subscriptionCount);
 
                 // Get custom attributes of application
@@ -4519,7 +4520,7 @@ public class ApiMgtDAO {
     /**
      * Returns all the consumerkeys of application which are subscribed for the given api
      *
-     * @param identifier APIIdentifier
+     * @param identifier   APIIdentifier
      * @param organization Organization
      * @return Consumerkeys
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Applications for given subscriber.
@@ -4718,7 +4719,7 @@ public class ApiMgtDAO {
      * Retrieves the consumer keys and keymanager in a given application
      *
      * @param appId application id
-     * @return Map<ConsumerKey, Pair<keyManagerName, keyManagerTenantDomain>
+     * @return Map<ConsumerKey, Pair < keyManagerName, keyManagerTenantDomain>
      * @throws APIManagementException
      */
     public Map<String, Pair<String, String>> getConsumerKeysForApplication(int appId) throws APIManagementException {
@@ -5081,16 +5082,16 @@ public class ApiMgtDAO {
     }
 
     /**
+     * This method is used to copy the subscription new for new API Version
      *
-     *  This method is used to copy the subscription new for new API Version
-     *
-     * @param  apiTypeWrapper apiTypeWrapper
-     * @param  oldAPIVersions oldAPIVersions
+     * @param apiTypeWrapper apiTypeWrapper
+     * @param oldAPIVersions oldAPIVersions
      * @return List<SubscribedAPI> list of Subscribed APIs
      * @throws APIManagementException APIManagementException
      */
     public List<SubscribedAPI> makeKeysForwardCompatibleForNewAPIVersion(ApiTypeWrapper apiTypeWrapper,
-            List<API> oldAPIVersions) throws APIManagementException {
+                                                                         List<API> oldAPIVersions) throws APIManagementException {
+
         int versionCount;
         List<SubscribedAPI> subscribedAPISet = new ArrayList<>();
 
@@ -5130,8 +5131,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     *
-     * @param apiTypeWrapper apiTypeWrapper
+     * @param apiTypeWrapper        apiTypeWrapper
      * @param oldAPIProductVersions oldAPIProductVersions
      * @return List<SubscribedAPI> list of Subscribed APIProducts
      * @throws APIManagementException APIManagementException
@@ -5139,6 +5139,7 @@ public class ApiMgtDAO {
     public List<SubscribedAPI> makeKeysForwardCompatibleForNewAPIProductVersion
     (ApiTypeWrapper apiTypeWrapper, List<APIProduct> oldAPIProductVersions)
             throws APIManagementException {
+
         int versionCount = 0;
         List<SubscribedAPI> subscribedAPISet = new ArrayList<>();
 
@@ -5161,7 +5162,7 @@ public class ApiMgtDAO {
                     prepStmt.setString(2, apiTypeWrapper.getId().getName());
                     int index = 3;
                     for (APIProduct oldAPIProduct : oldAPIProductVersions) {
-                            prepStmt.setString(index++, oldAPIProduct.getId().getVersion());
+                        prepStmt.setString(index++, oldAPIProduct.getId().getVersion());
                     }
                     retrieveSubscriptionDataOfAPIProducts(apiTypeWrapper, oldAPIProductVersions, versionCount,
                             subscribedAPISet, connection, prepStmt);
@@ -5178,8 +5179,9 @@ public class ApiMgtDAO {
     }
 
     private void retrieveSubscriptionDataOfAPIs(ApiTypeWrapper apiTypeWrapper, List<API> oldAPIVersions,
-            int versionCount, List<SubscribedAPI> subscribedAPISet,
-            Connection connection, PreparedStatement prepStmt) throws SQLException, APIManagementException {
+                                                int versionCount, List<SubscribedAPI> subscribedAPISet,
+                                                Connection connection, PreparedStatement prepStmt) throws SQLException, APIManagementException {
+
         ApiTypeWrapper oldApiTypeWrapperCopy;
         try (ResultSet rs = prepStmt.executeQuery()) {
             List<SubscriptionInfo> subscriptionData = new ArrayList<SubscriptionInfo>();
@@ -5205,8 +5207,9 @@ public class ApiMgtDAO {
     }
 
     private void retrieveSubscriptionDataOfAPIProducts(ApiTypeWrapper apiTypeWrapper,
-            List<APIProduct> oldAPIProductVersions, int versionCount, List<SubscribedAPI> subscribedAPISet,
-            Connection connection, PreparedStatement prepStmt) throws SQLException, APIManagementException {
+                                                       List<APIProduct> oldAPIProductVersions, int versionCount, List<SubscribedAPI> subscribedAPISet,
+                                                       Connection connection, PreparedStatement prepStmt) throws SQLException, APIManagementException {
+
         ApiTypeWrapper oldApiTypeWrapperCopy;
         try (ResultSet rs = prepStmt.executeQuery()) {
             List<SubscriptionInfo> subscriptionData = new ArrayList<SubscriptionInfo>();
@@ -5232,8 +5235,9 @@ public class ApiMgtDAO {
     }
 
     private void addSubscriptionData(ApiTypeWrapper apiTypeWrapper, List<SubscribedAPI> subscribedAPISet,
-            Connection connection, ApiTypeWrapper oldApiTypeWrapperCopy, List<SubscriptionInfo> subscriptionData,
-            List<Integer> addedApplications) throws SQLException, APIManagementException {
+                                     Connection connection, ApiTypeWrapper oldApiTypeWrapperCopy, List<SubscriptionInfo> subscriptionData,
+                                     List<Integer> addedApplications) throws SQLException, APIManagementException {
+
         for (SubscriptionInfo info : subscriptionData) {
             try {
                 if (info.getApiVersion().equals(oldApiTypeWrapperCopy.getId()
@@ -5290,7 +5294,8 @@ public class ApiMgtDAO {
     }
 
     private int getNoOfVersionsToCopySubscription(ApiTypeWrapper apiTypeWrapper, List<API> oldAPIVersions,
-            List<APIProduct> oldAPIProductVersions) {
+                                                  List<APIProduct> oldAPIProductVersions) {
+
         int count = 0;
         if (!apiTypeWrapper.isAPIProduct()) {
             if (oldAPIVersions != null && !oldAPIVersions.isEmpty())
@@ -5306,8 +5311,10 @@ public class ApiMgtDAO {
     private int addSubscription(Connection connection, ApiTypeWrapper apiTypeWrapper, Application application,
                                 String subscriptionStatus, String subscriber) throws APIManagementException,
             SQLException {
+
         return addSubscription(connection, apiTypeWrapper, application, subscriptionStatus, subscriber, UUID.randomUUID().toString());
     }
+
     private int addSubscription(Connection connection, ApiTypeWrapper apiTypeWrapper, Application application,
                                 String subscriptionStatus, String subscriber, String subscriptionUUID)
             throws APIManagementException, SQLException {
@@ -5327,7 +5334,7 @@ public class ApiMgtDAO {
             if (apiUUID != null) {
                 id = getAPIID(apiUUID);
             }
-            if (id == -1){
+            if (id == -1) {
                 id = identifier.getId();
             }
         } else {
@@ -5385,37 +5392,37 @@ public class ApiMgtDAO {
         if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             subscriptionIDColumn = "subscription_id";
         }
-            try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
-                    new String[]{subscriptionIDColumn})) {
-                if (!isProduct) {
-                    tier = apiTypeWrapper.getApi().getId().getTier();
-                    preparedStForInsert.setString(1, tier);
-                    preparedStForInsert.setString(10, tier);
-                } else {
-                    tier = apiTypeWrapper.getApiProduct().getId().getTier();
-                    preparedStForInsert.setString(1, tier);
-                    preparedStForInsert.setString(10, tier);
-                }
-                preparedStForInsert.setInt(2, id);
-                preparedStForInsert.setInt(3, application.getId());
-                preparedStForInsert.setString(4, subscriptionStatus != null ? subscriptionStatus :
-                        APIConstants.SubscriptionStatus.UNBLOCKED);
-                preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-                preparedStForInsert.setString(6, subscriber);
+        try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
+                new String[]{subscriptionIDColumn})) {
+            if (!isProduct) {
+                tier = apiTypeWrapper.getApi().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
+            } else {
+                tier = apiTypeWrapper.getApiProduct().getId().getTier();
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
+            }
+            preparedStForInsert.setInt(2, id);
+            preparedStForInsert.setInt(3, application.getId());
+            preparedStForInsert.setString(4, subscriptionStatus != null ? subscriptionStatus :
+                    APIConstants.SubscriptionStatus.UNBLOCKED);
+            preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+            preparedStForInsert.setString(6, subscriber);
 
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                preparedStForInsert.setTimestamp(7, timestamp);
-                preparedStForInsert.setTimestamp(8, timestamp);
-                preparedStForInsert.setString(9, subscriptionUUID);
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            preparedStForInsert.setTimestamp(7, timestamp);
+            preparedStForInsert.setTimestamp(8, timestamp);
+            preparedStForInsert.setString(9, subscriptionUUID);
 
-                preparedStForInsert.executeUpdate();
-                try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
-                    while (rs.next()) {
-                        //subscriptionId = rs.getInt(1);
-                        subscriptionId = Integer.parseInt(rs.getString(1));
-                    }
+            preparedStForInsert.executeUpdate();
+            try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
+                while (rs.next()) {
+                    //subscriptionId = rs.getInt(1);
+                    subscriptionId = Integer.parseInt(rs.getString(1));
                 }
             }
+        }
 
         return subscriptionId;
     }
@@ -5430,12 +5437,12 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get API Names
      */
     public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String username,
-            String organization) throws APIManagementException {
+                                                                     String organization) throws APIManagementException {
 
         List<String> versionList = new ArrayList<String>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = connection
-                        .prepareStatement(SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL)) {
+             PreparedStatement ps = connection
+                     .prepareStatement(SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL)) {
             boolean initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             ps.setString(1, apiName);
@@ -5506,9 +5513,10 @@ public class ApiMgtDAO {
      */
     public boolean isDuplicateContextTemplateMatchesOrganization(String contextTemplate, String organization)
             throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = connection
-                        .prepareStatement(SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION)) {
+             PreparedStatement ps = connection
+                     .prepareStatement(SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION)) {
             boolean initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             ps.setString(1, contextTemplate.toLowerCase());
@@ -5535,8 +5543,8 @@ public class ApiMgtDAO {
     /**
      * Add API metadata.
      *
-     * @param api      API to add
-     * @param tenantId tenant id
+     * @param api          API to add
+     * @param tenantId     tenant id
      * @param organization identifier of the organization
      * @return API Id of the successfully added API
      * @throws APIManagementException if fails to add API
@@ -5876,8 +5884,8 @@ public class ApiMgtDAO {
         List<WorkflowDTO> workflowDTOList = new ArrayList<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL)) {
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.GET_ALL_WORKFLOW_ENTRY_FROM_INTERNAL_REF_SQL)) {
             statement.setString(1, workflowReference);
             statement.setString(2, workflowType);
             try (ResultSet rs = statement.executeQuery()) {
@@ -5955,11 +5963,11 @@ public class ApiMgtDAO {
             }
             prepStmtDefVersionDelete.executeBatch();
         } catch (SQLException e) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Error while rolling back the failed operation", e1);
-                }
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+                log.error("Error while rolling back the failed operation", e1);
+            }
             handleException("Error while deleting the API default version entry: " + apiIdList.stream().
                     map(Identifier::getName).collect(Collectors.joining(",")) + " from the " +
                     "database", e);
@@ -5992,7 +6000,6 @@ public class ApiMgtDAO {
         }
         return publishedDefaultVersion;
     }
-
 
     public String getPublishedDefaultVersion(APIProductIdentifier apiId) throws APIManagementException {
 
@@ -6037,7 +6044,6 @@ public class ApiMgtDAO {
         }
         return null;
     }
-
 
     public void addUpdateAPIAsDefaultVersion(ApiTypeWrapper apiTypeWrapper, Connection connection)
             throws APIManagementException {
@@ -6172,7 +6178,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * Checks whether application is accessible to the specified user
      *
@@ -6289,10 +6294,10 @@ public class ApiMgtDAO {
                     "AND SUB.USER_ID = ?) AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
             String whereClauseWithMultiGroupIdCaseInSensitive =
                     "  WHERE  (((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM "
-                    + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) "
-                    + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) "
-                    + "AND LOWER(SUB.USER_ID) = LOWER(?)) AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
-            
+                            + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) "
+                            + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) "
+                            + "AND LOWER(SUB.USER_ID) = LOWER(?)) AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
@@ -7155,6 +7160,7 @@ public class ApiMgtDAO {
     }
 
     public int getAPIID(String uuid) throws APIManagementException {
+
         int id = -1;
         try {
             try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -7672,7 +7678,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     private void setAssociatedAPIProductsURLMappings(String uuid, Map<Integer, URITemplate> uriTemplates)
             throws SQLException {
 
@@ -7871,7 +7876,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer limit,
-     Integer offset) throws APIManagementException {
+                                   Integer offset) throws APIManagementException {
 
         CommentList commentList = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -7922,7 +7927,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     private CommentList getComments(String uuid, String parentCommentID, Integer limit, Integer offset,
-     Connection connection) throws
+                                    Connection connection) throws
             APIManagementException {
 
         List<Comment> list = new ArrayList<Comment>();
@@ -8009,7 +8014,7 @@ public class ApiMgtDAO {
     /**
      * Returns all the Comments on an API
      *
-     * @param uuid      API uuid
+     * @param uuid            API uuid
      * @param parentCommentID Parent Comment ID
      * @return Comment Array
      * @throws APIManagementException
@@ -8172,12 +8177,13 @@ public class ApiMgtDAO {
     }
 
     private void deleteAPIComments(int apiId, String uuid, Connection connection) throws APIManagementException {
+
         try {
             connection.setAutoCommit(false);
             String deleteChildComments = SQLConstants.DELETE_API_CHILD_COMMENTS;
             String deleteParentComments = SQLConstants.DELETE_API_PARENT_COMMENTS;
             try (PreparedStatement childCommentPreparedStmt = connection.prepareStatement(deleteChildComments);
-                    PreparedStatement parentCommentPreparedStmt = connection.prepareStatement(deleteParentComments)) {
+                 PreparedStatement parentCommentPreparedStmt = connection.prepareStatement(deleteParentComments)) {
                 childCommentPreparedStmt.setInt(1, apiId);
                 childCommentPreparedStmt.execute();
 
@@ -8192,8 +8198,8 @@ public class ApiMgtDAO {
     /**
      * Delete a comment
      *
-     * @param uuid API uuid
-     * @param commentId  Comment ID
+     * @param uuid      API uuid
+     * @param commentId Comment ID
      * @throws APIManagementException
      */
     public void deleteComment(String uuid, String commentId) throws APIManagementException {
@@ -8296,7 +8302,7 @@ public class ApiMgtDAO {
     /**
      * Get API Context by passing an existing DB connection.
      *
-     * @param uuid API uuid
+     * @param uuid       API uuid
      * @param connection DB Connection
      * @return API Context
      * @throws APIManagementException if an error occurs
@@ -8381,13 +8387,14 @@ public class ApiMgtDAO {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String getOrganizationByAPIUUID(String apiId) throws APIManagementException {
+
         String organization = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_ORGANIZATION_BY_API_ID)) {
             boolean initialAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             ps.setString(1, apiId);
-            try (ResultSet result = ps.executeQuery()){
+            try (ResultSet result = ps.executeQuery()) {
                 while (result.next()) {
                     organization = result.getString("ORGANIZATION");
                 }
@@ -8412,6 +8419,7 @@ public class ApiMgtDAO {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String getGatewayVendorByAPIUUID(String apiId) throws APIManagementException {
+
         String gatewayVendor = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_GATEWAY_VENDOR_BY_API_ID)) {
@@ -8436,6 +8444,7 @@ public class ApiMgtDAO {
     }
 
     public String getUUIDFromIdentifier(Identifier apiIdentifier, String organization) throws APIManagementException {
+
         if (apiIdentifier instanceof APIProductIdentifier) {
             return getUUIDFromIdentifier((APIProductIdentifier) apiIdentifier, organization);
         } else {
@@ -8459,7 +8468,7 @@ public class ApiMgtDAO {
         String uuid = null;
         String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+             PreparedStatement prepStmt = connection.prepareStatement(sql)) {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getApiName());
             prepStmt.setString(3, identifier.getVersion());
@@ -8506,7 +8515,7 @@ public class ApiMgtDAO {
     /**
      * Get API UUID by the API Identifier.
      *
-     * @param identifier API Identifier
+     * @param identifier   API Identifier
      * @param organization identifier of the organization
      * @return String UUID
      * @throws APIManagementException if an error occurs
@@ -8516,7 +8525,7 @@ public class ApiMgtDAO {
         String uuid = null;
         String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+             PreparedStatement prepStmt = connection.prepareStatement(sql)) {
             prepStmt.setString(1, identifier.getApiName());
             prepStmt.setString(2, identifier.getVersion());
             prepStmt.setString(3, organization);
@@ -8535,9 +8544,9 @@ public class ApiMgtDAO {
     /**
      * Get API UUID by passed parameters.
      *
-     * @param provider Provider of the API
-     * @param apiName  Name of the API
-     * @param version  Version of the API
+     * @param provider     Provider of the API
+     * @param apiName      Name of the API
+     * @param version      Version of the API
      * @param organization identifier of the organization
      * @return String UUID
      * @throws APIManagementException if an error occurs
@@ -8548,7 +8557,7 @@ public class ApiMgtDAO {
         String uuid = null;
         String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+             PreparedStatement prepStmt = connection.prepareStatement(sql)) {
             prepStmt.setString(1, apiName);
             prepStmt.setString(2, version);
             prepStmt.setString(3, organization);
@@ -8563,17 +8572,17 @@ public class ApiMgtDAO {
         return uuid;
     }
 
-
     /**
      * Get API Product UUID by the API Product Identifier and organization.
      *
-     * @param identifier API Product Identifier
+     * @param identifier   API Product Identifier
      * @param organization
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
     public String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
             throws APIManagementException {
+
         if (organization != null) {
             return getUUIDFromIdentifier(identifier, organization, null);
         } else {
@@ -8615,7 +8624,7 @@ public class ApiMgtDAO {
     /**
      * Get API Product UUID by the API Product Identifier and organization.
      *
-     * @param identifier API Product Identifier
+     * @param identifier   API Product Identifier
      * @param organization
      * @param connection
      * @return String UUID
@@ -8623,6 +8632,7 @@ public class ApiMgtDAO {
      */
     private String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization, Connection connection)
             throws APIManagementException {
+
         boolean isNewConnection = false;
         String uuid = null;
         PreparedStatement prepStmt = null;
@@ -8961,8 +8971,8 @@ public class ApiMgtDAO {
     /**
      * Retries the WorkflowExternalReference for a subscription.
      *
-     * @param identifier Identifier to find the subscribed api
-     * @param appID      ID of the application which has the subscription
+     * @param identifier   Identifier to find the subscribed api
+     * @param appID        ID of the application which has the subscription
      * @param organization organization
      * @return External workflow reference for the subscription identified
      * @throws APIManagementException
@@ -9165,13 +9175,11 @@ public class ApiMgtDAO {
 
             while (rs.next()) {
                 String subStatus = rs.getString("SUB_STATUS");
-                if(APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus)) {
+                if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus)) {
                     pendingCreateSubscriptionIds.add(rs.getInt("SUBSCRIPTION_ID"));
-                }
-                else if(APIConstants.SubscriptionStatus.DELETE_PENDING.equals(subStatus)){
+                } else if (APIConstants.SubscriptionStatus.DELETE_PENDING.equals(subStatus)) {
                     pendingDeleteSubscriptionIds.add(rs.getInt("SUBSCRIPTION_ID"));
-                }
-                else if(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING.equals(subStatus)){
+                } else if (APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING.equals(subStatus)) {
                     pendingUpdateSubscriptionIds.add(rs.getInt("SUBSCRIPTION_ID"));
                 }
             }
@@ -9181,7 +9189,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
-        Map<String,Set<Integer>> map = new HashMap<>();
+        Map<String, Set<Integer>> map = new HashMap<>();
         map.put(APIConstants.SubscriptionStatus.ON_HOLD, pendingCreateSubscriptionIds);
         map.put(APIConstants.SubscriptionStatus.DELETE_PENDING, pendingDeleteSubscriptionIds);
         map.put(APIConstants.SubscriptionStatus.TIER_UPDATE_PENDING, pendingUpdateSubscriptionIds);
@@ -9200,7 +9208,7 @@ public class ApiMgtDAO {
         Set<Integer> pendingSubscriptions = new HashSet<Integer>();
         String sqlQuery = SQLConstants.GET_SUBSCRIPTIONS_BY_API_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement(sqlQuery);) {
+             PreparedStatement ps = connection.prepareStatement(sqlQuery);) {
 
             ps.setString(1, uuid);
             ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
@@ -9253,7 +9261,7 @@ public class ApiMgtDAO {
     /**
      * Retrives subscription status for APIIdentifier and applicationId
      *
-     * @param uuid    API subscribed
+     * @param uuid          API subscribed
      * @param applicationId application with subscription
      * @return subscription status
      * @throws APIManagementException
@@ -9291,7 +9299,7 @@ public class ApiMgtDAO {
     /**
      * Retrieves subscription Id for APIIdentifier and applicationId
      *
-     * @param uuid    API subscribed
+     * @param uuid          API subscribed
      * @param applicationId application with subscription
      * @return subscription id
      * @throws APIManagementException
@@ -9325,18 +9333,19 @@ public class ApiMgtDAO {
         }
         return subId;
     }
+
     /**
      * Retrieve subscription create state for APIIdentifier and applicationID
      *
      * @param identifier    - api identifier which is subscribed
      * @param applicationId - application used to subscribed
-     * @param organization identifier of the organization
+     * @param organization  identifier of the organization
      * @param connection
      * @return subscription create status
      * @throws APIManagementException
      */
     public String getSubscriptionCreaeteStatus(APIIdentifier identifier, int applicationId, String organization,
-            Connection connection) throws APIManagementException {
+                                               Connection connection) throws APIManagementException {
 
         String status = null;
         PreparedStatement ps = null;
@@ -9453,7 +9462,7 @@ public class ApiMgtDAO {
 
         final String query = "SELECT 1 FROM AM_KEY_MANAGER WHERE EXTERNAL_REFERENCE_ID  = ? AND ORGANIZATION = ?";
         try (Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
             preparedStatement.setString(1, resourceId);
             preparedStatement.setString(2, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -9742,6 +9751,7 @@ public class ApiMgtDAO {
         }
         return keyManagerPermissions;
     }
+
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurations() throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
@@ -9868,12 +9878,12 @@ public class ApiMgtDAO {
     }
 
     public KeyManagerApplicationInfo getKeyManagerNameAndConsumerKeyByAppIdAndKeyMappingId(int applicationId,
-            String keyMappingId) throws APIManagementException {
+                                                                                           String keyMappingId) throws APIManagementException {
 
         String query = SQLConstants.KeyManagerSqlConstants
                 .GET_KEY_MANAGER_NAME_AND_CONSUMER_KEY_BY_APPLICATION_ID_AND_KEY_MAPPING_ID;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, applicationId);
             preparedStatement.setString(2, keyMappingId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -10160,6 +10170,7 @@ public class ApiMgtDAO {
     }
 
     private static void setContext(APIIdentifier apiIdentifier, ResultSet resultSet, API api) throws SQLException {
+
         String context = resultSet.getString("CONTEXT");
         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
         // If context template is null for migrated API Products, set the default version as the Context/1.0.0
@@ -10269,7 +10280,7 @@ public class ApiMgtDAO {
     /**
      * Store external APIStore details to which APIs successfully published
      *
-     * @param uuid       API uuid
+     * @param uuid        API uuid
      * @param apiStoreSet APIStores set
      * @return added/failed
      * @throws APIManagementException
@@ -10331,7 +10342,7 @@ public class ApiMgtDAO {
     /**
      * Delete the records of external APIStore details.
      *
-     * @param uuid       API uuid
+     * @param uuid        API uuid
      * @param apiStoreSet APIStores set
      * @return added/failed
      * @throws APIManagementException
@@ -10611,8 +10622,8 @@ public class ApiMgtDAO {
     /**
      * Get the unversioned local scope keys set of the API.
      *
-     * @param uuid API uuid
-     * @param tenantId      Tenant Id
+     * @param uuid     API uuid
+     * @param tenantId Tenant Id
      * @return Local Scope keys set
      * @throws APIManagementException if fails to get local scope keys for API
      */
@@ -10645,8 +10656,8 @@ public class ApiMgtDAO {
     /**
      * Get the versioned local scope keys set of the API.
      *
-     * @param uuid API uuid
-     * @param tenantId      Tenant Id
+     * @param uuid     API uuid
+     * @param tenantId Tenant Id
      * @return Local Scope keys set
      * @throws APIManagementException if fails to get local scope keys for API
      */
@@ -10679,8 +10690,8 @@ public class ApiMgtDAO {
     /**
      * Get the local scope keys set of the API.
      *
-     * @param uuid API uuid
-     * @param tenantId      Tenant Id
+     * @param uuid     API uuid
+     * @param tenantId Tenant Id
      * @return Local Scope keys set
      * @throws APIManagementException if fails to get local scope keys for API
      */
@@ -10831,17 +10842,18 @@ public class ApiMgtDAO {
      * Check whether the given scope key is already assigned locally to another API which are different from the given
      * API or its versioned APIs under given tenant.
      *
-     * @param apiName       API Name
-     * @param scopeKey      candidate scope key
-     * @param tenantId      tenant id
+     * @param apiName      API Name
+     * @param scopeKey     candidate scope key
+     * @param tenantId     tenant id
      * @param organization identifier of the organization
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
      */
     public boolean isScopeKeyAssignedLocally(String apiName, String scopeKey, int tenantId, String organization)
             throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_SCOPE_ATTACHED_LOCALLY)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_SCOPE_ATTACHED_LOCALLY)) {
             statement.setString(1, scopeKey);
             statement.setString(2, organization);
             statement.setInt(3, tenantId);
@@ -10951,17 +10963,18 @@ public class ApiMgtDAO {
     /**
      * Check if key mapping exists for (app ID, key type and key manager) or (consumer key and key manager) values.
      *
-     * @param applicationId AppID
+     * @param applicationId  AppID
      * @param keyManagerName KeyManager Name
-     * @param keyManagerId KeyManager Id
-     * @param keyType KeyType
-     * @param consumerKey   Consumer Key
+     * @param keyManagerId   KeyManager Id
+     * @param keyType        KeyType
+     * @param consumerKey    Consumer Key
      * @return true if key mapping exists
      * @throws APIManagementException if an error occurs.
      */
     public boolean isKeyMappingExistsForConsumerKeyOrApplication(int applicationId, String keyManagerName,
                                                                  String keyManagerId, String keyType,
                                                                  String consumerKey) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection
                      .prepareStatement(SQLConstants.IS_KEY_MAPPING_EXISTS_FOR_APP_ID_KEY_TYPE_OR_CONSUMER_KEY)) {
@@ -13385,11 +13398,13 @@ public class ApiMgtDAO {
     }
 
     private void setRateLimitDetails(ApplicationPolicy policy, ResultSet resultSet) throws SQLException {
+
         if (resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT) > 0) {
             policy.setRateLimitCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
             policy.setRateLimitTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
         }
     }
+
     /**
      * Populated common attributes of policy type objects to <code>policy</code>
      * from <code>resultSet</code>
@@ -13789,14 +13804,15 @@ public class ApiMgtDAO {
     /**
      * Retrieves block conditions based on the specified condition type and condition value.
      *
-     * @param conditionType     type of the condition
-     * @param conditionValue    condition value
-     * @param tenantDomain      tenant domain
+     * @param conditionType  type of the condition
+     * @param conditionValue condition value
+     * @param tenantDomain   tenant domain
      * @return list of block conditions
      * @throws APIManagementException
      */
     public List<BlockConditionsDTO> getBlockConditionsByConditionTypeAndValue(String conditionType,
-            String conditionValue, String tenantDomain) throws APIManagementException {
+                                                                              String conditionValue, String tenantDomain) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement selectPreparedStatement = null;
         ResultSet resultSet = null;
@@ -14656,6 +14672,7 @@ public class ApiMgtDAO {
     }
 
     private boolean isEmptyValuesInApplicationAttributesEnabled() {
+
         return Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.ApplicationAttributes.
                         ENABLE_EMPTY_VALUES_IN_APPLICATION_ATTRIBUTES));
@@ -14846,7 +14863,7 @@ public class ApiMgtDAO {
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 if (multiGroupAppSharingEnabled) {
                     if (StringUtils.isEmpty(application.getGroupId())) {
-                        application.setGroupId(getGroupId(connection,application.getId()));
+                        application.setGroupId(getGroupId(connection, application.getId()));
                     }
                 }
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
@@ -15019,7 +15036,8 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void addAPIProductResourceMappings(List<APIProductResource> productResources, String organization,
-            Connection connection) throws APIManagementException {
+                                              Connection connection) throws APIManagementException {
+
         String addProductResourceMappingSql = SQLConstants.ADD_PRODUCT_RESOURCE_MAPPING_SQL;
 
         boolean isNewConnection = false;
@@ -15606,7 +15624,7 @@ public class ApiMgtDAO {
     /**
      * Add custom complexity details for a particular API
      *
-     * @param apiUuid         API uuid to retrieve API ID
+     * @param apiUuid               API uuid to retrieve API ID
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException
      */
@@ -15637,7 +15655,7 @@ public class ApiMgtDAO {
     /**
      * Update custom complexity details for a particular API
      *
-     * @param uuid         API uuid object to retrieve API ID
+     * @param uuid                  API uuid object to retrieve API ID
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @throws APIManagementException
      */
@@ -15666,7 +15684,7 @@ public class ApiMgtDAO {
     /**
      * Add or Update complexity details
      *
-     * @param uuid         API uuid to retrieve API ID
+     * @param uuid                  API uuid to retrieve API ID
      * @param graphqlComplexityInfo GraphqlComplexityDetails object
      * @throws APIManagementException
      */
@@ -15906,8 +15924,8 @@ public class ApiMgtDAO {
     /**
      * Adds an API category
      *
-     * @param category      Category
-     * @param organization  Organization
+     * @param category     Category
+     * @param organization Organization
      * @return Category
      */
     public APICategory addCategory(APICategory category, String organization) throws APIManagementException {
@@ -15950,6 +15968,7 @@ public class ApiMgtDAO {
 
     /**
      * Get all available API categories of the organization
+     *
      * @param organization
      * @return
      * @throws APIManagementException
@@ -16713,8 +16732,8 @@ public class ApiMgtDAO {
     /**
      * Return the existing versions for the given api name for the provider
      *
-     * @param apiName     api name
-     * @param apiProvider provider
+     * @param apiName      api name
+     * @param apiProvider  provider
      * @param organization identifier of the organization
      * @return set version
      * @throws APIManagementException
@@ -16785,12 +16804,11 @@ public class ApiMgtDAO {
         return apiVersions;
     }
 
-
     /**
      * Return ids of the versions for the given name for the given provider
      *
-     * @param apiProductName     apiProduct name
-     * @param apiProvider provider
+     * @param apiProductName apiProduct name
+     * @param apiProvider    provider
      * @return set ids
      * @throws APIManagementException
      */
@@ -16800,7 +16818,7 @@ public class ApiMgtDAO {
         List<APIProduct> apiProductVersions = new ArrayList<APIProduct>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS_UUID)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS_UUID)) {
             statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
             statement.setString(2, apiProductName);
             ResultSet resultSet = statement.executeQuery();
@@ -16828,7 +16846,7 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error while retrieving versions for apiProduct " + apiProductName +
-                            " for the provider " + apiProvider, e);
+                    " for the provider " + apiProvider, e);
         }
         return apiProductVersions;
     }
@@ -16998,7 +17016,7 @@ public class ApiMgtDAO {
                     }
                 }
 
-                String migrate =  System.getProperty(APIConstants.MIGRATE);
+                String migrate = System.getProperty(APIConstants.MIGRATE);
                 if (migrate == null) {
                     setOperationPoliciesToURITemplatesMap(connection, apiRevision.getApiUUID(), uriTemplateMap);
                 }
@@ -17200,9 +17218,9 @@ public class ApiMgtDAO {
     /**
      * Get revision UUID providing revision number and organization
      *
-     * @param revisionNum   Revision number
-     * @param apiUUID       UUID of the API
-     * @param organization  organization ID of the API
+     * @param revisionNum  Revision number
+     * @param apiUUID      UUID of the API
+     * @param organization organization ID of the API
      * @return UUID of the revision
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
@@ -17235,19 +17253,20 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
     public String getEarliestRevision(String apiUUID) throws APIManagementException {
+
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = (
-                        connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
-                                .getDriverName().contains("Microsoft") ?
-                                connection.prepareStatement(
-                                        SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MSSQL) :
-                                (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData()
-                                        .getDriverName().contains("H2")) ?
-                                        connection.prepareStatement(
-                                                SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MYSQL) :
-                                        connection.prepareStatement(
-                                                SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID))) {
+             PreparedStatement statement = (
+                     connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
+                             .getDriverName().contains("Microsoft") ?
+                             connection.prepareStatement(
+                                     SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MSSQL) :
+                             (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData()
+                                     .getDriverName().contains("H2")) ?
+                                     connection.prepareStatement(
+                                             SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MYSQL) :
+                                     connection.prepareStatement(
+                                             SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID))) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -17293,7 +17312,7 @@ public class ApiMgtDAO {
         // adding deployment info to revision objects
         List<APIRevisionDeployment> allAPIRevisionDeploymentList = getAPIRevisionDeploymentByApiUUID(apiUUID);
 
-        for(APIRevisionDeployment apiRevisionDeployment : allAPIRevisionDeploymentList) {
+        for (APIRevisionDeployment apiRevisionDeployment : allAPIRevisionDeploymentList) {
             for (APIRevision apiRevision : revisionList) {
                 if (apiRevision.getRevisionUUID().equals(apiRevisionDeployment.getRevisionUUID())) {
                     apiRevision.getApiRevisionDeploymentList().add(apiRevisionDeployment);
@@ -17380,12 +17399,13 @@ public class ApiMgtDAO {
      */
     public void addDeployedAPIRevision(String apiRevisionId, List<DeployedAPIRevision> deployedAPIRevisionList)
             throws APIManagementException {
+
         if (deployedAPIRevisionList.size() > 0) {
             try (Connection connection = APIMgtDBUtil.getConnection()) {
                 connection.setAutoCommit(false);
                 // Adding to AM_DEPLOYED_REVISION table
                 try (PreparedStatement statement = connection
-                            .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_DEPLOYED_API_REVISION)) {
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_DEPLOYED_API_REVISION)) {
                     for (DeployedAPIRevision deployedAPIRevision : deployedAPIRevisionList) {
                         String envName = deployedAPIRevision.getDeployment();
                         String vhost = deployedAPIRevision.getVhost();
@@ -17407,7 +17427,7 @@ public class ApiMgtDAO {
                         log.warn("Duplicate entries detected for Revision UUID " + apiRevisionId +
                                 " while adding deployed API revisions", e);
                         throw new APIManagementException("Failed to add deployed API Revision for Revision UUID "
-                                + apiRevisionId,  e, ExceptionCodes.REVISION_ALREADY_DEPLOYED);
+                                + apiRevisionId, e, ExceptionCodes.REVISION_ALREADY_DEPLOYED);
                     } else {
                         handleException("Failed to add deployed API Revision for Revision UUID "
                                 + apiRevisionId, e);
@@ -17526,12 +17546,12 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
      */
     public List<APIRevisionDeployment> getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(String apiUUID,
-            String workflowStatus) throws APIManagementException {
+                                                                                           String workflowStatus) throws APIManagementException {
 
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(
-                        SQLConstants.APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_REVISION_STATUS_AND_API_UUID)) {
+             PreparedStatement statement = connection.prepareStatement(
+                     SQLConstants.APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_REVISION_STATUS_AND_API_UUID)) {
             statement.setString(1, workflowStatus);
             statement.setString(2, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
@@ -17707,7 +17727,7 @@ public class ApiMgtDAO {
     /**
      * Remove an API revision Deployment mapping record to the database
      *
-     * @param apiUUID          uuid of the revision
+     * @param apiUUID     uuid of the revision
      * @param deployments content of the revision deployment mapping objects
      * @throws APIManagementException if an error occurs when adding a new API revision
      */
@@ -17746,6 +17766,7 @@ public class ApiMgtDAO {
      */
     public void removeDeployedAPIRevision(String apiUUID, Set<DeployedAPIRevision> deployments)
             throws APIManagementException {
+
         if (deployments.size() > 0) {
             try (Connection connection = APIMgtDBUtil.getConnection()) {
                 connection.setAutoCommit(false);
@@ -17780,6 +17801,7 @@ public class ApiMgtDAO {
      */
     public void setUnDeployedAPIRevision(String apiUUID, Set<DeployedAPIRevision> deployments)
             throws APIManagementException {
+
         if (deployments.size() > 0) {
             try (Connection connection = APIMgtDBUtil.getConnection()) {
                 connection.setAutoCommit(false);
@@ -18070,8 +18092,6 @@ public class ApiMgtDAO {
         }
     }
 
-
-
     /**
      * Restore API revision database records as the Current API of an API
      *
@@ -18137,6 +18157,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs when adding a new API revision
      */
     public void addAPIProductRevision(APIRevision apiRevision) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
@@ -18314,7 +18335,7 @@ public class ApiMgtDAO {
                 } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
                     getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_MSSQL;
                 }
-                
+
                 PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
 
                 //get production and sandbox certificates lists separately
@@ -18398,6 +18419,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs when restoring an API revision
      */
     public void restoreAPIProductRevision(APIRevision apiRevision) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
@@ -18787,7 +18809,7 @@ public class ApiMgtDAO {
     /**
      * Retrieve the Unique Identifier of the Service used in API
      *
-     * @param apiId    Unique Identifier of API
+     * @param apiId Unique Identifier of API
      * @return Service Key
      * @throws APIManagementException
      */
@@ -18819,6 +18841,7 @@ public class ApiMgtDAO {
      */
     private void updateAPIServiceMapping(int apiId, String serviceKey, String md5, int tenantID, Connection connection)
             throws APIManagementException {
+
         try {
             if (!retrieveServiceKeyByApiId(apiId, connection).isEmpty()) {
                 try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
@@ -18836,14 +18859,15 @@ public class ApiMgtDAO {
     }
 
     /**
-     *  Update the API provider of a given API
+     * Update the API provider of a given API
      *
-     * @param apiUUID API id of the API that needs to update the provider
+     * @param apiUUID      API id of the API that needs to update the provider
      * @param providerName New API provider
      * @throws APIManagementException if an error occurs when changing the API provider
      */
     public void updateApiProvider(String apiUUID, String providerName)
             throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_PROVIDER_SQL)) {
@@ -18903,6 +18927,7 @@ public class ApiMgtDAO {
     }
 
     public ApplicationInfo getLightweightApplicationByConsumerKey(String consumerKey) throws APIManagementException {
+
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -18933,6 +18958,7 @@ public class ApiMgtDAO {
 
     public Set<SubscribedAPI> getSubscribedAPIsByApplication(Application application)
             throws APIManagementException {
+
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -18964,6 +18990,7 @@ public class ApiMgtDAO {
     public Set<SubscribedAPI> getPaginatedSubscribedAPIsByApplication(Application application, Integer offset,
                                                                       Integer limit, String organization)
             throws APIManagementException {
+
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -19003,8 +19030,8 @@ public class ApiMgtDAO {
                     }
                     index++;
 
+                }
             }
-        }
 
         } catch (SQLException e) {
             handleException("Failed to get SubscribedAPI of application :" + application.getName(), e);
@@ -19023,7 +19050,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException If failed to add policy mapping for new API version
      */
     public void addPolicyMappingsForNewAPIVersion(Set<URITemplate> uriTemplates,
-            List<OperationPolicy> extractedAPILevelPolicies, API newAPI) throws APIManagementException {
+                                                  List<OperationPolicy> extractedAPILevelPolicies, API newAPI) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -19046,17 +19073,18 @@ public class ApiMgtDAO {
 
     public void addOperationPolicyMapping(Set<URITemplate> uriTemplates, Connection connection)
             throws APIManagementException, SQLException {
+
         if (uriTemplates != null && !uriTemplates.isEmpty()) {
             try (PreparedStatement preparedStatement =
                          connection.prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING)) {
-                for (URITemplate uriTemplate : uriTemplates){
+                for (URITemplate uriTemplate : uriTemplates) {
                     List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
-                    if (operationPolicies != null && !operationPolicies.isEmpty()){
-                        for (OperationPolicy operationPolicy : operationPolicies){
+                    if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                        for (OperationPolicy operationPolicy : operationPolicies) {
                             Gson gson = new Gson();
                             String paramJSON = gson.toJson(operationPolicy.getParameters());
                             preparedStatement.setInt(1, uriTemplate.getId());
-                            preparedStatement.setString(2,operationPolicy.getPolicyId());
+                            preparedStatement.setString(2, operationPolicy.getPolicyId());
                             preparedStatement.setString(3, operationPolicy.getDirection());
                             preparedStatement.setString(4, paramJSON);
                             preparedStatement.setInt(5, operationPolicy.getOrder());
@@ -19066,7 +19094,7 @@ public class ApiMgtDAO {
                 }
                 preparedStatement.executeBatch();
                 connection.commit();
-            } catch(SQLException e){
+            } catch (SQLException e) {
                 connection.rollback();
                 throw e;
             }
@@ -19074,11 +19102,12 @@ public class ApiMgtDAO {
     }
 
     public boolean hasApplicationPolicyAttachedToApplication(String policyName, String organization) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement =
                          connection.prepareStatement(ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_APPLICATION)) {
                 preparedStatement.setString(1, organization);
-                preparedStatement.setString(2,policyName);
+                preparedStatement.setString(2, policyName);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     return resultSet.next();
                 }
@@ -19095,10 +19124,10 @@ public class ApiMgtDAO {
         String sql = ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_SUBSCRIPTION_SUPER_TENANT;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                    preparedStatement.setString(1, organization);
-                    preparedStatement.setString(2, policyName);
-                    preparedStatement.setString(3, organization);
-                    preparedStatement.setString(4, policyName);
+                preparedStatement.setString(1, organization);
+                preparedStatement.setString(2, policyName);
+                preparedStatement.setString(3, organization);
+                preparedStatement.setString(4, policyName);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     return resultSet.next();
                 }
@@ -19109,15 +19138,16 @@ public class ApiMgtDAO {
 
         return false;
     }
+
     public boolean hasAPIPolicyAttached(String policyName, String organization) throws APIManagementException {
 
         String sql = ThrottleSQLConstants.TIER_HAS_ATTACHED_TO_API_RESOURCE_TENANT;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                    preparedStatement.setString(1, organization);
-                    preparedStatement.setString(2, policyName);
-                    preparedStatement.setString(3, organization);
-                    preparedStatement.setString(4, policyName);
+                preparedStatement.setString(1, organization);
+                preparedStatement.setString(2, policyName);
+                preparedStatement.setString(3, organization);
+                preparedStatement.setString(4, policyName);
 
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     return resultSet.next();
@@ -19126,9 +19156,280 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while checking existence of Policy " + policyName + "Attached to API/Resouce.", e);
         }
-
         return false;
     }
+
+    /**
+     * Adds a new LLM (Large Language Model) provider to the system for a specified organization.
+     *
+     * @param provider The LLMProvider object containing details of the provider to be added.
+     * @return The LLMProvider object that was added, with its ID set.
+     * @throws APIManagementException If an error occurs while adding the LLM provider to the database.
+     */
+    public LlmProvider addLlmProvider(LlmProvider provider) throws APIManagementException {
+
+        String providerId = UUID.randomUUID().toString();
+        provider.setId(providerId);
+        try {
+            Connection conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String insertProviderQuery = SQLConstants.INSERT_LLM_PROVIDER_SQL;
+            PreparedStatement prepStmt = conn.prepareStatement(insertProviderQuery);
+            prepStmt.setString(1, providerId);
+            prepStmt.setString(2, provider.getName());
+            prepStmt.setString(3, provider.getVersion());
+            prepStmt.setString(4, provider.getDescription());
+            prepStmt.setString(5, provider.getOrganization());
+            prepStmt.setString(6, provider.getModelPath());
+            prepStmt.setString(7, provider.getPromptTokensPath());
+            prepStmt.setString(8, provider.getCompletionTokensPath());
+            prepStmt.setString(9, provider.getTotalTokensPath());
+            prepStmt.setString(10, provider.getPayloadHandler());
+            prepStmt.setBoolean(11, provider.hasMetadataInPayload());
+            prepStmt.setString(12, provider.getApiDefinition());
+            prepStmt.executeUpdate();
+            String insertHeadersQuery = SQLConstants.INSERT_LLM_PROVIDER_PARAMETERS;
+            PreparedStatement prepStmtInsertParams = conn.prepareStatement(insertHeadersQuery);
+            for (Map.Entry<String, String> headerEntry : provider.getHeaders().entrySet()) {
+                prepStmtInsertParams.setString(1, providerId);
+                prepStmtInsertParams.setString(2, headerEntry.getKey());
+                prepStmtInsertParams.setString(3, headerEntry.getValue());
+                prepStmtInsertParams.setString(4, provider.getOrganization());
+                prepStmtInsertParams.setBoolean(5, true);
+                prepStmtInsertParams.setBoolean(6, false);
+                prepStmtInsertParams.addBatch();
+            }
+            for (Map.Entry<String, String> queryParamEntry : provider.getQueryParams().entrySet()) {
+                prepStmtInsertParams.setString(1, providerId);
+                prepStmtInsertParams.setString(2, queryParamEntry.getKey());
+                prepStmtInsertParams.setString(3, queryParamEntry.getValue());
+                prepStmtInsertParams.setString(4, provider.getOrganization());
+                prepStmtInsertParams.setBoolean(5, false);
+                prepStmtInsertParams.setBoolean(6, true);
+                prepStmtInsertParams.addBatch();
+            }
+            prepStmtInsertParams.executeBatch();
+            conn.commit();
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to add LLM Provider: " + providerId, e);
+        }
+        return provider;
+    }
+
+    /**
+     * Retrieves all LLM Providers for a given organization.
+     * <p>
+     * This method fetches a list of LLM providers from the database for a specific organization.
+     *
+     * @param organization the tenant domain or organization identifier for which to retrieve LLM providers
+     * @return List<LlmProvider> a list of LLM provider objects associated with the given organization
+     * @throws APIManagementException if an error occurs while accessing the database or retrieving data
+     */
+    public List<LlmProvider> getLLMProvidersByOrg(String organization) throws APIManagementException {
+
+        List<LlmProvider> providerList = new ArrayList<>();
+        String errorMessage = "Failed to get LLM Providers in tenant domain: " + organization;
+
+        try {
+            Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_LLM_PROVIDERS_BY_ORG_SQL);
+            preparedStatement.setString(1, organization);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                LlmProvider provider = new LlmProvider();
+                provider.setId(resultSet.getString("UUID"));
+                provider.setName(resultSet.getString("NAME"));
+                provider.setVersion(resultSet.getString("VERSION"));
+                provider.setDescription(resultSet.getString("DESCRIPTION"));
+                providerList.add(provider);
+            }
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+
+        return providerList;
+    }
+
+    public List<LlmProvider> getLLMProviders() throws APIManagementException {
+
+        List<LlmProvider> providerList = new ArrayList<>();
+        String errorMessage = "Failed to get LLM Providers.";
+
+        try {
+            Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_LLM_PROVIDERS_SQL);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                LlmProvider provider = new LlmProvider();
+                provider.setName(resultSet.getString("NAME"));
+                provider.setVersion(resultSet.getString("VERSION"));
+                provider.setOrganization(resultSet.getString("ORGANIZATION"));
+                provider.setModelPath(resultSet.getString("MODEL_PATH"));
+                provider.setPromptTokensPath(resultSet.getString("PROMPT_TOKENS_PATH"));
+                provider.setCompletionTokensPath(resultSet.getString("COMPLETION_TOKENS_PATH"));
+                provider.setTotalTokensPath(resultSet.getString("TOTAL_TOKENS_PATH"));
+                provider.setPayloadHandler(resultSet.getString("PAYLOAD_HANDLER"));
+                provider.setHasMetadataInPayload(resultSet.getBoolean("HAS_METADATA_IN_PAYLOAD"));
+                providerList.add(provider);
+            }
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        } return providerList;
+    }
+
+    /**
+     * Deletes an LLM Provider and its associated parameters from the database.
+     * <p>
+     * This method removes the specified LLM Provider and all its related parameters
+     * for the given organization and provider ID.
+     *
+     * @param organization  the tenant domain or organization identifier
+     * @param llmProviderId the unique identifier of the LLM provider to be deleted
+     * @throws APIManagementException if an error occurs while accessing the database or deleting the data
+     */
+    public void deleteLlmProvider(String organization, String llmProviderId) throws APIManagementException {
+
+        String errorMessage = "Failed to delete LLM Provider in tenant domain: " + organization;
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            PreparedStatement deleteParamsStmt = connection.prepareStatement(SQLConstants.DELETE_LLM_PROVIDER_PARAMETERS_SQL);
+            deleteParamsStmt.setString(1, organization);
+            deleteParamsStmt.setString(2, llmProviderId);
+            deleteParamsStmt.executeUpdate();
+            PreparedStatement deleteProviderStmt = connection.prepareStatement(SQLConstants.DELETE_LLM_PROVIDERS_SQL);
+            deleteProviderStmt.setString(1, organization);
+            deleteProviderStmt.setString(2, llmProviderId);
+            deleteProviderStmt.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Updates an LLM Provider's details in the database for a given organization.
+     * <p>
+     * This method updates the basic details of an LLM Provider and its associated parameters, such as headers and query
+     * parameters. It handles transactions to ensure data consistency and rolls back changes if an error occurs.
+     *
+     * @param provider the LLM provider object containing updated details
+     * @return LlmProvider the updated LLM provider object
+     * @throws APIManagementException if an error occurs while accessing the database or updating data
+     */
+    public LlmProvider updateLlmProvider(LlmProvider provider) throws APIManagementException {
+
+        String errorMessage = "Failed to update LLM Provider in tenant domain: " + provider.getOrganization();
+        try {
+            Connection connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_LLM_PROVIDERS_SQL);
+            prepStmt.setString(1, provider.getDescription());
+            prepStmt.setString(2, provider.getApiDefinition());
+            prepStmt.setString(3, provider.getModelPath());
+            prepStmt.setString(4, provider.getPromptTokensPath());
+            prepStmt.setString(5, provider.getCompletionTokensPath());
+            prepStmt.setString(6, provider.getTotalTokensPath());
+            prepStmt.setString(7, provider.getPayloadHandler());
+            prepStmt.setBoolean(8, provider.hasMetadataInPayload());
+            prepStmt.setString(9, provider.getOrganization());
+            prepStmt.setString(10, provider.getId());
+            prepStmt.executeUpdate();
+
+            PreparedStatement prepStmtDelete = connection.prepareStatement(SQLConstants.DELETE_LLM_PROVIDER_PARAMETERS_SQL);
+            prepStmtDelete.setString(1, provider.getOrganization());
+            prepStmtDelete.setString(2, provider.getId());
+            prepStmtDelete.executeUpdate();
+
+            String insertHeadersQuery = SQLConstants.INSERT_LLM_PROVIDER_PARAMETERS;
+            PreparedStatement prepStmtInsertHeader = connection.prepareStatement(insertHeadersQuery);
+            for (Map.Entry<String, String> headerEntry : provider.getHeaders().entrySet()) {
+                prepStmtInsertHeader.setString(1, provider.getId());
+                prepStmtInsertHeader.setString(2, headerEntry.getKey());
+                prepStmtInsertHeader.setString(3, headerEntry.getValue());
+                prepStmtInsertHeader.setString(4, provider.getOrganization());
+                prepStmtInsertHeader.setBoolean(5, true);
+                prepStmtInsertHeader.setBoolean(6, false);
+                prepStmtInsertHeader.addBatch();
+            }
+            for (Map.Entry<String, String> queryParamEntry : provider.getQueryParams().entrySet()) {
+                prepStmtInsertHeader.setString(1, provider.getId());
+                prepStmtInsertHeader.setString(2, queryParamEntry.getKey());
+                prepStmtInsertHeader.setString(3, queryParamEntry.getValue());
+                prepStmtInsertHeader.setBoolean(4, false);
+                prepStmtInsertHeader.setBoolean(5, true);
+                prepStmtInsertHeader.addBatch();
+            }
+            prepStmtInsertHeader.executeBatch();
+            connection.commit();
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        } return provider;
+    }
+
+    /**
+     * Retrieves an LLM Provider based on the organization and provider ID.
+     * <p>
+     * This method fetches the LLM Provider details, including its headers and query parameters,
+     * from the database for a given organization and LLM provider ID.
+     *
+     * @param organization  the tenant domain or organization identifier
+     * @param llmProviderId the unique identifier of the LLM provider
+     * @return LlmProvider   the LLM provider object containing its details, headers, and query parameters,
+     * or {@code null} if no provider is found
+     * @throws APIManagementException if an error occurs while accessing the database or retrieving data
+     */
+    public LlmProvider getLlmProvider(String organization, String llmProviderId) throws APIManagementException {
+
+        String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
+        try {
+            Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_SQL);
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, llmProviderId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
+            }
+
+            LlmProvider provider = new LlmProvider();
+            provider.setId(resultSet.getString("UUID"));
+            provider.setName(resultSet.getString("NAME"));
+            provider.setVersion(resultSet.getString("VERSION"));
+            provider.setDescription(resultSet.getString("DESCRIPTION"));
+            provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
+            provider.setModelPath(resultSet.getString("MODEL_PATH"));
+            provider.setPromptTokensPath(resultSet.getString("PROMPT_TOKENS_PATH"));
+            provider.setCompletionTokensPath(resultSet.getString("COMPLETION_TOKENS_PATH"));
+            provider.setTotalTokensPath(resultSet.getString("TOTAL_TOKENS_PATH"));
+            provider.setPayloadHandler(resultSet.getString("PAYLOAD_HANDLER"));
+            provider.setHasMetadataInPayload(resultSet.getBoolean("HAS_METADATA_IN_PAYLOAD"));
+            Map<String, String> headers = new HashMap<>();
+            Map<String, String> queryParams = new HashMap<>();
+
+            do {
+                String parameterName = resultSet.getString("PARAMETER_NAME");
+                String parameterValue = resultSet.getString("PARAMETER_VALUE");
+                if (parameterName != null && parameterValue != null) {
+                    if (resultSet.getBoolean("IS_HEADER")) {
+                        headers.put(parameterName, parameterValue);
+                    } else if (resultSet.getBoolean("IS_QUERY_PARAMS")) {
+                        queryParams.put(parameterName, parameterValue);
+                    }
+                }
+            } while (resultSet.next());
+            provider.setHeaders(headers);
+            provider.setQueryParams(queryParams);
+            return provider;
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
 
     private class SubscriptionInfo {
 
@@ -19140,6 +19441,7 @@ public class ApiMgtDAO {
 
         public SubscriptionInfo(int subscriptionId, String tierId, int applicationId,
                                 String apiVersion, String subscriptionStatus) {
+
             this.subscriptionId = subscriptionId;
             this.tierId = tierId;
             this.applicationId = applicationId;
@@ -19148,6 +19450,7 @@ public class ApiMgtDAO {
         }
 
         public String getApiVersion() {
+
             return apiVersion;
         }
 
@@ -19510,7 +19813,7 @@ public class ApiMgtDAO {
         }
         List<OperationPolicy> operationPolicies = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
+                SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_BY_URI_TEMPLATE_ID)) {
             ps.setInt(1, urlMappingId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -19622,7 +19925,7 @@ public class ApiMgtDAO {
             throws SQLException, APIManagementException {
 
         try (PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_API_PRODUCT_SQL)) {
+                SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_PER_API_PRODUCT_SQL)) {
             ps.setString(1, productRevisionId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -19650,6 +19953,7 @@ public class ApiMgtDAO {
      **/
     private String cloneCommonPolicyToAPI(Connection connection, String commonPolicyId, String clonedPolicyId,
                                           String apiUUID) throws APIManagementException, SQLException {
+
         OperationPolicyData policyData = getOperationPolicyByPolicyID(connection, commonPolicyId, true);
         if (policyData != null) {
             if (log.isDebugEnabled()) {
@@ -19714,6 +20018,7 @@ public class ApiMgtDAO {
     public boolean cloneAPISpecificPoliciesForVersioning(String previousAPIVersionUUID, String newAPIVersionUUID,
                                                          String organization, List<ClonePolicyMetadataDTO> clonePolicyMetadata)
             throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
@@ -19738,6 +20043,7 @@ public class ApiMgtDAO {
                                                          String previousPolicyUUID, String newAPIVersionUUID,
                                                          String newPolicyUUID, String organization)
             throws APIManagementException, SQLException {
+
         OperationPolicyData policyData = getAPISpecificOperationPolicyByPolicyID(connection, previousPolicyUUID,
                 previousAPIVersionUUID, organization, true);
         if (policyData != null) {
@@ -20026,9 +20332,9 @@ public class ApiMgtDAO {
         return operationPolicyDefinitions;
     }
 
-
     public void populatePolicyDefinitions(Connection connection, String policyId, OperationPolicyData policyData)
             throws SQLException {
+
         if (policyId != null && !policyId.isEmpty()) {
             List<OperationPolicyDefinition> policyDefinitions = getPolicyDefinitionForPolicyId(connection, policyId);
             for (OperationPolicyDefinition policyDefinition : policyDefinitions) {
@@ -20041,9 +20347,8 @@ public class ApiMgtDAO {
         }
     }
 
-
     private void addOperationPolicyDefinition(Connection connection, String policyId,
-                                               OperationPolicyDefinition policyDefinition) throws SQLException {
+                                              OperationPolicyDefinition policyDefinition) throws SQLException {
 
         String dbQuery = SQLConstants.OperationPolicyConstants.ADD_OPERATION_POLICY_DEFINITION;
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
@@ -20055,9 +20360,8 @@ public class ApiMgtDAO {
         }
     }
 
-
     private void updateOperationPolicyDefinition(Connection connection, String policyId,
-                                               OperationPolicyDefinition policyDefinition) throws SQLException {
+                                                 OperationPolicyDefinition policyDefinition) throws SQLException {
 
         String dbQuery = SQLConstants.OperationPolicyConstants.UPDATE_OPERATION_POLICY_DEFINITION;
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
@@ -20317,8 +20621,6 @@ public class ApiMgtDAO {
         return policyNames;
     }
 
-
-
     /**
      * This method will return a list of all cloned policies for an API.
      *
@@ -20350,7 +20652,7 @@ public class ApiMgtDAO {
         String sqlQuery = SQLConstants.GET_APPLICATIONS_OF_KEY_MANAGERS_SQL;
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, keyManagerId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 ApplicationInfoKeyManager application;
@@ -20512,7 +20814,6 @@ public class ApiMgtDAO {
         return policySpecification;
     }
 
-
     /**
      * Create a string list from a single string element by splitting from the comma
      *
@@ -20539,7 +20840,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to add policy mapping
      */
     public void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
-            String tenantDomain) throws APIManagementException {
+                                      String tenantDomain) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -20567,10 +20868,10 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to add policy mapping to the database
      */
     private void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
-            String tenantDomain, Connection connection) throws APIManagementException {
+                                       String tenantDomain, Connection connection) throws APIManagementException {
 
         try (PreparedStatement operationPolicyMappingStatement = connection
-                     .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
+                .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
              PreparedStatement apiLevelPolicyMappingStatement = connection
                      .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_POLICY_MAPPING)) {
             connection.setAutoCommit(false);
@@ -20648,7 +20949,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to update policy mapping
      */
     public void updateAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate,
-            List<OperationPolicy> apiLevelPolicies, String tenantDomain) throws APIManagementException {
+                                         List<OperationPolicy> apiLevelPolicies, String tenantDomain) throws APIManagementException {
         // No need to delete the Operation policy mapping as they will be removed from the db when the url template
         // rows are deleted.
         String deleteOldAPILevelMappingsQuery = SQLConstants.OperationPolicyConstants.DELETE_API_POLICY_MAPPING;
@@ -20668,14 +20969,15 @@ public class ApiMgtDAO {
     /**
      * This method will add API level policy mappings to the database.
      *
-     * @param policies      List of API policies
-     * @param apiUUID       API UUID
-     * @param revisionUUID  API revision UUID
-     * @param tenantDomain  Tenant domain
+     * @param policies     List of API policies
+     * @param apiUUID      API UUID
+     * @param revisionUUID API revision UUID
+     * @param tenantDomain Tenant domain
      * @throws APIManagementException if failed to add policy mapping
      */
     public void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
-            String tenantDomain) throws APIManagementException {
+                                    String tenantDomain) throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -20693,16 +20995,17 @@ public class ApiMgtDAO {
     /**
      * This method will add API level policy mappings using the provided database connection.
      *
-     * @param policies      List of API policies
-     * @param apiUUID       API UUID
-     * @param revisionUUID  API revision UUID
-     * @param tenantDomain  Tenant domain
-     * @param connection    Database connection
+     * @param policies     List of API policies
+     * @param apiUUID      API UUID
+     * @param revisionUUID API revision UUID
+     * @param tenantDomain Tenant domain
+     * @param connection   Database connection
      * @throws APIManagementException if failed to add policy mapping
-     * @throws SQLException if an SQL error occurs while adding policy mapping
+     * @throws SQLException           if an SQL error occurs while adding policy mapping
      */
     private void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
-            String tenantDomain, Connection connection) throws APIManagementException, SQLException {
+                                     String tenantDomain, Connection connection) throws APIManagementException, SQLException {
+
         Map<String, String> updatedPoliciesMap = new HashMap<>();
         Set<String> usedClonedPolicies = new HashSet<String>();
         List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
@@ -20741,8 +21044,8 @@ public class ApiMgtDAO {
     }
 
     private void handlePolicyCloning(OperationPolicy policy, String apiUUID, String tenantDomain, Connection connection,
-            Map<String, String> updatedPoliciesMap, Set<String> usedClonedPolicies,
-            List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException, APIManagementException {
+                                     Map<String, String> updatedPoliciesMap, Set<String> usedClonedPolicies,
+                                     List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException, APIManagementException {
 
         if (!updatedPoliciesMap.keySet().contains(policy.getPolicyId())) {
             //Check whether API specific policies available
@@ -20786,6 +21089,7 @@ public class ApiMgtDAO {
      */
     public List<OperationPolicy> getAPIPolicyMapping(String apiUUID, String revisionUUID)
             throws APIManagementException {
+
         List<OperationPolicy> policyList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -20805,9 +21109,9 @@ public class ApiMgtDAO {
     /**
      * Get API policy mapping by UUID using provided database connection.
      *
-     * @param apiUUID         UUID of API
-     * @param revisionUUID    UUID of API Revision
-     * @param connection      Connection
+     * @param apiUUID      UUID of API
+     * @param revisionUUID UUID of API Revision
+     * @param connection   Connection
      * @throws APIManagementException If failed to get API policy mapping
      */
     private List<OperationPolicy> getAPIPolicyMapping(String apiUUID, String revisionUUID, Connection connection)
@@ -20852,13 +21156,13 @@ public class ApiMgtDAO {
     /**
      * Create a revision of API policis. This will clone the policy and policy mapping with each revision
      *
-     * @param apiRevision       API revision
-     * @param tenantDomain      Tenant domain
-     * @param uriTemplates      URI Templates map
-     * @param connection        Connection
+     * @param apiRevision  API revision
+     * @param tenantDomain Tenant domain
+     * @param uriTemplates URI Templates map
+     * @param connection   Connection
      */
     private void revisionAPIPolicies(APIRevision apiRevision, String tenantDomain,
-            Map<String, URITemplate> uriTemplates, Connection connection) throws SQLException, APIManagementException {
+                                     Map<String, URITemplate> uriTemplates, Connection connection) throws SQLException, APIManagementException {
 
         try (PreparedStatement operationPolicyMappingStatement = connection
                 .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
@@ -20937,7 +21241,7 @@ public class ApiMgtDAO {
      * @param toBeClonedPolicyDetails List of policies to be cloned
      */
     private void handlePolicyCloningWhenRevisioning(OperationPolicy policy, String apiUUID, String revisionUUID,
-            Map<String, String> clonedPolicyMap, List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) {
+                                                    Map<String, String> clonedPolicyMap, List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) {
 
         if (!clonedPolicyMap.keySet().contains(policy.getPolicyId())) {
             // Since we are creating a new revision, if the policy is not found in the policy map,
@@ -20967,7 +21271,7 @@ public class ApiMgtDAO {
      * @throws SQLException           If failed to execute the SQL statement
      */
     private void restoreAPIPolicies(APIRevision apiRevision, String tenantDomain, Map<String, URITemplate> uriTemplates,
-            Connection connection) throws SQLException, APIManagementException {
+                                    Connection connection) throws SQLException, APIManagementException {
 
         try (PreparedStatement operationPolicyMappingStatement = connection
                 .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
@@ -21055,7 +21359,6 @@ public class ApiMgtDAO {
         }
     }
 
-
     /**
      * This method will copy API level policies to each product resource individually. API level policies will be added
      * before the existing operation level policies.
@@ -21069,7 +21372,7 @@ public class ApiMgtDAO {
      * @throws SQLException           If failed to execute SQL statements
      */
     private void populateAPIPoliciesToProductResource(APIProductResource productResource, int urlMappingId,
-            URITemplate uriTemplate, Map<String, List<OperationPolicy>> apiToAPIPolicyMap, Connection connection)
+                                                      URITemplate uriTemplate, Map<String, List<OperationPolicy>> apiToAPIPolicyMap, Connection connection)
             throws APIManagementException, SQLException {
 
         List<OperationPolicy> apiPolicies;
@@ -21084,11 +21387,11 @@ public class ApiMgtDAO {
 
         int requestPolicyCount = 0;
         int responsePolicyCount = 0;
-        int faultPolicyCount=0;
+        int faultPolicyCount = 0;
 
         resourcePolicyList.addAll(operationPolicies);
 
-        for (OperationPolicy policy: resourcePolicyList) {
+        for (OperationPolicy policy : resourcePolicyList) {
             if (APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST.equals(policy.getDirection())) {
                 requestPolicyCount += 1;
                 policy.setOrder(requestPolicyCount);
@@ -21102,32 +21405,33 @@ public class ApiMgtDAO {
 
             if (log.isDebugEnabled()) {
                 log.debug("Policy " + policy.getPolicyName() + ":"
-                        + policy.getPolicyVersion() + " added in order" + policy.getOrder()  + " policy to the " +
+                        + policy.getPolicyVersion() + " added in order" + policy.getOrder() + " policy to the " +
                         "product resource" + productResource.getUriTemplate().toString());
             }
         }
         uriTemplate.setOperationPolicies(resourcePolicyList);
     }
 
-
     private List<OperationPolicy> deepCopyPolicyList(List<OperationPolicy> policyList) {
+
         Gson gson = new Gson();
-        return gson.fromJson(gson.toJson(policyList), new TypeToken<ArrayList<OperationPolicy>>() {}.getType());
+        return gson.fromJson(gson.toJson(policyList), new TypeToken<ArrayList<OperationPolicy>>() {
+        }.getType());
     }
 
     /**
      * Add new gateway global policy mappings to the database.
      *
-     * @param gatewayGlobalPolicyList      List of applied policies for each direction in the gateways
-     * @param orgId                        organization ID
-     * @param name                         Name of the policy mapping
-     * @param description                  Description of the policy mapping
-     * @param mappingUUID                  UUID of the mapping when updating the policy mapping
+     * @param gatewayGlobalPolicyList List of applied policies for each direction in the gateways
+     * @param orgId                   organization ID
+     * @param name                    Name of the policy mapping
+     * @param description             Description of the policy mapping
+     * @param mappingUUID             UUID of the mapping when updating the policy mapping
      * @return UUID of the policy mapping
      * @throws APIManagementException
      */
     public String addGatewayGlobalPolicy(List<OperationPolicy> gatewayGlobalPolicyList, String description, String name,
-            String orgId, String mappingUUID) throws APIManagementException {
+                                         String orgId, String mappingUUID) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -21149,16 +21453,16 @@ public class ApiMgtDAO {
     /**
      * Update gateway global policy mappings in the database.
      *
-     * @param gatewayGlobalPolicyList      Updated list of applied policies for each direction in the gateways
-     * @param orgId                        organization ID
-     * @param name                         Name of the policy mapping
-     * @param description                  Description of the policy mapping
-     * @param mappingUUID                  UUID of the mapping when updating the policy mapping
+     * @param gatewayGlobalPolicyList Updated list of applied policies for each direction in the gateways
+     * @param orgId                   organization ID
+     * @param name                    Name of the policy mapping
+     * @param description             Description of the policy mapping
+     * @param mappingUUID             UUID of the mapping when updating the policy mapping
      * @return UUID of the policy mapping
      * @throws APIManagementException
      */
     public String updateGatewayGlobalPolicy(List<OperationPolicy> gatewayGlobalPolicyList, String description,
-            String name, String orgId, String mappingUUID) throws APIManagementException {
+                                            String name, String orgId, String mappingUUID) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -21180,8 +21484,8 @@ public class ApiMgtDAO {
     /**
      * Add gateway policy deployment mapping records to the database.
      *
-     * @param gatewayPolicyDeploymentList       content of the policy deployment mapping objects
-     * @throws APIManagementException           if an error occurs when adding a new gateway policy deployment mapping
+     * @param gatewayPolicyDeploymentList content of the policy deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new gateway policy deployment mapping
      */
     public void addGatewayPolicyDeployment(List<GatewayPolicyDeployment> gatewayPolicyDeploymentList, String orgId)
             throws APIManagementException {
@@ -21212,8 +21516,8 @@ public class ApiMgtDAO {
     /**
      * Remove gateway policy deployment mapping records from the database.
      *
-     * @param gatewayPolicyUnDeploymentList     content of the policy un-deployment mapping objects
-     * @throws APIManagementException           if an error occurs when adding a new gateway policy deployment mapping
+     * @param gatewayPolicyUnDeploymentList content of the policy un-deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new gateway policy deployment mapping
      */
     public void removeGatewayPolicyDeployment(List<GatewayPolicyDeployment> gatewayPolicyUnDeploymentList, String orgId)
             throws APIManagementException {
@@ -21244,11 +21548,11 @@ public class ApiMgtDAO {
     /**
      * Remove gateway policy deployment mapping records corresponding to a mapping UUID from the database.
      *
-     * @param mappingUUID               UUID of the policy mapping
-     * @throws APIManagementException   if an error occurs when adding a new gateway policy deployment mapping
+     * @param mappingUUID UUID of the policy mapping
+     * @throws APIManagementException if an error occurs when adding a new gateway policy deployment mapping
      */
     public void removeGatewayPolicyDeploymentByMappingUUIDAndGatewayLabel(String gatewayLabel, String mappingUUID,
-            String orgId) throws APIManagementException {
+                                                                          String orgId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -21280,7 +21584,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public List<OperationPolicyData> getAllGatewayPoliciesDataForPolicyMappingUUID(String policyMappingUUID,
-            boolean isWithPolicyDefinition) throws APIManagementException {
+                                                                                   boolean isWithPolicyDefinition) throws APIManagementException {
 
         List<String> policyUUIDList = getPolicyUUIDsByPolicyMappingUUID(policyMappingUUID);
         List<OperationPolicyData> policyDataList = new ArrayList<>();
@@ -21312,7 +21616,7 @@ public class ApiMgtDAO {
         String dbQuery = SQLConstants.GatewayPolicyConstants.GET_GATEWAY_POLICIES_BY_POLICY_MAPPING_UUID;
         List<OperationPolicy> gatewayPolicies = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-        PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyMappingUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -21341,7 +21645,7 @@ public class ApiMgtDAO {
                 String.join(",", Collections.nCopies(gatewayLabels.length, "?")));
         List<String> policyMappingUUIDs = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, orgId);
             int index = 2;
             for (String label : gatewayLabels) {
@@ -21373,7 +21677,7 @@ public class ApiMgtDAO {
 
         String dbQuery = SQLConstants.GatewayPolicyConstants.GET_POLICY_DEPLOYMENT_BY_GATEWAY;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, gatewayLabel);
             statement.setString(2, orgId);
             try (ResultSet rs = statement.executeQuery()) {
@@ -21437,7 +21741,7 @@ public class ApiMgtDAO {
         String dbQuery = SQLConstants.GatewayPolicyConstants.GET_GATEWAY_POLICY_DEPLOYMENT_BY_MAPPING_UUID;
         Set<String> gatewayLabels = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyMappingUUID);
             statement.setString(2, orgId);
             try (ResultSet rs = statement.executeQuery()) {
@@ -21505,7 +21809,7 @@ public class ApiMgtDAO {
         String dbQuery = SQLConstants.GatewayPolicyConstants.GET_ALL_GATEWAY_POLICY_METADATA_FOR_ORGANIZATION;
         List<GatewayPolicyData> gatewayPolicyMetaDataList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, organization);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -21533,7 +21837,7 @@ public class ApiMgtDAO {
         String dbQuery = SQLConstants.GatewayPolicyConstants.GET_GATEWAY_POLICY_METADATA_BY_POLICY_MAPPING_UUID;
         GatewayPolicyData gatewayPolicyData = new GatewayPolicyData();
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyMappingUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -21554,7 +21858,7 @@ public class ApiMgtDAO {
         List<String> policyUUIDList = new ArrayList<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(dbQueryToGetPolicyUUID)) {
+             PreparedStatement statement = connection.prepareStatement(dbQueryToGetPolicyUUID)) {
             statement.setString(1, policyMappingUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -21603,10 +21907,11 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public int getPolicyUUIDCount(String policyUUID) throws APIManagementException {
+
         String dbQuery = SQLConstants.GatewayPolicyConstants.GET_COMMON_POLICY_USAGE_COUNT_BY_POLICY_UUID;
         int count = 0;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+             PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, policyUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -21645,7 +21950,8 @@ public class ApiMgtDAO {
     }
 
     private void updateGatewayGlobalPolicyMetadata(Connection connection, String description, String name,
-            String orgId, String mappingUUID) throws SQLException {
+                                                   String orgId, String mappingUUID) throws SQLException {
+
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 SQLConstants.GatewayPolicyConstants.UPDATE_GATEWAY_POLICY_METADATA)) {
             preparedStatement.setString(1, name);
@@ -21690,7 +21996,7 @@ public class ApiMgtDAO {
     private void deleteGatewayPolicyMetaData(Connection connection, String policyMappingUUID) throws SQLException {
 
         try (PreparedStatement preparedStatement =
-                connection.prepareStatement(SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_METADATA)) {
+                     connection.prepareStatement(SQLConstants.GatewayPolicyConstants.DELETE_GATEWAY_POLICY_METADATA)) {
             preparedStatement.setString(1, policyMappingUUID);
             preparedStatement.executeUpdate();
         }
