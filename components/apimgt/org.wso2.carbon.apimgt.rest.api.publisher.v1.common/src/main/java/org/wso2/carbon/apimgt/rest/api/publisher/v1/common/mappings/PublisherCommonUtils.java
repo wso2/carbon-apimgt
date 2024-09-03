@@ -198,6 +198,39 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * @param api           API of the Custom Backend
+     * @param apiProvider   API Provider
+     * @param endpointType  Endpoint Type of the Custom Backend (SANDBOX, PRODUCTION)
+     * @param customBackend Custom Backend
+     * @param contentDecomp Header Content of the Request
+     * @return Custom Backend File Name
+     * @throws APIManagementException If an error occurs while updating the API and API definition
+     */
+    public static String updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
+            InputStream customBackend, String contentDecomp) throws APIManagementException {
+        String fileName = getFileNameFromContentDisposition(contentDecomp);
+        if (fileName == null)
+            throw new APIManagementException(
+                    "Error when retrieving Custom Backend file name of API: " + api.getId().getApiName());
+        apiProvider.updateCustomBackend(api, endpointType, customBackend, fileName);
+        return fileName;
+    }
+
+    private static String getFileNameFromContentDisposition(String contentDisposition) {
+        // Split the Content-Disposition header to get the file name
+        String[] parts = contentDisposition.split(";");
+        for (String part : parts) {
+            if (part.trim().startsWith("filename")) {
+                // Extract the file name value
+                return part.split("=")[1].trim().replace("\"", "");
+            }
+        }
+        return null;
+    }
+
+
+
+    /**
      * Prepare for API object before updating the API.
      *
      * @param originalAPI    Existing API

@@ -690,6 +690,7 @@ public class TemplateBuilderUtil {
             api.setUuid(apidto.getId());
             GatewayUtils.setCustomSequencesToBeRemoved(apiProduct.getId(), api.getUuid(), productAPIDto);
             APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api, apiProduct);
+            // check the endpoint type
             addEndpoints(api, apiTemplateBuilder, productAPIDto);
             setCustomSequencesToBeAdded(apiProduct, api, productAPIDto, apiExtractedPath, apidto);
             setAPIFaultSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
@@ -974,7 +975,8 @@ public class TemplateBuilderUtil {
                 endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
                 && endpointConfigMap.get("sequence") != null) {
             GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
-                    APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, endpointConfigMap.get("sequence").toString());
+                    APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, endpointConfigMap.get("sequence").toString(),
+                    endpointConfigMap.get("type").toString());
             if (gatewayCustomBackendSequenceDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayCustomBackendSequenceDTO, gatewayAPIDTO.getSequenceToBeAdd()));
@@ -1427,8 +1429,8 @@ public class TemplateBuilderUtil {
         return null;
     }
 
-    private static GatewayContentDTO retrieveCustomBackendSequence(API api, String flow, String sequence)
-            throws APIManagementException {
+    private static GatewayContentDTO retrieveCustomBackendSequence(API api, String flow, String sequence,
+            String endpointType) throws APIManagementException {
         GatewayContentDTO customBackendSequenceContentDto = new GatewayContentDTO();
 
         String customSequence = null;
@@ -1436,7 +1438,7 @@ public class TemplateBuilderUtil {
                 + "-Custom-Backend";
         try {
             customSequence = SynapsePolicyAggregator.generateBackendSequenceForCustomSequence(api, seqExt, flow,
-                    sequence);
+                    sequence, endpointType);
         } catch (IOException e) {
             throw new APIManagementException(e);
         }

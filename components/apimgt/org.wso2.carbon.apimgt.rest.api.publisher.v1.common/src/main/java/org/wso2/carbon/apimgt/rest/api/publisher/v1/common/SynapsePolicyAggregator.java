@@ -108,7 +108,7 @@ public class SynapsePolicyAggregator {
     }
 
     public static String generateBackendSequenceForCustomSequence(API api, String sequenceName, String flow,
-            String sequence) throws APIManagementException, IOException {
+            String sequence, String endpointType) throws APIManagementException, IOException {
         Map<String, Object> configMap = new HashMap<>();
         boolean render = false;
         String customBackendTemplate = FileUtil.readFileToString(CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION)
@@ -120,6 +120,7 @@ public class SynapsePolicyAggregator {
                 throw new APIManagementException("Error when preparing the sequence: " + sequenceName);
             }
             configMap.put("custom_sequence", sanitizedSequence);
+            configMap.put("endpoint_type", endpointType);
             render = true;
         }
         if (render) {

@@ -1167,6 +1167,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
     }
 
+    @Override
+    public void updateCustomBackend(API api, String type, InputStream sequence, String fileName)
+            throws APIManagementException {
+        apiMgtDAO.updateCustomBackend(api.getUuid(), fileName, sequence, type);
+    }
+
+    @Override
+    public void updateCustomBackendByRevisionID(API api, String type, InputStream sequence,
+            String revision, String fileName) throws APIManagementException {
+        apiMgtDAO.updateCustomBackendByRevision(api.getUuid(), fileName, sequence, type, revision);
+    }
+
     private void validateKeyManagers(API api) throws APIManagementException {
 
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
@@ -6302,6 +6314,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
+
+        // update AM_API_CUSTOM_BACKEND table
+
         WorkflowExecutor revisionDeploymentWFExecutor = getWorkflowExecutor(
                 WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
 
@@ -6685,6 +6700,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
+        apiMgtDAO.deleteCustomBackend(apiId, apiRevisionId);
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {

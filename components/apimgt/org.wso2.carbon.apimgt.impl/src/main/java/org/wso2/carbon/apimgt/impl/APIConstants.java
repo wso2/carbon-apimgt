@@ -1561,6 +1561,8 @@ public final class APIConstants {
     public static final String MEDIATION_SEQUENCE_ELEM = "sequence";
     public static final String MEDIATION_CONFIG_EXT = ".xml";
     public static final String API_CUSTOM_SEQ_IN_EXT = "--In";
+
+    public static final String API_CUSTOM_BACKEND_SEQ_EXT = "--Custom_Backend";
     public static final String API_CUSTOM_SEQ_OUT_EXT = "--Out";
     public static final String API_CUSTOM_SEQ_FAULT_EXT = "--Fault";
 

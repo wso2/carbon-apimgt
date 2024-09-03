@@ -487,13 +487,13 @@ paths:
           -H "Content-Type: application/json" -d @data.json
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/topics"'
 
-  /apis/{apiId}/custom-sequence:
+  /apis/{apiId}/custom-backend:
     put:
       tags:
         - APIs
       summary: Upload Custom Sequence as the Endpoint of the API
       description: This operation can be used to change the endpoint of the API to Custom Sequence
-      operationId: customSequenceUpdate
+      operationId: customBackendUpdate
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
@@ -509,9 +509,6 @@ paths:
                 type:
                   type: string
                   description: Type of the Endpoint
-                apiData:
-                  type: string
-                  description: API Data to be updated
       responses:
         200:
           description: |
@@ -561,7 +558,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend"'
 
 
   /apis/{apiId}/reimport-service:

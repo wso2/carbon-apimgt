@@ -86,6 +86,7 @@ import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
@@ -206,28 +207,21 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(apiToReturn).build();
     }
 
-    @Override
-    public Response customSequenceUpdate(String apiId, String ifMatch, InputStream sequenceInputStream,
-            Attachment sequenceDetail, String type, String apiData, MessageContext messageContext)
-            throws APIManagementException {
-        APIDTO apidto =  new Gson().fromJson(apiData, APIDTO.class);
-        // Get the endpoint config object updated
-        APIUtil.validateAPIEndpointConfig(apidto.getEndpointConfig(), apidto.getType().toString(),
-                apidto.getName());
-        if (apidto.getEndpointConfig() != null) {
-            org.json.JSONObject endpointConfig = new org.json.JSONObject(new Gson().toJson(apidto.getEndpointConfig()));
-            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                try {
-                    String content = ImportUtils.retrieveXMLContent(sequenceInputStream);
-                    endpointConfig.put("sequence", content);
-                } catch (IOException ex) {
-                    RestApiUtil.handleInternalServerError("Failed to read Custom Sequence of " + apiId, ex, log);
-                }
-            }
-            apidto.setEndpointConfig(new Gson().fromJson(endpointConfig.toString(), Object.class));
-        }
-        return updateAPI(apiId, apidto, ifMatch, messageContext);
+    @Override public Response customBackendUpdate(String apiId, String ifMatch, InputStream sequenceInputStream,
+            Attachment sequenceDetail, String type, MessageContext messageContext) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        api.setOrganization(organization);
+        MultivaluedMap<String, String> headers = sequenceDetail.getHeaders();
+        String contentDecomp = headers.getFirst("Content-Disposition");
+
+        String sequenceName = PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream,
+                contentDecomp);
+        JSONObject obj = new JSONObject();
+        obj.put("sequenceName", sequenceName);
+        return Response.ok().entity(obj).build();
     }
 
     @Override

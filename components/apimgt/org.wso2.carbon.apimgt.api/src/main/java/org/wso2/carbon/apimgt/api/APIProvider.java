@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -314,6 +315,9 @@ public interface APIProvider extends APIManager {
      * @return updated API
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
+
+    void updateCustomBackend(API api,String type, InputStream sequence, String fileName) throws APIManagementException;
+    void updateCustomBackendByRevisionID(API api, String type, InputStream sequence, String revision, String fileName) throws APIManagementException;
 
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>

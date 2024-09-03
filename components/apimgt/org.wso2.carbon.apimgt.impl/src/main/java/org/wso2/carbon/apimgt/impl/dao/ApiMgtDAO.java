@@ -11214,6 +11214,58 @@ public class ApiMgtDAO {
     }
 
     /**
+     *
+     * @param apiUUID UUID of API
+     * @param revisionUUID Revision ID of the API
+     * @return A HashMap with Custom Backend data
+     * @throws APIManagementException
+     */
+    public Map<String, Object> retrieveCustomBackendOfAPIRevision(String apiUUID, String revisionUUID) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_CUSTOM_BACKEND_OF_API_REVISION;
+        Map<String, Object> map = new HashMap<>();
+        ResultSet resultSet = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            ps.setString(2, revisionUUID);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                map.put("sequence", resultSet.getString("SEQUENCE"));
+                map.put("endpoint_type", resultSet.getString("TYPE"));
+                map.put("sequence_name", resultSet.getString("NAME"));
+            }
+        } catch (SQLException ex) {
+            handleException("Error retrieving Custom Backend of an API: " + apiUUID, ex);
+        }
+        return map;
+    }
+
+    /**
+     *
+     * @param apiUUID API UUID
+     * @return HashMap with Custom Backend data
+     * @throws APIManagementException
+     */
+    public Map<String, Object> retrieveCustomBackendOfAPI(String apiUUID) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_CUSTOM_BACKEND_OF_API_DEFAULT_REVISION;
+        Map<String, Object> map = new HashMap<>();
+        ResultSet resultSet = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                map.put("sequence", resultSet.getString("SEQUENCE"));
+                map.put("endpoint_type", resultSet.getString("TYPE"));
+                map.put("sequence_name", resultSet.getString("NAME"));
+            }
+        } catch (SQLException ex) {
+            handleException("Error retrieving Custom Backend of an API: " + apiUUID, ex);
+        }
+        return map;
+    }
+
+    /**
      * This method will delete all email alert subscriptions details from tables
      *
      * @param userName
@@ -21326,6 +21378,64 @@ public class ApiMgtDAO {
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding api level policies for API : " + apiUUID, e);
+        }
+    }
+
+    public void updateCustomBackend(String apiUUID, String sequenceName, InputStream sequence, String type) throws APIManagementException {
+        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiUUID);
+            prepStmt.executeUpdate();
+            addCustomBackend(apiUUID, sequenceName, null, sequence, type, connection);
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding Custom Backend for API : " + apiUUID, e);
+        }
+    }
+
+    public void deleteCustomBackend(String apiUUID, String revisionId) throws APIManagementException {
+        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiUUID);
+            prepStmt.setString(2, revisionId);
+            prepStmt.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting Custom Backend for API : " + apiUUID, e);
+        }
+    }
+
+    public void updateCustomBackendByRevision(String apiUUID, String sequenceName, InputStream sequence, String type, String revision) throws APIManagementException {
+        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiUUID);
+            prepStmt.setString(2, revision);
+            prepStmt.executeUpdate();
+            addCustomBackend(apiUUID, sequenceName, revision, sequence, type, connection);
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding Custom Backend for API : " + apiUUID, e);
+        }
+    }
+
+    public void addCustomBackend(String apiUUID, String sequenceName, String revision, InputStream sequence, String type, Connection connection) throws APIManagementException {
+        String insertCustomBackendQuery = SQLConstants.CustomBackendConstants.ADD_CUSTOM_BACKEND;
+        try (PreparedStatement prepStmt = connection.prepareStatement(insertCustomBackendQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiUUID);
+            prepStmt.setBinaryStream(2, sequence);
+            prepStmt.setString(3, type);
+            prepStmt.setString(4, revision);
+            prepStmt.setString(5, sequenceName);
+            prepStmt.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Error while adding Custom Backend for API : " + apiUUID, e);
         }
     }
 
