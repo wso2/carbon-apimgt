@@ -424,6 +424,8 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEY_TEMPLATE));
             eventPublishers.putIfAbsent(EventPublisherType.KEYMGT_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEYMGT_EVENT));
+            eventPublishers.putIfAbsent(EventPublisherType.LLMPROVIDER_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.LLMPROVIDER_EVENT));
         } catch (EventPublisherException e) {
             log.error("Could not initialize the event publishers. Events might not be published properly.");
             throw new APIManagementException(e);

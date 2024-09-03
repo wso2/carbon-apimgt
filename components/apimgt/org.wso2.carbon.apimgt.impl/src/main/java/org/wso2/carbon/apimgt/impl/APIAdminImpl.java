@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.LlmProvider;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -597,6 +598,62 @@ public class APIAdminImpl implements APIAdmin {
             new KeyMgtNotificationSender()
                     .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
         }
+    }
+
+    @Override
+    public LlmProvider addLlmProvider(LlmProvider provider) throws APIManagementException {
+
+        LlmProvider result = apiMgtDAO.addLlmProvider(provider);
+        if (result != null) {
+            new LlmProviderNotificationSender().notify(result.getName(), result.getApiVersion(),
+                    result.getOrganization(), result.getConfigurations(),
+                    APIConstants.EventType.LLM_PROVIDER_CREATE.name());
+        }
+        return result;
+    }
+
+    @Override
+    public List<LlmProvider> getLlmProvidersByOrg(String organization) throws APIManagementException {
+        return apiMgtDAO.getLlmProvidersByOrg(organization);
+    }
+
+    @Override
+    public List<LlmProvider> getLlmProviderConfigurations() throws APIManagementException {
+        return apiMgtDAO.getLlmProviderConfigurations();
+    }
+
+    @Override
+    public LlmProvider deleteLlmProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException {
+
+        LlmProvider result = apiMgtDAO.deleteLlmProvider(organization, llmProviderId, builtIn);
+        if (result != null) {
+            new LlmProviderNotificationSender().notify(result.getName(), result.getApiVersion(), organization, null,
+                    APIConstants.EventType.LLM_PROVIDER_DELETE.name());
+        }
+        return result;
+    }
+
+    @Override
+    public LlmProvider updateLlmProvider(LlmProvider provider) throws APIManagementException {
+
+        LlmProvider result = apiMgtDAO.updateLlmProvider(provider);
+        if (result != null) {
+            new LlmProviderNotificationSender().notify(result.getName(), result.getApiVersion(), result.getOrganization(),
+                    provider.getConfigurations(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
+        }
+        return result;
+    }
+
+    @Override
+    public LlmProvider getLlmProvider(String organization, String llmProviderId) throws APIManagementException {
+
+        return apiMgtDAO.getLlmProvider(organization, llmProviderId);
+    }
+
+    @Override
+    public List<LlmProvider> getBuiltInLlmProviders(String organization) throws APIManagementException {
+
+        return apiMgtDAO.getBuiltInLlmProviders(organization);
     }
 
     @Override

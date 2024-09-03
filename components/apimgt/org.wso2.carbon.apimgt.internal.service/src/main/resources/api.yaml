@@ -642,6 +642,23 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /llm-provider-configs:
+    get:
+      summary: Retrieve persisted LLM Providers
+      description: |
+        This retrieve the persisted LLM Providers.
+      tags:
+        - 'LLMProviders'
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            $ref: '#/definitions/LLMProviderList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      operationId: getLlmProviderConfigs
   /correlation-configs:
     get:
       summary: Retrieve persisted correlation configs data.
@@ -1614,6 +1631,28 @@ definitions:
             description: Maximum number of events allowed
             format: int64
             example: 3000
+  #-----------------------------------------------------
+  # LLM Provider Config List
+  #-----------------------------------------------------
+  LLMProviderList:
+    title: LLM Provider Config List
+    properties:
+      apis:
+        type: array
+        items:
+          $ref: '#/definitions/LLMProvider'
+  LLMProvider:
+    title: LLM Provider Config
+    properties:
+      name:
+        type: string
+      apiVersion:
+        type: string
+      organization:
+        type: string
+      configurations:
+        type: string
+
   #-----------------------------------------------------
   # API Logging detail list
   #-----------------------------------------------------
