@@ -454,7 +454,7 @@ public class JWTValidator {
 
         String consumerKey = jwtValidationInfo.getConsumerKey();
         String keyManager = jwtValidationInfo.getKeyManager();
-        if (keyManager != null) {
+        if (consumerKey != null && keyManager != null) {
             return apiKeyValidator.validateSubscription(apiContext, apiVersion, consumerKey, tenantDomain, keyManager);
         }
         log.debug("Cannot call Key Manager to validate subscription. " +
