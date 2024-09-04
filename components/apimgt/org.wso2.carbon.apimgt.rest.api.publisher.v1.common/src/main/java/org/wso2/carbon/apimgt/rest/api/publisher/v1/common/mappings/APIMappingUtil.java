@@ -209,15 +209,6 @@ public class APIMappingUtil {
                 if (endpointConfig instanceof LinkedHashMap) {
                     ((LinkedHashMap) endpointConfig).remove(APIConstants.IMPLEMENTATION_STATUS);
                 }
-                if (endpointConfig instanceof HashMap) {
-                    if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                            ((HashMap) endpointConfig).get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                        String seqExt = APIUtil.getSequenceExtensionName(dto.getName(), dto.getVersion())
-                                + SynapsePolicyAggregator.getSequenceExtensionFlow(
-                                APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST) + "-Custom-Backend";
-                        ((HashMap) endpointConfig).put("sequence_name", seqExt);
-                    }
-                }
                 model.setEndpointConfig(mapper.writeValueAsString(endpointConfig));
             } catch (IOException e) {
                 handleException("Error while converting endpointConfig to json", e);

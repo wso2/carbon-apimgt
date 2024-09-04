@@ -21,10 +21,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import com.amazonaws.SdkClientException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.internal.LinkedTreeMap;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -217,11 +213,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         MultivaluedMap<String, String> headers = sequenceDetail.getHeaders();
         String contentDecomp = headers.getFirst("Content-Disposition");
 
-        String sequenceName = PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream,
+        JSONObject resp = PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream,
                 contentDecomp);
-        JSONObject obj = new JSONObject();
-        obj.put("sequenceName", sequenceName);
-        return Response.ok().entity(obj).build();
+        return Response.ok().entity(resp).build();
     }
 
     @Override
@@ -3817,6 +3811,20 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevision.setDescription(apIRevisionDTO.getDescription());
             //adding the api revision
             String revisionId = apiProvider.addAPIRevision(apiRevision, organization);
+
+            Object endpointConfig = apiDto.getEndpointConfig();
+
+            if (endpointConfig != null && endpointConfig instanceof HashMap) {
+                String endpointType = ((HashMap) endpointConfig).get("endpoint_type").toString();
+                if (endpointType != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointType)) {
+                    String sequenceName = ((HashMap) endpointConfig).get("sequence_name").toString();
+                    String sequenceEndpointType = ((HashMap) endpointConfig).get("sequence_type").toString();
+                    String backendUUID = ((HashMap) endpointConfig).get("sequence_id").toString();
+                    // Update Custom Backend table
+                    apiProvider.addNewCustomBackendForRevision(revisionId, backendUUID, apiId,
+                            (HashMap) endpointConfig);
+                }
+            }
 
             //Retrieve the newly added APIRevision to send in the response payload
             APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);

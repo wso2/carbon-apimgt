@@ -316,8 +316,14 @@ public interface APIProvider extends APIManager {
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
 
-    void updateCustomBackend(API api,String type, InputStream sequence, String fileName) throws APIManagementException;
-    void updateCustomBackendByRevisionID(API api, String type, InputStream sequence, String revision, String fileName) throws APIManagementException;
+    void updateCustomBackend(API api,String type, InputStream sequence, String fileName, String customBackendUUID) throws APIManagementException;
+    Map<String, String> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID, boolean isInfoOnly) throws APIManagementException;
+
+    void updateCustomBackendByRevisionID(String apiUUID, String type, String revision,
+            String seqName, String backendUUID) throws APIManagementException;
+
+    void addNewCustomBackendForRevision(String revisionUUID, String updatedBackendUUID, String apiUUID,
+            Map<String, Object> config) throws APIManagementException;
 
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>

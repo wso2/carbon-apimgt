@@ -4302,6 +4302,10 @@ public final class APIUtil {
         return api.getId().getApiName() + ":v" + api.getId().getVersion();
     }
 
+    public static String getCustomBackendName(String apiUUID, String type) {
+        return apiUUID + "-" + type;
+    }
+
     /**
      * Return the sequence extension name.
      * eg: admin--testAPi--v1.00
@@ -10061,6 +10065,27 @@ public final class APIUtil {
         return policyDefinition;
     }
 
+    public static String getOperationCustomBackendSequenceFromFile(String extractedFolderPath,
+            String sequenceName,
+            String fileExtension)
+            throws APIManagementException {
+
+        String customBackendContent = null;
+        try {
+            String fileName = extractedFolderPath + File.separator + sequenceName + fileExtension;
+            if (checkFileExistence(fileName)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found policy definition file " + fileName);
+                }
+                customBackendContent = FileUtils.readFileToString(new File(fileName));
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Custom Backend from path: "
+                    + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
+        }
+        return customBackendContent;
+    }
+
     /**
      * Check whether there exists a file for the provided location
      *
@@ -10258,6 +10283,10 @@ public final class APIUtil {
             policyVersion = "v1";
         }
         return policyName + "_" + policyVersion;
+    }
+
+    public static String getCustomBackendFileName(String apiUUID, String endpointType) {
+        return apiUUID + "-" + endpointType;
     }
 
     public static void initializeVelocityContext(VelocityEngine velocityEngine){

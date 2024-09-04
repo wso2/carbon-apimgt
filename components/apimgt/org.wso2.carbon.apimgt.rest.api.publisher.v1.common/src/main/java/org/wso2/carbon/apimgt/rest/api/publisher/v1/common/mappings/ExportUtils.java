@@ -86,6 +86,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPOINTS;
@@ -216,6 +217,13 @@ public class ExportUtils {
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
                 api, currentApiUuid);
+
+        // TODO: Add Custom Backend to the Archive
+        JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+        if(APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+            addCustomBackendToAPI(archivePath, apiProvider, api, currentApiUuid, endpointConfig);
+        }
+
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
         if (migrationEnabled != null) {
@@ -628,6 +636,23 @@ public class ExportUtils {
         }
     }
 
+    public static void addCustomBackendToAPI(String archivePath,
+            APIProvider apiProvider, API api, String currentApiUuid, JsonObject endpointConfig) throws APIManagementException {
+        String exportedCustomBackend = null;
+        try {
+            String backendUUID = endpointConfig.get("sequence_id").getAsString();
+            CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY);
+            String customBackendName = APIUtil.getCustomBackendName(api.getUuid(), endpointConfig.get("type").getAsString());
+            Map<String, String> endpointConfigMap = apiProvider.getCustomBackendOfAPIByUUID(backendUUID, currentApiUuid, false);
+            if(endpointConfigMap != null) {
+                exportCustomBackend(customBackendName, endpointConfigMap, archivePath);
+            }
+
+        } catch (IOException | APIImportExportException ex) {
+
+        }
+    }
+
     /**
      * Retrieve the operation policies and store those in the archive directory.
      *
@@ -733,6 +758,14 @@ public class ExportUtils {
         if (policyData.getCcPolicyDefinition() != null) {
             CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
                     policyData.getCcPolicyDefinition().getContent());
+        }
+    }
+
+    public static void exportCustomBackend(String customBackendFileName, Map<String, String> endpointConfig, String archivePath) throws APIImportExportException, IOException {
+        String customBackendName = archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY + File.separator + customBackendFileName;
+        if(endpointConfig != null && endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE) != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfig.get(
+                API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            CommonUtil.writeFile(customBackendName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML, endpointConfig.get("sequence"));
         }
     }
 

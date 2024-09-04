@@ -487,6 +487,96 @@ paths:
           -H "Content-Type: application/json" -d @data.json
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/topics"'
 
+
+  /apis/{apiId}/custom-backend/{customBackendId}:
+    get:
+      tags:
+        - APIs
+      summary: Get Custom Backend of the API
+      description: This operation can be used to get Custom Backend data of the API
+      operationId: getCustomBackendData
+      parameters:
+        - $ref: '#/components/parameters/customBackendId'
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API Custom Backend is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomBackend'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:api_import_export
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f"'
+    delete:
+      tags:
+        - APIs
+      summary: Delete Custom Backend of the API
+      description: This operation can be used to remove the Custom Backend of the API
+      operationId: customBackendDelete
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-Match'
+        - $ref: '#/components/parameters/customBackendId'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: { }
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_delete
+            - apim:api_manage
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f"'
+
   /apis/{apiId}/custom-backend:
     put:
       tags:
@@ -9432,6 +9522,26 @@ paths:
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
 components:
   schemas:
+    CustomBackend:
+      title: Custom Backend
+      type: object
+      properties:
+        sequenceId:
+          type: string
+          readOnly: true
+          example: 943d3002-000c-42d3-a1b9-d6559f8a4d49
+        sequenceName:
+          type: string
+          readOnly: true
+          example: 943d3002-000c-42d3-a1b9-d6559f8a4d49-SANDBOX
+        sequenceType:
+          type: string
+          readOnly: true
+          example: SANDBOX
+        sequence:
+          type: string
+          format: binary
+          readOnly: true
     Comment:
       title: Comment
       required:
@@ -13763,6 +13873,14 @@ components:
       schema:
         type: integer
         default: 0
+    customBackendId:
+      name: customBackendId
+      in: path
+      description: |
+        Custom Backend ID
+      required: true
+      schema:
+        type: string
     commentId:
       name: commentId
       in: path

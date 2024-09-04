@@ -113,6 +113,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -206,14 +207,22 @@ public class PublisherCommonUtils {
      * @return Custom Backend File Name
      * @throws APIManagementException If an error occurs while updating the API and API definition
      */
-    public static String updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
+    public static JSONObject updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
             InputStream customBackend, String contentDecomp) throws APIManagementException {
         String fileName = getFileNameFromContentDisposition(contentDecomp);
         if (fileName == null)
             throw new APIManagementException(
                     "Error when retrieving Custom Backend file name of API: " + api.getId().getApiName());
-        apiProvider.updateCustomBackend(api, endpointType, customBackend, fileName);
-        return fileName;
+        String seqName = APIUtil.getCustomBackendName(api.getUuid(), endpointType);
+        String customBackendUUID = UUID.randomUUID().toString();
+        apiProvider.updateCustomBackend(api, endpointType, customBackend, seqName, customBackendUUID);
+        JSONObject obj = new JSONObject();
+        obj.put("sequence_name", seqName);
+        obj.put("sequence_file", fileName);
+        obj.put("sequence_id", customBackendUUID);
+        obj.put("type", endpointType);
+        obj.put("endpoint_type", "custom_backend");
+        return obj;
     }
 
     private static String getFileNameFromContentDisposition(String contentDisposition) {

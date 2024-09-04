@@ -46,11 +46,6 @@ public class GatewayUtils {
         gatewayAPIDTO.setSequencesToBeRemove(addStringToList(faultSequence, gatewayAPIDTO.getSequencesToBeRemove()));
     }
 
-    public static void setCustomBackendToBeRemoved(API api, GatewayAPIDTO gatewayAPIDTO) {
-        String sequence = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT + APIConstants.API_CUSTOM_BACKEND_SEQ_EXT;
-        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(sequence, gatewayAPIDTO.getSequencesToBeRemove()));
-    }
-
     public static String[] addStringToList(String key, String[] keys) {
 
         if (keys == null) {

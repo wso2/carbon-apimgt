@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
@@ -1168,15 +1170,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateCustomBackend(API api, String type, InputStream sequence, String fileName)
+    public void updateCustomBackend(API api, String type, InputStream sequence, String seqName, String customBackendUUID)
             throws APIManagementException {
-        apiMgtDAO.updateCustomBackend(api.getUuid(), fileName, sequence, type);
+        apiMgtDAO.updateCustomBackend(api.getUuid(), seqName, sequence, type, customBackendUUID);
     }
 
     @Override
-    public void updateCustomBackendByRevisionID(API api, String type, InputStream sequence,
-            String revision, String fileName) throws APIManagementException {
-        apiMgtDAO.updateCustomBackendByRevision(api.getUuid(), fileName, sequence, type, revision);
+    public Map<String, String> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID, boolean isInfoOnly) throws APIManagementException {
+        return apiMgtDAO.getCustomBackendOfAPIByUUID(customBackendUUID, apiUUID, isInfoOnly);
+    }
+
+    @Override
+    public void updateCustomBackendByRevisionID(String apiUUID, String type, String revision,
+            String seqName, String backendUUID) throws APIManagementException {
+        String customBackendUUID = UUID.randomUUID().toString();
+        InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(backendUUID, apiUUID);
+        apiMgtDAO.updateCustomBackendByRevision(apiUUID, seqName, sequence, type, revision, customBackendUUID);
+    }
+
+    @Override public void addNewCustomBackendForRevision(String revisionUUID, String updatedBackendUUID, String apiUUID,
+            Map<String, Object> config) throws APIManagementException {
+        InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(updatedBackendUUID, apiUUID);
+        config.put("sequence", sequence);
+        apiMgtDAO.addNewCustomBackendForAPIRevision(apiUUID, revisionUUID, config);
     }
 
     private void validateKeyManagers(API api) throws APIManagementException {
@@ -5395,6 +5411,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
                     populateAiConfiguration(api);
                 }
+
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     if (migrationEnabled == null) {
@@ -5465,6 +5482,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiPolicyMapping = apiMgtDAO.getAPIPolicyMapping(api.getUuid(), null);
         if (!apiPolicyMapping.isEmpty()) {
             api.setApiPolicies(apiPolicyMapping);
+        }
+    }
+
+    private void populateCustomBackend(API api) throws APIManagementException {
+        JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+        if(endpointConfig != null) {
+            if(endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE) != null &&
+               APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+                ObjectMapper mapper = new ObjectMapper();
+                // TODO: Check DB Queries. Following fetches data by API UUID and Revision ID = null
+                Map<String, Object> conf = apiMgtDAO.retrieveCustomBackendOfAPI(api.getUuid());
+                try {
+                    api.setEndpointConfig(mapper.writeValueAsString(conf));
+                } catch (IOException ex) {
+                    handleException("Error while converting endpointConfig to json", ex);
+                }
+            }
         }
     }
 

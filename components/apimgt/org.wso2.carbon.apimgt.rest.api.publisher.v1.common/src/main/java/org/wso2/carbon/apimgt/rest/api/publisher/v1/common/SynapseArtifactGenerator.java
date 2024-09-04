@@ -115,7 +115,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                             } else {
                                 APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
                                 // Update the EndpointConfig if it's a Custom Backend
-                                updateCustomBackendOfAPI(apidto, runTimeArtifact.getRevision());
+                                // updateCustomBackendOfAPI(apidto, runTimeArtifact.getRevision());
                                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
 
                                 api.setUUID(apidto.getId());

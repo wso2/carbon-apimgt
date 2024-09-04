@@ -972,11 +972,9 @@ public class TemplateBuilderUtil {
         Map<String, Object> endpointConfigMap = (Map) apidto.getEndpointConfig();
 
         if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
-                && endpointConfigMap.get("sequence") != null) {
+                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
             GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
-                    APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, endpointConfigMap.get("sequence").toString(),
-                    endpointConfigMap.get("type").toString());
+                    endpointConfigMap.get("type").toString(), extractedPath);
             if (gatewayCustomBackendSequenceDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayCustomBackendSequenceDTO, gatewayAPIDTO.getSequenceToBeAdd()));
@@ -1429,16 +1427,15 @@ public class TemplateBuilderUtil {
         return null;
     }
 
-    private static GatewayContentDTO retrieveCustomBackendSequence(API api, String flow, String sequence,
-            String endpointType) throws APIManagementException {
+    private static GatewayContentDTO retrieveCustomBackendSequence(API api, String endpointType, String pathToAchieve)
+            throws APIManagementException {
         GatewayContentDTO customBackendSequenceContentDto = new GatewayContentDTO();
 
         String customSequence = null;
-        String seqExt = APIUtil.getSequenceExtensionName(api) + SynapsePolicyAggregator.getSequenceExtensionFlow(flow)
-                + "-Custom-Backend";
+        String seqExt = APIUtil.getCustomBackendName(api.getUuid(), endpointType);
         try {
-            customSequence = SynapsePolicyAggregator.generateBackendSequenceForCustomSequence(api, seqExt, flow,
-                    sequence, endpointType);
+            customSequence = SynapsePolicyAggregator.generateBackendSequenceForCustomSequence(seqExt,
+                    pathToAchieve, endpointType);
         } catch (IOException e) {
             throw new APIManagementException(e);
         }
