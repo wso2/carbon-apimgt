@@ -139,15 +139,21 @@ public class SubscriptionThrottlePolicyMappingUtil {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(dto.getPolicyName());
         subscriptionPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, subscriptionPolicy);
         subscriptionPolicy.setBillingPlan(dto.getBillingPlan());
-        subscriptionPolicy.setRateLimitTimeUnit(dto.getRateLimitTimeUnit());
-        subscriptionPolicy.setRateLimitCount(dto.getRateLimitCount());
-        subscriptionPolicy.setSubscriberCount(dto.getSubscriberCount());
         subscriptionPolicy.setStopOnQuotaReach(dto.isStopOnQuotaReach());
-        if (dto.getGraphQLMaxComplexity() != null && !(PolicyConstants.AI_QUOTA_TYPE_ENUM_VALUE).equals(quotaType)) {
-            subscriptionPolicy.setGraphQLMaxComplexity(dto.getGraphQLMaxComplexity());
-        }
-        if (dto.getGraphQLMaxDepth() != null && !(PolicyConstants.AI_QUOTA_TYPE_ENUM_VALUE).equals(quotaType)) {
-            subscriptionPolicy.setGraphQLMaxDepth(dto.getGraphQLMaxDepth());
+        if (!PolicyConstants.AI_API_QUOTA_TYPE_ENUM_VALUE.equals(quotaType)) {
+            subscriptionPolicy.setRateLimitTimeUnit(dto.getRateLimitTimeUnit());
+            if (dto.getRateLimitCount() != null) {
+                subscriptionPolicy.setRateLimitCount(dto.getRateLimitCount());
+            }
+            if (dto.getSubscriberCount() != null) {
+                subscriptionPolicy.setSubscriberCount(dto.getSubscriberCount());
+            }
+            if (dto.getGraphQLMaxComplexity() != null) {
+                subscriptionPolicy.setGraphQLMaxComplexity(dto.getGraphQLMaxComplexity());
+            }
+            if (dto.getGraphQLMaxDepth() != null) {
+                subscriptionPolicy.setGraphQLMaxDepth(dto.getGraphQLMaxDepth());
+            }
         }
         List<CustomAttributeDTO> customAttributes = dto.getCustomAttributes();
         if (customAttributes != null && customAttributes.size() > 0) {

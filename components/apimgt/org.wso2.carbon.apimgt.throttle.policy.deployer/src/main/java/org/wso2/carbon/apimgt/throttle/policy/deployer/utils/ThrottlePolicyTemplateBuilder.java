@@ -463,7 +463,7 @@ public class ThrottlePolicyTemplateBuilder {
             Template template;
             if (PolicyConstants.EVENT_COUNT_TYPE.equals(policy.getDefaultLimit().getQuotaType())) {
                 template = velocityengine.getTemplate(getTemplatePathForAsyncSubscription());
-            } else if (PolicyConstants.AI_QUOTA_TYPE.equals(policy.getDefaultLimit().getQuotaType())) {
+            } else if (PolicyConstants.AI_API_QUOTA_TYPE.equals(policy.getDefaultLimit().getQuotaType())) {
                 template = velocityengine.getTemplate(getTemplatePathForAISubscription());
             } else {
                 template = velocityengine.getTemplate(getTemplatePathForSubscription());

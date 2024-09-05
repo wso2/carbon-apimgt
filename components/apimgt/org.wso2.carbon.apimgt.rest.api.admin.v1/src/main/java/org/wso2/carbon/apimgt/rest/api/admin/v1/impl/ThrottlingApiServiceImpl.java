@@ -801,8 +801,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
 
             String existingPolicyQuotaType = existingPolicy.getDefaultQuotaPolicy().getType();
             String dtoQuotaType = body.getDefaultLimit().getType().toString();
-            if (existingPolicyQuotaType.equals(PolicyConstants.AI_QUOTA_TYPE)
-                    != dtoQuotaType.equals(PolicyConstants.AI_QUOTA_TYPE_ENUM_VALUE)) {
+            if (existingPolicyQuotaType.equals(PolicyConstants.AI_API_QUOTA_TYPE)
+                    != dtoQuotaType.equals(PolicyConstants.AI_API_QUOTA_TYPE_ENUM_VALUE)) {
                 throw new APIManagementException(
                         "Subscription quota type can not be changed for AI Subscription policies.",
                         ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_POLICY_UPDATE_TYPE_BAD_REQUEST));
@@ -811,7 +811,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //overridden properties
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
-            if (PolicyConstants.AI_QUOTA_TYPE_ENUM_VALUE.equals(body.getDefaultLimit().getType().toString())) {
+            if (PolicyConstants.AI_API_QUOTA_TYPE_ENUM_VALUE.equals(body.getDefaultLimit().getType().toString())) {
                 body.setDefaultLimit(RestApiAdminUtils.overrideTokenBasedQuotaLimits(body.getDefaultLimit(),
                         existingPolicy.getDefaultQuotaPolicy()));
             }

@@ -4269,23 +4269,24 @@ components:
         type:
           type: string
           description: |
-            Type of the throttling limit. Allowed values are "REQUESTCOUNTLIMIT" and "BANDWIDTHLIMIT".
-            Please see schemas of "RequestCountLimit" and "BandwidthLimit" throttling limit types in
-            Definitions section.
+            Type of the throttling limit. Allowed values are "REQUESTCOUNTLIMIT", "BANDWIDTHLIMIT", "EVENTCOUNTLIMIT"
+            and "AIAPIQUOTALIMIT".
+            Please see schemas of "RequestCountLimit", "BandwidthLimit", "EventCountLimit" and "AIAPIQuotaLimit" 
+            throttling limit types in Definitions section.
           example: REQUESTCOUNTLIMIT
           enum:
             - REQUESTCOUNTLIMIT
             - BANDWIDTHLIMIT
             - EVENTCOUNTLIMIT
-            - AIQUOTALIMIT
+            - AIAPIQUOTALIMIT
         requestCount:
           $ref: '#/components/schemas/RequestCountLimit'
         bandwidth:
           $ref: '#/components/schemas/BandwidthLimit'
         eventCount:
           $ref: '#/components/schemas/EventCountLimit'
-        aiQuota:
-          $ref: '#/components/schemas/AIQuotaLimit'
+        aiApiQuota:
+          $ref: '#/components/schemas/AIAPIQuotaLimit'
     BurstLimit:
       title: Burst Limit object
       type: object
@@ -4348,8 +4349,8 @@ components:
               description: Maximum number of requests allowed
               format: int64
               example: 30
-    AIQuotaLimit:
-      title: AI Quota Limit object
+    AIAPIQuotaLimit:
+      title: AI API Quota Limit object
       allOf:
         - $ref: '#/components/schemas/ThrottleLimitBase'
         - required:
@@ -4360,22 +4361,22 @@ components:
               type: integer
               description: Maximum number of requests allowed
               format: int64
-              example: 30
+              example: 300
             totalTokenCount:
               type: integer
               description: Maximum number of total tokens allowed
               format: int64
-              example: 1000
-            requestTokenCount:
+              example: 800
+            promptTokenCount:
               type: integer
-              description: Maximum number of request tokens allowed
+              description: Maximum number of prompt tokens allowed
               format: int64
-              example: 300
-            responseTokenCount:
+              example: 400
+            completionTokenCount:
               type: integer
-              description: Maximum number of response tokens allowed
+              description: Maximum number of completion tokens allowed
               format: int64
-              example: 300
+              example: 500
     EventCountLimit:
       title: Event Count Limit object
       allOf:

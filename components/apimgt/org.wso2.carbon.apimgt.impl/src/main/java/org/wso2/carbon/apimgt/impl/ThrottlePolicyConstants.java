@@ -54,9 +54,9 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_TOTAL_TOKEN_COUNT = "TOTAL_TOKEN_COUNT";
 
-    public static final String COLUMN_REQUEST_TOKEN_COUNT = "REQUEST_TOKEN_COUNT";
+    public static final String COLUMN_PROMPT_TOKEN_COUNT = "PROMPT_TOKEN_COUNT";
 
-    public static final String COLUMN_RESPONSE_TOKEN_COUNT = "RESPONSE_TOKEN_COUNT";
+    public static final String COLUMN_COMPLETION_TOKEN_COUNT = "COMPLETION_TOKEN_COUNT";
 
     public static final String COLUMN_APPLICABLE_LEVEL = "APPLICABLE_LEVEL";
 

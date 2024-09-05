@@ -1,4 +1,4 @@
-		@Plan:name('${policy.getTenantDomain()}sub${policy.getName()}')
+		@Plan:name('${policy.getTenantDomain()}_sub_${policy.getName()}')
 		@Plan:description('ExecutionPlan for sub_${policy.getName()}')
 		@Import('org.wso2.throttle.processed.request.stream:1.0.0')
 		define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
@@ -16,19 +16,19 @@
 		#if($quotaPolicy.getLimit().getRequestCount() != "")
 		ifThenElse((count(messageID) >= 1000), true,
 		#end
-		#if($quotaPolicy.getLimit().getRequestTokenCount() != "")
-		ifThenElse((sum(cast(map:get(propertiesMap,'requestTokenCount'),'long')) >= 30000L), true,
+		#if($quotaPolicy.getLimit().getPromptTokenCount() != "")
+		ifThenElse((sum(cast(map:get(propertiesMap,'promptTokenCount'),'long')) >= 30000L), true,
 		#end
-		#if($quotaPolicy.getLimit().getResponseTokenCount() != "")
-		ifThenElse((sum(cast(map:get(propertiesMap,'responseTokenCount'),'long')) >= 30000L), true,
+		#if($quotaPolicy.getLimit().getCompletionTokenCount() != "")
+		ifThenElse((sum(cast(map:get(propertiesMap,'completionTokenCount'),'long')) >= 30000L), true,
 		#end
 		#if($quotaPolicy.getLimit().getTotalTokenCount() != "")
 		ifThenElse((sum(cast(map:get(propertiesMap,'totalTokenCount'),'long')) >= 30000L), true, false)
 		#end
-		#if($quotaPolicy.getLimit().getRequestTokenCount() != "")
+		#if($quotaPolicy.getLimit().getPromptTokenCount() != "")
 		)
 		#end
-		#if($quotaPolicy.getLimit().getResponseTokenCount() != "")
+		#if($quotaPolicy.getLimit().getCompletionTokenCount() != "")
 		)
 		#end
 		#if($quotaPolicy.getRequestCountLimit().getRequestCount() != "")

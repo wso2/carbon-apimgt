@@ -218,8 +218,8 @@ public class SubscriptionValidationSQLConstants {
                     "   APS.UNIT_TIME AS UNIT_TIME, " +
                     "   APS.TIME_UNIT AS TIME_UNIT, " +
                     "   APS.TOTAL_TOKEN_COUNT AS TOTAL_TOKEN_COUNT, " +
-                    "   APS.REQUEST_TOKEN_COUNT AS REQUEST_TOKEN_COUNT, " +
-                    "   APS.RESPONSE_TOKEN_COUNT AS RESPONSE_TOKEN_COUNT, " +
+                    "   APS.PROMPT_TOKEN_COUNT AS PROMPT_TOKEN_COUNT, " +
+                    "   APS.COMPLETION_TOKEN_COUNT AS COMPLETION_TOKEN_COUNT, " +
                     " FROM " +
                     "   AM_POLICY_SUBSCRIPTION APS";
 
@@ -323,8 +323,8 @@ public class SubscriptionValidationSQLConstants {
                     "   APS.UNIT_TIME AS UNIT_TIME, " +
                     "   APS.TIME_UNIT AS TIME_UNIT, " +
                     "   APS.TOTAL_TOKEN_COUNT AS TOTAL_TOKEN_COUNT, " +
-                    "   APS.REQUEST_TOKEN_COUNT AS REQUEST_TOKEN_COUNT, " +
-                    "   APS.RESPONSE_TOKEN_COUNT AS RESPONSE_TOKEN_COUNT, " +
+                    "   APS.PROMPT_TOKEN_COUNT AS PROMPT_TOKEN_COUNT, " +
+                    "   APS.COMPLETION_TOKEN_COUNT AS COMPLETION_TOKEN_COUNT, " +
                     " FROM " +
                     "   AM_POLICY_SUBSCRIPTION APS" +
                     " WHERE " +
@@ -347,8 +347,8 @@ public class SubscriptionValidationSQLConstants {
                     "   APS.UNIT_TIME AS UNIT_TIME, " +
                     "   APS.TIME_UNIT AS TIME_UNIT, " +
                     "   APS.TOTAL_TOKEN_COUNT AS TOTAL_TOKEN_COUNT, " +
-                    "   APS.REQUEST_TOKEN_COUNT AS REQUEST_TOKEN_COUNT, " +
-                    "   APS.RESPONSE_TOKEN_COUNT AS RESPONSE_TOKEN_COUNT, " +
+                    "   APS.PROMPT_TOKEN_COUNT AS PROMPT_TOKEN_COUNT, " +
+                    "   APS.COMPLETION_TOKEN_COUNT AS COMPLETION_TOKEN_COUNT, " +
                     " FROM " +
                     "   AM_POLICY_SUBSCRIPTION APS" +
                     " WHERE " +

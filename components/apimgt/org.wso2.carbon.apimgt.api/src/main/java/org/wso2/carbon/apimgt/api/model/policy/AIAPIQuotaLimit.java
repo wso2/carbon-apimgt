@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
-public class AIQuotaLimit extends Limit {
+public class AIAPIQuotaLimit extends Limit {
     private long requestCount;
     private long totalTokenCount;
-    private long requestTokenCount;
-    private long responseTokenCount;
+    private long promptTokenCount;
+    private long completionTokenCount;
 
     public long getRequestCount() {
         return requestCount;
@@ -40,26 +40,26 @@ public class AIQuotaLimit extends Limit {
         this.totalTokenCount = totalTokenCount;
     }
 
-    public long getRequestTokenCount() {
-        return requestTokenCount;
+    public long getPromptTokenCount() {
+        return promptTokenCount;
     }
 
-    public void setRequestTokenCount(long requestTokenCount) {
-        this.requestTokenCount = requestTokenCount;
+    public void setPromptTokenCount(long promptTokenCount) {
+        this.promptTokenCount = promptTokenCount;
     }
 
-    public long getResponseTokenCount() {
-        return responseTokenCount;
+    public long getCompletionTokenCount() {
+        return completionTokenCount;
     }
 
-    public void setResponseTokenCount(long responseTokenCount) {
-        this.responseTokenCount = responseTokenCount;
+    public void setCompletionTokenCount(long completionTokenCount) {
+        this.completionTokenCount = completionTokenCount;
     }
 
     @Override
     public String toString() {
-        return "RequestCountLimit [requestCount=" + requestCount + ",totalTokenCount=" + totalTokenCount
-                + ", requestTokenCount=" + requestTokenCount + ", responseTokenCount=" + responseTokenCount
+        return "RequestCountLimit [requestCount=" + requestCount + ", totalTokenCount=" + totalTokenCount
+                + ", promptTokenCount=" + promptTokenCount + ", completionTokenCount=" + completionTokenCount
                 + ", toString()=" + super.toString() + "]";
     }
 }
