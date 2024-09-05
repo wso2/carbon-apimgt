@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.solr.common.util.Hash;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -1176,23 +1177,50 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, String> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID, boolean isInfoOnly) throws APIManagementException {
-        return apiMgtDAO.getCustomBackendOfAPIByUUID(customBackendUUID, apiUUID, isInfoOnly);
+    public Map<String, Object> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID, String type, boolean isInfoOnly) throws APIManagementException {
+        return apiMgtDAO.getCustomBackendOfAPIByUUID(customBackendUUID, apiUUID, type, isInfoOnly);
     }
 
-    @Override
-    public void updateCustomBackendByRevisionID(String apiUUID, String type, String revision,
-            String seqName, String backendUUID) throws APIManagementException {
+    @Override public void updateCustomBackendByRevisionID(String apiUUID, String type, String revision, String seqName,
+            String backendUUID) throws APIManagementException {
         String customBackendUUID = UUID.randomUUID().toString();
-        InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(backendUUID, apiUUID);
+        InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(backendUUID, apiUUID, type);
         apiMgtDAO.updateCustomBackendByRevision(apiUUID, seqName, sequence, type, revision, customBackendUUID);
+    }
+
+    @Override public InputStream getCustomBackendSequenceOfAPIByUUID(String apiUUID, String backendUUID, String type)
+            throws APIManagementException {
+        return apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(backendUUID, apiUUID, type);
     }
 
     @Override public void addNewCustomBackendForRevision(String revisionUUID, String updatedBackendUUID, String apiUUID,
             Map<String, Object> config) throws APIManagementException {
-        InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(updatedBackendUUID, apiUUID);
-        config.put("sequence", sequence);
-        apiMgtDAO.addNewCustomBackendForAPIRevision(apiUUID, revisionUUID, config);
+        if (config.get("production") != null) {
+            InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(updatedBackendUUID, apiUUID,
+                    "PRODUCTION");
+            if (config.get("production") instanceof HashMap) {
+                String seqName = ((HashMap) config.get("production")).get("sequence_name").toString();
+                String backendUUID = ((HashMap) config.get("production")).get("sequence_id").toString();
+                apiMgtDAO.addNewCustomBackendForAPIRevision(apiUUID, revisionUUID, "PRODUCTION", seqName, sequence,
+                        backendUUID);
+            }
+        }
+
+        if (config.get("SANDBOX") != null) {
+            InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(updatedBackendUUID, apiUUID,
+                    "SANDBOX");
+            if (config.get("sandbox") instanceof HashMap) {
+                String seqName = ((HashMap) config.get("sandbox")).get("sequence_name").toString();
+                String backendUUID = ((HashMap) config.get("sandbox")).get("sequence_id").toString();
+                apiMgtDAO.addNewCustomBackendForAPIRevision(apiUUID, revisionUUID, "SANDBOX", seqName, sequence,
+                        backendUUID);
+            }
+        }
+    }
+
+    @Override public void deleteCustomBackendByID(String backendUUID, String apiUUID, String type)
+            throws APIManagementException {
+        apiMgtDAO.deleteCustomBackend(apiUUID, backendUUID, type);
     }
 
     private void validateKeyManagers(API api) throws APIManagementException {
@@ -6734,7 +6762,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
-        apiMgtDAO.deleteCustomBackend(apiId, apiRevisionId);
+        apiMgtDAO.deleteCustomBackendByRevision(apiId, apiRevisionId);
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {

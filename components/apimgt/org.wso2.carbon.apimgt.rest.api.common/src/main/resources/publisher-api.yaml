@@ -577,6 +577,34 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f"'
 
+  /apis/{apiId}/custom-backend/{customBackendId}/content:
+    get:
+      tags:
+        - API Custom Backend Sequence
+      summary: Download an API Specific Custom Backend
+      description: |
+        This operation can be used to download a particular API specific Custom Backend.
+      operationId: getAPISpecificOperationPolicyContentByPolicyId
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/customBackendId'
+      responses:
+        200:
+          description: |
+            OK.
+            Custom Backend returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+
   /apis/{apiId}/custom-backend:
     put:
       tags:

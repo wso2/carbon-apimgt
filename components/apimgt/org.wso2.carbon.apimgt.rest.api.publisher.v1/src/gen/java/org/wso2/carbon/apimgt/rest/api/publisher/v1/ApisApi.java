@@ -18,6 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CustomBackendDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
@@ -375,6 +376,27 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response createNewAPIVersion( @NotNull @Size(max=30) @ApiParam(value = "Version of the new API.",required=true)  @QueryParam("newVersion") String newVersion,  @NotNull @ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true)  @QueryParam("apiId") String apiId,  @ApiParam(value = "Specifies whether new API should be added as default version.", defaultValue="false") @DefaultValue("false") @QueryParam("defaultVersion") Boolean defaultVersion,  @ApiParam(value = "Version of the Service that will used in creating new version")  @QueryParam("serviceVersion") String serviceVersion) throws APIManagementException{
         return delegate.createNewAPIVersion(newVersion, apiId, defaultVersion, serviceVersion, securityContext);
+    }
+
+    @DELETE
+    @Path("/{apiId}/custom-backend/{customBackendId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete Custom Backend of the API", notes = "This operation can be used to remove the Custom Backend of the API", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_delete", description = "Delete API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response customBackendDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.customBackendDelete(apiId, customBackendId, ifMatch, securityContext);
     }
 
     @PUT
@@ -1308,6 +1330,27 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getCommentOfAPI(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Whether we need to display commentor details. ", defaultValue="false") @DefaultValue("false") @QueryParam("includeCommenterInfo") Boolean includeCommenterInfo,  @ApiParam(value = "Maximum size of replies array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("replyLimit") Integer replyLimit,  @ApiParam(value = "Starting point within the complete list of replies. ", defaultValue="0") @DefaultValue("0") @QueryParam("replyOffset") Integer replyOffset) throws APIManagementException{
         return delegate.getCommentOfAPI(commentId, apiId, xWSO2Tenant, ifNoneMatch, includeCommenterInfo, replyLimit, replyOffset, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/custom-backend/{customBackendId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Custom Backend of the API", notes = "This operation can be used to get Custom Backend data of the API", response = CustomBackendDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested API Custom Backend is returned ", response = CustomBackendDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response getCustomBackendData(@ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getCustomBackendData(customBackendId, apiId, securityContext);
     }
 
     @GET

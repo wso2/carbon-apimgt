@@ -30,6 +30,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.util.IO;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +70,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CustomBackendDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
@@ -221,7 +223,7 @@ public class ExportUtils {
         // TODO: Add Custom Backend to the Archive
         JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
         if(APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
-            addCustomBackendToAPI(archivePath, apiProvider, api, currentApiUuid, endpointConfig);
+            addCustomBackendToArchive(archivePath, apiProvider, api, currentApiUuid, endpointConfig);
         }
 
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
@@ -636,20 +638,27 @@ public class ExportUtils {
         }
     }
 
-    public static void addCustomBackendToAPI(String archivePath,
+    public static void addCustomBackendToArchive(String archivePath,
             APIProvider apiProvider, API api, String currentApiUuid, JsonObject endpointConfig) throws APIManagementException {
-        String exportedCustomBackend = null;
         try {
-            String backendUUID = endpointConfig.get("sequence_id").getAsString();
+            JsonElement prodElement = endpointConfig.get("production");
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY);
-            String customBackendName = APIUtil.getCustomBackendName(api.getUuid(), endpointConfig.get("type").getAsString());
-            Map<String, String> endpointConfigMap = apiProvider.getCustomBackendOfAPIByUUID(backendUUID, currentApiUuid, false);
-            if(endpointConfigMap != null) {
-                exportCustomBackend(customBackendName, endpointConfigMap, archivePath);
+            if(prodElement != null) {
+                String backendUUID = prodElement.getAsJsonObject().get("sequence_id").getAsString();
+                String sequenceName = prodElement.getAsJsonObject().get("sequence_name").getAsString();
+                InputStream sequence = apiProvider.getCustomBackendSequenceOfAPIByUUID(backendUUID, api.getUuid(), "PRODUCTION");
+                exportCustomBackend(sequenceName, IOUtils.toString(sequence), archivePath);
+            }
+            JsonElement sandElement = endpointConfig.get("sandbox");
+            if(sandElement != null) {
+                String backendUUID = sandElement.getAsJsonObject().get("sequence_id").getAsString();
+                String sequenceName = sandElement.getAsJsonObject().get("sequence_name").getAsString();
+                InputStream sequence = apiProvider.getCustomBackendSequenceOfAPIByUUID(backendUUID, api.getUuid(), "SANDBOX");
+                exportCustomBackend(sequenceName, IOUtils.toString(sequence), archivePath);
             }
 
         } catch (IOException | APIImportExportException ex) {
-
+            throw new APIManagementException("Error adding Custom Backends to the API Directory: " + api.getUuid(), ex);
         }
     }
 
@@ -761,12 +770,9 @@ public class ExportUtils {
         }
     }
 
-    public static void exportCustomBackend(String customBackendFileName, Map<String, String> endpointConfig, String archivePath) throws APIImportExportException, IOException {
+    public static void exportCustomBackend(String customBackendFileName, String sequence, String archivePath) throws APIImportExportException, IOException {
         String customBackendName = archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY + File.separator + customBackendFileName;
-        if(endpointConfig != null && endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE) != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfig.get(
-                API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-            CommonUtil.writeFile(customBackendName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML, endpointConfig.get("sequence"));
-        }
+        CommonUtil.writeFile(customBackendName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML, sequence);
     }
 
     /**

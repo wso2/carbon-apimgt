@@ -114,10 +114,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                         tenantDomain, extractedFolderPath);
                             } else {
                                 APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
-                                // Update the EndpointConfig if it's a Custom Backend
-                                // updateCustomBackendOfAPI(apidto, runTimeArtifact.getRevision());
                                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
-
                                 api.setUUID(apidto.getId());
                                 if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
                                     APIDefinition parser = new OAS3Parser();
@@ -138,7 +135,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
                                             tenantDomain, apidto, extractedFolderPath);
                                 } else if (api.getType() != null &&
-                                        (APIConstants.APITransportType.HTTP.toString ().equals(api.getType())
+                                        (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())
                                                 || APIConstants.APITransportType.WEBHOOK.toString()
@@ -180,28 +177,6 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         runtimeArtifactDto.setFile(false);
         runtimeArtifactDto.setArtifact(synapseArtifacts);
         return runtimeArtifactDto;
-    }
-
-    private void updateCustomBackendOfAPI(APIDTO apidto, String revisionID) throws APIManagementException {
-        Object endpointConfig = apidto.getEndpointConfig();
-        // update the sequence name generated
-        if (endpointConfig != null) {
-            if (endpointConfig instanceof HashMap) {
-                if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                        ((HashMap) endpointConfig).get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                    // Get Endpoint Configurations from the DB
-                    Map<String, Object> conf = apiMgtDao.retrieveCustomBackendOfAPIRevision(apidto.getId(), revisionID);
-                    if (conf == null) {
-                        throw new APIManagementException(
-                                "Cannot find the Custom Backend for the API: " + apidto.getId() + " , Revision: "
-                                        + revisionID);
-                    }
-                    ((HashMap) endpointConfig).put("sequence", conf.get("sequence"));
-                    ((HashMap) endpointConfig).put("type", conf.get("type"));
-                }
-            }
-            apidto.setEndpointConfig(endpointConfig);
-        }
     }
 
     /**

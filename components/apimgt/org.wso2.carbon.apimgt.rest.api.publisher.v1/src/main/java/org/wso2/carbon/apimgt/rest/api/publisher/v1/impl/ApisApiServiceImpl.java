@@ -168,6 +168,34 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override public Response getCustomBackendData(String customBackendId, String apiId, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
+        String type = "SANDBOX";
+
+        Map<String, Object> endpointConfig = apiProvider.getCustomBackendOfAPIByUUID(customBackendId, apiId, type,
+                true);
+        CustomBackendDTO backendDTO = new CustomBackendDTO();
+        backendDTO.setSequenceName(endpointConfig.get("sequence_name").toString());
+        backendDTO.setSequenceId(endpointConfig.get("sequence_id").toString());
+        backendDTO.setSequenceType(endpointConfig.get("type").toString());
+        return Response.ok().entity(backendDTO).build();
+    }
+
+    @Override public Response customBackendDelete(String apiId, String customBackendId, String ifMatch,
+            MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
+        String type = "SANDBOX";
+        apiProvider.deleteCustomBackendByID(apiId, customBackendId, type);
+        return Response.ok().entity(null).build();
+    }
+
     @Override
     public Response createAPI(APIDTO body, String oasVersion, MessageContext messageContext)
             throws APIManagementException{
@@ -3811,20 +3839,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevision.setDescription(apIRevisionDTO.getDescription());
             //adding the api revision
             String revisionId = apiProvider.addAPIRevision(apiRevision, organization);
-
-            Object endpointConfig = apiDto.getEndpointConfig();
-
-            if (endpointConfig != null && endpointConfig instanceof HashMap) {
-                String endpointType = ((HashMap) endpointConfig).get("endpoint_type").toString();
-                if (endpointType != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointType)) {
-                    String sequenceName = ((HashMap) endpointConfig).get("sequence_name").toString();
-                    String sequenceEndpointType = ((HashMap) endpointConfig).get("sequence_type").toString();
-                    String backendUUID = ((HashMap) endpointConfig).get("sequence_id").toString();
-                    // Update Custom Backend table
-                    apiProvider.addNewCustomBackendForRevision(revisionId, backendUUID, apiId,
-                            (HashMap) endpointConfig);
-                }
-            }
 
             //Retrieve the newly added APIRevision to send in the response payload
             APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);

@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.dao;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import jdk.internal.util.xml.impl.Input;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -11240,7 +11239,7 @@ public class ApiMgtDAO {
         return map;
     }
 
-    public InputStream getCustomBackendSequenceOfAPIByUUID(String backendUUID, String apiUUID) throws APIManagementException {
+    public InputStream getCustomBackendSequenceOfAPIByUUID(String backendUUID, String apiUUID, String type) throws APIManagementException {
         String sqlQuery = SQLConstants.CustomBackendConstants.GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
         ResultSet rs = null;
         InputStream sequence = null;
@@ -11266,27 +11265,31 @@ public class ApiMgtDAO {
         return sequence;
     }
 
-    public Map<String, String> getCustomBackendOfAPIByUUID(String backendUUID, String apiUUID, boolean isInfo) throws APIManagementException {
+    public Map<String, Object> getCustomBackendOfAPIByUUID(String backendUUID, String apiUUID, String type,
+            boolean isInfo) throws APIManagementException {
         String sqlQuery;
-        Map<String, String> endpointConfig = new HashMap<>();
+        Map<String, Object> endpointConfig = new HashMap<>();
         boolean isRevisioned = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
-        if(isRevisioned) {
+        if (isRevisioned) {
             sqlQuery = SQLConstants.CustomBackendConstants.GET_REVISION_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
         } else {
             sqlQuery = SQLConstants.CustomBackendConstants.GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
         }
         ResultSet resultSet = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+                PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
             ps.setString(1, backendUUID);
             ps.setString(2, apiUUID);
+            ps.setString(3, type);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
-                if(!isInfo) {
+                if (!isInfo) {
                     try (InputStream in = resultSet.getBinaryStream("SEQUENCE")) {
-                        endpointConfig.put("sequence", IOUtils.toString(in));
+                        endpointConfig.put("sequence", in);
                     } catch (IOException ex) {
-                        handleException("Error reading Sequence Content of Custom Backend: " + backendUUID + " API: " + apiUUID, ex);
+                        handleException(
+                                "Error reading Sequence Content of Custom Backend: " + backendUUID + " API: " + apiUUID,
+                                ex);
                     }
                 }
                 endpointConfig.put("type", resultSet.getString("TYPE"));
@@ -17515,6 +17518,9 @@ public class ApiMgtDAO {
 
                 // Retrieve API ID
                 APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+
+                // Insert Custom Backend if Provided
+
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
@@ -17643,6 +17649,8 @@ public class ApiMgtDAO {
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
                 revisionAPIPolicies(apiRevision, tenantDomain, uriTemplateMap, connection);
+                // Add Custom Backend
+                revisionCustomBackend(apiRevision, connection);
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
                 String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
@@ -21448,6 +21456,7 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             prepStmt.setString(1, apiUUID);
             prepStmt.setString(2, backendUUID);
+            prepStmt.setString(3, type);
             prepStmt.executeUpdate();
             addCustomBackend(apiUUID, sequenceName, null, sequence, type, connection, backendUUID);
             connection.commit();
@@ -21456,17 +21465,36 @@ public class ApiMgtDAO {
         }
     }
 
-    public void deleteCustomBackend(String apiUUID, String revisionId) throws APIManagementException {
-        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;
+    public void deleteCustomBackend(String apiUUID, String type, String backendUUID) throws APIManagementException {
+        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
             connection.setAutoCommit(false);
             prepStmt.setString(1, apiUUID);
-            prepStmt.setString(2, revisionId);
+            prepStmt.setString(2, backendUUID);
+            prepStmt.setString(3, type);
             prepStmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while deleting Custom Backend for API : " + apiUUID, e);
+        }
+    }
+
+    public void deleteCustomBackendByRevision(String apiUUID, String revisionUUID) throws APIManagementException {
+        boolean isRevisioned = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
+        String deleteSqlQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;
+        if(isRevisioned) {
+            try (Connection con = APIMgtDBUtil.getConnection();
+                    PreparedStatement ps = con.prepareStatement(deleteSqlQuery)) {
+                con.setAutoCommit(false);
+                ps.setString(1, apiUUID);
+                ps.executeUpdate();
+                con.commit();
+            } catch (SQLException ex) {
+                handleException("Error deleting Custom Backend for Revision: "+ apiUUID, ex);
+            }
+        } else {
+            throw new APIManagementException("Invalid Revision Id: "+ apiUUID);
         }
     }
 
@@ -21486,22 +21514,19 @@ public class ApiMgtDAO {
         }
     }
 
-    public void addNewCustomBackendForAPIRevision(String apiUUID, String revisionID, Map<String, Object> endpointConfig) throws APIManagementException {
+    public void addNewCustomBackendForAPIRevision(String apiUUID, String revisionID, String type, String seqName, InputStream sequence, String backendUUID) throws APIManagementException {
         String addSqlQuery = SQLConstants.CustomBackendConstants.ADD_CUSTOM_BACKEND;
         try (Connection con = APIMgtDBUtil.getConnection();
             PreparedStatement ps = con.prepareStatement(addSqlQuery)) {
-            String backendUUID = endpointConfig.get("sequence_id").toString();
-            InputStream sequence = (InputStream) endpointConfig.get("sequence");
-            String type = endpointConfig.get("type").toString();
-            String sequenceName = endpointConfig.get("sequence_name").toString();
             con.setAutoCommit(false);
             ps.setString(1, backendUUID);
             ps.setString(2, apiUUID);
             ps.setBinaryStream(3, sequence);
             ps.setString(4, type);
             ps.setString(5, revisionID);
-            ps.setString(6, sequenceName);
+            ps.setString(6, seqName);
             ps.executeUpdate();
+            con.commit();
         } catch (SQLException ex) {
             handleException("Error when inserting Custom Backend data for API: " + apiUUID, ex);
         }
@@ -21516,6 +21541,9 @@ public class ApiMgtDAO {
             prepStmt.setString(2, apiUUID);
             prepStmt.setBinaryStream(3, sequence);
             prepStmt.setString(4, type);
+            if (revision == null) {
+                revision = "0";
+            }
             prepStmt.setString(5, revision);
             prepStmt.setString(6, sequenceName);
             prepStmt.executeUpdate();
@@ -21706,6 +21734,33 @@ public class ApiMgtDAO {
             handleException("Error while getting API level policy mapping of API " + apiUUID, e);
         }
         return policyList;
+    }
+
+    private void revisionCustomBackend(APIRevision apiRevision, Connection connection)
+            throws SQLException, APIManagementException {
+        String addCBSqlQuery = SQLConstants.CustomBackendConstants.ADD_CUSTOM_BACKEND;
+        String getCBSQLQuery = SQLConstants.CustomBackendConstants.GET_ALL_API_SPECIFIC_CUSTOM_BACKENDS;
+        ResultSet rs = null;
+        try (Connection con = APIMgtDBUtil.getConnection();
+                PreparedStatement getPstmt = con.prepareStatement(getCBSQLQuery);
+                PreparedStatement addPstmt = con.prepareStatement(addCBSqlQuery)) {
+            con.setAutoCommit(false);
+            getPstmt.setString(1, apiRevision.getApiUUID());
+            rs = getPstmt.executeQuery();
+            while (rs.next()) {
+                addPstmt.setString(1, rs.getString("ID"));
+                addPstmt.setString(2, apiRevision.getApiUUID());
+                addPstmt.setBinaryStream(3, rs.getBinaryStream("SEQUENCE"));
+                addPstmt.setString(4, rs.getString("TYPE"));
+                addPstmt.setString(5, apiRevision.getRevisionUUID());
+                addPstmt.setString(6, rs.getString("NAME"));
+                addPstmt.addBatch();
+            }
+            addPstmt.executeBatch();
+        } catch (SQLException ex) {
+            handleException("Error while adding Custom Backends to the database of API: " + apiRevision.getApiUUID(),
+                    ex);
+        }
     }
 
     /**
