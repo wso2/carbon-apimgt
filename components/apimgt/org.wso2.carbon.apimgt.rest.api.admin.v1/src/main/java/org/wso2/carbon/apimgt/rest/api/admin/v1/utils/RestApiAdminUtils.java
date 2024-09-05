@@ -25,13 +25,13 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.policy.AIQuotaLimit;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIQuotaLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIAPIQuotaLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
@@ -394,19 +394,19 @@ public class RestApiAdminUtils {
     public static ThrottleLimitDTO overrideTokenBasedQuotaLimits(ThrottleLimitDTO throttleLimitDTO,
             QuotaPolicy quotaPolicy) {
 
-        AIQuotaLimitDTO aiQuotaLimitDTO = throttleLimitDTO.getAiQuota();
-        AIQuotaLimit aiQuotaLimit = (AIQuotaLimit) quotaPolicy.getLimit();
+        AIAPIQuotaLimitDTO aiApiQuotaLimitDTO = throttleLimitDTO.getAiApiQuota();
+        AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) quotaPolicy.getLimit();
         throttleLimitDTO.setType(throttleLimitDTO.getType());
-        if (throttleLimitDTO.getAiQuota().getTotalTokenCount() == null) {
-            aiQuotaLimitDTO.setTotalTokenCount(aiQuotaLimit.getTotalTokenCount());
+        if (throttleLimitDTO.getAiApiQuota().getTotalTokenCount() == null) {
+            aiApiQuotaLimitDTO.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
         }
-        if (throttleLimitDTO.getAiQuota().getRequestTokenCount() == null) {
-            aiQuotaLimitDTO.setRequestTokenCount(aiQuotaLimit.getRequestTokenCount());
+        if (throttleLimitDTO.getAiApiQuota().getPromptTokenCount() == null) {
+            aiApiQuotaLimitDTO.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
         }
-        if (throttleLimitDTO.getAiQuota().getResponseTokenCount() == null) {
-            aiQuotaLimitDTO.setResponseTokenCount(aiQuotaLimit.getResponseTokenCount());
+        if (throttleLimitDTO.getAiApiQuota().getCompletionTokenCount() == null) {
+            aiApiQuotaLimitDTO.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
         }
-        throttleLimitDTO.setAiQuota(aiQuotaLimitDTO);
+        throttleLimitDTO.setAiApiQuota(aiApiQuotaLimitDTO);
         return throttleLimitDTO;
     }
 }

@@ -1354,8 +1354,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
-          "default" : "DIRECT"
+          "default" : "DIRECT",
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
         }
       }
     },
@@ -1920,6 +1920,9 @@
         },
         "eventCount" : {
           "$ref" : "#/definitions/EventCountLimit"
+        },
+        "aiApiQuota" : {
+          "$ref" : "#/definitions/AIAPIQuotaLimit"
         }
       },
       "title" : "Throttle Limit"
@@ -1990,6 +1993,40 @@
             "format" : "int64",
             "example" : 3000,
             "description" : "Maximum number of events allowed"
+          }
+        }
+      } ]
+    },
+    "AIAPIQuotaLimit" : {
+      "title" : "AI Quota Limit object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/ThrottleLimitBase"
+      }, {
+        "required" : [ "requestCount" ],
+        "properties" : {
+          "requestCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 1000,
+            "description" : "Maximum number of requests allowed"
+          },
+          "totalTokenCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 1000,
+            "description" : "Maximum number of total tokens allowed"
+          },
+          "promptTokenCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 300,
+            "description" : "Maximum number of prompt tokens allowed"
+          },
+          "completionTokenCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 300,
+            "description" : "Maximum number of completion tokens allowed"
           }
         }
       } ]

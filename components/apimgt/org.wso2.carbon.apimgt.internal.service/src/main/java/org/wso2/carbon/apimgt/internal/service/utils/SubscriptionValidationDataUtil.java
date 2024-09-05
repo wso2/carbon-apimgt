@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.policy.AIQuotaLimit;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -42,7 +42,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
-import org.wso2.carbon.apimgt.internal.service.dto.AIQuotaLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.AIAPIQuotaLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
@@ -332,9 +332,9 @@ public class SubscriptionValidationDataUtil {
         } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())) {
             EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
             defaultLimit.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
-        } else if (PolicyConstants.AI_QUOTA_TYPE.equals(quotaPolicy.getType())) {
-            AIQuotaLimit aiQuotaLimit = (AIQuotaLimit) quotaPolicy.getLimit();
-            defaultLimit.setAiQuota(fromAIQuotaLimitToDTO(aiQuotaLimit));
+        } else if (PolicyConstants.AI_API_QUOTA_TYPE.equals(quotaPolicy.getType())) {
+            AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) quotaPolicy.getLimit();
+            defaultLimit.setAiApiQuota(fromAIAPIQuotaLimitToDTO(AIAPIQuotaLimit));
         }
         return defaultLimit;
     }
@@ -413,20 +413,20 @@ public class SubscriptionValidationDataUtil {
     }
 
     /**
-     * Converts a AI Quota Limit model object into a AI Quota Limit DTO object.
+     * Converts a AI API Quota Limit model object into a AI API Quota Limit DTO object.
      *
-     * @param aiQuotaLimit AI Quota Limit model object
-     * @return AI Quota Limit DTO object derived from model
+     * @param AIAPIQuotaLimit AI APIQuota Limit model object
+     * @return AI API Quota Limit DTO object derived from model
      */
-    private static AIQuotaLimitDTO fromAIQuotaLimitToDTO(AIQuotaLimit aiQuotaLimit) {
+    private static AIAPIQuotaLimitDTO fromAIAPIQuotaLimitToDTO(AIAPIQuotaLimit AIAPIQuotaLimit) {
 
-        AIQuotaLimitDTO dto = new AIQuotaLimitDTO();
-        dto.setTimeUnit(aiQuotaLimit.getTimeUnit());
-        dto.setUnitTime(aiQuotaLimit.getUnitTime());
-        dto.setRequestCount(aiQuotaLimit.getRequestCount());
-        dto.setTotalTokenCount(aiQuotaLimit.getTotalTokenCount());
-        dto.setRequestTokenCount(aiQuotaLimit.getRequestTokenCount());
-        dto.setResponseTokenCount(aiQuotaLimit.getResponseTokenCount());
+        AIAPIQuotaLimitDTO dto = new AIAPIQuotaLimitDTO();
+        dto.setTimeUnit(AIAPIQuotaLimit.getTimeUnit());
+        dto.setUnitTime(AIAPIQuotaLimit.getUnitTime());
+        dto.setRequestCount(AIAPIQuotaLimit.getRequestCount());
+        dto.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
+        dto.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
+        dto.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
         return dto;
     }
 

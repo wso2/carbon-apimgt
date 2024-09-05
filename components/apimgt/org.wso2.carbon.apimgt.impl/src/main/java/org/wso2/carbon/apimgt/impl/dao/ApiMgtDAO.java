@@ -88,7 +88,7 @@ import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
-import org.wso2.carbon.apimgt.api.model.policy.AIQuotaLimit;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -11452,11 +11452,11 @@ public class ApiMgtDAO {
             policyStatement.setInt(15, policy.getGraphQLMaxDepth());
             policyStatement.setInt(16, policy.getGraphQLMaxComplexity());
             policyStatement.setString(17, policy.getBillingPlan());
-            if (PolicyConstants.AI_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
-                AIQuotaLimit limit = (AIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
+            if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                AIAPIQuotaLimit limit = (AIAPIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
                 policyStatement.setLong(18, limit.getTotalTokenCount());
-                policyStatement.setLong(19, limit.getRequestTokenCount());
-                policyStatement.setLong(20, limit.getResponseTokenCount());
+                policyStatement.setLong(19, limit.getPromptTokenCount());
+                policyStatement.setLong(20, limit.getCompletionTokenCount());
             } else {
                 policyStatement.setLong(18, 0);
                 policyStatement.setLong(19, 0);
@@ -13114,13 +13114,13 @@ public class ApiMgtDAO {
                 updateStatement.setLong(6, 0);
                 updateStatement.setLong(7, 0);
                 updateStatement.setLong(8, 0);
-            } else if (PolicyConstants.AI_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
-                AIQuotaLimit limit = (AIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
+            } else if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                AIAPIQuotaLimit limit = (AIAPIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(4, limit.getRequestCount());
                 updateStatement.setString(5, null);
                 updateStatement.setLong(6, limit.getTotalTokenCount());
-                updateStatement.setLong(7, limit.getRequestTokenCount());
-                updateStatement.setLong(8, limit.getResponseTokenCount());
+                updateStatement.setLong(7, limit.getPromptTokenCount());
+                updateStatement.setLong(8, limit.getCompletionTokenCount());
             }
 
             updateStatement.setLong(9, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
@@ -13398,8 +13398,8 @@ public class ApiMgtDAO {
             EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
             policyStatement.setLong(6, limit.getEventCount());
             policyStatement.setString(7, null);
-        } else if (PolicyConstants.AI_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
-            AIQuotaLimit limit = (AIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
+        } else if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            AIAPIQuotaLimit limit = (AIAPIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
             policyStatement.setLong(6, limit.getRequestCount());
             policyStatement.setString(7, null);
         }
@@ -13463,15 +13463,15 @@ public class ApiMgtDAO {
             eventCountLimit.setEventCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
             quotaPolicy.setLimit(eventCountLimit);
         } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
-                .equalsIgnoreCase(PolicyConstants.AI_QUOTA_TYPE)) {
-            AIQuotaLimit aiQuotaLimit = new AIQuotaLimit();
-            aiQuotaLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
-            aiQuotaLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
-            aiQuotaLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
-            aiQuotaLimit.setTotalTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_TOTAL_TOKEN_COUNT));
-            aiQuotaLimit.setRequestTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_REQUEST_TOKEN_COUNT));
-            aiQuotaLimit.setResponseTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_RESPONSE_TOKEN_COUNT));
-            quotaPolicy.setLimit(aiQuotaLimit);
+                .equalsIgnoreCase(PolicyConstants.AI_API_QUOTA_TYPE)) {
+            AIAPIQuotaLimit AIAPIQuotaLimit = new AIAPIQuotaLimit();
+            AIAPIQuotaLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            AIAPIQuotaLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            AIAPIQuotaLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            AIAPIQuotaLimit.setTotalTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_TOTAL_TOKEN_COUNT));
+            AIAPIQuotaLimit.setPromptTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_PROMPT_TOKEN_COUNT));
+            AIAPIQuotaLimit.setCompletionTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_COMPLETION_TOKEN_COUNT));
+            quotaPolicy.setLimit(AIAPIQuotaLimit);
         }
 
         policy.setUUID(resultSet.getString(ThrottlePolicyConstants.COLUMN_UUID));
