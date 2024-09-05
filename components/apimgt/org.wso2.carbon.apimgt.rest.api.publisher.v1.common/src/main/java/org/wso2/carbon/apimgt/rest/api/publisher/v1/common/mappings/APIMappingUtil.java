@@ -195,11 +195,6 @@ public class APIMappingUtil {
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
-
-        if (dto != null && dto.getSequence() != null) {
-            model.setSequence(dto.getSequence());
-        }
-
         Object endpointConfig = dto.getEndpointConfig();
 
         // update the sequence name generated
