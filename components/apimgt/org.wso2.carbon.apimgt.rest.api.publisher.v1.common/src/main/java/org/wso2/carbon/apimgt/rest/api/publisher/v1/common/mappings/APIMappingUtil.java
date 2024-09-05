@@ -71,7 +71,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SynapsePolicyAggregator;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -196,7 +195,6 @@ public class APIMappingUtil {
         model.setContext(context);
         model.setDescription(dto.getDescription());
         Object endpointConfig = dto.getEndpointConfig();
-
         if (endpointConfig != null) {
             ObjectMapper mapper = new ObjectMapper();
             try {
