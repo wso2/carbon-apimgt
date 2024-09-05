@@ -3383,7 +3383,13 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
 
-        return getOpenAPIDefinitionForDeployment(api, environmentName);
+        return getOpenAPIDefinitionForDeployment(api, environmentName, null);
+    }
+
+    @Override
+    public String getOpenAPIDefinitionForEnvironmentByKm(API api, String environmentName, String kmId)
+            throws APIManagementException {
+        return getOpenAPIDefinitionForDeployment(api, environmentName, kmId);
     }
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
@@ -3412,7 +3418,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @return Updated Open API definition
      * @throws APIManagementException
      */
-    private String getOpenAPIDefinitionForDeployment(API api, String environmentName)
+    private String getOpenAPIDefinitionForDeployment(API api, String environmentName, String kmId)
             throws APIManagementException {
 
         String apiTenantDomain;
@@ -3431,7 +3437,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
         api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
         return updatedDefinition;
     }
 
