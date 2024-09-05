@@ -34,14 +34,13 @@ public class AMIndexerPreprocessor implements IndexerPreProcessor {
             if (log.isDebugEnabled()) {
                 log.debug("Analyzing API in " + resource.getPath());
             }
-            if (!resource.getProperties().isEmpty() && !resource.getProperties().contains("visible_organizations")) {
+            if (!resource.getProperties().isEmpty() && (resource.getProperties().get("visible_organizations") == null)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Update property for the resource in " + resource.getPath());
                 }
                 resource.setProperty("visible_organizations", "all");
             }
         }
-
     }
 
 }
