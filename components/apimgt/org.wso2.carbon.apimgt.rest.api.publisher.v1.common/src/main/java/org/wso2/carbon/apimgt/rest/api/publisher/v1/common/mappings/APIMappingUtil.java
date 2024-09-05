@@ -197,7 +197,6 @@ public class APIMappingUtil {
         model.setDescription(dto.getDescription());
         Object endpointConfig = dto.getEndpointConfig();
 
-        // update the sequence name generated
         if (endpointConfig != null) {
             ObjectMapper mapper = new ObjectMapper();
             try {
