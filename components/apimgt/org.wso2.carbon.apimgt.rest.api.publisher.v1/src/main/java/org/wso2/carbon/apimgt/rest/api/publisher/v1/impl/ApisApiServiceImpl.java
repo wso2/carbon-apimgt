@@ -3418,6 +3418,23 @@ public class ApisApiServiceImpl implements ApisApiService {
                                MessageContext messageContext) throws APIManagementException {
         RuntimeArtifactDto runtimeArtifactDto;
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        if (StringUtils.isEmpty(apiId) && StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version)) {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String query = "name:" + name + " version:" + version;
+            Map<String, Object> result = apiProvider.searchPaginatedAPIs(query, organization, 0, 1, null, null);
+            int length = (int) result.get("length");
+            if (length == 0) {
+                throw new APIMgtResourceNotFoundException("API not found for name: " + name + " version: " + version,
+                        ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, name + "-" + version));
+            } else if (length != 1) {
+                throw new APIManagementException("Error occurred while exporting APIs. " + length + " APIs found for "
+                        + "name: " + name + " version: " + version, ExceptionCodes.from(ExceptionCodes.API_EXPORT_ERROR,
+                        name + "-" + version));
+            } else {
+                Set<Object> apiSet = (Set<Object>) result.get("apis");
+                apiId = ((API) apiSet.iterator().next()).getUuid();
+            }
+        }
         if (StringUtils.isNotEmpty(organization) && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
                 .equalsIgnoreCase(organization)) {
             runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(apiId, gatewayLabel,
