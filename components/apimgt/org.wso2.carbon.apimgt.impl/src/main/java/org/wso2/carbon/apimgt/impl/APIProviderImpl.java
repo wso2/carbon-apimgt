@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.apache.solr.common.util.Hash;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -1191,6 +1190,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override public InputStream getCustomBackendSequenceOfAPIByUUID(String apiUUID, String backendUUID, String type)
             throws APIManagementException {
         return apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(backendUUID, apiUUID, type);
+    }
+
+    @Override
+    public InputStream getCustomBackendSequenceByAPIAndRevisionUUUID(String apiUUID, String revisionUUID, String type) throws APIManagementException {
+        return apiMgtDAO.getCustomBackendSequenceByAPIandRevisionUUID(apiUUID, revisionUUID, type);
     }
 
     @Override public void addNewCustomBackendForRevision(String revisionUUID, String updatedBackendUUID, String apiUUID,
@@ -6173,6 +6177,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
         apiRevision.setRevisionUUID(revisionUUID);
+
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
             AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null, organization);
@@ -6762,7 +6767,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
-        apiMgtDAO.deleteCustomBackendByRevision(apiId, apiRevisionId);
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {

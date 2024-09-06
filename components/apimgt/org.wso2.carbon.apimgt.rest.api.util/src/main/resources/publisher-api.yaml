@@ -8539,9 +8539,6 @@ components:
         isDefaultVersion:
           type: boolean
           example: false
-        sequence:
-          type: string
-          example: in sequence
         isRevision:
           type: boolean
           example: false

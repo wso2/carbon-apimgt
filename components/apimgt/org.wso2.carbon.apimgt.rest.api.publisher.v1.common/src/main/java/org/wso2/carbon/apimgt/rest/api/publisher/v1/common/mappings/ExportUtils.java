@@ -223,7 +223,7 @@ public class ExportUtils {
         // TODO: Add Custom Backend to the Archive
         JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
         if(APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
-            addCustomBackendToArchive(archivePath, apiProvider, api, currentApiUuid, endpointConfig);
+            addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid, endpointConfig);
         }
 
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
@@ -638,27 +638,28 @@ public class ExportUtils {
         }
     }
 
-    public static void addCustomBackendToArchive(String archivePath,
-            APIProvider apiProvider, API api, String currentApiUuid, JsonObject endpointConfig) throws APIManagementException {
+    public static void addCustomBackendToArchive(String archivePath, APIProvider apiProvider, String apiUUID,
+            JsonObject endpointConfig) throws APIManagementException {
         try {
             JsonElement prodElement = endpointConfig.get("production");
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY);
-            if(prodElement != null) {
+            if (prodElement != null) {
                 String backendUUID = prodElement.getAsJsonObject().get("sequence_id").getAsString();
                 String sequenceName = prodElement.getAsJsonObject().get("sequence_name").getAsString();
-                InputStream sequence = apiProvider.getCustomBackendSequenceOfAPIByUUID(backendUUID, api.getUuid(), "PRODUCTION");
+                InputStream sequence = apiProvider.getCustomBackendSequenceOfAPIByUUID(apiUUID, backendUUID,
+                        "PRODUCTION");
                 exportCustomBackend(sequenceName, IOUtils.toString(sequence), archivePath);
             }
             JsonElement sandElement = endpointConfig.get("sandbox");
-            if(sandElement != null) {
+            if (sandElement != null) {
                 String backendUUID = sandElement.getAsJsonObject().get("sequence_id").getAsString();
                 String sequenceName = sandElement.getAsJsonObject().get("sequence_name").getAsString();
-                InputStream sequence = apiProvider.getCustomBackendSequenceOfAPIByUUID(backendUUID, api.getUuid(), "SANDBOX");
+                InputStream sequence = apiProvider.getCustomBackendSequenceOfAPIByUUID(apiUUID, backendUUID, "SANDBOX");
                 exportCustomBackend(sequenceName, IOUtils.toString(sequence), archivePath);
             }
 
         } catch (IOException | APIImportExportException ex) {
-            throw new APIManagementException("Error adding Custom Backends to the API Directory: " + api.getUuid(), ex);
+            throw new APIManagementException("Error adding Custom Backends to the API Directory: " + apiUUID, ex);
         }
     }
 

@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.CustomBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
@@ -11239,14 +11240,37 @@ public class ApiMgtDAO {
         return map;
     }
 
+    public InputStream getCustomBackendSequenceByAPIandRevisionUUID(String apiUUID, String revisionUUID, String type) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_CUSTOM_BACKEND_FROM_API_AND_REVISION_UUID;
+        boolean isRev = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
+        InputStream sequence = null;
+        try (Connection con = APIMgtDBUtil.getConnection();
+            PreparedStatement pstmt = con.prepareStatement(sqlQuery)) {
+            pstmt.setString(1, apiUUID);
+            pstmt.setString(2, revisionUUID);
+            pstmt.setString(3, type);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while(rs.next()) {
+                    sequence = rs.getBinaryStream("SEQUENCE");
+                }
+            }
+        } catch (SQLException ex) {
+            handleException("Error when retrieving Custom Backend of API: "+apiUUID, ex);
+        }
+        return sequence;
+    }
+
     public InputStream getCustomBackendSequenceOfAPIByUUID(String backendUUID, String apiUUID, String type) throws APIManagementException {
         String sqlQuery = SQLConstants.CustomBackendConstants.GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
+        boolean isRev = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
         ResultSet rs = null;
         InputStream sequence = null;
         try (Connection con = APIMgtDBUtil.getConnection();
             PreparedStatement ps = con.prepareStatement(sqlQuery)) {
             ps.setString(1, backendUUID);
             ps.setString(2, apiUUID);
+            ps.setString(3, type);
+
             rs = ps.executeQuery();
             while(rs.next()) {
                 try (InputStream in = rs.getBinaryStream("SEQUENCE")) {
@@ -17649,8 +17673,6 @@ public class ApiMgtDAO {
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
                 revisionAPIPolicies(apiRevision, tenantDomain, uriTemplateMap, connection);
-                // Add Custom Backend
-                revisionCustomBackend(apiRevision, connection);
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
                 String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
@@ -17722,6 +17744,8 @@ public class ApiMgtDAO {
                 insertGraphQLComplexityStatement.executeBatch();
                 updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 addAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+                // Add Custom Backend
+                revisionCustomBackend(apiRevision, connection);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -18573,6 +18597,7 @@ public class ApiMgtDAO {
                 }
 
                 restoreAPIPolicies(apiRevision, tenantDomain, uriTemplateMap, connection);
+                restoreCustomBackend(apiRevision, connection);
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
 
@@ -18710,6 +18735,9 @@ public class ApiMgtDAO {
                 // Removing related revision entries from operation policies
                 deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
 
+                // Removing related Custom Backend entries
+                deleteAllCustomBackendsOfAPIRevision(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), connection);
+
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -18719,6 +18747,18 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to delete API Revision entry of API UUID "
                     + apiRevision.getApiUUID(), e);
+        }
+    }
+
+    private void deleteAllCustomBackendsOfAPIRevision(String apiUUID, String revisionUUID, Connection connection) throws APIManagementException {
+        String deleteSqlQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;
+        try (PreparedStatement pstmt = connection.prepareStatement(deleteSqlQuery)) {
+            connection.setAutoCommit(false);
+            pstmt.setString(1, apiUUID);
+            pstmt.setString(2, revisionUUID);
+            pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            handleException("Error when deleting Custom Backend of API: " + apiUUID, ex);
         }
     }
 
@@ -21740,23 +21780,48 @@ public class ApiMgtDAO {
             throws SQLException, APIManagementException {
         String addCBSqlQuery = SQLConstants.CustomBackendConstants.ADD_CUSTOM_BACKEND;
         String getCBSQLQuery = SQLConstants.CustomBackendConstants.GET_ALL_API_SPECIFIC_CUSTOM_BACKENDS;
-        ResultSet rs = null;
-        try (Connection con = APIMgtDBUtil.getConnection();
-                PreparedStatement getPstmt = con.prepareStatement(getCBSQLQuery);
-                PreparedStatement addPstmt = con.prepareStatement(addCBSqlQuery)) {
-            con.setAutoCommit(false);
+        try (PreparedStatement getPstmt = connection.prepareStatement(getCBSQLQuery);
+                PreparedStatement addPstmt = connection.prepareStatement(addCBSqlQuery)) {
+            connection.setAutoCommit(false);
             getPstmt.setString(1, apiRevision.getApiUUID());
-            rs = getPstmt.executeQuery();
-            while (rs.next()) {
-                addPstmt.setString(1, rs.getString("ID"));
-                addPstmt.setString(2, apiRevision.getApiUUID());
-                addPstmt.setBinaryStream(3, rs.getBinaryStream("SEQUENCE"));
-                addPstmt.setString(4, rs.getString("TYPE"));
-                addPstmt.setString(5, apiRevision.getRevisionUUID());
-                addPstmt.setString(6, rs.getString("NAME"));
-                addPstmt.addBatch();
+            List<CustomBackendData> customBackendDataList = new ArrayList<>();
+            int count = 0;
+
+            try (ResultSet rs = getPstmt.executeQuery()) {
+                while (rs.next()) {
+                    addPstmt.setString(1, rs.getString("ID"));
+                    addPstmt.setString(2, apiRevision.getApiUUID());
+                    addPstmt.setBinaryStream(3, rs.getBinaryStream("SEQUENCE"));
+                    addPstmt.setString(4, rs.getString("TYPE"));
+                    addPstmt.setString(5, apiRevision.getRevisionUUID());
+                    addPstmt.setString(6, rs.getString("NAME"));
+                    addPstmt.addBatch();
+                    count++;
+
+                    //                    CustomBackendData customBackendData = new CustomBackendData();
+                    //                    customBackendData.setId(rs.getString("ID"));
+                    //                    customBackendData.setName(rs.getString("NAME"));
+                    //                    customBackendData.setApiUUID(apiRevision.getApiUUID());
+                    //                    customBackendData.setRevisionUUID(apiRevision.getRevisionUUID());
+                    //                    customBackendData.setSequence(rs.getBinaryStream("SEQUENCE"));
+                    //                    customBackendData.setType(rs.getString("TYPE"));
+                    //                    customBackendDataList.add(customBackendData);
+                }
             }
-            addPstmt.executeBatch();
+
+            //            for(CustomBackendData customBackendData: customBackendDataList) {
+            //                addPstmt.setString(1, customBackendData.getId());
+            //                addPstmt.setString(2, customBackendData.getApiUUID());
+            //                addPstmt.setBinaryStream(3, customBackendData.getSequence());
+            //                addPstmt.setString(4, customBackendData.getType());
+            //                addPstmt.setString(5, customBackendData.getRevisionUUID());
+            //                addPstmt.setString(6, customBackendData.getName());
+            //                addPstmt.addBatch();
+            //            }
+
+            if (count > 0) {
+                addPstmt.executeBatch();
+            }
         } catch (SQLException ex) {
             handleException("Error while adding Custom Backends to the database of API: " + apiRevision.getApiUUID(),
                     ex);
@@ -21867,6 +21932,35 @@ public class ApiMgtDAO {
             // policy ID is stored in a map as same policy can be applied to multiple operations
             // and we only need to create the policy once.
             clonedPolicyMap.put(policy.getPolicyId(), clonedPolicyId);
+        }
+    }
+
+    private void restoreCustomBackend(APIRevision apiRevision, Connection connection) throws SQLException {
+        String deleteSql = SQLConstants.CustomBackendConstants.DELETE_WORKING_COPY_OF_CUSTOM_BACKEND;
+        String getSql = SQLConstants.CustomBackendConstants.GET_CUSTOM_BACKEND_OF_API_REVISION;
+        String addSql = SQLConstants.CustomBackendConstants.ADD_CUSTOM_BACKEND;
+        try (PreparedStatement pstmt = connection.prepareStatement(deleteSql);
+            PreparedStatement pstmtGet = connection.prepareStatement(getSql);
+            PreparedStatement pstmtAdd = connection.prepareStatement(addSql)) {
+            connection.setAutoCommit(false);
+            pstmt.setString(1, apiRevision.getApiUUID());
+            pstmt.executeUpdate();
+
+            pstmtGet.setString(1, apiRevision.getApiUUID());
+            pstmtGet.setString(2, apiRevision.getRevisionUUID());
+
+            try(ResultSet rs = pstmtGet.executeQuery()) {
+                while(rs.next()) {
+                    pstmtAdd.setString(1, rs.getString("ID"));
+                    pstmtAdd.setString(2, apiRevision.getApiUUID());
+                    pstmtAdd.setBinaryStream(3, rs.getBinaryStream("SEQUENCE"));
+                    pstmtAdd.setString(4, rs.getString("TYPE"));
+                    pstmtAdd.setString(5, "0");
+                    pstmtAdd.setString(6, rs.getString("NAME"));
+                    pstmtAdd.addBatch();
+                }
+            }
+            pstmtAdd.executeBatch();
         }
     }
 

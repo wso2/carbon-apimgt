@@ -66,6 +66,7 @@ public interface APIProvider extends APIManager {
     Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException;
     void deleteCustomBackendByID(String backendUUID, String apiUUID, String type) throws APIManagementException;
+    InputStream getCustomBackendSequenceByAPIAndRevisionUUUID(String apiUUID, String revisionUUID, String type) throws APIManagementException;
 
     /**
      * @param apiTypeWrapper  Api type wrapper

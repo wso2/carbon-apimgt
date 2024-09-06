@@ -973,11 +973,21 @@ public class TemplateBuilderUtil {
 
         if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                 endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-            GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
-                    endpointConfigMap.get("type").toString(), extractedPath);
-            if (gatewayCustomBackendSequenceDTO != null) {
-                gatewayAPIDTO.setSequenceToBeAdd(
-                        addGatewayContentToList(gatewayCustomBackendSequenceDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            if (endpointConfigMap.get("sandbox") != null) {
+                GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api, "SANDBOX",
+                        extractedPath);
+                if (gatewayCustomBackendSequenceDTO != null) {
+                    gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
+                            gatewayAPIDTO.getSequenceToBeAdd()));
+                }
+            }
+            if (endpointConfigMap.get("production") != null) {
+                GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api, "PRODUCTION",
+                        extractedPath);
+                if (gatewayCustomBackendSequenceDTO != null) {
+                    gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
+                            gatewayAPIDTO.getSequenceToBeAdd()));
+                }
             }
         }
     }

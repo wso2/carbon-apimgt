@@ -349,7 +349,7 @@ public class InMemoryAPIDeployer {
                     }
 
                     GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
-                    // GatewayUtils.setCustomBackendToBeRemoved(api, gatewayAPIDTO);
+                    GatewayUtils.setCustomBackendToBeRemoved(gatewayAPIDTO);
 
                 }
                 gatewayAPIDTO.setLocalEntriesToBeRemove(
