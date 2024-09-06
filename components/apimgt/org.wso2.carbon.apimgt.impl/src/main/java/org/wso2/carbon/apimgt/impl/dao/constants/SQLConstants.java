@@ -1009,8 +1009,8 @@ public class SQLConstants {
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
-                    "UUID, TOKEN_TYPE, ORGANIZATION)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "UUID, TOKEN_TYPE, ORGANIZATION, SHARED_ORGANIZATION)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_SQL =
             " UPDATE " +
@@ -1022,7 +1022,8 @@ public class SQLConstants {
             "   DESCRIPTION = ?, " +
             "   UPDATED_BY = ?, " +
             "   UPDATED_TIME = ?, " +
-            "   TOKEN_TYPE = ? " +
+            "   TOKEN_TYPE = ?, " +
+            "   SHARED_ORGANIZATION = ? " +
             " WHERE" +
             "   APPLICATION_ID = ?";
 
@@ -1629,6 +1630,7 @@ public class SQLConstants {
             "   APP.TOKEN_TYPE," +
             "   APP.CREATED_BY," +
             "   APP.ORGANIZATION ORGANIZATION,"+
+            "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION, " +
             "   SUB.USER_ID " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -2353,16 +2355,16 @@ public class SQLConstants {
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " BILLING_PLAN,ALLOWED_ORGANIZATIONS,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, CONNECTIONS_COUNT) \n" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
-                    " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
+                    " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY,\n" +
+                    " BILLING_PLAN, ALLOWED_ORGANIZATIONS, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
                     " FIXED_RATE, BILLING_CYCLE, PRICE_PER_REQUEST, CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -2578,6 +2580,7 @@ public class SQLConstants {
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, " +
+                    "ALLOWED_ORGANIZATIONS = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2602,6 +2605,7 @@ public class SQLConstants {
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, "+
+                    "ALLOWED_ORGANIZATIONS = ?, " +
                     "CUSTOM_ATTRIBUTES = ?, "+
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
@@ -2627,6 +2631,7 @@ public class SQLConstants {
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, "+
+                    "ALLOWED_ORGANIZATIONS = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2651,6 +2656,7 @@ public class SQLConstants {
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, "+
+                    "ALLOWED_ORGANIZATIONS = ?, " +
                     "CUSTOM_ATTRIBUTES = ?, "+
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +

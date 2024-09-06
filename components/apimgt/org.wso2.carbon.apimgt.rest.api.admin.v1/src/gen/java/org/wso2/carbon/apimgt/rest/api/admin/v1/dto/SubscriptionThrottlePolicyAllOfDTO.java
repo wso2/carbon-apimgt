@@ -35,6 +35,7 @@ public class SubscriptionThrottlePolicyAllOfDTO   {
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
     private SubscriptionThrottlePolicyPermissionDTO permissions = null;
+    private List<String> allowedOrganizations = new ArrayList<String>();
 
   /**
    **/
@@ -200,6 +201,23 @@ public class SubscriptionThrottlePolicyAllOfDTO   {
     this.permissions = permissions;
   }
 
+  /**
+   **/
+  public SubscriptionThrottlePolicyAllOfDTO allowedOrganizations(List<String> allowedOrganizations) {
+    this.allowedOrganizations = allowedOrganizations;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("allowedOrganizations")
+  public List<String> getAllowedOrganizations() {
+    return allowedOrganizations;
+  }
+  public void setAllowedOrganizations(List<String> allowedOrganizations) {
+    this.allowedOrganizations = allowedOrganizations;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -218,12 +236,13 @@ public class SubscriptionThrottlePolicyAllOfDTO   {
         Objects.equals(customAttributes, subscriptionThrottlePolicyAllOf.customAttributes) &&
         Objects.equals(stopOnQuotaReach, subscriptionThrottlePolicyAllOf.stopOnQuotaReach) &&
         Objects.equals(billingPlan, subscriptionThrottlePolicyAllOf.billingPlan) &&
-        Objects.equals(permissions, subscriptionThrottlePolicyAllOf.permissions);
+        Objects.equals(permissions, subscriptionThrottlePolicyAllOf.permissions) &&
+        Objects.equals(allowedOrganizations, subscriptionThrottlePolicyAllOf.allowedOrganizations);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, subscriberCount, customAttributes, stopOnQuotaReach, billingPlan, permissions);
+    return Objects.hash(defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, subscriberCount, customAttributes, stopOnQuotaReach, billingPlan, permissions, allowedOrganizations);
   }
 
   @Override
@@ -240,6 +259,7 @@ public class SubscriptionThrottlePolicyAllOfDTO   {
     sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
     sb.append("    billingPlan: ").append(toIndentedString(billingPlan)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
+    sb.append("    allowedOrganizations: ").append(toIndentedString(allowedOrganizations)).append("\n");
     sb.append("}");
     return sb.toString();
   }

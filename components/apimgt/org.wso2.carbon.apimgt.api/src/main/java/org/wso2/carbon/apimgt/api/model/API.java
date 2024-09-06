@@ -98,8 +98,10 @@ public class API implements Serializable {
     private String visibility;
     private String visibleRoles;
     private String visibleTenants;
+    private String visibleOrganizations;
 
-    private boolean endpointSecured = false;
+
+	private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
     private String endpointUTUsername;
     private String endpointUTPassword;
@@ -1499,4 +1501,12 @@ public class API implements Serializable {
     public void setApiPolicies(List<OperationPolicy> apiPolicies) {
         this.apiPolicies = apiPolicies;
     }
+    
+    public String getVisibleOrganizations() {
+		return visibleOrganizations;
+	}
+
+	public void setVisibleOrganizations(String visibleOrganizations) {
+		this.visibleOrganizations = visibleOrganizations;
+	}
 }
