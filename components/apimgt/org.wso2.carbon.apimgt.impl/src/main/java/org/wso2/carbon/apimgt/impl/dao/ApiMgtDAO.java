@@ -21489,14 +21489,15 @@ public class ApiMgtDAO {
         }
     }
 
-    public void updateCustomBackend(String apiUUID, String sequenceName, InputStream sequence, String type, String backendUUID) throws APIManagementException {
-        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND;
+    public void updateCustomBackend(String apiUUID, String sequenceName, InputStream sequence, String type,
+            String backendUUID) throws APIManagementException {
+        // delete current working copy
+        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_API_AND_TYPE;
         try (Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
+                PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
             connection.setAutoCommit(false);
             prepStmt.setString(1, apiUUID);
-            prepStmt.setString(2, backendUUID);
-            prepStmt.setString(3, type);
+            prepStmt.setString(2, type);
             prepStmt.executeUpdate();
             addCustomBackend(apiUUID, sequenceName, null, sequence, type, connection, backendUUID);
             connection.commit();

@@ -10029,6 +10029,20 @@ public final class APIUtil {
         }
     }
 
+    public static InputStream getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
+            String fileExtension) throws APIManagementException {
+        String fileName = extractedFolderPath + File.separator + customBackendFileName + fileExtension;
+        InputStream inputStream = null;
+        if (checkFileExistence(fileName)) {
+            try {
+                inputStream = new FileInputStream(fileName);
+            } catch (IOException ex) {
+                handleException("Error reading Custom Backend " + customBackendFileName);
+            }
+        }
+        return inputStream;
+    }
+
     /**
      * Read the operation policy definition from the provided path and return the definition object
      *

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -125,6 +126,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -269,18 +271,25 @@ public class ImportUtils {
             APIUtil.validateAPIEndpointConfig(importedApiDTO.getEndpointConfig(), importedApiDTO.getType().toString(),
                     importedApiDTO.getName());
 
-            Map endpointConfig = (Map) importedApiDTO.getEndpointConfig();
-
-            // if a valid one then update the sequence file path
-            if (endpointConfig != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                if (endpointConfig.get("sequence_name") != null) {
-                    String sequenceFileName = endpointConfig.get("sequence_name").toString();
-                    String path = extractedFolderPath + File.separator + sequenceFileName;
-                    endpointConfig.put("sequence_path", path);
-                }
-                importedApiDTO.setEndpointConfig(endpointConfig);
-            }
+//            Map endpointConfig = (Map) importedApiDTO.getEndpointConfig();
+//
+//            // if a valid one then update the sequence file path
+//            if (endpointConfig != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+//                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+//                if (endpointConfig.get("sandbox") != null) {
+//                    Map sandboxConfig = (Map) endpointConfig.get("sandbox");
+//                    String seqName = sandboxConfig.get("sequence_name").toString();
+//                    String path = extractedFolderPath + File.separator + seqName;
+//                    String id = sandboxConfig.get("sequence_id").toString();
+//
+//                }
+//                if (endpointConfig.get("sequence_name") != null) {
+//                    String sequenceFileName = endpointConfig.get("sequence_name").toString();
+//                    String path = extractedFolderPath + File.separator + sequenceFileName;
+//                    endpointConfig.put("sequence_path", path);
+//                }
+//                importedApiDTO.setEndpointConfig(endpointConfig);
+//            }
 
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE, organization);
@@ -402,6 +411,13 @@ public class ImportUtils {
 
             populateAPIWithPolicies(importedApi, apiProvider, extractedFolderPath, extractedPoliciesMap,
                     extractedAPIPolicies, currentTenantDomain);
+            // Update Custom Backend Data if endpoint type is selected to "custom_backend"
+            Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
+            if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConf.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                updateAPIWithCustomBackend(importedApi, extractedFolderPath, apiProvider);
+            }
+
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
             apiProvider.updateAPI(importedApi, oldAPI);
 
@@ -687,6 +703,46 @@ public class ImportUtils {
             // If still the policy specification is not found, user has used a wrong policy name
             throw new APIManagementException("Invalid API policy added as " + policyFileName,
                     ExceptionCodes.INVALID_OPERATION_POLICY);
+        }
+    }
+
+    public static void updateAPIWithCustomBackend(API api, String extractedFolderPath, APIProvider apiProvider)
+            throws APIManagementException {
+        String customBackendDir = extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
+        JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            if (endpointConfig != null) {
+                if (endpointConfig.get("sandbox") != null) {
+                    JsonObject sandboxConf = endpointConfig.get("sandbox").getAsJsonObject();
+                    String seqFile = sandboxConf.get("sequence_file").getAsString();
+                    String type = sandboxConf.get("type").getAsString();
+                    String seqName = APIUtil.getCustomBackendName(api.getUuid(), type);
+                    String seqId = UUID.randomUUID().toString();
+                    sandboxConf.addProperty("sequence_id", seqId);
+                    sandboxConf.addProperty("sequence_name", seqName);
+                    endpointConfig.add("sandbox", sandboxConf);
+                    InputStream seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    apiProvider.updateCustomBackend(api, type, seq, seqName, seqId);
+                }
+                if (endpointConfig.get("production") != null) {
+                    JsonObject prodConf = endpointConfig.get("production").getAsJsonObject();
+                    String seqFile = endpointConfig.get("sequence_file").getAsString();
+                    String type = endpointConfig.get("type").getAsString();
+                    String seqName = APIUtil.getCustomBackendName(api.getUuid(), type);
+                    String seqId = UUID.randomUUID().toString();
+                    prodConf.addProperty("sequence_id", seqId);
+                    prodConf.addProperty("sequence_name", seqName);
+                    endpointConfig.add("production", prodConf);
+                    InputStream seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    apiProvider.updateCustomBackend(api, type, seq, seqName, seqId);
+                }
+                Map<String, Object> endpointConfMap = new ObjectMapper().readValue(endpointConfig.toString(),
+                        Map.class);
+                api.setEndpointConfig(objectMapper.writeValueAsString(endpointConfMap));
+            }
+        } catch (IOException ex) {
+            throw new APIManagementException("Error when updating Endpoint Configuration of API: " + api.getUuid());
         }
     }
 
