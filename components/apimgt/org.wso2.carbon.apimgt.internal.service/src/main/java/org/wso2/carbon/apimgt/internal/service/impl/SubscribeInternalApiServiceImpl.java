@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -22,9 +40,11 @@ public class SubscribeInternalApiServiceImpl implements SubscribeInternalApiServ
                                    MessageContext messageContext) {
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         Map<String, Object> subDetails = null;
+        String synchronizeKey = api.getUuid() + ":" + appUuid;
         String defaultTier = APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS;
         String apiType = api.getApiType();
         int apiId = api.getApiId();
+
         if ("WS".equals(apiType) || "WEBSUB".equals(apiType) || "SSE".equals(apiType)) {
             defaultTier = APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS;
         }
@@ -32,8 +52,10 @@ public class SubscribeInternalApiServiceImpl implements SubscribeInternalApiServ
             String subscriber = subscriptionValidationDAO.getApplicationSubscriber(appUuid);
             String subscriberTenant = MultitenantUtils.getTenantDomain(subscriber);
             int tenantId = APIUtil.getTenantId(subscriberTenant);
-            subDetails = subscriptionValidationDAO
-                    .subscribeToAPI(apiId, appId, defaultTier, subscriber);
+            synchronized (synchronizeKey.intern()) {
+                subDetails = subscriptionValidationDAO
+                        .subscribeToAPI(apiId, appId, defaultTier, subscriber);
+            }
             int subscriptionId = (int) subDetails.get("id");
             String subscriptionUuid = (String) subDetails.get("uuid");
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),

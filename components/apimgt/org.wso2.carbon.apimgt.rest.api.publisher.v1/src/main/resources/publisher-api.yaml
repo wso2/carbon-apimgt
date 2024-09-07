@@ -12602,6 +12602,11 @@ components:
         IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
+        allowSubscriptionValidationDisabling:
+          type: boolean
+          description: |
+            Allow subscription validation disabling for OAuth tokens
+          default: true
         customProperties:
           type: array
           items:

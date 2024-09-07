@@ -1233,6 +1233,11 @@ public class APIManagerConfiguration {
             if (enablePolicyDeployElement != null) {
                 throttleProperties.setEnablePolicyDeployment(Boolean.parseBoolean(enablePolicyDeployElement.getText()));
             }
+            OMElement enablePolicyRecreateElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_RECREATE));
+            if (enablePolicyRecreateElement != null) {
+                throttleProperties.setEnablePolicyRecreate(Boolean.parseBoolean(enablePolicyRecreateElement.getText()));
+            }
             // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants

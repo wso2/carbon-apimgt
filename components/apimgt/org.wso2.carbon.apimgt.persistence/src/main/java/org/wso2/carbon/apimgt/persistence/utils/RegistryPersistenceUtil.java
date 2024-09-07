@@ -557,15 +557,14 @@ public class RegistryPersistenceUtil {
         }
     }
 
-    public static boolean isSubscriptionValidationDisabled(GovernanceArtifact artifact) throws APIManagementException {
+    public static List<String> getBusinessPlansOfAPI(GovernanceArtifact artifact) throws APIManagementException {
         try {
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+            List<String> tierList = new ArrayList<>();
             if (!tiers.isEmpty()) {
-                List<String> tierList = new ArrayList<>(Arrays.asList(tiers.split("\\|\\|")));
-                return tierList.size() == 1
-                        && StringUtils.contains(tierList.get(0), APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+                tierList = Arrays.asList(tiers.split("\\|\\|"));
             }
-            return false;
+            return tierList;
         } catch (GovernanceException e) {
             String msg = "Failed to get subscription validation status of API for the artifact ";
             throw new APIManagementException(msg, e);

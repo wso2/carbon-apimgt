@@ -131,10 +131,10 @@ public interface APIPersistence {
      *
      * @param org   Organization the API is owned by
      * @param apiId API ID
-     * @return Whether subscription validation is disabled
+     * @return The business plans of the API
      * @throws APIPersistenceException
      */
-    boolean isSubscriptionValidationDisabled(Organization org, String apiId) throws APIPersistenceException;
+    List<String> getBusinessPlansOfAPI(Organization org, String apiId) throws APIPersistenceException;
 
     /**
      * Get the API information stored in persistence layer, that is used for publisher operations

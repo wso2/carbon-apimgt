@@ -392,11 +392,11 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         Subscription defaultSub = new Subscription();
         defaultSub.setPolicyId(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
 
-        key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
+        key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager, true);
         if (key != null) {
-            app = datastore.getApplicationById(key.getApplicationId());
+            app = datastore.getApplicationById(key.getApplicationId(), true);
             if (app != null) {
-                sub = datastore.getSubscriptionById(app.getId(), api.getApiId());
+                sub = datastore.getSubscriptionById(app.getId(), api.getApiId(), true);
                 if (sub != null) {
                     if (log.isDebugEnabled()) {
                         log.debug("All information is retrieved from the inmemory data store.");

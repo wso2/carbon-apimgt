@@ -691,7 +691,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public boolean isSubscriptionValidationDisabled(Organization org, String apiId) throws APIPersistenceException {
+    public List<String> getBusinessPlansOfAPI(Organization org, String apiId) throws APIPersistenceException {
 
         boolean tenantFlowStarted = false;
         try {
@@ -700,13 +700,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
             Registry registry = holder.getRegistry();
             GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact != null) {
-                return RegistryPersistenceUtil.isSubscriptionValidationDisabled(apiArtifact);
+                return RegistryPersistenceUtil.getBusinessPlansOfAPI(apiArtifact);
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + apiId + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (RegistryException | APIManagementException e) {
-            String msg = "Failed to get subscription validation status of API";
+            String msg = "Failed to get business plans to check subscription validation status of API";
             throw new APIPersistenceException(msg, e);
         } finally {
             if (tenantFlowStarted) {

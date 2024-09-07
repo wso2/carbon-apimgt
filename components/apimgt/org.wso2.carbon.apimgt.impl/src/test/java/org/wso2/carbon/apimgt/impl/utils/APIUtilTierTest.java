@@ -926,6 +926,7 @@ public class APIUtilTierTest {
         ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
         Map<String, Long> defaultLimits = new HashMap<>();
         Mockito.when(throttleProperties.getDefaultThrottleTierLimits()).thenReturn(defaultLimits);
+        Mockito.when(throttleProperties.isEnablePolicyRecreate()).thenReturn(true);
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())

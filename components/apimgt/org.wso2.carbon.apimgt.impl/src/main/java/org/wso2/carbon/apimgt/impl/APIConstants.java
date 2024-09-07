@@ -136,6 +136,8 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_SUBSCRIPTION_TIER = "DefaultSubscriptionLevelTier";
 
     public static final String API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD = "ExposeEndpointPassword";
+    public static final String API_TENANT_CONF_ALLOW_SUBSCRIPTION_VALIDATION_DISABLING
+            = "AllowSubscriptionValidationDisabling";
 
     public static final String API_CATEGORY_FREE = "Free";
 
@@ -815,6 +817,8 @@ public final class APIConstants {
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
     public static final String API_KEY_SUBSCRIPTION_VALIDATION_ENABLED =
             API_KEY_VALIDATOR + "EnableAPIKeySubscriptionValidation";
+    public static final String ALLOW_SUBSCRIPTION_VALIDATION_DISABLING = API_KEY_VALIDATOR +
+            "AllowSubscriptionValidationDisabling";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
@@ -1919,13 +1923,13 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_BRONZE = "Bronze";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
-    public static final String DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS = "Default_Subscriptionless";
+    public static final String DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS = "DefaultSubscriptionless";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "AsyncGold";
     public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "AsyncSilver";
     public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "AsyncBronze";
     public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "AsyncUnlimited";
-    public static final String DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS = "Async_Default_Subscriptionless";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS = "AsyncDefaultSubscriptionless";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "AsyncWHGold";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "AsyncWHSilver";
@@ -2081,6 +2085,7 @@ public final class APIConstants {
         public static final String TRUE = "true";
         public static final String ADD = "add";
         public static final String ENABLE_POLICY_DEPLOYMENT = "EnablePolicyDeployment";
+        public static final String ENABLE_POLICY_RECREATE = "EnablePolicyRecreationOnStartup";
     }
 
     /**

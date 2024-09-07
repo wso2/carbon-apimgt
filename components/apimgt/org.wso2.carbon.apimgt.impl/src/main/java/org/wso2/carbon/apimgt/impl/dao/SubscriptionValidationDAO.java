@@ -1598,6 +1598,7 @@ public class SubscriptionValidationDAO {
         String sqlQuery = SQLConstants.ADD_SUBSCRIPTION_SQL;
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
             try (PreparedStatement ps = connection.prepareStatement(checkDuplicateQuery)) {
                 ps.setInt(1, apiId);
                 ps.setInt(2, appId);
@@ -1643,6 +1644,11 @@ public class SubscriptionValidationDAO {
                     while (rs.next()) {
                         subscriptionId = Integer.parseInt(rs.getString(1));
                     }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw new APIManagementException("Error while adding subscription for API/API Product " + apiId +
+                            " in Application " + appId, e);
                 }
             }
         } catch (SQLException e) {
