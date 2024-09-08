@@ -561,7 +561,7 @@ public class RegistryPersistenceUtil {
         try {
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
             List<String> tierList = new ArrayList<>();
-            if (!tiers.isEmpty()) {
+            if (tiers != null && !tiers.isEmpty()) {
                 tierList = Arrays.asList(tiers.split("\\|\\|"));
             }
             return tierList;
