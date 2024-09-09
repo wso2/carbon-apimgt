@@ -934,7 +934,7 @@ public class OAS2Parser extends APIDefinition {
      */
     private void updateOperationManagedInfo(SwaggerData.Resource resource, Operation operation) {
         String authType = resource.getAuthType();
-        if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)) {
+        if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType) || authType == null) {
             authType = APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER;
         }
         if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authType)) {

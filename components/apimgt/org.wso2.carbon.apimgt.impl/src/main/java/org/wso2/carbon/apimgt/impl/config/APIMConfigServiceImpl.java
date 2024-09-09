@@ -56,6 +56,8 @@ import java.util.Iterator;
 public class APIMConfigServiceImpl implements APIMConfigService {
 
     private static final Log log = LogFactory.getLog(APIMConfigServiceImpl.class);
+    private static final String SUBSCRIPTION_APPROVAL_VIEW_SCOPE = "apim:subscription_approval_view";
+    private static final String SUBSCRIPTION_APPROVAL_MANAGE_SCOPE = "apim:subscription_approval_manage";
     protected SystemConfigurationsDAO systemConfigurationsDAO;
 
     public APIMConfigServiceImpl() {
@@ -195,7 +197,9 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                 "apim:admin_tier_view",
                 "apim:admin_tier_manage",
                 "apim:keymanagers_manage",
-                "apim:api_category"
+                "apim:api_category",
+                SUBSCRIPTION_APPROVAL_VIEW_SCOPE,
+                SUBSCRIPTION_APPROVAL_MANAGE_SCOPE
             };
         
         ArrayList<String> missingScopesList = new ArrayList<>(Arrays.asList(scopesToCheck));
@@ -227,7 +231,12 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         for (String missingScope : missingScopesList) {
             JsonObject newScope = new JsonObject();
             newScope.addProperty("Name", missingScope);
-            newScope.addProperty("Roles", "admin");
+            if (missingScope.equals(SUBSCRIPTION_APPROVAL_VIEW_SCOPE) ||
+                    missingScope.equals(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE)) {
+                newScope.addProperty("Roles", "admin,Internal/publisher");
+            } else {
+                newScope.addProperty("Roles", "admin");
+            }
             scopeArray.add(newScope);
         }
               

@@ -19,6 +19,7 @@
     <HttpClient>
          <MaxTotal>{{apim.http_client.max_total}}</MaxTotal>
          <DefaultMaxPerRoute>{{apim.http_client.default_max_per_route}}</DefaultMaxPerRoute>
+         <ConnectionTimeout>{{apim.http_client.connection_timeout}}</ConnectionTimeout>
      </HttpClient>
 
 
@@ -511,6 +512,11 @@
         </PersistentNotifier>
         {% endif %}
     </TokenRevocationNotifiers>
+
+    <TokenValidation>
+        <!-- Enforce validating JWT type header -->
+        <EnforceTypeHeaderValidation>{{apim.token.validation.enforce_type_header_validation}}</EnforceTypeHeaderValidation>
+    </TokenValidation>
 
     <!-- Settings related to managing API access tiers. -->
     <TierManagement>

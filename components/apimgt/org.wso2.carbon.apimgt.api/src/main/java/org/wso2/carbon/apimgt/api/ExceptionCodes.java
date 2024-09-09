@@ -537,6 +537,9 @@ public enum ExceptionCodes implements ErrorHandler {
     OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "API Policy Not Found with given name and version", 404,
             "Requested api policy with name '%s' and version '%s not found"),
 
+    OPERATION_POLICY_NOT_FOUND_WITH_NAME(903007, "API Policy Not Found with given name", 404,
+            "Requested api policy with name '%s' not found"),
+
     OPERATION_POLICY_GATEWAY_ERROR(903008,
             "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
             "API Policy cannot be imported due to the missing Gateway files."),
@@ -631,6 +634,15 @@ public enum ExceptionCodes implements ErrorHandler {
             "Operation type/http method is not specified for the operation/resource", 400,
             "Operation type/http method is not specified for the operation/resource: %s", false),
 
+    FAILED_TO_RETRIEVE_WORKFLOW_BY_EXTERNAL_REFERENCE_ID(902033, "Failed to rettrieve workflow request by the " +
+            "external workflow reference", 500,
+            "Failed to retrieve workflow request by the external workflow reference"),
+    FAILED_TO_RETRIEVE_WORKFLOWS(902034, "Error while retrieving workflow requests.", 500,
+            "Error while retrieving workflow requests."),
+    WORKFLOW_PAYLOAD_MISSING(902035, "Payload is missing", 400,
+            "Payload is missing in the workflow request"),
+    WORKFLOW_STATUS_NOT_DEFINED(902036, "Workflow status not defined", 400,
+            "Workflow status is not defined"),
     RESOURCE_URI_TEMPLATE_NOT_DEFINED(902032, "Resource URI template value not defined", 400,
             "Resource URI template value (target) not defined", false);
     private final long errorCode;

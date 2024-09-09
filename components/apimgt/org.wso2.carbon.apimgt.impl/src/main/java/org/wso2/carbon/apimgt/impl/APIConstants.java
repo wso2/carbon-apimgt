@@ -668,6 +668,7 @@ public final class APIConstants {
     public static final String JWKS_URI = "jwksUri";
 
     public static final String ORG_ALL_QUERY_PARAM = "ALL";
+    public static final String JWT_HEADER_ACCESS_TOKEN_TYPE = "at+jwt";
 
     public static class TokenStatus {
 
@@ -1513,6 +1514,7 @@ public final class APIConstants {
 
     public static final String HTTP_CLIENT_MAX_TOTAL = "HttpClient.MaxTotal";
     public static final String HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE = "HttpClient.DefaultMaxPerRoute";
+    public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "HttpClient.ConnectionTimeout";
 
     public static final String PROXY_ENABLE = "ProxyConfig.Enable";
     public static final String PROXY_HOST = "ProxyConfig.Host";
@@ -3170,4 +3172,9 @@ public final class APIConstants {
 
     //Property for enabling tenant aware sub claims when invoking APIs with API key
     public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
+
+    public static class TokenValidationConstants {
+        public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
+        public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
+    }
 }

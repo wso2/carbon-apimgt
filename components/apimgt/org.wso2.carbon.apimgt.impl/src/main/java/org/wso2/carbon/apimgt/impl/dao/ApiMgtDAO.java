@@ -928,7 +928,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 int applicationId = resultSet.getInt("APPLICATION_ID");
                 Application application = getLightweightApplicationById(conn, applicationId);
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(resultSet.getString("API_TYPE"))) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
@@ -983,7 +983,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 Identifier identifier;
 
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(resultSet.getString("API_TYPE"))) {
                     identifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
@@ -1544,7 +1544,7 @@ public class ApiMgtDAO {
             while (result.next()) {
                 String apiType = result.getString("TYPE");
 
-                if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                     APIProductIdentifier identifier =
                             new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
@@ -10029,7 +10029,7 @@ public class ApiMgtDAO {
                         String context = resultSet.getString("CONTEXT");
                         String apiType = resultSet.getString("API_TYPE");
                         String version = resultSet.getString("API_VERSION");
-                        if (APIConstants.API_PRODUCT.equals(apiType)
+                        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)
                                 && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(version)
                                 && StringUtils.isBlank(contextTemplate)) {
                             context = context + "/" + APIConstants.API_PRODUCT_VERSION_1_0_0;
@@ -16835,7 +16835,7 @@ public class ApiMgtDAO {
                 String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
                 String uuid = resultSet.getString("API_UUID");
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(resultSet.getString("API_TYPE"))) {
                     // skip api products
                     continue;
                 }
@@ -19024,7 +19024,7 @@ public class ApiMgtDAO {
             try (ResultSet result = ps.executeQuery()) {
                 while (result.next()) {
                     String apiType = result.getString("TYPE");
-                    if (!APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                    if (!APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                         APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
                                 ("API_PROVIDER")), result.getString("API_NAME"),
                                 result.getString("API_VERSION"));
@@ -19059,7 +19059,7 @@ public class ApiMgtDAO {
                     if (index >= offset && index < limit) {
                         String apiType = result.getString("TYPE");
 
-                        if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                             APIProductIdentifier identifier = new APIProductIdentifier(
                                     APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
@@ -20227,13 +20227,69 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Retrieve a list of common operation policies by providing the policy name and organization
+     *
+     * @param policyName             Policy name
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition Include the policy definition to the output or not
+     * @return List of operation policy data
+     * @throws APIManagementException
+     */
+    public List<OperationPolicyData> getCommonOperationPolicyByPolicyName(String policyName,
+                                                                    String organization, boolean isWithPolicyDefinition)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getCommonOperationPolicyByPolicyName(connection, policyName, organization,
+                    isWithPolicyDefinition);
+        } catch (SQLException e) {
+            handleException("Failed to get common operation policy for name " + policyName + "for organization "
+                    + organization, e);
+        }
+        return null;
+    }
+
+    private List<OperationPolicyData> getCommonOperationPolicyByPolicyName(Connection connection, String policyName,
+                                                                     String tenantDomain,
+                                                                     boolean isWithPolicyDefinition)
+            throws SQLException {
+
+        String dbQuery =
+                SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME;
+
+        List<OperationPolicyData> operationPolicyDataList = new ArrayList<>();
+        OperationPolicyData policyData = null;
+        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, policyName);
+            statement.setString(2, tenantDomain);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    policyData = new OperationPolicyData();
+                    policyData.setOrganization(tenantDomain);
+                    policyData.setPolicyId(rs.getString("POLICY_UUID"));
+                    policyData.setMd5Hash(rs.getString("POLICY_MD5"));
+                    policyData.setSpecification(populatePolicySpecificationFromRS(rs));
+
+                    if (isWithPolicyDefinition && policyData != null) {
+                        if (isWithPolicyDefinition && policyData != null) {
+                            populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
+                        }
+                    }
+                    operationPolicyDataList.add(policyData);
+                }
+            }
+        }
+        return operationPolicyDataList;
+    }
+
     private OperationPolicyData getCommonOperationPolicyByPolicyName(Connection connection, String policyName,
                                                                      String policyVersion, String tenantDomain,
                                                                      boolean isWithPolicyDefinition)
             throws SQLException {
 
         String dbQuery =
-                SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME;
+                SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME_AND_VERSION;
 
         OperationPolicyData policyData = null;
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
@@ -20258,6 +20314,7 @@ public class ApiMgtDAO {
         }
         return policyData;
     }
+
 
     /**
      * Retrieve an API Specific operation policy by providing the policy name. In order to narrow down the specific policy
