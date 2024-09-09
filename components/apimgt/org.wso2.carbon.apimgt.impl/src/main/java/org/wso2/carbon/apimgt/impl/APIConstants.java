@@ -2635,6 +2635,22 @@ public final class APIConstants {
         }
     }
 
+    public static class LlmProviderEvent {
+        public static final String EVENT_TYPE = "event_type";
+        public static final String LLM_PROVIDER_CONFIGURATION = "llm_provider_configuration";
+        public static final String ACTION = "action";
+        public static final String NAME = "name";
+        public static final String VERSION = "version";
+        public static final String ENABLED = "enabled";
+        public static final String VALUE = "value";
+        public static final String ORGANIZATION = "organization";
+        public static final String ACTION_ADD = "add";
+        public static final String ACTION_UPDATE = "update";
+        public static final String ACTION_DELETE = "delete";
+        public static final String TYPE = "type";
+        public static final String LLM_PROVIDER_STREAM_ID = "org.wso2.apimgt.llm.provider.stream:1.0.0";
+    }
+
     public static class KeyManager {
 
         public static final String SERVICE_URL = "ServiceURL";
@@ -2767,11 +2783,15 @@ public final class APIConstants {
         GA_CONFIG,
         KEY_TEMPLATE,
         CORRELATION_CONFIG,
-        GATEWAY_POLICY
+        GATEWAY_POLICY,
+        LLM_PROVIDER
     }
 
     // Supported Event Types
     public enum EventType {
+        LLM_PROVIDER_CREATE,
+        LLM_PROVIDER_UPDATE,
+        LLM_PROVIDER_DELETE,
         API_CREATE,
         API_UPDATE,
         API_DELETE,

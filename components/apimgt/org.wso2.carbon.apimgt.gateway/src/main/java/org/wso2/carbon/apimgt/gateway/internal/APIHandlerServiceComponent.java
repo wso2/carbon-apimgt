@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.api.LlmProviderService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
@@ -268,6 +269,22 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service unbound from the API handlers");
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
+    }
+
+    @Reference(
+            name = "llm.payload.handler.connector.service",
+            service = LlmProviderService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeLlmPayloadHandler")
+    protected void addLlmPayloadHandler(LlmProviderService llmProviderService) {
+
+        ServiceReferenceHolder.getInstance().addLlmProviderService(llmProviderService.getType(), llmProviderService);
+    }
+
+    protected void removeLlmPayloadHandler(LlmProviderService llmProviderService) {
+
+        ServiceReferenceHolder.getInstance().removeLlmProviderService(llmProviderService.getType());
     }
 
     @Reference(

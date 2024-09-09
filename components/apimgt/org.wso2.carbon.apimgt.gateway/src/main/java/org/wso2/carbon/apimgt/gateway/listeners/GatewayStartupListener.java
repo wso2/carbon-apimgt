@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.LlmProviderManager;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
@@ -222,6 +223,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     new GatewayJMSMessageListener());
             copyTenantArtifacts();
             APILoggerManager.getInstance().initializeAPILoggerList();
+            LlmProviderManager.getInstance().initializeLlmProviderConfigurations();
         } else {
             log.info("Running on migration enabled mode: Stopped at Gateway Startup listener completed");
         }
