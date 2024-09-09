@@ -210,9 +210,10 @@ public class PublisherCommonUtils {
     public static JSONObject updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
             InputStream customBackend, String contentDecomp) throws APIManagementException {
         String fileName = getFileNameFromContentDisposition(contentDecomp);
-        if (fileName == null)
+        if (fileName == null) {
             throw new APIManagementException(
                     "Error when retrieving Custom Backend file name of API: " + api.getId().getApiName());
+        }
         String seqName = APIUtil.getCustomBackendName(api.getUuid(), endpointType);
         String customBackendUUID = UUID.randomUUID().toString();
         apiProvider.updateCustomBackend(api, endpointType, customBackend, seqName, customBackendUUID);
