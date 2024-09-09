@@ -2430,6 +2430,11 @@ public class APIManagerConfiguration {
             if (marketplaceAssistantEndpoint != null) {
                 marketplaceAssistantConfigurationDto.setEndpoint(marketplaceAssistantEndpoint.getText());
             }
+            OMElement marketplaceAssistantTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_TOKEN_ENDPOINT));
+            if (marketplaceAssistantTokenEndpoint != null) {
+                marketplaceAssistantConfigurationDto.setTokenEndpoint(marketplaceAssistantTokenEndpoint.getText());
+            }
             OMElement marketplaceAssistantToken =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_KEY));
 
@@ -2478,6 +2483,11 @@ public class APIManagerConfiguration {
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_ENDPOINT));
             if (apiChatEndpoint != null) {
                 apiChatConfigurationDto.setEndpoint(apiChatEndpoint.getText());
+            }
+            OMElement apiChatTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_TOKEN_ENDPOINT));
+            if (apiChatEndpoint != null) {
+                apiChatConfigurationDto.setTokenEndpoint(apiChatTokenEndpoint.getText());
             }
             OMElement apiChatKey =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_KEY));

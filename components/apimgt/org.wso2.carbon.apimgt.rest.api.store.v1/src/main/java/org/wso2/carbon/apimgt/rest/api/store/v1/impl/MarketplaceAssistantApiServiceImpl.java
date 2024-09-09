@@ -81,8 +81,8 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 payload.put(APIConstants.HISTORY, history);
                 payload.put(APIConstants.TENANT_DOMAIN, organization);
 
-                String response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getKey(),
-                        configDto.getChatResource(), payload.toString(), null);
+                String response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
+                        configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 MarketplaceAssistantResponseDTO executeResponseDTO = objectMapper.readValue(response,
@@ -118,6 +118,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
 
                 CloseableHttpResponse response = APIUtil.
                         getMarketplaceChatApiCount(configDto.getEndpoint(),
+                                configDto.getTokenEndpoint(),
                                 configDto.getKey(),
                                 configDto.getApiCountResource());
                 int statusCode = response.getStatusLine().getStatusCode();

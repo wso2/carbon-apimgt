@@ -52,6 +52,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.RegexValidator;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -252,6 +254,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -10479,21 +10482,68 @@ public final class APIUtil {
     }
 
     /**
+     * Get the AI token using the key
+     */
+    private static String getAiTokenUsingKey(String tokenEndpoint, String key) throws APIManagementException {
+    try {
+        HttpPost tokenRequest = new HttpPost(tokenEndpoint);
+        tokenRequest.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + key);
+        tokenRequest.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.CONTENT_TYPE_APPLICATION_FORM);
+
+        List<BasicNameValuePair> urlParameters = new ArrayList<>();
+        urlParameters.add(new BasicNameValuePair(APIConstants.TOKEN_GRANT_TYPE_KEY, APIConstants.GRANT_TYPE_VALUE));
+        tokenRequest.setEntity(new UrlEncodedFormEntity(urlParameters, StandardCharsets.UTF_8));
+
+        URL url = new URL(tokenEndpoint);
+        int port = url.getPort();
+        String protocol = url.getProtocol();
+        HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+        CloseableHttpResponse response = executeHTTPRequest(tokenRequest, httpClient);
+        int statusCode = response.getStatusLine().getStatusCode();
+        String responseStr = EntityUtils.toString(response.getEntity());
+
+        if (statusCode == HttpStatus.SC_OK) {
+            org.json.JSONObject responseJson = new org.json.JSONObject(responseStr);
+            if (responseJson.has("access_token")) {
+                log.info("AI access token : " + responseJson.getString("access_token"));
+                return responseJson.getString("access_token");
+            } else {
+                throw new APIManagementException("Access token not found in the response.",
+                    ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+            }
+        } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+            throw new APIManagementException("Invalid key used when requesting AI token.",
+                    ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+        } else {
+            throw new APIManagementException("Unexpected response when fetching AI token",
+                ExceptionCodes.AI_SERVICE_INVALID_RESPONSE);
+        }
+    } catch (MalformedURLException e) {
+        throw new APIManagementException("Invalid/malformed URL encountered. URL: " + tokenEndpoint, e);
+    } catch (IOException e) {
+        throw new APIManagementException("Error encountered while connecting to token service", e);
+    }
+}
+
+    /**
      * This method is used to invoke the Choreo deployed AI service. This can handle both API Chat and Marketplace
      * Assistant related POST calls.
      *
-     * @param endpoint  Endpoint to be invoked
-     * @param authToken OnPremKey for the organization
-     * @param resource  Specifies the backend resource the request should be forwarded to
-     * @param payload   Request payload that needs to be attached to the request
-     * @param requestId UUID of the request, so that AI service can track the progress
+     * @param endpoint      Endpoint to be invoked
+     * @param tokenEndpoint Endpoint to be invoked to get the token using key
+     * @param authToken     OnPremKey for the organization
+     * @param resource      Specifies the backend resource the request should be forwarded to
+     * @param payload       Request payload that needs to be attached to the request
+     * @param requestId     UUID of the request, so that AI service can track the progress
      * @return returns the response if invocation is successful
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    public static String invokeAIService(String endpoint, String authToken, String resource, String payload,
-            String requestId) throws APIManagementException {
+    public static String invokeAIService(String endpoint, String tokenEndpoint, String authToken, String resource,
+            String payload, String requestId) throws APIManagementException {
 
         try {
+            String token = getAiTokenUsingKey(tokenEndpoint, authToken);
             HttpPost preparePost = new HttpPost(endpoint + resource);
             preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
@@ -10549,10 +10599,11 @@ public final class APIUtil {
      * @return CloseableHttpResponse of the GET call
      * @throws APIManagementException if an error occurs while retrieving API count
      */
-    public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String authToken, String resource)
-            throws APIManagementException {
+    public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String tokenEndpoint,
+            String authToken, String resource) throws APIManagementException {
 
         try {
+            String token = getAiTokenUsingKey(tokenEndpoint, authToken);
             HttpGet apiCountGet = new HttpGet(endpoint + resource);
             apiCountGet.setHeader(APIConstants.API_KEY_AUTH, authToken);
             URL url = new URL(endpoint);
@@ -10576,10 +10627,11 @@ public final class APIUtil {
      * @param uuid      UUID of the API to be deleted
      * @throws APIManagementException if an error occurs while deleting the API
      */
-    public static void marketplaceAssistantDeleteService(String endpoint, String authToken, String resource, String uuid)
-            throws APIManagementException {
+    public static void marketplaceAssistantDeleteService(String endpoint, String tokenEndpoint, String authToken,
+            String resource, String uuid) throws APIManagementException {
 
         try {
+            String token = getAiTokenUsingKey(tokenEndpoint, authToken);
             String resourceWithPathParam = endpoint + resource + "/{uuid}";
             resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
 

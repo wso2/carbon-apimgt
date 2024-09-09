@@ -206,6 +206,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                 payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
 
                 APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                        marketplaceAssistantConfigurationDto.getTokenEndpoint(),
                         marketplaceAssistantConfigurationDto.getKey(),
                         marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
             } catch (APIManagementException e) {
@@ -226,6 +227,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         public void run() {
             try {
                 APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                        marketplaceAssistantConfigurationDto.getTokenEndpoint(),
                         marketplaceAssistantConfigurationDto.getKey(),
                         marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
             } catch (APIManagementException e) {
