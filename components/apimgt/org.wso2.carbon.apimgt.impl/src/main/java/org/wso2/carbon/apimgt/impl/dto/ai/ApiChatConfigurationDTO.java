@@ -23,19 +23,20 @@ package org.wso2.carbon.apimgt.impl.dto.ai;
  */
 public class ApiChatConfigurationDTO {
 
-    private String accessToken;
+    private String key;
     private String endpoint;
+    private String tokenEndpoint;
     private String prepareResource;
     private String executeResource;
     private boolean isEnabled;
     private boolean isAuthTokenProvided;
 
-    public String getAccessToken() {
-        return accessToken;
+    public String getKey() {
+        return key;
     }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getEndpoint() {
@@ -44,6 +45,14 @@ public class ApiChatConfigurationDTO {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public String getTokenEndpoint() {
+        return tokenEndpoint;
+    }
+
+    public void setTokenEndpoint(String tokenEndpoint) {
+        this.tokenEndpoint = tokenEndpoint;
     }
 
     public String getPrepareResource() {

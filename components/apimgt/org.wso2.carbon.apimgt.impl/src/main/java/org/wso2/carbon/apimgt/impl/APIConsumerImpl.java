@@ -3347,7 +3347,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiChatConfigurationDto();
-        return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+        return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getKey(),
                 configDto.getExecuteResource(), requestPayload, apiChatRequestId);
     }
 
@@ -3363,7 +3363,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
-            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getKey(),
                     configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
         } catch (JsonProcessingException e) {
             String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";

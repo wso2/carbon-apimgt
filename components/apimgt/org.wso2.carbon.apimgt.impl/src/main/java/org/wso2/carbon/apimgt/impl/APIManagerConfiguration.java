@@ -2431,13 +2431,13 @@ public class APIManagerConfiguration {
                 marketplaceAssistantConfigurationDto.setEndpoint(marketplaceAssistantEndpoint.getText());
             }
             OMElement marketplaceAssistantToken =
-                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_AUTH_TOKEN));
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_KEY));
 
             if (marketplaceAssistantToken != null) {
-                String AccessToken = MiscellaneousUtil.resolve(marketplaceAssistantToken, secretResolver);
-                marketplaceAssistantConfigurationDto.setAccessToken(AccessToken);
-                if (!AccessToken.isEmpty()){
-                    marketplaceAssistantConfigurationDto.setAuthTokenProvided(true);
+                String Key = MiscellaneousUtil.resolve(marketplaceAssistantToken, secretResolver);
+                marketplaceAssistantConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
+                    marketplaceAssistantConfigurationDto.setKeyProvided(true);
                 }
             }
 
@@ -2479,13 +2479,13 @@ public class APIManagerConfiguration {
             if (apiChatEndpoint != null) {
                 apiChatConfigurationDto.setEndpoint(apiChatEndpoint.getText());
             }
-            OMElement apiChatToken =
-                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_AUTH_TOKEN));
+            OMElement apiChatKey =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_KEY));
 
-            if (apiChatToken != null) {
-                String AccessToken = MiscellaneousUtil.resolve(apiChatToken, secretResolver);
-                apiChatConfigurationDto.setAccessToken(AccessToken);
-                if (!AccessToken.isEmpty()){
+            if (apiChatKey != null) {
+                String Key = MiscellaneousUtil.resolve(apiChatKey, secretResolver);
+                apiChatConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
                     apiChatConfigurationDto.setAuthTokenProvided(true);
                 }
             }

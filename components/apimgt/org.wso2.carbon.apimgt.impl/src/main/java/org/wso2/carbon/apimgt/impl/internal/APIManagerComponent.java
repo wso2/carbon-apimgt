@@ -219,7 +219,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
-            if (configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
+            if (configuration.getMarketplaceAssistantConfigurationDto().isKeyProvided() ||
+                    configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
             }
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);

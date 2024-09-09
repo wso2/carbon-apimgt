@@ -206,7 +206,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                 payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
 
                 APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                        marketplaceAssistantConfigurationDto.getAccessToken(),
+                        marketplaceAssistantConfigurationDto.getKey(),
                         marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Uploading the API with UUID: " +
@@ -226,7 +226,7 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         public void run() {
             try {
                 APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                        marketplaceAssistantConfigurationDto.getAccessToken(),
+                        marketplaceAssistantConfigurationDto.getKey(),
                         marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Deleting the API with UUID: " +
