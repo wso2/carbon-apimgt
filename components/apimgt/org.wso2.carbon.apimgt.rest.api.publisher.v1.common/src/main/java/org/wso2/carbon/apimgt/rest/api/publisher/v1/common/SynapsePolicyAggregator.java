@@ -223,7 +223,7 @@ public class SynapsePolicyAggregator {
     private static String renderCustomBackendSequence(String sequenceName, String pathToArchive)
             throws APIManagementException {
         String policyDirectory = pathToArchive + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
-        String sequence = APIUtil.getOperationCustomBackendSequenceFromFile(policyDirectory, sequenceName,
+        String sequence = APIUtil.getCustomBackendSequenceFromFile(policyDirectory, sequenceName,
                 APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
         return renderPolicyTemplate(sequence, new HashMap<>());
     }

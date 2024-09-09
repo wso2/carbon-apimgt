@@ -193,6 +193,7 @@ public class APIMappingUtil {
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
+
         Object endpointConfig = dto.getEndpointConfig();
         if (endpointConfig != null) {
             ObjectMapper mapper = new ObjectMapper();

@@ -4314,7 +4314,7 @@ public final class APIUtil {
      * Return the Custom Backend name
      *
      * @param apiUUID API Id
-     * @param type Type of the custom backend used for (SANDBOX, PRODUCTION)
+     * @param type    Type of the custom backend used for (SANDBOX, PRODUCTION)
      * @return The name of the Custom Backend
      */
     public static String getCustomBackendName(String apiUUID, String type) {
@@ -10047,9 +10047,9 @@ public final class APIUtil {
     /**
      * Method is used to retrieve the Custom Backend sequence
      *
-     * @param extractedFolderPath Extracted folder path of the APICTL project
+     * @param extractedFolderPath   Extracted folder path of the APICTL project
      * @param customBackendFileName Custom Backend name
-     * @param fileExtension .xml
+     * @param fileExtension         .xml
      * @return The Sequence of the Custom Backend as an Input Stream
      * @throws APIManagementException If an error occurs while reading, throws an error
      */
@@ -10103,10 +10103,17 @@ public final class APIUtil {
         return policyDefinition;
     }
 
-    public static String getOperationCustomBackendSequenceFromFile(String extractedFolderPath,
-            String sequenceName,
-            String fileExtension)
-            throws APIManagementException {
+    /**
+     * Method is used to get Custom Backend Sequence from the APICTL project
+     *
+     * @param extractedFolderPath Extracted Folder path
+     * @param sequenceName        Sequence File name
+     * @param fileExtension       File extension of the Custom Backend
+     * @return Custom Backend sequence as a String
+     * @throws APIManagementException Throws if an error occurs when reading the file
+     */
+    public static String getCustomBackendSequenceFromFile(String extractedFolderPath, String sequenceName,
+            String fileExtension) throws APIManagementException {
 
         String customBackendContent = null;
         try {
@@ -10118,8 +10125,8 @@ public final class APIUtil {
                 customBackendContent = FileUtils.readFileToString(new File(fileName));
             }
         } catch (IOException e) {
-            throw new APIManagementException("Error while reading Custom Backend from path: "
-                    + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
+            throw new APIManagementException("Error while reading Custom Backend from path: " + extractedFolderPath, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
         }
         return customBackendContent;
     }
