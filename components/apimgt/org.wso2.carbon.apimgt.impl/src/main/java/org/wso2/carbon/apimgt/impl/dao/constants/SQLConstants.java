@@ -2742,9 +2742,42 @@ public class SQLConstants {
             "SET DISPLAY_NAME = ?, DESCRIPTION = ? " +
             "WHERE UUID = ?";
 
+    public static final String INSERT_LLM_PROVIDER_SQL =
+            "INSERT INTO AM_LLM_PROVIDERS (UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, ORGANIZATION, DESCRIPTION, " +
+                    "API_DEFINITION, CONFIGURATIONS) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    public static final String GET_LLM_PROVIDERS_BY_ORG_SQL =
+            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION " +
+                    "FROM AM_LLM_PROVIDERS " +
+                    "WHERE ORGANIZATION = ?";
+
+    public static final String GET_LLM_PROVIDER_CONFIGURATIONS_SQL =
+            "SELECT NAME, API_VERSION, ORGANIZATION, CONFIGURATIONS " +
+                    "FROM AM_LLM_PROVIDERS";
+
+    public static final String GET_BUILT_IN_LLM_PROVIDER_CONFIGURATIONS_BY_ORG_SQL =
+            "SELECT UUID, CONFIGURATIONS FROM AM_LLM_PROVIDERS WHERE ORGANIZATION = ? AND BUILT_IN_SUPPORT = true";
+
+    public static final String GET_LLM_PROVIDER_SQL =
+            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, CONFIGURATIONS " +
+                    "FROM AM_LLM_PROVIDERS PROVIDER WHERE ORGANIZATION = ? AND UUID = ?";
+
+    public static final String DELETE_LLM_PROVIDER_SQL =
+            "DELETE FROM AM_LLM_PROVIDERS " +
+                    "WHERE ORGANIZATION = ? AND UUID = ? AND BUILT_IN_SUPPORT = ?";
+
+    public static final String UPDATE_LLM_PROVIDER_SQL =
+            "UPDATE AM_LLM_PROVIDERS SET DESCRIPTION = ?, API_DEFINITION = ?, CONFIGURATIONS = ? " +
+                    "WHERE ORGANIZATION = ? AND UUID = ? AND BUILT_IN_SUPPORT = false";
+
+    public static final String UPDATE_BUILT_IN_LLM_PROVIDER_SQL = "UPDATE AM_LLM_PROVIDERS SET API_DEFINITION = ? WHERE ORGANIZATION = ? AND UUID = ?";;
+
     public static final String DELETE_API_PRODUCT_SQL =
             "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
                     + APIConstants.API_PRODUCT + "'";
+
+    public static final String CHECK_LLM_PROVIDER_BUILT_IN_SUPPORT_SQL = "SELECT NAME, API_VERSION, BUILT_IN_SUPPORT FROM AM_LLM_PROVIDERS WHERE ORGANIZATION = ? AND UUID = ?";
 
     public static final String UPDATE_PRODUCT_SQL =
             " UPDATE AM_API " +
