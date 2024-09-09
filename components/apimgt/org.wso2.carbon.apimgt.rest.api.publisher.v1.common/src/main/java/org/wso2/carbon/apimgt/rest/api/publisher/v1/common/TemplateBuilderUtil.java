@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -691,7 +693,12 @@ public class TemplateBuilderUtil {
             GatewayUtils.setCustomSequencesToBeRemoved(apiProduct.getId(), api.getUuid(), productAPIDto);
             APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api, apiProduct);
             // check the endpoint type
-            addEndpoints(api, apiTemplateBuilder, productAPIDto);
+            if (api.getEndpointConfig() != null) {
+                JsonObject endpointConfObj = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+                if(APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfObj.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+                    addEndpoints(api, apiTemplateBuilder, productAPIDto);
+                }
+            }
             setCustomSequencesToBeAdded(apiProduct, api, productAPIDto, apiExtractedPath, apidto);
             setAPIFaultSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
             String prefix = id.getName() + "--v" + id.getVersion();
@@ -735,6 +742,27 @@ public class TemplateBuilderUtil {
             if (gatewayFaultContentDTO != null) {
                 gatewayAPIDTO.setSequenceToBeAdd(
                         addGatewayContentToList(gatewayFaultContentDTO, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+
+            JsonObject endpointConfigMap = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                if (endpointConfigMap.get("sandbox") != null) {
+                    GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api, "SANDBOX",
+                            extractedPath);
+                    if (gatewayCustomBackendSequenceDTO != null) {
+                        gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
+                                gatewayAPIDTO.getSequenceToBeAdd()));
+                    }
+                }
+                if (endpointConfigMap.get("production") != null) {
+                    GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api, "PRODUCTION",
+                            extractedPath);
+                    if (gatewayCustomBackendSequenceDTO != null) {
+                        gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
+                                gatewayAPIDTO.getSequenceToBeAdd()));
+                    }
+                }
             }
         }
     }

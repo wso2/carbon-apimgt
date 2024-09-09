@@ -80,9 +80,7 @@ public interface ApisApiService {
       public Response createAPI(APIDTO APIDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
       public Response createNewAPIVersion(String newVersion, String apiId, Boolean defaultVersion, String serviceVersion, MessageContext messageContext) throws APIManagementException;
-
-      Response customBackendDelete(String type, String apiId, String customBackendId, String ifMatch,
-              MessageContext messageContext) throws APIManagementException;
+      public Response customBackendDelete(String type, String apiId, String customBackendId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response customBackendUpdate(String apiId, String ifMatch, InputStream sequenceInputStream, Attachment sequenceDetail, String type, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPI(String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
@@ -130,12 +128,8 @@ public interface ApisApiService {
       public Response getAmazonResourceNamesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAuditReportOfAPI(String apiId, String accept, MessageContext messageContext) throws APIManagementException;
       public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws APIManagementException;
-
-      Response getCustomBackendData(String type, String customBackendId, String apiId,
-              MessageContext messageContext) throws APIManagementException;
-
-      Response getCustomBackendDataContent(String type, String customBackendId, String apiId,
-              MessageContext messageContext) throws APIManagementException;
+      public Response getCustomBackendData(String type, String customBackendId, String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response getCustomBackendDataContent(String type, String customBackendId, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
