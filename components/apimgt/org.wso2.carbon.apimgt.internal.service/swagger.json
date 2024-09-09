@@ -917,6 +917,39 @@
           }
         }
       }
+    },
+    "/transaction-records" : {
+      "post" : {
+        "summary" : "Insert Transaction Records",
+        "description" : "Inserts a list of transaction records into the database.",
+        "operationId" : "insertTransactionRecords",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A list of transaction records to be inserted",
+          "required" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/TransactionRecord"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully inserted transaction records",
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. Invalid input data."
+          },
+          "500" : {
+            "description" : "Internal server error. Failed to insert transaction records."
+          }
+        }
+      }
     }
   },
   "definitions" : {
@@ -2127,6 +2160,30 @@
         }
       },
       "title" : "Properties for correlation components"
+    },
+    "TransactionRecord" : {
+      "type" : "object",
+      "required" : [ "count", "id", "recordedTime" ],
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "serverID" : {
+          "type" : "string"
+        },
+        "serverType" : {
+          "type" : "string"
+        },
+        "host" : {
+          "type" : "string"
+        },
+        "count" : {
+          "type" : "integer"
+        },
+        "recordedTime" : {
+          "type" : "string"
+        }
+      }
     }
   },
   "parameters" : {
