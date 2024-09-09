@@ -487,6 +487,71 @@ paths:
           -H "Content-Type: application/json" -d @data.json
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/topics"'
 
+  /apis/{apiId}/custom-backend/{customBackendId}/content:
+    get:
+      tags:
+        - APIs
+      summary: Get Sequence of Custom Backend
+      description: This operation can be used to get Sequence of the Custom Backend
+      operationId: getCustomBackendDataContent
+      parameters:
+        - name: type
+          in: query
+          description: |
+            Type of the Endpoint.
+            SANDBOX or PRODUCTION
+          required: true
+          schema:
+            maxLength: 15
+            type: string
+        - $ref: '#/components/parameters/customBackendId'
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API Custom Backend is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:api_import_export
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f/content"'
 
   /apis/{apiId}/custom-backend/{customBackendId}:
     get:
@@ -496,6 +561,15 @@ paths:
       description: This operation can be used to get Custom Backend data of the API
       operationId: getCustomBackendData
       parameters:
+        - name: type
+          in: query
+          description: |
+            Type of the Endpoint.
+            SANDBOX or PRODUCTION
+          required: true
+          schema:
+            maxLength: 15
+            type: string
         - $ref: '#/components/parameters/customBackendId'
         - $ref: '#/components/parameters/apiId'
       responses:
@@ -550,6 +624,15 @@ paths:
       description: This operation can be used to remove the Custom Backend of the API
       operationId: customBackendDelete
       parameters:
+        - name: type
+          in: query
+          description: |
+            Type of the Endpoint.
+            SANDBOX or PRODUCTION
+          required: true
+          schema:
+            maxLength: 15
+            type: string
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
         - $ref: '#/components/parameters/customBackendId'

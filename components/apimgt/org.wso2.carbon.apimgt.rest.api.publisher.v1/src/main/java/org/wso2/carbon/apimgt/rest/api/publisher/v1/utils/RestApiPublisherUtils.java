@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.FileUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -275,6 +276,24 @@ public class RestApiPublisherUtils {
             fileContentType = fileDetail.getContentType().toString();
         }
         return fileContentType;
+    }
+
+    public static File exportCustomBackendData(InputStream seq, String seqName) throws APIManagementException {
+        File exportFolder = null;
+        try {
+            exportFolder = CommonUtil.createTempDirectoryFromName(seqName + "_" + "Custom-Backend");
+            String exportCustomBackendBasePath = exportFolder.toString();
+            String archivePath = exportCustomBackendBasePath.concat(File.separator + seqName);
+            CommonUtil.createDirectory(archivePath);
+            String customBackendName =
+                    archivePath + File.separator + seqName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+            CommonUtil.writeFile(customBackendName, IOUtils.toString(seq));
+            CommonUtil.archiveDirectory(exportCustomBackendBasePath);
+            FileUtils.deleteQuietly(new File(exportCustomBackendBasePath));
+            return new File(exportCustomBackendBasePath + APIConstants.ZIP_FILE_EXTENSION);
+        } catch (APIImportExportException | IOException ex) {
+            throw new APIManagementException("Error when exporting Custom Backend: " + seqName, ex);
+        }
     }
 
     public static File exportOperationPolicyData(OperationPolicyData policyData, String format)

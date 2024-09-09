@@ -395,8 +395,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response customBackendDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.customBackendDelete(apiId, customBackendId, ifMatch, securityContext);
+    public Response customBackendDelete( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.customBackendDelete(type, apiId, customBackendId, ifMatch, securityContext);
     }
 
     @PUT
@@ -1349,8 +1349,29 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getCustomBackendData(@ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
-        return delegate.getCustomBackendData(customBackendId, apiId, securityContext);
+    public Response getCustomBackendData( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getCustomBackendData(type, customBackendId, apiId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/custom-backend/{customBackendId}/content")
+    
+    @Produces({ "application/zip", "application/json" })
+    @ApiOperation(value = "Get Sequence of Custom Backend", notes = "This operation can be used to get Sequence of the Custom Backend", response = File.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested API Custom Backend is returned ", response = File.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response getCustomBackendDataContent( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getCustomBackendDataContent(type, customBackendId, apiId, securityContext);
     }
 
     @GET

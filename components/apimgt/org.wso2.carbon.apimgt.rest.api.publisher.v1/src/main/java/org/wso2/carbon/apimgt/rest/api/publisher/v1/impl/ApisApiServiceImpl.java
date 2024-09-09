@@ -168,32 +168,51 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override public Response getCustomBackendData(String customBackendId, String apiId, MessageContext messageContext)
-            throws APIManagementException {
+    @Override public Response getCustomBackendData(String type, String customBackendId, String apiId,
+            MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         //validate if api exists
         CommonUtils.validateAPIExistence(apiId);
-        String type = "SANDBOX";
 
         Map<String, Object> endpointConfig = apiProvider.getCustomBackendOfAPIByUUID(customBackendId, apiId, type,
-                true);
+                false);
+
+        if(endpointConfig != null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing Custom Backend with ID: "
+                    + customBackendId + " for API " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, customBackendId));
+        }
         CustomBackendDTO backendDTO = new CustomBackendDTO();
         backendDTO.setSequenceName(endpointConfig.get("sequence_name").toString());
         backendDTO.setSequenceId(endpointConfig.get("sequence_id").toString());
         backendDTO.setSequenceType(endpointConfig.get("type").toString());
         return Response.ok().entity(backendDTO).build();
     }
+    @Override
+    public Response getCustomBackendDataContent(String type, String customBackendId, String apiId, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        CommonUtils.validateAPIExistence(apiId);
 
-    @Override public Response customBackendDelete(String apiId, String customBackendId, String ifMatch,
+        InputStream seq = apiProvider.getCustomBackendSequenceOfAPIByUUID(apiId, customBackendId, type);
+        if(seq != null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve an existing Custom Backend with ID: "
+                    + customBackendId + " for API " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, customBackendId));
+        }
+        String seqName = APIUtil.getCustomBackendName(apiId, type);
+        File file = RestApiPublisherUtils.exportCustomBackendData(seq, seqName);
+        return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getName() + "\"").build();
+    }
+
+    @Override public Response customBackendDelete(String type, String apiId, String customBackendId, String ifMatch,
             MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
         //validate if api exists
         CommonUtils.validateAPIExistence(apiId);
-        String type = "SANDBOX";
         apiProvider.deleteCustomBackendByID(apiId, customBackendId, type);
-        return Response.ok().entity(null).build();
+        return Response.ok().build();
     }
 
     @Override
