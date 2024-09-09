@@ -607,6 +607,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     for (String docPath : docsPaths) {
                         if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
                             Resource docResource = registry.get(docPath);
+                            if (docResource instanceof org.wso2.carbon.registry.core.Collection) {
+                                //This is a custom folder and will be ignored.
+                                continue;
+                            } else if (docResource != null) {
+                                if (!APIConstants.DOCUMENT_RXT_MEDIA_TYPE.equals(docResource.getMediaType())) {
+                                    //These are custom resources and will be ignored.
+                                    continue;
+                                }
+                            }
                             GenericArtifactManager docArtifactManager = RegistryPersistenceDocUtil
                                     .getDocumentArtifactManager(registry);
                             GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docResource.getUUID());
