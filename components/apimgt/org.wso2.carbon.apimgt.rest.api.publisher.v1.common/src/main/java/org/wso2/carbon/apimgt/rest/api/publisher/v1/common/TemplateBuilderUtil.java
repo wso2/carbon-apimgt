@@ -695,7 +695,8 @@ public class TemplateBuilderUtil {
             // check the endpoint type
             if (api.getEndpointConfig() != null) {
                 JsonObject endpointConfObj = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-                if(APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfObj.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+                if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                        endpointConfObj.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
                     addEndpoints(api, apiTemplateBuilder, productAPIDto);
                 }
             }
@@ -745,7 +746,7 @@ public class TemplateBuilderUtil {
             }
 
             JsonObject endpointConfigMap = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+            if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                     endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                 if (endpointConfigMap.get("sandbox") != null) {
                     GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api, "SANDBOX",
