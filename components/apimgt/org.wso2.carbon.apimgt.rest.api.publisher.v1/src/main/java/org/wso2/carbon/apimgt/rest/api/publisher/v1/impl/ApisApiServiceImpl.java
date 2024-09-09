@@ -179,7 +179,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         Map<String, Object> endpointConfig = apiProvider.getCustomBackendOfAPIByUUID(customBackendId, apiId, type,
                 false);
 
-        if (endpointConfig != null) {
+        if (endpointConfig == null) {
             throw new APIMgtResourceNotFoundException(
                     "Couldn't retrieve an existing Custom Backend with ID: " + customBackendId + " for API " + apiId,
                     ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, customBackendId));
