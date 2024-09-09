@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 import java.util.List;
 import java.util.Map;
@@ -26,9 +26,9 @@ import java.util.Map;
 /**
  * Interface for handling payloads specific to LLMs in the API Manager.
  */
-public interface LlmProviderService {
+public interface LLMProviderService {
 
-    Log log = LogFactory.getLog(LlmProviderService.class);
+    Log log = LogFactory.getLog(LLMProviderService.class);
 
     /**
      * Extracts response metadata from the payload, headers, or query parameters.
@@ -41,7 +41,7 @@ public interface LlmProviderService {
      * @throws APIManagementException If extraction fails.
      */
     Map<String, String> getResponseMetadata(String payload, Map<String, String> header,
-                                            Map<String, String> queryParams, List<LlmProviderMetadata> metadata)
+                                            Map<String, String> queryParams, List<LLMProviderMetadata> metadata)
             throws APIManagementException;
 
     /**
@@ -55,7 +55,7 @@ public interface LlmProviderService {
      * @throws APIManagementException If extraction fails.
      */
     Map<String, String> getRequestMetadata(String payload, Map<String, String> header,
-                                           Map<String, String> queryParams, List<LlmProviderMetadata> metadata)
+                                           Map<String, String> queryParams, List<LLMProviderMetadata> metadata)
             throws APIManagementException;
 
     /**
@@ -73,5 +73,5 @@ public interface LlmProviderService {
      * @return The registered LLM Provider.
      * @throws APIManagementException If registration fails.
      */
-    LlmProvider registerLlmProvider(String organization, String apiDefinitionFilePath) throws APIManagementException;
+    LLMProvider registerLlmProvider(String organization, String apiDefinitionFilePath) throws APIManagementException;
 }

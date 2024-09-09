@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
@@ -44,7 +44,7 @@ public class DataHolder {
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
-    private Map<LlmProvider, String> llmProviderConfigurationHolder = new HashMap<>();
+    private Map<LLMProvider, String> llmProviderConfigurationHolder = new HashMap<>();
     private boolean isAllGatewayPoliciesDeployed = false;
 
     private DataHolder() {
@@ -56,7 +56,7 @@ public class DataHolder {
         return apiToCertificatesMap;
     }
 
-    public String getLlmProviderConfigurations(LlmProvider provider) {
+    public String getLlmProviderConfigurations(LLMProvider provider) {
 
         if (llmProviderConfigurationHolder.containsKey(provider)) {
             return llmProviderConfigurationHolder.get(provider);
@@ -66,17 +66,17 @@ public class DataHolder {
         }
     }
 
-    public void addLlmProviderConfigurations(LlmProvider provider, String configurations) {
+    public void addLlmProviderConfigurations(LLMProvider provider, String configurations) {
         llmProviderConfigurationHolder.put(provider, configurations);
     }
-    public void removeLlmProviderConfigurations(LlmProvider provider) {
+    public void removeLlmProviderConfigurations(LLMProvider provider) {
         if (provider == null) {
             return;
         }
         llmProviderConfigurationHolder.remove(provider);
     }
 
-    public void updateLlmProviderConfigurations(LlmProvider provider, String configurations) {
+    public void updateLlmProviderConfigurations(LLMProvider provider, String configurations) {
         this.removeLlmProviderConfigurations(provider);
         this.addLlmProviderConfigurations(provider, configurations);
     }

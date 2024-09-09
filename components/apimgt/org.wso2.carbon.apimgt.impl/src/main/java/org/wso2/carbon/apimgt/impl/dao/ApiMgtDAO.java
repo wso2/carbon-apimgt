@@ -67,7 +67,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -14392,7 +14392,7 @@ public class ApiMgtDAO {
      * @return The LLMProvider object that was added, with its ID set.
      * @throws APIManagementException If an error occurs while adding the LLM provider to the database.
      */
-    public LlmProvider addLlmProvider(LlmProvider provider) throws APIManagementException {
+    public LLMProvider addLlmProvider(LLMProvider provider) throws APIManagementException {
 
         String providerId = UUID.randomUUID().toString();
         provider.setId(providerId);
@@ -14438,9 +14438,9 @@ public class ApiMgtDAO {
      * @return List<LlmProvider> a list of LLM provider objects associated with the given organization
      * @throws APIManagementException if an error occurs while accessing the database or retrieving data
      */
-    public List<LlmProvider> getLlmProvidersByOrg(String organization) throws APIManagementException {
+    public List<LLMProvider> getLlmProvidersByOrg(String organization) throws APIManagementException {
 
-        List<LlmProvider> providerList = new ArrayList<>();
+        List<LLMProvider> providerList = new ArrayList<>();
         String errorMessage = "Failed to get LLM Providers in tenant domain: " + organization;
 
         try {
@@ -14450,7 +14450,7 @@ public class ApiMgtDAO {
             preparedStatement.setString(1, organization);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                LlmProvider provider = new LlmProvider();
+                LLMProvider provider = new LLMProvider();
                 provider.setId(resultSet.getString("UUID"));
                 provider.setName(resultSet.getString("NAME"));
                 provider.setApiVersion(resultSet.getString("API_VERSION"));
@@ -14466,9 +14466,9 @@ public class ApiMgtDAO {
         return providerList;
     }
 
-    public List<LlmProvider> getLlmProviderConfigurations() throws APIManagementException {
+    public List<LLMProvider> getLlmProviderConfigurations() throws APIManagementException {
 
-        List<LlmProvider> providerList = new ArrayList<>();
+        List<LLMProvider> providerList = new ArrayList<>();
         String errorMessage = "Failed to get LLM Providers.";
 
         try {
@@ -14477,7 +14477,7 @@ public class ApiMgtDAO {
                     connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_CONFIGURATIONS_SQL);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                LlmProvider provider = new LlmProvider();
+                LLMProvider provider = new LLMProvider();
                 provider.setName(resultSet.getString("NAME"));
                 provider.setApiVersion(resultSet.getString("API_VERSION"));
                 provider.setOrganization(resultSet.getString("ORGANIZATION"));
@@ -14491,10 +14491,10 @@ public class ApiMgtDAO {
         return providerList;
     }
 
-    public List<LlmProvider> getBuiltInLlmProviders(String organization) throws APIManagementException {
+    public List<LLMProvider> getBuiltInLlmProviders(String organization) throws APIManagementException {
 
         String errorMessage = "Failed to retrieve BUILT_IN_SUPPORT LLM Providers configurations in tenant domain: " + organization;
-        List<LlmProvider> builtInLlmProviders = new ArrayList<>();
+        List<LLMProvider> builtInLLMProviders = new ArrayList<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_INBUILT_LLM_PROVIDER_CONFIGURATIONS_BY_ORG_SQL)) {
@@ -14503,17 +14503,17 @@ public class ApiMgtDAO {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                LlmProvider provider = new LlmProvider();
+                LLMProvider provider = new LLMProvider();
                 provider.setId(resultSet.getString("UUID"));
                 provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
-                builtInLlmProviders.add(provider);
+                builtInLLMProviders.add(provider);
             }
 
         } catch (SQLException e) {
             throw new APIManagementException(errorMessage, e);
         }
 
-        return builtInLlmProviders;
+        return builtInLLMProviders;
     }
 
 
@@ -14527,9 +14527,9 @@ public class ApiMgtDAO {
      * @param llmProviderId the unique identifier of the LLM provider to be deleted
      * @throws APIManagementException if an error occurs while accessing the database or deleting the data
      */
-    public LlmProvider deleteLlmProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException {
+    public LLMProvider deleteLlmProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException {
 
-        LlmProvider provider = getLlmProvider(organization, llmProviderId);
+        LLMProvider provider = getLlmProvider(organization, llmProviderId);
         String errorMessage = "Failed to delete LLM Provider in tenant domain: " + organization;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -14562,7 +14562,7 @@ public class ApiMgtDAO {
      * @return LlmProvider the updated LLM provider object
      * @throws APIManagementException if an error occurs while accessing the database or updating data
      */
-    public LlmProvider updateLlmProvider(LlmProvider provider) throws APIManagementException {
+    public LLMProvider updateLlmProvider(LLMProvider provider) throws APIManagementException {
 
         String errorMessage = "Failed to update LLM Provider in tenant domain: " + provider.getOrganization();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -14618,7 +14618,7 @@ public class ApiMgtDAO {
      * or {@code null} if no provider is found
      * @throws APIManagementException if an error occurs while accessing the database or retrieving data
      */
-    public LlmProvider getLlmProvider(String organization, String llmProviderId) throws APIManagementException {
+    public LLMProvider getLlmProvider(String organization, String llmProviderId) throws APIManagementException {
 
         String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
         try {
@@ -14630,7 +14630,7 @@ public class ApiMgtDAO {
             if (!resultSet.next()) {
                 return null;
             }
-            LlmProvider provider = new LlmProvider();
+            LLMProvider provider = new LLMProvider();
             provider.setId(resultSet.getString("UUID"));
             provider.setName(resultSet.getString("NAME"));
             provider.setApiVersion(resultSet.getString("API_VERSION"));

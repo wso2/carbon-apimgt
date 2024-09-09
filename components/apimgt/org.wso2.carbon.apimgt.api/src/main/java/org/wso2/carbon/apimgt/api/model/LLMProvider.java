@@ -24,7 +24,7 @@ import java.util.Objects;
 /**
  * This class represents a LLM (Large Language Model) Provider.
  */
-public class LlmProvider implements Serializable {
+public class LLMProvider implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private String id = null;
@@ -108,7 +108,7 @@ public class LlmProvider implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LlmProvider that = (LlmProvider) o;
+        LLMProvider that = (LLMProvider) o;
         return Objects.equals(name, that.name) && Objects.equals(apiVersion, that.apiVersion) &&
                 Objects.equals(organization, that.organization);
     }

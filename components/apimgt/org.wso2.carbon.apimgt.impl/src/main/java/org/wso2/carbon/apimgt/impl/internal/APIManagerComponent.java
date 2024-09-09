@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
-import org.wso2.carbon.apimgt.api.LlmProviderService;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
@@ -84,7 +84,7 @@ import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.LlmProviderNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.LLMProviderNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
@@ -218,7 +218,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
-            bundleContext.registerService(Notifier.class.getName(), new LlmProviderNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
             if (configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
             }
@@ -421,16 +421,16 @@ public class APIManagerComponent {
 
     @Reference(
             name = "llm.payload.handler.connector.service",
-            service = LlmProviderService.class,
+            service = LLMProviderService.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "removeLlmPayloadHandler")
-    protected void addLlmPayloadHandler(LlmProviderService llmProviderService) {
+    protected void addLlmPayloadHandler(LLMProviderService llmProviderService) {
 
         ServiceReferenceHolder.getInstance().addLlmProviderService(llmProviderService.getType(), llmProviderService);
     }
 
-    protected void removeLlmPayloadHandler(LlmProviderService llmProviderService) {
+    protected void removeLlmPayloadHandler(LLMProviderService llmProviderService) {
 
         ServiceReferenceHolder.getInstance().removeLlmProviderService(llmProviderService.getType());
     }

@@ -19,7 +19,7 @@ public class KeyMgtNotificationSender {
 
         String keyManagerConfiguration = new Gson().toJson(keyManagerConfigurationDTO);
         String encodedString = new String(Base64.encodeBase64(keyManagerConfiguration.getBytes()));
-        Object[] objects = new Object[]{APIConstants.LlmProviderEvent.LLM_PROVIDER_CONFIGURATION, action,
+        Object[] objects = new Object[]{APIConstants.KeyManager.KeyManagerEvent.KEY_MANAGER_CONFIGURATION, action,
                 keyManagerConfigurationDTO.getName(), keyManagerConfigurationDTO.getType(),
                 keyManagerConfigurationDTO.isEnabled(), encodedString,
                 keyManagerConfigurationDTO.getOrganization(), keyManagerConfigurationDTO.getTokenType()};

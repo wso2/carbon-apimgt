@@ -1,65 +1,64 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mistral AI LLM Provider Service.
+ * OpenAI LLM Provider Service.
  */
 @Component(
-        name = "mistralAi.llm.provider.service",
+        name = "openAi.llm.provider.service",
         immediate = true,
-        service = LlmProviderService.class
+        service = LLMProviderService.class
 )
-public class MistralAiInLlmProviderService extends BuiltInLlmProviderService {
+public class OpenAiLLMProviderService extends BuiltInLLMProviderService {
 
     @Override
     public String getType() {
 
-        return APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_CONNECTOR;
+        return APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_CONNECTOR;
     }
 
     @Override
-    public LlmProvider registerLlmProvider(String organization, String apiDefinitionFilePath)
+    public LLMProvider registerLlmProvider(String organization, String apiDefinitionFilePath)
             throws APIManagementException {
 
         try {
-            LlmProvider llmProvider = new LlmProvider();
-            llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_NAME);
-            llmProvider.setApiVersion(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_VERSION);
+            LLMProvider llmProvider = new LLMProvider();
+            llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_NAME);
+            llmProvider.setApiVersion(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_VERSION);
             llmProvider.setOrganization(organization);
-            llmProvider.setDescription(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION);
+            llmProvider.setDescription(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_DESCRIPTION);
             llmProvider.setBuiltInSupport(true);
 
             llmProvider.setApiDefinition(readApiDefinition(
                     apiDefinitionFilePath
-                            + APIConstants.AIAPIConstants
-                            .LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME));
+                            + APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_API_DEFINITION_FILE_NAME));
 
-            LlmProviderConfiguration llmProviderConfiguration = new LlmProviderConfiguration();
+            LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
             List<String> additionalHeader = new ArrayList<>();
-            additionalHeader.add(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_KEY);
+            additionalHeader.add(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_KEY);
             llmProviderConfiguration.setAdditionalHeaders(additionalHeader);
             llmProviderConfiguration.setConnectorType(this.getType());
 
-            List<LlmProviderMetadata> llmProviderMetadata = new ArrayList<>();
-            llmProviderMetadata.add(new LlmProviderMetadata(
+            List<LLMProviderMetadata> llmProviderMetadata = new ArrayList<>();
+            llmProviderMetadata.add(new LLMProviderMetadata(
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_MODEL));
-            llmProviderMetadata.add(new LlmProviderMetadata(
+            llmProviderMetadata.add(new LLMProviderMetadata(
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT));
-            llmProviderMetadata.add(new LlmProviderMetadata(
+            llmProviderMetadata.add(new LLMProviderMetadata(
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
                     APIConstants.AIAPIConstants
                             .LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_COMPLETION_TOKEN_COUNT));
-            llmProviderMetadata.add(new LlmProviderMetadata(
+            llmProviderMetadata.add(new LLMProviderMetadata(
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT,
                     APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD,
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT));

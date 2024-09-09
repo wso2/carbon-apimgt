@@ -10,7 +10,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -24,19 +24,19 @@ import java.nio.charset.StandardCharsets;
 
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.UTF8;
 
-public class LlmProviderManager {
+public class LLMProviderManager {
 
     private final EventHubConfigurationDto eventHubConfigurationDto;
-    private static final LlmProviderManager llmProviderManager = new LlmProviderManager();
+    private static final LLMProviderManager llmProviderManager = new LLMProviderManager();
 
-    private static final Log log = LogFactory.getLog(LlmProviderManager.class);
+    private static final Log log = LogFactory.getLog(LLMProviderManager.class);
 
     /**
      * Returns the singleton instance of LlmProviderManager.
      *
      * @return The LlmProviderManager instance.
      */
-    public static LlmProviderManager getInstance() {
+    public static LLMProviderManager getInstance() {
 
         return llmProviderManager;
     }
@@ -44,7 +44,7 @@ public class LlmProviderManager {
     /**
      * Initializes LlmProviderManager with the EventHub configuration.
      */
-    public LlmProviderManager() {
+    public LLMProviderManager() {
 
         this.eventHubConfigurationDto = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
                 .getAPIManagerConfiguration().getEventHubConfigurationDto();
@@ -70,7 +70,7 @@ public class LlmProviderManager {
                 String apiVersion = apiObj.getString(AIAPIConstants.LLM_PROVIDER_API_VERSION);
                 String organization = apiObj.getString(AIAPIConstants.LLM_PROVIDER_ORGANIZATION);
                 String configurations = apiObj.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
-                LlmProvider provider = new LlmProvider();
+                LLMProvider provider = new LLMProvider();
                 provider.setName(name);
                 provider.setApiVersion(apiVersion);
                 provider.setOrganization(organization);

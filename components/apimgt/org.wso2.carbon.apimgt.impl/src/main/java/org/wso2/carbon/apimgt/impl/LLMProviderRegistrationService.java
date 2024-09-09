@@ -5,9 +5,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.BuiltInLlmProviderService;
-import org.wso2.carbon.apimgt.api.LlmProviderService;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.BuiltInLLMProviderService;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class LlmProviderRegistrationService {
+public class LLMProviderRegistrationService {
 
-    private static final Log log = LogFactory.getLog(LlmProviderRegistrationService.class);
+    private static final Log log = LogFactory.getLog(LLMProviderRegistrationService.class);
 
     /**
      * Registers default built-in LLM Providers for the organization.
@@ -29,10 +29,10 @@ public class LlmProviderRegistrationService {
     public static void registerDefaultLLMProviders(String organization) throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
-        List<LlmProvider> builtInLlmProviders = apiAdmin.getBuiltInLlmProviders(organization);
-        Map<String, String> llmProviderMap = mapLlmProviders(builtInLlmProviders);
+        List<LLMProvider> builtInLLMProviders = apiAdmin.getBuiltInLlmProviders(organization);
+        Map<String, String> llmProviderMap = mapLlmProviders(builtInLLMProviders);
 
-        Map<String, LlmProviderService> llmProviderServiceMap =
+        Map<String, LLMProviderService> llmProviderServiceMap =
                 ServiceReferenceHolder.getInstance().getLlmProviderServiceMap();
 
         Set<String> llmProviderConnectorTypes = llmProviderMap.keySet();
@@ -42,7 +42,7 @@ public class LlmProviderRegistrationService {
                 + APIConstants.AIAPIConstants.AI_API_DEFINITION_FILE_PATH;
         for (String connectorType : llmProviderConnectorTypes) {
             if (!llmProviderServiceConnectorTypes.contains(connectorType)) {
-                LlmProvider provider = apiAdmin.deleteLlmProvider(organization, llmProviderMap.get(connectorType), true);
+                LLMProvider provider = apiAdmin.deleteLlmProvider(organization, llmProviderMap.get(connectorType), true);
                 if (provider == null) {
                     log.debug("Failed to delete LLM Provider with ID: " + llmProviderMap.get(connectorType) + "in " +
                             "organization " + organization);
@@ -51,9 +51,9 @@ public class LlmProviderRegistrationService {
         }
         for (String connectorType : llmProviderServiceConnectorTypes) {
             if (!llmProviderConnectorTypes.contains(connectorType)) {
-                LlmProviderService llmProviderService = llmProviderServiceMap.get(connectorType);
-                if (llmProviderService instanceof BuiltInLlmProviderService) {
-                    LlmProvider llmProvider = llmProviderService
+                LLMProviderService llmProviderService = llmProviderServiceMap.get(connectorType);
+                if (llmProviderService instanceof BuiltInLLMProviderService) {
+                    LLMProvider llmProvider = llmProviderService
                             .registerLlmProvider(organization, apiDefinitionFilePath);
                     if (llmProvider != null) {
                         apiAdmin.addLlmProvider(llmProvider);
@@ -69,13 +69,13 @@ public class LlmProviderRegistrationService {
     /**
      * Maps built-in LLM Providers to their connector types and IDs.
      *
-     * @param builtInLlmProviders The list of built-in LLM Providers.
+     * @param builtInLLMProviders The list of built-in LLM Providers.
      * @return A map of connector types to LLM Provider IDs.
      */
-    private static Map<String, String> mapLlmProviders(List<LlmProvider> builtInLlmProviders) {
+    private static Map<String, String> mapLlmProviders(List<LLMProvider> builtInLLMProviders) {
 
         Map<String, String> providerMap = new HashMap<>();
-        for (LlmProvider provider : builtInLlmProviders) {
+        for (LLMProvider provider : builtInLLMProviders) {
             String configurations = provider.getConfigurations();
             org.json.JSONObject configJson = new org.json.JSONObject(configurations);
             String connectorType = configJson.getString(APIConstants.AIAPIConstants.CONNECTOR_TYPE);

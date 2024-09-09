@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class LlmProviderMetadata {
+public class LLMProviderMetadata {
 
     @JsonProperty("attributeName")
     private String attributeName;
@@ -13,9 +13,9 @@ public class LlmProviderMetadata {
     @JsonProperty("attributeIdentifier")
     private String attributeIdentifier;
 
-    public LlmProviderMetadata() {}
+    public LLMProviderMetadata() {}
 
-    public LlmProviderMetadata(@JsonProperty("attributeName") String attributeName,
+    public LLMProviderMetadata(@JsonProperty("attributeName") String attributeName,
                                @JsonProperty("inputSource") String inputSource,
                                @JsonProperty("attributeIdentifier") String attributeIdentifier) {
 

@@ -7,13 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 
-public class LlmProviderConfiguration {
+public class LLMProviderConfiguration {
 
     @JsonProperty("connectorType")
     private String connectorType;
 
     @JsonProperty("metadata")
-    private List<LlmProviderMetadata> metadata;
+    private List<LLMProviderMetadata> metadata;
 
     @JsonProperty("additionalHeaders")
     private List<String> additionalHeaders;
@@ -21,12 +21,12 @@ public class LlmProviderConfiguration {
     @JsonProperty("additionalQueryParameters")
     private List<String> additionalQueryParameters;
 
-    public LlmProviderConfiguration() {}
+    public LLMProviderConfiguration() {}
 
     @JsonCreator
-    public LlmProviderConfiguration(
+    public LLMProviderConfiguration(
             @JsonProperty("connectorType") String connectorType,
-            @JsonProperty("metadata") List<LlmProviderMetadata> metadata,
+            @JsonProperty("metadata") List<LLMProviderMetadata> metadata,
             @JsonProperty("additionalHeaders") List<String> additionalHeaders,
             @JsonProperty("additionalQueryParameters") List<String> additionalQueryParameters) {
 
@@ -46,12 +46,12 @@ public class LlmProviderConfiguration {
         this.connectorType = connectorType;
     }
 
-    public List<LlmProviderMetadata> getMetadata() {
+    public List<LLMProviderMetadata> getMetadata() {
 
         return metadata;
     }
 
-    public void setMetadata(List<LlmProviderMetadata> metadata) {
+    public void setMetadata(List<LLMProviderMetadata> metadata) {
 
         this.metadata = metadata;
     }

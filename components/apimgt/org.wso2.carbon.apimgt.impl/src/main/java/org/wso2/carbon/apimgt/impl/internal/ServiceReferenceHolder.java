@@ -17,7 +17,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.LlmProviderService;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
@@ -80,7 +80,7 @@ public class ServiceReferenceHolder {
     private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
     private WorkflowTaskService workflowTaskService;
 
-    private Map<String, LlmProviderService> llmProviderServiceMap = new HashMap();
+    private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
 
     private ServiceReferenceHolder() {
 
@@ -381,7 +381,7 @@ public class ServiceReferenceHolder {
         this.workflowTaskService = workflowTaskService;    
     }
 
-    public void addLlmProviderService(String type, LlmProviderService llmProviderService) {
+    public void addLlmProviderService(String type, LLMProviderService llmProviderService) {
 
         llmProviderServiceMap.put(type, llmProviderService);
     }
@@ -391,12 +391,12 @@ public class ServiceReferenceHolder {
         llmProviderServiceMap.remove(type);
     }
 
-    public LlmProviderService getLlmProviderService(String type) {
+    public LLMProviderService getLlmProviderService(String type) {
 
         return llmProviderServiceMap.get(type);
     }
 
-    public Map<String, LlmProviderService> getLlmProviderServiceMap() {
+    public Map<String, LLMProviderService> getLlmProviderServiceMap() {
 
         return this.llmProviderServiceMap;
     }

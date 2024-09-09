@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 /**
  * Default LLM Provider Service
@@ -28,9 +28,9 @@ import org.wso2.carbon.apimgt.api.model.LlmProvider;
 @Component(
         name = "default.llm.provider.service",
         immediate = true,
-        service = LlmProviderService.class
+        service = LLMProviderService.class
 )
-public class DefaultInLlmProviderService extends BuiltInLlmProviderService {
+public class DefaultLLMProviderService extends BuiltInLLMProviderService {
 
     @Override
     public String getType() {
@@ -39,7 +39,7 @@ public class DefaultInLlmProviderService extends BuiltInLlmProviderService {
     }
 
     @Override
-    public LlmProvider registerLlmProvider(String organization, String apiDefinitionFilePath) {
+    public LLMProvider registerLlmProvider(String organization, String apiDefinitionFilePath) {
 
         return null;
     }

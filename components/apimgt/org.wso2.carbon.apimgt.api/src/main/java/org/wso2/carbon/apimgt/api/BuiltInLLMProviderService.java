@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.api;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * InBuiltLlmProviderService handles the common logic for Built In LLM provider services.
  */
-public abstract class BuiltInLlmProviderService implements LlmProviderService {
+public abstract class BuiltInLLMProviderService implements LLMProviderService {
 
     /**
      * Extracts metadata from the payload, headers, or query params.
@@ -30,7 +30,7 @@ public abstract class BuiltInLlmProviderService implements LlmProviderService {
     @Override
     public Map<String, String> getResponseMetadata(String payload, Map<String, String> headers,
                                                    Map<String, String> queryParams,
-                                                   List<LlmProviderMetadata> metadataList)
+                                                   List<LLMProviderMetadata> metadataList)
             throws APIManagementException {
 
         Map<String, String> extractedMetadata = new HashMap<>();
@@ -39,7 +39,7 @@ public abstract class BuiltInLlmProviderService implements LlmProviderService {
             return extractedMetadata;
         }
         try {
-            for (LlmProviderMetadata metadata : metadataList) {
+            for (LLMProviderMetadata metadata : metadataList) {
                 String attributeName = metadata.getAttributeName();
                 String inputSource = metadata.getInputSource();
                 String attributeIdentifier = metadata.getAttributeIdentifier();
@@ -69,7 +69,7 @@ public abstract class BuiltInLlmProviderService implements LlmProviderService {
     @Override
     public Map<String, String> getRequestMetadata(String payload, Map<String, String> headers,
                                                   Map<String, String> queryParams,
-                                                  List<LlmProviderMetadata> metadataList)
+                                                  List<LLMProviderMetadata> metadataList)
             throws APIManagementException {
         return null;
     }
@@ -94,6 +94,6 @@ public abstract class BuiltInLlmProviderService implements LlmProviderService {
     public abstract String getType();
 
     @Override
-    public abstract LlmProvider registerLlmProvider(String organization, String apiDefinitionFilePath)
+    public abstract LLMProvider registerLlmProvider(String organization, String apiDefinitionFilePath)
             throws APIManagementException;
 }

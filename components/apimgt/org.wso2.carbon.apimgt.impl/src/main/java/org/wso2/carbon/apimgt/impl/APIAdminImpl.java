@@ -52,7 +52,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -601,11 +601,11 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public LlmProvider addLlmProvider(LlmProvider provider) throws APIManagementException {
+    public LLMProvider addLlmProvider(LLMProvider provider) throws APIManagementException {
 
-        LlmProvider result = apiMgtDAO.addLlmProvider(provider);
+        LLMProvider result = apiMgtDAO.addLlmProvider(provider);
         if (result != null) {
-            new LlmProviderNotificationSender().notify(result.getName(), result.getApiVersion(),
+            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(),
                     result.getOrganization(), result.getConfigurations(),
                     APIConstants.EventType.LLM_PROVIDER_CREATE.name());
         }
@@ -613,45 +613,45 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<LlmProvider> getLlmProvidersByOrg(String organization) throws APIManagementException {
+    public List<LLMProvider> getLlmProvidersByOrg(String organization) throws APIManagementException {
         return apiMgtDAO.getLlmProvidersByOrg(organization);
     }
 
     @Override
-    public List<LlmProvider> getLlmProviderConfigurations() throws APIManagementException {
+    public List<LLMProvider> getLlmProviderConfigurations() throws APIManagementException {
         return apiMgtDAO.getLlmProviderConfigurations();
     }
 
     @Override
-    public LlmProvider deleteLlmProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException {
+    public LLMProvider deleteLlmProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException {
 
-        LlmProvider result = apiMgtDAO.deleteLlmProvider(organization, llmProviderId, builtIn);
+        LLMProvider result = apiMgtDAO.deleteLlmProvider(organization, llmProviderId, builtIn);
         if (result != null) {
-            new LlmProviderNotificationSender().notify(result.getName(), result.getApiVersion(), organization, null,
+            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), organization, null,
                     APIConstants.EventType.LLM_PROVIDER_DELETE.name());
         }
         return result;
     }
 
     @Override
-    public LlmProvider updateLlmProvider(LlmProvider provider) throws APIManagementException {
+    public LLMProvider updateLlmProvider(LLMProvider provider) throws APIManagementException {
 
-        LlmProvider result = apiMgtDAO.updateLlmProvider(provider);
+        LLMProvider result = apiMgtDAO.updateLlmProvider(provider);
         if (result != null) {
-            new LlmProviderNotificationSender().notify(result.getName(), result.getApiVersion(), result.getOrganization(),
+            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), result.getOrganization(),
                     provider.getConfigurations(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
         }
         return result;
     }
 
     @Override
-    public LlmProvider getLlmProvider(String organization, String llmProviderId) throws APIManagementException {
+    public LLMProvider getLlmProvider(String organization, String llmProviderId) throws APIManagementException {
 
         return apiMgtDAO.getLlmProvider(organization, llmProviderId);
     }
 
     @Override
-    public List<LlmProvider> getBuiltInLlmProviders(String organization) throws APIManagementException {
+    public List<LLMProvider> getBuiltInLlmProviders(String organization) throws APIManagementException {
 
         return apiMgtDAO.getBuiltInLlmProviders(organization);
     }

@@ -30,13 +30,13 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.XML;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.api.LlmProviderService;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.api.LlmProviderConfiguration;
-import org.wso2.carbon.apimgt.api.LlmProviderMetadata;
+import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
+import org.wso2.carbon.apimgt.api.LLMProviderMetadata;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.stream.XMLStreamException;
@@ -125,7 +125,7 @@ public class AiApiHandler extends AbstractSynapseHandler {
                 (String) messageContext.getProperty(APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION);
         String organization = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
 
-        LlmProvider provider = createLlmProvider(llmProviderName, llmProviderApiVersion, organization);
+        LLMProvider provider = createLlmProvider(llmProviderName, llmProviderApiVersion, organization);
         String providerConfigurations = DataHolder.getInstance().getLlmProviderConfigurations(provider);
 
         if (providerConfigurations == null) {
@@ -135,8 +135,8 @@ public class AiApiHandler extends AbstractSynapseHandler {
             return true;
         }
 
-        LlmProviderConfiguration config = parseLlmProviderConfig(providerConfigurations);
-        LlmProviderService llmProviderService =
+        LLMProviderConfiguration config = parseLlmProviderConfig(providerConfigurations);
+        LLMProviderService llmProviderService =
                 ServiceReferenceHolder.getInstance().getLlmProviderService(config.getConnectorType());
 
         if (llmProviderService == null) {
@@ -171,9 +171,9 @@ public class AiApiHandler extends AbstractSynapseHandler {
      * @param organization The organization associated with the LLM Provider.
      * @return The initialized LlmProvider object.
      */
-    private LlmProvider createLlmProvider(String name, String apiVersion, String organization) {
+    private LLMProvider createLlmProvider(String name, String apiVersion, String organization) {
 
-        LlmProvider provider = new LlmProvider();
+        LLMProvider provider = new LLMProvider();
         provider.setName(name);
         provider.setApiVersion(apiVersion);
         provider.setOrganization(organization);
@@ -189,13 +189,13 @@ public class AiApiHandler extends AbstractSynapseHandler {
      * @throws XMLStreamException If an error occurs while processing XML.
      * @throws IOException        If an I/O error occurs.
      */
-    private String extractPayloadFromContext(MessageContext messageContext, LlmProviderConfiguration config)
+    private String extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config)
             throws XMLStreamException, IOException {
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
-        for (LlmProviderMetadata metadata : config.getMetadata()) {
+        for (LLMProviderMetadata metadata : config.getMetadata()) {
             if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equals(metadata.getInputSource())) {
                 return getPayload(axis2MessageContext);
             }
@@ -245,12 +245,12 @@ public class AiApiHandler extends AbstractSynapseHandler {
      * @return The parsed LlmProviderConfiguration object.
      * @throws APIManagementException If parsing fails.
      */
-    public LlmProviderConfiguration parseLlmProviderConfig(String providerConfigurations)
+    public LLMProviderConfiguration parseLlmProviderConfig(String providerConfigurations)
             throws APIManagementException {
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(providerConfigurations, LlmProviderConfiguration.class);
+            return objectMapper.readValue(providerConfigurations, LLMProviderConfiguration.class);
         } catch (JsonProcessingException e) {
             throw new APIManagementException("Error occurred while parsing LLM Provider configuration", e);
         }

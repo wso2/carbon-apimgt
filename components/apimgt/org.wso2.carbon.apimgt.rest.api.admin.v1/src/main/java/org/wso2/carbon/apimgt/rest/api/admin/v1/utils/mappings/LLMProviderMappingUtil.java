@@ -18,8 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseListDTO;
@@ -35,16 +34,16 @@ public class LLMProviderMappingUtil {
     /**
      * Converts a list of LLMProvider objects to an LLMProviderSummaryResponseListDTO.
      *
-     * @param llmProviderList The list of LLM Providers.
+     * @param LLMProviderList The list of LLM Providers.
      * @return The converted LLMProviderSummaryResponseListDTO.
      */
     public static LLMProviderSummaryResponseListDTO fromProviderSummaryListToProviderSummaryListDTO(
-            List<LlmProvider> llmProviderList) {
+            List<LLMProvider> LLMProviderList) {
 
         LLMProviderSummaryResponseListDTO providerListDTO = new LLMProviderSummaryResponseListDTO();
-        if (llmProviderList != null) {
-            providerListDTO.setCount(llmProviderList.size());
-            providerListDTO.setList(llmProviderList.stream()
+        if (LLMProviderList != null) {
+            providerListDTO.setCount(LLMProviderList.size());
+            providerListDTO.setList(LLMProviderList.stream()
                     .map(LLMProviderMappingUtil::fromProviderToProviderSummaryDTO).collect(Collectors.toList()));
         } else {
             providerListDTO.setCount(0);
@@ -59,7 +58,7 @@ public class LLMProviderMappingUtil {
      * @param llmProvider The LLMProvider object to be converted.
      * @return An LLMProviderResponseDTO containing detailed information about the LLMProvider object.
      */
-    public static LLMProviderResponseDTO fromProviderToProviderResponseDTO(LlmProvider llmProvider) {
+    public static LLMProviderResponseDTO fromProviderToProviderResponseDTO(LLMProvider llmProvider) {
 
         if (llmProvider == null) {
             return null;
@@ -81,7 +80,7 @@ public class LLMProviderMappingUtil {
      * @param llmProvider The LLMProvider object to be converted.
      * @return An LLMProviderSummaryResponseDTO containing summary information about the LLMProvider object.
      */
-    public static LLMProviderSummaryResponseDTO fromProviderToProviderSummaryDTO(LlmProvider llmProvider) {
+    public static LLMProviderSummaryResponseDTO fromProviderToProviderSummaryDTO(LLMProvider llmProvider) {
 
         if (llmProvider == null) {
             return null;

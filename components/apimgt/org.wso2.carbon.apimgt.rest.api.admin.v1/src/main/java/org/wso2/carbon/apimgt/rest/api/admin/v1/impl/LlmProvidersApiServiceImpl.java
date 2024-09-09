@@ -23,10 +23,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.LlmProviderRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.LlmProvidersApiService;
 
@@ -65,7 +64,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
-            LlmProvider provider = new LlmProvider();
+            LLMProvider provider = new LLMProvider();
             provider.setName(name);
             provider.setApiVersion(apiVersion);
             provider.setOrganization(RestApiUtil.getValidatedOrganization(messageContext));
@@ -75,7 +74,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             if (apiDefinitionInputStream != null) {
                 provider.setApiDefinition(IOUtils.toString(apiDefinitionInputStream, StandardCharsets.UTF_8));
             }
-            LlmProvider result = apiAdmin.addLlmProvider(provider);
+            LLMProvider result = apiAdmin.addLlmProvider(provider);
             if (result != null) {
                 LLMProviderResponseDTO llmProviderResponseDTO =
                         LLMProviderMappingUtil.fromProviderToProviderResponseDTO(result);
@@ -107,7 +106,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
-            LlmProvider provider = apiAdmin.deleteLlmProvider(organization, llmProviderId, false);
+            LLMProvider provider = apiAdmin.deleteLlmProvider(organization, llmProviderId, false);
             if (provider != null) {
                 String info = String.format("{\"id\":\"%s\"}", llmProviderId);
                 APIUtil.logAuditMessage(
@@ -144,9 +143,9 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
-            List<LlmProvider> LlmProviderList = apiAdmin.getLlmProvidersByOrg(organization);
+            List<LLMProvider> LLMProviderList = apiAdmin.getLlmProvidersByOrg(organization);
             LLMProviderSummaryResponseListDTO providerListDTO =
-                    LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LlmProviderList);
+                    LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LLMProviderList);
             return Response.ok().entity(providerListDTO).build();
         } catch (APIManagementException e) {
             handleException("Error while retrieving all LLM Providers", e);
@@ -176,7 +175,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
-            LlmProvider provider = new LlmProvider();
+            LLMProvider provider = new LLMProvider();
             provider.setId(llmProviderId);
             provider.setDescription(description);
             if (apiDefinitionInputStream != null) {
@@ -184,7 +183,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             }
             provider.setOrganization(RestApiUtil.getValidatedOrganization(messageContext));
             provider.setConfigurations(configurations);
-            LlmProvider result = apiAdmin.updateLlmProvider(provider);
+            LLMProvider result = apiAdmin.updateLlmProvider(provider);
             if (result != null) {
                 LLMProviderResponseDTO llmProviderResponseDTO =
                         LLMProviderMappingUtil.fromProviderToProviderResponseDTO(result);

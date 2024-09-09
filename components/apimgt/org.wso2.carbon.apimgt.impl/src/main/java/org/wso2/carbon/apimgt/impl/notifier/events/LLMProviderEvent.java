@@ -1,12 +1,12 @@
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
-public class LlmProviderEvent extends Event {
+public class LLMProviderEvent extends Event {
 
     private String name;
     private String apiVersion;
     private String configurations;
 
-    public LlmProviderEvent(String eventId, long timeStamp, String type, int tenantId, String tenantDomain,
+    public LLMProviderEvent(String eventId, long timeStamp, String type, int tenantId, String tenantDomain,
                             String name, String apiVersion, String configurations) {
 
         this.eventId = eventId;

@@ -1,12 +1,12 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.notifier.events.LlmProviderEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.LLMProviderEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.UUID;
 
-public class LlmProviderNotificationSender {
+public class LLMProviderNotificationSender {
 
     /**
      * Sends a notification about an LLM Provider event with the specified details.
@@ -21,7 +21,7 @@ public class LlmProviderNotificationSender {
     public void notify(String name, String apiVersion, String organization, String configurations, String action) throws APIManagementException {
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
-        LlmProviderEvent llmProviderEvent = new LlmProviderEvent(UUID.randomUUID().toString(),
+        LLMProviderEvent llmProviderEvent = new LLMProviderEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), action, tenantId, organization, name, apiVersion, configurations);
         APIUtil.sendNotification(llmProviderEvent, APIConstants.NotifierType.LLM_PROVIDER.name());
     }

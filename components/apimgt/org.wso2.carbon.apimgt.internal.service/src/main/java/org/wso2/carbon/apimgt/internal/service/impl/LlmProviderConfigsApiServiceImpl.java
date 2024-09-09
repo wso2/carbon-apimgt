@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.LlmProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.internal.service.*;
 
@@ -27,9 +27,9 @@ public class LlmProviderConfigsApiServiceImpl implements LlmProviderConfigsApiSe
     public Response getLlmProviderConfigs(MessageContext messageContext) throws APIManagementException {
 
         APIAdmin admin = new APIAdminImpl();
-        List<LlmProvider> llmProviderList = admin.getLlmProviderConfigurations();
+        List<LLMProvider> LLMProviderList = admin.getLlmProviderConfigurations();
 
-        List<LLMProviderDTO> llmProviderDtoList = llmProviderList.stream()
+        List<LLMProviderDTO> llmProviderDtoList = LLMProviderList.stream()
                 .map(llmProvider -> {
                     LLMProviderDTO llmProviderDto = new LLMProviderDTO();
                     llmProviderDto.setName(llmProvider.getName());
