@@ -1752,7 +1752,9 @@ public final class APIConstants {
     public static final String QUERY = "query";
     public static final String HISTORY = "history";
     public static final String VERSION = "version";
+    public static final String VISIBILITYROLES = "visibility_roles";
     public static final String DESCRIPTION = "description";
+    public static final String USERROLES = "user_roles";
 
     public static final String DEMOTE_TO_CREATED= "Demote to Created";
     public static final String BLOCK = "Block";

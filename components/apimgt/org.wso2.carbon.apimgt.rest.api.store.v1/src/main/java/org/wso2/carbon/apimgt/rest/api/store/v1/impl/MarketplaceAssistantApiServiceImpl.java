@@ -40,6 +40,10 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantApiCount
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MarketplaceAssistantResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
+import org.wso2.carbon.identity.oauth.OAuthUtil;
+import org.wso2.carbon.identity.oauth2.authz.OAuthAuthzReqMessageContext;
 
 import java.io.IOException;
 
@@ -77,9 +81,14 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 JSONObject payload = new JSONObject();
                 String history = new Gson().toJson(marketplaceAssistantRequestDTO.getHistory());
 
+                String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+                String userRoles = new Gson().toJson(APIUtil.getListOfRoles(username));
+
                 payload.put(APIConstants.QUERY, marketplaceAssistantRequestDTO.getQuery());
                 payload.put(APIConstants.HISTORY, history);
                 payload.put(APIConstants.TENANT_DOMAIN, organization);
+                payload.put(APIConstants.USERROLES, userRoles.toLowerCase());
+
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),

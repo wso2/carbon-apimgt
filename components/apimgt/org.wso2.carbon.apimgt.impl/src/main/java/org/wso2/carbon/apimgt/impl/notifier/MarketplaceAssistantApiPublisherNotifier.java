@@ -69,30 +69,15 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
 
         if (APIConstants.EventType.API_UPDATE.name().equals(event.getType())) {
             String currentStatus = apiEvent.getCurrentStatus().toUpperCase();
-            if (!APIConstants.API_GLOBAL_VISIBILITY.equals(apiEvent.getApiVisibility())) {
-                switch (currentStatus) {
-                    case APIConstants.PROTOTYPED:
-                    case APIConstants.PUBLISHED:
-                        deleteRequest(apiEvent);
-                        break;
-                    default:
-                        break;
-                }
-            } else {
-                switch (currentStatus) {
-                    case APIConstants.PROTOTYPED:
-                    case APIConstants.PUBLISHED:
-                        postRequest(apiEvent);
-                        break;
-                    default:
-                        break;
-                }
+            switch (currentStatus) {
+                case APIConstants.PROTOTYPED:
+                case APIConstants.PUBLISHED:
+                    postRequest(apiEvent);
+                    break;
+                default:
+                    break;
             }
         } else {
-
-            if (!APIConstants.API_GLOBAL_VISIBILITY.equals(apiEvent.getApiVisibility())) {
-                return;
-            }
 
             if (APIConstants.EventType.API_LIFECYCLE_CHANGE.name().equals(event.getType())) {
                 String lifecycleEvent = apiEvent.getLifecycleEvent();
@@ -204,6 +189,13 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                 payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
                 payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
                 payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
+                payload.put(APIConstants.VISIBILITY, apiEvent.getApiVisibility());
+
+                String visibleRoles = apiEvent.getApiVisibleRoles();
+                if (visibleRoles == null) {
+                    visibleRoles = "";  // Assign an empty string if null
+                }
+                payload.put(APIConstants.VISIBILITYROLES, visibleRoles.toLowerCase());
 
                 if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
                     APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
