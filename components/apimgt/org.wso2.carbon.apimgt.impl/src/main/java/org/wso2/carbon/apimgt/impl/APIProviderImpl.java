@@ -21,8 +21,6 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
@@ -1170,34 +1168,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateCustomBackend(API api, String type, InputStream sequence, String seqName, String customBackendUUID)
-            throws APIManagementException {
+    public void updateCustomBackend(API api, String type, InputStream sequence, String seqName,
+            String customBackendUUID) throws APIManagementException {
         apiMgtDAO.updateCustomBackend(api.getUuid(), seqName, sequence, type, customBackendUUID);
     }
 
     @Override
-    public Map<String, Object> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID, String type, boolean isInfoOnly) throws APIManagementException {
+    public Map<String, Object> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID,
+            String type, boolean isInfoOnly) throws APIManagementException {
         return apiMgtDAO.getCustomBackendOfAPIByUUID(customBackendUUID, apiUUID, type, isInfoOnly);
     }
 
-    @Override public void updateCustomBackendByRevisionID(String apiUUID, String type, String revision, String seqName,
+    @Override
+    public void updateCustomBackendByRevisionID(String apiUUID, String type, String revision, String seqName,
             String backendUUID) throws APIManagementException {
         String customBackendUUID = UUID.randomUUID().toString();
         InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(backendUUID, apiUUID, type);
         apiMgtDAO.updateCustomBackendByRevision(apiUUID, seqName, sequence, type, revision, customBackendUUID);
     }
 
-    @Override public InputStream getCustomBackendSequenceOfAPIByUUID(String apiUUID, String backendUUID, String type)
+    @Override
+    public InputStream getCustomBackendSequenceOfAPIByUUID(String apiUUID, String backendUUID, String type)
             throws APIManagementException {
         return apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(backendUUID, apiUUID, type);
     }
 
     @Override
-    public InputStream getCustomBackendSequenceByAPIAndRevisionUUUID(String apiUUID, String revisionUUID, String type) throws APIManagementException {
+    public InputStream getCustomBackendSequenceByAPIAndRevisionUUUID(String apiUUID, String revisionUUID,
+            String type) throws APIManagementException {
         return apiMgtDAO.getCustomBackendSequenceByAPIandRevisionUUID(apiUUID, revisionUUID, type);
     }
 
-    @Override public void addNewCustomBackendForRevision(String revisionUUID, String updatedBackendUUID, String apiUUID,
+    @Override
+    public void addNewCustomBackendForRevision(String revisionUUID, String updatedBackendUUID, String apiUUID,
             Map<String, Object> config) throws APIManagementException {
         if (config.get("production") != null) {
             InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(updatedBackendUUID, apiUUID,
@@ -1222,7 +1225,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    @Override public void deleteCustomBackendByID(String backendUUID, String apiUUID, String type)
+    @Override
+    public void deleteCustomBackendByID(String backendUUID, String apiUUID, String type)
             throws APIManagementException {
         apiMgtDAO.deleteCustomBackend(apiUUID, backendUUID, type);
     }
@@ -5517,23 +5521,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void populateCustomBackend(API api) throws APIManagementException {
-        JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-        if(endpointConfig != null) {
-            if(endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE) != null &&
-               APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
-                ObjectMapper mapper = new ObjectMapper();
-                // TODO: Check DB Queries. Following fetches data by API UUID and Revision ID = null
-                Map<String, Object> conf = apiMgtDAO.retrieveCustomBackendOfAPI(api.getUuid());
-                try {
-                    api.setEndpointConfig(mapper.writeValueAsString(conf));
-                } catch (IOException ex) {
-                    handleException("Error while converting endpointConfig to json", ex);
-                }
-            }
-        }
-    }
-
     @Override
     public APISearchResult searchPaginatedAPIsByFQDN(String endpoint, String tenantDomain,
                                                      int offset, int limit) throws APIManagementException {
@@ -6381,8 +6368,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
-
-        // update AM_API_CUSTOM_BACKEND table
 
         WorkflowExecutor revisionDeploymentWFExecutor = getWorkflowExecutor(
                 WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);

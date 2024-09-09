@@ -271,26 +271,6 @@ public class ImportUtils {
             APIUtil.validateAPIEndpointConfig(importedApiDTO.getEndpointConfig(), importedApiDTO.getType().toString(),
                     importedApiDTO.getName());
 
-//            Map endpointConfig = (Map) importedApiDTO.getEndpointConfig();
-//
-//            // if a valid one then update the sequence file path
-//            if (endpointConfig != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-//                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-//                if (endpointConfig.get("sandbox") != null) {
-//                    Map sandboxConfig = (Map) endpointConfig.get("sandbox");
-//                    String seqName = sandboxConfig.get("sequence_name").toString();
-//                    String path = extractedFolderPath + File.separator + seqName;
-//                    String id = sandboxConfig.get("sequence_id").toString();
-//
-//                }
-//                if (endpointConfig.get("sequence_name") != null) {
-//                    String sequenceFileName = endpointConfig.get("sequence_name").toString();
-//                    String path = extractedFolderPath + File.separator + sequenceFileName;
-//                    endpointConfig.put("sequence_path", path);
-//                }
-//                importedApiDTO.setEndpointConfig(endpointConfig);
-//            }
-
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE, organization);
 
@@ -706,6 +686,14 @@ public class ImportUtils {
         }
     }
 
+    /**
+     * Method is used to Update the Custom Backend of the API
+     *
+     * @param api                 API Object
+     * @param extractedFolderPath Extracted folder path
+     * @param apiProvider         API Provider
+     * @throws APIManagementException Throws an error occurs while reading the sequence as an Input Stream
+     */
     public static void updateAPIWithCustomBackend(API api, String extractedFolderPath, APIProvider apiProvider)
             throws APIManagementException {
         String customBackendDir = extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
@@ -1380,17 +1368,6 @@ public class ImportUtils {
         JsonObject jsonObject = retrievedAPIProductDtoJson(pathToArchive);
 
         return new Gson().fromJson(jsonObject, APIProductDTO.class);
-    }
-
-    public static String retrieveXMLContent(InputStream sequenceInputStream) throws IOException {
-        StringBuilder result = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(sequenceInputStream))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line).append("\n");
-            }
-        }
-        return result.toString();
     }
 
     /**

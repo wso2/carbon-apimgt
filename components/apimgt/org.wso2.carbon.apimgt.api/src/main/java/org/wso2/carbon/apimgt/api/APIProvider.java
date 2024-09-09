@@ -65,8 +65,11 @@ public interface APIProvider extends APIManager {
      */
     Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException;
+
     void deleteCustomBackendByID(String backendUUID, String apiUUID, String type) throws APIManagementException;
-    InputStream getCustomBackendSequenceByAPIAndRevisionUUUID(String apiUUID, String revisionUUID, String type) throws APIManagementException;
+
+    InputStream getCustomBackendSequenceByAPIAndRevisionUUUID(String apiUUID, String revisionUUID, String type)
+            throws APIManagementException;
 
     /**
      * @param apiTypeWrapper  Api type wrapper
@@ -318,12 +321,17 @@ public interface APIProvider extends APIManager {
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
 
-    void updateCustomBackend(API api,String type, InputStream sequence, String fileName, String customBackendUUID) throws APIManagementException;
-    Map<String, Object> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID, String type, boolean isInfoOnly) throws APIManagementException;
-    InputStream getCustomBackendSequenceOfAPIByUUID(String apiUUID, String backendUUID, String type) throws APIManagementException;
+    void updateCustomBackend(API api, String type, InputStream sequence, String fileName, String customBackendUUID)
+            throws APIManagementException;
 
-    void updateCustomBackendByRevisionID(String apiUUID, String type, String revision,
-            String seqName, String backendUUID) throws APIManagementException;
+    Map<String, Object> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID, String type,
+            boolean isInfoOnly) throws APIManagementException;
+
+    InputStream getCustomBackendSequenceOfAPIByUUID(String apiUUID, String backendUUID, String type)
+            throws APIManagementException;
+
+    void updateCustomBackendByRevisionID(String apiUUID, String type, String revision, String seqName,
+            String backendUUID) throws APIManagementException;
 
     void addNewCustomBackendForRevision(String revisionUUID, String updatedBackendUUID, String apiUUID,
             Map<String, Object> config) throws APIManagementException;

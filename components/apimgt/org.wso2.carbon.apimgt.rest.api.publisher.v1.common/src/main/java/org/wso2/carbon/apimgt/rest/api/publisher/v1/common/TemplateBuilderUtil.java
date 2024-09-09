@@ -1444,8 +1444,8 @@ public class TemplateBuilderUtil {
         String customSequence = null;
         String seqExt = APIUtil.getCustomBackendName(api.getUuid(), endpointType);
         try {
-            customSequence = SynapsePolicyAggregator.generateBackendSequenceForCustomSequence(seqExt,
-                    pathToAchieve, endpointType);
+            customSequence = SynapsePolicyAggregator.generateBackendSequenceForCustomSequence(seqExt, pathToAchieve,
+                    endpointType);
         } catch (IOException e) {
             throw new APIManagementException(e);
         }

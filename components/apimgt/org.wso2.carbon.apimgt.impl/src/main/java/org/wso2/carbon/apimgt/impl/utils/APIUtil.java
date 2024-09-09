@@ -2921,6 +2921,14 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * This method is used to validate the endpoint configuration for API
+     *
+     * @param endpointConfigObject Endpoint Configuratioj of the API
+     * @param apiType API Type
+     * @param apiName Name of the API
+     * @throws APIManagementException Throws an error if endpoint configuration is not valid
+     */
     public static void validateAPIEndpointConfig(Object endpointConfigObject, String apiType, String apiName)
             throws APIManagementException {
         Map endpointConfigMap = (Map) endpointConfigObject;
@@ -4302,6 +4310,13 @@ public final class APIUtil {
         return api.getId().getApiName() + ":v" + api.getId().getVersion();
     }
 
+    /**
+     * Return the Custom Backend name
+     *
+     * @param apiUUID API Id
+     * @param type Type of the custom backend used for (SANDBOX, PRODUCTION)
+     * @return The name of the Custom Backend
+     */
     public static String getCustomBackendName(String apiUUID, String type) {
         return apiUUID + "-" + type;
     }
@@ -10029,6 +10044,15 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * Method is used to retrieve the Custom Backend sequence
+     *
+     * @param extractedFolderPath Extracted folder path of the APICTL project
+     * @param customBackendFileName Custom Backend name
+     * @param fileExtension .xml
+     * @return The Sequence of the Custom Backend as an Input Stream
+     * @throws APIManagementException If an error occurs while reading, throws an error
+     */
     public static InputStream getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
             String fileExtension) throws APIManagementException {
         String fileName = extractedFolderPath + File.separator + customBackendFileName + fileExtension;

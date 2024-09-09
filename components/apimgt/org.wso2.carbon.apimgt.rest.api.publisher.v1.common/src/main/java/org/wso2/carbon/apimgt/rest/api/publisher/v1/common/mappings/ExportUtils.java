@@ -771,8 +771,20 @@ public class ExportUtils {
         }
     }
 
-    public static void exportCustomBackend(String customBackendFileName, String sequence, String archivePath) throws APIImportExportException, IOException {
-        String customBackendName = archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY + File.separator + customBackendFileName;
+    /**
+     * Method is used to write Custom Backend file to the Directory
+     *
+     * @param customBackendFileName Custom Backend file name
+     * @param sequence              Content of the Custom Backend
+     * @param archivePath           Archived path
+     * @throws APIImportExportException Import/Export error if exists
+     * @throws IOException              IO Error when reading/writing to the file
+     */
+    public static void exportCustomBackend(String customBackendFileName, String sequence, String archivePath)
+            throws APIImportExportException, IOException {
+        String customBackendName =
+                archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY + File.separator
+                        + customBackendFileName;
         CommonUtil.writeFile(customBackendName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML, sequence);
     }
 

@@ -57,9 +57,9 @@ public class SynapsePolicyAggregator {
     private static final String POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
             + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
             + "operation_policy_template.j2";
-    private static final String CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
-            + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
-            + "custom_backend_sequence_template.j2";
+    private static final String CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION =
+            CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator
+                    + "api_templates" + File.separator + "custom_backend_sequence_template.j2";
     private static final String GATEWAY_POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
             + "repository" + File.separator + "resources" + File.separator + "templates" + File.separator
             + "gateway_policy_template.j2";
@@ -107,7 +107,8 @@ public class SynapsePolicyAggregator {
         }
     }
 
-    public static String generateBackendSequenceForCustomSequence(String sequenceName, String pathToArchive, String endpointType) throws APIManagementException, IOException {
+    public static String generateBackendSequenceForCustomSequence(String sequenceName, String pathToArchive,
+            String endpointType) throws APIManagementException, IOException {
         Map<String, Object> configMap = new HashMap<>();
         String customBackendTemplate = FileUtil.readFileToString(CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION)
                 .replace("\\", "");
@@ -219,9 +220,11 @@ public class SynapsePolicyAggregator {
         return renderedPolicyMappingList;
     }
 
-    private static String renderCustomBackendSequence(String sequenceName, String pathToArchive) throws APIManagementException {
+    private static String renderCustomBackendSequence(String sequenceName, String pathToArchive)
+            throws APIManagementException {
         String policyDirectory = pathToArchive + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
-        String sequence = APIUtil.getOperationCustomBackendSequenceFromFile(policyDirectory, sequenceName, ".xml");
+        String sequence = APIUtil.getOperationCustomBackendSequenceFromFile(policyDirectory, sequenceName,
+                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
         return renderPolicyTemplate(sequence, new HashMap<>());
     }
 

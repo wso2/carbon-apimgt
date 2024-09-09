@@ -4476,7 +4476,8 @@ public class SQLConstants {
     }
     public static class CustomBackendConstants {
         public static final String ADD_CUSTOM_BACKEND =
-                "INSERT INTO AM_API_CUSTOM_BACKEND (ID,API_UUID,SEQUENCE,TYPE,REVISION_UUID,NAME) " + "VALUES (?,?,?,?,?,?)";
+                "INSERT INTO AM_API_CUSTOM_BACKEND (ID,API_UUID,SEQUENCE,TYPE,REVISION_UUID,NAME) "
+                        + "VALUES (?,?,?,?,?,?)";
         public static final String DELETE_WORKING_COPY_OF_CUSTOM_BACKEND = "DELETE FROM AM_API_CUSTOM_BACKEND WHERE API_UUID = ? AND REVISION_UUID = '0'";
         public static final String DELETE_CUSTOM_BACKEND = "DELETE FROM AM_API_CUSTOM_BACKEND WHERE API_UUID = ? AND TYPE = ? AND ID = ? AND REVISION_UUID = '0'";
         public static final String DELETE_CUSTOM_BACKEND_BY_API_AND_TYPE = "DELETE FROM AM_API_CUSTOM_BACKEND WHERE API_UUID = ? AND TYPE = ? AND REVISION_UUID = '0'";
