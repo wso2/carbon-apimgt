@@ -2353,16 +2353,17 @@ public class SQLConstants {
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " BILLING_PLAN, TOTAL_TOKEN_COUNT, PROMPT_TOKEN_COUNT, COMPLETION_TOKEN_COUNT, \n" +
+                    " MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, \n" +
+                    " CONNECTIONS_COUNT) \n" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
+                    " BILLING_PLAN, TOTAL_TOKEN_COUNT, PROMPT_TOKEN_COUNT, COMPLETION_TOKEN_COUNT, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
                     " FIXED_RATE, BILLING_CYCLE, PRICE_PER_REQUEST, CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -2570,6 +2571,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2594,6 +2598,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2601,8 +2608,8 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
-                    "CUSTOM_ATTRIBUTES = ?, "+
+                    "BILLING_PLAN = ?, " +
+                    "CUSTOM_ATTRIBUTES = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2619,6 +2626,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2626,7 +2636,7 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
+                    "BILLING_PLAN = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2643,6 +2653,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2650,8 +2663,8 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
-                    "CUSTOM_ATTRIBUTES = ?, "+
+                    "BILLING_PLAN = ?, " +
+                    "CUSTOM_ATTRIBUTES = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +

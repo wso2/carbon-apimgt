@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -41,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.internal.service.dto.AIAPIQuotaLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
@@ -330,6 +332,9 @@ public class SubscriptionValidationDataUtil {
         } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())) {
             EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
             defaultLimit.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
+        } else if (PolicyConstants.AI_API_QUOTA_TYPE.equals(quotaPolicy.getType())) {
+            AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) quotaPolicy.getLimit();
+            defaultLimit.setAiApiQuota(fromAIAPIQuotaLimitToDTO(AIAPIQuotaLimit));
         }
         return defaultLimit;
     }
@@ -404,6 +409,24 @@ public class SubscriptionValidationDataUtil {
         dto.setTimeUnit(eventCountLimit.getTimeUnit());
         dto.setUnitTime(eventCountLimit.getUnitTime());
         dto.setEventCount(eventCountLimit.getEventCount());
+        return dto;
+    }
+
+    /**
+     * Converts a AI API Quota Limit model object into a AI API Quota Limit DTO object.
+     *
+     * @param AIAPIQuotaLimit AI APIQuota Limit model object
+     * @return AI API Quota Limit DTO object derived from model
+     */
+    private static AIAPIQuotaLimitDTO fromAIAPIQuotaLimitToDTO(AIAPIQuotaLimit AIAPIQuotaLimit) {
+
+        AIAPIQuotaLimitDTO dto = new AIAPIQuotaLimitDTO();
+        dto.setTimeUnit(AIAPIQuotaLimit.getTimeUnit());
+        dto.setUnitTime(AIAPIQuotaLimit.getUnitTime());
+        dto.setRequestCount(AIAPIQuotaLimit.getRequestCount());
+        dto.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
+        dto.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
+        dto.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
         return dto;
     }
 
