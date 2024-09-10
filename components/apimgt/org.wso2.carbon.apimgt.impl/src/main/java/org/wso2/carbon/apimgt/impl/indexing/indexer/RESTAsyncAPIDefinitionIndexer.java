@@ -29,9 +29,9 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.AsyncIndexer.File2Index;
 import org.wso2.carbon.registry.indexing.IndexingManager;
-import org.wso2.carbon.registry.indexing.indexer.JSONIndexer;
 import org.wso2.carbon.registry.indexing.solr.IndexDocument;
 
 import java.util.Arrays;
@@ -41,7 +41,7 @@ import java.util.Map;
 /**
  * This is indexer introduced to index swagger,async api artifacts for unified content search.
  */
-public class RESTAsyncAPIDefinitionIndexer extends JSONIndexer {
+public class RESTAsyncAPIDefinitionIndexer extends PlainTextIndexer {
     public static final Log log = LogFactory.getLog(RESTAsyncAPIDefinitionIndexer.class);
 
     @Override
@@ -57,6 +57,12 @@ public class RESTAsyncAPIDefinitionIndexer extends JSONIndexer {
                 || definitionResourcePath.contains(APIConstants.API_ASYNCAPI_DEFINITION_RESOURCE_NAME))) {
             return null;
         }
+
+        // Filter out only values from the swagger, async json files for indexing
+        String jsonAsString = RegistryUtils.decodeBytes(fileData.data);
+        String valuesString = IndexerUtil.getValuesFromJsonString(jsonAsString);
+        fileData.data = valuesString.getBytes();
+        fileData.mediaType = "application/json";
 
         IndexDocument indexDocument = super.getIndexedDocument(fileData);
         IndexDocument newIndexDocument = indexDocument;
@@ -88,6 +94,5 @@ public class RESTAsyncAPIDefinitionIndexer extends JSONIndexer {
 
         return newIndexDocument;
     }
-
 
 }

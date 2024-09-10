@@ -1712,7 +1712,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     .getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
             ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
 
-            SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(attributes, systemUserRegistry);
+            SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(attributes,
+                    systemUserRegistry);
             String errorMsg = resultsBean.getErrorMessage();
             if (errorMsg != null) {
                 throw new APIPersistenceException("Error while searching " + errorMsg);
@@ -4112,7 +4113,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             content.setApiType(APIDefSearchContent.ApiType.SOAP);
         } else {
             index = resourcePath.indexOf(APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
-            content.setApiType(APIDefSearchContent.ApiType.REST);
+            // swagger.json is included in all types of APIs, hence we need to properly set the API type
+            setAPITypeForSwagger(resourcePath, index, content, registry);
         }
 
         String apiPath = resourcePath.substring(0, index) + APIConstants.API_KEY;
@@ -4123,25 +4125,73 @@ public class RegistryPersistenceImpl implements APIPersistence {
         String defResourceName = defResource.getId().substring(defResource.getId().lastIndexOf('/') + 1);
         DevPortalAPI devAPI;
 
+        /* Ignore internal swagger.json content search results of non REST APIs
+        as most of the data is duplicated in WSDL, GraphQL, AsyncAPI def. */
+        boolean ignoreDuplicateSwaggerContent =
+                (!APIDefSearchContent.ApiType.REST.toString().equals(content.getApiType())
+                        && defResourceName.contains("swagger"));
+
         if (apiArtifactId != null) {
-            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-            devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
-            content.setId(defResourceId);
-            content.setName(defResourceName);
-            content.setApiUUID(devAPI.getId());
-            content.setApiName(devAPI.getApiName());
-            content.setApiContext(devAPI.getContext());
-            content.setApiProvider(devAPI.getProviderName());
-            content.setApiVersion(devAPI.getVersion());
-            if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
-                    .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
-                content.setAssociatedType(APIConstants.API_PRODUCT);
-            } else {
-                content.setAssociatedType(APIConstants.API);
+            if (!ignoreDuplicateSwaggerContent) {
+                GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
+                content.setId(defResourceId);
+                content.setName(defResourceName);
+                content.setApiUUID(devAPI.getId());
+                content.setApiName(devAPI.getApiName());
+                content.setApiContext(devAPI.getContext());
+                content.setApiProvider(devAPI.getProviderName());
+                content.setApiVersion(devAPI.getVersion());
+                if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
+                        .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                    content.setAssociatedType(APIConstants.API_PRODUCT);
+                } else {
+                    content.setAssociatedType(APIConstants.API);
+                }
+                contentData.add(content);
             }
-            contentData.add(content);
+
         } else {
             throw new GovernanceException("artifact id is null of " + apiPath);
+        }
+    }
+
+    /**
+     * This method is used to set the correct API Type for swagger.json as all API types have a swagger.json
+     * file in registry
+     *
+     * @param resourcePath registry resourcePath
+     * @param index        int index
+     * @param content      APIDefSearchContent obj.
+     * @param registry     registry obj.
+     * @throws RegistryException on failure
+     */
+    private void setAPITypeForSwagger(String resourcePath, int index,
+                                      APIDefSearchContent content, Registry registry) throws RegistryException {
+        String directoryPath = resourcePath.substring(0, index);
+        Resource directoryResource = registry.get(directoryPath);
+
+        if (directoryResource instanceof Collection) {
+            Collection collection = (Collection) directoryResource;
+            int childrenCount = collection.getChildCount();
+            String[] childPaths = collection.getChildren();
+            if (childrenCount > 2) {
+                for (String childPath : childPaths) {
+                    if (childPath.contains(APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME)) {
+                        content.setApiType(APIDefSearchContent.ApiType.ASYNC);
+                        break;
+                    } else if (childPath.contains(APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION)) {
+                        content.setApiType(APIDefSearchContent.ApiType.GRAPHQL);
+                        break;
+                    } else if (childPath.contains(APIConstants.WSDL_FILE_EXTENSION)) {
+                        content.setApiType(APIDefSearchContent.ApiType.SOAP);
+                        break;
+                    }
+                }
+            }
+            if (content.getApiType() == null) {
+                content.setApiType(APIDefSearchContent.ApiType.REST);
+            }
         }
 
     }

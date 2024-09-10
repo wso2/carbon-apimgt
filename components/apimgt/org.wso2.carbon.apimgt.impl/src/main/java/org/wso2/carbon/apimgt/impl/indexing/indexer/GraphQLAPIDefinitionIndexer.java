@@ -29,6 +29,7 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.AsyncIndexer;
 import org.wso2.carbon.registry.indexing.IndexingManager;
 import org.wso2.carbon.registry.indexing.solr.IndexDocument;
@@ -55,6 +56,11 @@ public class GraphQLAPIDefinitionIndexer extends PlainTextIndexer {
                 || !definitionResourcePath.contains(APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION)) {
             return null;
         }
+
+        // Extract only required info (types) from graphql definition to index
+        String schemaString = RegistryUtils.decodeBytes(fileData.data);
+        String definitionString = IndexerUtil.getTypesFromGraphQLSchemaString(schemaString);
+        fileData.data = definitionString.getBytes();
 
         IndexDocument indexDocument = super.getIndexedDocument(fileData);
         IndexDocument newIndexDocument = indexDocument;

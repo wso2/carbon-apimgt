@@ -112,6 +112,9 @@ public class APIDefSearchContent implements SearchContent {
     }
 
     public String getApiType() {
+        if (apiType == null) {
+            return null;
+        }
         return apiType.toString();
     }
 

@@ -40,7 +40,7 @@ import java.util.Map;
 /**
  * This indexer is introduced to index .wsdl files for unified content search.
  */
-public class SOAPAPIDefinitionIndexer extends XMLIndexer {
+public class SOAPAPIDefinitionIndexer extends PlainTextIndexer {
 
     public static final Log log = LogFactory.getLog(SOAPAPIDefinitionIndexer.class);
 
@@ -57,6 +57,10 @@ public class SOAPAPIDefinitionIndexer extends XMLIndexer {
                 || !definitionResourcePath.contains(APIConstants.WSDL_EXTENSION)) {
             return null;
         }
+
+        // Extract only required data before indexing
+        String contentString = IndexerUtil.getContentFromXMLData(fileData.data);
+        fileData.data = contentString.getBytes();
 
         IndexDocument indexDocument = super.getIndexedDocument(fileData);
         IndexDocument newIndexDocument = indexDocument;
