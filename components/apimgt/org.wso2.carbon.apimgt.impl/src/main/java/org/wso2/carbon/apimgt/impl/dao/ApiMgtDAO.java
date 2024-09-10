@@ -66,6 +66,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.LLMConfigurations;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
@@ -163,6 +164,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -19451,6 +19453,112 @@ public class ApiMgtDAO {
         }
 
         return false;
+    }
+
+    public void addLLMConfigurationMapping(String apiUUID, LLMConfigurations llmConfigurations, String tenantDomain) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                addLLMConfigurationMapping(apiUUID, llmConfigurations, tenantDomain, connection);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while adding API policy mapping for : " + apiUUID, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while adding API policy mapping for : " + apiUUID, e);
+        }
+    }
+
+    private void addLLMConfigurationMapping(String apiUUID, LLMConfigurations llmConfigurations,
+                                            String tenantDomain, Connection connection) throws APIManagementException {
+
+        try (PreparedStatement llmConfigurationMappingStatement = connection
+                .prepareStatement(SQLConstants.INSERT_API_LLM_CONFIGURATIONS_MAPPING)) {
+
+            String additionalHeadersStr = mapToKeyValueString(llmConfigurations.getAdditionalHeaders());
+            String additionalQueryParametersStr = mapToKeyValueString(llmConfigurations.getAdditionalQueryParameters());
+            String tokenDetails = "YourTokenDetails";
+
+            llmConfigurationMappingStatement.setString(1, java.util.UUID.randomUUID().toString());
+            llmConfigurationMappingStatement.setString(2, apiUUID);
+            llmConfigurationMappingStatement.setString(3, llmConfigurations.getLlmProviderName());
+            llmConfigurationMappingStatement.setString(4, llmConfigurations.getLlmProviderApiVersion());
+            llmConfigurationMappingStatement.setString(5, additionalHeadersStr);
+            llmConfigurationMappingStatement.setString(6, additionalQueryParametersStr);
+            llmConfigurationMappingStatement.setString(7, tokenDetails);
+            llmConfigurationMappingStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while adding LLM configuration mapping for API : " + apiUUID, e);
+        }
+    }
+
+    private String mapToKeyValueString(Map<String, String> map) {
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
+        StringJoiner joiner = new StringJoiner(",");
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            joiner.add(entry.getKey() + ":" + entry.getValue());
+        }
+        return joiner.toString();
+    }
+
+    public LLMConfigurations getLLMConfigurationsMapping(String uuid) throws APIManagementException {
+        LLMConfigurations llmConfigurations = new LLMConfigurations();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                llmConfigurations = getLLMConfigurationsMapping(uuid, connection);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while getting API level policy mapping of API " + uuid, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting API level policy mapping of API " + uuid, e);
+        }
+        return llmConfigurations;
+    }
+
+    private LLMConfigurations getLLMConfigurationsMapping(String apiUUID, Connection connection)
+            throws APIManagementException {
+
+        LLMConfigurations llmConfigurations = new LLMConfigurations();
+        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_API_LLM_CONFIGURATIONS_MAPPING)) {
+            ps.setString(1, apiUUID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String additionalHeadersStr = rs.getString("ADDITIONAL_HEADERS");
+                    String additionalQueryParametersStr = rs.getString("ADDITIONAL_QUERY_PARAMETERS");
+                    String llmProviderName = rs.getString("LLM_PROVIDER_NAME");
+                    String llmProviderVersion = rs.getString("LLM_PROVIDER_VERSION");
+                    String tokenDetails = rs.getString("TOKEN_DETAILS");
+                    llmConfigurations.setEnabled(true);
+                    llmConfigurations.setAdditionalHeaders(stringToMap(additionalHeadersStr));
+                    llmConfigurations.setAdditionalQueryParameters(stringToMap(additionalQueryParametersStr));
+                    llmConfigurations.setLlmProviderName(llmProviderName);
+                    llmConfigurations.setLlmProviderApiVersion(llmProviderVersion);
+//                    llmConfigurations.setTokenDetails(tokenDetails);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting API level policy mapping of API " + apiUUID, e);
+        }
+        return llmConfigurations;
+    }
+
+    private Map<String, String> stringToMap(String str) {
+        if (str == null || str.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<String, String> map = new HashMap<>();
+        String[] pairs = str.split(",");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split(":");
+            map.put(keyValue[0], keyValue[1]);
+        }
+        return map;
     }
 
     private class SubscriptionInfo {

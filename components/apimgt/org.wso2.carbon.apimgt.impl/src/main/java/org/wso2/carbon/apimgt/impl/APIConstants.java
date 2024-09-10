@@ -2768,7 +2768,8 @@ public final class APIConstants {
         KEY_TEMPLATE,
         CORRELATION_CONFIG,
         GATEWAY_POLICY,
-        LLM_PROVIDER
+        LLM_PROVIDER,
+        LLM_API,
     }
 
     // Supported Event Types
@@ -2776,6 +2777,9 @@ public final class APIConstants {
         LLM_PROVIDER_CREATE,
         LLM_PROVIDER_UPDATE,
         LLM_PROVIDER_DELETE,
+
+        LLM_API_DEPLOY,
+        LLM_API_UNDEPLOY,
         API_CREATE,
         API_UPDATE,
         API_DELETE,

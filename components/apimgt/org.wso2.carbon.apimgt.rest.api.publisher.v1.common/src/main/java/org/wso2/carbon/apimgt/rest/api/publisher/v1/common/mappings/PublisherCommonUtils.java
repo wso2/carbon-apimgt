@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.schema.GraphQLSchema;
@@ -56,6 +57,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.LLMConfigurations;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -80,6 +82,7 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APILlmConfigurationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
@@ -1372,7 +1375,37 @@ public class PublisherCommonUtils {
         }
         apiToAdd.setOrganization(organization);
         apiToAdd.setGatewayType(body.getGatewayType());
+        if (body.getLlmConfigurations() != null) {
+            apiToAdd.setLlmConfigurations(convertToLLMConfigurations(body.getLlmConfigurations()));
+        }
         return apiToAdd;
+    }
+
+    public static LLMConfigurations convertToLLMConfigurations(APILlmConfigurationsDTO dto)
+            throws APIManagementException {
+
+        LLMConfigurations llmConfigurations = new LLMConfigurations();
+        try {
+            llmConfigurations.setEnabled(dto.isEnabled());
+            llmConfigurations.setLlmProviderName(dto.getLlmProviderName());
+            llmConfigurations.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (dto.getAdditionalHeaders() != null) {
+                Map<String, String> headersMap = objectMapper.readValue(dto.getAdditionalHeaders(),
+                        new TypeReference<Map<String, String>>() {
+                        });
+                llmConfigurations.setAdditionalHeaders(headersMap);
+            }
+            if (dto.getAdditionalQueryParameters() != null) {
+                Map<String, String> queryParamsMap = objectMapper.readValue(dto.getAdditionalQueryParameters(),
+                        new TypeReference<Map<String, String>>() {
+                        });
+                llmConfigurations.setAdditionalQueryParameters(queryParamsMap);
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while parsing AI API Configurations", e);
+        }
+        return llmConfigurations;
     }
 
     public static String updateAPIDefinition(String apiId, APIDefinitionValidationResponse response,

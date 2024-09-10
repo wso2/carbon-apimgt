@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.LLMConfigurations;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
@@ -77,6 +78,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APILlmConfigurationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
@@ -1432,7 +1434,36 @@ public class APIMappingUtil {
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
+        dto.setLlmConfigurations(convertToAPILlmConfigurationsDTO(model.getLlmConfigurations()));
 
+        return dto;
+    }
+
+    public static APILlmConfigurationsDTO convertToAPILlmConfigurationsDTO(LLMConfigurations llmConfigurations)
+            throws APIManagementException {
+
+        APILlmConfigurationsDTO dto = new APILlmConfigurationsDTO();
+        try {
+            dto.setEnabled(llmConfigurations.isEnabled());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // Convert additionalHeaders map to JSON string
+            if (llmConfigurations.getAdditionalHeaders() != null) {
+                String headersJson = objectMapper.writeValueAsString(llmConfigurations.getAdditionalHeaders());
+                dto.setAdditionalHeaders(headersJson);
+            }
+
+            // Convert additionalQueryParameters map to JSON string
+            if (llmConfigurations.getAdditionalQueryParameters() != null) {
+                String queryParamsJson =
+                        objectMapper.writeValueAsString(llmConfigurations.getAdditionalQueryParameters());
+                dto.setAdditionalQueryParameters(queryParamsJson);
+            }
+
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while converting LLMConfigurations to DTO", e);
+        }
         return dto;
     }
 

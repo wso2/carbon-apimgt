@@ -2879,7 +2879,16 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, String inlineApiDefinition,
                                             MessageContext messageContext) throws APIManagementException {
-        
+
+        additionalProperties = "{\"name\":\"MistralAIAPI\",\"version\":\"0.0.2\",\"context\":\"mistralaiapi\"," +
+                "\"gatewayType\":\"wso2/synapse\",\"policies\":[\"Unlimited\"]," +
+                "\"endpointConfig\":{\"endpoint_type\":\"http\",\"sandbox_endpoints\":{\"url\":\"https://api.mistral.ai\"}," +
+                "\"production_endpoints\":{\"url\":\"https://api.mistral.ai\"}}," +
+                "\"llmConfigurations\":{\"enabled\":true," +
+                "\"additionalHeaders\":\"{\\\"headerKey1\\\":\\\"headerValue1\\\",\\\"headerKey2\\\":\\\"headerValue2\\\"}\"," +
+                "\"additionalQueryParameters\":\"{\\\"paramKey1\\\":\\\"paramValue1\\\",\\\"paramKey2\\\":\\\"paramValue2\\\"}\"," +
+                "\"llmProviderName\":\"MistralAI\"," +
+                "\"llmProviderApiVersion\":\"v1.0.0\"}}\n";
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
             RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);

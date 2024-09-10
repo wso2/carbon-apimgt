@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LLMConfigurations;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -608,6 +609,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
+        addLLMConfigurations(api, tenantDomain);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -627,6 +629,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAPIPolicyParameters(api, tenantDomain);
         // Add API level and operation level policies
         apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
+    }
+
+    private void addLLMConfigurations(API api, String tenantDomain) throws APIManagementException {
+
+        LLMConfigurations configurations = api.getLlmConfigurations();
+        if (configurations != null) {
+            apiMgtDAO.addLLMConfigurationMapping(api.getUuid(), api.getLlmConfigurations(), tenantDomain);
+        }
     }
 
     /**
@@ -5230,6 +5240,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
                 populateAPILevelPolicies(api);
+                populateLLMConfigurations(api);
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     if (migrationEnabled == null) {
@@ -5254,6 +5265,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e);
         }
+    }
+
+    private void populateLLMConfigurations(API api) throws APIManagementException {
+        LLMConfigurations configurations = apiMgtDAO.getLLMConfigurationsMapping(api.getUuid());
+        api.setLlmConfigurations(configurations);
     }
 
     @Override

@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
+import org.wso2.carbon.apimgt.api.model.LLMConfigurations;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
@@ -427,6 +428,18 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
             deleteLLMProvider(eventJson);
         } else if (EventType.LLM_PROVIDER_UPDATE.toString().equals(eventType)) {
             updateLLMProvider(eventJson);
+        } else if (EventType.LLM_API_DEPLOY.toString().equals(eventType)) {
+            JSONObject jsonObject = new JSONObject(eventJson);
+            String context = jsonObject.getString("context");
+            String llmConfigurationsString = jsonObject.getString("llmConfigurations");
+            LLMConfigurations llmConfigurations = new Gson().fromJson(llmConfigurationsString, LLMConfigurations.class);
+            DataHolder.getInstance().addLLMApiConfigurations(context, llmConfigurations);
+            log.info("LLM_API_CREATE Event received: " + eventJson);
+        } else if (EventType.LLM_API_UNDEPLOY.toString().equals(eventType)) {
+            JSONObject jsonObject = new JSONObject(eventJson);
+            String context = jsonObject.getString("context");
+            DataHolder.getInstance().removeLLMApiConfigurations(context);
+            log.info("LLM_API_UNDEPLOY Event received: " + eventJson);
         }
     }
 
