@@ -71,9 +71,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
     String apiName;
     String appId;
     String ipAddress;
-    Integer totalTokens;
-    Integer promptTokens;
-    Integer completionTokens;
+    Long totalTokens;
+    Long promptTokens;
+    Long completionTokens;
     Map<String, String> headersMap;
     Map<String, Object> customPropertyMap;
     private AuthenticationContext authenticationContext;
