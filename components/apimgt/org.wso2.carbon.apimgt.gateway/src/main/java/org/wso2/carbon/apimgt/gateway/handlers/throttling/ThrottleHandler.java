@@ -1352,28 +1352,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                " </wsp:Policy>\n";
     }
 
-    private String createPolicyForRoleWithTokenBasedThrottling(String roleId, String unitTime, String maxCount,
-                                                               long maxTotalTokenCount, long maxCompletionTokenCount,
-                                                               long maxPromptTokenCount) {
-        return "<wsp:Policy>\n" +
-                "     <throttle:ID throttle:type=\"ROLE\">" + roleId + "</throttle:ID>\n" +
-                "            <wsp:Policy>\n" +
-                "                <throttle:Control>\n" +
-                "                    <wsp:Policy>\n" +
-                "                        <throttle:MaximumCount>" + maxCount + "</throttle:MaximumCount>\n" +
-                "                        <throttle:UnitTime>" + unitTime + "</throttle:UnitTime>\n" +
-                "                        <throttle:MaximumCompletionTokenCount>" + maxCompletionTokenCount +
-                "</throttle:MaximumCompletionTokenCount>\n" +
-                "                        <throttle:MaximumPromptTokenCount>" + maxPromptTokenCount +
-                "</throttle:MaximumPromptTokenCount>\n" +
-                "                        <throttle:MaximumTotalTokenCount>" + maxTotalTokenCount +
-                "</throttle:MaximumTotalTokenCount>\n" +
-                "                    </wsp:Policy>\n" +
-                "                </throttle:Control>\n" +
-                "            </wsp:Policy>\n" +
-                " </wsp:Policy>\n";
-    }
-
     private boolean isHardLimitThrottled(MessageContext synCtx, AuthenticationContext authContext, String apiContext,
                                          String apiVersion) {
         if (StringUtils.isEmpty(sandboxMaxCount) && StringUtils.isEmpty(productionMaxCount)) {
