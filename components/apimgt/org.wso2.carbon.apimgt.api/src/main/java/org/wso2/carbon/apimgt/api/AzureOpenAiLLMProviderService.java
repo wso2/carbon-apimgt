@@ -44,6 +44,8 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
             additionalHeader.add(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_KEY);
             llmProviderConfiguration.setAdditionalHeaders(additionalHeader);
             llmProviderConfiguration.setConnectorType(this.getType());
+            List<String> additionalQueryParameters = new ArrayList<>();
+            llmProviderConfiguration.setAdditionalQueryParameters(additionalQueryParameters);
 
             List<LLMProviderMetadata> llmProviderMetadata = new ArrayList<>();
             llmProviderMetadata.add(new LLMProviderMetadata(
