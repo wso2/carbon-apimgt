@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -88,6 +89,7 @@ import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -928,7 +930,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 int applicationId = resultSet.getInt("APPLICATION_ID");
                 Application application = getLightweightApplicationById(conn, applicationId);
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(resultSet.getString("API_TYPE"))) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
@@ -983,7 +985,7 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 Identifier identifier;
 
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(resultSet.getString("API_TYPE"))) {
                     identifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
@@ -1544,7 +1546,7 @@ public class ApiMgtDAO {
             while (result.next()) {
                 String apiType = result.getString("TYPE");
 
-                if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                     APIProductIdentifier identifier =
                             new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
@@ -10004,7 +10006,7 @@ public class ApiMgtDAO {
                         String context = resultSet.getString("CONTEXT");
                         String apiType = resultSet.getString("API_TYPE");
                         String version = resultSet.getString("API_VERSION");
-                        if (APIConstants.API_PRODUCT.equals(apiType)
+                        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)
                                 && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(version)
                                 && StringUtils.isBlank(contextTemplate)) {
                             context = context + "/" + APIConstants.API_PRODUCT_VERSION_1_0_0;
@@ -11459,29 +11461,39 @@ public class ApiMgtDAO {
             policyStatement.setInt(15, policy.getGraphQLMaxDepth());
             policyStatement.setInt(16, policy.getGraphQLMaxComplexity());
             policyStatement.setString(17, policy.getBillingPlan());
-            if (hasCustomAttrib) {
-                policyStatement.setBytes(18, policy.getCustomAttributes());
-                policyStatement.setString(19, policy.getMonetizationPlan());
-                policyStatement.setString(20,
-                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                policyStatement.setString(21,
-                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                policyStatement.setString(22,
-                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                policyStatement.setString(23,
-                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                policyStatement.setInt(24, policy.getSubscriberCount());
+            if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                AIAPIQuotaLimit limit = (AIAPIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
+                policyStatement.setLong(18, limit.getTotalTokenCount());
+                policyStatement.setLong(19, limit.getPromptTokenCount());
+                policyStatement.setLong(20, limit.getCompletionTokenCount());
             } else {
-                policyStatement.setString(18, policy.getMonetizationPlan());
-                policyStatement.setString(19,
+                policyStatement.setLong(18, 0);
+                policyStatement.setLong(19, 0);
+                policyStatement.setLong(20, 0);
+            }
+            if (hasCustomAttrib) {
+                policyStatement.setBytes(21, policy.getCustomAttributes());
+                policyStatement.setString(22, policy.getMonetizationPlan());
+                policyStatement.setString(23,
                         policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                policyStatement.setString(20,
+                policyStatement.setString(24,
                         policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                policyStatement.setString(21,
+                policyStatement.setString(25,
                         policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                policyStatement.setString(22,
+                policyStatement.setString(26,
                         policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                policyStatement.setInt(23, policy.getSubscriberCount());
+                policyStatement.setInt(27, policy.getSubscriberCount());
+            } else {
+                policyStatement.setString(21, policy.getMonetizationPlan());
+                policyStatement.setString(22,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                policyStatement.setString(23,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                policyStatement.setString(24,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                policyStatement.setString(25,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                policyStatement.setInt(26, policy.getSubscriberCount());
             }
             policyStatement.executeUpdate();
             conn.commit();
@@ -13094,81 +13106,98 @@ public class ApiMgtDAO {
                 RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(4, limit.getRequestCount());
                 updateStatement.setString(5, null);
+                updateStatement.setLong(6, 0);
+                updateStatement.setLong(7, 0);
+                updateStatement.setLong(8, 0);
             } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(4, limit.getDataAmount());
                 updateStatement.setString(5, limit.getDataUnit());
+                updateStatement.setLong(6, 0);
+                updateStatement.setLong(7, 0);
+                updateStatement.setLong(8, 0);
             } else if (PolicyConstants.EVENT_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(4, limit.getEventCount());
                 updateStatement.setString(5, null);
+                updateStatement.setLong(6, 0);
+                updateStatement.setLong(7, 0);
+                updateStatement.setLong(8, 0);
+            } else if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                AIAPIQuotaLimit limit = (AIAPIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
+                updateStatement.setLong(4, limit.getRequestCount());
+                updateStatement.setString(5, null);
+                updateStatement.setLong(6, limit.getTotalTokenCount());
+                updateStatement.setLong(7, limit.getPromptTokenCount());
+                updateStatement.setLong(8, limit.getCompletionTokenCount());
             }
 
-            updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            updateStatement.setInt(8, policy.getRateLimitCount());
-            updateStatement.setString(9, policy.getRateLimitTimeUnit());
-            updateStatement.setBoolean(10, policy.isStopOnQuotaReach());
-            updateStatement.setInt(11, policy.getGraphQLMaxDepth());
-            updateStatement.setInt(12, policy.getGraphQLMaxComplexity());
-            updateStatement.setString(13, policy.getBillingPlan());
+            updateStatement.setLong(9, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(10, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            updateStatement.setInt(11, policy.getRateLimitCount());
+            updateStatement.setString(12, policy.getRateLimitTimeUnit());
+            updateStatement.setBoolean(13, policy.isStopOnQuotaReach());
+            updateStatement.setInt(14, policy.getGraphQLMaxDepth());
+            updateStatement.setInt(15, policy.getGraphQLMaxComplexity());
+            updateStatement.setString(16, policy.getBillingPlan());
+
             if (hasCustomAttrib) {
                 long lengthOfStream = policy.getCustomAttributes().length;
-                updateStatement.setBinaryStream(14, new ByteArrayInputStream(policy.getCustomAttributes()),
+                updateStatement.setBinaryStream(17, new ByteArrayInputStream(policy.getCustomAttributes()),
                         lengthOfStream);
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(15, policy.getMonetizationPlan());
-                    updateStatement.setString(16,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(17,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(18,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(18, policy.getMonetizationPlan());
                     updateStatement.setString(19,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(20,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(21,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(22,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setInt(20, policy.getSubscriberCount());
-                    updateStatement.setString(21, policy.getPolicyName());
-                    updateStatement.setInt(22, policy.getTenantId());
+                    updateStatement.setInt(23, policy.getSubscriberCount());
+                    updateStatement.setString(24, policy.getPolicyName());
+                    updateStatement.setInt(25, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(15, policy.getMonetizationPlan());
-                    updateStatement.setString(16,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(17,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(18,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(18, policy.getMonetizationPlan());
                     updateStatement.setString(19,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(20,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(21,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(22,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setInt(20, policy.getSubscriberCount());
-                    updateStatement.setString(21, policy.getUUID());
+                    updateStatement.setInt(23, policy.getSubscriberCount());
+                    updateStatement.setString(24, policy.getUUID());
                 }
             } else {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(14, policy.getMonetizationPlan());
-                    updateStatement.setString(15,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(16,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(17,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlan());
                     updateStatement.setString(18,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(19,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(20,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(21,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setInt(19, policy.getSubscriberCount());
-                    updateStatement.setString(20, policy.getPolicyName());
-                    updateStatement.setInt(21, policy.getTenantId());
+                    updateStatement.setInt(22, policy.getSubscriberCount());
+                    updateStatement.setString(23, policy.getPolicyName());
+                    updateStatement.setInt(24, policy.getTenantId());
 
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(14, policy.getMonetizationPlan());
-                    updateStatement.setString(15,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(16,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(17,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlan());
                     updateStatement.setString(18,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(19,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(20,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(21,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setInt(19, policy.getSubscriberCount());
-                    updateStatement.setString(20, policy.getUUID());
+                    updateStatement.setInt(22, policy.getSubscriberCount());
+                    updateStatement.setString(23, policy.getUUID());
                 }
             }
             updateStatement.executeUpdate();
@@ -13378,6 +13407,10 @@ public class ApiMgtDAO {
             EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
             policyStatement.setLong(6, limit.getEventCount());
             policyStatement.setString(7, null);
+        } else if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            AIAPIQuotaLimit limit = (AIAPIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
+            policyStatement.setLong(6, limit.getRequestCount());
+            policyStatement.setString(7, null);
         }
 
         policyStatement.setLong(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
@@ -13438,6 +13471,16 @@ public class ApiMgtDAO {
             eventCountLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
             eventCountLimit.setEventCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
             quotaPolicy.setLimit(eventCountLimit);
+        } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.AI_API_QUOTA_TYPE)) {
+            AIAPIQuotaLimit AIAPIQuotaLimit = new AIAPIQuotaLimit();
+            AIAPIQuotaLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            AIAPIQuotaLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            AIAPIQuotaLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            AIAPIQuotaLimit.setTotalTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_TOTAL_TOKEN_COUNT));
+            AIAPIQuotaLimit.setPromptTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_PROMPT_TOKEN_COUNT));
+            AIAPIQuotaLimit.setCompletionTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_COMPLETION_TOKEN_COUNT));
+            quotaPolicy.setLimit(AIAPIQuotaLimit);
         }
 
         policy.setUUID(resultSet.getString(ThrottlePolicyConstants.COLUMN_UUID));
@@ -14382,6 +14425,266 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return application;
+    }
+
+    /**
+     * Adds a new LLM (Large Language Model) provider to the system for a specified organization.
+     *
+     * @param provider The LLMProvider object containing details of the provider to be added.
+     * @return The LLMProvider object that was added, with its ID set.
+     * @throws APIManagementException If an error occurs while adding the LLM provider to the database.
+     */
+    public LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException {
+
+        String providerId = UUID.randomUUID().toString();
+        provider.setId(providerId);
+
+        String errorMessage = "Failed to add LLM Provider: " + providerId;
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            String insertProviderQuery = SQLConstants.INSERT_LLM_PROVIDER_SQL;
+            try (PreparedStatement prepStmt = conn.prepareStatement(insertProviderQuery)) {
+                prepStmt.setString(1, providerId);
+                prepStmt.setString(2, provider.getName());
+                prepStmt.setString(3, provider.getApiVersion());
+                prepStmt.setBoolean(4, provider.isBuiltInSupport());
+                prepStmt.setString(5, provider.getOrganization());
+                prepStmt.setString(6, provider.getDescription());
+                prepStmt.setString(7, provider.getApiDefinition());
+                prepStmt.setString(8, provider.getConfigurations());
+
+                int rowsAffected = prepStmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    conn.commit();
+                    return provider;
+                } else {
+                    conn.rollback();
+                    return null;
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Retrieves all LLM Providers for a given organization.
+     * <p>
+     * This method fetches a list of LLM providers from the database for a specific organization.
+     *
+     * @param organization the tenant domain or organization identifier for which to retrieve LLM providers
+     * @return List<LlmProvider> a list of LLM provider objects associated with the given organization
+     * @throws APIManagementException if an error occurs while accessing the database or retrieving data
+     */
+    public List<LLMProvider> getLLMProvidersByOrg(String organization) throws APIManagementException {
+
+        List<LLMProvider> providerList = new ArrayList<>();
+        String errorMessage = "Failed to get LLM Providers in tenant domain: " + organization;
+
+        try {
+            Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(SQLConstants.GET_LLM_PROVIDERS_BY_ORG_SQL);
+            preparedStatement.setString(1, organization);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                LLMProvider provider = new LLMProvider();
+                provider.setId(resultSet.getString("UUID"));
+                provider.setName(resultSet.getString("NAME"));
+                provider.setApiVersion(resultSet.getString("API_VERSION"));
+                provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
+                provider.setDescription(resultSet.getString("DESCRIPTION"));
+                providerList.add(provider);
+            }
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+
+        return providerList;
+    }
+
+    public List<LLMProvider> getLLMProviderConfigurations() throws APIManagementException {
+
+        List<LLMProvider> providerList = new ArrayList<>();
+        String errorMessage = "Failed to get LLM Providers.";
+
+        try {
+            Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_CONFIGURATIONS_SQL);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                LLMProvider provider = new LLMProvider();
+                provider.setName(resultSet.getString("NAME"));
+                provider.setApiVersion(resultSet.getString("API_VERSION"));
+                provider.setOrganization(resultSet.getString("ORGANIZATION"));
+                provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+                providerList.add(provider);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+
+        return providerList;
+    }
+
+    public List<LLMProvider> getBuiltInLLMProviders(String organization) throws APIManagementException {
+
+        String errorMessage = "Failed to retrieve BUILT_IN_SUPPORT LLM Providers configurations in tenant domain: " + organization;
+        List<LLMProvider> builtInLLMProviders = new ArrayList<>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_BUILT_IN_LLM_PROVIDER_CONFIGURATIONS_BY_ORG_SQL)) {
+
+            preparedStatement.setString(1, organization);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                LLMProvider provider = new LLMProvider();
+                provider.setId(resultSet.getString("UUID"));
+                provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+                builtInLLMProviders.add(provider);
+            }
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+
+        return builtInLLMProviders;
+    }
+
+
+    /**
+     * Deletes an LLM Provider and its associated parameters from the database.
+     * <p>
+     * This method removes the specified LLM Provider and all its related parameters
+     * for the given organization and provider ID.
+     *
+     * @param organization  the tenant domain or organization identifier
+     * @param llmProviderId the unique identifier of the LLM provider to be deleted
+     * @throws APIManagementException if an error occurs while accessing the database or deleting the data
+     */
+    public LLMProvider deleteLLMProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException {
+
+        LLMProvider provider = getLLMProvider(organization, llmProviderId);
+        String errorMessage = "Failed to delete LLM Provider in tenant domain: " + organization;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement deleteProviderStmt =
+                         connection.prepareStatement(SQLConstants.DELETE_LLM_PROVIDER_SQL)) {
+                deleteProviderStmt.setString(1, organization);
+                deleteProviderStmt.setString(2, llmProviderId);
+                deleteProviderStmt.setBoolean(3, builtIn);
+                int rowsAffected = deleteProviderStmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    connection.commit();
+                    return provider;
+                } else {
+                    connection.rollback();
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Updates an LLM Provider's details in the database for a given organization.
+     * <p>
+     * This method updates the basic details of an LLM Provider and its associated parameters, such as headers and query
+     * parameters. It handles transactions to ensure data consistency and rolls back changes if an error occurs.
+     *
+     * @param provider the LLM provider object containing updated details
+     * @return LlmProvider the updated LLM provider object
+     * @throws APIManagementException if an error occurs while accessing the database or updating data
+     */
+    public LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException {
+
+        String errorMessage = "Failed to update LLM Provider in tenant domain: " + provider.getOrganization();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement checkStmt = connection.prepareStatement(SQLConstants.CHECK_LLM_PROVIDER_BUILT_IN_SUPPORT_SQL)) {
+                checkStmt.setString(1, provider.getOrganization());
+                checkStmt.setString(2, provider.getId());
+
+                try (ResultSet resultSet = checkStmt.executeQuery()) {
+                    if (resultSet.next()) {
+                        provider.setName(resultSet.getString("NAME"));
+                        provider.setApiVersion(resultSet.getString("API_VERSION"));
+                        provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
+                    }
+                }
+            }
+            String updateSql = provider.isBuiltInSupport() ? SQLConstants.UPDATE_BUILT_IN_LLM_PROVIDER_SQL : SQLConstants.UPDATE_LLM_PROVIDER_SQL;
+            try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
+                if (provider.isBuiltInSupport()) {
+                    updateStmt.setString(1, provider.getApiDefinition());
+                    updateStmt.setString(2, provider.getOrganization());
+                    updateStmt.setString(3, provider.getId());
+                } else {
+                    updateStmt.setString(1, provider.getDescription());
+                    updateStmt.setString(2, provider.getApiDefinition());
+                    updateStmt.setString(3, provider.getConfigurations());
+                    updateStmt.setString(4, provider.getOrganization());
+                    updateStmt.setString(5, provider.getId());
+                }
+                int rowsAffected = updateStmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    connection.commit();
+                    return provider;
+                } else {
+                    connection.rollback();
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Retrieves an LLM Provider based on the organization and provider ID.
+     * <p>
+     * This method fetches the LLM Provider details, including its headers and query parameters,
+     * from the database for a given organization and LLM provider ID.
+     *
+     * @param organization  the tenant domain or organization identifier
+     * @param llmProviderId the unique identifier of the LLM provider
+     * @return LlmProvider   the LLM provider object containing its details, headers, and query parameters,
+     * or {@code null} if no provider is found
+     * @throws APIManagementException if an error occurs while accessing the database or retrieving data
+     */
+    public LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException {
+
+        String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
+        try {
+            Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_SQL);
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, llmProviderId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
+            }
+            LLMProvider provider = new LLMProvider();
+            provider.setId(resultSet.getString("UUID"));
+            provider.setName(resultSet.getString("NAME"));
+            provider.setApiVersion(resultSet.getString("API_VERSION"));
+            provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
+            provider.setDescription(resultSet.getString("DESCRIPTION"));
+            provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
+            provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+            return provider;
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
     }
 
     /**
@@ -16773,7 +17076,7 @@ public class ApiMgtDAO {
                 String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
                 String uuid = resultSet.getString("API_UUID");
-                if (APIConstants.API_PRODUCT.equals(resultSet.getString("API_TYPE"))) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(resultSet.getString("API_TYPE"))) {
                     // skip api products
                     continue;
                 }
@@ -18962,7 +19265,7 @@ public class ApiMgtDAO {
             try (ResultSet result = ps.executeQuery()) {
                 while (result.next()) {
                     String apiType = result.getString("TYPE");
-                    if (!APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                    if (!APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                         APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
                                 ("API_PROVIDER")), result.getString("API_NAME"),
                                 result.getString("API_VERSION"));
@@ -18997,7 +19300,7 @@ public class ApiMgtDAO {
                     if (index >= offset && index < limit) {
                         String apiType = result.getString("TYPE");
 
-                        if (APIConstants.API_PRODUCT.toString().equals(apiType)) {
+                        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                             APIProductIdentifier identifier = new APIProductIdentifier(
                                     APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
                                     result.getString("API_NAME"), result.getString("API_VERSION"));
@@ -20165,13 +20468,69 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Retrieve a list of common operation policies by providing the policy name and organization
+     *
+     * @param policyName             Policy name
+     * @param organization           Organization name
+     * @param isWithPolicyDefinition Include the policy definition to the output or not
+     * @return List of operation policy data
+     * @throws APIManagementException
+     */
+    public List<OperationPolicyData> getCommonOperationPolicyByPolicyName(String policyName,
+                                                                    String organization, boolean isWithPolicyDefinition)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getCommonOperationPolicyByPolicyName(connection, policyName, organization,
+                    isWithPolicyDefinition);
+        } catch (SQLException e) {
+            handleException("Failed to get common operation policy for name " + policyName + "for organization "
+                    + organization, e);
+        }
+        return null;
+    }
+
+    private List<OperationPolicyData> getCommonOperationPolicyByPolicyName(Connection connection, String policyName,
+                                                                     String tenantDomain,
+                                                                     boolean isWithPolicyDefinition)
+            throws SQLException {
+
+        String dbQuery =
+                SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME;
+
+        List<OperationPolicyData> operationPolicyDataList = new ArrayList<>();
+        OperationPolicyData policyData = null;
+        try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+            statement.setString(1, policyName);
+            statement.setString(2, tenantDomain);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    policyData = new OperationPolicyData();
+                    policyData.setOrganization(tenantDomain);
+                    policyData.setPolicyId(rs.getString("POLICY_UUID"));
+                    policyData.setMd5Hash(rs.getString("POLICY_MD5"));
+                    policyData.setSpecification(populatePolicySpecificationFromRS(rs));
+
+                    if (isWithPolicyDefinition && policyData != null) {
+                        if (isWithPolicyDefinition && policyData != null) {
+                            populatePolicyDefinitions(connection, policyData.getPolicyId(), policyData);
+                        }
+                    }
+                    operationPolicyDataList.add(policyData);
+                }
+            }
+        }
+        return operationPolicyDataList;
+    }
+
     private OperationPolicyData getCommonOperationPolicyByPolicyName(Connection connection, String policyName,
                                                                      String policyVersion, String tenantDomain,
                                                                      boolean isWithPolicyDefinition)
             throws SQLException {
 
         String dbQuery =
-                SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME;
+                SQLConstants.OperationPolicyConstants.GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME_AND_VERSION;
 
         OperationPolicyData policyData = null;
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
@@ -20196,6 +20555,7 @@ public class ApiMgtDAO {
         }
         return policyData;
     }
+
 
     /**
      * Retrieve an API Specific operation policy by providing the policy name. In order to narrow down the specific policy

@@ -2353,16 +2353,17 @@ public class SQLConstants {
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " BILLING_PLAN, TOTAL_TOKEN_COUNT, PROMPT_TOKEN_COUNT, COMPLETION_TOKEN_COUNT, \n" +
+                    " MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, \n" +
+                    " CONNECTIONS_COUNT) \n" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
+                    " BILLING_PLAN, TOTAL_TOKEN_COUNT, PROMPT_TOKEN_COUNT, COMPLETION_TOKEN_COUNT, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
                     " FIXED_RATE, BILLING_CYCLE, PRICE_PER_REQUEST, CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -2570,6 +2571,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2594,6 +2598,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2601,8 +2608,8 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
-                    "CUSTOM_ATTRIBUTES = ?, "+
+                    "BILLING_PLAN = ?, " +
+                    "CUSTOM_ATTRIBUTES = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2619,6 +2626,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2626,7 +2636,7 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
+                    "BILLING_PLAN = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2643,6 +2653,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2650,8 +2663,8 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
-                    "CUSTOM_ATTRIBUTES = ?, "+
+                    "BILLING_PLAN = ?, " +
+                    "CUSTOM_ATTRIBUTES = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2742,9 +2755,42 @@ public class SQLConstants {
             "SET DISPLAY_NAME = ?, DESCRIPTION = ? " +
             "WHERE UUID = ?";
 
+    public static final String INSERT_LLM_PROVIDER_SQL =
+            "INSERT INTO AM_LLM_PROVIDERS (UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, ORGANIZATION, DESCRIPTION, " +
+                    "API_DEFINITION, CONFIGURATIONS) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    public static final String GET_LLM_PROVIDERS_BY_ORG_SQL =
+            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION " +
+                    "FROM AM_LLM_PROVIDERS " +
+                    "WHERE ORGANIZATION = ?";
+
+    public static final String GET_LLM_PROVIDER_CONFIGURATIONS_SQL =
+            "SELECT NAME, API_VERSION, ORGANIZATION, CONFIGURATIONS " +
+                    "FROM AM_LLM_PROVIDERS";
+
+    public static final String GET_BUILT_IN_LLM_PROVIDER_CONFIGURATIONS_BY_ORG_SQL =
+            "SELECT UUID, CONFIGURATIONS FROM AM_LLM_PROVIDERS WHERE ORGANIZATION = ? AND BUILT_IN_SUPPORT = true";
+
+    public static final String GET_LLM_PROVIDER_SQL =
+            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, CONFIGURATIONS " +
+                    "FROM AM_LLM_PROVIDERS PROVIDER WHERE ORGANIZATION = ? AND UUID = ?";
+
+    public static final String DELETE_LLM_PROVIDER_SQL =
+            "DELETE FROM AM_LLM_PROVIDERS " +
+                    "WHERE ORGANIZATION = ? AND UUID = ? AND BUILT_IN_SUPPORT = ?";
+
+    public static final String UPDATE_LLM_PROVIDER_SQL =
+            "UPDATE AM_LLM_PROVIDERS SET DESCRIPTION = ?, API_DEFINITION = ?, CONFIGURATIONS = ? " +
+                    "WHERE ORGANIZATION = ? AND UUID = ? AND BUILT_IN_SUPPORT = false";
+
+    public static final String UPDATE_BUILT_IN_LLM_PROVIDER_SQL = "UPDATE AM_LLM_PROVIDERS SET API_DEFINITION = ? WHERE ORGANIZATION = ? AND UUID = ?";;
+
     public static final String DELETE_API_PRODUCT_SQL =
             "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
                     + APIConstants.API_PRODUCT + "'";
+
+    public static final String CHECK_LLM_PROVIDER_BUILT_IN_SUPPORT_SQL = "SELECT NAME, API_VERSION, BUILT_IN_SUPPORT FROM AM_LLM_PROVIDERS WHERE ORGANIZATION = ? AND UUID = ?";
 
     public static final String UPDATE_PRODUCT_SQL =
             " UPDATE AM_API " +
@@ -4220,6 +4266,15 @@ public class SQLConstants {
                         " OP.POLICY_NAME = ? AND OP.POLICY_VERSION = ? AND OP.ORGANIZATION = ? AND AOP.API_UUID = ? ";
 
         public static final String GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME =
+                "SELECT " +
+                        " OP.POLICY_UUID, OP.POLICY_NAME, OP.POLICY_VERSION, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
+                        " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.POLICY_MD5 " +
+                        " FROM " +
+                        " AM_OPERATION_POLICY OP INNER JOIN AM_COMMON_OPERATION_POLICY COP ON OP.POLICY_UUID = COP.POLICY_UUID " +
+                        " WHERE " +
+                        " OP.POLICY_NAME = ? AND OP.ORGANIZATION = ?";
+
+        public static final String GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME_AND_VERSION =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.POLICY_VERSION, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
                         " OP.POLICY_PARAMETERS, OP.POLICY_CATEGORY, OP.POLICY_MD5 " +

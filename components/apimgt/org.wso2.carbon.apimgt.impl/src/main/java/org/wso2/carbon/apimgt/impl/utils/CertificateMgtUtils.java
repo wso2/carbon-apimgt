@@ -27,6 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.xerces.impl.Constants;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
@@ -73,6 +74,7 @@ import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -853,6 +855,14 @@ public class CertificateMgtUtils {
                 try {
                     String xml = customSSLProfilesOmElement.toString();
                     DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
+                    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                    factory.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE,
+                            true);
+                    factory.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE,
+                            false);
+                    factory.setFeature(Constants.SAX_FEATURE_PREFIX +
+                            Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
+                    factory.setNamespaceAware(true);
                     DocumentBuilder builder = factory.newDocumentBuilder();
                     Document doc = builder.parse(new InputSource(new StringReader(xml)));
                     DOMSource source = new DOMSource(doc);

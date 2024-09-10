@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -431,7 +432,7 @@ public class SubscriptionValidationDAO {
                         if (isExpand) {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
@@ -1028,6 +1029,18 @@ public class SubscriptionValidationDAO {
                 eventCountLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
                 eventCountLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
                 quotaPolicy.setLimit(eventCountLimit);
+            } else if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                AIAPIQuotaLimit AIAPIQuotaLimit = new AIAPIQuotaLimit();
+                AIAPIQuotaLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                AIAPIQuotaLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                AIAPIQuotaLimit.setRequestCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+                AIAPIQuotaLimit.setTotalTokenCount(
+                        resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_TOTAL_TOKEN_COUNT));
+                AIAPIQuotaLimit.setPromptTokenCount(
+                        resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_PROMPT_TOKEN_COUNT));
+                AIAPIQuotaLimit.setCompletionTokenCount(
+                        resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_COMPLETION_TOKEN_COUNT));
+                quotaPolicy.setLimit(AIAPIQuotaLimit);
             }
             policy.setQuotaPolicy(quotaPolicy);
         }
@@ -1131,7 +1144,7 @@ public class SubscriptionValidationDAO {
                         if (isExpand) {
                             String revision = resultSet.getString("REVISION_UUID");
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
@@ -1157,7 +1170,7 @@ public class SubscriptionValidationDAO {
             api.setIsDefaultVersion(true);
         }
 
-        if (APIConstants.API_PRODUCT.equals(apiType)
+        if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)
                 && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(version)
                 && StringUtils.isBlank(contextTemplate)) {
             if (StringUtils.isBlank(publishedDefaultApiVersion)) {
@@ -1246,7 +1259,7 @@ public class SubscriptionValidationDAO {
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
@@ -1458,7 +1471,7 @@ public class SubscriptionValidationDAO {
                                 contextTemplate);
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);
@@ -1547,7 +1560,7 @@ public class SubscriptionValidationDAO {
 
                         if (expand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
-                            if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
                                 attachURlMappingDetailsOfApiProduct(connection, api, revision);
                             } else {
                                 attachURLMappingDetails(connection, revision, api);

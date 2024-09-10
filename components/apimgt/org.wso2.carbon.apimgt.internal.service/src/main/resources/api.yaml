@@ -642,6 +642,23 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /llm-provider-configs:
+    get:
+      summary: Retrieve persisted LLM Providers
+      description: |
+        This retrieve the persisted LLM Providers.
+      tags:
+        - 'LLMProviders'
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            $ref: '#/definitions/LLMProviderList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      operationId: getLLMProviderConfigs
   /correlation-configs:
     get:
       summary: Retrieve persisted correlation configs data.
@@ -1548,6 +1565,8 @@ definitions:
         $ref: '#/definitions/BandwidthLimit'
       eventCount:
         $ref: '#/definitions/EventCountLimit'
+      aiApiQuota:
+        $ref: '#/definitions/AIAPIQuotaLimit'
 
   BurstLimit:
     title: Burst Limit object
@@ -1614,6 +1633,60 @@ definitions:
             description: Maximum number of events allowed
             format: int64
             example: 3000
+
+  #-----------------------------------------------------
+  # The Throttling AI API Quota Limit resource
+  #-----------------------------------------------------
+  AIAPIQuotaLimit:
+    title: AI Quota Limit object
+    allOf:
+      - $ref: '#/definitions/ThrottleLimitBase'
+      - required:
+          - requestCount
+        properties:
+          requestCount:
+            type: integer
+            format: int64
+            description: Maximum number of requests allowed
+            example: 1000
+          totalTokenCount:
+            type: integer
+            description: Maximum number of total tokens allowed
+            format: int64
+            example: 1000
+          promptTokenCount:
+            type: integer
+            description: Maximum number of prompt tokens allowed
+            format: int64
+            example: 300
+          completionTokenCount:
+            type: integer
+            description: Maximum number of completion tokens allowed
+            format: int64
+            example: 300
+
+  #-----------------------------------------------------
+  # LLM Provider Config List
+  #-----------------------------------------------------
+  LLMProviderList:
+    title: LLM Provider Config List
+    properties:
+      apis:
+        type: array
+        items:
+          $ref: '#/definitions/LLMProvider'
+  LLMProvider:
+    title: LLM Provider Config
+    properties:
+      name:
+        type: string
+      apiVersion:
+        type: string
+      organization:
+        type: string
+      configurations:
+        type: string
+
   #-----------------------------------------------------
   # API Logging detail list
   #-----------------------------------------------------

@@ -85,7 +85,6 @@ import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -121,6 +120,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -288,6 +288,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import java.security.cert.X509Certificate;
 import javax.validation.constraints.NotNull;
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -423,6 +424,8 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEY_TEMPLATE));
             eventPublishers.putIfAbsent(EventPublisherType.KEYMGT_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEYMGT_EVENT));
+            eventPublishers.putIfAbsent(EventPublisherType.LLMPROVIDER_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.LLMPROVIDER_EVENT));
         } catch (EventPublisherException e) {
             log.error("Could not initialize the event publishers. Events might not be published properly.");
             throw new APIManagementException(e);
@@ -6493,6 +6496,11 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else if (limit instanceof AIAPIQuotaLimit){
+                    // Todo: Need to implement this according to publisher and developer portals' requirements
+                    AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
+                    tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
+                    tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());
@@ -6571,6 +6579,11 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else if (limit instanceof AIAPIQuotaLimit) {
+                    // Todo: Need to implement this according to publisher and developer portals' requirements
+                    AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
+                    tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
+                    tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());
@@ -6855,6 +6868,9 @@ public final class APIUtil {
         dbf.setXIncludeAware(false);
         dbf.setExpandEntityReferences(false);
         try {
+            // Enable secure processing
+            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE, true);
             dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
             dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
             dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
