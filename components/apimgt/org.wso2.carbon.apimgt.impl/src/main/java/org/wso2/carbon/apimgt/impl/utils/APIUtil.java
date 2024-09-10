@@ -10532,20 +10532,20 @@ public final class APIUtil {
      *
      * @param endpoint      Endpoint to be invoked
      * @param tokenEndpoint Endpoint to be invoked to get the token using key
-     * @param authToken     OnPremKey for the organization
+     * @param key           AI Subscription key
      * @param resource      Specifies the backend resource the request should be forwarded to
      * @param payload       Request payload that needs to be attached to the request
      * @param requestId     UUID of the request, so that AI service can track the progress
      * @return returns the response if invocation is successful
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    public static String invokeAIService(String endpoint, String tokenEndpoint, String authToken, String resource,
+    public static String invokeAIService(String endpoint, String tokenEndpoint, String key, String resource,
             String payload, String requestId) throws APIManagementException {
 
         try {
-            String token = getAiTokenUsingKey(tokenEndpoint, authToken);
+            String token = getAiTokenUsingKey(tokenEndpoint, key);
             HttpPost preparePost = new HttpPost(endpoint + resource);
-            preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
+            preparePost.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BEARER + token);
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             if (StringUtils.isNotEmpty(requestId)) {
                 preparePost.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
@@ -10593,19 +10593,20 @@ public final class APIUtil {
     /**
      * This method is used to get the no of apis in the vector db for an organization
      *
-     * @param endpoint  Endpoint to be invoked
-     * @param authToken OnPremKey for the organization
-     * @param resource  Resource that we should forward the request to
+     * @param endpoint      Endpoint to be invoked
+     * @param tokenEndpoint Endpoint to be invoked to get the token using key
+     * @param key           AI Subscription key
+     * @param resource      Resource that we should forward the request to
      * @return CloseableHttpResponse of the GET call
      * @throws APIManagementException if an error occurs while retrieving API count
      */
     public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String tokenEndpoint,
-            String authToken, String resource) throws APIManagementException {
+            String key, String resource) throws APIManagementException {
 
         try {
-            String token = getAiTokenUsingKey(tokenEndpoint, authToken);
+            String token = getAiTokenUsingKey(tokenEndpoint, key);
             HttpGet apiCountGet = new HttpGet(endpoint + resource);
-            apiCountGet.setHeader(APIConstants.API_KEY_AUTH, authToken);
+            apiCountGet.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BEARER + token);
             URL url = new URL(endpoint);
             int port = url.getPort();
             String protocol = url.getProtocol();
@@ -10621,22 +10622,23 @@ public final class APIUtil {
     /**
      * This method is used to delete an API from the vector database service to accommodate the Marketplace assistant
      *
-     * @param endpoint  Endpoint to be invoked
-     * @param authToken OnPremKey for the organization
-     * @param resource  Resource that we should forward the request to
-     * @param uuid      UUID of the API to be deleted
+     * @param endpoint      Endpoint to be invoked
+     * @param tokenEndpoint Endpoint to be invoked to get the token using key
+     * @param key           AI Subscription key
+     * @param resource      Resource that we should forward the request to
+     * @param uuid          UUID of the API to be deleted
      * @throws APIManagementException if an error occurs while deleting the API
      */
-    public static void marketplaceAssistantDeleteService(String endpoint, String tokenEndpoint, String authToken,
+    public static void marketplaceAssistantDeleteService(String endpoint, String tokenEndpoint, String key,
             String resource, String uuid) throws APIManagementException {
 
         try {
-            String token = getAiTokenUsingKey(tokenEndpoint, authToken);
+            String token = getAiTokenUsingKey(tokenEndpoint, key);
             String resourceWithPathParam = endpoint + resource + "/{uuid}";
             resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
 
             HttpDelete prepareDelete = new HttpDelete(resourceWithPathParam);
-            prepareDelete.setHeader(APIConstants.API_KEY_AUTH, authToken);
+            prepareDelete.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BEARER + token);
 
             URL url = new URL(endpoint);
             int port = url.getPort();
