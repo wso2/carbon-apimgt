@@ -1227,6 +1227,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException {
+        apiMgtDAO.deleteCustomBackendByAPIID(apiUUID);
+    }
+    @Override
     public void deleteCustomBackendByID(String backendUUID, String apiUUID, String type)
             throws APIManagementException {
         apiMgtDAO.deleteCustomBackend(apiUUID, backendUUID, type);
@@ -2626,6 +2630,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // DB delete operations
         if (!isError && api != null) {
             try {
+                // Remove Custom Backend entries of the API
+                deleteCustomBackendByAPIID(apiUuid);
                 deleteAPIRevisions(apiUuid, organization);
                 deleteAPIFromDB(api);
                 if (log.isDebugEnabled()) {

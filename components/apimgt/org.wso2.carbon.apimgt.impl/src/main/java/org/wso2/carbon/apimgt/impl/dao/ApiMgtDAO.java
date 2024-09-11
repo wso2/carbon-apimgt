@@ -21521,6 +21521,18 @@ public class ApiMgtDAO {
         }
     }
 
+    public void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException {
+        String deleteCustomBackendSql = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_API;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackendSql)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiUUID);
+            connection.commit();
+        } catch (SQLException ex) {
+            handleException("Error while deleting Custom Backend for API: " + apiUUID, ex);
+        }
+    }
+
     public void deleteCustomBackendByRevision(String apiUUID, String revisionUUID) throws APIManagementException {
         boolean isRevisioned = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
         String deleteSqlQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;

@@ -67,6 +67,7 @@ public interface APIProvider extends APIManager {
             APIManagementException;
 
     void deleteCustomBackendByID(String backendUUID, String apiUUID, String type) throws APIManagementException;
+    void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException;
 
     InputStream getCustomBackendSequenceByAPIAndRevisionUUUID(String apiUUID, String revisionUUID, String type)
             throws APIManagementException;
