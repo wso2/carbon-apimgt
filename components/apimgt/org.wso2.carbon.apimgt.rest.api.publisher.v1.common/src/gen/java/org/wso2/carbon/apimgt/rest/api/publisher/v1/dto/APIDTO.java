@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APILlmConfigurationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
@@ -310,6 +311,7 @@ return null;
         }
     }
     private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
+    private APILlmConfigurationsDTO llmConfigurations = null;
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
@@ -1206,6 +1208,24 @@ return null;
 
   /**
    **/
+  public APIDTO llmConfigurations(APILlmConfigurationsDTO llmConfigurations) {
+    this.llmConfigurations = llmConfigurations;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("llmConfigurations")
+  public APILlmConfigurationsDTO getLlmConfigurations() {
+    return llmConfigurations;
+  }
+  public void setLlmConfigurations(APILlmConfigurationsDTO llmConfigurations) {
+    this.llmConfigurations = llmConfigurations;
+  }
+
+  /**
+   **/
   public APIDTO scopes(List<APIScopeDTO> scopes) {
     this.scopes = scopes;
     return this;
@@ -1444,6 +1464,7 @@ return null;
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(endpointConfig, API.endpointConfig) &&
         Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
+        Objects.equals(llmConfigurations, API.llmConfigurations) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
@@ -1458,7 +1479,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, audiences, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, audiences, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, endpointImplementationType, llmConfigurations, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols);
   }
 
   @Override
@@ -1516,6 +1537,7 @@ return null;
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");
+    sb.append("    llmConfigurations: ").append(toIndentedString(llmConfigurations)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");

@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LLMConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -608,6 +609,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
+        addLLMConfigurations(api);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -627,6 +629,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAPIPolicyParameters(api, tenantDomain);
         // Add API level and operation level policies
         apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
+    }
+
+    private void addLLMConfigurations(API api) throws APIManagementException {
+
+        if (api.getLlmConfigurations() != null && api.getLlmConfigurations().isEnabled()) {
+            LLMConfiguration configurations = api.getLlmConfigurations();
+            if (configurations != null) {
+                apiMgtDAO.addLLMConfiguration(api.getUuid(), null, api.getLlmConfigurations());
+            }
+        }
+    }
+
+    private void updateLLMConfigurations(API api) throws APIManagementException {
+
+        if (api.getLlmConfigurations() != null && api.getLlmConfigurations().isEnabled()) {
+            LLMConfiguration configurations = api.getLlmConfigurations();
+            if (configurations != null) {
+                apiMgtDAO.updateLLMConfigurationsMapping(api.getUuid(), null, api.getLlmConfigurations());
+            }
+        }
+    }
+
+    private void deleteLLMConfigurations(API api) throws APIManagementException {
+        if (api.getLlmConfigurations() != null && api.getLlmConfigurations().isEnabled()) {
+            apiMgtDAO.deleteLLMConfigurations(api.getUuid(), null);
+        }
     }
 
     /**
@@ -969,6 +997,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         updateProductResourceMappings(api, organization, productResources);
 
         updateAPIPolicies(api, tenantDomain);
+        updateLLMConfigurations(api);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -2515,6 +2544,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         + apiUuid + " on organization " + organization, e);
                 isError = true;
             }
+        }
+
+        if (api != null && apiId != -1) {
+            deleteLLMConfigurations(api);
         }
 
         // Delete event publishing to gateways
@@ -5230,6 +5263,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
                 populateAPILevelPolicies(api);
+                populateLLMConfiguration(api);
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     if (migrationEnabled == null) {
@@ -5254,6 +5288,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e);
         }
+    }
+
+    private void populateLLMConfiguration(API api) throws APIManagementException {
+        LLMConfiguration configurations = apiMgtDAO.getLLMConfiguration(api.getUuid(), null);
+        api.setLlmConfigurations(configurations);
     }
 
     @Override
@@ -5868,6 +5907,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiRevision.setRevisionUUID(revisionUUID);
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
+
+            LLMConfiguration configuration = apiMgtDAO.getLLMConfiguration(apiRevision.getApiUUID(), null);
+            apiMgtDAO.addLLMConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), configuration);
         } catch (APIManagementException e) {
             try {
                     apiPersistenceInstance.deleteAPIRevision(new Organization(organization), apiId.getUUID(), revisionUUID,
@@ -6402,6 +6444,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIRevision(apiRevision);
+        LLMConfiguration configuration = apiMgtDAO.getLLMConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+        apiMgtDAO.addLLMConfiguration(apiRevision.getApiUUID(), null, configuration);
     }
 
     /**
@@ -6444,6 +6488,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
+        apiMgtDAO.deleteLLMConfigurations(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {
