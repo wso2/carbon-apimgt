@@ -10225,6 +10225,22 @@ public final class APIUtil {
     }
 
     /**
+     * Get the subscription validation stats before inserting the API
+     *
+     * @param tiers Available business plans for the API
+     * @return true if the subscription validation is enabled
+     */
+    public static String setSubscriptionValidationStatusBeforeInsert(Set<Tier> tiers) {
+        if (tiers != null && tiers.size() == 1) {
+            Tier tier = tiers.iterator().next();
+            if(tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+                return "DISABLED";
+            }
+        }
+        return "ENABLED";
+    }
+
+    /**
      * Handles gateway vendor for APK before insert DB operations.
      *
      * @param gatewayVendorType Gateway vendor

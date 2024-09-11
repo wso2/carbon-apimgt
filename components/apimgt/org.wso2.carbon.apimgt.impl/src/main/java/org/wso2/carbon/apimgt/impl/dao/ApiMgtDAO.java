@@ -5586,6 +5586,8 @@ public class ApiMgtDAO {
             prepStmt.setString(12, organization);
             prepStmt.setString(13, api.getGatewayVendor());
             prepStmt.setString(14, api.getVersionTimestamp());
+            prepStmt.setString(15,
+                    APIUtil.setSubscriptionValidationStatusBeforeInsert(api.getAvailableTiers()));
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -7127,7 +7129,9 @@ public class ApiMgtDAO {
             prepStmt.setString(6, api.getApiLevelPolicy());
             prepStmt.setString(7, api.getType());
             prepStmt.setString(8, api.getGatewayVendor());
-            prepStmt.setString(9, api.getUuid());
+            prepStmt.setString(9,
+                    APIUtil.setSubscriptionValidationStatusBeforeInsert(api.getAvailableTiers()));
+            prepStmt.setString(10, api.getUuid());
             prepStmt.execute();
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
@@ -14982,6 +14986,8 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(12, organization);
             prepStmtAddAPIProduct.setString(13, apiProduct.getGatewayVendor());
             prepStmtAddAPIProduct.setString(14, apiProduct.getVersionTimestamp());
+            prepStmtAddAPIProduct.setString(15,
+                    APIUtil.setSubscriptionValidationStatusBeforeInsert(apiProduct.getAvailableTiers()));
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -15382,10 +15388,12 @@ public class ApiMgtDAO {
             ps.setString(2, username);
             ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             ps.setString(4, product.getGatewayVendor());
+            ps.setString(5,
+                    APIUtil.setSubscriptionValidationStatusBeforeInsert(product.getAvailableTiers()));
             APIProductIdentifier identifier = product.getId();
-            ps.setString(5, identifier.getName());
-            ps.setString(6, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(7, identifier.getVersion());
+            ps.setString(6, identifier.getName());
+            ps.setString(7, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            ps.setString(8, identifier.getVersion());
             ps.executeUpdate();
 
             int productId = getAPIID(product.getUuid(), conn);
