@@ -323,6 +323,20 @@ public class PublisherCommonUtils {
         List<String> apiSecurity = apiDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
+        // Remove the subscriptionless tier if other tiers are available.
+        if (tiersFromDTO != null && tiersFromDTO.size() > 1) {
+            String tierToDrop = null;
+            for (String tier : tiersFromDTO) {
+                if (tier.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+                    tierToDrop = tier;
+                    break;
+                }
+            }
+            if (tierToDrop != null) {
+                tiersFromDTO.remove(tierToDrop);
+                apiDtoToUpdate.setPolicies(tiersFromDTO);
+            }
+        }
         String originalStatus = originalAPI.getStatus();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         boolean condition = ((tiersFromDTO == null || tiersFromDTO.isEmpty()
@@ -1909,6 +1923,12 @@ public class PublisherCommonUtils {
         List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiProductDtoToUpdate.getPolicies();
+        // Remove the subscriptionless tier if other tiers are available.
+        if (tiersFromDTO != null && tiersFromDTO.size() > 1
+                && tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+            tiersFromDTO.remove(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+            apiProductDtoToUpdate.setPolicies(tiersFromDTO);
+        }
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (!APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
             if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
