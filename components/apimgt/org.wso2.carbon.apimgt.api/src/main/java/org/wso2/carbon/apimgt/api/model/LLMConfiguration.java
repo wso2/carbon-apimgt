@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.util.Map;
 
-public class LLMConfigurations {
+public class LLMConfiguration {
 
     private boolean enabled;
 

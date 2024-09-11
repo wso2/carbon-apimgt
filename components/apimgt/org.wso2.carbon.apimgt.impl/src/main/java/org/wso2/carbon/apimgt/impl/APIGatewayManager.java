@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GatewayPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.LLMApiEvent;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -77,14 +76,6 @@ public class APIGatewayManager {
             log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "
                     + "with apiID " + api + " at " + deployAPIInGatewayEvent.getTimeStamp());
         }
-
-        LLMApiEvent llmApiEvent = new LLMApiEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.LLM_API_DEPLOY.name(), api.getOrganization(), api.getContext(),
-                apiIdentifier.getVersion(), api.getLlmConfigurations());
-        APIUtil.sendNotification(llmApiEvent, APIConstants.NotifierType.LLM_API.name());
-        if (debugEnabled) {
-            log.debug("Event sent to Gateway with eventID " + llmApiEvent.getEventId() + " for api " + "with apiID " + api + " at " + llmApiEvent.getTimeStamp());
-        }
     }
 
     private void sendDeploymentEvent(APIProduct api, String tenantDomain, Set<String> publishedGateways) {
@@ -112,11 +103,6 @@ public class APIGatewayManager {
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName(), api.getType(), api.getContext());
         APIUtil.sendNotification(deployAPIInGatewayEvent,
                 APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-
-        LLMApiEvent llmApiEvent = new LLMApiEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.LLM_API_UNDEPLOY.name(), api.getOrganization(), api.getContext(),
-                apiIdentifier.getVersion(), api.getLlmConfigurations());
-        APIUtil.sendNotification(llmApiEvent, APIConstants.NotifierType.LLM_API.name());
 
     }
 

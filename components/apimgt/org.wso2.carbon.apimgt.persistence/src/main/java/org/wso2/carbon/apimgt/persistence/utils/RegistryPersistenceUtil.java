@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.LLMConfigurations;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
@@ -200,7 +199,6 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
             artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, api.getType());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_LLM_CONFIGURATIONS, new Gson().toJson(api.getLlmConfigurations()));
 
             StringBuilder policyBuilder = new StringBuilder();
             for (Tier tier : api.getAvailableTiers()) {
@@ -730,7 +728,6 @@ public class RegistryPersistenceUtil {
             } else {
                 api.setKeyManagers(Arrays.asList(APIConstants.API_LEVEL_ALL_KEY_MANAGERS));
             }
-            api.setLlmConfigurations(new Gson().fromJson(artifact.getAttribute(APIConstants.API_OVERVIEW_LLM_CONFIGURATIONS), LLMConfigurations.class));
             try {
                 api.setEnvironmentList(extractEnvironmentListForAPI(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
