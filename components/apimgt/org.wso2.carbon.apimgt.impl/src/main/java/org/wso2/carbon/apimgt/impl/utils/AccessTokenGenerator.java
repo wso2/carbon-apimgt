@@ -64,6 +64,8 @@ public class AccessTokenGenerator {
                 accessTokenInfoMap.remove(tokenEndpoint);
                 accessTokenInfo = generateNewAccessToken();
                 accessTokenInfoMap.put(tokenEndpoint, accessTokenInfo);
+                assert accessTokenInfo != null;
+                return accessTokenInfo.getAccessToken();
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Valid Access Token already available");
