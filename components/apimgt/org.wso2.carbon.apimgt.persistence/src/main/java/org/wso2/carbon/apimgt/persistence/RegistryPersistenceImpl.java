@@ -1120,7 +1120,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
     private List<GovernanceArtifact> searchDevportalAPIs(String query, int tenantId, Registry reg, int start, int offset)
             throws APIManagementException {
         List<GovernanceArtifact> artifacts = new ArrayList<GovernanceArtifact>();
-        query = query.replace("PUBLISHED", "published").replace("PROTOTYPED", "prototyped");// convert to lowercase
+        query = query.replace("PUBLISHED", "published").replace("PROTOTYPED", "prototyped").replace("DEPRECATED",
+                "deprecated");// convert to lowercase
         Map<String, String> fields = RegistryPersistenceUtil.getFields(query);
         //since store_view_roles and overview_visible_organizations are passed as property search value, remove this.
         fields.remove("overview_store_view_roles"); 
