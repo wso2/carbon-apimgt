@@ -395,8 +395,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response customBackendDelete( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.customBackendDelete(type, apiId, customBackendId, ifMatch, securityContext);
+    public Response customBackendDelete( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId) throws APIManagementException{
+        return delegate.customBackendDelete(type, apiId, customBackendId, securityContext);
     }
 
     @PUT
@@ -417,8 +417,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response customBackendUpdate(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch,  @Multipart(value = "sequence", required = false) InputStream sequenceInputStream, @Multipart(value = "sequence" , required = false) Attachment sequenceDetail, @Multipart(value = "type", required = false)  String type) throws APIManagementException{
-        return delegate.customBackendUpdate(apiId, ifMatch, sequenceInputStream, sequenceDetail, type, securityContext);
+    public Response customBackendUpdate(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "sequence", required = false) InputStream sequenceInputStream, @Multipart(value = "sequence" , required = false) Attachment sequenceDetail, @Multipart(value = "type", required = false)  String type) throws APIManagementException{
+        return delegate.customBackendUpdate(apiId, sequenceInputStream, sequenceDetail, type, securityContext);
     }
 
     @DELETE

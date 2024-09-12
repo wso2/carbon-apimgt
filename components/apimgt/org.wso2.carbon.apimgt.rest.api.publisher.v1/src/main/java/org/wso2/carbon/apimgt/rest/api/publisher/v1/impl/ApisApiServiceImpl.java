@@ -211,7 +211,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response customBackendDelete(String type, String apiId, String customBackendId, String ifMatch,
+    public Response customBackendDelete(String type, String apiId, String customBackendId,
             MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //validate if api exists
@@ -256,7 +256,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response customBackendUpdate(String apiId, String ifMatch, InputStream sequenceInputStream,
+    public Response customBackendUpdate(String apiId, InputStream sequenceInputStream,
             Attachment sequenceDetail, String type, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
