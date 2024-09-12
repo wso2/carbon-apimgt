@@ -407,6 +407,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId, organization);
             if (application != null) {
@@ -431,7 +432,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     }
                 }
                 application.setApplicationAttributes(applicationAttributes);
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application) || (orgInfo.getName() != null
+                        && orgInfo.getName().equals(application.getSharedOrganization()))) {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                     applicationDTO.setHashEnabled(OAuthServerConfiguration.getInstance().isClientSecretHashEnabled());
                     Set<Scope> scopes = apiConsumer
