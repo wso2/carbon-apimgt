@@ -198,7 +198,5 @@ public class APIMgtGatewayConstants {
     public static final String ACCESS_GRANT_CLAIM_NAME = "grantVerificationClaim";
     public static final String ACCESS_GRANT_CLAIM_VALUE = "grantVerificationClaimValue";
     public static final String SHOULD_ALLOW_ACCESS_VALIDATION = "shouldAllowValidation";
-
-    public static final String LLM_RESPONSE_METADATA = "llmResponseMetadata";
 }
 

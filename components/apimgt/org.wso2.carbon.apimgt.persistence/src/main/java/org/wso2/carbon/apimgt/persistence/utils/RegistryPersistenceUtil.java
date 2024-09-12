@@ -167,19 +167,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION, api.getImplementation());
 
             artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
-            artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAX_PROMPT_TOKENS,
-                    api.getProductionMaxPromptTokenCount());
-            artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAX_COMPLETION_TOKENS,
-                    api.getProductionMaxCompletionTokenCount());
-            artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAX_TOTAL_TOKENS,
-                    api.getProductionMaxTotalTokenCount());
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
-            artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAX_PROMPT_TOKENS,
-                    api.getSandboxMaxPromptTokenCount());
-            artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAX_COMPLETION_TOKENS,
-                    api.getSandboxMaxCompletionTokenCount());
-            artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAX_TOTAL_TOKENS,
-                    api.getSandboxMaxTotalTokenCount());
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, api.getAuthorizationHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER, api.getApiKeyHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
@@ -634,7 +622,6 @@ public class RegistryPersistenceUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
-
             api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
             api.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
             api.setAsyncTransportProtocols(artifact.getAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS));
