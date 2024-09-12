@@ -93,7 +93,14 @@ public class API implements Serializable {
 
     // Used for keeping Production & Sandbox Throttling limits.
     private String productionMaxTps;
+    private String productionMaxPromptTokenCount;
+    private String productionMaxCompletionTokenCount;
+    private String productionMaxTotalTokenCount;
     private String sandboxMaxTps;
+    private String sandboxMaxPromptTokenCount;
+    private String sandboxMaxCompletionTokenCount;
+    private String sandboxMaxTotalTokenCount;
+
 
     private String visibility;
     private String visibleRoles;
@@ -484,12 +491,60 @@ public class API implements Serializable {
         this.productionMaxTps = productionMaxTps;
     }
 
+    public String getProductionMaxPromptTokenCount() {
+        return productionMaxPromptTokenCount;
+    }
+
+    public void setProductionMaxPromptTokenCount(String productionMaxPromptTokenCount) {
+        this.productionMaxPromptTokenCount = productionMaxPromptTokenCount;
+    }
+
+    public String getProductionMaxCompletionTokenCount() {
+        return productionMaxCompletionTokenCount;
+    }
+
+    public void setProductionMaxCompletionTokenCount(String productionMaxCompletionTokenCount) {
+        this.productionMaxCompletionTokenCount = productionMaxCompletionTokenCount;
+    }
+
+    public String getProductionMaxTotalTokenCount() {
+        return productionMaxTotalTokenCount;
+    }
+
+    public void setProductionMaxTotalTokenCount(String productionMaxTotalTokenCount) {
+        this.productionMaxTotalTokenCount = productionMaxTotalTokenCount;
+    }
+
     public String getSandboxMaxTps() {
         return sandboxMaxTps;
     }
 
     public void setSandboxMaxTps(String sandboxMaxTps) {
         this.sandboxMaxTps = sandboxMaxTps;
+    }
+
+    public String getSandboxMaxPromptTokenCount() {
+        return sandboxMaxPromptTokenCount;
+    }
+
+    public void setSandboxMaxPromptTokenCount(String sandboxMaxPromptTokenCount) {
+        this.sandboxMaxPromptTokenCount = sandboxMaxPromptTokenCount;
+    }
+
+    public String getSandboxMaxCompletionTokenCount() {
+        return sandboxMaxCompletionTokenCount;
+    }
+
+    public void setSandboxMaxCompletionTokenCount(String sandboxMaxCompletionTokenCount) {
+        this.sandboxMaxCompletionTokenCount = sandboxMaxCompletionTokenCount;
+    }
+
+    public String getSandboxMaxTotalTokenCount() {
+        return sandboxMaxTotalTokenCount;
+    }
+
+    public void setSandboxMaxTotalTokenCount(String sandboxMaxTotalTokenCount) {
+        this.sandboxMaxTotalTokenCount = sandboxMaxTotalTokenCount;
     }
 
     public boolean isAdvertiseOnly() {

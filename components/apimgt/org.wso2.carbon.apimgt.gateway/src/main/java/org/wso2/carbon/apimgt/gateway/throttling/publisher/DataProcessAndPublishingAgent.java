@@ -10,6 +10,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.model.LlmMetadata;
 import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
@@ -33,6 +34,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import javax.xml.stream.XMLStreamException;
+
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.LLM_RESPONSE_METADATA;
 
 /**
  * This class is responsible for executing data publishing logic. This class implements runnable interface and
@@ -68,6 +71,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
     String apiName;
     String appId;
     String ipAddress;
+    Long totalTokens;
+    Long promptTokens;
+    Long completionTokens;
     Map<String, String> headersMap;
     Map<String, Object> customPropertyMap;
     private AuthenticationContext authenticationContext;
@@ -104,6 +110,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.ipAddress = null;
         this.headersMap = null;
         this.messageSizeInBytes = 0;
+        this.totalTokens = null;
+        this.promptTokens = null;
+        this.completionTokens = null;
         this.customPropertyMap = Collections.emptyMap();
     }
 
@@ -138,6 +147,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.appId = appId;
         this.apiName = GatewayUtils.getAPINameFromContextAndVersion(messageContext);
         this.messageSizeInBytes = 0;
+        this.totalTokens = null;
+        this.promptTokens = null;
+        this.completionTokens = null;
 
         ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
         boolean isVerbInfoContentAware = false;
@@ -199,6 +211,15 @@ public class DataProcessAndPublishingAgent implements Runnable {
                         messageSizeInBytes = size.length;
                     }
                 } 
+            }
+        }
+
+        if (messageContext.getProperty(LLM_RESPONSE_METADATA) != null) {
+            LlmMetadata responseMetadata = (LlmMetadata) messageContext.getProperty(LLM_RESPONSE_METADATA);
+            if (responseMetadata != null) {
+                totalTokens = responseMetadata.getTotalTokens();
+                promptTokens = responseMetadata.getPromptTokens();
+                completionTokens = responseMetadata.getCompletionTokens();
             }
         }
     }
@@ -280,6 +301,16 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 jsonObMap.put(APIThrottleConstants.SUBSCRIPTION_TYPE, APIConstants.API_SUBSCRIPTION_TYPE);
             }
 
+        }
+
+        if (totalTokens != null) {
+            jsonObMap.put("APIThrottleConstants.TOTAL_TOKENS", totalTokens);
+        }
+        if (promptTokens != null) {
+            jsonObMap.put("APIThrottleConstants.PROMPT_TOKENS", promptTokens);
+        }
+        if (completionTokens != null) {
+            jsonObMap.put("APIThrottleConstants.COMPLETION_TOKENS", completionTokens);
         }
 
         Object[] objects = new Object[]{messageContext.getMessageID(),

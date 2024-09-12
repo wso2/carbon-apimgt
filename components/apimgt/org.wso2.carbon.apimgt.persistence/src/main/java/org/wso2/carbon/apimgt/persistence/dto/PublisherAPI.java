@@ -64,7 +64,13 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;
     private String implementation;
     private String productionMaxTps;
+    private String productionMaxPromptTokenCount;
+    private String productionMaxCompletionTokenCount;
+    private String productionMaxTotalTokenCount;
     private String sandboxMaxTps;
+    private String sandboxMaxPromptTokenCount;
+    private String sandboxMaxCompletionTokenCount;
+    private String sandboxMaxTotalTokenCount;
     private String authorizationHeader;
     private String apiKeyHeader;
     private String apiSecurity; // ?check whether same to private List<String> securityScheme = new ArrayList<>();
@@ -354,8 +360,56 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.productionMaxTps = productionMaxTps;
     }
 
+    public String getProductionMaxPromptTokenCount() {
+        return productionMaxPromptTokenCount;
+    }
+
+    public void setProductionMaxPromptTokenCount(String productionMaxPromptTokenCount) {
+        this.productionMaxPromptTokenCount = productionMaxPromptTokenCount;
+    }
+
+    public String getProductionMaxCompletionTokenCount() {
+        return productionMaxCompletionTokenCount;
+    }
+
+    public void setProductionMaxCompletionTokenCount(String productionMaxCompletionTokenCount) {
+        this.productionMaxCompletionTokenCount = productionMaxCompletionTokenCount;
+    }
+
+    public String getProductionMaxTotalTokenCount() {
+        return productionMaxTotalTokenCount;
+    }
+
+    public void setProductionMaxTotalTokenCount(String productionMaxTotalTokenCount) {
+        this.productionMaxTotalTokenCount = productionMaxTotalTokenCount;
+    }
+
     public String getSandboxMaxTps() {
         return sandboxMaxTps;
+    }
+
+    public String getSandboxMaxPromptTokenCount() {
+        return sandboxMaxPromptTokenCount;
+    }
+
+    public void setSandboxMaxPromptTokenCount(String sandboxMaxPromptTokenCount) {
+        this.sandboxMaxPromptTokenCount = sandboxMaxPromptTokenCount;
+    }
+
+    public String getSandboxMaxCompletionTokenCount() {
+        return sandboxMaxCompletionTokenCount;
+    }
+
+    public void setSandboxMaxCompletionTokenCount(String sandboxMaxCompletionTokenCount) {
+        this.sandboxMaxCompletionTokenCount = sandboxMaxCompletionTokenCount;
+    }
+
+    public String getSandboxMaxTotalTokenCount() {
+        return sandboxMaxTotalTokenCount;
+    }
+
+    public void setSandboxMaxTotalTokenCount(String sandboxMaxTotalTokenCount) {
+        this.sandboxMaxTotalTokenCount = sandboxMaxTotalTokenCount;
     }
 
     public void setSandboxMaxTps(String sandboxMaxTps) {
@@ -650,7 +704,8 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + responseCache + ", cacheTimeout=" + cacheTimeout + ", endpointConfig=" + endpointConfig
                 + ", subscriptionAvailability=" + subscriptionAvailability + ", subscriptionAvailableOrgs="
                 + subscriptionAvailableOrgs + ", implementation=" + implementation + ", productionMaxTps="
-                + productionMaxTps + ", sandboxMaxTps=" + sandboxMaxTps + ", authorizationHeader=" + authorizationHeader
+                + productionMaxTps + ", productionMaxPromptTokenCount=" + productionMaxPromptTokenCount +
+                ", sandboxMaxTps=" + sandboxMaxTps + ", authorizationHeader=" + authorizationHeader
                 + ", apiKeyHeader=" + apiKeyHeader
                 + ", apiSecurity=" + apiSecurity + ", enableSchemaValidation=" + enableSchemaValidation
                 + ", enableSubscriberVerification=" + enableSubscriberVerification + ", enableStore=" + enableStore
