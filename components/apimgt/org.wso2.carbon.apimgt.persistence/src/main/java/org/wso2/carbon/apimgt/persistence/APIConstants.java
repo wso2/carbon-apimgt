@@ -112,13 +112,7 @@ public final class APIConstants {
 
     public static final String API_OVERVIEW_TESTKEY = "overview_testKey";
     public static final String API_PRODUCTION_THROTTLE_MAXTPS = "overview_productionTps";
-    public static final String API_PRODUCTION_THROTTLE_MAX_PROMPT_TOKENS = "overview_productionMaxPromptTokens";
-    public static final String API_PRODUCTION_THROTTLE_MAX_COMPLETION_TOKENS = "overview_productionMaxCompletionTokens";
-    public static final String API_PRODUCTION_THROTTLE_MAX_TOTAL_TOKENS = "overview_productionMaxTotalTokens";
     public static final String API_SANDBOX_THROTTLE_MAXTPS = "overview_sandboxTps";
-    public static final String API_SANDBOX_THROTTLE_MAX_PROMPT_TOKENS = "overview_sandboxMaxPromptTokens";
-    public static final String API_SANDBOX_THROTTLE_MAX_COMPLETION_TOKENS = "overview_sandboxMaxCompletionTokens";
-    public static final String API_SANDBOX_THROTTLE_MAX_TOTAL_TOKENS = "overview_sandboxMaxTotalTokens";
     public static final String SUPER_TENANT_DOMAIN = "carbon.super";
     public static final String VERSION_PLACEHOLDER = "{version}";
     public static final String TENANT_PREFIX = "/t/";
