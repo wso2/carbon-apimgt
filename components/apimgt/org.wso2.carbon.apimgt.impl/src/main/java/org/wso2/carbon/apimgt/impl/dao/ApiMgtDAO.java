@@ -13795,11 +13795,12 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Retrieves block conditions based on the specified condition type and condition value.
+     * Retrieves block conditions based on the specified condition type and condition value. If the condition value is
+     * wrapped in double quotes (""), an exact match is performed; otherwise, a partial match is applied.
      *
-     * @param conditionType     type of the condition
-     * @param conditionValue    condition value
-     * @param tenantDomain      tenant domain
+     * @param conditionType  type of the condition
+     * @param conditionValue condition value
+     * @param tenantDomain   tenant domain
      * @return list of block conditions
      * @throws APIManagementException
      */
@@ -13811,9 +13812,9 @@ public class ApiMgtDAO {
         List<BlockConditionsDTO> blockConditionsDTOList = new ArrayList<>();
         try {
             String query;
-            boolean isConditionValueQuoted = conditionValue != null && conditionValue.startsWith(
-                    "\"") && conditionValue.endsWith("\"");
-            if (isConditionValueQuoted) {
+            boolean isExactMatch = conditionValue != null && conditionValue.startsWith("\"") && conditionValue.endsWith(
+                    "\"");
+            if (isExactMatch) {
                 query = ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_EXACT_VALUE_SQL;
                 conditionValue = conditionValue.substring(1, conditionValue.length() - 1);
             } else {
@@ -13825,7 +13826,7 @@ public class ApiMgtDAO {
             selectPreparedStatement.setString(1, conditionTypeUpper);
             selectPreparedStatement.setString(2, conditionTypeUpper);
             selectPreparedStatement.setString(3, conditionValue);
-            if (isConditionValueQuoted) {
+            if (isExactMatch) {
                 selectPreparedStatement.setString(4, tenantDomain);
             } else {
                 selectPreparedStatement.setString(4, conditionValue);
