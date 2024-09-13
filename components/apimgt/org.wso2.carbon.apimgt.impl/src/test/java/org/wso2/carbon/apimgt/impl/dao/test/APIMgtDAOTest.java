@@ -1193,8 +1193,12 @@ public class APIMgtDAOTest {
         BlockConditionsDTO userUUID = apiMgtDAO.addBlockConditions(userBlockcondition);
         assertNotNull(apiMgtDAO.getBlockConditionByUUID(apiUUID.getUUID()));
         assertNotNull(userUUID);
-        assertNotNull(apiMgtDAO.getBlockConditionsByConditionTypeAndValue(APIConstants.BLOCKING_CONDITIONS_API,
-                "/testAddUpdateDeleteBlockCondition", "carbon.super"));
+        assertEquals(1, apiMgtDAO.getBlockConditionsByConditionTypeAndValue(APIConstants.BLOCKING_CONDITIONS_API,
+                "/testAddUpdateDeleteBlock", "carbon.super").size());
+        assertEquals(1, apiMgtDAO.getBlockConditionsByConditionTypeAndValue(APIConstants.BLOCKING_CONDITIONS_API,
+                "\"/testAddUpdateDeleteBlockCondition\"", "carbon.super").size());
+        assertEquals(0, apiMgtDAO.getBlockConditionsByConditionTypeAndValue(APIConstants.BLOCKING_CONDITIONS_API,
+                "\"/testAddUpdateDeleteBlock\"", "carbon.super").size());
         assertNotNull(apiMgtDAO
                 .updateBlockConditionState(apiMgtDAO.getBlockConditionByUUID(userUUID.getUUID()).getConditionId(),
                         "FALSE"));
