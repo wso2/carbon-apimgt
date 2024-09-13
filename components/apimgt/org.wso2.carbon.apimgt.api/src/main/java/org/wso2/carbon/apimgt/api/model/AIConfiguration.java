@@ -5,57 +5,22 @@ import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import java.util.List;
 import java.util.Map;
 
-public class AiConfiguration {
+public class AIConfiguration {
 
     private boolean enabled;
-    private Map<String, String> productionEndpointAdditionalHeaders;
-    private Map<String, String> sandboxEndpointAdditionalHeaders;
-    private Map<String, String> productionEndpointAdditionalQueryParameters;
-    private Map<String, String> sandboxEndpointAdditionalQueryParameters;
-    private List<String> productionEndpointSensitiveParameters;
-    private List<String> sandboxEndpointSensitiveParameters;
+    private AIEndpointConfiguration aiEndpointConfiguration;
     private String llmProviderName;
     private String llmProviderApiVersion;
     private TokenBaseThrottlingCountHolder tokenBasedThrottlingConfiguration;
 
-    public List<String> getProductionEndpointSensitiveParameters() {
+    public AIEndpointConfiguration getAiEndpointConfiguration() {
 
-        return productionEndpointSensitiveParameters;
+        return aiEndpointConfiguration;
     }
 
-    public void setProductionEndpointSensitiveParameters(List<String> productionEndpointSensitiveParameters) {
+    public void setAiEndpointConfiguration(AIEndpointConfiguration aiEndpointConfiguration) {
 
-        this.productionEndpointSensitiveParameters = productionEndpointSensitiveParameters;
-    }
-
-    public List<String> getSandboxEndpointSensitiveParameters() {
-
-        return sandboxEndpointSensitiveParameters;
-    }
-
-    public void setSandboxEndpointSensitiveParameters(List<String> sandboxEndpointSensitiveParameters) {
-
-        this.sandboxEndpointSensitiveParameters = sandboxEndpointSensitiveParameters;
-    }
-
-    public Map<String, String> getSandboxEndpointAdditionalHeaders() {
-
-        return sandboxEndpointAdditionalHeaders;
-    }
-
-    public void setSandboxEndpointAdditionalHeaders(Map<String, String> sandboxEndpointAdditionalHeaders) {
-
-        this.sandboxEndpointAdditionalHeaders = sandboxEndpointAdditionalHeaders;
-    }
-
-    public Map<String, String> getProductionEndpointAdditionalQueryParameters() {
-
-        return productionEndpointAdditionalQueryParameters;
-    }
-
-    public void setProductionEndpointAdditionalQueryParameters(Map<String, String> productionEndpointAdditionalQueryParameters) {
-
-        this.productionEndpointAdditionalQueryParameters = productionEndpointAdditionalQueryParameters;
+        this.aiEndpointConfiguration = aiEndpointConfiguration;
     }
 
     public TokenBaseThrottlingCountHolder getTokenBasedThrottlingConfiguration() {
@@ -96,25 +61,5 @@ public class AiConfiguration {
     public void setEnabled(boolean enabled) {
 
         this.enabled = enabled;
-    }
-
-    public Map<String, String> getProductionEndpointAdditionalHeaders() {
-
-        return productionEndpointAdditionalHeaders;
-    }
-
-    public void setProductionEndpointAdditionalHeaders(Map<String, String> productionEndpointAdditionalHeaders) {
-
-        this.productionEndpointAdditionalHeaders = productionEndpointAdditionalHeaders;
-    }
-
-    public Map<String, String> getSandboxEndpointAdditionalQueryParameters() {
-
-        return sandboxEndpointAdditionalQueryParameters;
-    }
-
-    public void setSandboxEndpointAdditionalQueryParameters(Map<String, String> sandboxEndpointAdditionalQueryParameters) {
-
-        this.sandboxEndpointAdditionalQueryParameters = sandboxEndpointAdditionalQueryParameters;
     }
 }

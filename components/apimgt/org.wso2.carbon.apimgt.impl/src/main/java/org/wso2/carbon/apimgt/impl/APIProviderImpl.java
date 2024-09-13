@@ -609,7 +609,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
-        addLLMConfigurations(api);
+        addAiConfiguration(api);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -631,7 +631,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
     }
 
-    private void addLLMConfigurations(API api) throws APIManagementException {
+    private void addAiConfiguration(API api) throws APIManagementException {
 
         if (api.getAiConfigurations() != null && api.getAiConfigurations().isEnabled()) {
             AIConfiguration configurations = api.getAiConfigurations();
@@ -641,7 +641,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void updateLLMConfigurations(API api) throws APIManagementException {
+    private void updateAiConfiguration(API api) throws APIManagementException {
 
         if (api.getAiConfigurations() != null && api.getAiConfigurations().isEnabled()) {
             AIConfiguration configurations = api.getAiConfigurations();
@@ -651,7 +651,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void deleteLLMConfigurations(API api) throws APIManagementException {
+    private void deleteAiConfiguration(API api) throws APIManagementException {
         if (api.getAiConfigurations() != null && api.getAiConfigurations().isEnabled()) {
             apiMgtDAO.deleteLLMConfigurations(api.getUuid(), null);
         }
@@ -996,7 +996,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         updateProductResourceMappings(api, organization, productResources);
 
         updateAPIPolicies(api, tenantDomain);
-        updateLLMConfigurations(api);
+        updateAiConfiguration(api);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -2546,7 +2546,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (api != null && apiId != -1) {
-            deleteLLMConfigurations(api);
+            deleteAiConfiguration(api);
         }
 
         // Delete event publishing to gateways
@@ -5290,7 +5290,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void populateAIConfiguration(API api) throws APIManagementException {
-        AIConfiguration configurations = apiMgtDAO.getAIConfiguration(api.getUuid(), null);
+        AIConfiguration configurations = apiMgtDAO.getAiConfiguration(api.getUuid(), null);
         api.setAIConfigurations(configurations);
     }
 
@@ -5907,7 +5907,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
 
-            AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null);
+            AIConfiguration configuration = apiMgtDAO.getAiConfiguration(apiRevision.getApiUUID(), null);
             apiMgtDAO.addAiConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), configuration);
         } catch (APIManagementException e) {
             try {
@@ -6443,7 +6443,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIRevision(apiRevision);
-        AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+        AIConfiguration configuration = apiMgtDAO.getAiConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         apiMgtDAO.updateAiConfiguration(apiRevision.getApiUUID(), configuration);
     }
 

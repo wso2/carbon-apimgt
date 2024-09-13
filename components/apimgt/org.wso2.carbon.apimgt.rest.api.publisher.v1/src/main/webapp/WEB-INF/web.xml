@@ -53,7 +53,8 @@
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.OperationPoliciesApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.LinterCustomRulesApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApi,
-                org.wso2.carbon.apimgt.rest.api.publisher.v1.WorkflowsApi
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.WorkflowsApi,
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.LlmProvidersApi
             </param-value>
         </init-param>
         <init-param>

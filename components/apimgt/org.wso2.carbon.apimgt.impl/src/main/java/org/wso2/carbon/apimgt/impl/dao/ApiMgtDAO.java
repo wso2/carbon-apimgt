@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
+import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
@@ -40,6 +41,7 @@ import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -66,7 +68,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.LLMConfiguration;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
@@ -14510,15 +14512,34 @@ public class ApiMgtDAO {
         return providerList;
     }
 
-    public List<LLMProvider> getLLMProviderConfigurations() throws APIManagementException {
+    public List<LLMProvider> getLLMProviderConfigurations(String name, String apiVersion, String organization) throws APIManagementException {
 
         List<LLMProvider> providerList = new ArrayList<>();
         String errorMessage = "Failed to get LLM Providers.";
+        StringBuilder queryBuilder = new StringBuilder(SQLConstants.GET_LLM_PROVIDER_CONFIGURATIONS_SQL);
 
-        try {
-            Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_CONFIGURATIONS_SQL);
+        if (name != null && !name.isEmpty()) {
+            queryBuilder.append(" AND NAME = ?");
+        }
+        if (organization != null && !organization.isEmpty()) {
+            queryBuilder.append(" AND ORGANIZATION = ?");
+        }
+        if (apiVersion != null && !apiVersion.isEmpty()) {
+            queryBuilder.append(" AND API_VERSION = ?");
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(queryBuilder.toString())) {
+
+            int paramIndex = 1;
+            if (name != null && !name.isEmpty()) {
+                preparedStatement.setString(paramIndex++, name);
+            }
+            if (organization != null && !organization.isEmpty()) {
+                preparedStatement.setString(paramIndex++, organization);
+            }
+            if (apiVersion != null && !apiVersion.isEmpty()) {
+                preparedStatement.setString(paramIndex, apiVersion);
+            }
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 LLMProvider provider = new LLMProvider();
@@ -19455,11 +19476,11 @@ public class ApiMgtDAO {
         return false;
     }
 
-    public void addLLMConfiguration(String apiUUID, String revisionUUID, LLMConfiguration llmConfiguration) throws APIManagementException {
+    public void addAiConfiguration(String apiUUID, String revisionUUID, AIConfiguration aiConfiguration) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                addLLMConfiguration(apiUUID, revisionUUID, llmConfiguration, connection);
+                addAiConfiguration(apiUUID, revisionUUID, aiConfiguration, connection);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -19470,34 +19491,29 @@ public class ApiMgtDAO {
         }
     }
 
-    private void addLLMConfiguration(String apiUUID, String revisionUUID, LLMConfiguration llmConfiguration, Connection connection) throws APIManagementException {
+    private void addAiConfiguration(String apiUUID, String revisionUUID, AIConfiguration aiConfiguration, Connection connection) throws APIManagementException {
 
         try (PreparedStatement llmConfigurationMappingStatement = connection
-                .prepareStatement(SQLConstants.INSERT_API_LLM_CONFIGURATION)) {
-
-            String additionalHeadersStr = mapToKeyValueString(llmConfiguration.getAdditionalHeaders());
-            String additionalQueryParametersStr = mapToKeyValueString(llmConfiguration.getAdditionalQueryParameters());
-            String tokenDetails = "YourTokenDetails";
+                .prepareStatement(SQLConstants.INSERT_AI_CONFIGURATION)) {
 
             llmConfigurationMappingStatement.setString(1, java.util.UUID.randomUUID().toString());
             llmConfigurationMappingStatement.setString(2, apiUUID);
             llmConfigurationMappingStatement.setString(3, revisionUUID);
-            llmConfigurationMappingStatement.setString(4, llmConfiguration.getLlmProviderName());
-            llmConfigurationMappingStatement.setString(5, llmConfiguration.getLlmProviderApiVersion());
-            llmConfigurationMappingStatement.setString(6, additionalHeadersStr);
-            llmConfigurationMappingStatement.setString(7, additionalQueryParametersStr);
-            llmConfigurationMappingStatement.setString(8, tokenDetails);
+            llmConfigurationMappingStatement.setString(4, aiConfiguration.getLlmProviderName());
+            llmConfigurationMappingStatement.setString(5, aiConfiguration.getLlmProviderApiVersion());
+            llmConfigurationMappingStatement.setString(6, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
+            llmConfigurationMappingStatement.setString(7, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
             llmConfigurationMappingStatement.executeUpdate();
         } catch (SQLException e) {
             throw new APIManagementException("Error while adding LLM configuration mapping for API : " + apiUUID, e);
         }
     }
 
-    public void updateLLMConfigurationsMapping(String apiUUID, String revisionUUID, LLMConfiguration llmConfiguration) throws APIManagementException {
+    public void updateAiConfiguration(String apiUUID, AIConfiguration aiConfiguration) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                updateLLMConfigurationsMapping(apiUUID, revisionUUID, llmConfiguration, connection);
+                updateAiConfiguration(apiUUID, aiConfiguration, connection);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -19508,24 +19524,17 @@ public class ApiMgtDAO {
         }
     }
 
-    private void updateLLMConfigurationsMapping(String apiUUID, String revisionUUID, LLMConfiguration llmConfiguration, Connection connection) throws APIManagementException {
+    private void updateAiConfiguration(String apiUUID, AIConfiguration aiConfiguration, Connection connection) throws APIManagementException {
 
         try (PreparedStatement llmConfigurationMappingStatement = connection
-                .prepareStatement(SQLConstants.UPDATE_API_LLM_CONFIGURATION)) {
-
-            String additionalHeadersStr = mapToKeyValueString(llmConfiguration.getAdditionalHeaders());
-            String additionalQueryParametersStr = mapToKeyValueString(llmConfiguration.getAdditionalQueryParameters());
-            String tokenDetails = "YourTokenDetails";
-
-            llmConfigurationMappingStatement.setString(1, llmConfiguration.getLlmProviderName());
-            llmConfigurationMappingStatement.setString(2, llmConfiguration.getLlmProviderApiVersion());
-            llmConfigurationMappingStatement.setString(3, additionalHeadersStr);
-            llmConfigurationMappingStatement.setString(4, additionalQueryParametersStr);
-            llmConfigurationMappingStatement.setString(5, tokenDetails);
-            llmConfigurationMappingStatement.setString(6, apiUUID);
+                .prepareStatement(SQLConstants.UPDATE_AI_CONFIGURATION)) {
+            llmConfigurationMappingStatement.setString(1, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
+            llmConfigurationMappingStatement.setString(2, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
+            llmConfigurationMappingStatement.setString(3, apiUUID);
             llmConfigurationMappingStatement.executeUpdate();
+
         } catch (SQLException e) {
-            throw new APIManagementException("Error while updating LLM configuration mapping for API : " + apiUUID, e);
+            throw new APIManagementException("Error while updating AI configuration mapping for API: " + apiUUID, e);
         }
     }
 
@@ -19547,8 +19556,8 @@ public class ApiMgtDAO {
     private void deleteLLMConfigurations(String apiUUID, String revisionUUID, Connection connection) throws APIManagementException {
 
         String query = (revisionUUID != null) ?
-                SQLConstants.DELETE_API_LLM_CONFIGURATION :
-                SQLConstants.DELETE_API_LLM_CONFIGURATION_ALL_REVISIONS;
+                SQLConstants.DELETE_AI_CONFIGURATION_REVISION :
+                SQLConstants.DELETE_AI_CONFIGURATIONS;
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, apiUUID);
             if (revisionUUID != null) {
@@ -19571,12 +19580,19 @@ public class ApiMgtDAO {
         return joiner.toString();
     }
 
-    public LLMConfiguration getLLMConfiguration(String uuid, String revisionUUID) throws APIManagementException {
-        LLMConfiguration llmConfiguration = new LLMConfiguration();
+    public AIConfiguration getAiConfiguration(String uuid, String revisionUUID) throws APIManagementException {
+        AIConfiguration AiConfiguration = new AIConfiguration();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                llmConfiguration = getLLMConfiguration(uuid, revisionUUID, connection);
+                if (revisionUUID == null) {
+                    APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+                    if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                        uuid = apiRevision.getApiUUID();
+                        revisionUUID = apiRevision.getRevisionUUID();
+                    }
+                }
+                AiConfiguration = getAiConfiguration(uuid, revisionUUID, connection);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -19585,16 +19601,16 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while getting API level policy mapping of API " + uuid, e);
         }
-        return llmConfiguration;
+        return AiConfiguration;
     }
 
-    private LLMConfiguration getLLMConfiguration(String apiUUID, String revisionUUID, Connection connection)
+    private AIConfiguration getAiConfiguration(String apiUUID, String revisionUUID, Connection connection)
             throws APIManagementException {
 
-        LLMConfiguration llmConfiguration = new LLMConfiguration();
+        AIConfiguration aiConfiguration = new AIConfiguration();
         String query = revisionUUID == null ?
-                SQLConstants.GET_API_LLM_CONFIGURATION :
-                SQLConstants.GET_API_LLM_CONFIGURATION_REVISION;
+                SQLConstants.GET_AI_CONFIGURATION :
+                SQLConstants.GET_AI_CONFIGURATION_REVISION;
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, apiUUID);
             if (revisionUUID != null) {
@@ -19602,23 +19618,23 @@ public class ApiMgtDAO {
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    String additionalHeadersStr = rs.getString("ADDITIONAL_HEADERS");
-                    String additionalQueryParametersStr = rs.getString("ADDITIONAL_QUERY_PARAMETERS");
                     String llmProviderName = rs.getString("LLM_PROVIDER_NAME");
-                    String llmProviderVersion = rs.getString("LLM_PROVIDER_VERSION");
-                    String tokenDetails = rs.getString("TOKEN_DETAILS");
-                    llmConfiguration.setEnabled(true);
-                    llmConfiguration.setAdditionalHeaders(stringToMap(additionalHeadersStr));
-                    llmConfiguration.setAdditionalQueryParameters(stringToMap(additionalQueryParametersStr));
-                    llmConfiguration.setLlmProviderName(llmProviderName);
-                    llmConfiguration.setLlmProviderApiVersion(llmProviderVersion);
-//                    llmConfigurations.setTokenDetails(tokenDetails);
+                    String llmProviderVersion = rs.getString("LLM_PROVIDER_API_VERSION");
+                    String endpointConfiguration = rs
+                            .getString("ENDPOINT_CONFIGURATION");
+                    String tokenDetails = rs.getString("THROTTLING_CONFIGURATIONS");
+                    aiConfiguration.setEnabled(true);
+                    aiConfiguration.setLlmProviderName(llmProviderName);
+                    aiConfiguration.setLlmProviderApiVersion(llmProviderVersion);
+                    aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(endpointConfiguration, AIEndpointConfiguration.class));
+                    aiConfiguration.setTokenBasedThrottlingConfiguration(
+                            new Gson().fromJson(tokenDetails, TokenBaseThrottlingCountHolder.class));
                 }
             }
         } catch (SQLException e) {
             handleException("Error while getting API level policy mapping of API " + apiUUID, e);
         }
-        return llmConfiguration;
+        return aiConfiguration;
     }
 
     private Map<String, String> stringToMap(String str) {
