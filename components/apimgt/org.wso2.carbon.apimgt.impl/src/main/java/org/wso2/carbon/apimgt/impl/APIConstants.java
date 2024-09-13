@@ -531,7 +531,7 @@ public final class APIConstants {
 
         public static final String MARKETPLACE_ASSISTANT = "MarketplaceAssistant";
         public static final String MARKETPLACE_ASSISTANT_ENABLED = "Enabled";
-        public static final String MARKETPLACE_ASSISTANT_KEY = "key";
+        public static final String MARKETPLACE_ASSISTANT_KEY = "Key";
         public static final String MARKETPLACE_ASSISTANT_ENDPOINT = "Endpoint";
         public static final String MARKETPLACE_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String MARKETPLACE_ASSISTANT_CHAT_RESOURCE = "ChatResource";
