@@ -1388,42 +1388,38 @@ public class PublisherCommonUtils {
             throws APIManagementException {
 
         AIConfiguration aiConfiguration = new AIConfiguration();
-        try {
-            // Set basic LLM configuration attributes
-            aiConfiguration.setEnabled(dto.isEnabled());
-            aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
-            aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
+        // Set basic LLM configuration attributes
+        aiConfiguration.setEnabled(dto.isEnabled());
+        aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
+        aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
 
-            AIEndpointConfiguration endpointConfiguration = new AIEndpointConfiguration();
-            endpointConfiguration.setAuthKey(dto.getEndpointConfiguration().getAuthKey());
-            endpointConfiguration.setAuthType(dto.getEndpointConfiguration().getAuthType().name());
+        AIEndpointConfiguration endpointConfiguration = new AIEndpointConfiguration();
+        endpointConfiguration.setAuthKey(dto.getEndpointConfiguration().getAuthKey());
+        endpointConfiguration.setAuthType(dto.getEndpointConfiguration().getAuthType().name());
 
-            endpointConfiguration.setProductionAuthValue(dto.getEndpointConfiguration().getProductionAuthValue());
-            endpointConfiguration.setSandboxAuthValue(dto.getEndpointConfiguration().getSandboxAuthValue());
+        endpointConfiguration.setProductionAuthValue(dto.getEndpointConfiguration().getProductionAuthValue());
+        endpointConfiguration.setSandboxAuthValue(dto.getEndpointConfiguration().getSandboxAuthValue());
 
-            aiConfiguration.setAiEndpointConfiguration(endpointConfiguration);
+        aiConfiguration.setAiEndpointConfiguration(endpointConfiguration);
 
-            APIAiConfigurationThrottlingConfigurationDTO throttlingConfigDTO = dto.getThrottlingConfiguration();
-            if (throttlingConfigDTO != null) {
-                TokenBaseThrottlingCountHolder throttlingConfig = new TokenBaseThrottlingCountHolder();
-                throttlingConfig.setProductionMaxPromptTokenCount(throttlingConfigDTO
-                        .getProductionMaxPromptTokenCount());
-                throttlingConfig.setProductionMaxCompletionTokenCount(throttlingConfigDTO
-                        .getProductionMaxCompletionTokenCount());
-                throttlingConfig.setProductionMaxTotalTokenCount(throttlingConfigDTO
-                        .getProductionMaxTotalTokenCount());
-                throttlingConfig.setSandboxMaxPromptTokenCount(throttlingConfigDTO
-                        .getSandboxMaxPromptTokenCount());
-                throttlingConfig.setSandboxMaxCompletionTokenCount(throttlingConfigDTO
-                        .getSandboxMaxCompletionTokenCount());
-                throttlingConfig.setSandboxMaxTotalTokenCount(throttlingConfigDTO
-                        .getSandboxMaxTotalTokenCount());
-                throttlingConfig.setTokenBasedThrottlingEnabled(throttlingConfigDTO
-                        .isIsTokenBasedThrottlingEnabled());
-                aiConfiguration.setTokenBasedThrottlingConfiguration(throttlingConfig);
-            }
-        } catch (CryptoException e) {
-            throw new APIManagementException("Error occured while encrypting production Authorization key");
+        APIAiConfigurationThrottlingConfigurationDTO throttlingConfigDTO = dto.getThrottlingConfiguration();
+        if (throttlingConfigDTO != null) {
+            TokenBaseThrottlingCountHolder throttlingConfig = new TokenBaseThrottlingCountHolder();
+            throttlingConfig.setProductionMaxPromptTokenCount(throttlingConfigDTO
+                    .getProductionMaxPromptTokenCount());
+            throttlingConfig.setProductionMaxCompletionTokenCount(throttlingConfigDTO
+                    .getProductionMaxCompletionTokenCount());
+            throttlingConfig.setProductionMaxTotalTokenCount(throttlingConfigDTO
+                    .getProductionMaxTotalTokenCount());
+            throttlingConfig.setSandboxMaxPromptTokenCount(throttlingConfigDTO
+                    .getSandboxMaxPromptTokenCount());
+            throttlingConfig.setSandboxMaxCompletionTokenCount(throttlingConfigDTO
+                    .getSandboxMaxCompletionTokenCount());
+            throttlingConfig.setSandboxMaxTotalTokenCount(throttlingConfigDTO
+                    .getSandboxMaxTotalTokenCount());
+            throttlingConfig.setTokenBasedThrottlingEnabled(throttlingConfigDTO
+                    .isIsTokenBasedThrottlingEnabled());
+            aiConfiguration.setTokenBasedThrottlingConfiguration(throttlingConfig);
         }
 
         return aiConfiguration;
