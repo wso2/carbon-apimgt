@@ -566,7 +566,7 @@ public interface APIAdmin  {
      * @return List of LLM Provider configurations.
      * @throws APIManagementException If retrieval fails.
      */
-    List<LLMProvider> getLLMProviderConfigurations() throws APIManagementException;
+    List<LLMProvider> getLLMProviderConfigurations(String name, String apiVersion, String organization) throws APIManagementException;
 
     /**
      * Deletes an LLM Provider by ID for the given organization.

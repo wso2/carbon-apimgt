@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.api.model.LLMConfiguration;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -46,7 +46,6 @@ public class DataHolder {
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<LLMProvider, String> llmProviderConfigurationHolder = new HashMap<>();
-    private Map<String, LLMConfiguration> llmApiConfigurationHolder = new HashMap<>();
     private boolean isAllGatewayPoliciesDeployed = false;
 
     private DataHolder() {
@@ -56,26 +55,6 @@ public class DataHolder {
     public Map<String, List<String>> getApiToCertificatesMap() {
 
         return apiToCertificatesMap;
-    }
-
-    public LLMConfiguration getLLMApiConfigurations(String apiIdentifier) {
-
-        if (llmApiConfigurationHolder.containsKey(apiIdentifier)) {
-            return llmApiConfigurationHolder.get(apiIdentifier);
-        } else {
-            log.warn("LLM Provider key " + apiIdentifier + " not found");
-            return null;
-        }
-    }
-
-    public void addLLMApiConfigurations(String apiIdentifier, LLMConfiguration configurations) {
-        llmApiConfigurationHolder.put(apiIdentifier, configurations);
-    }
-    public void removeLLMApiConfigurations(String apiIdentifier) {
-        if (apiIdentifier == null) {
-            return;
-        }
-        llmApiConfigurationHolder.remove(apiIdentifier);
     }
 
     public String getLLMProviderConfigurations(LLMProvider provider) {

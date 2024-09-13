@@ -82,7 +82,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.LLMConfiguration;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -633,26 +633,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void addLLMConfigurations(API api) throws APIManagementException {
 
-        if (api.getLlmConfigurations() != null && api.getLlmConfigurations().isEnabled()) {
-            LLMConfiguration configurations = api.getLlmConfigurations();
+        if (api.getAiConfigurations() != null && api.getAiConfigurations().isEnabled()) {
+            AIConfiguration configurations = api.getAiConfigurations();
             if (configurations != null) {
-                apiMgtDAO.addLLMConfiguration(api.getUuid(), null, api.getLlmConfigurations());
+                apiMgtDAO.addAiConfiguration(api.getUuid(), null, api.getAiConfigurations());
             }
         }
     }
 
     private void updateLLMConfigurations(API api) throws APIManagementException {
 
-        if (api.getLlmConfigurations() != null && api.getLlmConfigurations().isEnabled()) {
-            LLMConfiguration configurations = api.getLlmConfigurations();
+        if (api.getAiConfigurations() != null && api.getAiConfigurations().isEnabled()) {
+            AIConfiguration configurations = api.getAiConfigurations();
             if (configurations != null) {
-                apiMgtDAO.updateLLMConfigurationsMapping(api.getUuid(), null, api.getLlmConfigurations());
+                apiMgtDAO.updateAiConfiguration(api.getUuid(), api.getAiConfigurations());
             }
         }
     }
 
     private void deleteLLMConfigurations(API api) throws APIManagementException {
-        if (api.getLlmConfigurations() != null && api.getLlmConfigurations().isEnabled()) {
+        if (api.getAiConfigurations() != null && api.getAiConfigurations().isEnabled()) {
             apiMgtDAO.deleteLLMConfigurations(api.getUuid(), null);
         }
     }
@@ -935,7 +935,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public API updateAPI(API api, API existingAPI) throws APIManagementException {
-
         if (!existingAPI.getStatus().equals(api.getStatus())) {
             throw new APIManagementException("Invalid API update operation involving API status changes");
         }
@@ -5263,7 +5262,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
                 populateAPILevelPolicies(api);
-                populateLLMConfiguration(api);
+                populateAIConfiguration(api);
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     if (migrationEnabled == null) {
@@ -5290,9 +5289,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void populateLLMConfiguration(API api) throws APIManagementException {
-        LLMConfiguration configurations = apiMgtDAO.getLLMConfiguration(api.getUuid(), null);
-        api.setLlmConfigurations(configurations);
+    private void populateAIConfiguration(API api) throws APIManagementException {
+        AIConfiguration configurations = apiMgtDAO.getAIConfiguration(api.getUuid(), null);
+        api.setAIConfigurations(configurations);
     }
 
     @Override
@@ -5908,8 +5907,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
 
-            LLMConfiguration configuration = apiMgtDAO.getLLMConfiguration(apiRevision.getApiUUID(), null);
-            apiMgtDAO.addLLMConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), configuration);
+            AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null);
+            apiMgtDAO.addAiConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), configuration);
         } catch (APIManagementException e) {
             try {
                     apiPersistenceInstance.deleteAPIRevision(new Organization(organization), apiId.getUUID(), revisionUUID,
@@ -6444,8 +6443,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIRevision(apiRevision);
-        LLMConfiguration configuration = apiMgtDAO.getLLMConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
-        apiMgtDAO.addLLMConfiguration(apiRevision.getApiUUID(), null, configuration);
+        AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+        apiMgtDAO.updateAiConfiguration(apiRevision.getApiUUID(), configuration);
     }
 
     /**

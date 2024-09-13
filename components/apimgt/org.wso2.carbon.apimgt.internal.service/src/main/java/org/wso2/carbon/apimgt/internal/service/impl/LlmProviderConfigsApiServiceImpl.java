@@ -23,11 +23,12 @@ public class LlmProviderConfigsApiServiceImpl implements LlmProviderConfigsApiSe
      * @return The response containing LLM Provider configurations.
      * @throws APIManagementException If retrieval fails.
      */
+
     @Override
-    public Response getLLMProviderConfigs(MessageContext messageContext) throws APIManagementException {
+    public Response getLLMProviderConfigs(String name, String apiVersion, String organization, MessageContext messageContext) throws APIManagementException {
 
         APIAdmin admin = new APIAdminImpl();
-        List<LLMProvider> LLMProviderList = admin.getLLMProviderConfigurations();
+        List<LLMProvider> LLMProviderList = admin.getLLMProviderConfigurations(name, apiVersion, organization);
 
         List<LLMProviderDTO> llmProviderDtoList = LLMProviderList.stream()
                 .map(llmProvider -> {

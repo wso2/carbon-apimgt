@@ -606,7 +606,7 @@ public class APIAdminImpl implements APIAdmin {
         LLMProvider result = apiMgtDAO.addLLMProvider(provider);
         if (result != null) {
             new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(),
-                    result.getOrganization(), result.getConfigurations(),
+                    result.getOrganization(),
                     APIConstants.EventType.LLM_PROVIDER_CREATE.name());
         }
         return result;
@@ -618,8 +618,8 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<LLMProvider> getLLMProviderConfigurations() throws APIManagementException {
-        return apiMgtDAO.getLLMProviderConfigurations();
+    public List<LLMProvider> getLLMProviderConfigurations(String name, String apiVersion, String organization) throws APIManagementException {
+        return apiMgtDAO.getLLMProviderConfigurations(name, apiVersion, organization);
     }
 
     @Override
@@ -627,7 +627,7 @@ public class APIAdminImpl implements APIAdmin {
 
         LLMProvider result = apiMgtDAO.deleteLLMProvider(organization, llmProviderId, builtIn);
         if (result != null) {
-            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), organization, null,
+            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), organization,
                     APIConstants.EventType.LLM_PROVIDER_DELETE.name());
         }
         return result;
@@ -638,8 +638,7 @@ public class APIAdminImpl implements APIAdmin {
 
         LLMProvider result = apiMgtDAO.updateLLMProvider(provider);
         if (result != null) {
-            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), result.getOrganization(),
-                    provider.getConfigurations(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
+            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), result.getOrganization(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
         }
         return result;
     }

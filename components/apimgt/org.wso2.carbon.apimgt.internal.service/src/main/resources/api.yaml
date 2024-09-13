@@ -649,6 +649,19 @@ paths:
         This retrieve the persisted LLM Providers.
       tags:
         - 'LLMProviders'
+      parameters:
+        - name: name
+          in: query
+          required: false
+          type: string
+        - name: apiVersion
+          in: query
+          required: false
+          type: string
+        - name: organization
+          in: query
+          required: false
+          type: string
       responses:
         200:
           description: 'Event Received success'
@@ -659,6 +672,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       operationId: getLLMProviderConfigs
+
+
+
   /correlation-configs:
     get:
       summary: Retrieve persisted correlation configs data.

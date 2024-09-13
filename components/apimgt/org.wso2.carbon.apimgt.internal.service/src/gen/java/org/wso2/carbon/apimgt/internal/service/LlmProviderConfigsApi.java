@@ -44,7 +44,7 @@ LlmProviderConfigsApiService delegate = new LlmProviderConfigsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Event Received success", response = LLMProviderListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response getLLMProviderConfigs() throws APIManagementException{
-        return delegate.getLLMProviderConfigs(securityContext);
+    public Response getLLMProviderConfigs( @ApiParam(value = "")  @QueryParam("name") String name,  @ApiParam(value = "")  @QueryParam("apiVersion") String apiVersion,  @ApiParam(value = "")  @QueryParam("organization") String organization) throws APIManagementException{
+        return delegate.getLLMProviderConfigs(name, apiVersion, organization, securityContext);
     }
 }
