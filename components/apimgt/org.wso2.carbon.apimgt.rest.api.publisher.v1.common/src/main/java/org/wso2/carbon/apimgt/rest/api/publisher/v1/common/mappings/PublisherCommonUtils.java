@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.schema.GraphQLSchema;
@@ -45,7 +44,10 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
+import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -57,7 +59,6 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.LLMConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -79,10 +80,12 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationEndpointConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APILlmConfigurationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
@@ -1375,65 +1378,103 @@ public class PublisherCommonUtils {
         }
         apiToAdd.setOrganization(organization);
         apiToAdd.setGatewayType(body.getGatewayType());
-        if (body.getLlmConfigurations() != null) {
-            apiToAdd.setLlmConfigurations(convertToLLMConfigurations(body.getLlmConfigurations()));
+        if (body.getAiConfiguration() != null) {
+            apiToAdd.setAIConfigurations(convertToAiConfiguration(body.getAiConfiguration()));
         }
         return apiToAdd;
     }
 
-    public static LLMConfiguration convertToLLMConfigurations(APILlmConfigurationsDTO dto)
+    public static AIConfiguration convertToAiConfiguration(APIAiConfigurationDTO dto)
             throws APIManagementException {
 
-        LLMConfiguration llmConfiguration = new LLMConfiguration();
+        AIConfiguration aiConfiguration = new AIConfiguration();
         try {
-            llmConfiguration.setEnabled(dto.isEnabled());
-            llmConfiguration.setLlmProviderName(dto.getLlmProviderName());
-            llmConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
-            ObjectMapper objectMapper = new ObjectMapper();
-            if (dto.getAdditionalHeaders() != null) {
-                Map<String, String> headersMap = objectMapper.readValue(dto.getAdditionalHeaders(),
-                        new TypeReference<Map<String, String>>() {
-                        });
-                llmConfiguration.setAdditionalHeaders(headersMap);
+            // Set basic LLM configuration attributes
+            aiConfiguration.setEnabled(dto.isEnabled());
+            aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
+            aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
+
+            AIEndpointConfiguration endpointConfiguration = new AIEndpointConfiguration();
+            endpointConfiguration.setAuthKey(dto.getEndpointConfiguration().getAuthKey());
+            endpointConfiguration.setAuthType(dto.getEndpointConfiguration().getAuthType().name());
+
+            endpointConfiguration.setProductionAuthValue(dto.getEndpointConfiguration().getProductionAuthValue());
+            endpointConfiguration.setSandboxAuthValue(dto.getEndpointConfiguration().getSandboxAuthValue());
+
+            aiConfiguration.setAiEndpointConfiguration(endpointConfiguration);
+
+            APIAiConfigurationThrottlingConfigurationDTO throttlingConfigDTO = dto.getThrottlingConfiguration();
+            if (throttlingConfigDTO != null) {
+                TokenBaseThrottlingCountHolder throttlingConfig = new TokenBaseThrottlingCountHolder();
+                throttlingConfig.setProductionMaxPromptTokenCount(throttlingConfigDTO
+                        .getProductionMaxPromptTokenCount());
+                throttlingConfig.setProductionMaxCompletionTokenCount(throttlingConfigDTO
+                        .getProductionMaxCompletionTokenCount());
+                throttlingConfig.setProductionMaxTotalTokenCount(throttlingConfigDTO
+                        .getProductionMaxTotalTokenCount());
+                throttlingConfig.setSandboxMaxPromptTokenCount(throttlingConfigDTO
+                        .getSandboxMaxPromptTokenCount());
+                throttlingConfig.setSandboxMaxCompletionTokenCount(throttlingConfigDTO
+                        .getSandboxMaxCompletionTokenCount());
+                throttlingConfig.setSandboxMaxTotalTokenCount(throttlingConfigDTO
+                        .getSandboxMaxTotalTokenCount());
+                throttlingConfig.setTokenBasedThrottlingEnabled(throttlingConfigDTO
+                        .isIsTokenBasedThrottlingEnabled());
+                aiConfiguration.setTokenBasedThrottlingConfiguration(throttlingConfig);
             }
-            if (dto.getAdditionalQueryParameters() != null) {
-                Map<String, String> queryParamsMap = objectMapper.readValue(dto.getAdditionalQueryParameters(),
-                        new TypeReference<Map<String, String>>() {
-                        });
-                llmConfiguration.setAdditionalQueryParameters(queryParamsMap);
-            }
-        } catch (IOException e) {
-            throw new APIManagementException("Error while parsing AI API Configurations", e);
+        } catch (CryptoException e) {
+            throw new APIManagementException("Error occured while encrypting production Authorization key");
         }
-        return llmConfiguration;
+
+        return aiConfiguration;
     }
 
-    public static APILlmConfigurationsDTO convertToAPILlmConfigurationsDTO(LLMConfiguration llmConfiguration)
+    public static APIAiConfigurationDTO convertToApiAiConfigurationsDTO(AIConfiguration aiConfiguration)
             throws APIManagementException {
 
-        APILlmConfigurationsDTO dto = new APILlmConfigurationsDTO();
-        try {
-            dto.setEnabled(llmConfiguration.isEnabled());
-            dto.setLlmProviderName(llmConfiguration.getLlmProviderName());
-            dto.setLlmProviderApiVersion(llmConfiguration.getLlmProviderApiVersion());
-            ObjectMapper objectMapper = new ObjectMapper();
+        APIAiConfigurationDTO dto = new APIAiConfigurationDTO();
 
-            // Convert additionalHeaders map to JSON string
-            if (llmConfiguration.getAdditionalHeaders() != null) {
-                String headersJson = objectMapper.writeValueAsString(llmConfiguration.getAdditionalHeaders());
-                dto.setAdditionalHeaders(headersJson);
-            }
+        dto.setEnabled(aiConfiguration.isEnabled());
+        dto.setLlmProviderName(aiConfiguration.getLlmProviderName());
+        dto.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
 
-            // Convert additionalQueryParameters map to JSON string
-            if (llmConfiguration.getAdditionalQueryParameters() != null) {
-                String queryParamsJson =
-                        objectMapper.writeValueAsString(llmConfiguration.getAdditionalQueryParameters());
-                dto.setAdditionalQueryParameters(queryParamsJson);
-            }
+        APIAiConfigurationEndpointConfigurationDTO endpointConfigurationDTO =
+                new APIAiConfigurationEndpointConfigurationDTO();
 
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error while converting LLMConfigurations to DTO", e);
+        endpointConfigurationDTO
+                .setAuthKey(aiConfiguration.getAiEndpointConfiguration().getAuthKey());
+        endpointConfigurationDTO
+                .setAuthType(APIAiConfigurationEndpointConfigurationDTO
+                        .AuthTypeEnum.valueOf(aiConfiguration.getAiEndpointConfiguration().getAuthType()));
+        endpointConfigurationDTO
+                .setProductionAuthValue(aiConfiguration.getAiEndpointConfiguration().getProductionAuthValue());
+        endpointConfigurationDTO
+                .setSandboxAuthValue(aiConfiguration.getAiEndpointConfiguration().getSandboxAuthValue());
+        dto.setEndpointConfiguration(endpointConfigurationDTO);
+
+        if (aiConfiguration.getTokenBasedThrottlingConfiguration() != null) {
+            TokenBaseThrottlingCountHolder throttlingConfig =
+                    aiConfiguration.getTokenBasedThrottlingConfiguration();
+            APIAiConfigurationThrottlingConfigurationDTO throttlingConfigurationsDTO =
+                    new APIAiConfigurationThrottlingConfigurationDTO();
+
+            throttlingConfigurationsDTO.setProductionMaxPromptTokenCount(throttlingConfig
+                    .getProductionMaxPromptTokenCount());
+            throttlingConfigurationsDTO.setProductionMaxCompletionTokenCount(throttlingConfig
+                    .getProductionMaxCompletionTokenCount());
+            throttlingConfigurationsDTO.setProductionMaxTotalTokenCount(throttlingConfig
+                    .getProductionMaxTotalTokenCount());
+            throttlingConfigurationsDTO.setSandboxMaxPromptTokenCount(throttlingConfig
+                    .getSandboxMaxPromptTokenCount());
+            throttlingConfigurationsDTO.setSandboxMaxCompletionTokenCount(throttlingConfig
+                    .getSandboxMaxCompletionTokenCount());
+            throttlingConfigurationsDTO.setSandboxMaxTotalTokenCount(throttlingConfig
+                    .getSandboxMaxTotalTokenCount());
+            throttlingConfigurationsDTO.setIsTokenBasedThrottlingEnabled(throttlingConfig
+                    .isTokenBasedThrottlingEnabled());
+            dto.setThrottlingConfiguration(throttlingConfigurationsDTO);
         }
+
         return dto;
     }
 

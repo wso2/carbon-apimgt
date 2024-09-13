@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.XML;
@@ -48,7 +49,7 @@ import java.util.Map;
  * AiAPIHandler handles AI-specific API requests and responses.
  * It extends the AbstractSynapseHandler to integrate with the Synapse MessageContext.
  */
-public class AiApiHandler extends AbstractSynapseHandler {
+public class AiApiHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(AiApiHandler.class);
 
@@ -59,7 +60,7 @@ public class AiApiHandler extends AbstractSynapseHandler {
      * @return true if the handling is successful, otherwise false
      */
     @Override
-    public boolean handleRequestInFlow(MessageContext messageContext) {
+    public boolean handleRequest(MessageContext messageContext) {
 
         try {
             return processMessage(messageContext, true);
@@ -69,17 +70,6 @@ public class AiApiHandler extends AbstractSynapseHandler {
         return true;
     }
 
-    /**
-     * Handles the outgoing request flow.
-     *
-     * @param messageContext the Synapse MessageContext
-     * @return true if the handling is successful, otherwise false
-     */
-    @Override
-    public boolean handleRequestOutFlow(MessageContext messageContext) {
-
-        return true;
-    }
 
     /**
      * Handles the incoming response flow.
@@ -88,25 +78,13 @@ public class AiApiHandler extends AbstractSynapseHandler {
      * @return true if the handling is successful, otherwise false
      */
     @Override
-    public boolean handleResponseInFlow(MessageContext messageContext) {
+    public boolean handleResponse(MessageContext messageContext) {
 
         try {
             return processMessage(messageContext, false);
         } catch (APIManagementException | XMLStreamException | IOException e) {
             log.error("Error occurred while processing AI API", e);
         }
-        return true;
-    }
-
-    /**
-     * Handles the outgoing response flow.
-     *
-     * @param messageContext the Synapse MessageContext
-     * @return true if the handling is successful, otherwise false
-     */
-    @Override
-    public boolean handleResponseOutFlow(MessageContext messageContext) {
-
         return true;
     }
 

@@ -2880,15 +2880,42 @@ public class ApisApiServiceImpl implements ApisApiService {
                                             String additionalProperties, String inlineApiDefinition,
                                             MessageContext messageContext) throws APIManagementException {
 
-        additionalProperties = "{\"name\":\"MistralAIAPI\",\"version\":\"0.0.2\",\"context\":\"mistralaiapi\"," +
-                "\"gatewayType\":\"wso2/synapse\",\"policies\":[\"Unlimited\"]," +
-                "\"endpointConfig\":{\"endpoint_type\":\"http\",\"sandbox_endpoints\":{\"url\":\"https://api.mistral.ai\"}," +
-                "\"production_endpoints\":{\"url\":\"https://api.mistral.ai\"}}," +
-                "\"llmConfigurations\":{\"enabled\":true," +
-                "\"additionalHeaders\":\"{\\\"headerKey1\\\":\\\"headerValue1\\\",\\\"headerKey2\\\":\\\"headerValue2\\\"}\"," +
-                "\"additionalQueryParameters\":\"{\\\"paramKey1\\\":\\\"paramValue1\\\",\\\"paramKey2\\\":\\\"paramValue2\\\"}\"," +
-                "\"llmProviderName\":\"MistralAI\"," +
-                "\"llmProviderApiVersion\":\"v1.0.0\"}}\n";
+        additionalProperties = "{\n" +
+                "  \"name\": \"MistralAIAPI\",\n" +
+                "  \"version\": \"0.0.2\",\n" +
+                "  \"context\": \"mistralaiapi\",\n" +
+                "  \"gatewayType\": \"wso2/synapse\",\n" +
+                "  \"policies\": [\"Unlimited\"],\n" +
+                "  \"endpointConfig\": {\n" +
+                "    \"endpoint_type\": \"http\",\n" +
+                "    \"sandbox_endpoints\": {\n" +
+                "      \"url\": \"https://api.mistral.ai\"\n" +
+                "    },\n" +
+                "    \"production_endpoints\": {\n" +
+                "      \"url\": \"https://api.mistral.ai\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"aiConfiguration\": {\n" +
+                "    \"enabled\": true,\n" +
+                "    \"endpointConfiguration\": {\n" +
+                "      \"authType\": \"HEADER\",\n" +
+                "      \"authKey\": \"Authorization\",\n" +
+                "      \"sandboxAuthValue\": \"1234\",\n" +
+                "      \"productionAuthValue\": \"456\"\n" +
+                "    },\n" +
+                "    \"llmProviderName\": \"MistralAI\",\n" +
+                "    \"llmProviderApiVersion\": \"v1.0.0\",\n" +
+                "    \"throttlingConfiguration\": {\n" +
+                "      \"productionMaxPromptTokenCount\": -1,\n" +
+                "      \"productionMaxCompletionTokenCount\": -1,\n" +
+                "      \"productionMaxTotalTokenCount\": -1,\n" +
+                "      \"sandboxMaxPromptTokenCount\": -1,\n" +
+                "      \"sandboxMaxCompletionTokenCount\": -1,\n" +
+                "      \"sandboxMaxTotalTokenCount\": -1,\n" +
+                "      \"isTokenBasedThrottlingEnabled\": false\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
             RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);

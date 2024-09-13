@@ -84,6 +84,29 @@ public class LLMProviderManager {
         }
     }
 
+    public LLMProvider getLLMProviderConfiguration(String name, String apiVersion, String organization) {
+        LLMProvider llmProvider = new LLMProvider();
+        try {
+            String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT + "?name=" + name +
+                    "&apiVersion=" + apiVersion + "&organization=" + organization);
+            JSONObject responseJson = new JSONObject(responseString);
+
+            JSONArray llmProviderConfigArray = responseJson.getJSONArray("apis");
+            JSONObject apiObj = llmProviderConfigArray.getJSONObject(0);
+            String configurations = apiObj.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
+            llmProvider.setName(name);
+            llmProvider.setApiVersion(apiVersion);
+            llmProvider.setOrganization(organization);
+            llmProvider.setConfigurations(configurations);
+            if (log.isDebugEnabled()) {
+                log.debug("Response : " + responseJson);
+            }
+        } catch (IOException | APIManagementException ex) {
+            log.error("Error while calling internal service API", ex);
+        }
+        return llmProvider;
+    }
+
     /**
      * Invokes an internal service at the specified path and returns the response as a string.
      *

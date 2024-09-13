@@ -230,16 +230,16 @@ public class API implements Serializable {
 
     private Set<String> audiences;
 
-    private LLMConfiguration llmConfiguration;
+    private AIConfiguration AIConfigurations;
 
-    public LLMConfiguration getLlmConfigurations() {
+    public AIConfiguration getAiConfigurations() {
 
-        return llmConfiguration;
+        return AIConfigurations;
     }
 
-    public void setLlmConfigurations(LLMConfiguration llmConfiguration) {
+    public void setAIConfigurations(AIConfiguration AiConfiguration) {
 
-        this.llmConfiguration = llmConfiguration;
+        this.AIConfigurations = AiConfiguration;
     }
 
     public String getAudience() {

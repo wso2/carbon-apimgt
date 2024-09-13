@@ -8803,7 +8803,7 @@ components:
             - INLINE
             - ENDPOINT
             - MOCKED_OAS
-        llmConfigurations:
+        aiConfiguration:
           type: object
           properties:
             enabled:
@@ -8811,16 +8811,53 @@ components:
               default: false
             llmProviderName:
               type: string
-              default: "OpenAI"
             llmProviderApiVersion:
               type: string
-              default: "1.0.0"
-            additionalHeaders:
-              type: string
-              description: "A JSON string representing key-value pairs for headers"
-            additionalQueryParameters:
-              type: string
-              description: "A JSON string representing key-value pairs for query parameters"
+            endpointConfiguration:
+              type: object
+              properties:
+                authType:
+                  type: string
+                  enum:
+                    - header
+                    - queryParameter
+                authKey:
+                  type: string
+                sandboxAuthValue:
+                  type: string
+                productionAuthValue:
+                  type: string
+            throttlingConfiguration:
+              type: object
+              properties:
+                productionMaxPromptTokenCount:
+                  type: integer
+                  description: "Maximum prompt token count for production"
+                  format: int64
+                productionMaxCompletionTokenCount:
+                  type: integer
+                  description: "Maximum completion token count for production"
+                  format: int64
+                productionMaxTotalTokenCount:
+                  type: integer
+                  description: "Maximum total token count for production"
+                  format: int64
+                sandboxMaxPromptTokenCount:
+                  type: integer
+                  description: "Maximum prompt token count for sandbox"
+                  format: int64
+                sandboxMaxCompletionTokenCount:
+                  type: integer
+                  description: "Maximum completion token count for sandbox"
+                  format: int64
+                sandboxMaxTotalTokenCount:
+                  type: integer
+                  description: "Maximum total token count for sandbox"
+                  format: int64
+                isTokenBasedThrottlingEnabled:
+                  type: boolean
+                  default: false
+                  description: "Whether token-based throttling is enabled"
         scopes:
           type: array
           items:

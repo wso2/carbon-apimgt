@@ -284,6 +284,9 @@ public class TemplateBuilderUtil {
             vtb.addHandler(
                     "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
                     , properties);
+            vtb.addHandler(
+                    "org.wso2.carbon.apimgt.gateway.handlers.AiApiHandler"
+                    , properties);
 
             String extensionHandlerPosition = getExtensionHandlerPosition(tenantDomain);
             if ("top".equalsIgnoreCase(extensionHandlerPosition)) {

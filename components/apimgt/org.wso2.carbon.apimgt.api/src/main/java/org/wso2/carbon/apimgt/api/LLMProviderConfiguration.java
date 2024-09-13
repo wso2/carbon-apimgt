@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -15,11 +16,13 @@ public class LLMProviderConfiguration {
     @JsonProperty("metadata")
     private List<LLMProviderMetadata> metadata;
 
-    @JsonProperty("additionalHeaders")
-    private List<String> additionalHeaders;
+    @JsonProperty("authHeader")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String authHeader;
 
-    @JsonProperty("additionalQueryParameters")
-    private List<String> additionalQueryParameters;
+    @JsonProperty("authQueryParameter")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String authQueryParameter;
 
     public LLMProviderConfiguration() {}
 
@@ -27,13 +30,13 @@ public class LLMProviderConfiguration {
     public LLMProviderConfiguration(
             @JsonProperty("connectorType") String connectorType,
             @JsonProperty("metadata") List<LLMProviderMetadata> metadata,
-            @JsonProperty("additionalHeaders") List<String> additionalHeaders,
-            @JsonProperty("additionalQueryParameters") List<String> additionalQueryParameters) {
+            @JsonProperty("authHeader") String authHeader,
+            @JsonProperty("authQueryParameter") String authQueryParameter) {
 
         this.connectorType = connectorType;
         this.metadata = metadata;
-        this.additionalHeaders = additionalHeaders;
-        this.additionalQueryParameters = additionalQueryParameters;
+        this.authHeader = authHeader;
+        this.authQueryParameter = authQueryParameter;
     }
 
     public String getConnectorType() {
@@ -56,24 +59,24 @@ public class LLMProviderConfiguration {
         this.metadata = metadata;
     }
 
-    public List<String> getAdditionalHeaders() {
+    public String getAuthHeader() {
 
-        return additionalHeaders;
+        return authHeader;
     }
 
-    public void setAdditionalHeaders(List<String> additionalHeaders) {
+    public void setAuthHeader(String authHeader) {
 
-        this.additionalHeaders = additionalHeaders;
+        this.authHeader = authHeader;
     }
 
-    public List<String> getAdditionalQueryParameters() {
+    public String getAuthQueryParameter() {
 
-        return additionalQueryParameters;
+        return authQueryParameter;
     }
 
-    public void setAdditionalQueryParameters(List<String> additionalQueryParameters) {
+    public void setAuthQueryParam(String authQueryParameter) {
 
-        this.additionalQueryParameters = additionalQueryParameters;
+        this.authQueryParameter = authQueryParameter;
     }
 
     public String toJsonString() throws APIManagementException {

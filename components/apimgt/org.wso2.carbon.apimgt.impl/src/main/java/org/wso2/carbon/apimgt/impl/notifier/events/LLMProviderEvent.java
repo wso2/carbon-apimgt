@@ -4,10 +4,9 @@ public class LLMProviderEvent extends Event {
 
     private String name;
     private String apiVersion;
-    private String configurations;
 
     public LLMProviderEvent(String eventId, long timeStamp, String type, int tenantId, String tenantDomain,
-                            String name, String apiVersion, String configurations) {
+                            String name, String apiVersion) {
 
         this.eventId = eventId;
         this.timeStamp = timeStamp;
@@ -16,7 +15,6 @@ public class LLMProviderEvent extends Event {
         this.tenantDomain = tenantDomain;
         this.name = name;
         this.apiVersion = apiVersion;
-        this.configurations = configurations;
     }
 
 }

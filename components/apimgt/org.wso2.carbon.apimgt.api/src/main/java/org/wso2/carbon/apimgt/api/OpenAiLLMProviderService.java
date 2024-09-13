@@ -39,12 +39,9 @@ public class OpenAiLLMProviderService extends BuiltInLLMProviderService {
                             + APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_API_DEFINITION_FILE_NAME));
 
             LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
-            List<String> additionalHeader = new ArrayList<>();
-            additionalHeader.add(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_KEY);
-            llmProviderConfiguration.setAdditionalHeaders(additionalHeader);
+            llmProviderConfiguration.setAuthHeader(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_KEY);
+            llmProviderConfiguration.setAuthQueryParam(null);
             llmProviderConfiguration.setConnectorType(this.getType());
-            List<String> additionalQueryParameters = new ArrayList<>();
-            llmProviderConfiguration.setAdditionalQueryParameters(additionalQueryParameters);
 
             List<LLMProviderMetadata> llmProviderMetadata = new ArrayList<>();
             llmProviderMetadata.add(new LLMProviderMetadata(
