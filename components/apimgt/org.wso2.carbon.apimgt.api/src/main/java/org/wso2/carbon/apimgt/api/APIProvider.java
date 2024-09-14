@@ -66,7 +66,7 @@ public interface APIProvider extends APIManager {
     Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException;
 
-    void deleteCustomBackendByID(String backendUUID, String apiUUID, String type) throws APIManagementException;
+    void deleteCustomBackendByID(String apiUUID, String type) throws APIManagementException;
     void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException;
 
     /**
@@ -327,7 +327,9 @@ public interface APIProvider extends APIManager {
 
     String getCustomBackendSequenceOfAPIByUUID(String apiUUID, String type) throws APIManagementException;
 
-    CustomBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException;
+    SequenceBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException;
+
+    List<SequenceBackendData> getAllSequenceBackendsByAPIUUID(String apiUUID) throws APIManagementException;
 
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>

@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -116,6 +117,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceBackendDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceBackendListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
@@ -507,6 +510,22 @@ public class APIMappingUtil {
         mockResponsePayloadInfoDTO.setVerb(model.getVerb());
         mockResponsePayloadInfoDTO.setContent(model.getContent());
         return mockResponsePayloadInfoDTO;
+    }
+
+    public static SequenceBackendListDTO fromSequenceDataToDTO(List<SequenceBackendData> list) {
+        SequenceBackendListDTO res = new SequenceBackendListDTO();
+        res.setCount(list.size());
+        List<SequenceBackendDTO> backends = new ArrayList<>();
+
+        for (SequenceBackendData backend : list) {
+            SequenceBackendDTO dto = new SequenceBackendDTO();
+            dto.sequenceId(backend.getId());
+            dto.setSequenceName(backend.getName());
+            dto.setSequenceType(backend.getType());
+            backends.add(dto);
+        }
+        res.setList(backends);
+        return res;
     }
 
     /**

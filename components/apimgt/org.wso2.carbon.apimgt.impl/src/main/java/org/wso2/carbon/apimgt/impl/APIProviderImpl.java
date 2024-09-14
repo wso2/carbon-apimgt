@@ -73,7 +73,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.CustomBackendData;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
@@ -1188,8 +1188,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public CustomBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException {
+    public SequenceBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException {
         return apiMgtDAO.getCustomBackendByAPIUUID(apiUUID, type);
+    }
+
+    public List<SequenceBackendData> getAllSequenceBackendsByAPIUUID(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getSequenceBackendsByAPIUUID(apiUUID);
     }
 
     @Override
@@ -1197,9 +1201,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.deleteCustomBackendByAPIID(apiUUID);
     }
     @Override
-    public void deleteCustomBackendByID(String backendUUID, String apiUUID, String type)
-            throws APIManagementException {
-        apiMgtDAO.deleteCustomBackend(apiUUID, backendUUID, type);
+    public void deleteCustomBackendByID(String apiUUID, String type) throws APIManagementException {
+        apiMgtDAO.deleteCustomBackend(apiUUID, type);
     }
 
     private void validateKeyManagers(API api) throws APIManagementException {

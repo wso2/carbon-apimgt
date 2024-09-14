@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.api.model;
 
-public class CustomBackendData {
+public class SequenceBackendData {
     private String Id;
     private String sequence;
     private String type;

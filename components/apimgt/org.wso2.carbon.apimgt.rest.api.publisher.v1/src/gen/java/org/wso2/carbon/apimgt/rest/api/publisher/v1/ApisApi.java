@@ -40,18 +40,21 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceBackendDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceBackendListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ApisApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.inject.Inject;
 
 import io.swagger.annotations.*;
 import java.io.InputStream;
@@ -60,6 +63,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
+import java.util.Map;
+import java.util.List;
 import javax.validation.constraints.*;
 @Path("/apis")
 
@@ -371,49 +376,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response createNewAPIVersion( @NotNull @Size(max=30) @ApiParam(value = "Version of the new API.",required=true)  @QueryParam("newVersion") String newVersion,  @NotNull @ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true)  @QueryParam("apiId") String apiId,  @ApiParam(value = "Specifies whether new API should be added as default version.", defaultValue="false") @DefaultValue("false") @QueryParam("defaultVersion") Boolean defaultVersion,  @ApiParam(value = "Version of the Service that will used in creating new version")  @QueryParam("serviceVersion") String serviceVersion) throws APIManagementException{
         return delegate.createNewAPIVersion(newVersion, apiId, defaultVersion, serviceVersion, securityContext);
-    }
-
-    @DELETE
-    @Path("/{apiId}/custom-backend/{customBackendId}")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Delete Custom Backend of the API", notes = "This operation can be used to remove the Custom Backend of the API", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_delete", description = "Delete API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
-        })
-    }, tags={ "APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response customBackendDelete( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId) throws APIManagementException{
-        return delegate.customBackendDelete(type, apiId, customBackendId, securityContext);
-    }
-
-    @PUT
-    @Path("/{apiId}/custom-backend")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Upload Custom Sequence as the Endpoint of the API", notes = "This operation can be used to change the endpoint of the API to Custom Sequence", response = APIDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
-        })
-    }, tags={ "APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with updated API object ", response = APIDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response customBackendUpdate(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "sequence", required = false) InputStream sequenceInputStream, @Multipart(value = "sequence" , required = false) Attachment sequenceDetail, @Multipart(value = "type", required = false)  String type) throws APIManagementException{
-        return delegate.customBackendUpdate(apiId, sequenceInputStream, sequenceDetail, type, securityContext);
     }
 
     @DELETE
@@ -1328,48 +1290,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiId}/custom-backend/{customBackendId}")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get Custom Backend of the API", notes = "This operation can be used to get Custom Backend data of the API", response = SequenceBackendDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
-        })
-    }, tags={ "APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested API Custom Backend is returned ", response = SequenceBackendDTO.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getCustomBackendData( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
-        return delegate.getCustomBackendData(type, customBackendId, apiId, securityContext);
-    }
-
-    @GET
-    @Path("/{apiId}/custom-backend/{customBackendId}/content")
-    
-    @Produces({ "application/zip", "application/json" })
-    @ApiOperation(value = "Get Sequence of Custom Backend", notes = "This operation can be used to get Sequence of the Custom Backend", response = File.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
-        })
-    }, tags={ "APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested API Custom Backend is returned ", response = File.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getCustomBackendDataContent( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "Custom Backend ID ",required=true) @PathParam("customBackendId") String customBackendId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
-        return delegate.getCustomBackendDataContent(type, customBackendId, apiId, securityContext);
-    }
-
-    @GET
     @Path("/{apiId}/generated-mock-scripts")
     
     @Produces({ "application/json" })
@@ -1467,6 +1387,46 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getRepliesOfComment(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Whether we need to display commentor details. ", defaultValue="false") @DefaultValue("false") @QueryParam("includeCommenterInfo") Boolean includeCommenterInfo) throws APIManagementException{
         return delegate.getRepliesOfComment(commentId, apiId, xWSO2Tenant, limit, offset, ifNoneMatch, includeCommenterInfo, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/sequence-backend/{type}/content")
+    
+    @Produces({ "application/xml", "application/json" })
+    @ApiOperation(value = "Get Sequence of Custom Backend", notes = "This operation can be used to get Sequence of the Custom Backend", response = File.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested API Custom Backend is returned ", response = File.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response getSequenceBackendContent( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getSequenceBackendContent(type, apiId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/sequence-backend")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Sequence Backends of the API", notes = "This operation can be used to get Sequence Backend data of the API", response = SequenceBackendListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested API Sequence Backend is returned ", response = SequenceBackendListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response getSequenceBackendData(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getSequenceBackendData(apiId, securityContext);
     }
 
     @GET
@@ -1668,6 +1628,49 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response restoreAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Revision ID of an API ")  @QueryParam("revisionId") String revisionId) throws APIManagementException{
         return delegate.restoreAPIRevision(apiId, revisionId, securityContext);
+    }
+
+    @DELETE
+    @Path("/{apiId}/sequence-backend/{type}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete Sequence Backend of the API", notes = "This operation can be used to remove the Sequence Backend of the API", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_delete", description = "Delete API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response sequenceBackendDelete( @Size(max=15)@ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true) @PathParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.sequenceBackendDelete(type, apiId, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/sequence-backend")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Upload Sequence Sequence as the Endpoint of the API", notes = "This operation can be used to change the endpoint of the API to Sequence Backend", response = APIDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with updated API object ", response = APIDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response sequenceBackendUpdate(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "sequence", required = false) InputStream sequenceInputStream, @Multipart(value = "sequence" , required = false) Attachment sequenceDetail, @Multipart(value = "type", required = false)  String type) throws APIManagementException{
+        return delegate.sequenceBackendUpdate(apiId, sequenceInputStream, sequenceDetail, type, securityContext);
     }
 
     @POST

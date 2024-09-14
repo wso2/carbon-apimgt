@@ -61,7 +61,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.CustomBackendData;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
@@ -11240,27 +11240,49 @@ public class ApiMgtDAO {
         return map;
     }
 
-    public CustomBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException {
+    public SequenceBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException {
         String sqlQuery = SQLConstants.CustomBackendConstants.GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
-        CustomBackendData customBackendData = null;
+        SequenceBackendData sequenceBackendData = null;
         try (Connection con = APIMgtDBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sqlQuery)) {
             ps.setString(1, apiUUID);
             ps.setString(2, type);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    customBackendData = new CustomBackendData();
-                    customBackendData.setApiUUID(apiUUID);
-                    customBackendData.setRevisionUUID("0");
-                    customBackendData.setSequence(IOUtils.toString(rs.getBinaryStream("SEQUENCE")));
-                    customBackendData.setId(rs.getString("ID"));
-                    customBackendData.setName(rs.getString("NAME"));
-                    customBackendData.setType(type);
+                    sequenceBackendData = new SequenceBackendData();
+                    sequenceBackendData.setApiUUID(apiUUID);
+                    sequenceBackendData.setRevisionUUID("0");
+                    sequenceBackendData.setSequence(IOUtils.toString(rs.getBinaryStream("SEQUENCE")));
+                    sequenceBackendData.setId(rs.getString("ID"));
+                    sequenceBackendData.setName(rs.getString("NAME"));
+                    sequenceBackendData.setType(type);
                 }
             }
         } catch (SQLException | IOException ex) {
             handleException("Error when fetching Custom Backend data for API: " + apiUUID, ex);
         }
-        return customBackendData;
+        return sequenceBackendData;
+    }
+
+    public List<SequenceBackendData> getSequenceBackendsByAPIUUID(String apiUUID) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_ALL_API_SPECIFIC_CUSTOM_BACKENDS;
+        List<SequenceBackendData> backendDataList = new ArrayList<>();
+        try (Connection con = APIMgtDBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    SequenceBackendData sqBackend = new SequenceBackendData();
+                    sqBackend.setApiUUID(apiUUID);
+                    sqBackend.setId(rs.getString("ID"));
+                    sqBackend.setName(rs.getString("NAME"));
+                    sqBackend.setType(rs.getString("TYPE"));
+                    backendDataList.add(sqBackend);
+                }
+            }
+            return backendDataList;
+        } catch (SQLException ex) {
+            handleException("Error when retrieving Sequence Backends of API: " + apiUUID, ex);
+        }
+        return null;
     }
 
     public String getCustomBackendSequenceOfAPIByUUID(String apiUUID, String type) throws APIManagementException {
@@ -21506,14 +21528,13 @@ public class ApiMgtDAO {
         }
     }
 
-    public void deleteCustomBackend(String apiUUID, String type, String backendUUID) throws APIManagementException {
+    public void deleteCustomBackend(String apiUUID, String type) throws APIManagementException {
         String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
             connection.setAutoCommit(false);
             prepStmt.setString(1, apiUUID);
-            prepStmt.setString(2, backendUUID);
-            prepStmt.setString(3, type);
+            prepStmt.setString(2, type);
             prepStmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -21797,7 +21818,7 @@ public class ApiMgtDAO {
                 PreparedStatement addPstmt = connection.prepareStatement(addCBSqlQuery)) {
             connection.setAutoCommit(false);
             getPstmt.setString(1, apiRevision.getApiUUID());
-            List<CustomBackendData> customBackendDataList = new ArrayList<>();
+            List<SequenceBackendData> sequenceBackendDataList = new ArrayList<>();
             int count = 0;
 
             try (ResultSet rs = getPstmt.executeQuery()) {

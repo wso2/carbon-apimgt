@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -712,7 +711,8 @@ public class ImportUtils {
                 String seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION);
                 String seqId = UUID.randomUUID().toString();
                 InputStream seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
-                apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION, seq, seqName, seqId);
+                apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION, seq, seqName,
+                        seqId);
             }
         }
     }

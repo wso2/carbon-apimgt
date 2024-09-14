@@ -169,35 +169,31 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getCustomBackendData(String type, String customBackendId, String apiId,
-            MessageContext messageContext) throws APIManagementException {
+    public Response getSequenceBackendData(String apiId, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         //validate if api exists
         CommonUtils.validateAPIExistence(apiId);
-        CustomBackendData data = apiProvider.getCustomBackendByAPIUUID(apiId, type);
+        List<SequenceBackendData> data = apiProvider.getAllSequenceBackendsByAPIUUID(apiId);
         if (data == null) {
             throw new APIMgtResourceNotFoundException(
-                    "Couldn't retrieve an existing Custom Backend with ID: " + customBackendId + " for API " + apiId,
-                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, customBackendId));
+                    "Couldn't retrieve an existing Sequence Backend for API " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, apiId));
         }
-        SequenceBackendDTO backendDTO = new SequenceBackendDTO();
-        backendDTO.setSequenceName(data.getName());
-        backendDTO.setSequenceId(data.getId());
-        return Response.ok().entity(backendDTO).build();
+        SequenceBackendListDTO respObj = APIMappingUtil.fromSequenceDataToDTO(data);
+        return Response.ok().entity(respObj).build();
     }
 
     @Override
-    public Response getCustomBackendDataContent(String type, String customBackendId, String apiId,
-            MessageContext messageContext) throws APIManagementException {
+    public Response getSequenceBackendContent(String type, String apiId, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         CommonUtils.validateAPIExistence(apiId);
 
-        CustomBackendData data = apiProvider.getCustomBackendByAPIUUID(apiId, type);
+        SequenceBackendData data = apiProvider.getCustomBackendByAPIUUID(apiId, type);
         if (data == null) {
             throw new APIMgtResourceNotFoundException(
-                    "Couldn't retrieve an existing Custom Backend with ID: " + customBackendId + " for API " + apiId,
-                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, customBackendId));
+                    "Couldn't retrieve an existing Sequence Backend for API: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, apiId));
         }
         File file = RestApiPublisherUtils.exportCustomBackendData(data.getSequence(), data.getName());
         return Response.ok(file)
@@ -206,12 +202,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response customBackendDelete(String type, String apiId, String customBackendId,
-            MessageContext messageContext) throws APIManagementException {
+    public Response sequenceBackendDelete(String type, String apiId, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //validate if api exists
         CommonUtils.validateAPIExistence(apiId);
-        apiProvider.deleteCustomBackendByID(apiId, customBackendId, type);
+        apiProvider.deleteCustomBackendByID(apiId, type);
         return Response.ok().build();
     }
 
@@ -251,7 +246,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response customBackendUpdate(String apiId, InputStream sequenceInputStream,
+    public Response sequenceBackendUpdate(String apiId, InputStream sequenceInputStream,
             Attachment sequenceDetail, String type, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);

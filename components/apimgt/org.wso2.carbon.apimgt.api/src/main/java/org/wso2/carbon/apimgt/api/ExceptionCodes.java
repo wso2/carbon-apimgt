@@ -534,8 +534,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Required attributes(s) %s for api policy specification %s are either missing or empty"),
     OPERATION_POLICY_NOT_FOUND(902010, "API Policy Not Found", 404,
             "Requested api policy with id '%s' not found"),
-    CUSTOM_BACKEND_NOT_FOUND(903250, "Custom Backend not found",
-            404, "Requested Custom Backend with id '%s' not found"),
+    CUSTOM_BACKEND_NOT_FOUND(903250, "Sequence Backend not found",
+            404, "Requested Sequence Backend of API '%s' not found"),
 
     OPERATION_POLICY_ALREADY_EXISTS(903001, "The API Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
 

@@ -46,7 +46,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.CustomBackendData;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -218,11 +218,10 @@ public class ExportUtils {
         addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
                 api, currentApiUuid);
 
-        // TODO: Add Custom Backend to the Archive
         JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
         if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                 endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
-            addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid, endpointConfig);
+            addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid);
         }
 
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
@@ -637,20 +636,21 @@ public class ExportUtils {
         }
     }
 
-    public static void addCustomBackendToArchive(String archivePath, APIProvider apiProvider, String apiUUID,
-            JsonObject endpointConfig) throws APIManagementException {
+    public static void addCustomBackendToArchive(String archivePath, APIProvider apiProvider, String apiUUID)
+            throws APIManagementException {
         try {
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY);
 
             // Add production Backend Sequences
-            CustomBackendData data = apiProvider.getCustomBackendByAPIUUID(apiUUID, APIConstants.API_KEY_TYPE_PRODUCTION);
-            if(data != null) {
+            SequenceBackendData data = apiProvider.getCustomBackendByAPIUUID(apiUUID,
+                    APIConstants.API_KEY_TYPE_PRODUCTION);
+            if (data != null) {
                 exportCustomBackend(data.getName(), data.getSequence(), archivePath);
             }
 
             // Add sandbox Backend Sequences
             data = apiProvider.getCustomBackendByAPIUUID(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
-            if(data != null) {
+            if (data != null) {
                 exportCustomBackend(data.getName(), data.getSequence(), archivePath);
             }
 

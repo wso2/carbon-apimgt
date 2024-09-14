@@ -201,7 +201,6 @@ public class PublisherCommonUtils {
      * @param endpointType  Endpoint Type of the Custom Backend (SANDBOX, PRODUCTION)
      * @param customBackend Custom Backend
      * @param contentDecomp Header Content of the Request
-     * @return Custom Backend File Name
      * @throws APIManagementException If an error occurs while updating the API and API definition
      */
     public static void updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
