@@ -2879,43 +2879,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, String inlineApiDefinition,
                                             MessageContext messageContext) throws APIManagementException {
-
-        additionalProperties = "{\n" +
-                "  \"name\": \"MistralAIAPI\",\n" +
-                "  \"version\": \"0.0.2\",\n" +
-                "  \"context\": \"mistralaiapi\",\n" +
-                "  \"gatewayType\": \"wso2/synapse\",\n" +
-                "  \"policies\": [\"Unlimited\"],\n" +
-                "  \"endpointConfig\": {\n" +
-                "    \"endpoint_type\": \"http\",\n" +
-                "    \"sandbox_endpoints\": {\n" +
-                "      \"url\": \"https://api.mistral.ai\"\n" +
-                "    },\n" +
-                "    \"production_endpoints\": {\n" +
-                "      \"url\": \"https://api.mistral.ai\"\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"aiConfiguration\": {\n" +
-                "    \"enabled\": true,\n" +
-                "    \"endpointConfiguration\": {\n" +
-                "      \"authType\": \"HEADER\",\n" +
-                "      \"authKey\": \"Authorization\",\n" +
-                "      \"sandboxAuthValue\": \"1234\",\n" +
-                "      \"productionAuthValue\": \"456\"\n" +
-                "    },\n" +
-                "    \"llmProviderName\": \"MistralAI\",\n" +
-                "    \"llmProviderApiVersion\": \"v1.0.0\",\n" +
-                "    \"throttlingConfiguration\": {\n" +
-                "      \"productionMaxPromptTokenCount\": -1,\n" +
-                "      \"productionMaxCompletionTokenCount\": -1,\n" +
-                "      \"productionMaxTotalTokenCount\": -1,\n" +
-                "      \"sandboxMaxPromptTokenCount\": -1,\n" +
-                "      \"sandboxMaxCompletionTokenCount\": -1,\n" +
-                "      \"sandboxMaxTotalTokenCount\": -1,\n" +
-                "      \"isTokenBasedThrottlingEnabled\": false\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
             RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);
