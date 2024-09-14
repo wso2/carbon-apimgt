@@ -175,19 +175,15 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //validate if api exists
         CommonUtils.validateAPIExistence(apiId);
-
-        Map<String, Object> endpointConfig = apiProvider.getCustomBackendOfAPIByUUID(customBackendId, apiId, type,
-                false);
-
-        if (endpointConfig == null) {
+        CustomBackendData data = apiProvider.getCustomBackendByAPIUUID(apiId, type);
+        if (data == null) {
             throw new APIMgtResourceNotFoundException(
                     "Couldn't retrieve an existing Custom Backend with ID: " + customBackendId + " for API " + apiId,
                     ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, customBackendId));
         }
-        CustomBackendDTO backendDTO = new CustomBackendDTO();
-        backendDTO.setSequenceName(endpointConfig.get("sequence_name").toString());
-        backendDTO.setSequenceId(endpointConfig.get("sequence_id").toString());
-        backendDTO.setSequenceType(endpointConfig.get("type").toString());
+        SequenceBackendDTO backendDTO = new SequenceBackendDTO();
+        backendDTO.setSequenceName(data.getName());
+        backendDTO.setSequenceId(data.getId());
         return Response.ok().entity(backendDTO).build();
     }
 
@@ -197,14 +193,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         CommonUtils.validateAPIExistence(apiId);
 
-        InputStream seq = apiProvider.getCustomBackendSequenceOfAPIByUUID(apiId, customBackendId, type);
-        if (seq == null) {
+        CustomBackendData data = apiProvider.getCustomBackendByAPIUUID(apiId, type);
+        if (data == null) {
             throw new APIMgtResourceNotFoundException(
                     "Couldn't retrieve an existing Custom Backend with ID: " + customBackendId + " for API " + apiId,
                     ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, customBackendId));
         }
-        String seqName = APIUtil.getCustomBackendName(apiId, type);
-        File file = RestApiPublisherUtils.exportCustomBackendData(seq, seqName);
+        File file = RestApiPublisherUtils.exportCustomBackendData(data.getSequence(), data.getName());
         return Response.ok(file)
                 .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
                 .build();
@@ -266,9 +261,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         MultivaluedMap<String, String> headers = sequenceDetail.getHeaders();
         String contentDecomp = headers.getFirst("Content-Disposition");
 
-        JSONObject resp = PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream,
+        PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream,
                 contentDecomp);
-        return Response.ok().entity(resp).build();
+        return Response.ok().build();
     }
 
     @Override

@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.CustomBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
@@ -1169,9 +1170,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateCustomBackend(API api, String type, InputStream sequence, String seqName,
+    public void updateCustomBackend(String apiUUID, String type, InputStream sequence, String seqName,
             String customBackendUUID) throws APIManagementException {
-        apiMgtDAO.updateCustomBackend(api.getUuid(), seqName, sequence, type, customBackendUUID);
+        apiMgtDAO.updateCustomBackend(apiUUID, seqName, sequence, type, customBackendUUID);
     }
 
     @Override
@@ -1181,49 +1182,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateCustomBackendByRevisionID(String apiUUID, String type, String revision, String seqName,
-            String backendUUID) throws APIManagementException {
-        String customBackendUUID = UUID.randomUUID().toString();
-        InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(backendUUID, apiUUID, type);
-        apiMgtDAO.updateCustomBackendByRevision(apiUUID, seqName, sequence, type, revision, customBackendUUID);
-    }
-
-    @Override
-    public InputStream getCustomBackendSequenceOfAPIByUUID(String apiUUID, String backendUUID, String type)
+    public String getCustomBackendSequenceOfAPIByUUID(String apiUUID, String type)
             throws APIManagementException {
-        return apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(backendUUID, apiUUID, type);
+        return apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(apiUUID, type);
     }
 
     @Override
-    public InputStream getCustomBackendSequenceByAPIAndRevisionUUUID(String apiUUID, String revisionUUID,
-            String type) throws APIManagementException {
-        return apiMgtDAO.getCustomBackendSequenceByAPIandRevisionUUID(apiUUID, revisionUUID, type);
-    }
-
-    @Override
-    public void addNewCustomBackendForRevision(String revisionUUID, String updatedBackendUUID, String apiUUID,
-            Map<String, Object> config) throws APIManagementException {
-        if (config.get("production") != null) {
-            InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(updatedBackendUUID, apiUUID,
-                    "PRODUCTION");
-            if (config.get("production") instanceof HashMap) {
-                String seqName = ((HashMap) config.get("production")).get("sequence_name").toString();
-                String backendUUID = ((HashMap) config.get("production")).get("sequence_id").toString();
-                apiMgtDAO.addNewCustomBackendForAPIRevision(apiUUID, revisionUUID, "PRODUCTION", seqName, sequence,
-                        backendUUID);
-            }
-        }
-
-        if (config.get("SANDBOX") != null) {
-            InputStream sequence = apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(updatedBackendUUID, apiUUID,
-                    "SANDBOX");
-            if (config.get("sandbox") instanceof HashMap) {
-                String seqName = ((HashMap) config.get("sandbox")).get("sequence_name").toString();
-                String backendUUID = ((HashMap) config.get("sandbox")).get("sequence_id").toString();
-                apiMgtDAO.addNewCustomBackendForAPIRevision(apiUUID, revisionUUID, "SANDBOX", seqName, sequence,
-                        backendUUID);
-            }
-        }
+    public CustomBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException {
+        return apiMgtDAO.getCustomBackendByAPIUUID(apiUUID, type);
     }
 
     @Override

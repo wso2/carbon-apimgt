@@ -487,13 +487,13 @@ paths:
           -H "Content-Type: application/json" -d @data.json
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/topics"'
 
-  /apis/{apiId}/custom-backend/{customBackendId}/content:
+  /apis/{apiId}/sequence-backend/{type}/content:
     get:
       tags:
         - APIs
       summary: Get Sequence of Custom Backend
       description: This operation can be used to get Sequence of the Custom Backend
-      operationId: getCustomBackendDataContent
+      operationId: getSequenceBackendContent
       parameters:
         - name: type
           in: query
@@ -504,7 +504,6 @@ paths:
           schema:
             maxLength: 15
             type: string
-        - $ref: '#/components/parameters/customBackendId'
         - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -518,15 +517,10 @@ paths:
               schema:
                 type: string
           content:
-            application/zip:
+            application/xml:
               schema:
                 type: string
                 format: binary
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -542,68 +536,16 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f/content"'
 
-  /apis/{apiId}/custom-backend/{customBackendId}:
-    get:
-      tags:
-        - APIs
-      summary: Get Custom Backend of the API
-      description: This operation can be used to get Custom Backend data of the API
-      operationId: getCustomBackendData
-      parameters:
-        - name: type
-          in: query
-          description: |
-            Type of the Endpoint.
-            SANDBOX or PRODUCTION
-          required: true
-          schema:
-            maxLength: 15
-            type: string
-        - $ref: '#/components/parameters/customBackendId'
-        - $ref: '#/components/parameters/apiId'
-      responses:
-        200:
-          description: |
-            OK.
-            Requested API Custom Backend is returned
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomBackend'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
-        404:
-          $ref: '#/components/responses/NotFound'
-        406:
-          $ref: '#/components/responses/NotAcceptable'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:api_import_export
-            - apim:api_product_import_export
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f"'
+  /apis/{apiId}/sequence-backend/{type}:
     delete:
       tags:
         - APIs
-      summary: Delete Custom Backend of the API
-      description: This operation can be used to remove the Custom Backend of the API
-      operationId: customBackendDelete
+      summary: Delete Sequence Backend of the API
+      description: This operation can be used to remove the Sequence Backend of the API
+      operationId: sequenceBackendDelete
       parameters:
         - name: type
-          in: query
+          in: path
           description: |
             Type of the Endpoint.
             SANDBOX or PRODUCTION
@@ -612,7 +554,6 @@ paths:
             maxLength: 15
             type: string
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/customBackendId'
       responses:
         200:
           description: |
@@ -637,13 +578,50 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f"'
 
-  /apis/{apiId}/custom-backend:
+  /apis/{apiId}/sequence-backend:
+    get:
+      tags:
+        - APIs
+      summary: Get Sequence Backends of the API
+      description: This operation can be used to get Sequence Backend data of the API
+      operationId: getSequenceBackendData
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API Sequence Backend is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SequenceBackendList'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:api_import_export
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f"'
     put:
       tags:
         - APIs
-      summary: Upload Custom Sequence as the Endpoint of the API
-      description: This operation can be used to change the endpoint of the API to Custom Sequence
-      operationId: customBackendUpdate
+      summary: Upload Sequence Sequence as the Endpoint of the API
+      description: This operation can be used to change the endpoint of the API to Sequence Backend
+      operationId: sequenceBackendUpdate
       parameters:
         - $ref: '#/components/parameters/apiId'
       requestBody:
@@ -9570,8 +9548,21 @@ paths:
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
 components:
   schemas:
-    CustomBackend:
-      title: Custom Backend
+    SequenceBackendList:
+      title: Sequence Backend List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Sequence Backends returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/SequenceBackend'
+    SequenceBackend:
+      title: Sequence Backend
       type: object
       properties:
         sequenceId:
@@ -13918,14 +13909,6 @@ components:
       schema:
         type: integer
         default: 0
-    customBackendId:
-      name: customBackendId
-      in: path
-      description: |
-        Custom Backend ID
-      required: true
-      schema:
-        type: string
     commentId:
       name: commentId
       in: path

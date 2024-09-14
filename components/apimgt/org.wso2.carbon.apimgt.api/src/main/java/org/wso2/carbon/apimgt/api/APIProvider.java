@@ -69,9 +69,6 @@ public interface APIProvider extends APIManager {
     void deleteCustomBackendByID(String backendUUID, String apiUUID, String type) throws APIManagementException;
     void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException;
 
-    InputStream getCustomBackendSequenceByAPIAndRevisionUUUID(String apiUUID, String revisionUUID, String type)
-            throws APIManagementException;
-
     /**
      * @param apiTypeWrapper  Api type wrapper
      * @param parentCommentID
@@ -322,20 +319,15 @@ public interface APIProvider extends APIManager {
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
 
-    void updateCustomBackend(API api, String type, InputStream sequence, String fileName, String customBackendUUID)
+    void updateCustomBackend(String api, String type, InputStream sequence, String fileName, String customBackendUUID)
             throws APIManagementException;
 
     Map<String, Object> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID, String type,
             boolean isInfoOnly) throws APIManagementException;
 
-    InputStream getCustomBackendSequenceOfAPIByUUID(String apiUUID, String backendUUID, String type)
-            throws APIManagementException;
+    String getCustomBackendSequenceOfAPIByUUID(String apiUUID, String type) throws APIManagementException;
 
-    void updateCustomBackendByRevisionID(String apiUUID, String type, String revision, String seqName,
-            String backendUUID) throws APIManagementException;
-
-    void addNewCustomBackendForRevision(String revisionUUID, String updatedBackendUUID, String apiUUID,
-            Map<String, Object> config) throws APIManagementException;
+    CustomBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException;
 
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>

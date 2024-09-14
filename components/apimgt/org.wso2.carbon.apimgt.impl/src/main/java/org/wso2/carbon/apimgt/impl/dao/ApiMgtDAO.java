@@ -11240,50 +11240,50 @@ public class ApiMgtDAO {
         return map;
     }
 
-    public InputStream getCustomBackendSequenceByAPIandRevisionUUID(String apiUUID, String revisionUUID, String type) throws APIManagementException {
-        String sqlQuery = SQLConstants.CustomBackendConstants.GET_CUSTOM_BACKEND_FROM_API_AND_REVISION_UUID;
-        boolean isRev = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
-        InputStream sequence = null;
-        try (Connection con = APIMgtDBUtil.getConnection();
-            PreparedStatement pstmt = con.prepareStatement(sqlQuery)) {
-            pstmt.setString(1, apiUUID);
-            pstmt.setString(2, revisionUUID);
-            pstmt.setString(3, type);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while(rs.next()) {
-                    sequence = rs.getBinaryStream("SEQUENCE");
+    public CustomBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
+        CustomBackendData customBackendData = null;
+        try (Connection con = APIMgtDBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            ps.setString(2, type);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    customBackendData = new CustomBackendData();
+                    customBackendData.setApiUUID(apiUUID);
+                    customBackendData.setRevisionUUID("0");
+                    customBackendData.setSequence(IOUtils.toString(rs.getBinaryStream("SEQUENCE")));
+                    customBackendData.setId(rs.getString("ID"));
+                    customBackendData.setName(rs.getString("NAME"));
+                    customBackendData.setType(type);
                 }
             }
-        } catch (SQLException ex) {
-            handleException("Error when retrieving Custom Backend of API: "+apiUUID, ex);
+        } catch (SQLException | IOException ex) {
+            handleException("Error when fetching Custom Backend data for API: " + apiUUID, ex);
         }
-        return sequence;
+        return customBackendData;
     }
 
-    public InputStream getCustomBackendSequenceOfAPIByUUID(String backendUUID, String apiUUID, String type) throws APIManagementException {
+    public String getCustomBackendSequenceOfAPIByUUID(String apiUUID, String type) throws APIManagementException {
         String sqlQuery = SQLConstants.CustomBackendConstants.GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
-        boolean isRev = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
-        ResultSet rs = null;
-        InputStream sequence = null;
-        try (Connection con = APIMgtDBUtil.getConnection();
-            PreparedStatement ps = con.prepareStatement(sqlQuery)) {
-            ps.setString(1, backendUUID);
-            ps.setString(2, apiUUID);
-            ps.setString(3, type);
+        String sequence = null;
+        try (Connection con = APIMgtDBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            ps.setString(2, type);
 
-            rs = ps.executeQuery();
-            while(rs.next()) {
-                try (InputStream in = rs.getBinaryStream("SEQUENCE")) {
-                    sequence = in;
-                } catch (IOException ex) {
-                    handleException("Error reading the sequence of Custom Backend: "+ backendUUID + ", API: " + apiUUID, ex);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    try (InputStream in = rs.getBinaryStream("SEQUENCE")) {
+                        sequence = IOUtils.toString(in);
+                    } catch (IOException ex) {
+                        handleException("Error reading the sequence of Custom Backend API: " + apiUUID, ex);
+                    }
                 }
             }
         } catch (SQLException ex) {
-            handleException("Error when fetching Custom Backend data: "+ backendUUID + " of API: " + apiUUID, ex);
+            handleException("Error when fetching Custom Backend data of API: " + apiUUID, ex);
         }
 
-        if(sequence == null) {
+        if (sequence == null) {
             throw new APIManagementException("Custom Backend Content cannot be empty");
         }
         return sequence;

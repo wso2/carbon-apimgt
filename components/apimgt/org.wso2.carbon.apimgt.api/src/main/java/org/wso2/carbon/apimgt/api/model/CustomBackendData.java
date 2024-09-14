@@ -1,20 +1,18 @@
 package org.wso2.carbon.apimgt.api.model;
 
-import java.io.InputStream;
-
 public class CustomBackendData {
     private String Id;
-    private InputStream sequence;
+    private String sequence;
     private String type;
     private String name;
     private String apiUUID;
     private String revisionUUID;
 
-    public InputStream getSequence() {
+    public String getSequence() {
         return sequence;
     }
 
-    public void setSequence(InputStream sequence) {
+    public void setSequence(String sequence) {
         this.sequence = sequence;
     }
 

@@ -19,7 +19,7 @@ import javax.validation.Valid;
 
 
 
-public class CustomBackendDTO   {
+public class SequenceBackendDTO   {
   
     private String sequenceId = null;
     private String sequenceName = null;
@@ -28,7 +28,7 @@ public class CustomBackendDTO   {
 
   /**
    **/
-  public CustomBackendDTO sequenceId(String sequenceId) {
+  public SequenceBackendDTO sequenceId(String sequenceId) {
     this.sequenceId = sequenceId;
     return this;
   }
@@ -45,7 +45,7 @@ public class CustomBackendDTO   {
 
   /**
    **/
-  public CustomBackendDTO sequenceName(String sequenceName) {
+  public SequenceBackendDTO sequenceName(String sequenceName) {
     this.sequenceName = sequenceName;
     return this;
   }
@@ -62,7 +62,7 @@ public class CustomBackendDTO   {
 
   /**
    **/
-  public CustomBackendDTO sequenceType(String sequenceType) {
+  public SequenceBackendDTO sequenceType(String sequenceType) {
     this.sequenceType = sequenceType;
     return this;
   }
@@ -79,7 +79,7 @@ public class CustomBackendDTO   {
 
   /**
    **/
-  public CustomBackendDTO sequence(File sequence) {
+  public SequenceBackendDTO sequence(File sequence) {
     this.sequence = sequence;
     return this;
   }
@@ -103,11 +103,11 @@ public class CustomBackendDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CustomBackendDTO customBackend = (CustomBackendDTO) o;
-    return Objects.equals(sequenceId, customBackend.sequenceId) &&
-        Objects.equals(sequenceName, customBackend.sequenceName) &&
-        Objects.equals(sequenceType, customBackend.sequenceType) &&
-        Objects.equals(sequence, customBackend.sequence);
+    SequenceBackendDTO sequenceBackend = (SequenceBackendDTO) o;
+    return Objects.equals(sequenceId, sequenceBackend.sequenceId) &&
+        Objects.equals(sequenceName, sequenceBackend.sequenceName) &&
+        Objects.equals(sequenceType, sequenceBackend.sequenceType) &&
+        Objects.equals(sequence, sequenceBackend.sequence);
   }
 
   @Override
@@ -118,7 +118,7 @@ public class CustomBackendDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CustomBackendDTO {\n");
+    sb.append("class SequenceBackendDTO {\n");
     
     sb.append("    sequenceId: ").append(toIndentedString(sequenceId)).append("\n");
     sb.append("    sequenceName: ").append(toIndentedString(sequenceName)).append("\n");

@@ -277,20 +277,14 @@ public class RestApiPublisherUtils {
         return fileContentType;
     }
 
-    public static File exportCustomBackendData(InputStream seq, String seqName) throws APIManagementException {
-        File exportFolder = null;
+    public static File exportCustomBackendData(String seq, String seqName) throws APIManagementException {
         try {
-            exportFolder = CommonUtil.createTempDirectoryFromName(seqName + "_" + "Custom-Backend");
-            String exportCustomBackendBasePath = exportFolder.toString();
-            String archivePath = exportCustomBackendBasePath.concat(File.separator + seqName);
-            CommonUtil.createDirectory(archivePath);
-            String customBackendName =
-                    archivePath + File.separator + seqName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
-            CommonUtil.writeFile(customBackendName, IOUtils.toString(seq));
-            CommonUtil.archiveDirectory(exportCustomBackendBasePath);
-            FileUtils.deleteQuietly(new File(exportCustomBackendBasePath));
-            return new File(exportCustomBackendBasePath + APIConstants.ZIP_FILE_EXTENSION);
-        } catch (APIImportExportException | IOException ex) {
+            // Provided Sequence Name by the user
+            String customBackendName = seqName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+            CommonUtil.writeFile(customBackendName, seq);
+            FileUtils.deleteQuietly(new File(customBackendName));
+            return new File(customBackendName);
+        } catch (APIImportExportException ex) {
             throw new APIManagementException("Error when exporting Custom Backend: " + seqName, ex);
         }
     }

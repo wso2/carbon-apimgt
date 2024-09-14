@@ -29,7 +29,6 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import io.swagger.v3.parser.ObjectMapperFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -99,11 +98,9 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -207,7 +204,7 @@ public class PublisherCommonUtils {
      * @return Custom Backend File Name
      * @throws APIManagementException If an error occurs while updating the API and API definition
      */
-    public static JSONObject updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
+    public static void updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
             InputStream customBackend, String contentDecomp) throws APIManagementException {
         String fileName = getFileNameFromContentDisposition(contentDecomp);
         if (fileName == null) {
@@ -216,14 +213,7 @@ public class PublisherCommonUtils {
         }
         String seqName = APIUtil.getCustomBackendName(api.getUuid(), endpointType);
         String customBackendUUID = UUID.randomUUID().toString();
-        apiProvider.updateCustomBackend(api, endpointType, customBackend, seqName, customBackendUUID);
-        JSONObject obj = new JSONObject();
-        obj.put("sequence_name", seqName);
-        obj.put("sequence_file", fileName);
-        obj.put("sequence_id", customBackendUUID);
-        obj.put("type", endpointType);
-        obj.put("endpoint_type", "custom_backend");
-        return obj;
+        apiProvider.updateCustomBackend(api.getUuid(), endpointType, customBackend, seqName, customBackendUUID);
     }
 
     private static String getFileNameFromContentDisposition(String contentDisposition) {

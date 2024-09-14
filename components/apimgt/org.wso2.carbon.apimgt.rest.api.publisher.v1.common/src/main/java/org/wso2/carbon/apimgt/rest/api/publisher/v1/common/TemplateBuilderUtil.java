@@ -748,21 +748,17 @@ public class TemplateBuilderUtil {
             JsonObject endpointConfigMap = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
             if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                     endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
-                if (endpointConfigMap.get("sandbox") != null) {
-                    GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api, "SANDBOX",
-                            extractedPath);
-                    if (gatewayCustomBackendSequenceDTO != null) {
-                        gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
-                                gatewayAPIDTO.getSequenceToBeAdd()));
-                    }
+                GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
+                        APIConstants.API_KEY_TYPE_SANDBOX, extractedPath);
+                if (gatewayCustomBackendSequenceDTO != null) {
+                    gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
+                            gatewayAPIDTO.getSequenceToBeAdd()));
                 }
-                if (endpointConfigMap.get("production") != null) {
-                    GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api, "PRODUCTION",
-                            extractedPath);
-                    if (gatewayCustomBackendSequenceDTO != null) {
-                        gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
-                                gatewayAPIDTO.getSequenceToBeAdd()));
-                    }
+                gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
+                        APIConstants.API_KEY_TYPE_PRODUCTION, extractedPath);
+                if (gatewayCustomBackendSequenceDTO != null) {
+                    gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
+                            gatewayAPIDTO.getSequenceToBeAdd()));
                 }
             }
         }

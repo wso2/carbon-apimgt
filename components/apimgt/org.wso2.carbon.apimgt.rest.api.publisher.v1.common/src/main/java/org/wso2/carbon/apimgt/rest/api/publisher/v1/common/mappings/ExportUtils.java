@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.CustomBackendData;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -639,21 +640,18 @@ public class ExportUtils {
     public static void addCustomBackendToArchive(String archivePath, APIProvider apiProvider, String apiUUID,
             JsonObject endpointConfig) throws APIManagementException {
         try {
-            JsonElement prodElement = endpointConfig.get("production");
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY);
-            if (prodElement != null) {
-                String backendUUID = prodElement.getAsJsonObject().get("sequence_id").getAsString();
-                String sequenceName = prodElement.getAsJsonObject().get("sequence_name").getAsString();
-                InputStream sequence = apiProvider.getCustomBackendSequenceOfAPIByUUID(apiUUID, backendUUID,
-                        "PRODUCTION");
-                exportCustomBackend(sequenceName, IOUtils.toString(sequence), archivePath);
+
+            // Add production Backend Sequences
+            CustomBackendData data = apiProvider.getCustomBackendByAPIUUID(apiUUID, APIConstants.API_KEY_TYPE_PRODUCTION);
+            if(data != null) {
+                exportCustomBackend(data.getName(), data.getSequence(), archivePath);
             }
-            JsonElement sandElement = endpointConfig.get("sandbox");
-            if (sandElement != null) {
-                String backendUUID = sandElement.getAsJsonObject().get("sequence_id").getAsString();
-                String sequenceName = sandElement.getAsJsonObject().get("sequence_name").getAsString();
-                InputStream sequence = apiProvider.getCustomBackendSequenceOfAPIByUUID(apiUUID, backendUUID, "SANDBOX");
-                exportCustomBackend(sequenceName, IOUtils.toString(sequence), archivePath);
+
+            // Add sandbox Backend Sequences
+            data = apiProvider.getCustomBackendByAPIUUID(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
+            if(data != null) {
+                exportCustomBackend(data.getName(), data.getSequence(), archivePath);
             }
 
         } catch (IOException | APIImportExportException ex) {
