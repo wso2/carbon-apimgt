@@ -104,14 +104,14 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String vendor;
     private AIConfiguration aiConfiguration;
 
-    public AIConfiguration getAiConfigurations() {
+    public AIConfiguration getAiConfiguration() {
 
         return aiConfiguration;
     }
 
-    public void setAiConfigurations(AIConfiguration AiConfiguration) {
+    public void setAiConfiguration(AIConfiguration aiConfiguration) {
 
-        this.aiConfiguration = AiConfiguration;
+        this.aiConfiguration = aiConfiguration;
     }
 
     public String getAudience() {

@@ -2879,7 +2879,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, String inlineApiDefinition,
                                             MessageContext messageContext) throws APIManagementException {
-        
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
             RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);

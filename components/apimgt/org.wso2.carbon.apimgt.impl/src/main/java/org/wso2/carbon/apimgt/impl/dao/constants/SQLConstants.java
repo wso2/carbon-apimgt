@@ -2778,13 +2778,6 @@ public class SQLConstants {
     public static final String DELETE_LLM_PROVIDER_SQL =
             "DELETE FROM AM_LLM_PROVIDERS " +
                     "WHERE ORGANIZATION = ? AND UUID = ? AND BUILT_IN_SUPPORT = ?";
-
-    public static final String UPDATE_LLM_PROVIDER_SQL =
-            "UPDATE AM_LLM_PROVIDERS SET DESCRIPTION = ?, API_DEFINITION = ?, CONFIGURATIONS = ? " +
-                    "WHERE ORGANIZATION = ? AND UUID = ? AND BUILT_IN_SUPPORT = false";
-
-    public static final String UPDATE_BUILT_IN_LLM_PROVIDER_SQL = "UPDATE AM_LLM_PROVIDERS SET API_DEFINITION = ? WHERE ORGANIZATION = ? AND UUID = ?";;
-
     public static final String DELETE_API_PRODUCT_SQL =
             "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
                     + APIConstants.API_PRODUCT + "'";

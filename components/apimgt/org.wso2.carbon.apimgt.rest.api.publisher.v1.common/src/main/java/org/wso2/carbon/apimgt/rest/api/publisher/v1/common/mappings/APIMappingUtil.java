@@ -467,7 +467,7 @@ public class APIMappingUtil {
             model.setAsyncTransportProtocols(asyncTransports);
         }
         if (dto.getAiConfiguration() != null) {
-            model.setAIConfigurations(PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration()));
+            model.setAiConfiguration(PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration()));
         }
         return model;
     }
@@ -1434,8 +1434,9 @@ public class APIMappingUtil {
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
-        dto.setAiConfiguration(PublisherCommonUtils.convertToApiAiConfigurationsDTO(model.getAiConfigurations()));
-
+        if (model.getAiConfiguration() != null) {
+            dto.setAiConfiguration(PublisherCommonUtils.convertToApiAiConfigurationDTO(model.getAiConfiguration()));
+        }
         return dto;
     }
 
