@@ -645,13 +645,15 @@ public class ExportUtils {
             SequenceBackendData data = apiProvider.getCustomBackendByAPIUUID(apiUUID,
                     APIConstants.API_KEY_TYPE_PRODUCTION);
             if (data != null) {
-                exportCustomBackend(data.getName(), data.getSequence(), archivePath);
+                String seqName = APIUtil.getCustomBackendName(apiUUID, APIConstants.API_KEY_TYPE_PRODUCTION);
+                exportCustomBackend(seqName, data.getSequence(), archivePath);
             }
 
             // Add sandbox Backend Sequences
             data = apiProvider.getCustomBackendByAPIUUID(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
             if (data != null) {
-                exportCustomBackend(data.getName(), data.getSequence(), archivePath);
+                String seqName = APIUtil.getCustomBackendName(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
+                exportCustomBackend(seqName, data.getSequence(), archivePath);
             }
 
         } catch (IOException | APIImportExportException ex) {

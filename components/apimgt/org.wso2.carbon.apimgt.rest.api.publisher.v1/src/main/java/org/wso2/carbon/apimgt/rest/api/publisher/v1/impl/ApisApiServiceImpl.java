@@ -256,8 +256,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         MultivaluedMap<String, String> headers = sequenceDetail.getHeaders();
         String contentDecomp = headers.getFirst("Content-Disposition");
 
-        PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream,
-                contentDecomp);
+        PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream, contentDecomp);
         return Response.ok().build();
     }
 

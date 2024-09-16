@@ -68,6 +68,7 @@ public interface APIProvider extends APIManager {
 
     void deleteCustomBackendByID(String apiUUID, String type) throws APIManagementException;
     void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException;
+    void deleteSequenceBackendByRevision(String apiUUID, String revisionId) throws APIManagementException;
 
     /**
      * @param apiTypeWrapper  Api type wrapper
@@ -319,7 +320,7 @@ public interface APIProvider extends APIManager {
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
 
-    void updateCustomBackend(String api, String type, InputStream sequence, String fileName, String customBackendUUID)
+    void updateCustomBackend(String api, String type, InputStream sequence, String seqName, String customBackendUUID)
             throws APIManagementException;
 
     Map<String, Object> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID, String type,

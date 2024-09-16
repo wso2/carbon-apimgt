@@ -1405,7 +1405,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Requested API Custom Backend is returned ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getSequenceBackendContent( @NotNull @Size(max=15) @ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true)  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+    public Response getSequenceBackendContent( @Size(max=15)@ApiParam(value = "Type of the Endpoint. SANDBOX or PRODUCTION ",required=true) @PathParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getSequenceBackendContent(type, apiId, securityContext);
     }
 

@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -190,8 +192,13 @@ public class PublisherCommonUtils {
 
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
         apiProvider.updateAPI(apiToUpdate, originalAPI);
-
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+        API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+        JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
+        if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+            apiProvider.deleteSequenceBackendByRevision(apiUpdated.getUuid(), "0");
+        }
+        return apiUpdated;
         // TODO use returend api
     }
 
@@ -212,7 +219,7 @@ public class PublisherCommonUtils {
         }
         String seqName = APIUtil.getCustomBackendName(api.getUuid(), endpointType);
         String customBackendUUID = UUID.randomUUID().toString();
-        apiProvider.updateCustomBackend(api.getUuid(), endpointType, customBackend, seqName, customBackendUUID);
+        apiProvider.updateCustomBackend(api.getUuid(), endpointType, customBackend, fileName, customBackendUUID);
     }
 
     private static String getFileNameFromContentDisposition(String contentDisposition) {

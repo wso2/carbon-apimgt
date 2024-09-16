@@ -115,7 +115,7 @@ public class SynapsePolicyAggregator {
         configMap.put("sequence_name", sequenceName);
         String sanitizedSequence = renderCustomBackendSequence(sequenceName, pathToArchive);
         if (sanitizedSequence == null) {
-            throw new APIManagementException("Error when preparing the sequence: " + sequenceName);
+            return null;
         }
         configMap.put("custom_sequence", sanitizedSequence);
         configMap.put("endpoint_type", endpointType);
@@ -225,6 +225,9 @@ public class SynapsePolicyAggregator {
         String policyDirectory = pathToArchive + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
         String sequence = APIUtil.getCustomBackendSequenceFromFile(policyDirectory, sequenceName,
                 APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
+        if (sequence == null) {
+            return null;
+        }
         return renderPolicyTemplate(sequence, new HashMap<>());
     }
 

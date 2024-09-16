@@ -496,7 +496,7 @@ paths:
       operationId: getSequenceBackendContent
       parameters:
         - name: type
-          in: query
+          in: path
           description: |
             Type of the Endpoint.
             SANDBOX or PRODUCTION

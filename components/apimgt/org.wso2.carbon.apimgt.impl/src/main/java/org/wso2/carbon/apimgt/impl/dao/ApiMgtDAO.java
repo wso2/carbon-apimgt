@@ -21555,36 +21555,16 @@ public class ApiMgtDAO {
     }
 
     public void deleteCustomBackendByRevision(String apiUUID, String revisionUUID) throws APIManagementException {
-        boolean isRevisioned = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
         String deleteSqlQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;
-        if(isRevisioned) {
-            try (Connection con = APIMgtDBUtil.getConnection();
-                    PreparedStatement ps = con.prepareStatement(deleteSqlQuery)) {
-                con.setAutoCommit(false);
-                ps.setString(1, apiUUID);
-                ps.executeUpdate();
-                con.commit();
-            } catch (SQLException ex) {
-                handleException("Error deleting Custom Backend for Revision: "+ apiUUID, ex);
-            }
-        } else {
-            throw new APIManagementException("Invalid Revision Id: "+ apiUUID);
-        }
-    }
-
-    public void updateCustomBackendByRevision(String apiUUID, String sequenceName, InputStream sequence, String type,
-            String revision, String backendUUID) throws APIManagementException {
-        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
-            connection.setAutoCommit(false);
-            prepStmt.setString(1, apiUUID);
-            prepStmt.setString(2, revision);
-            prepStmt.executeUpdate();
-            addCustomBackend(apiUUID, sequenceName, revision, sequence, type, connection, backendUUID);
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while adding Custom Backend for API : " + apiUUID, e);
+        try (Connection con = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(deleteSqlQuery)) {
+            con.setAutoCommit(false);
+            ps.setString(1, apiUUID);
+            ps.setString(2, revisionUUID);
+            ps.executeUpdate();
+            con.commit();
+        } catch (SQLException ex) {
+            handleException("Error deleting Custom Backend for Revision: " + apiUUID, ex);
         }
     }
 
