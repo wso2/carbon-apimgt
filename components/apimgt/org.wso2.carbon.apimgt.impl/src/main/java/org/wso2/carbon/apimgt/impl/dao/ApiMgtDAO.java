@@ -166,7 +166,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -14442,12 +14441,8 @@ public class ApiMgtDAO {
 
         String providerId = UUID.randomUUID().toString();
         provider.setId(providerId);
-
-        String errorMessage = "Failed to add LLM Provider: " + providerId;
-
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
-
             String insertProviderQuery = SQLConstants.INSERT_LLM_PROVIDER_SQL;
             try (PreparedStatement prepStmt = conn.prepareStatement(insertProviderQuery)) {
                 prepStmt.setString(1, providerId);
@@ -14458,9 +14453,7 @@ public class ApiMgtDAO {
                 prepStmt.setString(6, provider.getDescription());
                 prepStmt.setString(7, provider.getApiDefinition());
                 prepStmt.setString(8, provider.getConfigurations());
-
                 int rowsAffected = prepStmt.executeUpdate();
-
                 if (rowsAffected > 0) {
                     conn.commit();
                     return provider;
@@ -14471,14 +14464,12 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Failed to add LLM Provider with ID: " + providerId, e);
         }
     }
 
     /**
      * Retrieves all LLM Providers for a given organization.
-     * <p>
-     * This method fetches a list of LLM providers from the database for a specific organization.
      *
      * @param organization the tenant domain or organization identifier for which to retrieve LLM providers
      * @return List<LlmProvider> a list of LLM provider objects associated with the given organization
@@ -14487,8 +14478,6 @@ public class ApiMgtDAO {
     public List<LLMProvider> getLLMProvidersByOrg(String organization) throws APIManagementException {
 
         List<LLMProvider> providerList = new ArrayList<>();
-        String errorMessage = "Failed to get LLM Providers in tenant domain: " + organization;
-
         try {
             Connection connection = APIMgtDBUtil.getConnection();
             PreparedStatement preparedStatement =
@@ -14504,20 +14493,57 @@ public class ApiMgtDAO {
                 provider.setDescription(resultSet.getString("DESCRIPTION"));
                 providerList.add(provider);
             }
-
         } catch (SQLException e) {
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Failed to get LLM Providers in tenant domain: " + organization, e);
         }
-
         return providerList;
     }
 
-    public List<LLMProvider> getLLMProviderConfigurations(String name, String apiVersion, String organization) throws APIManagementException {
+    /**
+     * Retrieves LLM provider configurations based on optional filters.
+     *
+     * @param name        the provider name (optional)
+     * @param apiVersion  the API version (optional)
+     * @param organization the organization (optional)
+     * @return list of LLM providers matching the filters
+     * @throws APIManagementException if a database error occurs
+     */
+    public List<LLMProvider> getLLMProviderConfiguration(String name, String apiVersion, String organization)
+            throws APIManagementException {
 
         List<LLMProvider> providerList = new ArrayList<>();
-        String errorMessage = "Failed to get LLM Providers.";
-        StringBuilder queryBuilder = new StringBuilder(SQLConstants.GET_LLM_PROVIDER_CONFIGURATIONS_SQL);
+        String query = buildGetSql(name, apiVersion, organization);
 
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            setQueryParameters(preparedStatement, name, organization, apiVersion);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    LLMProvider provider = new LLMProvider();
+                    provider.setName(resultSet.getString("NAME"));
+                    provider.setApiVersion(resultSet.getString("API_VERSION"));
+                    provider.setOrganization(resultSet.getString("ORGANIZATION"));
+                    provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+                    providerList.add(provider);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to get LLM Providers.", e);
+        }
+        return providerList;
+    }
+
+    /**
+     * Builds the SQL query with optional filters for name, organization, and API version.
+     *
+     * @param name        the provider name (optional)
+     * @param apiVersion  the API version (optional)
+     * @param organization the organization (optional)
+     * @return the constructed SQL query string
+     */
+    private String buildGetSql(String name, String apiVersion, String organization) {
+        StringBuilder queryBuilder = new StringBuilder(SQLConstants.GET_LLM_PROVIDER_CONFIGURATIONS_SQL);
         if (name != null && !name.isEmpty()) {
             queryBuilder.append(" AND NAME = ?");
         }
@@ -14527,66 +14553,56 @@ public class ApiMgtDAO {
         if (apiVersion != null && !apiVersion.isEmpty()) {
             queryBuilder.append(" AND API_VERSION = ?");
         }
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(queryBuilder.toString())) {
+        return queryBuilder.toString();
+    }
 
-            int paramIndex = 1;
-            if (name != null && !name.isEmpty()) {
-                preparedStatement.setString(paramIndex++, name);
-            }
-            if (organization != null && !organization.isEmpty()) {
-                preparedStatement.setString(paramIndex++, organization);
-            }
-            if (apiVersion != null && !apiVersion.isEmpty()) {
-                preparedStatement.setString(paramIndex, apiVersion);
-            }
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                LLMProvider provider = new LLMProvider();
-                provider.setName(resultSet.getString("NAME"));
-                provider.setApiVersion(resultSet.getString("API_VERSION"));
-                provider.setOrganization(resultSet.getString("ORGANIZATION"));
-                provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
-                providerList.add(provider);
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException(errorMessage, e);
+    /**
+     * Sets the parameters for the given PreparedStatement.
+     *
+     * @param preparedStatement the PreparedStatement to set parameters for
+     * @param name              the provider name (optional)
+     * @param organization      the organization (optional)
+     * @param apiVersion        the API version (optional)
+     * @throws SQLException if setting a parameter fails
+     */
+    private void setQueryParameters(PreparedStatement preparedStatement, String name, String organization, String apiVersion)
+            throws SQLException {
+        int paramIndex = 1;
+        if (name != null && !name.isEmpty()) {
+            preparedStatement.setString(paramIndex++, name);
         }
-
-        return providerList;
+        if (organization != null && !organization.isEmpty()) {
+            preparedStatement.setString(paramIndex++, organization);
+        }
+        if (apiVersion != null && !apiVersion.isEmpty()) {
+            preparedStatement.setString(paramIndex, apiVersion);
+        }
     }
 
     public List<LLMProvider> getBuiltInLLMProviders(String organization) throws APIManagementException {
-
-        String errorMessage = "Failed to retrieve BUILT_IN_SUPPORT LLM Providers configurations in tenant domain: " + organization;
+;
         List<LLMProvider> builtInLLMProviders = new ArrayList<>();
-
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_BUILT_IN_LLM_PROVIDER_CONFIGURATIONS_BY_ORG_SQL)) {
-
+             PreparedStatement preparedStatement = connection.prepareStatement(
+                     SQLConstants.GET_BUILT_IN_LLM_PROVIDER_CONFIGURATIONS_BY_ORG_SQL)) {
             preparedStatement.setString(1, organization);
             ResultSet resultSet = preparedStatement.executeQuery();
-
             while (resultSet.next()) {
                 LLMProvider provider = new LLMProvider();
                 provider.setId(resultSet.getString("UUID"));
                 provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
                 builtInLLMProviders.add(provider);
             }
-
         } catch (SQLException e) {
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Failed to retrieve BUILT_IN_SUPPORT LLM Providers configurations in " +
+                    "tenant domain: " + organization, e);
         }
-
         return builtInLLMProviders;
     }
 
 
     /**
      * Deletes an LLM Provider and its associated parameters from the database.
-     * <p>
-     * This method removes the specified LLM Provider and all its related parameters
-     * for the given organization and provider ID.
      *
      * @param organization  the tenant domain or organization identifier
      * @param llmProviderId the unique identifier of the LLM provider to be deleted
@@ -14595,7 +14611,6 @@ public class ApiMgtDAO {
     public LLMProvider deleteLLMProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException {
 
         LLMProvider provider = getLLMProvider(organization, llmProviderId);
-        String errorMessage = "Failed to delete LLM Provider in tenant domain: " + organization;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement deleteProviderStmt =
@@ -14613,15 +14628,13 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Failed to delete LLM Provider in tenant domain: "
+                    + organization, e);
         }
     }
 
     /**
      * Updates an LLM Provider's details in the database for a given organization.
-     * <p>
-     * This method updates the basic details of an LLM Provider and its associated parameters, such as headers and query
-     * parameters. It handles transactions to ensure data consistency and rolls back changes if an error occurs.
      *
      * @param provider the LLM provider object containing updated details
      * @return LlmProvider the updated LLM provider object
@@ -14629,13 +14642,11 @@ public class ApiMgtDAO {
      */
     public LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException {
 
-        String errorMessage = "Failed to update LLM Provider in tenant domain: " + provider.getOrganization();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement checkStmt = connection.prepareStatement(SQLConstants.CHECK_LLM_PROVIDER_BUILT_IN_SUPPORT_SQL)) {
                 checkStmt.setString(1, provider.getOrganization());
                 checkStmt.setString(2, provider.getId());
-
                 try (ResultSet resultSet = checkStmt.executeQuery()) {
                     if (resultSet.next()) {
                         provider.setName(resultSet.getString("NAME"));
@@ -14644,18 +14655,11 @@ public class ApiMgtDAO {
                     }
                 }
             }
-            String updateSql = provider.isBuiltInSupport() ? SQLConstants.UPDATE_BUILT_IN_LLM_PROVIDER_SQL : SQLConstants.UPDATE_LLM_PROVIDER_SQL;
+            String updateSql = buildUpdateSql(provider);
+            List<Object> params = buildUpdateParams(provider);
             try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
-                if (provider.isBuiltInSupport()) {
-                    updateStmt.setString(1, provider.getApiDefinition());
-                    updateStmt.setString(2, provider.getOrganization());
-                    updateStmt.setString(3, provider.getId());
-                } else {
-                    updateStmt.setString(1, provider.getDescription());
-                    updateStmt.setString(2, provider.getApiDefinition());
-                    updateStmt.setString(3, provider.getConfigurations());
-                    updateStmt.setString(4, provider.getOrganization());
-                    updateStmt.setString(5, provider.getId());
+                for (int i = 0; i < params.size(); i++) {
+                    updateStmt.setObject(i + 1, params.get(i));
                 }
                 int rowsAffected = updateStmt.executeUpdate();
                 if (rowsAffected > 0) {
@@ -14667,21 +14671,80 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Failed to update LLM Provider in tenant domain: "
+                    + provider.getOrganization(), e);
         }
     }
 
     /**
-     * Retrieves an LLM Provider based on the organization and provider ID.
-     * <p>
-     * This method fetches the LLM Provider details, including its headers and query parameters,
-     * from the database for a given organization and LLM provider ID.
+     * Builds the SQL update query for an LLM provider.
      *
-     * @param organization  the tenant domain or organization identifier
-     * @param llmProviderId the unique identifier of the LLM provider
-     * @return LlmProvider   the LLM provider object containing its details, headers, and query parameters,
-     * or {@code null} if no provider is found
-     * @throws APIManagementException if an error occurs while accessing the database or retrieving data
+     * @param provider the LLM provider to update
+     * @return the SQL update query string
+     */
+    private String buildUpdateSql(LLMProvider provider) {
+        StringBuilder updateSqlBuilder = new StringBuilder("UPDATE AM_LLM_PROVIDER SET ");
+        if (provider.isBuiltInSupport()) {
+            if (provider.getApiDefinition() != null) {
+                updateSqlBuilder.append("API_DEFINITION = ? ");
+            }
+        } else {
+            if (provider.getDescription() != null) {
+                updateSqlBuilder.append("DESCRIPTION = ?, ");
+            }
+            if (provider.getApiDefinition() != null) {
+                updateSqlBuilder.append("API_DEFINITION = ?, ");
+            }
+            if (provider.getConfigurations() != null) {
+                updateSqlBuilder.append("CONFIGURATIONS = ?, ");
+            }
+            if (updateSqlBuilder.toString().endsWith(", ")) {
+                updateSqlBuilder.setLength(updateSqlBuilder.length() - 2);
+            }
+        }
+        updateSqlBuilder.append(" WHERE ORGANIZATION = ? AND UUID = ?");
+        if (!provider.isBuiltInSupport()) {
+            updateSqlBuilder.append(" AND BUILT_IN_SUPPORT = false");
+        }
+        return updateSqlBuilder.toString();
+    }
+
+    /**
+     * Builds parameters for the LLM provider update SQL.
+     *
+     * @param provider the LLM provider to update
+     * @return list of SQL update parameters
+     */
+    private List<Object> buildUpdateParams(LLMProvider provider) {
+        List<Object> params = new ArrayList<>();
+
+        if (provider.isBuiltInSupport()) {
+            if (provider.getApiDefinition() != null) {
+                params.add(provider.getApiDefinition());
+            }
+        } else {
+            if (provider.getDescription() != null) {
+                params.add(provider.getDescription());
+            }
+            if (provider.getApiDefinition() != null) {
+                params.add(provider.getApiDefinition());
+            }
+            if (provider.getConfigurations() != null) {
+                params.add(provider.getConfigurations());
+            }
+        }
+        params.add(provider.getOrganization());
+        params.add(provider.getId());
+        return params;
+    }
+
+    /**
+     * Fetches an LLM provider by organization and provider ID.
+     *
+     * @param organization  the organization identifier
+     * @param llmProviderId the LLM provider ID
+     * @return the LLM provider or {@code null} if not found
+     * @throws APIManagementException if a database access error occurs
      */
     public LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException {
 
@@ -14691,6 +14754,34 @@ public class ApiMgtDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_SQL);
             preparedStatement.setString(1, organization);
             preparedStatement.setString(2, llmProviderId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
+            }
+            LLMProvider provider = new LLMProvider();
+            provider.setId(resultSet.getString("UUID"));
+            provider.setName(resultSet.getString("NAME"));
+            provider.setApiVersion(resultSet.getString("API_VERSION"));
+            provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
+            provider.setDescription(resultSet.getString("DESCRIPTION"));
+            provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
+            provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+            return provider;
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    public LLMProvider getLLMProvider(String organization, String name, String apiVersion) throws APIManagementException {
+
+        String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
+        try {
+            Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_BY_NAME_AND_VERSION_SQL);
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, name);
+            preparedStatement.setString(3, apiVersion);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
                 return null;
@@ -19476,178 +19567,128 @@ public class ApiMgtDAO {
         return false;
     }
 
-    public void addAiConfiguration(String apiUUID, String revisionUUID, AIConfiguration aiConfiguration) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
+    /**
+     * Adds AI configuration for the given API UUID and revision UUID.
+     *
+     * @param apiUUID        The UUID of the API.
+     * @param revisionUUID   The revision UUID of the API (can be null).
+     * @param aiConfiguration The AI configuration to be added.
+     * @throws APIManagementException If an error occurs while adding the AI configuration.
+     */
+    public void addAIConfiguration(String apiUUID, String revisionUUID, AIConfiguration aiConfiguration, String organization)
+            throws APIManagementException {
+
+        LLMProvider provider = getLLMProvider(organization, aiConfiguration.getLlmProviderName(), aiConfiguration.getLlmProviderApiVersion());
+
+        String sql = SQLConstants.INSERT_AI_CONFIGURATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
-            try {
-                addAiConfiguration(apiUUID, revisionUUID, aiConfiguration, connection);
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while adding AI API mapping for : " + apiUUID, e);
-            }
+            stmt.setString(1, java.util.UUID.randomUUID().toString());
+            stmt.setString(2, apiUUID);
+            stmt.setString(3, revisionUUID);
+            stmt.setString(4, provider.getId());
+            stmt.setString(5, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
+            stmt.setString(6, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
+            stmt.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
-            handleException("Error while adding AI API mapping for : " + apiUUID, e);
+            throw new APIManagementException("Error while adding AI API configuration for API: " + apiUUID, e);
         }
     }
 
-    private void addAiConfiguration(String apiUUID, String revisionUUID, AIConfiguration aiConfiguration, Connection connection) throws APIManagementException {
+    /**
+     * Updates AI configuration for the given API UUID.
+     *
+     * @param apiUUID        The UUID of the API.
+     * @param aiConfiguration The AI configuration to be updated.
+     * @throws APIManagementException If an error occurs while updating the AI configuration.
+     */
+    public void updateAIConfiguration(String apiUUID, AIConfiguration aiConfiguration)
+            throws APIManagementException {
 
-        try (PreparedStatement llmConfigurationMappingStatement = connection
-                .prepareStatement(SQLConstants.INSERT_AI_CONFIGURATION)) {
-
-            llmConfigurationMappingStatement.setString(1, java.util.UUID.randomUUID().toString());
-            llmConfigurationMappingStatement.setString(2, apiUUID);
-            llmConfigurationMappingStatement.setString(3, revisionUUID);
-            llmConfigurationMappingStatement.setString(4, aiConfiguration.getLlmProviderName());
-            llmConfigurationMappingStatement.setString(5, aiConfiguration.getLlmProviderApiVersion());
-            llmConfigurationMappingStatement.setString(6, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
-            llmConfigurationMappingStatement.setString(7, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
-            llmConfigurationMappingStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new APIManagementException("Error while adding LLM configuration mapping for API : " + apiUUID, e);
-        }
-    }
-
-    public void updateAiConfiguration(String apiUUID, AIConfiguration aiConfiguration) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
+        String sql = SQLConstants.UPDATE_AI_CONFIGURATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
-            try {
-                updateAiConfiguration(apiUUID, aiConfiguration, connection);
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while updating AI API mapping for : " + apiUUID, e);
-            }
+            stmt.setString(1, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
+            stmt.setString(2, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
+            stmt.setString(3, apiUUID);
+            stmt.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
-            handleException("Error while updating AI API mapping for : " + apiUUID, e);
+            throw new APIManagementException("Error while updating AI API configuration for API: " + apiUUID, e);
         }
     }
 
-    private void updateAiConfiguration(String apiUUID, AIConfiguration aiConfiguration, Connection connection) throws APIManagementException {
-
-        try (PreparedStatement llmConfigurationMappingStatement = connection
-                .prepareStatement(SQLConstants.UPDATE_AI_CONFIGURATION)) {
-            llmConfigurationMappingStatement.setString(1, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
-            llmConfigurationMappingStatement.setString(2, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
-            llmConfigurationMappingStatement.setString(3, apiUUID);
-            llmConfigurationMappingStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new APIManagementException("Error while updating AI configuration mapping for API: " + apiUUID, e);
-        }
-    }
-
-    public void deleteLLMConfigurations(String apiUUID, String revisionUUID) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
+    /**
+     * Deletes AI configuration for the given API UUID and optionally a revision UUID.
+     *
+     * @param apiUUID      The UUID of the API.
+     * @param revisionUUID The revision UUID of the API (can be null).
+     * @throws APIManagementException If an error occurs while deleting the LLM configuration.
+     */
+    public void deleteAIConfiguration(String apiUUID, String revisionUUID)
+            throws APIManagementException {
+        String query = (revisionUUID != null)
+                ? SQLConstants.DELETE_AI_CONFIGURATION_REVISION
+                : SQLConstants.DELETE_AI_CONFIGURATIONS;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            try {
-                deleteLLMConfigurations(apiUUID, revisionUUID, connection);
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while updating AI API mapping for : " + apiUUID, e);
-            }
-        } catch (SQLException e) {
-            handleException("Error while updating AI API mapping for : " + apiUUID, e);
-        }
-    }
-
-    private void deleteLLMConfigurations(String apiUUID, String revisionUUID, Connection connection) throws APIManagementException {
-
-        String query = (revisionUUID != null) ?
-                SQLConstants.DELETE_AI_CONFIGURATION_REVISION :
-                SQLConstants.DELETE_AI_CONFIGURATIONS;
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, apiUUID);
             if (revisionUUID != null) {
                 stmt.setString(2, revisionUUID);
             }
             stmt.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to remove LLM configuration for API: " + apiUUID, e);
+            throw new APIManagementException("Error while deleting AI API configuration for API: " + apiUUID, e);
         }
     }
 
-    private String mapToKeyValueString(Map<String, String> map) {
-        if (map == null || map.isEmpty()) {
-            return null;
-        }
-        StringJoiner joiner = new StringJoiner(",");
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            joiner.add(entry.getKey() + ":" + entry.getValue());
-        }
-        return joiner.toString();
-    }
+    /**
+     * Retrieves the AI configuration for the given API UUID and optionally a revision UUID.
+     *
+     * @param uuid         The UUID of the API.
+     * @param revisionUUID The revision UUID of the API (can be null).
+     * @return The AIConfiguration object if found, or null if no configuration exists.
+     * @throws APIManagementException If an error occurs while retrieving the AI configuration.
+     */
+    public AIConfiguration getAIConfiguration(String uuid, String revisionUUID, String organization) throws APIManagementException {
 
-    public AIConfiguration getAiConfiguration(String uuid, String revisionUUID) throws APIManagementException {
-        AIConfiguration AiConfiguration = new AIConfiguration();
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
+
+        AIConfiguration aiConfiguration = null;
+        String query = (revisionUUID == null)
+                ? SQLConstants.GET_AI_CONFIGURATION
+                : SQLConstants.GET_AI_CONFIGURATION_REVISION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            try {
-                if (revisionUUID == null) {
-                    APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
-                    if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                        uuid = apiRevision.getApiUUID();
-                        revisionUUID = apiRevision.getRevisionUUID();
-                    }
-                }
-                AiConfiguration = getAiConfiguration(uuid, revisionUUID, connection);
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while getting API level policy mapping of API " + uuid, e);
-            }
-        } catch (SQLException e) {
-            handleException("Error while getting API level policy mapping of API " + uuid, e);
-        }
-        return AiConfiguration;
-    }
-
-    private AIConfiguration getAiConfiguration(String apiUUID, String revisionUUID, Connection connection)
-            throws APIManagementException {
-
-        AIConfiguration aiConfiguration = new AIConfiguration();
-        String query = revisionUUID == null ?
-                SQLConstants.GET_AI_CONFIGURATION :
-                SQLConstants.GET_AI_CONFIGURATION_REVISION;
-        try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, apiUUID);
+            ps.setString(1, uuid);
             if (revisionUUID != null) {
                 ps.setString(2, revisionUUID);
             }
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    String llmProviderName = rs.getString("LLM_PROVIDER_NAME");
-                    String llmProviderVersion = rs.getString("LLM_PROVIDER_API_VERSION");
-                    String endpointConfiguration = rs
-                            .getString("ENDPOINT_CONFIGURATION");
-                    String tokenDetails = rs.getString("THROTTLING_CONFIGURATIONS");
+                if (rs.next()) {
+                    aiConfiguration = new AIConfiguration();
                     aiConfiguration.setEnabled(true);
-                    aiConfiguration.setLlmProviderName(llmProviderName);
-                    aiConfiguration.setLlmProviderApiVersion(llmProviderVersion);
-                    aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(endpointConfiguration, AIEndpointConfiguration.class));
+                    aiConfiguration.setAiEndpointConfiguration(
+                            new Gson().fromJson(rs.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
                     aiConfiguration.setTokenBasedThrottlingConfiguration(
-                            new Gson().fromJson(tokenDetails, TokenBaseThrottlingCountHolder.class));
+                            new Gson().fromJson(rs.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
+
+                    String providerId = rs.getString("LLM_PROVIDER_UUID");
+                    LLMProvider provider = getLLMProvider(organization, providerId);
+                    aiConfiguration.setLlmProviderName(provider.getName());
+                    aiConfiguration.setLlmProviderApiVersion(provider.getApiVersion());
                 }
             }
+            connection.commit();
         } catch (SQLException e) {
-            handleException("Error while getting API level policy mapping of API " + apiUUID, e);
+            throw new APIManagementException("Error while retrieving AI API configuration for API: " + uuid, e);
         }
         return aiConfiguration;
-    }
-
-    private Map<String, String> stringToMap(String str) {
-        if (str == null || str.isEmpty()) {
-            return new HashMap<>();
-        }
-        Map<String, String> map = new HashMap<>();
-        String[] pairs = str.split(",");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split(":");
-            map.put(keyValue[0], keyValue[1]);
-        }
-        return map;
     }
 
     private class SubscriptionInfo {

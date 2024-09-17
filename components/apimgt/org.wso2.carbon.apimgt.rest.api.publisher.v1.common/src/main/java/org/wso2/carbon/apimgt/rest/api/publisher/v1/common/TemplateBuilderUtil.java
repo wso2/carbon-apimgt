@@ -265,6 +265,10 @@ public class TemplateBuilderUtil {
                     Collections.emptyMap());
         }
 
+        vtb.addHandler(
+                "org.wso2.carbon.apimgt.gateway.handlers.AiApiHandler"
+                , Collections.emptyMap());
+
         if (!APIUtil.isStreamingApi(api)) {
             Map<String, String> properties = new HashMap<String, String>();
 
@@ -283,9 +287,6 @@ public class TemplateBuilderUtil {
             properties.put("configKey", APIConstants.GA_CONF_KEY);
             vtb.addHandler(
                     "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
-                    , properties);
-            vtb.addHandler(
-                    "org.wso2.carbon.apimgt.gateway.handlers.AiApiHandler"
                     , properties);
 
             String extensionHandlerPosition = getExtensionHandlerPosition(tenantDomain);
