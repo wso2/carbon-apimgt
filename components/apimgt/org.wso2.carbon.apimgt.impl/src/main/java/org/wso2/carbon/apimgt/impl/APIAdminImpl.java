@@ -613,13 +613,8 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<LLMProvider> getLLMProvidersByOrg(String organization) throws APIManagementException {
-        return apiMgtDAO.getLLMProvidersByOrg(organization);
-    }
-
-    @Override
-    public List<LLMProvider> getLLMProviderConfigurations(String name, String apiVersion, String organization) throws APIManagementException {
-        return apiMgtDAO.getLLMProviderConfiguration(name, apiVersion, organization);
+    public List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport) throws APIManagementException {
+        return apiMgtDAO.getLLMProviders(organization, name, apiVersion, builtInSupport);
     }
 
     @Override
@@ -647,12 +642,6 @@ public class APIAdminImpl implements APIAdmin {
     public LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException {
 
         return apiMgtDAO.getLLMProvider(organization, llmProviderId);
-    }
-
-    @Override
-    public List<LLMProvider> getBuiltInLLMProviders(String organization) throws APIManagementException {
-
-        return apiMgtDAO.getBuiltInLLMProviders(organization);
     }
 
     @Override

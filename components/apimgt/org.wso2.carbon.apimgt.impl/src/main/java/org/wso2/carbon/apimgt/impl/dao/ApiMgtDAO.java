@@ -14469,37 +14469,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Retrieves all LLM Providers for a given organization.
-     *
-     * @param organization the tenant domain or organization identifier for which to retrieve LLM providers
-     * @return List<LlmProvider> a list of LLM provider objects associated with the given organization
-     * @throws APIManagementException if an error occurs while accessing the database or retrieving data
-     */
-    public List<LLMProvider> getLLMProvidersByOrg(String organization) throws APIManagementException {
-
-        List<LLMProvider> providerList = new ArrayList<>();
-        try {
-            Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement(SQLConstants.GET_LLM_PROVIDERS_BY_ORG_SQL);
-            preparedStatement.setString(1, organization);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                LLMProvider provider = new LLMProvider();
-                provider.setId(resultSet.getString("UUID"));
-                provider.setName(resultSet.getString("NAME"));
-                provider.setApiVersion(resultSet.getString("API_VERSION"));
-                provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
-                provider.setDescription(resultSet.getString("DESCRIPTION"));
-                providerList.add(provider);
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Failed to get LLM Providers in tenant domain: " + organization, e);
-        }
-        return providerList;
-    }
-
-    /**
      * Retrieves LLM provider configurations based on optional filters.
      *
      * @param name        the provider name (optional)
@@ -14508,11 +14477,11 @@ public class ApiMgtDAO {
      * @return list of LLM providers matching the filters
      * @throws APIManagementException if a database error occurs
      */
-    public List<LLMProvider> getLLMProviderConfiguration(String name, String apiVersion, String organization)
+    public List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport)
             throws APIManagementException {
 
         List<LLMProvider> providerList = new ArrayList<>();
-        String query = buildGetSql(name, apiVersion, organization);
+        String query = buildGetLLMProvidersSql(organization, name, apiVersion, builtInSupport);
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -14521,9 +14490,12 @@ public class ApiMgtDAO {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     LLMProvider provider = new LLMProvider();
+                    provider.setId(resultSet.getString("UUID"));
                     provider.setName(resultSet.getString("NAME"));
                     provider.setApiVersion(resultSet.getString("API_VERSION"));
                     provider.setOrganization(resultSet.getString("ORGANIZATION"));
+                    provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
+                    provider.setDescription(resultSet.getString("DESCRIPTION"));
                     provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
                     providerList.add(provider);
                 }
@@ -14542,16 +14514,19 @@ public class ApiMgtDAO {
      * @param organization the organization (optional)
      * @return the constructed SQL query string
      */
-    private String buildGetSql(String name, String apiVersion, String organization) {
-        StringBuilder queryBuilder = new StringBuilder(SQLConstants.GET_LLM_PROVIDER_CONFIGURATIONS_SQL);
-        if (name != null && !name.isEmpty()) {
-            queryBuilder.append(" AND NAME = ?");
-        }
+    private String buildGetLLMProvidersSql(String organization, String name, String apiVersion, Boolean builtInSupport) {
+        StringBuilder queryBuilder = new StringBuilder(SQLConstants.GET_LLM_PROVIDERS_SQL);
         if (organization != null && !organization.isEmpty()) {
             queryBuilder.append(" AND ORGANIZATION = ?");
         }
+        if (name != null && !name.isEmpty()) {
+            queryBuilder.append(" AND NAME = ?");
+        }
         if (apiVersion != null && !apiVersion.isEmpty()) {
             queryBuilder.append(" AND API_VERSION = ?");
+        }
+        if (builtInSupport != null && builtInSupport) {
+            queryBuilder.append(" AND BUILT_IN_SUPPORT = ?");
         }
         return queryBuilder.toString();
     }
@@ -14577,27 +14552,6 @@ public class ApiMgtDAO {
         if (apiVersion != null && !apiVersion.isEmpty()) {
             preparedStatement.setString(paramIndex, apiVersion);
         }
-    }
-
-    public List<LLMProvider> getBuiltInLLMProviders(String organization) throws APIManagementException {
-;
-        List<LLMProvider> builtInLLMProviders = new ArrayList<>();
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(
-                     SQLConstants.GET_BUILT_IN_LLM_PROVIDER_CONFIGURATIONS_BY_ORG_SQL)) {
-            preparedStatement.setString(1, organization);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                LLMProvider provider = new LLMProvider();
-                provider.setId(resultSet.getString("UUID"));
-                provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
-                builtInLLMProviders.add(provider);
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Failed to retrieve BUILT_IN_SUPPORT LLM Providers configurations in " +
-                    "tenant domain: " + organization, e);
-        }
-        return builtInLLMProviders;
     }
 
 

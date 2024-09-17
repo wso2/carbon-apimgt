@@ -5,16 +5,23 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.internal.service.*;
+import org.wso2.carbon.apimgt.internal.service.dto.*;
 
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderDTO;
+
+import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderListDTO;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import javax.ws.rs.core.Response;
 
-public class LlmProviderConfigsApiServiceImpl implements LlmProviderConfigsApiService {
+import java.io.InputStream;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
     /**
      * Retrieves LLM Provider configurations.
@@ -23,12 +30,12 @@ public class LlmProviderConfigsApiServiceImpl implements LlmProviderConfigsApiSe
      * @return The response containing LLM Provider configurations.
      * @throws APIManagementException If retrieval fails.
      */
-
     @Override
-    public Response getLLMProviderConfigs(String name, String apiVersion, String organization, MessageContext messageContext) throws APIManagementException {
+    public Response getLLMProviders(String name, String apiVersion, String organization,
+                                    MessageContext messageContext) throws APIManagementException {
 
         APIAdmin admin = new APIAdminImpl();
-        List<LLMProvider> LLMProviderList = admin.getLLMProviderConfigurations(name, apiVersion, organization);
+        List<LLMProvider> LLMProviderList = admin.getLLMProviders(organization, name, apiVersion, null);
 
         List<LLMProviderDTO> llmProviderDtoList = LLMProviderList.stream()
                 .map(llmProvider -> {
