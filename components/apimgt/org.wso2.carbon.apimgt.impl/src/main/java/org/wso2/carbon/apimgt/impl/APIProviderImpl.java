@@ -657,7 +657,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 endpointConfig.getSandboxAuthValue()));
                     }
                 }
-                apiMgtDAO.addAIConfiguration(api.getUuid(), null, aiConfig);
+                apiMgtDAO.addAIConfiguration(api.getUuid(), null, aiConfig, api.getOrganization());
             } catch (CryptoException e) {
                 throw new APIManagementException("Error encrypting AI API endpoint auth values", e);
             }
@@ -707,12 +707,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (CryptoException e) {
                 throw new APIManagementException("Error encrypting AI API endpoint auth values", e);
             }
-        }
-    }
-
-    private void deleteAIConfiguration(API api) throws APIManagementException {
-        if (api.getAiConfiguration() != null && api.getAiConfiguration().isEnabled()) {
-            apiMgtDAO.deleteAIConfiguration(api.getUuid(), null);
         }
     }
 
@@ -2602,10 +2596,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         + apiUuid + " on organization " + organization, e);
                 isError = true;
             }
-        }
-
-        if (api != null && apiId != -1) {
-            deleteAIConfiguration(api);
         }
 
         // Delete event publishing to gateways
@@ -5363,7 +5353,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiUuid = apiRevision.getApiUUID();
             revisionUuid = apiRevision.getRevisionUUID();
         }
-        AIConfiguration configurations = apiMgtDAO.getAIConfiguration(apiUuid, revisionUuid);
+        AIConfiguration configurations = apiMgtDAO.getAIConfiguration(apiUuid, revisionUuid, api.getOrganization());
         if (configurations != null) {
             api.setAiConfiguration(configurations);
         } else {
@@ -5983,9 +5973,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiRevision.setRevisionUUID(revisionUUID);
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
-            AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null);
+            AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null, organization);
             if (configuration != null) {
-                apiMgtDAO.addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), configuration);
+                apiMgtDAO.addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), configuration, organization);
             }
         } catch (APIManagementException e) {
             try {
@@ -6521,7 +6511,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIRevision(apiRevision);
-        AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+        AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), organization);
         if (configuration != null) {
             apiMgtDAO.updateAIConfiguration(apiRevision.getApiUUID(), configuration);
         }
@@ -6567,7 +6557,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
-        apiMgtDAO.deleteAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {

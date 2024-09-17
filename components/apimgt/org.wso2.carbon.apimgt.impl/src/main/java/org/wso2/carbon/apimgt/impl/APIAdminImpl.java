@@ -619,7 +619,7 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public List<LLMProvider> getLLMProviderConfigurations(String name, String apiVersion, String organization) throws APIManagementException {
-        return apiMgtDAO.getLLMProviderConfigurations(name, apiVersion, organization);
+        return apiMgtDAO.getLLMProviderConfiguration(name, apiVersion, organization);
     }
 
     @Override
