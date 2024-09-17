@@ -776,7 +776,9 @@ public class TemplateBuilderUtil {
 
             JsonObject endpointConfigMap = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
             if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+                    endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && (
+                    APIConstants.API_TYPE_HTTP.equals(api.getType()) || APIConstants.API_TYPE_SOAPTOREST.equals(
+                            api.getType()))) {
                 GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
                         APIConstants.API_KEY_TYPE_SANDBOX, extractedPath);
                 if (gatewayCustomBackendSequenceDTO != null) {
