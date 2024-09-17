@@ -722,12 +722,14 @@ public class TemplateBuilderUtil {
             GatewayUtils.setCustomSequencesToBeRemoved(apiProduct.getId(), api.getUuid(), productAPIDto);
             APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api, apiProduct);
             // check the endpoint type
-            if (api.getEndpointConfig() != null) {
+            if (!StringUtils.isEmpty(api.getEndpointConfig())) {
                 JsonObject endpointConfObj = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
                 if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                         endpointConfObj.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
                     addEndpoints(api, apiTemplateBuilder, productAPIDto);
                 }
+            } else {
+                addEndpoints(api, apiTemplateBuilder, productAPIDto);
             }
             setCustomSequencesToBeAdded(apiProduct, api, productAPIDto, apiExtractedPath, apidto);
             setAPIFaultSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
