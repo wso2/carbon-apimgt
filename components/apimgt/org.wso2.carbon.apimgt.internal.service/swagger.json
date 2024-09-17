@@ -847,12 +847,12 @@
         }
       }
     },
-    "/llm-provider-configs" : {
+    "/llm-providers" : {
       "get" : {
         "tags" : [ "LLMProviders" ],
         "summary" : "Retrieve persisted LLM Providers",
         "description" : "This retrieve the persisted LLM Providers.\n",
-        "operationId" : "getLLMProviderConfigs",
+        "operationId" : "getLLMProviders",
         "parameters" : [ {
           "name" : "name",
           "in" : "query",
@@ -1392,8 +1392,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
-          "default" : "DIRECT"
+          "default" : "DIRECT",
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
         }
       }
     },
@@ -2095,7 +2095,7 @@
           "type" : "string"
         }
       },
-      "title" : "LLM Provider Config"
+      "title" : "LLM Provider"
     },
     "APILoggingConfigList" : {
       "properties" : {

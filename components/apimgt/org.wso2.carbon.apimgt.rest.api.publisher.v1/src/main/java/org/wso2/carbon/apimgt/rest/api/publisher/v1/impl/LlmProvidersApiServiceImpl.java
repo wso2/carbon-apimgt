@@ -41,7 +41,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
-            List<LLMProvider> LLMProviderList = apiAdmin.getLLMProvidersByOrg(organization);
+            List<LLMProvider> LLMProviderList = apiAdmin.getLLMProviders(organization, null, null, null);
             LLMProviderSummaryResponseListDTO providerListDTO =
                     LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LLMProviderList);
             return Response.ok().entity(providerListDTO).build();

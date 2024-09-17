@@ -21,22 +21,10 @@ package org.wso2.carbon.apimgt.api.model;
 import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 
 public class AIConfiguration {
-
-    private boolean isEnabled;
     private AIEndpointConfiguration aiEndpointConfiguration;
     private String llmProviderName;
     private String llmProviderApiVersion;
     private TokenBaseThrottlingCountHolder tokenBasedThrottlingConfiguration;
-
-    public boolean isEnabled() {
-
-        return isEnabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-
-        isEnabled = enabled;
-    }
 
     public AIEndpointConfiguration getAiEndpointConfiguration() {
 

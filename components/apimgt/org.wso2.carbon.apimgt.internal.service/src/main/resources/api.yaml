@@ -642,7 +642,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /llm-provider-configs:
+  /llm-providers:
     get:
       summary: Retrieve persisted LLM Providers
       description: |
@@ -671,7 +671,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-      operationId: getLLMProviderConfigs
+      operationId: getLLMProviders
 
 
 
@@ -1692,7 +1692,7 @@ definitions:
         items:
           $ref: '#/definitions/LLMProvider'
   LLMProvider:
-    title: LLM Provider Config
+    title: LLM Provider
     properties:
       name:
         type: string
