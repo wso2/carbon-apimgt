@@ -8806,9 +8806,6 @@ components:
         aiConfiguration:
           type: object
           properties:
-            enabled:
-              type: boolean
-              default: false
             llmProviderName:
               type: string
             llmProviderApiVersion:
@@ -8820,7 +8817,7 @@ components:
                   type: string
                   enum:
                     - header
-                    - queryParameter
+                    - query_parameter
                 authKey:
                   type: string
                 sandboxAuthValue:

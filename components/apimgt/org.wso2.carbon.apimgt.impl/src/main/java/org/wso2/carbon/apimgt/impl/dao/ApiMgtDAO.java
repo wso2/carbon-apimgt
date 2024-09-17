@@ -14486,7 +14486,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
-            setQueryParameters(preparedStatement, name, organization, apiVersion);
+            setQueryParameters(preparedStatement, name, organization, apiVersion, builtInSupport);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     LLMProvider provider = new LLMProvider();
@@ -14525,7 +14525,7 @@ public class ApiMgtDAO {
         if (apiVersion != null && !apiVersion.isEmpty()) {
             queryBuilder.append(" AND API_VERSION = ?");
         }
-        if (builtInSupport != null && builtInSupport) {
+        if (builtInSupport != null) {
             queryBuilder.append(" AND BUILT_IN_SUPPORT = ?");
         }
         return queryBuilder.toString();
@@ -14540,17 +14540,20 @@ public class ApiMgtDAO {
      * @param apiVersion        the API version (optional)
      * @throws SQLException if setting a parameter fails
      */
-    private void setQueryParameters(PreparedStatement preparedStatement, String name, String organization, String apiVersion)
+    private void setQueryParameters(PreparedStatement preparedStatement, String name, String organization, String apiVersion, Boolean builtInSupport)
             throws SQLException {
         int paramIndex = 1;
-        if (name != null && !name.isEmpty()) {
-            preparedStatement.setString(paramIndex++, name);
-        }
         if (organization != null && !organization.isEmpty()) {
             preparedStatement.setString(paramIndex++, organization);
         }
+        if (name != null && !name.isEmpty()) {
+            preparedStatement.setString(paramIndex++, name);
+        }
         if (apiVersion != null && !apiVersion.isEmpty()) {
             preparedStatement.setString(paramIndex, apiVersion);
+        }
+        if (builtInSupport != null) {
+            preparedStatement.setBoolean(paramIndex, builtInSupport);
         }
     }
 
@@ -19626,7 +19629,6 @@ public class ApiMgtDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     aiConfiguration = new AIConfiguration();
-                    aiConfiguration.setEnabled(true);
                     aiConfiguration.setAiEndpointConfiguration(
                             new Gson().fromJson(rs.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
                     aiConfiguration.setTokenBasedThrottlingConfiguration(

@@ -1393,11 +1393,7 @@ public class PublisherCommonUtils {
      */
     public static AIConfiguration convertToAiConfiguration(APIAiConfigurationDTO dto) {
 
-        if (!dto.isEnabled()) {
-            return null;
-        }
         AIConfiguration aiConfiguration = new AIConfiguration();
-        aiConfiguration.setEnabled(dto.isEnabled());
         aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
         aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
         if (dto.getEndpointConfiguration() != null) {
@@ -1465,11 +1461,7 @@ public class PublisherCommonUtils {
      */
     public static APIAiConfigurationDTO convertToApiAiConfigurationDTO(AIConfiguration aiConfiguration) {
 
-        if (!aiConfiguration.isEnabled()) {
-            return null;
-        }
         APIAiConfigurationDTO dto = new APIAiConfigurationDTO();
-        dto.setEnabled(aiConfiguration.isEnabled());
         dto.setLlmProviderName(aiConfiguration.getLlmProviderName());
         dto.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
         if (aiConfiguration.getAiEndpointConfiguration() != null) {

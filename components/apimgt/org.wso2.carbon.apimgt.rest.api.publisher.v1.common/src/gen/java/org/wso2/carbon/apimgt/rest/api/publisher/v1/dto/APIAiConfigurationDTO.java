@@ -22,28 +22,10 @@ import javax.validation.Valid;
 
 public class APIAiConfigurationDTO   {
   
-    private Boolean enabled = false;
     private String llmProviderName = null;
     private String llmProviderApiVersion = null;
     private APIAiConfigurationEndpointConfigurationDTO endpointConfiguration = null;
     private APIAiConfigurationThrottlingConfigurationDTO throttlingConfiguration = null;
-
-  /**
-   **/
-  public APIAiConfigurationDTO enabled(Boolean enabled) {
-    this.enabled = enabled;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("enabled")
-  public Boolean isEnabled() {
-    return enabled;
-  }
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
 
   /**
    **/
@@ -125,8 +107,7 @@ public class APIAiConfigurationDTO   {
       return false;
     }
     APIAiConfigurationDTO apIAiConfiguration = (APIAiConfigurationDTO) o;
-    return Objects.equals(enabled, apIAiConfiguration.enabled) &&
-        Objects.equals(llmProviderName, apIAiConfiguration.llmProviderName) &&
+    return Objects.equals(llmProviderName, apIAiConfiguration.llmProviderName) &&
         Objects.equals(llmProviderApiVersion, apIAiConfiguration.llmProviderApiVersion) &&
         Objects.equals(endpointConfiguration, apIAiConfiguration.endpointConfiguration) &&
         Objects.equals(throttlingConfiguration, apIAiConfiguration.throttlingConfiguration);
@@ -134,7 +115,7 @@ public class APIAiConfigurationDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(enabled, llmProviderName, llmProviderApiVersion, endpointConfiguration, throttlingConfiguration);
+    return Objects.hash(llmProviderName, llmProviderApiVersion, endpointConfiguration, throttlingConfiguration);
   }
 
   @Override
@@ -142,7 +123,6 @@ public class APIAiConfigurationDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIAiConfigurationDTO {\n");
     
-    sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    llmProviderName: ").append(toIndentedString(llmProviderName)).append("\n");
     sb.append("    llmProviderApiVersion: ").append(toIndentedString(llmProviderApiVersion)).append("\n");
     sb.append("    endpointConfiguration: ").append(toIndentedString(endpointConfiguration)).append("\n");

@@ -25,7 +25,7 @@ public class APIAiConfigurationEndpointConfigurationDTO   {
     @XmlEnum(String.class)
     public enum AuthTypeEnum {
         HEADER("header"),
-        QUERYPARAMETER("queryParameter");
+        QUERY_PARAMETER("query_parameter");
         private String value;
 
         AuthTypeEnum (String v) {

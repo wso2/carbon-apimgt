@@ -643,7 +643,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addAIConfiguration(API api) throws APIManagementException {
         AIConfiguration aiConfig = api.getAiConfiguration();
 
-        if (aiConfig != null && aiConfig.isEnabled()) {
+        if (aiConfig != null) {
             try {
                 AIEndpointConfiguration endpointConfig = aiConfig.getAiEndpointConfiguration();
                 if (endpointConfig != null) {
@@ -685,7 +685,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateAIConfiguration(API api) throws APIManagementException {
 
         AIConfiguration aiConfig = api.getAiConfiguration();
-        if (aiConfig != null && aiConfig.isEnabled()) {
+        if (aiConfig != null) {
             try {
                 AIEndpointConfiguration endpointConfig = aiConfig.getAiEndpointConfiguration();
                 if (endpointConfig != null) {
