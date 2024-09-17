@@ -218,13 +218,15 @@ public class ExportUtils {
         addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
                 api, currentApiUuid);
 
-        JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-        if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
-                apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())
-                || StringUtils.equals(apiDtoToReturn.getType().toString().toLowerCase(),
-                APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
-            addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid);
+        if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
+            JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
+                    apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())
+                    || StringUtils.equals(apiDtoToReturn.getType().toString().toLowerCase(),
+                    APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
+                addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid);
+            }
         }
 
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);

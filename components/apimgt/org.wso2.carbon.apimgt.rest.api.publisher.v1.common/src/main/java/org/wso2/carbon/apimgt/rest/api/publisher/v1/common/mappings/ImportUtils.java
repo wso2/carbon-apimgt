@@ -694,22 +694,24 @@ public class ImportUtils {
     public static void updateAPIWithCustomBackend(API api, String extractedFolderPath, APIProvider apiProvider)
             throws APIManagementException {
         String customBackendDir = extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
-        JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+        if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
+            JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
 
-        if (endpointConfig != null) {
-            if (endpointConfig.get("sandbox") != null) {
-                String seqFile = endpointConfig.get("sandbox").getAsString();
-                String seqId = UUID.randomUUID().toString();
-                InputStream seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
-                apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX, seq, seqFile + ".xml",
-                        seqId);
-            }
-            if (endpointConfig.get("production") != null) {
-                String seqFile = endpointConfig.get("production").getAsString();
-                String seqId = UUID.randomUUID().toString();
-                InputStream seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
-                apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION, seq,
-                        seqFile + ".xml", seqId);
+            if (endpointConfig != null) {
+                if (endpointConfig.get("sandbox") != null) {
+                    String seqFile = endpointConfig.get("sandbox").getAsString();
+                    String seqId = UUID.randomUUID().toString();
+                    InputStream seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX, seq,
+                            seqFile + ".xml", seqId);
+                }
+                if (endpointConfig.get("production") != null) {
+                    String seqFile = endpointConfig.get("production").getAsString();
+                    String seqId = UUID.randomUUID().toString();
+                    InputStream seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION, seq,
+                            seqFile + ".xml", seqId);
+                }
             }
         }
     }

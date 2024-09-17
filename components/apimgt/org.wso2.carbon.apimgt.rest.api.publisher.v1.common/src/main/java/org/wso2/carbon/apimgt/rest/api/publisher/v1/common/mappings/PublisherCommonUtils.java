@@ -193,10 +193,14 @@ public class PublisherCommonUtils {
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
-        JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
-        if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
-            apiProvider.deleteSequenceBackendByRevision(apiUpdated.getUuid(), "0");
+        if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
+            JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
+            if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && (
+                    APIConstants.API_TYPE_HTTP.equals(apiUpdated.getType()) || APIConstants.API_TYPE_SOAPTOREST.equals(
+                            apiUpdated.getType()))) {
+                apiProvider.deleteSequenceBackendByRevision(apiUpdated.getUuid(), "0");
+            }
         }
         return apiUpdated;
         // TODO use returend api
@@ -258,6 +262,8 @@ public class PublisherCommonUtils {
                     + " as the token information hasn't been correctly set internally",
                     ExceptionCodes.TOKEN_SCOPES_NOT_SET);
         }
+        APIUtil.validateAPIEndpointConfig(apiDtoToUpdate.getEndpointConfig(), apiDtoToUpdate.getType().toString(),
+                apiDtoToUpdate.getName());
         if (apiDtoToUpdate.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && apiDtoToUpdate.getVisibleRoles()
                 .isEmpty()) {
             throw new APIManagementException("Access control roles cannot be empty when visibility is restricted",

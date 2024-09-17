@@ -47,9 +47,11 @@ public class GatewayUtils {
     }
 
     public static void setCustomBackendToBeRemoved(GatewayAPIDTO gatewayAPIDTO) {
-        String sandBoxBackend = APIUtil.getCustomBackendName(gatewayAPIDTO.getApiId(), "SANDBOX");
+        String sandBoxBackend = APIUtil.getCustomBackendName(gatewayAPIDTO.getApiId(),
+                APIConstants.API_KEY_TYPE_SANDBOX);
         gatewayAPIDTO.setSequencesToBeRemove(addStringToList(sandBoxBackend, gatewayAPIDTO.getSequencesToBeRemove()));
-        String productionBackend = APIUtil.getCustomBackendName(gatewayAPIDTO.getApiId(), "PRODUCTION");
+        String productionBackend = APIUtil.getCustomBackendName(gatewayAPIDTO.getApiId(),
+                APIConstants.API_KEY_TYPE_PRODUCTION);
         gatewayAPIDTO.setSequencesToBeRemove(
                 addStringToList(productionBackend, gatewayAPIDTO.getSequencesToBeRemove()));
     }

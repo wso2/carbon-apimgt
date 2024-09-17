@@ -3953,7 +3953,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // Cannot deploy an API with custom sequence to the APK gateway
         Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
-        if (APIConstants.WSO2_APK_GATEWAY.equals(apiDto.getGatewayType()) && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+        if (!APIConstants.WSO2_SYNAPSE_GATEWAY.equals(apiDto.getGatewayType()) && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                 endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Cannot Deploy an API with a Custom Sequence to APK Gateway: " + apiId).build();
