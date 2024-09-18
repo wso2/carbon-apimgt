@@ -374,6 +374,7 @@ public class PublisherCommonUtils {
             apiToUpdate.setVisibleRoles(StringUtils.EMPTY);
         }
         apiToUpdate.setUUID(originalAPI.getUUID());
+        apiToUpdate.setOrganization(originalAPI.getOrganization());
         validateScopes(apiToUpdate);
         apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
         if (apiDtoToUpdate.getKeyManagers() instanceof List) {
