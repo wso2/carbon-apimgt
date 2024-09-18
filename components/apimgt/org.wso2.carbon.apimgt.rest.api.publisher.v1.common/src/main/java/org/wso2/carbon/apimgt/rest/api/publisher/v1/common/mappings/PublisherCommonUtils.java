@@ -374,7 +374,6 @@ public class PublisherCommonUtils {
             apiToUpdate.setVisibleRoles(StringUtils.EMPTY);
         }
         apiToUpdate.setUUID(originalAPI.getUUID());
-        apiToUpdate.setOrganization(originalAPI.getOrganization());
         validateScopes(apiToUpdate);
         apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
         if (apiDtoToUpdate.getKeyManagers() instanceof List) {
@@ -1265,13 +1264,6 @@ public class PublisherCommonUtils {
             if (!errorMessage.isEmpty()) {
                 throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
             }
-        }
-        
-        if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED_BY_ORG
-                && body.getVisibleOrganizations().isEmpty()) {
-            throw new APIManagementException(
-                    "Valid organizations should be added under 'visibleOrganizations' to restrict " + "the visibility",
-                    ExceptionCodes.ORGS_CANNOT_BE_NULL);
         }
         
 
