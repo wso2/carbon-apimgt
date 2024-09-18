@@ -22,7 +22,10 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
+import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -41,33 +44,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
-import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.BandwidthLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.BurstLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.EventCountLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -137,6 +114,34 @@ public class SubscriptionValidationDataUtil {
             }
             apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
+            AIConfiguration aiConfiguration = model.getAiConfiguration();
+            if (aiConfiguration != null) {
+                AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
+                AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
+                if (aiEndpointConfiguration != null) {
+                    AIEndpointConfigurationDTO aiEndpointConfigurationDTO = new AIEndpointConfigurationDTO();
+                    aiEndpointConfigurationDTO.setAuthKey(aiEndpointConfiguration.getAuthKey());
+                    aiEndpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration.getSandboxAuthValue());
+                    aiEndpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration.getProductionAuthValue());
+                    aiEndpointConfigurationDTO.setAuthType(aiEndpointConfiguration.getAuthType());
+                    aiConfigurationDTO.setAiEndpointConfiguration(aiEndpointConfigurationDTO);
+                }
+                aiConfigurationDTO.setLlmProviderName(aiConfiguration.getLlmProviderName());
+                aiConfigurationDTO.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
+                TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
+                if (tokenBaseThrottlingCountHolder != null) {
+                    TokenBaseThrottlingCountHolderDTO tokenBaseThrottlingCountHolderDTO = new TokenBaseThrottlingCountHolderDTO();
+                    tokenBaseThrottlingCountHolderDTO.setProductionMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setProductionMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setProductionMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setIsTokenBasedThrottlingEnabled(tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled());
+                    aiConfigurationDTO.setTokenBasedThrottlingConfiguration(tokenBaseThrottlingCountHolderDTO);
+                }
+                apidto.setAiConfiguration(aiConfigurationDTO);
+            }
         }
         return apidto;
     }
@@ -195,6 +200,34 @@ public class SubscriptionValidationDataUtil {
             }
             apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
+            AIConfiguration aiConfiguration = model.getAiConfiguration();
+            if (aiConfiguration != null) {
+                AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
+                AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
+                if (aiEndpointConfiguration != null) {
+                    AIEndpointConfigurationDTO aiEndpointConfigurationDTO = new AIEndpointConfigurationDTO();
+                    aiEndpointConfigurationDTO.setAuthKey(aiEndpointConfiguration.getAuthKey());
+                    aiEndpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration.getSandboxAuthValue());
+                    aiEndpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration.getProductionAuthValue());
+                    aiEndpointConfigurationDTO.setAuthType(aiEndpointConfiguration.getAuthType());
+                    aiConfigurationDTO.setAiEndpointConfiguration(aiEndpointConfigurationDTO);
+                }
+                aiConfigurationDTO.setLlmProviderName(aiConfiguration.getLlmProviderName());
+                aiConfigurationDTO.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
+                TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
+                if (tokenBaseThrottlingCountHolder != null) {
+                    TokenBaseThrottlingCountHolderDTO tokenBaseThrottlingCountHolderDTO = new TokenBaseThrottlingCountHolderDTO();
+                    tokenBaseThrottlingCountHolderDTO.setProductionMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setProductionMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setProductionMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount());
+                    tokenBaseThrottlingCountHolderDTO.setIsTokenBasedThrottlingEnabled(tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled());
+                    aiConfigurationDTO.setTokenBasedThrottlingConfiguration(tokenBaseThrottlingCountHolderDTO);
+                }
+                apidto.setAiConfiguration(aiConfigurationDTO);
+            }
             apiListdto.setCount(1);
             apiListdto.getList().add(apidto);
         } else {
