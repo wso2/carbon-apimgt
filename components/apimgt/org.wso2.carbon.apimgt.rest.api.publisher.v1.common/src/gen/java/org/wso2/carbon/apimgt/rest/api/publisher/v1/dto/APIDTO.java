@@ -323,6 +323,7 @@ return null;
     private String gatewayVendor = null;
     private String gatewayType = "wso2/synapse";
     private List<String> asyncTransportProtocols = new ArrayList<String>();
+    private Boolean egress = false;
 
   /**
    * UUID of the api registry artifact 
@@ -1404,6 +1405,24 @@ return null;
     this.asyncTransportProtocols = asyncTransportProtocols;
   }
 
+  /**
+   * Whether the API is EGRESS or not
+   **/
+  public APIDTO egress(Boolean egress) {
+    this.egress = egress;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "true", value = "Whether the API is EGRESS or not")
+  @JsonProperty("egress")
+  public Boolean isEgress() {
+    return egress;
+  }
+  public void setEgress(Boolean egress) {
+    this.egress = egress;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1474,7 +1493,8 @@ return null;
         Objects.equals(advertiseInfo, API.advertiseInfo) &&
         Objects.equals(gatewayVendor, API.gatewayVendor) &&
         Objects.equals(gatewayType, API.gatewayType) &&
-        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols);
+        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols) &&
+        Objects.equals(egress, API.egress);
   }
 
   @Override
@@ -1548,6 +1568,7 @@ return null;
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
+    sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");
     return sb.toString();
   }

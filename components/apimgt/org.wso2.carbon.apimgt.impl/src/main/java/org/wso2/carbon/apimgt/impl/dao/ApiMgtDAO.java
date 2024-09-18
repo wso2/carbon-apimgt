@@ -5591,6 +5591,7 @@ public class ApiMgtDAO {
             prepStmt.setString(12, organization);
             prepStmt.setString(13, api.getGatewayVendor());
             prepStmt.setString(14, api.getVersionTimestamp());
+            prepStmt.setInt(15, api.isEgress());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -10029,6 +10030,7 @@ public class ApiMgtDAO {
                                 .updatedTime(resultSet.getString("UPDATED_TIME"))
                                 .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
                                 .organization(resultSet.getString("ORGANIZATION"))
+                                .isEgress(resultSet.getInt("IS_EGRESS"))
                                 .isRevision(apiRevision != null).organization(resultSet.getString("ORGANIZATION"));
                         if (apiRevision != null) {
                             apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
@@ -15356,6 +15358,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(12, organization);
             prepStmtAddAPIProduct.setString(13, apiProduct.getGatewayVendor());
             prepStmtAddAPIProduct.setString(14, apiProduct.getVersionTimestamp());
+            prepStmtAddAPIProduct.setInt(15, apiProduct.isEgress());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -22387,5 +22390,31 @@ public class ApiMgtDAO {
         blockConditionsDTO.setUUID(resultSet.getString("UUID"));
         blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
         return blockConditionsDTO;
+    }
+
+    /**
+     * This returns whether the API is Egress or not (1 or 0)
+     *
+     * @param uuid
+     * @return
+     * @throws APIManagementException
+     */
+    public int checkForEgressAPIWithUUID(String uuid) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SQLConstants.CHECK_API_EGRESS_WITH_UUID)) {
+                preparedStatement.setString(1, uuid);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getInt("IS_EGRESS");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apimgt connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return 0;
     }
 }

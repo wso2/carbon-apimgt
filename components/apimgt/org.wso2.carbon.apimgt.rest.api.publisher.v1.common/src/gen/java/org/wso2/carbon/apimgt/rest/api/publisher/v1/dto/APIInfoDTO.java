@@ -83,6 +83,7 @@ return null;
     private String businessOwnerEmail = null;
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
+    private Boolean egress = false;
 
   /**
    **/
@@ -533,6 +534,24 @@ return null;
     this.technicalOwnerEmail = technicalOwnerEmail;
   }
 
+  /**
+   * Whether the API is EGRESS or not
+   **/
+  public APIInfoDTO egress(Boolean egress) {
+    this.egress = egress;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether the API is EGRESS or not")
+  @JsonProperty("egress")
+  public Boolean isEgress() {
+    return egress;
+  }
+  public void setEgress(Boolean egress) {
+    this.egress = egress;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -568,12 +587,13 @@ return null;
         Objects.equals(businessOwner, apIInfo.businessOwner) &&
         Objects.equals(businessOwnerEmail, apIInfo.businessOwnerEmail) &&
         Objects.equals(technicalOwner, apIInfo.technicalOwner) &&
-        Objects.equals(technicalOwnerEmail, apIInfo.technicalOwnerEmail);
+        Objects.equals(technicalOwnerEmail, apIInfo.technicalOwnerEmail) &&
+        Objects.equals(egress, apIInfo.egress);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, audiences, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, updatedBy, gatewayVendor, gatewayType, advertiseOnly, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, audiences, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, updatedBy, gatewayVendor, gatewayType, advertiseOnly, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
   }
 
   @Override
@@ -607,6 +627,7 @@ return null;
     sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
     sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
     sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
+    sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");
     return sb.toString();
   }

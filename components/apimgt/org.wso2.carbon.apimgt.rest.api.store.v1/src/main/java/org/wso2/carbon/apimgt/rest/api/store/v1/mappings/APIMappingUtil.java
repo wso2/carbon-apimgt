@@ -96,6 +96,7 @@ public class APIMappingUtil {
         dto.setLifeCycleStatus(model.getStatus());
         dto.setType(model.getType());
         dto.setAvgRating(String.valueOf(model.getRating()));
+        dto.setEgress(model.isEgress() == 1);
 
         Set<Scope> scopes = model.getScopes();
         Map<String, ScopeInfoDTO> uniqueScope = new HashMap<>();
@@ -293,6 +294,7 @@ public class APIMappingUtil {
         dto.setLifeCycleStatus(model.getState());
         dto.setType(model.getType());
         dto.setAvgRating(String.valueOf(model.getRating()));
+        dto.setEgress(model.isEgress() == 1);
 
         /* todo: created and last updated times
         if (null != model.getLastUpdated()) {
@@ -823,6 +825,7 @@ public class APIMappingUtil {
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(apiProduct.getGatewayVendor());
+        apiInfoDTO.setEgress(apiProduct.isEgress() == 1);
 
         return apiInfoDTO;
     }
@@ -890,6 +893,7 @@ public class APIMappingUtil {
                 subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         apiInfoDTO.setMonetizedInfo(api.isMonetizationEnabled());
+        apiInfoDTO.setEgress(api.isEgress() == 1);
 
         return apiInfoDTO;
     }
