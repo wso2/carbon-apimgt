@@ -175,7 +175,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             
             String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
-            if (APIConstants.API_RESTRICTED_BY_ORG.equals(api.getVisibility())){
+            if (!StringUtils.isEmpty(api.getVisibleOrganizations())) {
                 visibleOrgs = api.getVisibleOrganizations();
             }
 
@@ -554,9 +554,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String publisherAccessControlRoles = api.getAccessControlRoles();
 
             String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
-            if (APIConstants.API_RESTRICTED_BY_ORG.equals(api.getVisibility())){
+            if (!StringUtils.isEmpty(api.getVisibleOrganizations())) {
                 visibleOrgs = api.getVisibleOrganizations();
             }
+
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties(), visibleOrgs);
 
@@ -3340,9 +3341,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
             String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
-            if (APIConstants.API_RESTRICTED_BY_ORG.equals(apiProduct.getVisibility())){
+            // if (StringUtils.isEmpty(apiProduct.getVisibleOrganizations())) {
                 //visibleOrgs = apiProduct.getVisibleOrganizations(); TODO fix for products
-            }
+            // }
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
                     apiProduct.getAdditionalProperties(), visibleOrgs);
             RegistryPersistenceUtil.setResourcePermissions(apiProduct.getId().getProviderName(),
@@ -3570,9 +3571,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
 
             String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
-            if (APIConstants.API_RESTRICTED_BY_ORG.equals(apiProduct.getVisibility())){
+            // if (APIConstants.API_RESTRICTED_BY_ORG.equals(apiProduct.getVisibility())){
                 //visibleOrgs = apiProduct.getVisibleOrganizations(); TODO fix for products
-            }
+            // }
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
                     apiProduct.getAdditionalProperties(), visibleOrgs);
             RegistryPersistenceUtil.setResourcePermissions(apiProduct.getId().getProviderName(),
