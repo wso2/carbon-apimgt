@@ -6485,10 +6485,12 @@ public final class APIUtil {
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
                 } else if (limit instanceof AIAPIQuotaLimit){
-                    // Todo: Need to implement this according to publisher and developer portals' requirements
                     AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
                     tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
                     tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
+                    tier.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
+                    tier.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
+                    tier.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());
