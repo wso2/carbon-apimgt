@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -44,7 +45,7 @@ public class DataHolder {
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
-    private Map<LLMProvider, String> llmProviderConfigurationHolder = new HashMap<>();
+    private Map<String, String> llmProviderConfigMap = new HashMap<>();
     private boolean isAllGatewayPoliciesDeployed = false;
 
     private DataHolder() {
@@ -56,29 +57,29 @@ public class DataHolder {
         return apiToCertificatesMap;
     }
 
-    public String getLLMProviderConfigurations(LLMProvider provider) {
+    public String getLLMProviderConfigurations(String key) {
 
-        if (llmProviderConfigurationHolder.containsKey(provider)) {
-            return llmProviderConfigurationHolder.get(provider);
+        if (llmProviderConfigMap.containsKey(key)) {
+            return llmProviderConfigMap.get(key);
         } else {
-            log.warn("LLM Provider key " + provider + " not found");
+            log.warn("LLM Provider key " + key + " not found");
             return null;
         }
     }
 
-    public void addLLMProviderConfigurations(LLMProvider provider, String configurations) {
-        llmProviderConfigurationHolder.put(provider, configurations);
+    public void addLLMProviderConfigurations(String key, String configuration) {
+        llmProviderConfigMap.put(key, configuration);
     }
-    public void removeLLMProviderConfigurations(LLMProvider provider) {
-        if (provider == null) {
+    public void removeLLMProviderConfigurations(String key) {
+        if (StringUtils.isEmpty(key)) {
             return;
         }
-        llmProviderConfigurationHolder.remove(provider);
+        llmProviderConfigMap.remove(key);
     }
 
-    public void updateLLMProviderConfigurations(LLMProvider provider, String configurations) {
-        this.removeLLMProviderConfigurations(provider);
-        this.addLLMProviderConfigurations(provider, configurations);
+    public void updateLLMProviderConfigurations(String key, String configuration) {
+        this.removeLLMProviderConfigurations(key);
+        this.addLLMProviderConfigurations(key, configuration);
     }
 
     public void setApiToCertificatesMap(Map<String, List<String>> apiToCertificatesMap) {

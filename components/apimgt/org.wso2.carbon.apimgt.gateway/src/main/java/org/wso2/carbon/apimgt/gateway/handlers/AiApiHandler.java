@@ -104,7 +104,8 @@ public class AiApiHandler extends AbstractHandler {
         String organization = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
 
         LLMProvider provider = createLLMProvider(llmProviderName, llmProviderApiVersion, organization);
-        String providerConfigurations = DataHolder.getInstance().getLLMProviderConfigurations(provider);
+        String key = organization + ":" + llmProviderName + ":" + llmProviderApiVersion;
+        String providerConfigurations = DataHolder.getInstance().getLLMProviderConfigurations(key);
 
         if (providerConfigurations == null) {
             log.error("Unable to find provider configurations for provider: "
