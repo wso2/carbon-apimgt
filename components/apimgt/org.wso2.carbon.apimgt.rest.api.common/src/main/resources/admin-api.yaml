@@ -3858,6 +3858,10 @@ components:
               example: FREE
             permissions:
               $ref: '#/components/schemas/SubscriptionThrottlePolicyPermission'
+            allowedOrganizations:
+              type: array
+              items:
+                type: string
     SubscriptionThrottlePolicyPermission:
       title: SubscriptionThrottlePolicyPermission
       required:
@@ -4692,6 +4696,11 @@ components:
         IsJWTEnabledForLoginTokens: 
           type: boolean
           default: false
+        orgAccessControlEnabled:
+          type: boolean
+          description: |
+            Is Organization-based access control configuration enabled
+          example: true
         keyManagerConfiguration:
           type: array
           items:

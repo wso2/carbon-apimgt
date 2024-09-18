@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
+import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
@@ -131,6 +132,15 @@ public class APIManagerConfiguration {
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
+    private OrgAccessControl orgAccessControl = new OrgAccessControl();
+    public OrgAccessControl getOrgAccessControl() {
+        return orgAccessControl;
+    }
+
+    public void setOrgAccessControl(OrgAccessControl orgAccessControl) {
+        this.orgAccessControl = orgAccessControl;
+    }
+
     private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
     private JSONObject subscriberAttributes = new JSONObject();
     private static Map<String, String> analyticsMaskProps;
@@ -660,10 +670,21 @@ public class APIManagerConfiguration {
                 setApiChatConfiguration(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
+            } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
+                setOrgBasedAccessControlConfigs(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
         }
+    }
+
+    private void setOrgBasedAccessControlConfigs(OMElement element) {
+        OMElement orgEnableElement =
+                element.getFirstChildWithName(new QName(APIConstants.ORG_BASED_ACCESS_CONTROL_ENABLE));
+        if (orgEnableElement != null) {
+            orgAccessControl.setEnabled(Boolean.parseBoolean(orgEnableElement.getText()));
+        }
+        
     }
 
     public JSONObject getSubscriberAttributes() {

@@ -4696,6 +4696,11 @@ components:
         IsJWTEnabledForLoginTokens: 
           type: boolean
           default: false
+        orgAccessControlEnabled:
+          type: boolean
+          description: |
+            Is Organization-based access control configuration enabled
+          example: true
         keyManagerConfiguration:
           type: array
           items:
