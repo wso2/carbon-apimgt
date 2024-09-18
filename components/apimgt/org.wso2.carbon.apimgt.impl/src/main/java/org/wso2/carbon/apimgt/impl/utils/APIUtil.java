@@ -2936,8 +2936,7 @@ public final class APIUtil {
             if (endpointConfigMap != null && endpointConfigMap.containsKey("endpoint_type")
                     && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                     endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
-                    && !APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiType)
-                    && !APIConstants.API_TYPE_SOAPTOREST.equalsIgnoreCase(apiType)) {
+                    && !APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiType)) {
                 throw new APIManagementException("Invalid endpoint configuration provided for the API " + apiName);
             }
         }

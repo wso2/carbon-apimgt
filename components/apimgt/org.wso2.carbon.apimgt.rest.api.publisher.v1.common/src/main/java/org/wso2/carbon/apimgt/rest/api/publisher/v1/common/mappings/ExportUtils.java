@@ -222,10 +222,16 @@ public class ExportUtils {
             JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
             if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                     endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
-                    apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())
-                    || StringUtils.equals(apiDtoToReturn.getType().toString().toLowerCase(),
-                    APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
-                addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid);
+                    apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
+                String sandSequenceName = null;
+                String prodSequenceName = null;
+                if (endpointConfig.get("sandbox") != null) {
+                    sandSequenceName = endpointConfig.get("sandbox").getAsString();
+                }
+                if (endpointConfig.get("production") != null) {
+                    prodSequenceName = endpointConfig.get("production").getAsString();
+                }
+                addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid, sandSequenceName, prodSequenceName);
             }
         }
 
@@ -641,8 +647,8 @@ public class ExportUtils {
         }
     }
 
-    public static void addCustomBackendToArchive(String archivePath, APIProvider apiProvider, String apiUUID)
-            throws APIManagementException {
+    public static void addCustomBackendToArchive(String archivePath, APIProvider apiProvider, String apiUUID,
+            String prodBackendName, String sandBackendName) throws APIManagementException {
         try {
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY);
 
@@ -650,14 +656,20 @@ public class ExportUtils {
             SequenceBackendData data = apiProvider.getCustomBackendByAPIUUID(apiUUID,
                     APIConstants.API_KEY_TYPE_PRODUCTION);
             if (data != null) {
-                String seqName = APIUtil.getCustomBackendName(apiUUID, APIConstants.API_KEY_TYPE_PRODUCTION);
+                String seqName = prodBackendName;
+                if (StringUtils.isEmpty(seqName)) {
+                    seqName = APIUtil.getCustomBackendName(apiUUID, APIConstants.API_KEY_TYPE_PRODUCTION);
+                }
                 exportCustomBackend(seqName, data.getSequence(), archivePath);
             }
 
             // Add sandbox Backend Sequences
             data = apiProvider.getCustomBackendByAPIUUID(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
             if (data != null) {
-                String seqName = APIUtil.getCustomBackendName(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
+                String seqName = sandBackendName;
+                if (StringUtils.isEmpty(seqName)) {
+                    seqName = APIUtil.getCustomBackendName(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
+                }
                 exportCustomBackend(seqName, data.getSequence(), archivePath);
             }
 
