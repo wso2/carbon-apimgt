@@ -257,7 +257,7 @@ public class SearchResultMappingUtil {
         apiDefSearchResultDTO.setApiType(apiDefResult.getApiType());
         apiDefSearchResultDTO.setAssociatedType(apiDefResult.getAssociatedType());
         if (apiDefResult.getName().contains("swagger")) {
-            apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " Swagger Definition");
+            apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " REST API Definition");
         } else if (apiDefResult.getName().contains("graphql")) {
             apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " GraphQL Definition");
         } else if (apiDefResult.getName().contains("async")) {

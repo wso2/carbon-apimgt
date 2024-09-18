@@ -4114,7 +4114,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } else {
             index = resourcePath.indexOf(APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
             // swagger.json is included in all types of APIs, hence we need to properly set the API type
-            setAPITypeForSwagger(resourcePath, index, content, registry);
+            setAPITypeForSwagger(resourcePath, index, content, registry, apiArtifactManager);
         }
 
         String apiPath = resourcePath.substring(0, index) + APIConstants.API_KEY;
@@ -4160,39 +4160,37 @@ public class RegistryPersistenceImpl implements APIPersistence {
      * This method is used to set the correct API Type for swagger.json as all API types have a swagger.json
      * file in registry
      *
-     * @param resourcePath registry resourcePath
-     * @param index        int index
-     * @param content      APIDefSearchContent obj.
-     * @param registry     registry obj.
+     * @param resourcePath    registry resourcePath
+     * @param index           int index
+     * @param content         APIDefSearchContent obj.
+     * @param registry        registry obj.
+     * @param artifactManager artifact manager
      * @throws RegistryException on failure
      */
     private void setAPITypeForSwagger(String resourcePath, int index,
-                                      APIDefSearchContent content, Registry registry) throws RegistryException {
-        String directoryPath = resourcePath.substring(0, index);
-        Resource directoryResource = registry.get(directoryPath);
+                                      APIDefSearchContent content, Registry registry,
+                                      GenericArtifactManager
+                                              artifactManager) throws RegistryException {
 
-        if (directoryResource instanceof Collection) {
-            Collection collection = (Collection) directoryResource;
-            int childrenCount = collection.getChildCount();
-            String[] childPaths = collection.getChildren();
-            if (childrenCount > 2) {
-                for (String childPath : childPaths) {
-                    if (childPath.contains(APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME)) {
-                        content.setApiType(APIDefSearchContent.ApiType.ASYNC);
-                        break;
-                    } else if (childPath.contains(APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION)) {
-                        content.setApiType(APIDefSearchContent.ApiType.GRAPHQL);
-                        break;
-                    } else if (childPath.contains(APIConstants.WSDL_FILE_EXTENSION)) {
-                        content.setApiType(APIDefSearchContent.ApiType.SOAP);
-                        break;
-                    }
-                }
-            }
-            if (content.getApiType() == null) {
+        String apiPath = resourcePath.substring(0, index) + APIConstants.API_KEY;
+        Resource apiResource = registry.get(apiPath);
+        String apiArtifactId = apiResource.getUUID();
+        if (apiArtifactId != null) {
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            String type = artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+            if (APIConstants.API_TYPE_SOAP.equals(type) ||
+                    APIConstants.API_TYPE_SOAPTOREST.equals(type)) {
+                content.setApiType(APIDefSearchContent.ApiType.SOAP);
+            } else if (APIConstants.API_TYPE_GRAPHQL.equals(type)) {
+                content.setApiType(APIDefSearchContent.ApiType.GRAPHQL);
+            } else if (APIConstants.API_TYPE_WS.equals(type) ||
+                    APIConstants.API_TYPE_WEBHOOK.equals(type) ||
+                    APIConstants.API_TYPE_SSE.equals(type) ||
+                    APIConstants.API_TYPE_WEBSUB.equals(type)) {
+                content.setApiType(APIDefSearchContent.ApiType.ASYNC);
+            } else {
                 content.setApiType(APIDefSearchContent.ApiType.REST);
             }
         }
-
     }
 }
