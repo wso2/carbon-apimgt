@@ -44,7 +44,10 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
+import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -77,6 +80,9 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationEndpointConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
@@ -1372,7 +1378,153 @@ public class PublisherCommonUtils {
         }
         apiToAdd.setOrganization(organization);
         apiToAdd.setGatewayType(body.getGatewayType());
+        if (body.getAiConfiguration() != null) {
+            apiToAdd.setAiConfiguration(convertToAiConfiguration(body.getAiConfiguration()));
+        }
         return apiToAdd;
+    }
+
+    /**
+     * Converts an APIAiConfigurationDTO object to an AIConfiguration object.
+     *
+     * @param dto The APIAiConfigurationDTO to be converted.
+     * @return The converted AIConfiguration object.
+     * @throws APIManagementException If an error occurs during the conversion.
+     */
+    public static AIConfiguration convertToAiConfiguration(APIAiConfigurationDTO dto) {
+
+        AIConfiguration aiConfiguration = new AIConfiguration();
+        aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
+        aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
+        if (dto.getEndpointConfiguration() != null) {
+            AIEndpointConfiguration endpointConfiguration = buildEndpointConfiguration(dto);
+            aiConfiguration.setAiEndpointConfiguration(endpointConfiguration);
+        }
+        if (dto.getThrottlingConfiguration() != null) {
+            TokenBaseThrottlingCountHolder throttlingConfig = buildThrottlingConfiguration(dto);
+            aiConfiguration.setTokenBasedThrottlingConfiguration(throttlingConfig);
+        }
+
+        return aiConfiguration;
+    }
+
+    /**
+     * Builds the endpoint configuration from APIAiConfigurationDTO.
+     *
+     * @param dto The APIAiConfigurationDTO to extract data from.
+     * @return The AIEndpointConfiguration object.
+     */
+    private static AIEndpointConfiguration buildEndpointConfiguration(APIAiConfigurationDTO dto) {
+
+        AIEndpointConfiguration endpointConfiguration = new AIEndpointConfiguration();
+        endpointConfiguration.setAuthKey(dto.getEndpointConfiguration().getAuthKey());
+        endpointConfiguration.setAuthType(dto.getEndpointConfiguration().getAuthType().name());
+        endpointConfiguration.setProductionAuthValue(dto.getEndpointConfiguration().getProductionAuthValue());
+        endpointConfiguration.setSandboxAuthValue(dto.getEndpointConfiguration().getSandboxAuthValue());
+        return endpointConfiguration;
+    }
+
+    /**
+     * Builds the throttling configuration from APIAiConfigurationDTO.
+     *
+     * @param dto The APIAiConfigurationDTO to extract data from.
+     * @return The TokenBaseThrottlingCountHolder object.
+     */
+    private static TokenBaseThrottlingCountHolder buildThrottlingConfiguration(APIAiConfigurationDTO dto) {
+
+        APIAiConfigurationThrottlingConfigurationDTO throttlingConfigDTO = dto.getThrottlingConfiguration();
+        TokenBaseThrottlingCountHolder throttlingConfig = new TokenBaseThrottlingCountHolder();
+
+        throttlingConfig.setProductionMaxPromptTokenCount(throttlingConfigDTO
+                .getProductionMaxPromptTokenCount());
+        throttlingConfig.setProductionMaxCompletionTokenCount(throttlingConfigDTO
+                .getProductionMaxCompletionTokenCount());
+        throttlingConfig.setProductionMaxTotalTokenCount(throttlingConfigDTO
+                .getProductionMaxTotalTokenCount());
+        throttlingConfig.setSandboxMaxPromptTokenCount(throttlingConfigDTO
+                .getSandboxMaxPromptTokenCount());
+        throttlingConfig.setSandboxMaxCompletionTokenCount(throttlingConfigDTO
+                .getSandboxMaxCompletionTokenCount());
+        throttlingConfig.setSandboxMaxTotalTokenCount(throttlingConfigDTO
+                .getSandboxMaxTotalTokenCount());
+        throttlingConfig.setTokenBasedThrottlingEnabled(throttlingConfigDTO
+                .isIsTokenBasedThrottlingEnabled());
+
+        return throttlingConfig;
+    }
+
+    /**
+     * Converts an AIConfiguration object to an APIAiConfigurationDTO object.
+     *
+     * @param aiConfiguration The AIConfiguration to be converted.
+     * @return The converted APIAiConfigurationDTO object.
+     */
+    public static APIAiConfigurationDTO convertToApiAiConfigurationDTO(AIConfiguration aiConfiguration) {
+
+        APIAiConfigurationDTO dto = new APIAiConfigurationDTO();
+        dto.setLlmProviderName(aiConfiguration.getLlmProviderName());
+        dto.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
+        if (aiConfiguration.getAiEndpointConfiguration() != null) {
+            APIAiConfigurationEndpointConfigurationDTO endpointConfigurationDTO =
+                    buildEndpointConfigurationDTO(aiConfiguration.getAiEndpointConfiguration());
+            dto.setEndpointConfiguration(endpointConfigurationDTO);
+        }
+        if (aiConfiguration.getTokenBasedThrottlingConfiguration() != null) {
+            APIAiConfigurationThrottlingConfigurationDTO throttlingConfigurationsDTO =
+                    buildThrottlingConfigurationDTO(aiConfiguration.getTokenBasedThrottlingConfiguration());
+            dto.setThrottlingConfiguration(throttlingConfigurationsDTO);
+        }
+
+        return dto;
+    }
+
+    /**
+     * Builds the endpoint configuration DTO from AIConfiguration.
+     *
+     * @return The built APIAiConfigurationEndpointConfigurationDTO object.
+     */
+    private static APIAiConfigurationEndpointConfigurationDTO buildEndpointConfigurationDTO(
+            AIEndpointConfiguration aiEndpointConfiguration) {
+
+        APIAiConfigurationEndpointConfigurationDTO endpointConfigurationDTO =
+                new APIAiConfigurationEndpointConfigurationDTO();
+        endpointConfigurationDTO.setAuthKey(aiEndpointConfiguration.getAuthKey());
+        endpointConfigurationDTO.setAuthType(APIAiConfigurationEndpointConfigurationDTO
+                .AuthTypeEnum.valueOf(aiEndpointConfiguration.getAuthType()));
+        endpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration
+                .getProductionAuthValue());
+        endpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration
+                .getSandboxAuthValue());
+        return endpointConfigurationDTO;
+    }
+
+    /**
+     * Builds the throttling configuration DTO from AIConfiguration.
+     *
+     * @return The built APIAiConfigurationThrottlingConfigurationDTO object.
+     */
+    private static APIAiConfigurationThrottlingConfigurationDTO buildThrottlingConfigurationDTO(
+            TokenBaseThrottlingCountHolder throttlingConfig) {
+
+        APIAiConfigurationThrottlingConfigurationDTO throttlingConfigurationsDTO =
+                new APIAiConfigurationThrottlingConfigurationDTO();
+
+        throttlingConfigurationsDTO.setProductionMaxPromptTokenCount(throttlingConfig
+                .getProductionMaxPromptTokenCount());
+        throttlingConfigurationsDTO.setProductionMaxCompletionTokenCount(throttlingConfig
+                .getProductionMaxCompletionTokenCount());
+        throttlingConfigurationsDTO.setProductionMaxTotalTokenCount(throttlingConfig
+                .getProductionMaxTotalTokenCount());
+        throttlingConfigurationsDTO.setSandboxMaxPromptTokenCount(throttlingConfig
+                .getSandboxMaxPromptTokenCount());
+        throttlingConfigurationsDTO.setSandboxMaxCompletionTokenCount(throttlingConfig
+                .getSandboxMaxCompletionTokenCount());
+        throttlingConfigurationsDTO.setSandboxMaxTotalTokenCount(throttlingConfig
+                .getSandboxMaxTotalTokenCount());
+        throttlingConfigurationsDTO.setIsTokenBasedThrottlingEnabled(throttlingConfig
+                .isTokenBasedThrottlingEnabled());
+
+        return throttlingConfigurationsDTO;
     }
 
     public static String updateAPIDefinition(String apiId, APIDefinitionValidationResponse response,

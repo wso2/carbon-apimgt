@@ -25,14 +25,18 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -418,8 +422,80 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                     }
                 }
             }
+        } else if (EventType.LLM_PROVIDER_CREATE.toString().equals(eventType)) {
+            createLLMProvider(eventJson);
+        } else if (EventType.LLM_PROVIDER_DELETE.toString().equals(eventType)) {
+            deleteLLMProvider(eventJson);
+        } else if (EventType.LLM_PROVIDER_UPDATE.toString().equals(eventType)) {
+            updateLLMProvider(eventJson);
         }
     }
+
+    /**
+     * Updates the configuration for an existing LLM provider.
+     *
+     * @param eventJson JSON string containing provider details and configuration.
+     */
+    private void updateLLMProvider(String eventJson) {
+        LLMProvider provider = extractLLMProviderDetails(eventJson);
+        String configurations = LLMProviderManager.getInstance().getLLMProviderConfiguration(provider.getName(),
+                provider.getApiVersion(), provider.getOrganization()).getConfigurations();
+        DataHolder.getInstance().updateLLMProviderConfigurations(provider, configurations);
+    }
+
+    /**
+     * Creates a new LLM provider with the given configurations.
+     *
+     * @param eventJson JSON string containing provider details and configuration.
+     */
+    private void createLLMProvider(String eventJson) {
+
+        LLMProvider provider = extractLLMProviderDetails(eventJson);
+        String configurations = LLMProviderManager.getInstance().getLLMProviderConfiguration(provider.getName(),
+                provider.getApiVersion(), provider.getOrganization()).getConfigurations();
+        DataHolder.getInstance().addLLMProviderConfigurations(provider, configurations);
+    }
+
+    /**
+     * Deletes an existing LLM provider.
+     *
+     * @param eventJson JSON string containing provider details.
+     */
+    private void deleteLLMProvider(String eventJson) {
+        LLMProvider provider = extractLLMProviderDetails(eventJson);
+        DataHolder.getInstance().removeLLMProviderConfigurations(provider);
+    }
+
+    /**
+     * Extracts the LLM provider details (ID and organization) from the JSON string.
+     *
+     * @param eventJson JSON string containing provider details.
+     * @return LlmProvider object populated with ID and organization.
+     */
+    private LLMProvider extractLLMProviderDetails(String eventJson) {
+        JSONObject jsonObject = new JSONObject(eventJson);
+        String name = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_NAME);
+        String apiVersion = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_API_VERSION);
+        String organization = jsonObject.getString(APIConstants.Webhooks.TENANT_DOMAIN);
+
+        LLMProvider provider = new LLMProvider();
+        provider.setName(name);
+        provider.setApiVersion(apiVersion);
+        provider.setOrganization(organization);
+        return provider;
+    }
+
+    /**
+     * Extracts the configurations from the JSON string.
+     *
+     * @param eventJson JSON string containing configurations.
+     * @return String representing the configurations.
+     */
+    private String extractConfigurations(String eventJson) {
+        JSONObject jsonObject = new JSONObject(eventJson);
+        return jsonObject.getString(AIAPIConstants.CONFIGURATIONS);
+    }
+
 
     private void endTenantFlow() {
 

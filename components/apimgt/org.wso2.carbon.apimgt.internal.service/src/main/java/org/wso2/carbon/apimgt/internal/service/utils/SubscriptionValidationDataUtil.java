@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -44,7 +45,34 @@ import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
-import org.wso2.carbon.apimgt.internal.service.dto.*;
+import org.wso2.carbon.apimgt.internal.service.dto.AIAPIQuotaLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.BandwidthLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.BurstLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.EventCountLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -363,6 +391,9 @@ public class SubscriptionValidationDataUtil {
         } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())) {
             EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
             defaultLimit.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
+        } else if (PolicyConstants.AI_API_QUOTA_TYPE.equals(quotaPolicy.getType())) {
+            AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) quotaPolicy.getLimit();
+            defaultLimit.setAiApiQuota(fromAIAPIQuotaLimitToDTO(AIAPIQuotaLimit));
         }
         return defaultLimit;
     }
@@ -437,6 +468,24 @@ public class SubscriptionValidationDataUtil {
         dto.setTimeUnit(eventCountLimit.getTimeUnit());
         dto.setUnitTime(eventCountLimit.getUnitTime());
         dto.setEventCount(eventCountLimit.getEventCount());
+        return dto;
+    }
+
+    /**
+     * Converts a AI API Quota Limit model object into a AI API Quota Limit DTO object.
+     *
+     * @param AIAPIQuotaLimit AI APIQuota Limit model object
+     * @return AI API Quota Limit DTO object derived from model
+     */
+    private static AIAPIQuotaLimitDTO fromAIAPIQuotaLimitToDTO(AIAPIQuotaLimit AIAPIQuotaLimit) {
+
+        AIAPIQuotaLimitDTO dto = new AIAPIQuotaLimitDTO();
+        dto.setTimeUnit(AIAPIQuotaLimit.getTimeUnit());
+        dto.setUnitTime(AIAPIQuotaLimit.getUnitTime());
+        dto.setRequestCount(AIAPIQuotaLimit.getRequestCount());
+        dto.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
+        dto.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
+        dto.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
         return dto;
     }
 

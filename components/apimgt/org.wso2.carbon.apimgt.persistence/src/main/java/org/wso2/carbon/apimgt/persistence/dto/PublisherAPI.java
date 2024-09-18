@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 
 import java.util.ArrayList;
@@ -101,6 +102,17 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String redirectURL;
     private String apiOwner;
     private String vendor;
+    private AIConfiguration aiConfiguration;
+
+    public AIConfiguration getAiConfiguration() {
+
+        return aiConfiguration;
+    }
+
+    public void setAiConfiguration(AIConfiguration aiConfiguration) {
+
+        this.aiConfiguration = aiConfiguration;
+    }
 
     public String getAudience() {
         return audience;

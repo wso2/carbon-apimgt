@@ -466,7 +466,9 @@ public class APIMappingUtil {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
         }
-
+        if (dto.getAiConfiguration() != null) {
+            model.setAiConfiguration(PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration()));
+        }
         return model;
     }
 
@@ -1432,7 +1434,9 @@ public class APIMappingUtil {
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
-
+        if (model.getAiConfiguration() != null) {
+            dto.setAiConfiguration(PublisherCommonUtils.convertToApiAiConfigurationDTO(model.getAiConfiguration()));
+        }
         return dto;
     }
 

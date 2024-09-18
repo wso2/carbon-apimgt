@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
@@ -82,6 +83,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -199,6 +201,8 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -608,6 +612,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
+        addAIConfiguration(api);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -627,6 +632,82 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAPIPolicyParameters(api, tenantDomain);
         // Add API level and operation level policies
         apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
+    }
+
+    /**
+     * Adds AI configuration to the provided API.
+     *
+     * @param api The API to which AI configurations are added.
+     * @throws APIManagementException if an error occurs while processing AI configurations.
+     */
+    private void addAIConfiguration(API api) throws APIManagementException {
+        AIConfiguration aiConfig = api.getAiConfiguration();
+
+        if (aiConfig != null) {
+            try {
+                AIEndpointConfiguration endpointConfig = aiConfig.getAiEndpointConfiguration();
+                if (endpointConfig != null) {
+                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                    if (StringUtils.isNotEmpty(endpointConfig.getProductionAuthValue())) {
+                        endpointConfig.setProductionAuthValue(encryptValue(cryptoUtil,
+                                endpointConfig.getProductionAuthValue()));
+                    }
+                    if (StringUtils.isNotEmpty(endpointConfig.getSandboxAuthValue())) {
+                        endpointConfig.setSandboxAuthValue(encryptValue(cryptoUtil,
+                                endpointConfig.getSandboxAuthValue()));
+                    }
+                }
+                apiMgtDAO.addAIConfiguration(api.getUuid(), null, aiConfig, api.getOrganization());
+            } catch (CryptoException e) {
+                throw new APIManagementException("Error encrypting AI API endpoint auth values", e);
+            }
+        }
+    }
+
+    /**
+     * Encrypts the provided value using the given CryptoUtil instance.
+     *
+     * @param cryptoUtil The CryptoUtil instance used for encryption.
+     * @param value      The value to be encrypted.
+     * @return The encrypted value.
+     * @throws CryptoException if encryption fails.
+     */
+    private String encryptValue(CryptoUtil cryptoUtil, String value) throws CryptoException {
+        return cryptoUtil.encryptAndBase64Encode(value.getBytes());
+    }
+
+    /**
+     * Updates AI configuration for the API if enabled.
+     *
+     * @param api The API containing the AI configuration.
+     * @throws APIManagementException If an error occurs during the update.
+     */
+    private void updateAIConfiguration(API api) throws APIManagementException {
+
+        AIConfiguration aiConfig = api.getAiConfiguration();
+        if (aiConfig != null) {
+            try {
+                AIEndpointConfiguration endpointConfig = aiConfig.getAiEndpointConfiguration();
+                if (endpointConfig != null) {
+                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                    String productionAuthValue = endpointConfig.getProductionAuthValue();
+                    if (StringUtils.isNotEmpty(productionAuthValue)
+                            && !cryptoUtil.base64DecodeAndIsSelfContainedCipherText(productionAuthValue)) {
+                        endpointConfig.setProductionAuthValue(encryptValue(cryptoUtil,
+                                productionAuthValue));
+                    }
+                    String sandboxAuthValue = endpointConfig.getSandboxAuthValue();
+                    if (StringUtils.isNotEmpty(sandboxAuthValue)
+                            && !cryptoUtil.base64DecodeAndIsSelfContainedCipherText(sandboxAuthValue)) {
+                        endpointConfig.setSandboxAuthValue(encryptValue(cryptoUtil,
+                                sandboxAuthValue));
+                    }
+                }
+                apiMgtDAO.updateAIConfiguration(api.getUuid(), aiConfig);
+            } catch (CryptoException e) {
+                throw new APIManagementException("Error encrypting AI API endpoint auth values", e);
+            }
+        }
     }
 
     /**
@@ -907,7 +988,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public API updateAPI(API api, API existingAPI) throws APIManagementException {
-
         if (!existingAPI.getStatus().equals(api.getStatus())) {
             throw new APIManagementException("Invalid API update operation involving API status changes");
         }
@@ -969,6 +1049,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         updateProductResourceMappings(api, organization, productResources);
 
         updateAPIPolicies(api, tenantDomain);
+        updateAIConfiguration(api);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -5230,6 +5311,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
                 populateAPILevelPolicies(api);
+                populateAiConfiguration(api);
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     if (migrationEnabled == null) {
@@ -5253,6 +5335,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while parsing the OAS definition", e);
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e);
+        }
+    }
+
+    /**
+     * Populates the AI configuration for the given API.
+     *
+     * @param api The API object to which the AI configuration will be added.
+     * @throws APIManagementException If an error occurs while populating the AI configuration.
+     */
+    private void populateAiConfiguration(API api) throws APIManagementException {
+
+        String apiUuid = api.getUuid();
+        String revisionUuid = null;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            apiUuid = apiRevision.getApiUUID();
+            revisionUuid = apiRevision.getRevisionUUID();
+        }
+        AIConfiguration configurations = apiMgtDAO.getAIConfiguration(apiUuid, revisionUuid, api.getOrganization());
+        if (configurations != null) {
+            api.setAiConfiguration(configurations);
+        } else {
+            log.debug("No AI configuration found for API: " + apiUuid);
         }
     }
 
@@ -5868,6 +5973,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiRevision.setRevisionUUID(revisionUUID);
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
+            AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null, organization);
+            if (configuration != null) {
+                apiMgtDAO.addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), configuration, organization);
+            }
         } catch (APIManagementException e) {
             try {
                     apiPersistenceInstance.deleteAPIRevision(new Organization(organization), apiId.getUUID(), revisionUUID,
@@ -6402,6 +6511,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIRevision(apiRevision);
+        AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), organization);
+        if (configuration != null) {
+            apiMgtDAO.updateAIConfiguration(apiRevision.getApiUUID(), configuration);
+        }
     }
 
     /**

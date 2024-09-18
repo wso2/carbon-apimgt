@@ -67,6 +67,7 @@ public class ThrottlePolicyTemplateBuilder {
     private static final String POLICY_VELOCITY_APP = "throttle_policy_template_app";
     private static final String POLICY_VELOCITY_SUB = "throttle_policy_template_sub";
     private static final String POLICY_VELOCITY_ASYNC_SUB = "throttle_policy_template_async_sub";
+    private static final String POLICY_VELOCITY_AI_SUB = "throttle_policy_template_ai_sub";
     private final String policyTemplateLocation = "repository" + File.separator + "resources" + File.separator
             + "policy_templates" + File.separator;
 
@@ -462,6 +463,8 @@ public class ThrottlePolicyTemplateBuilder {
             Template template;
             if (PolicyConstants.EVENT_COUNT_TYPE.equals(policy.getDefaultLimit().getQuotaType())) {
                 template = velocityengine.getTemplate(getTemplatePathForAsyncSubscription());
+            } else if (PolicyConstants.AI_API_QUOTA_TYPE.equals(policy.getDefaultLimit().getQuotaType())) {
+                template = velocityengine.getTemplate(getTemplatePathForAISubscription());
             } else {
                 template = velocityengine.getTemplate(getTemplatePathForSubscription());
             }
@@ -502,5 +505,9 @@ public class ThrottlePolicyTemplateBuilder {
 
     private String getTemplatePathForAsyncSubscription() {
         return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_ASYNC_SUB + ".xml";
+    }
+
+    private String getTemplatePathForAISubscription() {
+        return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_AI_SUB + ".xml";
     }
 }

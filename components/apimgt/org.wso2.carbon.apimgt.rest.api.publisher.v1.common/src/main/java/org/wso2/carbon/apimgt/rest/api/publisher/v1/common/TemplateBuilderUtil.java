@@ -265,6 +265,10 @@ public class TemplateBuilderUtil {
                     Collections.emptyMap());
         }
 
+        vtb.addHandler(
+                "org.wso2.carbon.apimgt.gateway.handlers.AiApiHandler"
+                , Collections.emptyMap());
+
         if (!APIUtil.isStreamingApi(api)) {
             Map<String, String> properties = new HashMap<String, String>();
 

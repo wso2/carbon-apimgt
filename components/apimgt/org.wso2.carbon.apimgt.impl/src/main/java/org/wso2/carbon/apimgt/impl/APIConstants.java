@@ -2767,11 +2767,15 @@ public final class APIConstants {
         GA_CONFIG,
         KEY_TEMPLATE,
         CORRELATION_CONFIG,
-        GATEWAY_POLICY
+        GATEWAY_POLICY,
+        LLM_PROVIDER
     }
 
     // Supported Event Types
     public enum EventType {
+        LLM_PROVIDER_CREATE,
+        LLM_PROVIDER_UPDATE,
+        LLM_PROVIDER_DELETE,
         API_CREATE,
         API_UPDATE,
         API_DELETE,
