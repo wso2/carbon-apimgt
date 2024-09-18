@@ -9766,7 +9766,6 @@ components:
             - PUBLIC
             - PRIVATE
             - RESTRICTED
-            - RESTRICTED_BY_ORG
           x-otherScopes:
             - apim:api_publish
             - apim:api_manage
@@ -12609,6 +12608,11 @@ components:
         IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
+        orgAccessControlEnabled:
+          type: boolean
+          description: |
+            Is Organization-based access control configuration enabled
+          example: true
         customProperties:
           type: array
           items:

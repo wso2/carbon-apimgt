@@ -1962,6 +1962,7 @@ public final class APIConstants {
 
     public static final String BILLING_PLAN_FREE = "FREE";
     public static final String ALLOWED_ORGANIZATIONS_DEFAULT = "ALL";
+    public static final String DEFAULT_VISIBLE_ORG = "all";
     public static final String POLICY_RESET = "reset";
 
     public static final String BLOCKING_EVENT_TYPE = "wso2event";
@@ -3177,4 +3178,8 @@ public final class APIConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
     }
+    
+    // For Organization access control Configuration
+    public static final String ORG_BASED_ACCESS_CONTROL = "OrganizationBasedAccessControl";
+    public static final String ORG_BASED_ACCESS_CONTROL_ENABLE = "Enable";
 }

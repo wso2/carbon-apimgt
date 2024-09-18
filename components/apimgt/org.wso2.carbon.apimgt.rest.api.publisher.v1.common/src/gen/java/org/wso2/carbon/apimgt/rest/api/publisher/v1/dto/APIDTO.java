@@ -154,8 +154,7 @@ return null;
     public enum VisibilityEnum {
         PUBLIC("PUBLIC"),
         PRIVATE("PRIVATE"),
-        RESTRICTED("RESTRICTED"),
-        RESTRICTED_BY_ORG("RESTRICTED_BY_ORG");
+        RESTRICTED("RESTRICTED");
         private String value;
 
         VisibilityEnum (String v) {
