@@ -15843,6 +15843,24 @@ public class ApiMgtDAO {
         return alertSubscription;
     }
 
+    public String getSubscriptionValidationStatus(String apiUuid) throws APIManagementException {
+        String status = null;
+        String query = SQLConstants.GET_SUBSCRIPTION_VALIDATION_STATUS_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, apiUuid);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    status = rs.getString("SUB_VALIDATION");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving subscription validation status for API: " + apiUuid, e);
+        }
+        return status;
+    }
+
     /**
      * Persist revoked jwt signatures to database.
      *

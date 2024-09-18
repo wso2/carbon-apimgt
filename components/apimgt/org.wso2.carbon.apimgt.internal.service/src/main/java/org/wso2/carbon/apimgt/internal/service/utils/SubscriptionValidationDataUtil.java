@@ -106,7 +106,7 @@ public class SubscriptionValidationDataUtil {
                         getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
             }
             apidto.setIsSubscriptionValidationDisabled(apiProvider
-                    .isSubscriptionValidationDisabled(model.getApiUUID(), model.getOrganization()));
+                    .isSubscriptionValidationDisabled(model.getApiUUID()));
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -166,7 +166,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setOrganization(model.getOrganization());
             apidto.setSecurityScheme(apiProvider.getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
             apidto.setIsSubscriptionValidationDisabled(apiProvider
-                    .isSubscriptionValidationDisabled(model.getApiUUID(), model.getOrganization()));
+                    .isSubscriptionValidationDisabled(model.getApiUUID()));
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {

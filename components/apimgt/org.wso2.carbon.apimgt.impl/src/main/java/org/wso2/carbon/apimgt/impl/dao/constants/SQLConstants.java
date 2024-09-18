@@ -965,6 +965,9 @@ public class SQLConstants {
                     " ORDER BY " +
                     "   APP.NAME";
 
+    public static final String GET_SUBSCRIPTION_VALIDATION_STATUS_SQL =
+            " SELECT SUB_VALIDATION FROM AM_API WHERE API_UUID = ?";
+
     public static final String GET_API_RATING_SQL =
             "SELECT RATING FROM AM_API_RATINGS WHERE API_ID= ? AND SUBSCRIBER_ID=? ";
 

@@ -700,32 +700,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public List<String> getBusinessPlansOfAPI(Organization org, String apiId) throws APIPersistenceException {
-
-        boolean tenantFlowStarted = false;
-        try {
-            RegistryHolder holder = getRegistry(org.getName());
-            tenantFlowStarted = holder.isTenantFlowStarted();
-            Registry registry = holder.getRegistry();
-            GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
-            if (apiArtifact != null) {
-                return RegistryPersistenceUtil.getBusinessPlansOfAPI(apiArtifact);
-            } else {
-                String msg = "Failed to get API. API artifact corresponding to artifactId " + apiId + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
-            }
-        } catch (RegistryException | APIManagementException e) {
-            String msg = "Failed to get business plans to check subscription validation status of API";
-            throw new APIPersistenceException(msg, e);
-        } finally {
-            if (tenantFlowStarted) {
-                RegistryPersistenceUtil.endTenantFlow();
-            }
-        }
-
-    }
-
-    @Override
     public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
 
         boolean tenantFlowStarted = false;
