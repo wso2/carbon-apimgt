@@ -31,7 +31,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.http.HttpStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -52,13 +51,14 @@ import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.*;
+import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
@@ -79,11 +79,14 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.util.*;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
@@ -3364,36 +3367,71 @@ public class ApisApiServiceImpl implements ApisApiService {
      * WSDL and sequences are exported. This service generates a zipped archive which contains all the above mentioned
      * resources for a given API.
      *
-     * @param apiId          UUID of an API
-     * @param name           Name of the API that needs to be exported
-     * @param version        Version of the API that needs to be exported
-     * @param providerName   Provider name of the API that needs to be exported
-     * @param format         Format of output documents. Can be YAML or JSON
-     * @param preserveStatus Preserve API status on export
+     * @param apiId              UUID of an API
+     * @param name               Name of the API that needs to be exported
+     * @param version            Version of the API that needs to be exported
+     * @param providerName       Provider name of the API that needs to be exported
+     * @param format             Format of output documents. Can be YAML or JSON
+     * @param preserveStatus     Preserve API status on export
+     * @param gatewayEnvironment
      * @return
      */
     @Override public Response exportAPI(String apiId, String name, String version, String revisionNum,
                                         String providerName, String format, Boolean preserveStatus,
-                                        Boolean exportLatestRevision, MessageContext messageContext)
+                                        Boolean exportLatestRevision, String gatewayEnvironment,
+                                        MessageContext messageContext)
             throws APIManagementException {
 
-        //If not specified status is preserved by default
-        preserveStatus = preserveStatus == null || preserveStatus;
+        if (StringUtils.isEmpty(gatewayEnvironment)) {
+            //If not specified status is preserved by default
+            preserveStatus = preserveStatus == null || preserveStatus;
 
-        // Default export format is YAML
-        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
-                ExportFormat.valueOf(format.toUpperCase()) :
-                ExportFormat.YAML;
-        try {
+            // Default export format is YAML
+            ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
+                    ExportFormat.valueOf(format.toUpperCase()) :
+                    ExportFormat.YAML;
+            try {
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+                File file = importExportAPI
+                        .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
+                                Boolean.TRUE, Boolean.FALSE, exportLatestRevision, StringUtils.EMPTY, organization);
+                return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getName() + "\"").build();
+            } catch (APIImportExportException e) {
+                throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
+            }
+        } else {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-            File file = importExportAPI
-                    .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
-                            Boolean.TRUE, Boolean.FALSE, exportLatestRevision, StringUtils.EMPTY, organization);
-            return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + file.getName() + "\"").build();
-        } catch (APIImportExportException e) {
-            throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
+            if (StringUtils.isEmpty(apiId) && (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version))) {
+                APIIdentifier apiIdentifier = new APIIdentifier(providerName, name, version);
+                apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
+            }
+            RuntimeArtifactDto runtimeArtifactDto;
+            if (StringUtils.isNotEmpty(organization) && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equalsIgnoreCase(organization)) {
+                runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(apiId, gatewayEnvironment,
+                        APIConstants.API_GATEWAY_TYPE_ENVOY);
+            } else {
+                runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, gatewayEnvironment,
+                        APIConstants.API_GATEWAY_TYPE_ENVOY, organization);
+            }
+            if (runtimeArtifactDto != null) {
+                if (runtimeArtifactDto.isFile()) {
+                    File artifact = (File) runtimeArtifactDto.getArtifact();
+                    StreamingOutput streamingOutput = (outputStream) -> {
+                        try {
+                            Files.copy(artifact.toPath(), outputStream);
+                        } finally {
+                            Files.delete(artifact.toPath());
+                        }
+                    };
+                    return Response.ok(streamingOutput).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                            "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
+                            APIConstants.APPLICATION_ZIP).build();
+                }
+            }
+            throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
         }
     }
 
