@@ -218,6 +218,8 @@ public final class APIConstants {
     public static final String WSDL_FILE_EXTENSION = ".wsdl";
     public static final String WSDL_PROVIDER_SEPERATOR = "--";
     public static final String API_WSDL_ARCHIVE_LOCATION = "archives/";
+    public static final String WSDL_XML_MEDIA_TYPE = "application/wsdl+xml";
+    public static final String WSDL_FILE_MEDIA_TYPE = "application/octet-stream";
 
     public static final String ZIP_FILE_EXTENSION = ".zip";
 
@@ -363,14 +365,15 @@ public final class APIConstants {
     public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
     public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
     public static final String API = "API";
-    
+
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
-    
+
     public static final String GRAPHQL_SCHEMA_FILE_EXTENSION = ".graphql";
     public static final String GRAPHQL_LOCAL_ENTRY_EXTENSION = "_graphQL";
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
+    public static final String GRAPHQL_DEFINITION_MEDIA_TYPE = "text/plain; charset=ISO-8859-1";
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
     public static final String ALLOW_MULTIPLE_VERSIONS = "allowMultipleVersions";
 
@@ -379,6 +382,8 @@ public final class APIConstants {
     public static final String API_TYPE_SSE = "SSE";
     public static final String API_TYPE_WEBHOOK = "WEBHOOK";
     public static final String API_TYPE_WS = "WS";
+    public static final String API_TYPE_GRAPHQL = "GRAPHQL";
+    public static final String API_TYPE_SOAP = "SOAP";
 
     public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.json";
 

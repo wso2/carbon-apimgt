@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -117,6 +118,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.SimpleContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
@@ -137,6 +139,7 @@ import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.APIDefSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
@@ -4160,6 +4163,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Map<String, Object> result = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
+        List<APIDefinitionContentSearchResult> defSearchList = new ArrayList<>();
         int totalLength = 0;
 
         String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
@@ -4187,23 +4191,36 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 docItem.getApiVersion()));
                         api.setUuid(docItem.getApiUUID());
                         docMap.put(doc, api);
+                    } else if (item instanceof APIDefSearchContent) {
+                        APIDefSearchContent definitionItem = (APIDefSearchContent) item;
+                        APIDefinitionContentSearchResult apiDefSearchResult = new APIDefinitionContentSearchResult();
+                        apiDefSearchResult.setId(definitionItem.getId());
+                        apiDefSearchResult.setName(definitionItem.getName());
+                        apiDefSearchResult.setApiUuid(definitionItem.getApiUUID());
+                        apiDefSearchResult.setApiName(definitionItem.getApiName());
+                        apiDefSearchResult.setApiContext(definitionItem.getApiContext());
+                        apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
+                        apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
+                        apiDefSearchResult.setApiType(definitionItem.getApiType());
+                        apiDefSearchResult.setAssociatedType(definitionItem.getAssociatedType()); //API or API product
+                        defSearchList.add(apiDefSearchResult);
                     } else if ("API".equals(item.getType())) {
-                        DevPortalSearchContent publiserAPI = (DevPortalSearchContent) item;
-                        API api = new API(new APIIdentifier(publiserAPI.getProvider(), publiserAPI.getName(),
-                                publiserAPI.getVersion()));
-                        api.setUuid(publiserAPI.getId());
-                        api.setContext(publiserAPI.getContext());
-                        api.setContextTemplate(publiserAPI.getContext());
-                        api.setStatus(publiserAPI.getStatus());
-                        api.setBusinessOwner(publiserAPI.getBusinessOwner());
-                        api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
-                        api.setTechnicalOwner(publiserAPI.getTechnicalOwner());
-                        api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
-                        api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
-                        api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
-                        api.setRating(APIUtil.getAverageRating(publiserAPI.getId()));
-                        api.setDescription(publiserAPI.getDescription());
-                        api.setType(publiserAPI.getTransportType());
+                        DevPortalSearchContent publisherAPI = (DevPortalSearchContent) item;
+                        API api = new API(new APIIdentifier(publisherAPI.getProvider(), publisherAPI.getName(),
+                                publisherAPI.getVersion()));
+                        api.setUuid(publisherAPI.getId());
+                        api.setContext(publisherAPI.getContext());
+                        api.setContextTemplate(publisherAPI.getContext());
+                        api.setStatus(publisherAPI.getStatus());
+                        api.setBusinessOwner(publisherAPI.getBusinessOwner());
+                        api.setBusinessOwnerEmail(publisherAPI.getBusinessOwnerEmail());
+                        api.setTechnicalOwner(publisherAPI.getTechnicalOwner());
+                        api.setTechnicalOwnerEmail(publisherAPI.getTechnicalOwnerEmail());
+                        api.setMonetizationEnabled(publisherAPI.getMonetizationStatus());
+                        api.setAdvertiseOnly(publisherAPI.getAdvertiseOnly());
+                        api.setRating(APIUtil.getAverageRating(publisherAPI.getId()));
+                        api.setDescription(publisherAPI.getDescription());
+                        api.setType(publisherAPI.getTransportType());
                         apiSet.add(api);
                     } else if ("APIProduct".equals(item.getType())) {
                         DevPortalSearchContent devAPIProduct = (DevPortalSearchContent) item;
@@ -4226,10 +4243,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 compoundResult.addAll(apiSet);
                 compoundResult.addAll(docMap.entrySet());
                 compoundResult.addAll(apiProductSet);
-                compoundResult.sort(new ContentSearchResultNameComparator());
+                compoundResult.addAll(defSearchList);
+                compoundResult.sort(new SimpleContentSearchResultNameComparator());
                 result.put("length", sResults.getTotalCount());
             } else {
-                result.put("length", compoundResult.size());
+                result.put("length", 0);
             }
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching content ", e);

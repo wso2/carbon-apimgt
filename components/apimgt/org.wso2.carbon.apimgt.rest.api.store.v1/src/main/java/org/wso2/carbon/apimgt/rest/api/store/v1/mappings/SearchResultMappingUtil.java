@@ -19,12 +19,14 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefinitionSearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentSearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
@@ -176,6 +178,37 @@ public class SearchResultMappingUtil {
         paginationDTO.setNext(paginatedNext);
         paginationDTO.setPrevious(paginatedPrevious);
         resultListDTO.setPagination(paginationDTO);
+    }
+
+    /**
+     * Get APIDefinitionSearchResultDTO representation for APi Definition Content Search Result.
+     *
+     * @param apiDefResult APIDefinitionContentSearchResult obj
+     * @return APIDefinitionSearchResultDTO obj
+     */
+
+    public static APIDefinitionSearchResultDTO
+    fromAPIDefSearchResultToAPIDefSearchResultDTO(APIDefinitionContentSearchResult apiDefResult) {
+        APIDefinitionSearchResultDTO apiDefSearchResultDTO = new APIDefinitionSearchResultDTO();
+        apiDefSearchResultDTO.setId(apiDefResult.getId());
+        apiDefSearchResultDTO.setType(SearchResultDTO.TypeEnum.DEFINITION);
+        apiDefSearchResultDTO.setApiUUID(apiDefResult.getApiUuid());
+        apiDefSearchResultDTO.setApiName(apiDefResult.getApiName());
+        apiDefSearchResultDTO.setApiContext(apiDefResult.getApiContext());
+        apiDefSearchResultDTO.setApiVersion(apiDefResult.getApiVersion());
+        apiDefSearchResultDTO.setApiProvider(apiDefResult.getApiProvider());
+        apiDefSearchResultDTO.setApiType(apiDefResult.getApiType());
+        apiDefSearchResultDTO.setAssociatedType(apiDefResult.getAssociatedType());
+        if (apiDefResult.getName().contains("swagger")) {
+            apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " REST API Definition");
+        } else if (apiDefResult.getName().contains("graphql")) {
+            apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " GraphQL Definition");
+        } else if (apiDefResult.getName().contains("async")) {
+            apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " Async Definition");
+        } else if (apiDefResult.getName().contains("wsdl")) {
+            apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " WSDL Definition");
+        }
+        return apiDefSearchResultDTO;
     }
 
 }
