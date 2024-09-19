@@ -552,10 +552,14 @@ public interface APIAdmin  {
     LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException;
 
     /**
-     * Retrieves configurations of all LLM Providers.
+     * Retrieves a list of LLM providers based on the given filters.
      *
-     * @return List of LLM Provider configurations.
-     * @throws APIManagementException If retrieval fails.
+     * @param organization the organization name to filter
+     * @param name the provider name to filter
+     * @param apiVersion the API version to filter
+     * @param builtInSupport whether to filter
+     * @return a list of LLM providers matching the specified filters
+     * @throws APIManagementException if an error occurs while retrieving the providers
      */
     List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport) throws APIManagementException;
 
