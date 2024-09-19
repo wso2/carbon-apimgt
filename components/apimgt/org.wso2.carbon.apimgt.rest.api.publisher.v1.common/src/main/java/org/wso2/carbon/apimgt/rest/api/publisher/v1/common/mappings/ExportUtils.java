@@ -87,6 +87,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPOINTS;
@@ -227,9 +228,24 @@ public class ExportUtils {
                 String prodSequenceName = null;
                 if (endpointConfig.get("sandbox") != null) {
                     sandSequenceName = endpointConfig.get("sandbox").getAsString();
+                } else {
+                    sandSequenceName = apiProvider.getCustomBackendSequenceOfAPIByUUID(currentApiUuid,
+                            APIConstants.API_KEY_TYPE_SANDBOX);
                 }
                 if (endpointConfig.get("production") != null) {
                     prodSequenceName = endpointConfig.get("production").getAsString();
+                } else {
+                    prodSequenceName = apiProvider.getCustomBackendSequenceOfAPIByUUID(currentApiUuid,
+                            APIConstants.API_KEY_TYPE_PRODUCTION);
+                }
+                if (apiDtoToReturn.getEndpointConfig() != null) {
+                    Map endpointConf = (Map) apiDtoToReturn.getEndpointConfig();
+                    if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                            endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        endpointConf.put("sandbox", sandSequenceName);
+                        endpointConf.put("production", prodSequenceName);
+                        apiDtoToReturn.setEndpointConfig(endpointConf);
+                    }
                 }
                 addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid, sandSequenceName, prodSequenceName);
             }
