@@ -10104,6 +10104,8 @@ components:
                   type: string
             throttlingConfiguration:
               type: object
+              required:
+                - isTokenBasedThrottlingEnabled
               properties:
                 productionMaxPromptTokenCount:
                   type: integer
@@ -11717,10 +11719,26 @@ components:
           type: integer
           format: int64
           example: 1000
+        productionTimeUnit:
+          type: string
+          description: "Time unit for the production in milliseconds. Possible values are 1sec, 1min, 1hour"
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
         sandbox:
           type: integer
           format: int64
           example: 1000
+        sandboxTimeUnit:
+          type: string
+          description: "Time unit for the sandbox in milliseconds. Possible values are 1sec, 1min, 1hour"
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
     APIBusinessInformation:
       type: object
       properties:

@@ -64,7 +64,9 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;
     private String implementation;
     private String productionMaxTps;
+    private String productionTimeUnit;
     private String sandboxMaxTps;
+    private String sandboxTimeUnit;
     private String authorizationHeader;
     private String apiKeyHeader;
     private String apiSecurity; // ?check whether same to private List<String> securityScheme = new ArrayList<>();
@@ -360,6 +362,23 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setSandboxMaxTps(String sandboxMaxTps) {
         this.sandboxMaxTps = sandboxMaxTps;
+    }
+
+
+    public String getProductionTimeUnit() {
+        return productionTimeUnit;
+    }
+
+    public void setProductionTimeUnit(String productionTimeUnit) {
+        this.productionTimeUnit = productionTimeUnit;
+    }
+
+    public String getSandboxTimeUnit() {
+        return sandboxTimeUnit;
+    }
+
+    public void setSandboxTimeUnit(String sandboxTimeUnit) {
+        this.sandboxTimeUnit = sandboxTimeUnit;
     }
 
     public String getAuthorizationHeader() {
