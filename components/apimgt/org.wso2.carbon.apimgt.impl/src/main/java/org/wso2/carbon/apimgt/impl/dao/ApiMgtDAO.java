@@ -14666,7 +14666,7 @@ public class ApiMgtDAO {
         }
         updateSqlBuilder.append(" WHERE ORGANIZATION = ? AND UUID = ?");
         if (!provider.isBuiltInSupport()) {
-            updateSqlBuilder.append(" AND BUILT_IN_SUPPORT = false");
+            updateSqlBuilder.append(" AND BUILT_IN_SUPPORT = 'false'");
         }
         return updateSqlBuilder.toString();
     }
