@@ -48,6 +48,7 @@ public class ThrottleProperties {
     private boolean enableQueryParamConditions =false;
     private String[] skipRedeployingPolicies = new String[]{};
     private Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
+    private boolean enablePolicyRecreate;
     private TrafficManager trafficManager;
     public boolean isEnabledSubscriptionLevelSpikeArrest() {
         return enabledSubscriptionLevelSpikeArrest;
@@ -168,6 +169,14 @@ public class ThrottleProperties {
 
     public void setDefaultThrottleTierLimits(Map<String, Long> defaultThrottleTierLimits) {
         this.defaultThrottleTierLimits = defaultThrottleTierLimits;
+    }
+
+    public boolean isEnablePolicyRecreate() {
+        return enablePolicyRecreate;
+    }
+
+    public void setEnablePolicyRecreate(boolean enablePolicyRecreate) {
+        this.enablePolicyRecreate = enablePolicyRecreate;
     }
 
     public static class DataPublisher {

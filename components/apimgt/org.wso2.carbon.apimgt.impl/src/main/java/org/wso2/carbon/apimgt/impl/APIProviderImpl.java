@@ -5216,6 +5216,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public boolean isSubscriptionValidationDisabled(String uuid) throws APIManagementException {
+        String status = apiMgtDAO.getSubscriptionValidationStatus(uuid);
+        return !"ENABLED".equalsIgnoreCase(status);
+    }
+
+    @Override
     public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
         Organization org = new Organization(organization);
         try {

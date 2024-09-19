@@ -323,15 +323,52 @@ public class PublisherCommonUtils {
         List<String> apiSecurity = apiDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
+        // Remove the subscriptionless tier if other tiers are available.
+        if (tiersFromDTO != null && tiersFromDTO.size() > 1) {
+            String tierToDrop = null;
+            for (String tier : tiersFromDTO) {
+                if (tier.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+                    tierToDrop = tier;
+                    break;
+                }
+            }
+            if (tierToDrop != null) {
+                tiersFromDTO.remove(tierToDrop);
+                apiDtoToUpdate.setPolicies(tiersFromDTO);
+            }
+        }
         String originalStatus = originalAPI.getStatus();
-        if (apiSecurity != null && (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
-                .contains(APIConstants.API_SECURITY_API_KEY))) {
-            if ((tiersFromDTO == null || tiersFromDTO.isEmpty() && !(APIConstants.CREATED.equals(originalStatus)
-                    || APIConstants.PROTOTYPED.equals(originalStatus)))
-                    && !apiDtoToUpdate.getAdvertiseInfo().isAdvertised()) {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        boolean condition = ((tiersFromDTO == null || tiersFromDTO.isEmpty()
+                && !(APIConstants.CREATED.equals(originalStatus)
+                || APIConstants.PROTOTYPED.equals(originalStatus)))
+                && !apiDtoToUpdate.getAdvertiseInfo().isAdvertised());
+        if (!APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
+            if (apiSecurity != null && (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
+                    .contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
                 throw new APIManagementException(
                         "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
                         ExceptionCodes.TIER_CANNOT_BE_NULL);
+            }
+        } else {
+            if (apiSecurity != null) {
+                if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY) && condition) {
+                    throw new APIManagementException(
+                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
+                            ExceptionCodes.TIER_CANNOT_BE_NULL);
+                } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                    // Internally set the default tier when no tiers are defined in order to support
+                    // subscription validation disabling for OAuth2 secured APIs
+                    if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
+                        if (isAsyncAPI) {
+                            tiersFromDTO.add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS);
+                        } else {
+                            tiersFromDTO.add(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+
+                        }
+                        apiDtoToUpdate.setPolicies(tiersFromDTO);
+                    }
+                }
             }
         }
 
@@ -1886,11 +1923,34 @@ public class PublisherCommonUtils {
         List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiProductDtoToUpdate.getPolicies();
-        if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
-                .contains(APIConstants.API_SECURITY_API_KEY)) {
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                throw new APIManagementException("No tier defined for the API Product",
-                        ExceptionCodes.TIER_CANNOT_BE_NULL);
+        // Remove the subscriptionless tier if other tiers are available.
+        if (tiersFromDTO != null && tiersFromDTO.size() > 1
+                && tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+            tiersFromDTO.remove(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+            apiProductDtoToUpdate.setPolicies(tiersFromDTO);
+        }
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (!APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
+            if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
+                    .contains(APIConstants.API_SECURITY_API_KEY)) {
+                if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                    throw new APIManagementException("No tier defined for the API Product",
+                            ExceptionCodes.TIER_CANNOT_BE_NULL);
+                }
+            }
+        } else {
+            if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+                if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                    throw new APIManagementException("No tier defined for the API Product",
+                            ExceptionCodes.TIER_CANNOT_BE_NULL);
+                }
+            } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                // Internally set the default tier when no tiers are defined in order to support
+                // subscription validation disabling for OAuth2 secured APIs
+                if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
+                    tiersFromDTO.add(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+                    apiProductDtoToUpdate.setPolicies(tiersFromDTO);
+                }
             }
         }
 

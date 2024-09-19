@@ -982,6 +982,11 @@ public class ExportUtils {
                             + apiDtoToReturn.getVersion());
                 }
             }
+            List<String> tiers = apiDtoToReturn.getPolicies();
+            if (tiers != null && tiers.size() == 1
+                    && tiers.get(0).contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+                apiDtoToReturn.setPolicies(new ArrayList<>());
+            }
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonElement apiObj = gson.toJsonTree(apiDtoToReturn);
             JsonObject apiJson = (JsonObject) apiObj;

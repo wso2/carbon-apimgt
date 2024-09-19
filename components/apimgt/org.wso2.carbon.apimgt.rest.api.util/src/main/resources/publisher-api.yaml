@@ -11232,6 +11232,11 @@ components:
           type: string
           description: Authorization Header
           example: authorization
+        allowSubscriptionValidationDisabling:
+          type: boolean
+          description: |
+            Allow subscription validation disabling for OAuth tokens
+          default: true
         customProperties:
             type: array
             items:

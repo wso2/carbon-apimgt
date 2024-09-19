@@ -5318,6 +5318,22 @@ public final class APIUtil {
         return false;
     }
 
+    public static boolean isSubscriptionValidationDisablingAllowed(String tenantDomain) throws APIManagementException {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        boolean subValidationDisablingAllowedGlobal = Boolean.parseBoolean(config.getFirstProperty(
+                APIConstants.ALLOW_SUBSCRIPTION_VALIDATION_DISABLING));
+        boolean subValidationDisablingAllowedTenant = false;
+        JSONObject apiTenantConfig = getTenantConfig(tenantDomain);
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_ALLOW_SUBSCRIPTION_VALIDATION_DISABLING);
+            if (value != null) {
+                subValidationDisablingAllowedTenant = Boolean.parseBoolean(value.toString());
+            }
+        }
+        return subValidationDisablingAllowedGlobal || subValidationDisablingAllowedTenant;
+    }
+
     public static Map<String, Tier> getTiers(String organization) throws APIManagementException {
 
         int requestedTenantId = getInternalOrganizationId(organization);
@@ -6042,13 +6058,12 @@ public final class APIUtil {
     public static void addDefaultTenantAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        boolean recreate = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getThrottleProperties().isEnablePolicyRecreate();
 
-        /* Check if 'Unlimited' policy is available in AM_POLICY_APPLICATION table, to determine whether the default policies are loaded
-         into the database at least once. If yes, default policies won't be added to database again. */
-
-        if (apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_APP, tenantId, APIConstants.DEFAULT_APP_POLICY_UNLIMITED)) {
-            log.debug(
-                    "Default Throttling Policies are not written into the database again, as they were added once at initial server startup");
+        if (!recreate) {
+            log.debug("Default Throttling Policies are not written into the database again, " +
+                    "as they were added once at initial server startup");
             return;
         }
 
@@ -6128,13 +6143,19 @@ public final class APIUtil {
                 defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_GOLD) : 5000;
         long unauthenticatedTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED) : 500;
+        long subscriptionlessTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) ?
+                defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) : 100000;
+
         //Adding Subscription level policies
-        long[] requestCountSubPolicies = new long[]{goldTierLimit, silverTierLimit, bronzeTierLimit, unauthenticatedTierLimit, Integer.MAX_VALUE};
+        long[] requestCountSubPolicies = new long[]{goldTierLimit, silverTierLimit, bronzeTierLimit,
+                unauthenticatedTierLimit, subscriptionlessTierLimit, Integer.MAX_VALUE};
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
-                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
+                APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
         String[] subPolicyDecs = new String[]{
                 APIConstants.DEFAULT_SUB_POLICY_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_SILVER_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
         for (int i = 0; i < subPolicies.length; i++) {
             policyName = subPolicies[i];
             boolean needDeployment = false;
@@ -6183,12 +6204,15 @@ public final class APIUtil {
         }
 
         //Adding Event based subscription level policies for async policies (WS & SSE)
-        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, Integer.MAX_VALUE};
-        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
+        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, 10000, Integer.MAX_VALUE};
+        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS,  APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
         String[] eventCountSubPolicyDescriptions = new String[]{
                 APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
 
         for (int i = 0; i < eventCountSubPolicyNames.length; i++) {
             policyName = eventCountSubPolicyNames[i];
@@ -10202,6 +10226,22 @@ public final class APIUtil {
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
+    }
+
+    /**
+     * Get the subscription validation stats before inserting the API
+     *
+     * @param tiers Available business plans for the API
+     * @return true if the subscription validation is enabled
+     */
+    public static String setSubscriptionValidationStatusBeforeInsert(Set<Tier> tiers) {
+        if (tiers != null && tiers.size() == 1) {
+            Tier tier = tiers.iterator().next();
+            if(tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+                return "DISABLED";
+            }
+        }
+        return "ENABLED";
     }
 
     /**

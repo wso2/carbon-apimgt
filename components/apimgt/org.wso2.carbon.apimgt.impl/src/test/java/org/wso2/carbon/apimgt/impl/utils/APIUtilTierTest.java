@@ -434,11 +434,12 @@ public class APIUtilTierTest {
 
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
-                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
 
         for (String policy : subPolicies) {
             Mockito.when(
@@ -616,11 +617,12 @@ public class APIUtilTierTest {
 
         String[] policies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
-                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
 
         for (String policy : policies) {
             Mockito.when(
@@ -649,11 +651,12 @@ public class APIUtilTierTest {
 
         String[] policies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
-                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
 
         for (String policy : policies) {
             Mockito.when(
@@ -923,6 +926,7 @@ public class APIUtilTierTest {
         ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
         Map<String, Long> defaultLimits = new HashMap<>();
         Mockito.when(throttleProperties.getDefaultThrottleTierLimits()).thenReturn(defaultLimits);
+        Mockito.when(throttleProperties.isEnablePolicyRecreate()).thenReturn(true);
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())

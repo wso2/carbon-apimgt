@@ -459,6 +459,7 @@ public class SQLConstants {
                     " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND SUBS.APPLICATION_ID = APP.APPLICATION_ID" +
                     "   AND API.API_ID = SUBS.API_ID" +
+                    "   AND API.SUB_VALIDATION = 'ENABLED'" +
                     "   AND APP.APPLICATION_ID = ?" +
                     "   AND API.ORGANIZATION = ?";
 
@@ -963,6 +964,9 @@ public class SQLConstants {
                     "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
                     " ORDER BY " +
                     "   APP.NAME";
+
+    public static final String GET_SUBSCRIPTION_VALIDATION_STATUS_SQL =
+            " SELECT SUB_VALIDATION FROM AM_API WHERE API_UUID = ?";
 
     public static final String GET_API_RATING_SQL =
             "SELECT RATING FROM AM_API_RATINGS WHERE API_ID= ? AND SUBSCRIBER_ID=? ";
@@ -1470,8 +1474,9 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-                    "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE)" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE," +
+                    "SUB_VALIDATION)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_GATEWAY_TYPE_SQL_BY_UUID =
             "SELECT API.GATEWAY_TYPE FROM AM_API API WHERE API.API_UUID = ?";
@@ -1706,7 +1711,8 @@ public class SQLConstants {
                     "   UPDATED_TIME = ?, " +
                     "   API_TIER = ?, " +
                     "   API_TYPE = ?, " +
-                    "   GATEWAY_VENDOR = ? " +
+                    "   GATEWAY_VENDOR = ?, " +
+                    "   SUB_VALIDATION = ? " +
                     " WHERE " +
                     "   API_UUID = ? ";
 
@@ -2752,7 +2758,8 @@ public class SQLConstants {
             "   API_TIER=?," +
             "   UPDATED_BY=?," +
             "   UPDATED_TIME=?," +
-            "   GATEWAY_VENDOR=?" +
+            "   GATEWAY_VENDOR=?," +
+            "   SUB_VALIDATION=?" +
             " WHERE" +
             "   API_NAME=? AND API_PROVIDER=? AND API_VERSION=? AND API_TYPE='" + APIConstants.API_PRODUCT +"'";
 
@@ -2771,7 +2778,7 @@ public class SQLConstants {
 
     public static final String ADD_API_PRODUCT = "INSERT INTO " + "AM_API(API_PROVIDER, API_NAME, API_VERSION, " +
             "CONTEXT, CONTEXT_TEMPLATE, API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, " +
-            "ORGANIZATION, GATEWAY_VENDOR, VERSION_COMPARABLE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            "ORGANIZATION, GATEWAY_VENDOR, VERSION_COMPARABLE,SUB_VALIDATION) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +

@@ -234,6 +234,7 @@ public class ImportUtils {
             }
 
             String apiType = importedApiDTO.getType().toString();
+            boolean asyncAPI = PublisherCommonUtils.isStreamingAPI(importedApiDTO);
 
             // Validate swagger content except for streaming APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
@@ -341,6 +342,21 @@ public class ImportUtils {
                 // Initialize to CREATED when import
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
+                if (APIStatus.PUBLISHED.toString().equalsIgnoreCase(targetStatus)
+                        && importedApiDTO.getPolicies() != null
+                        && importedApiDTO.getPolicies().isEmpty()
+                        && importedApiDTO.getSecurityScheme() != null
+                        && importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && APIUtil.isSubscriptionValidationDisablingAllowed(organization)
+                        && !PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
+                   if (asyncAPI) {
+                        importedApiDTO.setPolicies(Arrays
+                                .asList(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS));
+                   } else {
+                       importedApiDTO.setPolicies(Arrays
+                                   .asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+                   }
+                }
                 if (!PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
                     importedApi = PublisherCommonUtils
                             .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
@@ -2595,6 +2611,16 @@ public class ImportUtils {
                     log.info("Cannot find : " + importedApiProductDTO.getName() + ". Creating it.");
                 }
                 currentStatus = APIStatus.CREATED.toString();
+                if (APIStatus.PUBLISHED.toString().equalsIgnoreCase(targetStatus)
+                        && importedApiProductDTO.getPolicies() != null
+                        && importedApiProductDTO.getPolicies().isEmpty()
+                        && importedApiProductDTO.getSecurityScheme() != null
+                        && importedApiProductDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && APIUtil.isSubscriptionValidationDisablingAllowed(organization)) {
+                    importedApiProductDTO.setPolicies(Arrays
+                                .asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+
+                }
                 importedApiProduct = PublisherCommonUtils
                         .addAPIProductWithGeneratedSwaggerDefinition(importedApiProductDTO,
                                 importedApiProductDTO.getProvider(), organization);

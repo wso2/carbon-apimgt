@@ -1341,6 +1341,16 @@
     },
     "LinterCustomRules": {
       "required": ["rules"]
+    },
+    "AllowSubscriptionValidationDisabling": {
+      "$id": "#/properties/AllowSubscriptionValidationDisabling",
+      "type": "boolean",
+      "title": "AllowSubscriptionValidationDisabling schema",
+      "description": "This property is used to specify whether to allow subscription validation disabling or not.",
+      "default": false,
+      "examples": [
+        true, false
+      ]
     }
   },
   "additionalProperties": true

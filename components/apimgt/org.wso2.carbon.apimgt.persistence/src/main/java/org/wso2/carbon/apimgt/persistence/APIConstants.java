@@ -131,6 +131,9 @@ public final class APIConstants {
 
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
+    // Subscription validation related constants
+    public static final String DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS = "DefaultSubscriptionless";
+
     /**
      * API categories related constants
      */
