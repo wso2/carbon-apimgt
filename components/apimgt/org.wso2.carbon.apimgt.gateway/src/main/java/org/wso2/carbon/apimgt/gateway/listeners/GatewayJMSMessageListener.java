@@ -438,9 +438,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      */
     private void updateLLMProvider(String eventJson) {
         LLMProvider provider = extractLLMProviderDetails(eventJson);
-        String configurations = LLMProviderManager.getInstance().getLLMProviderConfiguration(provider.getName(),
-                provider.getApiVersion(), provider.getOrganization()).getConfigurations();
-        DataHolder.getInstance().updateLLMProviderConfigurations(provider, configurations);
+
+        updateProviderConfigurations(provider);
     }
 
     /**
@@ -449,11 +448,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      * @param eventJson JSON string containing provider details and configuration.
      */
     private void createLLMProvider(String eventJson) {
-
         LLMProvider provider = extractLLMProviderDetails(eventJson);
-        String configurations = LLMProviderManager.getInstance().getLLMProviderConfiguration(provider.getName(),
-                provider.getApiVersion(), provider.getOrganization()).getConfigurations();
-        DataHolder.getInstance().addLLMProviderConfigurations(provider, configurations);
+        addProviderConfigurations(provider);
     }
 
     /**
@@ -463,14 +459,14 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      */
     private void deleteLLMProvider(String eventJson) {
         LLMProvider provider = extractLLMProviderDetails(eventJson);
-        DataHolder.getInstance().removeLLMProviderConfigurations(provider);
+        removeProviderConfigurations(provider);
     }
 
     /**
-     * Extracts the LLM provider details (ID and organization) from the JSON string.
+     * Extracts the LLM provider details (name, API version, organization) from the JSON string.
      *
      * @param eventJson JSON string containing provider details.
-     * @return LlmProvider object populated with ID and organization.
+     * @return LLMProvider object populated with name, API version, and organization.
      */
     private LLMProvider extractLLMProviderDetails(String eventJson) {
         JSONObject jsonObject = new JSONObject(eventJson);
@@ -478,24 +474,62 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         String apiVersion = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_API_VERSION);
         String organization = jsonObject.getString(APIConstants.Webhooks.TENANT_DOMAIN);
 
-        LLMProvider provider = new LLMProvider();
-        provider.setName(name);
-        provider.setApiVersion(apiVersion);
-        provider.setOrganization(organization);
-        return provider;
+        return new LLMProvider(name, apiVersion, organization);
     }
 
     /**
-     * Extracts the configurations from the JSON string.
+     * Updates LLM provider configurations in the DataHolder.
      *
-     * @param eventJson JSON string containing configurations.
-     * @return String representing the configurations.
+     * @param provider LLMProvider object containing provider details.
      */
-    private String extractConfigurations(String eventJson) {
-        JSONObject jsonObject = new JSONObject(eventJson);
-        return jsonObject.getString(AIAPIConstants.CONFIGURATIONS);
+    private void updateProviderConfigurations(LLMProvider provider) {
+        String configurations = getProviderConfigurations(provider);
+        String key = createProviderKey(provider);
+        DataHolder.getInstance().updateLLMProviderConfigurations(key, configurations);
     }
 
+    /**
+     * Adds new LLM provider configurations to the DataHolder.
+     *
+     * @param provider LLMProvider object containing provider details.
+     */
+    private void addProviderConfigurations(LLMProvider provider) {
+        String configurations = getProviderConfigurations(provider);
+        String key = createProviderKey(provider);
+        DataHolder.getInstance().addLLMProviderConfigurations(key, configurations);
+    }
+
+    /**
+     * Removes LLM provider configurations from the DataHolder.
+     *
+     * @param provider LLMProvider object containing provider details.
+     */
+    private void removeProviderConfigurations(LLMProvider provider) {
+        String key = createProviderKey(provider);
+        DataHolder.getInstance().removeLLMProviderConfigurations(key);
+    }
+
+    /**
+     * Retrieves provider configurations from the LLMProviderManager.
+     *
+     * @param provider LLMProvider object containing provider details.
+     * @return The configuration string for the provider.
+     */
+    private String getProviderConfigurations(LLMProvider provider) {
+        return LLMProviderManager.getInstance()
+                .getLLMProviderConfiguration(provider.getName(), provider.getApiVersion(), provider.getOrganization())
+                .getConfigurations();
+    }
+
+    /**
+     * Creates a unique key for the LLM provider based on its details.
+     *
+     * @param provider LLMProvider object containing provider details.
+     * @return A string key in the format "organization:name:apiVersion".
+     */
+    private String createProviderKey(LLMProvider provider) {
+        return provider.getOrganization() + ":" + provider.getName() + ":" + provider.getApiVersion();
+    }
 
     private void endTenantFlow() {
 

@@ -103,12 +103,12 @@ public class AiApiHandler extends AbstractHandler {
                 (String) messageContext.getProperty(APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION);
         String organization = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
 
-        LLMProvider provider = createLLMProvider(llmProviderName, llmProviderApiVersion, organization);
-        String providerConfigurations = DataHolder.getInstance().getLLMProviderConfigurations(provider);
+        String key = organization + ":" + llmProviderName + ":" + llmProviderApiVersion;
+        String providerConfigurations = DataHolder.getInstance().getLLMProviderConfigurations(key);
 
         if (providerConfigurations == null) {
             log.error("Unable to find provider configurations for provider: "
-                    + provider.getName() + "_" + provider.getApiVersion() + " in tenant "
+                    + llmProviderName + "_" + llmProviderApiVersion + " in tenant "
                     + "domain: " + organization);
             return true;
         }
@@ -119,7 +119,7 @@ public class AiApiHandler extends AbstractHandler {
 
         if (llmProviderService == null) {
             log.error("Unable to find LLM provider service for provider: "
-                    + provider.getName() + "_" + provider.getApiVersion() + " in tenant "
+                    + llmProviderName + "_" + llmProviderApiVersion + " in tenant "
                     + "domain: " + organization);
             return true;
         }
