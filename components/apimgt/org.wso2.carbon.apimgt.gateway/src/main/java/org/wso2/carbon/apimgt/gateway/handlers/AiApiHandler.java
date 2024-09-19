@@ -185,25 +185,24 @@ public class AiApiHandler extends AbstractHandler {
     private void addEndpointConfigurationToMessageContext(MessageContext messageContext, AIConfiguration aiConfiguration) throws CryptoException, URISyntaxException {
         AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
         if (aiEndpointConfiguration != null) {
+            org.apache.axis2.context.MessageContext axCtx = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             switch (aiEndpointConfiguration.getAuthType()) {
                 case "HEADER":
                     if (((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT")).getKeyType().equals(org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                        Map transportHeaders = (Map)((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                        Map transportHeaders = (Map) axCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                         transportHeaders.put(aiEndpointConfiguration.getAuthKey(), decryptSecret(aiEndpointConfiguration.getProductionAuthValue()));
                     } else {
-                        Map transportHeaders = (Map)((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                        Map transportHeaders = (Map) axCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                         transportHeaders.put(aiEndpointConfiguration.getAuthKey(), decryptSecret(aiEndpointConfiguration.getSandboxAuthValue()));
                     }
                     break;
                 case "QUERY":
                     if (((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT")).getKeyType().equals("PRODUCTION")) {
-                        URI updatedFullPath = (new URIBuilder((String) messageContext.getProperty("REST_FULL_REQUEST_PATH"))).addParameter(aiEndpointConfiguration.getAuthKey(), decryptSecret(aiEndpointConfiguration.getProductionAuthValue())).build();
-                        messageContext.setProperty("REST_FULL_REQUEST_PATH", updatedFullPath.toString());
+                        URI updatedFullPath = (new URIBuilder((String) axCtx.getProperty("REST_URL_POSTFIX"))).addParameter(aiEndpointConfiguration.getAuthKey(), decryptSecret(aiEndpointConfiguration.getProductionAuthValue())).build();
+                        axCtx.setProperty("REST_URL_POSTFIX", updatedFullPath.toString());
                     } else {
-                        URI updatedFullPath = (new URIBuilder((String) messageContext.getProperty("REST_FULL_REQUEST_PATH"))).addParameter(aiEndpointConfiguration.getAuthKey(), decryptSecret(aiEndpointConfiguration.getSandboxAuthValue())).build();
-                        messageContext.setProperty("REST_FULL_REQUEST_PATH", updatedFullPath.toString());
+                        URI updatedFullPath = (new URIBuilder((String) axCtx.getProperty("REST_URL_POSTFIX"))).addParameter(aiEndpointConfiguration.getAuthKey(), decryptSecret(aiEndpointConfiguration.getSandboxAuthValue())).build();
+                        axCtx.setProperty("REST_URL_POSTFIX", updatedFullPath.toString());
                     }
                     break;
                 default:
