@@ -68,12 +68,12 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
      */
     @Override
     public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset,
-                                             String ifNoneMatch, MessageContext messageContext) {
+                                             String ifNoneMatch, Boolean isAiApi, MessageContext messageContext) {
         //pre-processing
         //setting default limit and offset if they are null
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        List<Tier> tierList = getThrottlingPolicyList(policyLevel, false);
+        List<Tier> tierList = getThrottlingPolicyList(policyLevel, false, isAiApi);
         ThrottlingPolicyListDTO policyListDTO = ThrottlingPolicyMappingUtil
                 .fromTierListToDTO(tierList, policyLevel, limit, offset);
         //todo: set total counts properly
@@ -179,7 +179,8 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
      * @param policyLevel
      * @return list of throttling policies
      */
-    public List<Tier> getThrottlingPolicyList(String policyLevel, boolean includeAsyncPolicies) {
+    public List<Tier> getThrottlingPolicyList(String policyLevel, boolean includeAsyncPolicies,
+            boolean filterAIAPIPolicies) {
         try {
             List<Tier> tierList = new ArrayList<>();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -196,6 +197,19 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
                 if (!includeAsyncPolicies) {
                     tierList = tierList.stream().filter(tier -> !PolicyConstants.EVENT_COUNT_TYPE.equals(
                             tier.getQuotaPolicyType())).collect(Collectors.toList());
+                }
+
+                // Handle filtering for AI API policies
+                if (filterAIAPIPolicies) {
+                    // Keep tiers where QuotaPolicyType is AI_API_QUOTA_TYPE or is null
+                    tierList = tierList.stream()
+                            .filter(tier -> PolicyConstants.AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType())
+                                    || tier.getQuotaPolicyType() == null).collect(Collectors.toList());
+                } else {
+                    // Remove tiers where QuotaPolicyType is AI_API_QUOTA_TYPE
+                    tierList = tierList.stream()
+                            .filter(tier -> !PolicyConstants.AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType()))
+                            .collect(Collectors.toList());
                 }
             } else if (ThrottlingPolicyDTO.PolicyLevelEnum.API.toString().equals(policyLevel)) {
                 Map<String, Tier> resourceTiersMap =

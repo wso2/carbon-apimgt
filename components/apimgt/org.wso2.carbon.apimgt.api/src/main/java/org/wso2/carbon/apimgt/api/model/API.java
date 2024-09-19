@@ -93,7 +93,9 @@ public class API implements Serializable {
 
     // Used for keeping Production & Sandbox Throttling limits.
     private String productionMaxTps;
+    private String productionTimeUnit = "1000";
     private String sandboxMaxTps;
+    private String sandboxTimeUnit = "1000";
 
     private String visibility;
     private String visibleRoles;
@@ -484,8 +486,24 @@ public class API implements Serializable {
         this.productionMaxTps = productionMaxTps;
     }
 
+    public String getProductionTimeUnit() {
+        return productionTimeUnit;
+    }
+
+    public void setProductionTimeUnit(String productionTimeUnit) {
+        this.productionTimeUnit = productionTimeUnit;
+    }
+
     public String getSandboxMaxTps() {
         return sandboxMaxTps;
+    }
+
+    public String getSandboxTimeUnit() {
+        return sandboxTimeUnit;
+    }
+
+    public void setSandboxTimeUnit(String sandboxTimeUnit) {
+        this.sandboxTimeUnit = sandboxTimeUnit;
     }
 
     public void setSandboxMaxTps(String sandboxMaxTps) {

@@ -32,6 +32,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
@@ -279,6 +280,50 @@ public class TemplateBuilderUtil {
             if (api.getSandboxMaxTps() != null) {
                 properties.put("sandboxMaxCount", api.getSandboxMaxTps());
             }
+
+            if (api.getProductionTimeUnit() != null) {
+                properties.put("productionUnitTime", api.getProductionTimeUnit());
+            }
+
+            if (api.getSandboxTimeUnit() != null) {
+                properties.put("sandboxUnitTime", api.getSandboxTimeUnit());
+            }
+
+            if (api.getAiConfiguration() != null
+                    && api.getAiConfiguration().getTokenBasedThrottlingConfiguration() != null
+                    && api.getAiConfiguration().getTokenBasedThrottlingConfiguration()
+                    .isTokenBasedThrottlingEnabled()) {
+
+                TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = api.getAiConfiguration()
+                        .getTokenBasedThrottlingConfiguration();
+                properties.put("isTokenBasedThrottlingEnabled",
+                        tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled().toString());
+                if (tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount() != null) {
+                    properties.put("productionMaxPromptTokenCount",
+                            tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount().toString());
+                }
+                if (tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount() != null) {
+                    properties.put("productionMaxCompletionTokenCount",
+                            tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount().toString());
+                }
+                if (tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount() != null) {
+                    properties.put("productionMaxTotalTokenCount",
+                            tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount().toString());
+                }
+                if (tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount() != null) {
+                    properties.put("sandboxMaxPromptTokenCount",
+                            tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount().toString());
+                }
+                if (tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount() != null) {
+                    properties.put("sandboxMaxCompletionTokenCount",
+                            tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount().toString());
+                }
+                if (tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount() != null) {
+                    properties.put("sandboxMaxTotalTokenCount",
+                            tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount().toString());
+                }
+            }
+
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
                     , properties);

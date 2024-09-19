@@ -21,7 +21,73 @@ import javax.validation.Valid;
 public class APIMaxTpsDTO   {
   
     private Long production = null;
+
+    @XmlType(name="ProductionTimeUnitEnum")
+    @XmlEnum(String.class)
+    public enum ProductionTimeUnitEnum {
+        SECOND("SECOND"),
+        MINUTE("MINUTE"),
+        HOUR("HOUR");
+        private String value;
+
+        ProductionTimeUnitEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ProductionTimeUnitEnum fromValue(String v) {
+            for (ProductionTimeUnitEnum b : ProductionTimeUnitEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private ProductionTimeUnitEnum productionTimeUnit = ProductionTimeUnitEnum.SECOND;
     private Long sandbox = null;
+
+    @XmlType(name="SandboxTimeUnitEnum")
+    @XmlEnum(String.class)
+    public enum SandboxTimeUnitEnum {
+        SECOND("SECOND"),
+        MINUTE("MINUTE"),
+        HOUR("HOUR");
+        private String value;
+
+        SandboxTimeUnitEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static SandboxTimeUnitEnum fromValue(String v) {
+            for (SandboxTimeUnitEnum b : SandboxTimeUnitEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private SandboxTimeUnitEnum sandboxTimeUnit = SandboxTimeUnitEnum.SECOND;
 
   /**
    **/
@@ -41,6 +107,24 @@ public class APIMaxTpsDTO   {
   }
 
   /**
+   * Time unit for the production in milliseconds. Possible values are 1sec, 1min, 1hour
+   **/
+  public APIMaxTpsDTO productionTimeUnit(ProductionTimeUnitEnum productionTimeUnit) {
+    this.productionTimeUnit = productionTimeUnit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Time unit for the production in milliseconds. Possible values are 1sec, 1min, 1hour")
+  @JsonProperty("productionTimeUnit")
+  public ProductionTimeUnitEnum getProductionTimeUnit() {
+    return productionTimeUnit;
+  }
+  public void setProductionTimeUnit(ProductionTimeUnitEnum productionTimeUnit) {
+    this.productionTimeUnit = productionTimeUnit;
+  }
+
+  /**
    **/
   public APIMaxTpsDTO sandbox(Long sandbox) {
     this.sandbox = sandbox;
@@ -57,6 +141,24 @@ public class APIMaxTpsDTO   {
     this.sandbox = sandbox;
   }
 
+  /**
+   * Time unit for the sandbox in milliseconds. Possible values are 1sec, 1min, 1hour
+   **/
+  public APIMaxTpsDTO sandboxTimeUnit(SandboxTimeUnitEnum sandboxTimeUnit) {
+    this.sandboxTimeUnit = sandboxTimeUnit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Time unit for the sandbox in milliseconds. Possible values are 1sec, 1min, 1hour")
+  @JsonProperty("sandboxTimeUnit")
+  public SandboxTimeUnitEnum getSandboxTimeUnit() {
+    return sandboxTimeUnit;
+  }
+  public void setSandboxTimeUnit(SandboxTimeUnitEnum sandboxTimeUnit) {
+    this.sandboxTimeUnit = sandboxTimeUnit;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -68,12 +170,14 @@ public class APIMaxTpsDTO   {
     }
     APIMaxTpsDTO apIMaxTps = (APIMaxTpsDTO) o;
     return Objects.equals(production, apIMaxTps.production) &&
-        Objects.equals(sandbox, apIMaxTps.sandbox);
+        Objects.equals(productionTimeUnit, apIMaxTps.productionTimeUnit) &&
+        Objects.equals(sandbox, apIMaxTps.sandbox) &&
+        Objects.equals(sandboxTimeUnit, apIMaxTps.sandboxTimeUnit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(production, sandbox);
+    return Objects.hash(production, productionTimeUnit, sandbox, sandboxTimeUnit);
   }
 
   @Override
@@ -82,7 +186,9 @@ public class APIMaxTpsDTO   {
     sb.append("class APIMaxTpsDTO {\n");
     
     sb.append("    production: ").append(toIndentedString(production)).append("\n");
+    sb.append("    productionTimeUnit: ").append(toIndentedString(productionTimeUnit)).append("\n");
     sb.append("    sandbox: ").append(toIndentedString(sandbox)).append("\n");
+    sb.append("    sandboxTimeUnit: ").append(toIndentedString(sandboxTimeUnit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

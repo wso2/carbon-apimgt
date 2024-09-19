@@ -145,8 +145,9 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
   }
 
   
-  @ApiModelProperty(value = "Whether token-based throttling is enabled")
+  @ApiModelProperty(required = true, value = "Whether token-based throttling is enabled")
   @JsonProperty("isTokenBasedThrottlingEnabled")
+  @NotNull
   public Boolean isIsTokenBasedThrottlingEnabled() {
     return isTokenBasedThrottlingEnabled;
   }

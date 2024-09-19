@@ -1400,7 +1400,8 @@ public class PublisherCommonUtils {
             AIEndpointConfiguration endpointConfiguration = buildEndpointConfiguration(dto);
             aiConfiguration.setAiEndpointConfiguration(endpointConfiguration);
         }
-        if (dto.getThrottlingConfiguration() != null) {
+        if (dto.getThrottlingConfiguration() != null
+                && dto.getThrottlingConfiguration().isIsTokenBasedThrottlingEnabled()) {
             TokenBaseThrottlingCountHolder throttlingConfig = buildThrottlingConfiguration(dto);
             aiConfiguration.setTokenBasedThrottlingConfiguration(throttlingConfig);
         }
@@ -1435,18 +1436,30 @@ public class PublisherCommonUtils {
         APIAiConfigurationThrottlingConfigurationDTO throttlingConfigDTO = dto.getThrottlingConfiguration();
         TokenBaseThrottlingCountHolder throttlingConfig = new TokenBaseThrottlingCountHolder();
 
-        throttlingConfig.setProductionMaxPromptTokenCount(throttlingConfigDTO
-                .getProductionMaxPromptTokenCount());
-        throttlingConfig.setProductionMaxCompletionTokenCount(throttlingConfigDTO
-                .getProductionMaxCompletionTokenCount());
-        throttlingConfig.setProductionMaxTotalTokenCount(throttlingConfigDTO
-                .getProductionMaxTotalTokenCount());
-        throttlingConfig.setSandboxMaxPromptTokenCount(throttlingConfigDTO
-                .getSandboxMaxPromptTokenCount());
-        throttlingConfig.setSandboxMaxCompletionTokenCount(throttlingConfigDTO
-                .getSandboxMaxCompletionTokenCount());
-        throttlingConfig.setSandboxMaxTotalTokenCount(throttlingConfigDTO
-                .getSandboxMaxTotalTokenCount());
+        if (throttlingConfigDTO.getProductionMaxPromptTokenCount() != null) {
+            throttlingConfig.setProductionMaxPromptTokenCount(
+                    throttlingConfigDTO.getProductionMaxPromptTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getProductionMaxCompletionTokenCount() != null) {
+            throttlingConfig.setProductionMaxCompletionTokenCount(
+                    throttlingConfigDTO.getProductionMaxCompletionTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getProductionMaxTotalTokenCount() != null) {
+            throttlingConfig.setProductionMaxTotalTokenCount(
+                    throttlingConfigDTO.getProductionMaxTotalTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getSandboxMaxPromptTokenCount() != null) {
+            throttlingConfig.setSandboxMaxPromptTokenCount(
+                    throttlingConfigDTO.getSandboxMaxPromptTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getSandboxMaxCompletionTokenCount() != null) {
+            throttlingConfig.setSandboxMaxCompletionTokenCount(
+                    throttlingConfigDTO.getSandboxMaxCompletionTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getSandboxMaxTotalTokenCount() != null) {
+            throttlingConfig.setSandboxMaxTotalTokenCount(
+                    throttlingConfigDTO.getSandboxMaxTotalTokenCount().toString());
+        }
         throttlingConfig.setTokenBasedThrottlingEnabled(throttlingConfigDTO
                 .isIsTokenBasedThrottlingEnabled());
 
@@ -1508,22 +1521,36 @@ public class PublisherCommonUtils {
 
         APIAiConfigurationThrottlingConfigurationDTO throttlingConfigurationsDTO =
                 new APIAiConfigurationThrottlingConfigurationDTO();
-
-        throttlingConfigurationsDTO.setProductionMaxPromptTokenCount(throttlingConfig
-                .getProductionMaxPromptTokenCount());
-        throttlingConfigurationsDTO.setProductionMaxCompletionTokenCount(throttlingConfig
-                .getProductionMaxCompletionTokenCount());
-        throttlingConfigurationsDTO.setProductionMaxTotalTokenCount(throttlingConfig
-                .getProductionMaxTotalTokenCount());
-        throttlingConfigurationsDTO.setSandboxMaxPromptTokenCount(throttlingConfig
-                .getSandboxMaxPromptTokenCount());
-        throttlingConfigurationsDTO.setSandboxMaxCompletionTokenCount(throttlingConfig
-                .getSandboxMaxCompletionTokenCount());
-        throttlingConfigurationsDTO.setSandboxMaxTotalTokenCount(throttlingConfig
-                .getSandboxMaxTotalTokenCount());
-        throttlingConfigurationsDTO.setIsTokenBasedThrottlingEnabled(throttlingConfig
-                .isTokenBasedThrottlingEnabled());
-
+        try {
+            if (throttlingConfig.getProductionMaxPromptTokenCount() != null) {
+                throttlingConfigurationsDTO.setProductionMaxPromptTokenCount(
+                        Long.parseLong(throttlingConfig.getProductionMaxPromptTokenCount()));
+            }
+            if (throttlingConfig.getProductionMaxCompletionTokenCount() != null) {
+                throttlingConfigurationsDTO.setProductionMaxCompletionTokenCount(
+                        Long.parseLong(throttlingConfig.getProductionMaxCompletionTokenCount()));
+            }
+            if (throttlingConfig.getProductionMaxTotalTokenCount() != null) {
+                throttlingConfigurationsDTO.setProductionMaxTotalTokenCount(
+                        Long.parseLong(throttlingConfig.getProductionMaxTotalTokenCount()));
+            }
+            if (throttlingConfig.getSandboxMaxPromptTokenCount() != null) {
+                throttlingConfigurationsDTO.setSandboxMaxPromptTokenCount(
+                        Long.parseLong(throttlingConfig.getSandboxMaxPromptTokenCount()));
+            }
+            if (throttlingConfig.getSandboxMaxCompletionTokenCount() != null) {
+                throttlingConfigurationsDTO.setSandboxMaxCompletionTokenCount(
+                        Long.parseLong(throttlingConfig.getSandboxMaxCompletionTokenCount()));
+            }
+            if (throttlingConfig.getSandboxMaxTotalTokenCount() != null) {
+                throttlingConfigurationsDTO.setSandboxMaxTotalTokenCount(
+                        Long.parseLong(throttlingConfig.getSandboxMaxTotalTokenCount()));
+            }
+            throttlingConfigurationsDTO.setIsTokenBasedThrottlingEnabled(
+                    throttlingConfig.isTokenBasedThrottlingEnabled());
+        } catch (NumberFormatException e) {
+            log.error("Cannot convert to Long format when setting AI throttling configurations for API", e);
+        }
         return throttlingConfigurationsDTO;
     }
 

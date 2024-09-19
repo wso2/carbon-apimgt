@@ -1105,6 +1105,7 @@ paths:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/isAiApi'
       responses:
         200:
           description: |
@@ -4442,6 +4443,7 @@ paths:
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/policyLevel'
         - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/isAiApi'
       responses:
         200:
           description: |
@@ -10102,6 +10104,8 @@ components:
                   type: string
             throttlingConfiguration:
               type: object
+              required:
+                - isTokenBasedThrottlingEnabled
               properties:
                 productionMaxPromptTokenCount:
                   type: integer
@@ -11058,6 +11062,24 @@ components:
             Unit of data allowed to be transfered. Allowed values are "KB", "MB" and "GB"
           type: string
           example: KB
+        totalTokenCount:
+          type: integer
+          description: |
+            Maximum number of total tokens which can be used within a provided unit time
+          format: int64
+          example: 1000
+        promptTokenCount:
+          type: integer
+          description: |
+            Maximum number of prompt tokens which can be used within a provided unit time
+          format: int64
+          example: 500
+        completionTokenCount:
+          type: integer
+          description: |
+            Maximum number of completion tokens which can be used within a provided unit time
+          format: int64
+          example: 600
         unitTime:
           type: integer
           format: int64
@@ -11080,6 +11102,7 @@ components:
           enum:
             - REQUESTCOUNT
             - BANDWIDTHVOLUME
+            - AIAPIQUOTA
           example: REQUESTCOUNT
         tierPlan:
           type: string
@@ -11696,10 +11719,26 @@ components:
           type: integer
           format: int64
           example: 1000
+        productionTimeUnit:
+          type: string
+          description: "Time unit for the production in milliseconds. Possible values are 1sec, 1min, 1hour"
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
         sandbox:
           type: integer
           format: int64
           example: 1000
+        sandboxTimeUnit:
+          type: string
+          description: "Time unit for the sandbox in milliseconds. Possible values are 1sec, 1min, 1hour"
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
     APIBusinessInformation:
       type: object
       properties:
@@ -13774,6 +13813,14 @@ components:
       schema:
         type: string
         default: application/json
+    isAiApi:
+      name: isAiApi
+      in: query
+      description: |
+        Indicates the quota policy type to be AI API quota or not.
+      schema:
+        type: boolean
+        default: false
     offset:
       name: offset
       in: query

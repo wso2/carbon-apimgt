@@ -61,6 +61,9 @@ return null;
     private Map<String, String> attributes = new HashMap<String, String>();
     private Long requestCount = null;
     private String dataUnit = null;
+    private Long totalTokenCount = null;
+    private Long promptTokenCount = null;
+    private Long completionTokenCount = null;
     private Long unitTime = null;
     private String timeUnit = null;
     private Integer rateLimitCount = 0;
@@ -70,7 +73,8 @@ return null;
     @XmlEnum(String.class)
     public enum QuotaPolicyTypeEnum {
         REQUESTCOUNT("REQUESTCOUNT"),
-        BANDWIDTHVOLUME("BANDWIDTHVOLUME");
+        BANDWIDTHVOLUME("BANDWIDTHVOLUME"),
+        AIAPIQUOTA("AIAPIQUOTA");
         private String value;
 
         QuotaPolicyTypeEnum (String v) {
@@ -257,6 +261,60 @@ return null;
   }
 
   /**
+   * Maximum number of total tokens which can be used within a provided unit time 
+   **/
+  public ThrottlingPolicyDTO totalTokenCount(Long totalTokenCount) {
+    this.totalTokenCount = totalTokenCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1000", value = "Maximum number of total tokens which can be used within a provided unit time ")
+  @JsonProperty("totalTokenCount")
+  public Long getTotalTokenCount() {
+    return totalTokenCount;
+  }
+  public void setTotalTokenCount(Long totalTokenCount) {
+    this.totalTokenCount = totalTokenCount;
+  }
+
+  /**
+   * Maximum number of prompt tokens which can be used within a provided unit time 
+   **/
+  public ThrottlingPolicyDTO promptTokenCount(Long promptTokenCount) {
+    this.promptTokenCount = promptTokenCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "500", value = "Maximum number of prompt tokens which can be used within a provided unit time ")
+  @JsonProperty("promptTokenCount")
+  public Long getPromptTokenCount() {
+    return promptTokenCount;
+  }
+  public void setPromptTokenCount(Long promptTokenCount) {
+    this.promptTokenCount = promptTokenCount;
+  }
+
+  /**
+   * Maximum number of completion tokens which can be used within a provided unit time 
+   **/
+  public ThrottlingPolicyDTO completionTokenCount(Long completionTokenCount) {
+    this.completionTokenCount = completionTokenCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "600", value = "Maximum number of completion tokens which can be used within a provided unit time ")
+  @JsonProperty("completionTokenCount")
+  public Long getCompletionTokenCount() {
+    return completionTokenCount;
+  }
+  public void setCompletionTokenCount(Long completionTokenCount) {
+    this.completionTokenCount = completionTokenCount;
+  }
+
+  /**
    **/
   public ThrottlingPolicyDTO unitTime(Long unitTime) {
     this.unitTime = unitTime;
@@ -418,6 +476,9 @@ return null;
         Objects.equals(attributes, throttlingPolicy.attributes) &&
         Objects.equals(requestCount, throttlingPolicy.requestCount) &&
         Objects.equals(dataUnit, throttlingPolicy.dataUnit) &&
+        Objects.equals(totalTokenCount, throttlingPolicy.totalTokenCount) &&
+        Objects.equals(promptTokenCount, throttlingPolicy.promptTokenCount) &&
+        Objects.equals(completionTokenCount, throttlingPolicy.completionTokenCount) &&
         Objects.equals(unitTime, throttlingPolicy.unitTime) &&
         Objects.equals(timeUnit, throttlingPolicy.timeUnit) &&
         Objects.equals(rateLimitCount, throttlingPolicy.rateLimitCount) &&
@@ -430,7 +491,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description, policyLevel, displayName, attributes, requestCount, dataUnit, unitTime, timeUnit, rateLimitCount, rateLimitTimeUnit, quotaPolicyType, tierPlan, stopOnQuotaReach, monetizationProperties);
+    return Objects.hash(name, description, policyLevel, displayName, attributes, requestCount, dataUnit, totalTokenCount, promptTokenCount, completionTokenCount, unitTime, timeUnit, rateLimitCount, rateLimitTimeUnit, quotaPolicyType, tierPlan, stopOnQuotaReach, monetizationProperties);
   }
 
   @Override
@@ -445,6 +506,9 @@ return null;
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("    dataUnit: ").append(toIndentedString(dataUnit)).append("\n");
+    sb.append("    totalTokenCount: ").append(toIndentedString(totalTokenCount)).append("\n");
+    sb.append("    promptTokenCount: ").append(toIndentedString(promptTokenCount)).append("\n");
+    sb.append("    completionTokenCount: ").append(toIndentedString(completionTokenCount)).append("\n");
     sb.append("    unitTime: ").append(toIndentedString(unitTime)).append("\n");
     sb.append("    timeUnit: ").append(toIndentedString(timeUnit)).append("\n");
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");

@@ -127,6 +127,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private String productionUnitTime = "1000";
     private String sandboxMaxCount;
     private String productionMaxCount;
+    private String isTokenBasedThrottlingEnabled = "false";
+    private String productionMaxPromptTokenCount;
+    private String productionMaxCompletionTokenCount;
+    private String productionMaxTotalTokenCount;
+    private String sandboxMaxPromptTokenCount;
+    private String sandboxMaxCompletionTokenCount;
+    private String sandboxMaxTotalTokenCount;
     private RoleBasedAccessRateController roleBasedAccessController;
 
     public ThrottleHandler() {
@@ -1287,6 +1294,63 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     public void setProductionUnitTime(String productionUnitTime) {
         this.productionUnitTime = productionUnitTime;
     }
+
+    public String getIsTokenBasedThrottlingEnabled() {
+        return isTokenBasedThrottlingEnabled;
+    }
+
+    public void setIsTokenBasedThrottlingEnabled(String isTokenBasedThrottlingEnabled) {
+        this.isTokenBasedThrottlingEnabled = isTokenBasedThrottlingEnabled;
+    }
+
+    public String getProductionMaxPromptTokenCount() {
+        return productionMaxPromptTokenCount;
+    }
+
+    public void setProductionMaxPromptTokenCount(String productionMaxPromptTokenCount) {
+        this.productionMaxPromptTokenCount = productionMaxPromptTokenCount;
+    }
+
+    public String getProductionMaxCompletionTokenCount() {
+        return productionMaxCompletionTokenCount;
+    }
+
+    public void setProductionMaxCompletionTokenCount(String productionMaxCompletionTokenCount) {
+        this.productionMaxCompletionTokenCount = productionMaxCompletionTokenCount;
+    }
+
+    public String getProductionMaxTotalTokenCount() {
+        return productionMaxTotalTokenCount;
+    }
+
+    public void setProductionMaxTotalTokenCount(String productionMaxTotalTokenCount) {
+        this.productionMaxTotalTokenCount = productionMaxTotalTokenCount;
+    }
+
+    public String getSandboxMaxPromptTokenCount() {
+        return sandboxMaxPromptTokenCount;
+    }
+
+    public void setSandboxMaxPromptTokenCount(String sandboxMaxPromptTokenCount) {
+        this.sandboxMaxPromptTokenCount = sandboxMaxPromptTokenCount;
+    }
+
+    public String getSandboxMaxCompletionTokenCount() {
+        return sandboxMaxCompletionTokenCount;
+    }
+
+    public void setSandboxMaxCompletionTokenCount(String sandboxMaxCompletionTokenCount) {
+        this.sandboxMaxCompletionTokenCount = sandboxMaxCompletionTokenCount;
+    }
+
+    public String getSandboxMaxTotalTokenCount() {
+        return sandboxMaxTotalTokenCount;
+    }
+
+    public void setSandboxMaxTotalTokenCount(String sandboxMaxTotalTokenCount) {
+        this.sandboxMaxTotalTokenCount = sandboxMaxTotalTokenCount;
+    }
+
 
     public void init(SynapseEnvironment synapseEnvironment) {
         initThrottleForHardLimitThrottling();
