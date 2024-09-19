@@ -552,21 +552,12 @@ public interface APIAdmin  {
     LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException;
 
     /**
-     * Retrieves all LLM Providers for the given organization.
-     *
-     * @param organization The organization name.
-     * @return List of LLM Providers.
-     * @throws APIManagementException If retrieval fails.
-     */
-    List<LLMProvider> getLLMProvidersByOrg(String organization) throws APIManagementException;
-
-    /**
      * Retrieves configurations of all LLM Providers.
      *
      * @return List of LLM Provider configurations.
      * @throws APIManagementException If retrieval fails.
      */
-    List<LLMProvider> getLLMProviderConfigurations() throws APIManagementException;
+    List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport) throws APIManagementException;
 
     /**
      * Deletes an LLM Provider by ID for the given organization.
@@ -597,13 +588,4 @@ public interface APIAdmin  {
      * @throws APIManagementException If retrieval fails.
      */
     LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException;
-
-    /**
-     * Retrieves built-in LLM Providers for the given organization.
-     *
-     * @param organization The organization name.
-     * @return List of built-in LLM Providers.
-     * @throws APIManagementException If retrieval fails.
-     */
-    List<LLMProvider> getBuiltInLLMProviders(String organization) throws APIManagementException;
 }

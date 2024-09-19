@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -437,7 +438,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      */
     private void updateLLMProvider(String eventJson) {
         LLMProvider provider = extractLLMProviderDetails(eventJson);
-        String configurations = extractConfigurations(eventJson);
+        String configurations = LLMProviderManager.getInstance().getLLMProviderConfiguration(provider.getName(),
+                provider.getApiVersion(), provider.getOrganization()).getConfigurations();
         DataHolder.getInstance().updateLLMProviderConfigurations(provider, configurations);
     }
 
@@ -447,8 +449,10 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      * @param eventJson JSON string containing provider details and configuration.
      */
     private void createLLMProvider(String eventJson) {
+
         LLMProvider provider = extractLLMProviderDetails(eventJson);
-        String configurations = extractConfigurations(eventJson);
+        String configurations = LLMProviderManager.getInstance().getLLMProviderConfiguration(provider.getName(),
+                provider.getApiVersion(), provider.getOrganization()).getConfigurations();
         DataHolder.getInstance().addLLMProviderConfigurations(provider, configurations);
     }
 

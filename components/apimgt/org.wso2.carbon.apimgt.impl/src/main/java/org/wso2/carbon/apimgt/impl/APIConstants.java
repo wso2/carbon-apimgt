@@ -365,13 +365,13 @@ public final class APIConstants {
 
     public static final String PROTOTYPE_OVERVIEW_IMPLEMENTATION = "overview_implementation";
     public static final String API_PRODUCTION_THROTTLE_MAXTPS = "overview_productionTps";
-    public static final String API_PRODUCTION_THROTTLE_MAX_PROMPT_TOKENS = "overview_productionMaxPromptTokens";
-    public static final String API_PRODUCTION_THROTTLE_MAX_COMPLETION_TOKENS = "overview_productionMaxCompletionTokens";
-    public static final String API_PRODUCTION_THROTTLE_MAX_TOTAL_TOKENS = "overview_productionMaxTotalTokens";
     public static final String API_SANDBOX_THROTTLE_MAXTPS = "overview_sandboxTps";
-    public static final String API_SANDBOX_THROTTLE_MAX_PROMPT_TOKENS = "overview_sandboxMaxPromptTokens";
-    public static final String API_SANDBOX_THROTTLE_MAX_COMPLETION_TOKENS = "overview_sandboxMaxCompletionTokens";
-    public static final String API_SANDBOX_THROTTLE_MAX_TOTAL_TOKENS = "overview_sandboxMaxTotalTokens";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_SECOND = "SECOND";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_SECOND_MS = "1000";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_MINUTE = "MINUTE";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS = "60000";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_HOUR = "HOUR";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS = "3600000";
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";

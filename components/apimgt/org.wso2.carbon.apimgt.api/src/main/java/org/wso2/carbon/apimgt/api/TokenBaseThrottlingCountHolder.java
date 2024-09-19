@@ -1,13 +1,12 @@
 /*
+ * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -15,24 +14,27 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
-package org.wso2.carbon.apimgt.gateway.dto;
+package org.wso2.carbon.apimgt.api;
 
 public class TokenBaseThrottlingCountHolder {
 
-    private Long productionMaxPromptTokenCount = -1L;
-    private Long productionMaxCompletionTokenCount = -1L;
-    private Long productionMaxTotalTokenCount = -1L;
-    private Long sandboxMaxPromptTokenCount = -1L;
-    private Long sandboxMaxCompletionTokenCount = -1L;
-    private Long sandboxMaxTotalTokenCount = -1L;
-    private boolean isTokenBasedThrottlingEnabled = false;
+    private String productionMaxPromptTokenCount;
+    private String productionMaxCompletionTokenCount;
+    private String productionMaxTotalTokenCount;
+    private String sandboxMaxPromptTokenCount;
+    private String sandboxMaxCompletionTokenCount;
+    private String sandboxMaxTotalTokenCount;
+    private Boolean isTokenBasedThrottlingEnabled = false;
 
-    public TokenBaseThrottlingCountHolder(Long productionMaxPromptTokenCount, Long productionMaxCompletionTokenCount,
-                                          Long productionMaxTotalTokenCount, Long sandboxMaxPromptTokenCount,
-                                          Long sandboxMaxCompletionTokenCount, Long sandboxMaxTotalTokenCount,
+    public TokenBaseThrottlingCountHolder() {
+
+    }
+
+    public TokenBaseThrottlingCountHolder(String productionMaxPromptTokenCount, String productionMaxCompletionTokenCount,
+            String productionMaxTotalTokenCount, String sandboxMaxPromptTokenCount,
+            String sandboxMaxCompletionTokenCount, String sandboxMaxTotalTokenCount,
                                           boolean isTokenBasedThrottlingEnabled) {
         this.productionMaxPromptTokenCount = productionMaxPromptTokenCount;
         this.productionMaxCompletionTokenCount = productionMaxCompletionTokenCount;
@@ -43,59 +45,59 @@ public class TokenBaseThrottlingCountHolder {
         this.isTokenBasedThrottlingEnabled = isTokenBasedThrottlingEnabled;
     }
 
-    public Long getProductionMaxPromptTokenCount() {
+    public String getProductionMaxPromptTokenCount() {
         return productionMaxPromptTokenCount;
     }
 
-    public void setProductionMaxPromptTokenCount(Long productionMaxPromptTokenCount) {
+    public void setProductionMaxPromptTokenCount(String productionMaxPromptTokenCount) {
         this.productionMaxPromptTokenCount = productionMaxPromptTokenCount;
     }
 
-    public Long getProductionMaxCompletionTokenCount() {
+    public String getProductionMaxCompletionTokenCount() {
         return productionMaxCompletionTokenCount;
     }
 
-    public void setProductionMaxCompletionTokenCount(Long productionMaxCompletionTokenCount) {
+    public void setProductionMaxCompletionTokenCount(String productionMaxCompletionTokenCount) {
         this.productionMaxCompletionTokenCount = productionMaxCompletionTokenCount;
     }
 
-    public Long getProductionMaxTotalTokenCount() {
+    public String getProductionMaxTotalTokenCount() {
         return productionMaxTotalTokenCount;
     }
 
-    public void setProductionMaxTotalTokenCount(Long productionMaxTotalTokenCount) {
+    public void setProductionMaxTotalTokenCount(String productionMaxTotalTokenCount) {
         this.productionMaxTotalTokenCount = productionMaxTotalTokenCount;
     }
 
-    public Long getSandboxMaxPromptTokenCount() {
+    public String getSandboxMaxPromptTokenCount() {
         return sandboxMaxPromptTokenCount;
     }
 
-    public void setSandboxMaxPromptTokenCount(Long sandboxMaxPromptTokenCount) {
+    public void setSandboxMaxPromptTokenCount(String sandboxMaxPromptTokenCount) {
         this.sandboxMaxPromptTokenCount = sandboxMaxPromptTokenCount;
     }
 
-    public Long getSandboxMaxCompletionTokenCount() {
+    public String getSandboxMaxCompletionTokenCount() {
         return sandboxMaxCompletionTokenCount;
     }
 
-    public void setSandboxMaxCompletionTokenCount(Long sandboxMaxCompletionTokenCount) {
+    public void setSandboxMaxCompletionTokenCount(String sandboxMaxCompletionTokenCount) {
         this.sandboxMaxCompletionTokenCount = sandboxMaxCompletionTokenCount;
     }
 
-    public Long getSandboxMaxTotalTokenCount() {
+    public String getSandboxMaxTotalTokenCount() {
         return sandboxMaxTotalTokenCount;
     }
 
-    public void setSandboxMaxTotalTokenCount(Long sandboxMaxTotalTokenCount) {
+    public void setSandboxMaxTotalTokenCount(String sandboxMaxTotalTokenCount) {
         this.sandboxMaxTotalTokenCount = sandboxMaxTotalTokenCount;
     }
 
-    public boolean isTokenBasedThrottlingEnabled() {
+    public Boolean isTokenBasedThrottlingEnabled() {
         return isTokenBasedThrottlingEnabled;
     }
 
-    public void setTokenBasedThrottlingEnabled(boolean tokenBasedThrottlingEnabled) {
+    public void setTokenBasedThrottlingEnabled(Boolean tokenBasedThrottlingEnabled) {
         isTokenBasedThrottlingEnabled = tokenBasedThrottlingEnabled;
     }
 }

@@ -20,6 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public interface LlmProviderConfigsApiService {
-      public Response getLLMProviderConfigs(MessageContext messageContext) throws APIManagementException;
+public interface LlmProvidersApiService {
+      public Response getLLMProviders(String name, String apiVersion, String organization, MessageContext messageContext) throws APIManagementException;
 }

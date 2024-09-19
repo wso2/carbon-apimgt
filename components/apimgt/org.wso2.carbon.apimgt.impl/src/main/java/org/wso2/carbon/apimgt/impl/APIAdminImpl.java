@@ -606,20 +606,15 @@ public class APIAdminImpl implements APIAdmin {
         LLMProvider result = apiMgtDAO.addLLMProvider(provider);
         if (result != null) {
             new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(),
-                    result.getOrganization(), result.getConfigurations(),
+                    result.getOrganization(),
                     APIConstants.EventType.LLM_PROVIDER_CREATE.name());
         }
         return result;
     }
 
     @Override
-    public List<LLMProvider> getLLMProvidersByOrg(String organization) throws APIManagementException {
-        return apiMgtDAO.getLLMProvidersByOrg(organization);
-    }
-
-    @Override
-    public List<LLMProvider> getLLMProviderConfigurations() throws APIManagementException {
-        return apiMgtDAO.getLLMProviderConfigurations();
+    public List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport) throws APIManagementException {
+        return apiMgtDAO.getLLMProviders(organization, name, apiVersion, builtInSupport);
     }
 
     @Override
@@ -627,7 +622,7 @@ public class APIAdminImpl implements APIAdmin {
 
         LLMProvider result = apiMgtDAO.deleteLLMProvider(organization, llmProviderId, builtIn);
         if (result != null) {
-            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), organization, null,
+            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), organization,
                     APIConstants.EventType.LLM_PROVIDER_DELETE.name());
         }
         return result;
@@ -638,8 +633,7 @@ public class APIAdminImpl implements APIAdmin {
 
         LLMProvider result = apiMgtDAO.updateLLMProvider(provider);
         if (result != null) {
-            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), result.getOrganization(),
-                    provider.getConfigurations(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
+            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), result.getOrganization(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
         }
         return result;
     }
@@ -648,12 +642,6 @@ public class APIAdminImpl implements APIAdmin {
     public LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException {
 
         return apiMgtDAO.getLLMProvider(organization, llmProviderId);
-    }
-
-    @Override
-    public List<LLMProvider> getBuiltInLLMProviders(String organization) throws APIManagementException {
-
-        return apiMgtDAO.getBuiltInLLMProviders(organization);
     }
 
     @Override

@@ -57,7 +57,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_API_VERSION = "apiVersion";
         public static final String LLM_PROVIDER_ORGANIZATION = "organization";
         public static final String LLM_PROVIDER_CONFIGURATIONS = "configurations";
-        public static final String LLM_CONFIGS_ENDPOINT = "/llm-provider-configs";
+        public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
         public static final String CONFIGURATIONS = "configurations";
         public static final String AI_API_DEFINITION_FILE_PATH = File.separator + "repository" + File.separator +
                 "resources" + File.separator + "api_definitions" + File.separator;

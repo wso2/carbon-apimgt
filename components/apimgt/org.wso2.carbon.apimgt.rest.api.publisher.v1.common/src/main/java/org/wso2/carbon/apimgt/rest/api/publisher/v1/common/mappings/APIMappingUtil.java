@@ -466,7 +466,9 @@ public class APIMappingUtil {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
         }
-
+        if (dto.getAiConfiguration() != null) {
+            model.setAiConfiguration(PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration()));
+        }
         return model;
     }
 
@@ -977,9 +979,47 @@ public class APIMappingUtil {
             if (maxTpsDTO.getProduction() != null) {
                 api.setProductionMaxTps(maxTpsDTO.getProduction().toString());
             }
+            if (maxTpsDTO.getProductionTimeUnit() != null) {
+                api.setProductionTimeUnit(getTimeUnitInMilliseconds(maxTpsDTO.getProductionTimeUnit().toString()));
+            }
             if (maxTpsDTO.getSandbox() != null) {
                 api.setSandboxMaxTps(maxTpsDTO.getSandbox().toString());
             }
+            if (maxTpsDTO.getSandboxTimeUnit() != null) {
+                api.setSandboxTimeUnit(getTimeUnitInMilliseconds(maxTpsDTO.getSandboxTimeUnit().toString()));
+            }
+        }
+    }
+
+    /**
+     * Retrieves millisecond value for pre-defined time units.
+     * @param timeUnit String value of the time unit
+     * @return Millisecond value of the time unit
+     */
+    private static String getTimeUnitInMilliseconds(String timeUnit) {
+        switch(timeUnit) {
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS;
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS;
+        default:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND_MS;
+        }
+    }
+
+    /**
+     * Retrieved predefined strings for millisecond value.
+     * @param timeUnitInMillis Time in milliseconds
+     * @return  Time unit string for the given milliseconds value
+     */
+    private static String convertFromMilliseconds(String timeUnitInMillis) {
+        switch(timeUnitInMillis) {
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE;
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR;
+        default:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND;
         }
     }
 
@@ -1432,7 +1472,9 @@ public class APIMappingUtil {
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
-
+        if (model.getAiConfiguration() != null) {
+            dto.setAiConfiguration(PublisherCommonUtils.convertToApiAiConfigurationDTO(model.getAiConfiguration()));
+        }
         return dto;
     }
 
@@ -1594,6 +1636,14 @@ public class APIMappingUtil {
             }
             if (!StringUtils.isBlank(api.getSandboxMaxTps())) {
                 maxTpsDTO.setSandbox(Long.parseLong(api.getSandboxMaxTps()));
+            }
+            if (!StringUtils.isBlank(api.getProductionTimeUnit())) {
+                maxTpsDTO.setProductionTimeUnit(APIMaxTpsDTO.ProductionTimeUnitEnum.valueOf(
+                        convertFromMilliseconds(api.getProductionTimeUnit())));
+            }
+            if (!StringUtils.isBlank(api.getSandboxTimeUnit())) {
+                maxTpsDTO.setSandboxTimeUnit(APIMaxTpsDTO.SandboxTimeUnitEnum.valueOf(
+                        convertFromMilliseconds(api.getSandboxTimeUnit())));
             }
             dto.setMaxTps(maxTpsDTO);
         } catch (NumberFormatException e) {

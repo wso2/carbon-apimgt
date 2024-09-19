@@ -919,19 +919,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION, api.getImplementation());
 
             artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
-            artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAX_PROMPT_TOKENS,
-                    api.getProductionMaxPromptTokenCount());
-            artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAX_COMPLETION_TOKENS,
-                    api.getProductionMaxCompletionTokenCount());
-            artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAX_TOTAL_TOKENS,
-                   api.getProductionMaxTotalTokenCount());
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
-            artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAX_PROMPT_TOKENS,
-                    api.getSandboxMaxPromptTokenCount());
-            artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAX_COMPLETION_TOKENS,
-                    api.getSandboxMaxCompletionTokenCount());
-            artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAX_TOTAL_TOKENS,
-                    api.getSandboxMaxTotalTokenCount());
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, api.getAuthorizationHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER, api.getApiKeyHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
@@ -6497,10 +6485,12 @@ public final class APIUtil {
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
                 } else if (limit instanceof AIAPIQuotaLimit){
-                    // Todo: Need to implement this according to publisher and developer portals' requirements
                     AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
                     tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
                     tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
+                    tier.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
+                    tier.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
+                    tier.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());

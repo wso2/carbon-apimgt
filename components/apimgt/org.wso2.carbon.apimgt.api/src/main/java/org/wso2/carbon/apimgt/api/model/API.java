@@ -93,14 +93,9 @@ public class API implements Serializable {
 
     // Used for keeping Production & Sandbox Throttling limits.
     private String productionMaxTps;
-    private String productionMaxPromptTokenCount;
-    private String productionMaxCompletionTokenCount;
-    private String productionMaxTotalTokenCount;
+    private String productionTimeUnit = "1000";
     private String sandboxMaxTps;
-    private String sandboxMaxPromptTokenCount;
-    private String sandboxMaxCompletionTokenCount;
-    private String sandboxMaxTotalTokenCount;
-
+    private String sandboxTimeUnit = "1000";
 
     private String visibility;
     private String visibleRoles;
@@ -236,6 +231,18 @@ public class API implements Serializable {
     private String audience;
 
     private Set<String> audiences;
+
+    private AIConfiguration aiConfiguration;
+
+    public AIConfiguration getAiConfiguration() {
+
+        return aiConfiguration;
+    }
+
+    public void setAiConfiguration(AIConfiguration AiConfiguration) {
+
+        this.aiConfiguration = AiConfiguration;
+    }
 
     public String getAudience() {
         return audience;
@@ -479,60 +486,28 @@ public class API implements Serializable {
         this.productionMaxTps = productionMaxTps;
     }
 
-    public String getProductionMaxPromptTokenCount() {
-        return productionMaxPromptTokenCount;
+    public String getProductionTimeUnit() {
+        return productionTimeUnit;
     }
 
-    public void setProductionMaxPromptTokenCount(String productionMaxPromptTokenCount) {
-        this.productionMaxPromptTokenCount = productionMaxPromptTokenCount;
-    }
-
-    public String getProductionMaxCompletionTokenCount() {
-        return productionMaxCompletionTokenCount;
-    }
-
-    public void setProductionMaxCompletionTokenCount(String productionMaxCompletionTokenCount) {
-        this.productionMaxCompletionTokenCount = productionMaxCompletionTokenCount;
-    }
-
-    public String getProductionMaxTotalTokenCount() {
-        return productionMaxTotalTokenCount;
-    }
-
-    public void setProductionMaxTotalTokenCount(String productionMaxTotalTokenCount) {
-        this.productionMaxTotalTokenCount = productionMaxTotalTokenCount;
+    public void setProductionTimeUnit(String productionTimeUnit) {
+        this.productionTimeUnit = productionTimeUnit;
     }
 
     public String getSandboxMaxTps() {
         return sandboxMaxTps;
     }
 
+    public String getSandboxTimeUnit() {
+        return sandboxTimeUnit;
+    }
+
+    public void setSandboxTimeUnit(String sandboxTimeUnit) {
+        this.sandboxTimeUnit = sandboxTimeUnit;
+    }
+
     public void setSandboxMaxTps(String sandboxMaxTps) {
         this.sandboxMaxTps = sandboxMaxTps;
-    }
-
-    public String getSandboxMaxPromptTokenCount() {
-        return sandboxMaxPromptTokenCount;
-    }
-
-    public void setSandboxMaxPromptTokenCount(String sandboxMaxPromptTokenCount) {
-        this.sandboxMaxPromptTokenCount = sandboxMaxPromptTokenCount;
-    }
-
-    public String getSandboxMaxCompletionTokenCount() {
-        return sandboxMaxCompletionTokenCount;
-    }
-
-    public void setSandboxMaxCompletionTokenCount(String sandboxMaxCompletionTokenCount) {
-        this.sandboxMaxCompletionTokenCount = sandboxMaxCompletionTokenCount;
-    }
-
-    public String getSandboxMaxTotalTokenCount() {
-        return sandboxMaxTotalTokenCount;
-    }
-
-    public void setSandboxMaxTotalTokenCount(String sandboxMaxTotalTokenCount) {
-        this.sandboxMaxTotalTokenCount = sandboxMaxTotalTokenCount;
     }
 
     public boolean isAdvertiseOnly() {

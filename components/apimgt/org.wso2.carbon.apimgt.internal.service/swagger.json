@@ -847,13 +847,28 @@
         }
       }
     },
-    "/llm-provider-configs" : {
+    "/llm-providers" : {
       "get" : {
         "tags" : [ "LLMProviders" ],
         "summary" : "Retrieve persisted LLM Providers",
         "description" : "This retrieve the persisted LLM Providers.\n",
-        "operationId" : "getLLMProviderConfigs",
-        "parameters" : [ ],
+        "operationId" : "getLLMProviders",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "apiVersion",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "organization",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Event Received success",
@@ -2020,34 +2035,6 @@
         }
       } ]
     },
-    "LLMProviderList" : {
-      "properties" : {
-        "apis" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/LLMProvider"
-          }
-        }
-      },
-      "title" : "LLM Provider Config List"
-    },
-    "LLMProvider" : {
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        },
-        "apiVersion" : {
-          "type" : "string"
-        },
-        "organization" : {
-          "type" : "string"
-        },
-        "configurations" : {
-          "type" : "string"
-        }
-      },
-      "title" : "LLM Provider Config"
-    },
     "AIAPIQuotaLimit" : {
       "title" : "AI Quota Limit object",
       "allOf" : [ {
@@ -2081,6 +2068,34 @@
           }
         }
       } ]
+    },
+    "LLMProviderList" : {
+      "properties" : {
+        "apis" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/LLMProvider"
+          }
+        }
+      },
+      "title" : "LLM Provider Config List"
+    },
+    "LLMProvider" : {
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "apiVersion" : {
+          "type" : "string"
+        },
+        "organization" : {
+          "type" : "string"
+        },
+        "configurations" : {
+          "type" : "string"
+        }
+      },
+      "title" : "LLM Provider"
     },
     "APILoggingConfigList" : {
       "properties" : {

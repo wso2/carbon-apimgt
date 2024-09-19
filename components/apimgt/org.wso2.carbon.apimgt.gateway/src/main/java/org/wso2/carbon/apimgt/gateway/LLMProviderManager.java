@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2024 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.gateway;
 
 import org.apache.commons.codec.binary.Base64;
@@ -82,6 +100,29 @@ public class LLMProviderManager {
         } catch (IOException | APIManagementException ex) {
             log.error("Error while calling internal service API", ex);
         }
+    }
+
+    public LLMProvider getLLMProviderConfiguration(String name, String apiVersion, String organization) {
+        LLMProvider llmProvider = new LLMProvider();
+        try {
+            String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT + "?name=" + name +
+                    "&apiVersion=" + apiVersion + "&organization=" + organization);
+            JSONObject responseJson = new JSONObject(responseString);
+
+            JSONArray llmProviderConfigArray = responseJson.getJSONArray("apis");
+            JSONObject apiObj = llmProviderConfigArray.getJSONObject(0);
+            String configurations = apiObj.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
+            llmProvider.setName(name);
+            llmProvider.setApiVersion(apiVersion);
+            llmProvider.setOrganization(organization);
+            llmProvider.setConfigurations(configurations);
+            if (log.isDebugEnabled()) {
+                log.debug("Response : " + responseJson);
+            }
+        } catch (IOException | APIManagementException ex) {
+            log.error("Error while calling internal service API", ex);
+        }
+        return llmProvider;
     }
 
     /**
