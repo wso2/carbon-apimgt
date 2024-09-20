@@ -1141,9 +1141,8 @@ public class SubscriptionValidationDAO {
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
                         if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
                             AIConfiguration aiConfiguration = new AIConfiguration();
+                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
                             aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
-                            aiConfiguration.setLlmProviderName(resultSet.getString("LLM_PROVIDER_NAME"));
-                            aiConfiguration.setLlmProviderApiVersion(resultSet.getString("LLM_PROVIDER_API_VERSION"));
                             aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }
@@ -1271,9 +1270,8 @@ public class SubscriptionValidationDAO {
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
                             AIConfiguration aiConfiguration = new AIConfiguration();
+                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
                             aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
-                            aiConfiguration.setLlmProviderName(resultSet.getString("LLM_PROVIDER_NAME"));
-                            aiConfiguration.setLlmProviderApiVersion(resultSet.getString("LLM_PROVIDER_API_VERSION"));
                             aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }
@@ -1486,9 +1484,8 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
                             AIConfiguration aiConfiguration = new AIConfiguration();
+                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
                             aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
-                            aiConfiguration.setLlmProviderName(resultSet.getString("LLM_PROVIDER_NAME"));
-                            aiConfiguration.setLlmProviderApiVersion(resultSet.getString("LLM_PROVIDER_API_VERSION"));
                             aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }
@@ -1582,9 +1579,8 @@ public class SubscriptionValidationDAO {
                         api.setEnvironment(deploymentName);
                         if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
                             AIConfiguration aiConfiguration = new AIConfiguration();
+                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
                             aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
-                            aiConfiguration.setLlmProviderName(resultSet.getString("LLM_PROVIDER_NAME"));
-                            aiConfiguration.setLlmProviderApiVersion(resultSet.getString("LLM_PROVIDER_API_VERSION"));
                             aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }

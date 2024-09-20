@@ -19,8 +19,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public class AIConfigurationDTO   {
   
     private AIEndpointConfigurationDTO aiEndpointConfiguration = null;
-    private String llmProviderName = null;
-    private String llmProviderApiVersion = null;
+    private String llmProviderId = null;
     private TokenBaseThrottlingCountHolderDTO tokenBasedThrottlingConfiguration = null;
 
   /**
@@ -42,39 +41,21 @@ public class AIConfigurationDTO   {
   }
 
   /**
-   * The name of the LLM (Large Language Model) provider.
+   * UUID of the LLM (Large Language Model) provider.
    **/
-  public AIConfigurationDTO llmProviderName(String llmProviderName) {
-    this.llmProviderName = llmProviderName;
+  public AIConfigurationDTO llmProviderId(String llmProviderId) {
+    this.llmProviderId = llmProviderId;
     return this;
   }
 
   
-  @ApiModelProperty(value = "The name of the LLM (Large Language Model) provider.")
-  @JsonProperty("llmProviderName")
-  public String getLlmProviderName() {
-    return llmProviderName;
+  @ApiModelProperty(value = "UUID of the LLM (Large Language Model) provider.")
+  @JsonProperty("llmProviderId")
+  public String getLlmProviderId() {
+    return llmProviderId;
   }
-  public void setLlmProviderName(String llmProviderName) {
-    this.llmProviderName = llmProviderName;
-  }
-
-  /**
-   * The version of the API provided by the LLM provider.
-   **/
-  public AIConfigurationDTO llmProviderApiVersion(String llmProviderApiVersion) {
-    this.llmProviderApiVersion = llmProviderApiVersion;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "The version of the API provided by the LLM provider.")
-  @JsonProperty("llmProviderApiVersion")
-  public String getLlmProviderApiVersion() {
-    return llmProviderApiVersion;
-  }
-  public void setLlmProviderApiVersion(String llmProviderApiVersion) {
-    this.llmProviderApiVersion = llmProviderApiVersion;
+  public void setLlmProviderId(String llmProviderId) {
+    this.llmProviderId = llmProviderId;
   }
 
   /**
@@ -106,14 +87,13 @@ public class AIConfigurationDTO   {
     }
     AIConfigurationDTO aiConfiguration = (AIConfigurationDTO) o;
     return Objects.equals(aiEndpointConfiguration, aiConfiguration.aiEndpointConfiguration) &&
-        Objects.equals(llmProviderName, aiConfiguration.llmProviderName) &&
-        Objects.equals(llmProviderApiVersion, aiConfiguration.llmProviderApiVersion) &&
+        Objects.equals(llmProviderId, aiConfiguration.llmProviderId) &&
         Objects.equals(tokenBasedThrottlingConfiguration, aiConfiguration.tokenBasedThrottlingConfiguration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(aiEndpointConfiguration, llmProviderName, llmProviderApiVersion, tokenBasedThrottlingConfiguration);
+    return Objects.hash(aiEndpointConfiguration, llmProviderId, tokenBasedThrottlingConfiguration);
   }
 
   @Override
@@ -122,8 +102,7 @@ public class AIConfigurationDTO   {
     sb.append("class AIConfigurationDTO {\n");
     
     sb.append("    aiEndpointConfiguration: ").append(toIndentedString(aiEndpointConfiguration)).append("\n");
-    sb.append("    llmProviderName: ").append(toIndentedString(llmProviderName)).append("\n");
-    sb.append("    llmProviderApiVersion: ").append(toIndentedString(llmProviderApiVersion)).append("\n");
+    sb.append("    llmProviderId: ").append(toIndentedString(llmProviderId)).append("\n");
     sb.append("    tokenBasedThrottlingConfiguration: ").append(toIndentedString(tokenBasedThrottlingConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();

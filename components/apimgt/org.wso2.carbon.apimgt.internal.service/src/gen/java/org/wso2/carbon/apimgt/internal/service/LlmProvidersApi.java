@@ -37,6 +37,18 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
 
 
     @GET
+    @Path("/{llmProviderId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve persisted LLM Providers", notes = "This retrieve the persisted LLM Providers. ", response = LLMProviderListDTO.class, tags={ "LLMProviders",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Event Received success", response = LLMProviderListDTO.class),
+        @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
+    public Response getLLMProviderById(@ApiParam(value = "",required=true) @PathParam("llmProviderId") String llmProviderId) throws APIManagementException{
+        return delegate.getLLMProviderById(llmProviderId, securityContext);
+    }
+
+    @GET
     
     
     @Produces({ "application/json" })

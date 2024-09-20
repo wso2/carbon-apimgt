@@ -84,12 +84,9 @@ public class LLMProviderManager {
             JSONArray llmProviderConfigArray = responseJson.getJSONArray("apis");
             for (int i = 0; i < llmProviderConfigArray.length(); i++) {
                 JSONObject apiObj = llmProviderConfigArray.getJSONObject(i);
-                String name = apiObj.getString(AIAPIConstants.LLM_PROVIDER_NAME);
-                String apiVersion = apiObj.getString(AIAPIConstants.LLM_PROVIDER_API_VERSION);
-                String organization = apiObj.getString(AIAPIConstants.LLM_PROVIDER_ORGANIZATION);
+                String id = apiObj.getString(AIAPIConstants.LLM_PROVIDER_ID);
                 String configurations = apiObj.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
-                String key = organization + ":" + name + ":" + apiVersion;
-                DataHolder.getInstance().addLLMProviderConfigurations(key, configurations);
+                DataHolder.getInstance().addLLMProviderConfigurations(id, configurations);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Response : " + responseJson);
@@ -99,27 +96,19 @@ public class LLMProviderManager {
         }
     }
 
-    public LLMProvider getLLMProviderConfiguration(String name, String apiVersion, String organization) {
-        LLMProvider llmProvider = new LLMProvider();
+    public String getLLMProviderConfiguration(String providerId) {
         try {
-            String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT + "?name=" + name +
-                    "&apiVersion=" + apiVersion + "&organization=" + organization);
+            String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT + "/" + providerId);
             JSONObject responseJson = new JSONObject(responseString);
-
-            JSONArray llmProviderConfigArray = responseJson.getJSONArray("apis");
-            JSONObject apiObj = llmProviderConfigArray.getJSONObject(0);
-            String configurations = apiObj.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
-            llmProvider.setName(name);
-            llmProvider.setApiVersion(apiVersion);
-            llmProvider.setOrganization(organization);
-            llmProvider.setConfigurations(configurations);
+            String configurations = responseJson.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
             if (log.isDebugEnabled()) {
                 log.debug("Response : " + responseJson);
             }
+            return configurations;
         } catch (IOException | APIManagementException ex) {
             log.error("Error while calling internal service API", ex);
         }
-        return llmProvider;
+        return null;
     }
 
     /**

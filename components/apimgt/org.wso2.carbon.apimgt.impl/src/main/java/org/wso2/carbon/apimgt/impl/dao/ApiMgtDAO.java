@@ -14713,9 +14713,15 @@ public class ApiMgtDAO {
         String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
         try {
             Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_SQL);
-            preparedStatement.setString(1, organization);
-            preparedStatement.setString(2, llmProviderId);
+            String getLlmProviderSql = SQLConstants.GET_LLM_PROVIDER_SQL;
+            if (organization != null) {
+                getLlmProviderSql += " AND ORGANIZATION = ?";
+            }
+            PreparedStatement preparedStatement = connection.prepareStatement(getLlmProviderSql);
+            preparedStatement.setString(1, llmProviderId);
+            if (organization != null) {
+                preparedStatement.setString(2, organization);
+            }
             ResultSet resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
                 return null;

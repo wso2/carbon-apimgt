@@ -885,6 +885,34 @@
         }
       }
     },
+    "/llm-providers/{llmProviderId}" : {
+      "get" : {
+        "tags" : [ "LLMProviders" ],
+        "summary" : "Retrieve persisted LLM Providers",
+        "description" : "This retrieve the persisted LLM Providers.\n",
+        "operationId" : "getLLMProviderById",
+        "parameters" : [ {
+          "name" : "llmProviderId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Event Received success",
+            "schema" : {
+              "$ref" : "#/definitions/LLMProviderList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/correlation-configs" : {
       "get" : {
         "tags" : [ "Logging" ],
@@ -1272,13 +1300,9 @@
           "description" : "Configuration for AI endpoints, including sandbox and production.",
           "$ref" : "#/definitions/AIEndpointConfiguration"
         },
-        "llmProviderName" : {
+        "llmProviderId" : {
           "type" : "string",
-          "description" : "The name of the LLM (Large Language Model) provider."
-        },
-        "llmProviderApiVersion" : {
-          "type" : "string",
-          "description" : "The version of the API provided by the LLM provider."
+          "description" : "UUID of the LLM (Large Language Model) provider."
         },
         "tokenBasedThrottlingConfiguration" : {
           "description" : "Configuration for token-based throttling for AI features.",
@@ -1309,33 +1333,27 @@
     "TokenBaseThrottlingCountHolder" : {
       "properties" : {
         "productionMaxPromptTokenCount" : {
-          "type" : "integer",
-          "format" : "int64",
+          "type" : "string",
           "description" : "Maximum allowed prompt token count for production."
         },
         "productionMaxCompletionTokenCount" : {
-          "type" : "integer",
-          "format" : "int64",
+          "type" : "string",
           "description" : "Maximum allowed completion token count for production."
         },
         "productionMaxTotalTokenCount" : {
-          "type" : "integer",
-          "format" : "int64",
+          "type" : "string",
           "description" : "Maximum total token count allowed for production."
         },
         "sandboxMaxPromptTokenCount" : {
-          "type" : "integer",
-          "format" : "int64",
+          "type" : "string",
           "description" : "Maximum allowed prompt token count for sandbox."
         },
         "sandboxMaxCompletionTokenCount" : {
-          "type" : "integer",
-          "format" : "int64",
+          "type" : "string",
           "description" : "Maximum allowed completion token count for sandbox."
         },
         "sandboxMaxTotalTokenCount" : {
-          "type" : "integer",
-          "format" : "int64",
+          "type" : "string",
           "description" : "Maximum total token count allowed for sandbox."
         },
         "isTokenBasedThrottlingEnabled" : {
@@ -2163,6 +2181,9 @@
     },
     "LLMProvider" : {
       "properties" : {
+        "id" : {
+          "type" : "string"
+        },
         "name" : {
           "type" : "string"
         },
