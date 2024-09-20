@@ -983,6 +983,77 @@ definitions:
         type: string
         description: Available authentication methods of the API.
         example: Oauth2,api_key
+      aiConfiguration:
+        $ref: '#/definitions/AIConfiguration'
+
+  #-----------------------------------------------------
+  # The AIConfiguration resource
+  #-----------------------------------------------------
+  AIConfiguration:
+    properties:
+      aiEndpointConfiguration:
+        $ref: '#/definitions/AIEndpointConfiguration'
+        description: Configuration for AI endpoints, including sandbox and production.
+      llmProviderName:
+        type: string
+        description: The name of the LLM (Large Language Model) provider.
+      llmProviderApiVersion:
+        type: string
+        description: The version of the API provided by the LLM provider.
+      tokenBasedThrottlingConfiguration:
+        $ref: '#/definitions/TokenBaseThrottlingCountHolder'
+        description: Configuration for token-based throttling for AI features.
+
+  #-----------------------------------------------------
+  # The AIEndpointConfiguration resource
+  #-----------------------------------------------------
+  AIEndpointConfiguration:
+    properties:
+      authKey:
+        type: string
+        description: Authorization key for the AI endpoint.
+      sandboxAuthValue:
+        type: string
+        description: Authorization value for the sandbox environment.
+      productionAuthValue:
+        type: string
+        description: Authorization value for the production environment.
+      authType:
+        type: string
+        description: The type of authorization (e.g., Bearer, API Key).
+
+  #-----------------------------------------------------
+  # The TokenBaseThrottlingCountHolder resource
+  #-----------------------------------------------------
+  TokenBaseThrottlingCountHolder:
+    properties:
+      productionMaxPromptTokenCount:
+        type: integer
+        format: int64
+        description: Maximum allowed prompt token count for production.
+      productionMaxCompletionTokenCount:
+        type: integer
+        format: int64
+        description: Maximum allowed completion token count for production.
+      productionMaxTotalTokenCount:
+        type: integer
+        format: int64
+        description: Maximum total token count allowed for production.
+      sandboxMaxPromptTokenCount:
+        type: integer
+        format: int64
+        description: Maximum allowed prompt token count for sandbox.
+      sandboxMaxCompletionTokenCount:
+        type: integer
+        format: int64
+        description: Maximum allowed completion token count for sandbox.
+      sandboxMaxTotalTokenCount:
+        type: integer
+        format: int64
+        description: Maximum total token count allowed for sandbox.
+      isTokenBasedThrottlingEnabled:
+        type: boolean
+        description: Whether token-based throttling is enabled.
 
   #-----------------------------------------------------
   # synapse Artifact resource

@@ -1260,6 +1260,87 @@
           "type" : "string",
           "example" : "Oauth2,api_key",
           "description" : "Available authentication methods of the API."
+        },
+        "aiConfiguration" : {
+          "$ref" : "#/definitions/AIConfiguration"
+        }
+      }
+    },
+    "AIConfiguration" : {
+      "properties" : {
+        "aiEndpointConfiguration" : {
+          "description" : "Configuration for AI endpoints, including sandbox and production.",
+          "$ref" : "#/definitions/AIEndpointConfiguration"
+        },
+        "llmProviderName" : {
+          "type" : "string",
+          "description" : "The name of the LLM (Large Language Model) provider."
+        },
+        "llmProviderApiVersion" : {
+          "type" : "string",
+          "description" : "The version of the API provided by the LLM provider."
+        },
+        "tokenBasedThrottlingConfiguration" : {
+          "description" : "Configuration for token-based throttling for AI features.",
+          "$ref" : "#/definitions/TokenBaseThrottlingCountHolder"
+        }
+      }
+    },
+    "AIEndpointConfiguration" : {
+      "properties" : {
+        "authKey" : {
+          "type" : "string",
+          "description" : "Authorization key for the AI endpoint."
+        },
+        "sandboxAuthValue" : {
+          "type" : "string",
+          "description" : "Authorization value for the sandbox environment."
+        },
+        "productionAuthValue" : {
+          "type" : "string",
+          "description" : "Authorization value for the production environment."
+        },
+        "authType" : {
+          "type" : "string",
+          "description" : "The type of authorization (e.g., Bearer, API Key)."
+        }
+      }
+    },
+    "TokenBaseThrottlingCountHolder" : {
+      "properties" : {
+        "productionMaxPromptTokenCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Maximum allowed prompt token count for production."
+        },
+        "productionMaxCompletionTokenCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Maximum allowed completion token count for production."
+        },
+        "productionMaxTotalTokenCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Maximum total token count allowed for production."
+        },
+        "sandboxMaxPromptTokenCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Maximum allowed prompt token count for sandbox."
+        },
+        "sandboxMaxCompletionTokenCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Maximum allowed completion token count for sandbox."
+        },
+        "sandboxMaxTotalTokenCount" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Maximum total token count allowed for sandbox."
+        },
+        "isTokenBasedThrottlingEnabled" : {
+          "type" : "boolean",
+          "description" : "Whether token-based throttling is enabled."
         }
       }
     },

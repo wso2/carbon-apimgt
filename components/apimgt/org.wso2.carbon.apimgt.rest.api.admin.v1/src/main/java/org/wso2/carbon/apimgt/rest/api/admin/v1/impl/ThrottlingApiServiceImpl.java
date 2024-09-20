@@ -1115,7 +1115,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             String userName = RestApiCommonUtil.getLoggedInUsername();
             ExportThrottlePolicyDTO exportPolicy = new ExportThrottlePolicyDTO();
             exportPolicy.type(RestApiConstants.RESOURCE_THROTTLING_POLICY);
-            exportPolicy.version("v4.3.0");
+            exportPolicy.version(ImportExportConstants.APIM_VERSION);
             type = (type == null) ? StringUtils.EMPTY : type;
             if (StringUtils.EMPTY.equals(type) || PolicyConstants.POLICY_LEVEL_APP.equals(type)) {
                 try {
