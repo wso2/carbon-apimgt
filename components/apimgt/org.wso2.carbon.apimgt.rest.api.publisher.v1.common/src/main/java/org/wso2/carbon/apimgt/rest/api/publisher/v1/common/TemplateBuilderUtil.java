@@ -1047,7 +1047,7 @@ public class TemplateBuilderUtil {
         }
         Map<String, Object> endpointConfigMap = (Map) apidto.getEndpointConfig();
 
-        if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+        if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                 endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
             GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
                     APIConstants.API_KEY_TYPE_SANDBOX, extractedPath);
