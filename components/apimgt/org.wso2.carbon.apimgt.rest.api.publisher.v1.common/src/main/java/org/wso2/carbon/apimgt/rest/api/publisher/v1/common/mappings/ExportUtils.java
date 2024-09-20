@@ -224,30 +224,24 @@ public class ExportUtils {
             if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                     endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
                     apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
-                String sandSequenceName = null;
-                String prodSequenceName = null;
-                if (endpointConfig.get("sandbox") != null) {
-                    sandSequenceName = endpointConfig.get("sandbox").getAsString();
-                } else {
-                    sandSequenceName = apiProvider.getCustomBackendSequenceOfAPIByUUID(currentApiUuid,
-                            APIConstants.API_KEY_TYPE_SANDBOX);
-                }
-                if (endpointConfig.get("production") != null) {
-                    prodSequenceName = endpointConfig.get("production").getAsString();
-                } else {
-                    prodSequenceName = apiProvider.getCustomBackendSequenceOfAPIByUUID(currentApiUuid,
-                            APIConstants.API_KEY_TYPE_PRODUCTION);
-                }
                 if (apiDtoToReturn.getEndpointConfig() != null) {
                     Map endpointConf = (Map) apiDtoToReturn.getEndpointConfig();
                     if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                             endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                        endpointConf.put("sandbox", sandSequenceName);
-                        endpointConf.put("production", prodSequenceName);
+                        SequenceBackendData sqData = apiProvider.getCustomBackendByAPIUUID(currentApiUuid,
+                                APIConstants.API_KEY_TYPE_SANDBOX);
+                        if (sqData != null) {
+                            endpointConf.put("sandbox", sqData.getName());
+                        }
+                        sqData = apiProvider.getCustomBackendByAPIUUID(currentApiUuid,
+                                APIConstants.API_KEY_TYPE_PRODUCTION);
+                        if (sqData != null) {
+                            endpointConf.put("production", sqData.getName());
+                        }
                         apiDtoToReturn.setEndpointConfig(endpointConf);
                     }
                 }
-                addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid, sandSequenceName, prodSequenceName);
+                addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid);
             }
         }
 
@@ -663,8 +657,8 @@ public class ExportUtils {
         }
     }
 
-    public static void addCustomBackendToArchive(String archivePath, APIProvider apiProvider, String apiUUID,
-            String prodBackendName, String sandBackendName) throws APIManagementException {
+    public static void addCustomBackendToArchive(String archivePath, APIProvider apiProvider, String apiUUID)
+            throws APIManagementException {
         try {
             CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY);
 
@@ -672,20 +666,14 @@ public class ExportUtils {
             SequenceBackendData data = apiProvider.getCustomBackendByAPIUUID(apiUUID,
                     APIConstants.API_KEY_TYPE_PRODUCTION);
             if (data != null) {
-                String seqName = prodBackendName;
-                if (StringUtils.isEmpty(seqName)) {
-                    seqName = APIUtil.getCustomBackendName(apiUUID, APIConstants.API_KEY_TYPE_PRODUCTION);
-                }
+                String seqName = data.getName();
                 exportCustomBackend(seqName, data.getSequence(), archivePath);
             }
 
             // Add sandbox Backend Sequences
             data = apiProvider.getCustomBackendByAPIUUID(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
             if (data != null) {
-                String seqName = sandBackendName;
-                if (StringUtils.isEmpty(seqName)) {
-                    seqName = APIUtil.getCustomBackendName(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
-                }
+                String seqName = data.getName();
                 exportCustomBackend(seqName, data.getSequence(), archivePath);
             }
 
@@ -813,10 +801,14 @@ public class ExportUtils {
      */
     public static void exportCustomBackend(String customBackendFileName, String sequence, String archivePath)
             throws APIImportExportException, IOException {
+        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(
+                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+            customBackendFileName = customBackendFileName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+        }
         String customBackendName =
                 archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY + File.separator
                         + customBackendFileName;
-        CommonUtil.writeFile(customBackendName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML, sequence);
+        CommonUtil.writeFile(customBackendName, sequence);
     }
 
     /**

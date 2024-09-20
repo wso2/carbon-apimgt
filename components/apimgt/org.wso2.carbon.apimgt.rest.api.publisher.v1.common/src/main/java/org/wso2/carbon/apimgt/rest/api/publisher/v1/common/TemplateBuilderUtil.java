@@ -46,11 +46,13 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLSchemaDefinitionUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -92,6 +94,7 @@ public class TemplateBuilderUtil {
     private static final String ENDPOINT_SANDBOX = "_SANDBOX_";
 
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
+    private static final ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
                                                            List<ClientCertificateDTO> clientCertificateDTOSProduction,
@@ -571,14 +574,30 @@ public class TemplateBuilderUtil {
                     String policyDirectory =
                             extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
                     String seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX);
-                    if (APIUtil.checkFileExistence(policyDirectory + File.separator + seqName
-                            + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
-                        endpointConfig.put("sandbox", seqName);
+                    SequenceBackendData seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(),
+                            APIConstants.API_KEY_TYPE_SANDBOX);
+                    if (seqData != null) {
+                        String name = seqData.getName();
+                        if (!StringUtils.isEmpty(name) && !name.contains(
+                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                            name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+                        }
+                        if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
+                            endpointConfig.put("sandbox", seqName);
+                        }
                     }
+
                     seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION);
-                    if (APIUtil.checkFileExistence(policyDirectory + File.separator + seqName
-                            + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
-                        endpointConfig.put("production", seqName);
+                    seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION);
+                    if (seqData != null) {
+                        String name = seqData.getName();
+                        if (!StringUtils.isEmpty(name) && !name.contains(
+                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                            name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+                        }
+                        if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
+                            endpointConfig.put("production", seqName);
+                        }
                     }
                     api.setEndpointConfig(objectMapper.writeValueAsString(endpointConfig));
                 }
@@ -778,16 +797,15 @@ public class TemplateBuilderUtil {
 
             JsonObject endpointConfigMap = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
             if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && (
-                    APIConstants.API_TYPE_HTTP.equals(api.getType()) || APIConstants.API_TYPE_SOAPTOREST.equals(
-                            api.getType()))) {
-                GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
-                        APIConstants.API_KEY_TYPE_SANDBOX, extractedPath);
+                    endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())
+                    && APIConstants.API_TYPE_HTTP.equals(api.getType())) {
+                GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveSequenceBackendForAPIProduct(api,
+                        apiProduct, APIConstants.API_KEY_TYPE_SANDBOX, extractedPath);
                 if (gatewayCustomBackendSequenceDTO != null) {
                     gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
                             gatewayAPIDTO.getSequenceToBeAdd()));
                 }
-                gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
+                gatewayCustomBackendSequenceDTO = retrieveSequenceBackendForAPIProduct(api, apiProduct,
                         APIConstants.API_KEY_TYPE_PRODUCTION, extractedPath);
                 if (gatewayCustomBackendSequenceDTO != null) {
                     gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayCustomBackendSequenceDTO,
@@ -1491,32 +1509,74 @@ public class TemplateBuilderUtil {
         return null;
     }
 
+    private static GatewayContentDTO retrieveSequenceBackendForAPIProduct(API api, APIProduct apiProduct,
+            String endpointType, String pathToAchieve) throws APIManagementException {
+        GatewayContentDTO customBackendSequenceContentDto = new GatewayContentDTO();
+        String customSequence = null;
+        SequenceBackendData data = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(), endpointType);
+        if (data != null) {
+            String seqExt = data.getName();
+            if (!StringUtils.isEmpty(seqExt) && seqExt.contains(".xml")) {
+                seqExt = seqExt + ".xml";
+            }
+            String prodSeqExt = APIUtil.getCustomBackendName(apiProduct.getUuid().concat("-" + api.getUuid()),
+                    endpointType);
+            try {
+                customSequence = SynapsePolicyAggregator.generateSequenceBackendForAPIProducts(seqExt, prodSeqExt,
+                        pathToAchieve, endpointType);
+            } catch (IOException e) {
+                throw new APIManagementException(e);
+            }
+
+            if (StringUtils.isNotEmpty(customSequence)) {
+                try {
+                    OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(customSequence.getBytes()));
+                    if (omElement != null) {
+                        if (omElement.getAttribute(new QName("name")) != null) {
+                            omElement.getAttribute(new QName("name")).setAttributeValue(prodSeqExt);
+                        }
+                        customBackendSequenceContentDto.setName(prodSeqExt);
+                        customBackendSequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+                        return customBackendSequenceContentDto;
+                    }
+                } catch (Exception e) {
+                    throw new APIManagementException(e);
+                }
+            }
+        }
+
+        return null;
+    }
+
     private static GatewayContentDTO retrieveCustomBackendSequence(API api, String endpointType, String pathToAchieve)
             throws APIManagementException {
         GatewayContentDTO customBackendSequenceContentDto = new GatewayContentDTO();
-
         String customSequence = null;
-        String seqExt = APIUtil.getCustomBackendName(api.getUuid(), endpointType);
-        try {
-            customSequence = SynapsePolicyAggregator.generateBackendSequenceForCustomSequence(seqExt, pathToAchieve,
-                    endpointType);
-        } catch (IOException e) {
-            throw new APIManagementException(e);
-        }
-
-        if (StringUtils.isNotEmpty(customSequence)) {
+        SequenceBackendData data = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(), endpointType);
+        if (data != null) {
+            String seqExt = data.getName();
+            String apiSeqName = APIUtil.getCustomBackendName(api.getUuid(), endpointType);
             try {
-                OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(customSequence.getBytes()));
-                if (omElement != null) {
-                    if (omElement.getAttribute(new QName("name")) != null) {
-                        omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
-                    }
-                    customBackendSequenceContentDto.setName(seqExt);
-                    customBackendSequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
-                    return customBackendSequenceContentDto;
-                }
-            } catch (Exception e) {
+                customSequence = SynapsePolicyAggregator.generateBackendSequenceForCustomSequence(seqExt, pathToAchieve,
+                        endpointType, apiSeqName);
+            } catch (IOException e) {
                 throw new APIManagementException(e);
+            }
+
+            if (StringUtils.isNotEmpty(customSequence)) {
+                try {
+                    OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(customSequence.getBytes()));
+                    if (omElement != null) {
+                        if (omElement.getAttribute(new QName("name")) != null) {
+                            omElement.getAttribute(new QName("name")).setAttributeValue(apiSeqName);
+                        }
+                        customBackendSequenceContentDto.setName(apiSeqName);
+                        customBackendSequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+                        return customBackendSequenceContentDto;
+                    }
+                } catch (Exception e) {
+                    throw new APIManagementException(e);
+                }
             }
         }
         return null;

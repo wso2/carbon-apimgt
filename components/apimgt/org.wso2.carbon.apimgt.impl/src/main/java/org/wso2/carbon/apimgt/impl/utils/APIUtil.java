@@ -10054,7 +10054,10 @@ public final class APIUtil {
      */
     public static InputStream getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
             String fileExtension) throws APIManagementException {
-        String fileName = extractedFolderPath + File.separator + customBackendFileName + fileExtension;
+        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(fileExtension)) {
+            customBackendFileName = customBackendFileName + fileExtension;
+        }
+        String fileName = extractedFolderPath + File.separator + customBackendFileName;
         InputStream inputStream = null;
         if (checkFileExistence(fileName)) {
             try {
@@ -10116,7 +10119,10 @@ public final class APIUtil {
 
         String customBackendContent = null;
         try {
-            String fileName = extractedFolderPath + File.separator + sequenceName + fileExtension;
+            if(!StringUtils.isEmpty(sequenceName) && !sequenceName.contains(".xml")) {
+                sequenceName = sequenceName + fileExtension;
+            }
+            String fileName = extractedFolderPath + File.separator + sequenceName;
             if (checkFileExistence(fileName)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Found policy definition file " + fileName);

@@ -329,6 +329,8 @@ public class InMemoryAPIDeployer {
                                 gatewayAPIDTO);
                         GatewayUtils.setEndpointsToBeRemoved(apiProductIdentifier, associatedApi.getUuid(),
                                 gatewayAPIDTO);
+                        GatewayUtils.setCustomBackendToBeRemoved(apiProductIdentifier, associatedApi.getUuid(),
+                                gatewayAPIDTO);
                     }
                 } else {
                     API api = new API(new APIIdentifier(gatewayEvent.getProvider(), gatewayEvent.getName(),
