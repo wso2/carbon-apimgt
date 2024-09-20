@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.JwtConfigContext;
 
@@ -32,7 +31,7 @@ public class JwtConfigContextTest {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
         api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
-        ConfigContext configcontext = new APIConfigContext(api);
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
         JwtConfigContext jwtConfigContext = new JwtConfigContext(configcontext);
         Assert.assertNotNull(jwtConfigContext.getContext());
     }

@@ -22,7 +22,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.EndpointConfigContext;
 
@@ -40,7 +39,7 @@ public class EndpointConfigContextTest {
         api.setEndpointConfig(endpointConfig);
         api.setUrl(url);
         api.setSandboxUrl(url);
-        ConfigContext configcontext = new APIConfigContext(api);
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
         EndpointConfigContext endpointConfigContext = new EndpointConfigContext(configcontext, api);
         endpointConfigContext.validate();
         Assert.assertNotNull(endpointConfigContext.getContext().get("endpoint_config"));
@@ -60,5 +59,9 @@ public class EndpointConfigContextTest {
         api.setEndpointConfig(invalidEndpointConfig);
         endpointConfigContext = new EndpointConfigContext(configcontext, api);
         endpointConfigContext.validate();
+
+        // Check enable retry call with new Oauth token is enabled
+        Assert.assertTrue((Boolean) configcontext.getContext().get(APIConstants.
+                ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN));
     }
 }

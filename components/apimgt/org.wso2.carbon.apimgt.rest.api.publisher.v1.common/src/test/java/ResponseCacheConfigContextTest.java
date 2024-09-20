@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ResponseCacheConfigContext;
 
@@ -33,7 +32,7 @@ public class ResponseCacheConfigContextTest {
         api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
         api.setResponseCache(APIConstants.DISABLED);
-        ConfigContext configcontext = new APIConfigContext(api);
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
         ResponseCacheConfigContext responseCacheConfigContext = new ResponseCacheConfigContext(configcontext, api);
         Assert.assertFalse((Boolean) responseCacheConfigContext.getContext().get("responseCacheEnabled"));
 

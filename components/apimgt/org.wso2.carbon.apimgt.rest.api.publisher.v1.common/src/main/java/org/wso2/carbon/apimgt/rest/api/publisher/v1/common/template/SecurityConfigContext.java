@@ -30,9 +30,9 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 
 import java.util.HashMap;
@@ -157,7 +157,7 @@ public class SecurityConfigContext extends ConfigContextDecorator {
 
     protected APIManagerConfiguration getApiManagerConfiguration() {
 
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
     }
 
     private EndpointSecurityModel retrieveEndpointSecurityModel(EndpointSecurityModel endpointSecurityModel,
