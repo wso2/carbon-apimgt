@@ -9495,6 +9495,11 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the API is EGRESS or not
+          default: false
+          example: true
     APIMetadata:
       title: API Info object with basic minimal API details.
       type: object
@@ -10217,6 +10222,11 @@ components:
             - https
           items:
             type: string
+        egress:
+          type: boolean
+          description: Whether the API is EGRESS or not
+          default: false
+          example: true
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -10438,6 +10448,11 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     APIProduct:
       title: API Product object
       required:
@@ -10702,6 +10717,11 @@ components:
           items:
             type: string
             example: [ "aud1","aud2","aud3" ]
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     ProductAPI:
       title: ProductAPI
       required:
@@ -12608,6 +12628,10 @@ components:
             TechnicalOwnerEmail:
               type: string
               example: technicalowner@abc.com
+            egress:
+              type: boolean
+              description: Whether the API is Egress or not
+              example: false
     APIMonetizationInfo:
       title: API monetization object
       required:

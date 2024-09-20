@@ -227,7 +227,7 @@ public class API implements Serializable {
      * Property to hold revision id
      */
     private int revisionId;
-    
+
     private String audience;
 
     private Set<String> audiences;
@@ -1528,5 +1528,18 @@ public class API implements Serializable {
 
     public void setApiPolicies(List<OperationPolicy> apiPolicies) {
         this.apiPolicies = apiPolicies;
+    }
+
+    /**
+     * Property to hold whether the API isEGRESS (1)
+     */
+    private int isEgress;
+
+    public int isEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(int egress) {
+        isEgress = egress;
     }
 }
