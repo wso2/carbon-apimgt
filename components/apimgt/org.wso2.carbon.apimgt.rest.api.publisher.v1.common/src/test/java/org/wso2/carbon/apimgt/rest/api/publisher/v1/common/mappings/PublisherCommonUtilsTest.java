@@ -444,8 +444,7 @@ public class PublisherCommonUtilsTest {
         endpointConfigs.put(PublisherCommonUtils.SESSION_TIMEOUT_CONFIG_KEY, "sdwed");
         flag = PublisherCommonUtils.validateEndpointConfigs(apiDTO);
         Assert.assertFalse(flag);
-        endpointConfigs.put(PublisherCommonUtils.SESSION_TIMEOUT_CONFIG_KEY,
-                new BigInteger("1000000000000000000000000000000000"));
+        endpointConfigs.put(PublisherCommonUtils.SESSION_TIMEOUT_CONFIG_KEY, "1000000000000000000000000000000000");
         flag = PublisherCommonUtils.validateEndpointConfigs(apiDTO);
         Assert.assertFalse(flag);
 
