@@ -221,7 +221,7 @@ public class ExportUtils {
 
         if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+            if (endpointConfig != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                     endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
                     apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
                 if (apiDtoToReturn.getEndpointConfig() != null) {
