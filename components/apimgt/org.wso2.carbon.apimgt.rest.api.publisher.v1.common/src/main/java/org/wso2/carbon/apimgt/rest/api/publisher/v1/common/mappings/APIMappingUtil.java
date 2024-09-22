@@ -743,6 +743,7 @@ public class APIMappingUtil {
         apiInfoDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiInfoDTO.setGatewayType(api.getGatewayType());
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
+        apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
         return apiInfoDTO;
     }
 
@@ -1464,6 +1465,7 @@ public class APIMappingUtil {
         String gatewayVendor = StringUtils.toRootLowerCase(model.getGatewayVendor());
         dto.setGatewayVendor(gatewayVendor);
         dto.setGatewayType(model.getGatewayType());
+        dto.setEgress(model.isEgress() == 1); //true - 1, false - 0
 
         if (model.getGatewayVendor() == null) {
             dto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
@@ -2410,6 +2412,7 @@ public class APIMappingUtil {
             productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
             productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
             productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
+            productDto.setEgress(apiProduct.isEgress() == 1);
 
             list.add(productDto);
         }
@@ -2454,6 +2457,7 @@ public class APIMappingUtil {
         productDto.setIsRevision(product.isRevision());
         productDto.setRevisionedApiProductId(product.getRevisionedApiProductId());
         productDto.setRevisionId(product.getRevisionId());
+        productDto.setEgress(product.isEgress() == 1);
 
         if (product.getAudiences() != null) {
             Set<String> audiences = product.getAudiences();
@@ -2841,6 +2845,7 @@ public class APIMappingUtil {
         product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
         product.setApiKeyHeader(dto.getApiKeyHeader());
+        product.setEgress(dto.isEgress() ? 1 : 0);
         if (product.getApiKeyHeader() == null) {
             product.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }

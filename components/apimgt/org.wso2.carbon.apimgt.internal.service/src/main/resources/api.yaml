@@ -673,7 +673,28 @@ paths:
             $ref: '#/definitions/Error'
       operationId: getLLMProviders
 
-
+  /llm-providers/{llmProviderId}:
+    get:
+      summary: Retrieve persisted LLM Providers
+      description: |
+        This retrieve the persisted LLM Providers.
+      tags:
+        - 'LLMProviders'
+      parameters:
+        - name: llmProviderId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            $ref: '#/definitions/LLMProviderList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      operationId: getLLMProviderById
 
   /correlation-configs:
     get:
@@ -983,6 +1004,62 @@ definitions:
         type: string
         description: Available authentication methods of the API.
         example: Oauth2,api_key
+      aiConfiguration:
+        $ref: '#/definitions/AIConfiguration'
+
+  #-----------------------------------------------------
+  # The AIConfiguration resource
+  #-----------------------------------------------------
+  AIConfiguration:
+    properties:
+      aiEndpointConfiguration:
+        $ref: '#/definitions/AIEndpointConfiguration'
+        description: Configuration for AI endpoints, including sandbox and production.
+      llmProviderId:
+        type: string
+        description: UUID of the LLM (Large Language Model) provider.
+      tokenBasedThrottlingConfiguration:
+        $ref: '#/definitions/TokenBaseThrottlingCountHolder'
+        description: Configuration for token-based throttling for AI features.
+
+  #-----------------------------------------------------
+  # The AIEndpointConfiguration resource
+  #-----------------------------------------------------
+  AIEndpointConfiguration:
+    properties:
+      sandboxAuthValue:
+        type: string
+        description: Authorization value for the sandbox environment.
+      productionAuthValue:
+        type: string
+        description: Authorization value for the production environment.
+
+  #-----------------------------------------------------
+  # The TokenBaseThrottlingCountHolder resource
+  #-----------------------------------------------------
+  TokenBaseThrottlingCountHolder:
+    properties:
+      productionMaxPromptTokenCount:
+        type: string
+        description: Maximum allowed prompt token count for production.
+      productionMaxCompletionTokenCount:
+        type: string
+        description: Maximum allowed completion token count for production.
+      productionMaxTotalTokenCount:
+        type: string
+        description: Maximum total token count allowed for production.
+      sandboxMaxPromptTokenCount:
+        type: string
+        description: Maximum allowed prompt token count for sandbox.
+      sandboxMaxCompletionTokenCount:
+        type: string
+        description: Maximum allowed completion token count for sandbox.
+      sandboxMaxTotalTokenCount:
+        type: string
+        description: Maximum total token count allowed for sandbox.
+      isTokenBasedThrottlingEnabled:
+        type: boolean
+        description: Whether token-based throttling is enabled.
 
   #-----------------------------------------------------
   # synapse Artifact resource
@@ -1694,6 +1771,8 @@ definitions:
   LLMProvider:
     title: LLM Provider
     properties:
+      id:
+        type: string
       name:
         type: string
       apiVersion:

@@ -18,32 +18,41 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.AbstractSynapseHandler;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.XML;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
+import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import org.wso2.carbon.apimgt.api.LLMProviderMetadata;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * AiAPIHandler handles AI-specific API requests and responses.
@@ -69,7 +78,6 @@ public class AiApiHandler extends AbstractHandler {
         }
         return true;
     }
-
 
     /**
      * Handles the incoming response flow.
@@ -97,40 +105,59 @@ public class AiApiHandler extends AbstractHandler {
     private boolean processMessage(MessageContext messageContext, boolean isRequest)
             throws APIManagementException, XMLStreamException, IOException {
 
-        String llmProviderName =
-                (String) messageContext.getProperty(APIConstants.AIAPIConstants.LLM_PROVIDER_NAME);
-        String llmProviderApiVersion =
-                (String) messageContext.getProperty(APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION);
-        String organization = (String) messageContext.getProperty(APIMgtGatewayConstants.TENANT_DOMAIN);
+        String path = ApiUtils.getFullRequestPath(messageContext);
+        String tenantDomain = GatewayUtils.getTenantDomain();
 
-        LLMProvider provider = createLLMProvider(llmProviderName, llmProviderApiVersion, organization);
-        String providerConfigurations = DataHolder.getInstance().getLLMProviderConfigurations(provider);
+        TreeMap<String, API> selectedAPIS = Utils.getSelectedAPIList(path, tenantDomain);
+        String selectedPath = selectedAPIS.firstKey();
+        API selectedAPI = selectedAPIS.get(selectedPath);
 
-        if (providerConfigurations == null) {
-            log.error("Unable to find provider configurations for provider: "
-                    + provider.getName() + "_" + provider.getApiVersion() + " in tenant "
-                    + "domain: " + organization);
+        if (selectedAPI == null) {
+            log.error("Unable to find API for path: " + path + " in tenant domain: " + tenantDomain);
             return true;
         }
 
-        LLMProviderConfiguration config = parseLLMProviderConfig(providerConfigurations);
+        AIConfiguration aiConfiguration = selectedAPI.getAiConfiguration();
+
+        if (aiConfiguration == null) {
+            log.debug("Unable to find AI configuration for API: " + selectedAPI.getApiId()
+                    + " in tenant domain: " + tenantDomain);
+            return true;
+        }
+
+        String llmProviderId = aiConfiguration.getLlmProviderId();
+        String config = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
+        if (config == null) {
+            log.error("Unable to find provider configurations for provider: " + llmProviderId);
+            return true;
+        }
+
+        LLMProviderConfiguration providerConfiguration = new Gson().fromJson(config, LLMProviderConfiguration.class);
+
+
+        try {
+            addEndpointConfigurationToMessageContext(messageContext, aiConfiguration.getAiEndpointConfiguration(), providerConfiguration);
+        } catch (CryptoException | URISyntaxException e) {
+            log.error("Error occurred while adding endpoint security configuration to message context", e);
+            return true;
+        }
+
         LLMProviderService llmProviderService =
-                ServiceReferenceHolder.getInstance().getLLMProviderService(config.getConnectorType());
+                ServiceReferenceHolder.getInstance().getLLMProviderService(providerConfiguration.getConnectorType());
 
         if (llmProviderService == null) {
             log.error("Unable to find LLM provider service for provider: "
-                    + provider.getName() + "_" + provider.getApiVersion() + " in tenant "
-                    + "domain: " + organization);
+                    + llmProviderId);
             return true;
         }
-        String payload = extractPayloadFromContext(messageContext, config);
+
+        String payload = extractPayloadFromContext(messageContext, providerConfiguration);
         Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
         Map<String, String> headers = extractHeadersFromContext(messageContext);
 
         Map<String, String> metadataMap = isRequest
-                ? llmProviderService.getRequestMetadata(payload, headers, queryParams, config.getMetadata())
-                : llmProviderService.getResponseMetadata(payload, headers, queryParams, config.getMetadata());
-
+                ? llmProviderService.getRequestMetadata(payload, headers, queryParams, providerConfiguration.getMetadata())
+                : llmProviderService.getResponseMetadata(payload, headers, queryParams, providerConfiguration.getMetadata());
         if (metadataMap != null && !metadataMap.isEmpty()) {
             String metadataProperty = isRequest
                     ? APIConstants.AIAPIConstants.AI_API_REQUEST_METADATA
@@ -141,21 +168,44 @@ public class AiApiHandler extends AbstractHandler {
         return true;
     }
 
-    /**
-     * Creates and initializes an LLM Provider with the given name, API version, and organization.
-     *
-     * @param name         The name of the LLM Provider.
-     * @param apiVersion   The API version of the LLM Provider.
-     * @param organization The organization associated with the LLM Provider.
-     * @return The initialized LlmProvider object.
-     */
-    private LLMProvider createLLMProvider(String name, String apiVersion, String organization) {
+    private void addEndpointConfigurationToMessageContext(MessageContext messageContext,
+                                                          AIEndpointConfiguration aiConfiguration,
+                                                          LLMProviderConfiguration providerConfiguration)
+            throws CryptoException, URISyntaxException {
+        if (aiConfiguration != null) {
+            org.apache.axis2.context.MessageContext axCtx =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            if (providerConfiguration.getAuthHeader() != null) {
+                if (((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT")).getKeyType().equals(org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                    Map transportHeaders =
+                            (Map) axCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    transportHeaders.put(providerConfiguration.getAuthHeader(),
+                            decryptSecret(aiConfiguration.getProductionAuthValue()));
+                } else {
+                    Map transportHeaders =
+                            (Map) axCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    transportHeaders.put(providerConfiguration.getAuthHeader(),
+                            decryptSecret(aiConfiguration.getSandboxAuthValue()));
+                }
+            }
+            if (providerConfiguration.getAuthQueryParameter() != null) {
+                if (((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT")).getKeyType().equals("PRODUCTION")) {
+                    URI updatedFullPath =
+                            (new URIBuilder((String) axCtx.getProperty("REST_URL_POSTFIX"))).addParameter(providerConfiguration.getAuthQueryParameter(), decryptSecret(aiConfiguration.getProductionAuthValue())).build();
+                    axCtx.setProperty("REST_URL_POSTFIX", updatedFullPath.toString());
+                } else {
+                    URI updatedFullPath =
+                            (new URIBuilder((String) axCtx.getProperty("REST_URL_POSTFIX"))).addParameter(providerConfiguration.getAuthQueryParameter(), decryptSecret(aiConfiguration.getSandboxAuthValue())).build();
+                    axCtx.setProperty("REST_URL_POSTFIX", updatedFullPath.toString());
+                }
+            }
+        }
+    }
 
-        LLMProvider provider = new LLMProvider();
-        provider.setName(name);
-        provider.setApiVersion(apiVersion);
-        provider.setOrganization(organization);
-        return provider;
+    private String decryptSecret(String cipherText) throws CryptoException {
+
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        return new String(cryptoUtil.base64DecodeAndDecrypt(cipherText));
     }
 
     /**
@@ -214,24 +264,6 @@ public class AiApiHandler extends AbstractHandler {
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         return (Map<String, String>) axis2MessageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-    }
-
-    /**
-     * Parses the given LLM Provider configuration string into an LlmProviderConfiguration object.
-     *
-     * @param providerConfigurations The JSON string of provider configurations.
-     * @return The parsed LlmProviderConfiguration object.
-     * @throws APIManagementException If parsing fails.
-     */
-    public LLMProviderConfiguration parseLLMProviderConfig(String providerConfigurations)
-            throws APIManagementException {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.readValue(providerConfigurations, LLMProviderConfiguration.class);
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error occurred while parsing LLM Provider configuration", e);
-        }
     }
 
     /**

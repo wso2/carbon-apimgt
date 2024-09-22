@@ -5321,6 +5321,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
                 populateAPIStatus(api);
+                populateEgressStatus(api);
                 populateDefaultVersion(api);
                 return api;
             } else {
@@ -5417,6 +5418,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     populateAPIStatus(mappedAPI);
                     populateDefaultVersion(mappedAPI);
                     populateGatewayVendor(mappedAPI);
+                    populateEgressStatus(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 result.setApis(apiList);
@@ -5471,6 +5473,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    private void populateEgressStatus(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getRevisionedApiId()));
+        } else {
+            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getUuid()));
+        }
+    }
+
+    private void populateEgressStatus(APIProduct apiProduct) throws APIManagementException {
+        if (apiProduct.isRevision()) {
+            apiProduct.setEgress(apiMgtDAO.
+                    checkForEgressAPIWithUUID(apiProduct.getRevisionedApiProductId()));
+        } else {
+            apiProduct.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(apiProduct.getUuid()));
+        }
+    }
+
     public APIProduct getAPIProductbyUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);
@@ -5485,6 +5504,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIProductInformation(uuid, organization, product);
                 populateAPIStatus(product);
                 populateAPITier(product);
+                populateEgressStatus(product);
                 if (migrationEnabled == null) {
                     populateDefaultVersion(product);
                 }
@@ -5527,6 +5547,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     populateAPIStatus(mappedAPI);
                     populateDefaultVersion(mappedAPI);
                     populateGatewayVendor(mappedAPI);
+                    populateEgressStatus(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -5912,6 +5933,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setContextTemplate(publisherAPIInfo.getContext());
                     populateDefaultVersion(mappedAPI);
                     populateAPIStatus(mappedAPI);
+                    populateEgressStatus(mappedAPI);
                     productList.add(mappedAPI);
                 }
                 productSet.addAll(productList);

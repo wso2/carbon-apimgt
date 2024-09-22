@@ -890,6 +890,7 @@ public class PublisherCommonUtils {
         boolean isAsyncAPI =
                 isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
                         APIDTO.TypeEnum.SSE.equals(apiDto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apiDto.getType());
+        boolean isEgressAPI = apiDto.isEgress();
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -962,6 +963,11 @@ public class PublisherCommonUtils {
                 throw new APIManagementException("Invalid API Category name(s) defined",
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
+        }
+
+        // Set API Key security for Egress APIs by default
+        if (isEgressAPI) {
+            apiToAdd.setApiSecurity(APIConstants.API_SECURITY_API_KEY);
         }
 
         if (!isAsyncAPI) {
@@ -1381,6 +1387,7 @@ public class PublisherCommonUtils {
         if (body.getAiConfiguration() != null) {
             apiToAdd.setAiConfiguration(convertToAiConfiguration(body.getAiConfiguration()));
         }
+        apiToAdd.setEgress(body.isEgress() ? 1 : 0);
         return apiToAdd;
     }
 
@@ -1418,8 +1425,6 @@ public class PublisherCommonUtils {
     private static AIEndpointConfiguration buildEndpointConfiguration(APIAiConfigurationDTO dto) {
 
         AIEndpointConfiguration endpointConfiguration = new AIEndpointConfiguration();
-        endpointConfiguration.setAuthKey(dto.getEndpointConfiguration().getAuthKey());
-        endpointConfiguration.setAuthType(dto.getEndpointConfiguration().getAuthType().name());
         endpointConfiguration.setProductionAuthValue(dto.getEndpointConfiguration().getProductionAuthValue());
         endpointConfiguration.setSandboxAuthValue(dto.getEndpointConfiguration().getSandboxAuthValue());
         return endpointConfiguration;
@@ -1501,9 +1506,6 @@ public class PublisherCommonUtils {
 
         APIAiConfigurationEndpointConfigurationDTO endpointConfigurationDTO =
                 new APIAiConfigurationEndpointConfigurationDTO();
-        endpointConfigurationDTO.setAuthKey(aiEndpointConfiguration.getAuthKey());
-        endpointConfigurationDTO.setAuthType(APIAiConfigurationEndpointConfigurationDTO
-                .AuthTypeEnum.valueOf(aiEndpointConfiguration.getAuthType()));
         endpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration
                 .getProductionAuthValue());
         endpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration

@@ -5591,6 +5591,7 @@ public class ApiMgtDAO {
             prepStmt.setString(12, organization);
             prepStmt.setString(13, api.getGatewayVendor());
             prepStmt.setString(14, api.getVersionTimestamp());
+            prepStmt.setInt(15, api.isEgress());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -10029,6 +10030,7 @@ public class ApiMgtDAO {
                                 .updatedTime(resultSet.getString("UPDATED_TIME"))
                                 .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
                                 .organization(resultSet.getString("ORGANIZATION"))
+                                .isEgress(resultSet.getInt("IS_EGRESS"))
                                 .isRevision(apiRevision != null).organization(resultSet.getString("ORGANIZATION"));
                         if (apiRevision != null) {
                             apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
@@ -14448,7 +14450,7 @@ public class ApiMgtDAO {
                 prepStmt.setString(1, providerId);
                 prepStmt.setString(2, provider.getName());
                 prepStmt.setString(3, provider.getApiVersion());
-                prepStmt.setBoolean(4, provider.isBuiltInSupport());
+                prepStmt.setString(4, String.valueOf(provider.isBuiltInSupport()));
                 prepStmt.setString(5, provider.getOrganization());
                 prepStmt.setString(6, provider.getDescription());
                 prepStmt.setString(7, provider.getApiDefinition());
@@ -14471,21 +14473,21 @@ public class ApiMgtDAO {
     /**
      * Retrieves LLM provider configurations based on optional filters.
      *
-     * @param name        the provider name (optional)
-     * @param apiVersion  the API version (optional)
-     * @param organization the organization (optional)
+     * @param organization   the organization (optional)
+     * @param name           the provider name (optional)
+     * @param apiVersion     the API version (optional)
+     * @param builtInSupport whether the API has built-in support (optional)
      * @return list of LLM providers matching the filters
      * @throws APIManagementException if a database error occurs
      */
-    public List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport)
+    public List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion,
+                                             Boolean builtInSupport)
             throws APIManagementException {
 
         List<LLMProvider> providerList = new ArrayList<>();
         String query = buildGetLLMProvidersSql(organization, name, apiVersion, builtInSupport);
-
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
             setQueryParameters(preparedStatement, name, organization, apiVersion, builtInSupport);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -14493,8 +14495,9 @@ public class ApiMgtDAO {
                     provider.setId(resultSet.getString("UUID"));
                     provider.setName(resultSet.getString("NAME"));
                     provider.setApiVersion(resultSet.getString("API_VERSION"));
+                    provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
                     provider.setOrganization(resultSet.getString("ORGANIZATION"));
-                    provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
+                    provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
                     provider.setDescription(resultSet.getString("DESCRIPTION"));
                     provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
                     providerList.add(provider);
@@ -14507,14 +14510,17 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Builds the SQL query with optional filters for name, organization, and API version.
+     * Builds the SQL query with optional filters for organization, name, API version, and built-in support.
      *
-     * @param name        the provider name (optional)
-     * @param apiVersion  the API version (optional)
-     * @param organization the organization (optional)
+     * @param organization   the organization (optional)
+     * @param name           the provider name (optional)
+     * @param apiVersion     the API version (optional)
+     * @param builtInSupport whether the API has built-in support (optional)
      * @return the constructed SQL query string
      */
-    private String buildGetLLMProvidersSql(String organization, String name, String apiVersion, Boolean builtInSupport) {
+    private String buildGetLLMProvidersSql(String organization, String name, String apiVersion,
+                                           Boolean builtInSupport) {
+
         StringBuilder queryBuilder = new StringBuilder(SQLConstants.GET_LLM_PROVIDERS_SQL);
         if (organization != null && !organization.isEmpty()) {
             queryBuilder.append(" AND ORGANIZATION = ?");
@@ -14532,16 +14538,19 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Sets the parameters for the given PreparedStatement.
+     * Sets query parameters for the prepared statement.
      *
-     * @param preparedStatement the PreparedStatement to set parameters for
-     * @param name              the provider name (optional)
-     * @param organization      the organization (optional)
+     * @param preparedStatement the statement to set parameters for
+     * @param name              the API name (optional)
+     * @param organization      the organization name (optional)
      * @param apiVersion        the API version (optional)
-     * @throws SQLException if setting a parameter fails
+     * @param builtInSupport    whether the API has built-in support (optional)
+     * @throws SQLException if a database access error occurs
      */
-    private void setQueryParameters(PreparedStatement preparedStatement, String name, String organization, String apiVersion, Boolean builtInSupport)
+    private void setQueryParameters(PreparedStatement preparedStatement, String name, String organization,
+                                    String apiVersion, Boolean builtInSupport)
             throws SQLException {
+
         int paramIndex = 1;
         if (organization != null && !organization.isEmpty()) {
             preparedStatement.setString(paramIndex++, organization);
@@ -14550,13 +14559,12 @@ public class ApiMgtDAO {
             preparedStatement.setString(paramIndex++, name);
         }
         if (apiVersion != null && !apiVersion.isEmpty()) {
-            preparedStatement.setString(paramIndex, apiVersion);
+            preparedStatement.setString(paramIndex++, apiVersion);
         }
         if (builtInSupport != null) {
-            preparedStatement.setBoolean(paramIndex, builtInSupport);
+            preparedStatement.setString(paramIndex, String.valueOf(builtInSupport));
         }
     }
-
 
     /**
      * Deletes an LLM Provider and its associated parameters from the database.
@@ -14608,7 +14616,7 @@ public class ApiMgtDAO {
                     if (resultSet.next()) {
                         provider.setName(resultSet.getString("NAME"));
                         provider.setApiVersion(resultSet.getString("API_VERSION"));
-                        provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
+                        provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
                     }
                 }
             }
@@ -14661,7 +14669,7 @@ public class ApiMgtDAO {
         }
         updateSqlBuilder.append(" WHERE ORGANIZATION = ? AND UUID = ?");
         if (!provider.isBuiltInSupport()) {
-            updateSqlBuilder.append(" AND BUILT_IN_SUPPORT = false");
+            updateSqlBuilder.append(" AND BUILT_IN_SUPPORT = 'false'");
         }
         return updateSqlBuilder.toString();
     }
@@ -14708,9 +14716,15 @@ public class ApiMgtDAO {
         String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
         try {
             Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_SQL);
-            preparedStatement.setString(1, organization);
-            preparedStatement.setString(2, llmProviderId);
+            String getLlmProviderSql = SQLConstants.GET_LLM_PROVIDER_SQL;
+            if (organization != null) {
+                getLlmProviderSql += " AND ORGANIZATION = ?";
+            }
+            PreparedStatement preparedStatement = connection.prepareStatement(getLlmProviderSql);
+            preparedStatement.setString(1, llmProviderId);
+            if (organization != null) {
+                preparedStatement.setString(2, organization);
+            }
             ResultSet resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
                 return null;
@@ -14719,7 +14733,7 @@ public class ApiMgtDAO {
             provider.setId(resultSet.getString("UUID"));
             provider.setName(resultSet.getString("NAME"));
             provider.setApiVersion(resultSet.getString("API_VERSION"));
-            provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
+            provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
             provider.setDescription(resultSet.getString("DESCRIPTION"));
             provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
             provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
@@ -14747,7 +14761,7 @@ public class ApiMgtDAO {
             provider.setId(resultSet.getString("UUID"));
             provider.setName(resultSet.getString("NAME"));
             provider.setApiVersion(resultSet.getString("API_VERSION"));
-            provider.setBuiltInSupport(resultSet.getBoolean("BUILT_IN_SUPPORT"));
+            provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
             provider.setDescription(resultSet.getString("DESCRIPTION"));
             provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
             provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
@@ -15356,6 +15370,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(12, organization);
             prepStmtAddAPIProduct.setString(13, apiProduct.getGatewayVendor());
             prepStmtAddAPIProduct.setString(14, apiProduct.getVersionTimestamp());
+            prepStmtAddAPIProduct.setInt(15, apiProduct.isEgress());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -22387,5 +22402,31 @@ public class ApiMgtDAO {
         blockConditionsDTO.setUUID(resultSet.getString("UUID"));
         blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
         return blockConditionsDTO;
+    }
+
+    /**
+     * This returns whether the API is Egress or not (1 or 0)
+     *
+     * @param uuid
+     * @return
+     * @throws APIManagementException
+     */
+    public int checkForEgressAPIWithUUID(String uuid) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SQLConstants.CHECK_API_EGRESS_WITH_UUID)) {
+                preparedStatement.setString(1, uuid);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getInt("IS_EGRESS");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apimgt connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return 0;
     }
 }

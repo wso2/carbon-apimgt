@@ -36,6 +36,15 @@ public class LLMProvider implements Serializable {
     private String configurations = null;
     private boolean builtInSupport = false;
 
+    public LLMProvider(String name, String apiVersion, String organization) {
+
+        this.name = name;
+        this.apiVersion = apiVersion;
+        this.organization = organization;
+    }
+
+    public LLMProvider() {}
+
     public boolean isBuiltInSupport() {
 
         return builtInSupport;

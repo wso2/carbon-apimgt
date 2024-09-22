@@ -38,6 +38,7 @@ public class APIProductInfoDTO   {
     private String businessOwnerEmail = null;
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
+    private Boolean egress = false;
 
   /**
    * UUID of the api product 
@@ -318,6 +319,24 @@ public class APIProductInfoDTO   {
     this.technicalOwnerEmail = technicalOwnerEmail;
   }
 
+  /**
+   * Whether the APIProduct is EGRESS or not
+   **/
+  public APIProductInfoDTO egress(Boolean egress) {
+    this.egress = egress;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether the APIProduct is EGRESS or not")
+  @JsonProperty("egress")
+  public Boolean isEgress() {
+    return egress;
+  }
+  public void setEgress(Boolean egress) {
+    this.egress = egress;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -343,12 +362,13 @@ public class APIProductInfoDTO   {
         Objects.equals(businessOwner, apIProductInfo.businessOwner) &&
         Objects.equals(businessOwnerEmail, apIProductInfo.businessOwnerEmail) &&
         Objects.equals(technicalOwner, apIProductInfo.technicalOwner) &&
-        Objects.equals(technicalOwnerEmail, apIProductInfo.technicalOwnerEmail);
+        Objects.equals(technicalOwnerEmail, apIProductInfo.technicalOwnerEmail) &&
+        Objects.equals(egress, apIProductInfo.egress);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, version, hasThumbnail, state, securityScheme, gatewayVendor, audiences, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    return Objects.hash(id, name, context, description, provider, version, hasThumbnail, state, securityScheme, gatewayVendor, audiences, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
   }
 
   @Override
@@ -372,6 +392,7 @@ public class APIProductInfoDTO   {
     sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
     sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
     sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
+    sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");
     return sb.toString();
   }

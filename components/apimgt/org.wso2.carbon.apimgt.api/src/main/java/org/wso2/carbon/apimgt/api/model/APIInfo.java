@@ -38,6 +38,7 @@ public class APIInfo {
     private int revisionsCreated;
     private boolean isRevision;
     private String organization;
+    private int isEgress;
 
     private APIInfo() {
 
@@ -207,6 +208,14 @@ public class APIInfo {
         isRevision = revision;
     }
 
+    public int isEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(int egress) {
+        isEgress = egress;
+    }
+
     public static class Builder {
 
         private String id;
@@ -225,6 +234,7 @@ public class APIInfo {
         private int revisionsCreated;
         private boolean isRevision;
         private String organization;
+        private int isEgress;
 
         public Builder id(String id) {
 
@@ -335,11 +345,17 @@ public class APIInfo {
             apiInfo.revisionsCreated = revisionsCreated;
             apiInfo.isRevision = isRevision;
             apiInfo.organization = organization;
+            apiInfo.isEgress = isEgress;
             return apiInfo;
         }
 
         public Builder organization(String organization) {
             this.organization = organization;
+            return this;
+        }
+
+        public Builder isEgress(int isEgress) {
+            this.isEgress = isEgress;
             return this;
         }
     }

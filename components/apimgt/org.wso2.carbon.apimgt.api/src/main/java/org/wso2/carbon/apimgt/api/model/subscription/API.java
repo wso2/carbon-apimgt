@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 
@@ -45,6 +46,7 @@ public class API implements CacheableEntity<String> {
     private String revision;
     private String organization;
     private Set<OperationPolicy> apiPolicies = new HashSet<>();
+    private AIConfiguration aiConfiguration;
 
     public String getRevision() {
 
@@ -212,5 +214,13 @@ public class API implements CacheableEntity<String> {
 
     public Set<OperationPolicy> getApiPolicies() {
         return apiPolicies;
+    }
+
+    public AIConfiguration getAiConfiguration() {
+        return aiConfiguration;
+    }
+
+    public void setAiConfiguration(AIConfiguration aiConfiguration) {
+        this.aiConfiguration = aiConfiguration;
     }
 }

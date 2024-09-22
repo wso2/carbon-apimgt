@@ -29,17 +29,18 @@ public class LLMProviderNotificationSender {
     /**
      * Sends a notification about an LLM Provider event with the specified details.
      *
-     * @param name The name of the LLM Provider.
-     * @param apiVersion The API version of the LLM Provider.
+     * @param name         The name of the LLM Provider.
+     * @param apiVersion   The API version of the LLM Provider.
      * @param organization The organization associated with the LLM Provider.
-     * @param action The action related to the LLM Provider (e.g., create, update).
+     * @param action       The action related to the LLM Provider (e.g., create, update).
      * @throws APIManagementException If an error occurs while sending the notification.
      */
-    public void notify(String name, String apiVersion, String organization, String action) throws APIManagementException {
+    public void notify(String llmProviderId, String name, String apiVersion, String organization, String action)
+            throws APIManagementException {
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         LLMProviderEvent llmProviderEvent = new LLMProviderEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), action, tenantId, organization, name, apiVersion);
+                System.currentTimeMillis(), action, tenantId, organization, llmProviderId, name, apiVersion);
         APIUtil.sendNotification(llmProviderEvent, APIConstants.NotifierType.LLM_PROVIDER.name());
     }
 }

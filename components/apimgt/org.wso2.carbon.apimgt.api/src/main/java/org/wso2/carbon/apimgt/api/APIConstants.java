@@ -53,9 +53,7 @@ public class APIConstants {
         public static final String AI_API_RESPONSE_METADATA = "AI_API_RESPONSE_METADATA";
         public static final String INPUT_SOURCE_PAYLOAD = "payload";
         public static final String CONNECTOR_TYPE = "connectorType";
-        public static final String LLM_PROVIDER_NAME = "name";
-        public static final String LLM_PROVIDER_API_VERSION = "apiVersion";
-        public static final String LLM_PROVIDER_ORGANIZATION = "organization";
+        public static final String LLM_PROVIDER_ID = "llmProviderId";
         public static final String LLM_PROVIDER_CONFIGURATIONS = "configurations";
         public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
         public static final String CONFIGURATIONS = "configurations";

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model;
 import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 
 public class AIConfiguration {
+    private String llmProviderId;
     private AIEndpointConfiguration aiEndpointConfiguration;
     private String llmProviderName;
     private String llmProviderApiVersion;
@@ -64,5 +65,15 @@ public class AIConfiguration {
     public void setLlmProviderApiVersion(String llmProviderApiVersion) {
 
         this.llmProviderApiVersion = llmProviderApiVersion;
+    }
+
+    public String getLlmProviderId() {
+
+        return llmProviderId;
+    }
+
+    public void setLlmProviderId(String llmProviderId) {
+
+        this.llmProviderId = llmProviderId;
     }
 }

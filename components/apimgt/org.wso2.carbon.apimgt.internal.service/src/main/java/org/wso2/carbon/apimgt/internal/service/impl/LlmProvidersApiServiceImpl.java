@@ -41,6 +41,20 @@ import javax.ws.rs.core.SecurityContext;
 
 public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
+    @Override
+    public Response getLLMProviderById(String llmProviderId, MessageContext messageContext) throws APIManagementException {
+
+        APIAdmin admin = new APIAdminImpl();
+        LLMProvider llmProvider = admin.getLLMProvider(null, llmProviderId);
+        LLMProviderDTO llmProviderDto = new LLMProviderDTO();
+        llmProviderDto.setId(llmProvider.getId());
+        llmProviderDto.setName(llmProvider.getName());
+        llmProviderDto.setApiVersion(llmProvider.getApiVersion());
+        llmProviderDto.setOrganization(llmProvider.getOrganization());
+        llmProviderDto.setConfigurations(llmProvider.getConfigurations());
+        return Response.ok().entity(llmProviderDto).build();
+    }
+
     /**
      * Retrieves LLM Provider configurations.
      *
@@ -58,6 +72,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         List<LLMProviderDTO> llmProviderDtoList = LLMProviderList.stream()
                 .map(llmProvider -> {
                     LLMProviderDTO llmProviderDto = new LLMProviderDTO();
+                    llmProviderDto.setId(llmProvider.getId());
                     llmProviderDto.setName(llmProvider.getName());
                     llmProviderDto.setApiVersion(llmProvider.getApiVersion());
                     llmProviderDto.setOrganization(llmProvider.getOrganization());

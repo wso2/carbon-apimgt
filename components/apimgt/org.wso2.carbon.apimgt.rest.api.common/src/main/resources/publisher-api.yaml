@@ -8330,6 +8330,78 @@ paths:
             "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers"'
       operationId: getLLMProviders
 
+  /llm-providers/api-definition:
+    get:
+      tags:
+        - LLMProvider
+      summary: Get LLM Provider's API Definition
+      description: |
+        Get LLM Provider's API Definition
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: apiVersion
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            API Definition
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/api-definition?name=OpenAI&apiVersion=1.0.0"'
+      operationId: getLLMProviderApiDefinition
+
+  /llm-providers/endpoint-configuration:
+    get:
+      tags:
+        - LLMProvider
+      summary: Get LLM provider's security configurations
+      description: |
+        Get LLM provider's endpoint security configurations
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: apiVersion
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            API Definition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderEndpointConfiguration'
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/endpoint-configuration?name=OpenAI&apiVersion=1.0.0"'
+      operationId: getLLMProviderEndpointConfiguration
+
   ######################################################
   # The "Individual LLM Provider" resource APIs
   ######################################################
@@ -9495,6 +9567,11 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the API is EGRESS or not
+          default: false
+          example: true
     APIMetadata:
       title: API Info object with basic minimal API details.
       type: object
@@ -10091,13 +10168,6 @@ components:
             endpointConfiguration:
               type: object
               properties:
-                authType:
-                  type: string
-                  enum:
-                    - header
-                    - query_parameter
-                authKey:
-                  type: string
                 sandboxAuthValue:
                   type: string
                 productionAuthValue:
@@ -10217,6 +10287,11 @@ components:
             - https
           items:
             type: string
+        egress:
+          type: boolean
+          description: Whether the API is EGRESS or not
+          default: false
+          example: true
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -10438,6 +10513,11 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     APIProduct:
       title: API Product object
       required:
@@ -10702,6 +10782,11 @@ components:
           items:
             type: string
             example: [ "aud1","aud2","aud3" ]
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     ProductAPI:
       title: ProductAPI
       required:
@@ -11655,6 +11740,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LLMProviderSummaryResponse'
+    LLMProviderEndpointConfiguration:
+      title: LLMProviderEndpointConfiguration
+      type: object
+      properties:
+        authHeader:
+          type: string
+          example: Authorization
+        authQueryParameter:
+          type: string
+          example: ApiKey
     AdditionalProperty:
       title: Additional Gateway Properties
       type: object
@@ -12608,6 +12703,10 @@ components:
             TechnicalOwnerEmail:
               type: string
               example: technicalowner@abc.com
+            egress:
+              type: boolean
+              description: Whether the API is Egress or not
+              example: false
     APIMonetizationInfo:
       title: API monetization object
       required:

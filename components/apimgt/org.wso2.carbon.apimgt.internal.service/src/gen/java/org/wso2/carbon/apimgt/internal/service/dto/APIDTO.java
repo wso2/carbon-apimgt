@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.AIConfigurationDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import javax.validation.constraints.*;
@@ -34,6 +35,7 @@ public class APIDTO   {
     private List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
     private String securityScheme = null;
+    private AIConfigurationDTO aiConfiguration = null;
 
   /**
    * UUID of API
@@ -284,6 +286,23 @@ public class APIDTO   {
     this.securityScheme = securityScheme;
   }
 
+  /**
+   **/
+  public APIDTO aiConfiguration(AIConfigurationDTO aiConfiguration) {
+    this.aiConfiguration = aiConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("aiConfiguration")
+  public AIConfigurationDTO getAiConfiguration() {
+    return aiConfiguration;
+  }
+  public void setAiConfiguration(AIConfigurationDTO aiConfiguration) {
+    this.aiConfiguration = aiConfiguration;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -307,12 +326,13 @@ public class APIDTO   {
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(apiPolicies, API.apiPolicies) &&
         Objects.equals(urlMappings, API.urlMappings) &&
-        Objects.equals(securityScheme, API.securityScheme);
+        Objects.equals(securityScheme, API.securityScheme) &&
+        Objects.equals(aiConfiguration, API.aiConfiguration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, aiConfiguration);
   }
 
   @Override
@@ -334,6 +354,7 @@ public class APIDTO   {
     sb.append("    apiPolicies: ").append(toIndentedString(apiPolicies)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("    aiConfiguration: ").append(toIndentedString(aiConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();
   }
