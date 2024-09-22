@@ -744,6 +744,7 @@ public class APIMappingUtil {
         apiInfoDTO.setGatewayType(api.getGatewayType());
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
+        apiInfoDTO.setSubtype(api.getSubtype());
         return apiInfoDTO;
     }
 
@@ -1466,6 +1467,7 @@ public class APIMappingUtil {
         dto.setGatewayVendor(gatewayVendor);
         dto.setGatewayType(model.getGatewayType());
         dto.setEgress(model.isEgress() == 1); //true - 1, false - 0
+        dto.setSubtype(model.getSubtype());
 
         if (model.getGatewayVendor() == null) {
             dto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);

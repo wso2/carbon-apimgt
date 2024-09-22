@@ -30,6 +30,7 @@ public class APIInfo {
     private String contextTemplate;
     private String apiTier;
     private String apiType;
+    private String apiSubtype;
     private String createdTime;
     private String createdBy;
     private String updatedTime;
@@ -126,6 +127,16 @@ public class APIInfo {
     public void setApiType(String apiType) {
 
         this.apiType = apiType;
+    }
+
+    public String getApiSubtype() {
+
+        return apiSubtype;
+    }
+
+    public void setApiSubtype(String apiSubtype) {
+
+        this.apiSubtype = apiSubtype;
     }
 
     public String getCreatedTime() {
@@ -226,6 +237,7 @@ public class APIInfo {
         private String contextTemplate;
         private String apiTier;
         private String apiType;
+        private String apiSubtype;
         private String createdTime;
         private String createdBy;
         private String updatedTime;
@@ -284,6 +296,12 @@ public class APIInfo {
             return this;
         }
 
+        public Builder apiSubtype(String apiSubtype) {
+
+            this.apiSubtype = apiSubtype;
+            return this;
+        }
+
         public Builder createdTime(String createdTime) {
 
             this.createdTime = createdTime;
@@ -337,6 +355,7 @@ public class APIInfo {
             apiInfo.contextTemplate = contextTemplate;
             apiInfo.apiTier = apiTier;
             apiInfo.apiType = apiType;
+            apiInfo.apiSubtype = apiSubtype;
             apiInfo.createdTime = createdTime;
             apiInfo.createdBy = createdBy;
             apiInfo.updatedTime = updatedTime;

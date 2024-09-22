@@ -300,27 +300,27 @@ public class TemplateBuilderUtil {
                         tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled().toString());
                 if (tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount() != null) {
                     properties.put("productionMaxPromptTokenCount",
-                            tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount().toString());
+                            tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount());
                 }
                 if (tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount() != null) {
                     properties.put("productionMaxCompletionTokenCount",
-                            tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount().toString());
+                            tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount());
                 }
                 if (tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount() != null) {
                     properties.put("productionMaxTotalTokenCount",
-                            tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount().toString());
+                            tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount());
                 }
                 if (tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount() != null) {
                     properties.put("sandboxMaxPromptTokenCount",
-                            tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount().toString());
+                            tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount());
                 }
                 if (tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount() != null) {
                     properties.put("sandboxMaxCompletionTokenCount",
-                            tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount().toString());
+                            tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
                 }
                 if (tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount() != null) {
                     properties.put("sandboxMaxTotalTokenCount",
-                            tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount().toString());
+                            tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount());
                 }
             }
 
