@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
+import ca.uhn.hl7v2.model.v21.datatype.ST;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -51,6 +52,12 @@ public class APIThrottleConstants {
     public static final String APPLICATION_BURST_LIMIT = "APPLICATION_BURST_LIMIT";
     public static final String APPLICATION_BURST_LIMIT_EXCEEDED = "APPLICATION_BURST_LIMIT_EXCEED";
     public static final String SANDBOX_HARD_LIMIT = "SANDBOX_HARD_LIMIT";
+    public static final String SANDBOX_HARD_LIMIT_TOTAL_TOKEN = "SANDBOX_HARD_LIMIT_TOTAL_TOKEN";
+    public static final String PRODUCTION_HARD_LIMIT_TOTAL_TOKEN = "PRODUCTION_HARD_LIMIT_TOTAL_TOKEN";
+    public static final String SANDBOX_HARD_LIMIT_COMPLETION_TOKEN = "SANDBOX_HARD_LIMIT_COMPLETION_TOKEN";
+    public static final String PRODUCTION_HARD_LIMIT_COMPLETION_TOKEN = "PRODUCTION_HARD_LIMIT_COMPLETION_TOKEN";
+    public static final String SANDBOX_HARD_LIMIT_PROMPT_TOKEN = "SANDBOX_HARD_LIMIT_PROMPT_TOKEN";
+    public static final String PRODUCTION_HARD_LIMIT_PROMPT_TOKEN = "PRODUCTION_HARD_LIMIT_PROMPT_TOKEN";
     public static final String THROTTLED_OUT_REASON = APIConstants.THROTTLE_OUT_REASON_KEY;
     public static final String THROTTLED_NEXT_ACCESS_TIMESTAMP = "NEXT_ACCESS_TIME";
     public static final String THROTTLED_NEXT_ACCESS_TIME = "NEXT_ACCESS_UTC_TIME";
