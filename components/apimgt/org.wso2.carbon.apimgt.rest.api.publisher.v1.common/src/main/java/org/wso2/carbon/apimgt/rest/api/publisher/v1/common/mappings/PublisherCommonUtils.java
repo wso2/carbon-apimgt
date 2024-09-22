@@ -1418,8 +1418,6 @@ public class PublisherCommonUtils {
     private static AIEndpointConfiguration buildEndpointConfiguration(APIAiConfigurationDTO dto) {
 
         AIEndpointConfiguration endpointConfiguration = new AIEndpointConfiguration();
-        endpointConfiguration.setAuthKey(dto.getEndpointConfiguration().getAuthKey());
-        endpointConfiguration.setAuthType(dto.getEndpointConfiguration().getAuthType().name());
         endpointConfiguration.setProductionAuthValue(dto.getEndpointConfiguration().getProductionAuthValue());
         endpointConfiguration.setSandboxAuthValue(dto.getEndpointConfiguration().getSandboxAuthValue());
         return endpointConfiguration;
@@ -1501,9 +1499,6 @@ public class PublisherCommonUtils {
 
         APIAiConfigurationEndpointConfigurationDTO endpointConfigurationDTO =
                 new APIAiConfigurationEndpointConfigurationDTO();
-        endpointConfigurationDTO.setAuthKey(aiEndpointConfiguration.getAuthKey());
-        endpointConfigurationDTO.setAuthType(APIAiConfigurationEndpointConfigurationDTO
-                .AuthTypeEnum.valueOf(aiEndpointConfiguration.getAuthType()));
         endpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration
                 .getProductionAuthValue());
         endpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration

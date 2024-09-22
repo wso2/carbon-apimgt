@@ -2760,7 +2760,7 @@ public class SQLConstants {
                     "API_DEFINITION, CONFIGURATIONS) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String GET_LLM_PROVIDERS_SQL =
-            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION, ORGANIZATION, CONFIGURATIONS " +
+            "SELECT UUID, NAME, API_VERSION, API_DEFINITION, BUILT_IN_SUPPORT, DESCRIPTION, ORGANIZATION, CONFIGURATIONS " +
                     "FROM AM_LLM_PROVIDER WHERE 1=1";
 
     public static final String GET_LLM_PROVIDER_SQL =

@@ -1027,18 +1027,12 @@ definitions:
   #-----------------------------------------------------
   AIEndpointConfiguration:
     properties:
-      authKey:
-        type: string
-        description: Authorization key for the AI endpoint.
       sandboxAuthValue:
         type: string
         description: Authorization value for the sandbox environment.
       productionAuthValue:
         type: string
         description: Authorization value for the production environment.
-      authType:
-        type: string
-        description: The type of authorization (e.g., Bearer, API Key).
 
   #-----------------------------------------------------
   # The TokenBaseThrottlingCountHolder resource

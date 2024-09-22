@@ -18,8 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.utils.URIBuilder;
@@ -126,24 +125,25 @@ public class AiApiHandler extends AbstractHandler {
             return true;
         }
 
+        String llmProviderId = aiConfiguration.getLlmProviderId();
+        String config = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
+        if (config == null) {
+            log.error("Unable to find provider configurations for provider: " + llmProviderId);
+            return true;
+        }
+
+        LLMProviderConfiguration providerConfiguration = new Gson().fromJson(config, LLMProviderConfiguration.class);
+
+
         try {
-            addEndpointConfigurationToMessageContext(messageContext, aiConfiguration);
+            addEndpointConfigurationToMessageContext(messageContext, aiConfiguration.getAiEndpointConfiguration(), providerConfiguration);
         } catch (CryptoException | URISyntaxException e) {
             log.error("Error occurred while adding endpoint security configuration to message context", e);
             return true;
         }
 
-        String llmProviderId = aiConfiguration.getLlmProviderId();
-        String providerConfigurations = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
-
-        if (providerConfigurations == null) {
-            log.error("Unable to find provider configurations for provider: " + llmProviderId);
-            return true;
-        }
-
-        LLMProviderConfiguration config = parseLLMProviderConfig(providerConfigurations);
         LLMProviderService llmProviderService =
-                ServiceReferenceHolder.getInstance().getLLMProviderService(config.getConnectorType());
+                ServiceReferenceHolder.getInstance().getLLMProviderService(providerConfiguration.getConnectorType());
 
         if (llmProviderService == null) {
             log.error("Unable to find LLM provider service for provider: "
@@ -151,13 +151,13 @@ public class AiApiHandler extends AbstractHandler {
             return true;
         }
 
-        String payload = extractPayloadFromContext(messageContext, config);
+        String payload = extractPayloadFromContext(messageContext, providerConfiguration);
         Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
         Map<String, String> headers = extractHeadersFromContext(messageContext);
 
         Map<String, String> metadataMap = isRequest
-                ? llmProviderService.getRequestMetadata(payload, headers, queryParams, config.getMetadata())
-                : llmProviderService.getResponseMetadata(payload, headers, queryParams, config.getMetadata());
+                ? llmProviderService.getRequestMetadata(payload, headers, queryParams, providerConfiguration.getMetadata())
+                : llmProviderService.getResponseMetadata(payload, headers, queryParams, providerConfiguration.getMetadata());
         if (metadataMap != null && !metadataMap.isEmpty()) {
             String metadataProperty = isRequest
                     ? APIConstants.AIAPIConstants.AI_API_REQUEST_METADATA
@@ -169,40 +169,35 @@ public class AiApiHandler extends AbstractHandler {
     }
 
     private void addEndpointConfigurationToMessageContext(MessageContext messageContext,
-                                                          AIConfiguration aiConfiguration) throws CryptoException,
-            URISyntaxException {
-
-        AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
-        if (aiEndpointConfiguration != null) {
+                                                          AIEndpointConfiguration aiConfiguration,
+                                                          LLMProviderConfiguration providerConfiguration)
+            throws CryptoException, URISyntaxException {
+        if (aiConfiguration != null) {
             org.apache.axis2.context.MessageContext axCtx =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            switch (aiEndpointConfiguration.getAuthType()) {
-                case "HEADER":
-                    if (((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT")).getKeyType().equals(org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                        Map transportHeaders =
-                                (Map) axCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                        transportHeaders.put(aiEndpointConfiguration.getAuthKey(),
-                                decryptSecret(aiEndpointConfiguration.getProductionAuthValue()));
-                    } else {
-                        Map transportHeaders =
-                                (Map) axCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                        transportHeaders.put(aiEndpointConfiguration.getAuthKey(),
-                                decryptSecret(aiEndpointConfiguration.getSandboxAuthValue()));
-                    }
-                    break;
-                case "QUERY_PARAMETER":
-                    if (((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT")).getKeyType().equals("PRODUCTION")) {
-                        URI updatedFullPath =
-                                (new URIBuilder((String) axCtx.getProperty("REST_URL_POSTFIX"))).addParameter(aiEndpointConfiguration.getAuthKey(), decryptSecret(aiEndpointConfiguration.getProductionAuthValue())).build();
-                        axCtx.setProperty("REST_URL_POSTFIX", updatedFullPath.toString());
-                    } else {
-                        URI updatedFullPath =
-                                (new URIBuilder((String) axCtx.getProperty("REST_URL_POSTFIX"))).addParameter(aiEndpointConfiguration.getAuthKey(), decryptSecret(aiEndpointConfiguration.getSandboxAuthValue())).build();
-                        axCtx.setProperty("REST_URL_POSTFIX", updatedFullPath.toString());
-                    }
-                    break;
-                default:
-                    log.error("Unsupported endpoint configuration: " + aiEndpointConfiguration.getAuthType());
+            if (providerConfiguration.getAuthHeader() != null) {
+                if (((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT")).getKeyType().equals(org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                    Map transportHeaders =
+                            (Map) axCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    transportHeaders.put(providerConfiguration.getAuthHeader(),
+                            decryptSecret(aiConfiguration.getProductionAuthValue()));
+                } else {
+                    Map transportHeaders =
+                            (Map) axCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    transportHeaders.put(providerConfiguration.getAuthHeader(),
+                            decryptSecret(aiConfiguration.getSandboxAuthValue()));
+                }
+            }
+            if (providerConfiguration.getAuthQueryParameter() != null) {
+                if (((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT")).getKeyType().equals("PRODUCTION")) {
+                    URI updatedFullPath =
+                            (new URIBuilder((String) axCtx.getProperty("REST_URL_POSTFIX"))).addParameter(providerConfiguration.getAuthQueryParameter(), decryptSecret(aiConfiguration.getProductionAuthValue())).build();
+                    axCtx.setProperty("REST_URL_POSTFIX", updatedFullPath.toString());
+                } else {
+                    URI updatedFullPath =
+                            (new URIBuilder((String) axCtx.getProperty("REST_URL_POSTFIX"))).addParameter(providerConfiguration.getAuthQueryParameter(), decryptSecret(aiConfiguration.getSandboxAuthValue())).build();
+                    axCtx.setProperty("REST_URL_POSTFIX", updatedFullPath.toString());
+                }
             }
         }
     }
@@ -269,24 +264,6 @@ public class AiApiHandler extends AbstractHandler {
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         return (Map<String, String>) axis2MessageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-    }
-
-    /**
-     * Parses the given LLM Provider configuration string into an LlmProviderConfiguration object.
-     *
-     * @param providerConfigurations The JSON string of provider configurations.
-     * @return The parsed LlmProviderConfiguration object.
-     * @throws APIManagementException If parsing fails.
-     */
-    public LLMProviderConfiguration parseLLMProviderConfig(String providerConfigurations)
-            throws APIManagementException {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.readValue(providerConfigurations, LLMProviderConfiguration.class);
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error occurred while parsing LLM Provider configuration", e);
-        }
     }
 
     /**
