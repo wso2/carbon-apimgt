@@ -303,13 +303,13 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         if (totalTokens != null) {
-            jsonObMap.put("APIThrottleConstants.TOTAL_TOKENS", totalTokens);
+            jsonObMap.put(APIThrottleConstants.TOTAL_TOKENS, totalTokens);
         }
         if (promptTokens != null) {
-            jsonObMap.put("APIThrottleConstants.PROMPT_TOKENS", promptTokens);
+            jsonObMap.put(APIThrottleConstants.PROMPT_TOKENS, promptTokens);
         }
         if (completionTokens != null) {
-            jsonObMap.put("APIThrottleConstants.COMPLETION_TOKENS", completionTokens);
+            jsonObMap.put(APIThrottleConstants.COMPLETION_TOKENS, completionTokens);
         }
 
         Object[] objects = new Object[]{messageContext.getMessageID(),

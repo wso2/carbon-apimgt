@@ -507,7 +507,14 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         return isThrottled;
     }
 
-    private boolean sendNonThrottledEventToCEP(MessageContext synCtx) {
+    /**
+     * This method is responsible for sending non-throttle events to the throttling engine. This method will send
+     * backend throttling events to the synapse throttler and Subscription level throttling events to the CEP
+     *
+     * @param synCtx Synapse message context that contains message details.
+     * @return
+     */
+    private void sendNonThrottleEventToThrottlingEngine(MessageContext synCtx) {
         String resourceLevelThrottleKey = "";
         String resourceLevelTier = "";
         String applicationLevelThrottleKey;
@@ -546,8 +553,10 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             subscriptionLevelThrottleKey = getSubscriptionLevelThrottleKey(subscriptionLevelTier,
                     authenticationContext, apiContext, apiVersion);
 
-            if (isHardLimitThrottled(synCtx, authenticationContext, apiContext, apiVersion)) {
-                return false;
+            if (Boolean.parseBoolean(isTokenBasedThrottlingEnabled)) {
+                //If backend token based throttling is enabled for AI APIs, we need to publish the throttling events
+                // to synapse throttler
+                isHardLimitThrottled(synCtx, authenticationContext, apiContext, apiVersion);
             }
             for (VerbInfoDTO verbInfo : verbInfoDTOList) {
                 resourceLevelThrottleKey = verbInfo.getRequestKey();
@@ -563,7 +572,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 synCtx, authenticationContext);
             }
         }
-        return true;
     }
 
 
@@ -705,7 +713,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 return false;
             }
             try {
-                sendNonThrottledEventToCEP(messageContext);
+                sendNonThrottleEventToThrottlingEngine(messageContext);
                 return ExtensionListenerUtil.postProcessResponse(messageContext, type);
             } catch (Exception e) {
                 if (TelemetryUtil.telemetryEnabled()) {
@@ -1148,9 +1156,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         PolicyEngine.getPolicy(hardThrottlingPolicy));
                 ThrottleConfiguration newThrottleConfig = tempThrottle.getThrottleConfiguration(ThrottleConstants
                         .ROLE_BASED_THROTTLE_KEY);
-                ThrottleContext hardThrottling = ThrottleContextFactory.createThrottleContext(ThrottleConstants
-                                .ROLE_BASE,
-                        newThrottleConfig);
+                ThrottleContext hardThrottling = ThrottleContextFactory.
+                        createThrottleContext(ThrottleConstants.ROLE_BASE, newThrottleConfig);
                 tempThrottle.addThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION, hardThrottling);
                 if (throttle != null) {
                     throttle.addThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION, hardThrottling);
@@ -1361,6 +1368,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                " </wsp:Policy>\n";
     }
 
+    /**
+     * This method will check if coming request is hitting hard limits.
+     *
+     * @param synCtx      synapse message context which contains message data
+     * @param authContext authentication context which contains authentication data
+     * @param apiContext  api context of the request
+     * @param apiVersion  api version of the request
+     * @return true if message is throttled else false
+     */
     private boolean isHardLimitThrottled(MessageContext synCtx, AuthenticationContext authContext, String apiContext,
                                          String apiVersion) {
         if (StringUtils.isEmpty(sandboxMaxCount) && StringUtils.isEmpty(productionMaxCount)) {
@@ -1401,6 +1417,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
     /**
      * Checks hard limits for production key type.
+     * @param synCtx synapse message context which contains message data
+     * @param hardThrottleContext throttle context for hard throttling
+     * @param throttleKey throttle key
+     * @param llmMetadata metadata from LLM provider
+     * @return true if message is throttled else false
      */
     private boolean checkProductionLimit(MessageContext synCtx, ThrottleContext hardThrottleContext,
                                          String throttleKey,  Map<String, String> llmMetadata) throws ThrottleException {
@@ -1409,11 +1430,18 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             return true;
         }
         return checkLlmMetadataLimits(synCtx, hardThrottleContext, throttleKey, llmMetadata,
-                productionMaxPromptTokenCount, productionMaxCompletionTokenCount, productionMaxTotalTokenCount);
+                APIThrottleConstants.PRODUCTION_HARD_LIMIT_PROMPT_TOKEN,
+                APIThrottleConstants.PRODUCTION_HARD_LIMIT_COMPLETION_TOKEN,
+                APIThrottleConstants.PRODUCTION_HARD_LIMIT_TOTAL_TOKEN);
     }
 
     /**
      * Checks hard limits for sandbox key type.
+     * @param synCtx synapse message context which contains message data
+     * @param hardThrottleContext throttle context for hard throttling
+     * @param throttleKey throttle key
+     * @param llmMetadata metadata from LLM provider
+     * @return true if message is throttled else false
      */
     private boolean checkSandboxLimit(MessageContext synCtx, ThrottleContext hardThrottleContext,
                                       String throttleKey, Map<String, String> llmMetadata) throws ThrottleException {
@@ -1422,7 +1450,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             return true;
         }
         return checkLlmMetadataLimits(synCtx, hardThrottleContext, throttleKey, llmMetadata,
-                sandboxMaxPromptTokenCount,sandboxMaxCompletionTokenCount, sandboxMaxTotalTokenCount);
+                APIThrottleConstants.SANDBOX_HARD_LIMIT_PROMPT_TOKEN,
+                APIThrottleConstants.SANDBOX_HARD_LIMIT_COMPLETION_TOKEN,
+                APIThrottleConstants.SANDBOX_HARD_LIMIT_TOTAL_TOKEN);
     }
 
     /**
