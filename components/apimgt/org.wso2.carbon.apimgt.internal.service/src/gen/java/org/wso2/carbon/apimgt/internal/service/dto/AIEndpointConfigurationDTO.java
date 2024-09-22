@@ -16,28 +16,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class AIEndpointConfigurationDTO   {
   
-    private String authKey = null;
     private String sandboxAuthValue = null;
     private String productionAuthValue = null;
-    private String authType = null;
-
-  /**
-   * Authorization key for the AI endpoint.
-   **/
-  public AIEndpointConfigurationDTO authKey(String authKey) {
-    this.authKey = authKey;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Authorization key for the AI endpoint.")
-  @JsonProperty("authKey")
-  public String getAuthKey() {
-    return authKey;
-  }
-  public void setAuthKey(String authKey) {
-    this.authKey = authKey;
-  }
 
   /**
    * Authorization value for the sandbox environment.
@@ -75,24 +55,6 @@ public class AIEndpointConfigurationDTO   {
     this.productionAuthValue = productionAuthValue;
   }
 
-  /**
-   * The type of authorization (e.g., Bearer, API Key).
-   **/
-  public AIEndpointConfigurationDTO authType(String authType) {
-    this.authType = authType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "The type of authorization (e.g., Bearer, API Key).")
-  @JsonProperty("authType")
-  public String getAuthType() {
-    return authType;
-  }
-  public void setAuthType(String authType) {
-    this.authType = authType;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -103,15 +65,13 @@ public class AIEndpointConfigurationDTO   {
       return false;
     }
     AIEndpointConfigurationDTO aiEndpointConfiguration = (AIEndpointConfigurationDTO) o;
-    return Objects.equals(authKey, aiEndpointConfiguration.authKey) &&
-        Objects.equals(sandboxAuthValue, aiEndpointConfiguration.sandboxAuthValue) &&
-        Objects.equals(productionAuthValue, aiEndpointConfiguration.productionAuthValue) &&
-        Objects.equals(authType, aiEndpointConfiguration.authType);
+    return Objects.equals(sandboxAuthValue, aiEndpointConfiguration.sandboxAuthValue) &&
+        Objects.equals(productionAuthValue, aiEndpointConfiguration.productionAuthValue);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authKey, sandboxAuthValue, productionAuthValue, authType);
+    return Objects.hash(sandboxAuthValue, productionAuthValue);
   }
 
   @Override
@@ -119,10 +79,8 @@ public class AIEndpointConfigurationDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class AIEndpointConfigurationDTO {\n");
     
-    sb.append("    authKey: ").append(toIndentedString(authKey)).append("\n");
     sb.append("    sandboxAuthValue: ").append(toIndentedString(sandboxAuthValue)).append("\n");
     sb.append("    productionAuthValue: ").append(toIndentedString(productionAuthValue)).append("\n");
-    sb.append("    authType: ").append(toIndentedString(authType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

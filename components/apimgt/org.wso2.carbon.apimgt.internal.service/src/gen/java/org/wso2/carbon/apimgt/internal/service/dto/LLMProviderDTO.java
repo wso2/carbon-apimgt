@@ -16,10 +16,28 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class LLMProviderDTO   {
   
+    private String id = null;
     private String name = null;
     private String apiVersion = null;
     private String organization = null;
     private String configurations = null;
+
+  /**
+   **/
+  public LLMProviderDTO id(String id) {
+    this.id = id;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("id")
+  public String getId() {
+    return id;
+  }
+  public void setId(String id) {
+    this.id = id;
+  }
 
   /**
    **/
@@ -99,7 +117,8 @@ public class LLMProviderDTO   {
       return false;
     }
     LLMProviderDTO llMProvider = (LLMProviderDTO) o;
-    return Objects.equals(name, llMProvider.name) &&
+    return Objects.equals(id, llMProvider.id) &&
+        Objects.equals(name, llMProvider.name) &&
         Objects.equals(apiVersion, llMProvider.apiVersion) &&
         Objects.equals(organization, llMProvider.organization) &&
         Objects.equals(configurations, llMProvider.configurations);
@@ -107,7 +126,7 @@ public class LLMProviderDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, apiVersion, organization, configurations);
+    return Objects.hash(id, name, apiVersion, organization, configurations);
   }
 
   @Override
@@ -115,6 +134,7 @@ public class LLMProviderDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class LLMProviderDTO {\n");
     
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    organization: ").append(toIndentedString(organization)).append("\n");

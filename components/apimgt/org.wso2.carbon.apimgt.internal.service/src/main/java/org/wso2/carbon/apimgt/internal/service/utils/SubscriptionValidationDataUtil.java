@@ -121,14 +121,11 @@ public class SubscriptionValidationDataUtil {
                 AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
                 if (aiEndpointConfiguration != null) {
                     AIEndpointConfigurationDTO aiEndpointConfigurationDTO = new AIEndpointConfigurationDTO();
-                    aiEndpointConfigurationDTO.setAuthKey(aiEndpointConfiguration.getAuthKey());
                     aiEndpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration.getSandboxAuthValue());
                     aiEndpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration.getProductionAuthValue());
-                    aiEndpointConfigurationDTO.setAuthType(aiEndpointConfiguration.getAuthType());
                     aiConfigurationDTO.setAiEndpointConfiguration(aiEndpointConfigurationDTO);
                 }
-                aiConfigurationDTO.setLlmProviderName(aiConfiguration.getLlmProviderName());
-                aiConfigurationDTO.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
+                aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
                 TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
                 if (tokenBaseThrottlingCountHolder != null) {
                     TokenBaseThrottlingCountHolderDTO tokenBaseThrottlingCountHolderDTO = new TokenBaseThrottlingCountHolderDTO();
@@ -207,14 +204,11 @@ public class SubscriptionValidationDataUtil {
                 AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
                 if (aiEndpointConfiguration != null) {
                     AIEndpointConfigurationDTO aiEndpointConfigurationDTO = new AIEndpointConfigurationDTO();
-                    aiEndpointConfigurationDTO.setAuthKey(aiEndpointConfiguration.getAuthKey());
                     aiEndpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration.getSandboxAuthValue());
                     aiEndpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration.getProductionAuthValue());
-                    aiEndpointConfigurationDTO.setAuthType(aiEndpointConfiguration.getAuthType());
                     aiConfigurationDTO.setAiEndpointConfiguration(aiEndpointConfigurationDTO);
                 }
-                aiConfigurationDTO.setLlmProviderName(aiConfiguration.getLlmProviderName());
-                aiConfigurationDTO.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
+                aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
                 TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
                 if (tokenBaseThrottlingCountHolder != null) {
                     TokenBaseThrottlingCountHolderDTO tokenBaseThrottlingCountHolderDTO = new TokenBaseThrottlingCountHolderDTO();

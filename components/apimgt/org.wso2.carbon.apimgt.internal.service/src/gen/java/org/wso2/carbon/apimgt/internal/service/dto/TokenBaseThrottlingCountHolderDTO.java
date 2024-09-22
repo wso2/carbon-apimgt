@@ -16,18 +16,18 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class TokenBaseThrottlingCountHolderDTO   {
   
-    private Long productionMaxPromptTokenCount = null;
-    private Long productionMaxCompletionTokenCount = null;
-    private Long productionMaxTotalTokenCount = null;
-    private Long sandboxMaxPromptTokenCount = null;
-    private Long sandboxMaxCompletionTokenCount = null;
-    private Long sandboxMaxTotalTokenCount = null;
+    private String productionMaxPromptTokenCount = null;
+    private String productionMaxCompletionTokenCount = null;
+    private String productionMaxTotalTokenCount = null;
+    private String sandboxMaxPromptTokenCount = null;
+    private String sandboxMaxCompletionTokenCount = null;
+    private String sandboxMaxTotalTokenCount = null;
     private Boolean isTokenBasedThrottlingEnabled = null;
 
   /**
    * Maximum allowed prompt token count for production.
    **/
-  public TokenBaseThrottlingCountHolderDTO productionMaxPromptTokenCount(Long productionMaxPromptTokenCount) {
+  public TokenBaseThrottlingCountHolderDTO productionMaxPromptTokenCount(String productionMaxPromptTokenCount) {
     this.productionMaxPromptTokenCount = productionMaxPromptTokenCount;
     return this;
   }
@@ -35,17 +35,17 @@ public class TokenBaseThrottlingCountHolderDTO   {
   
   @ApiModelProperty(value = "Maximum allowed prompt token count for production.")
   @JsonProperty("productionMaxPromptTokenCount")
-  public Long getProductionMaxPromptTokenCount() {
+  public String getProductionMaxPromptTokenCount() {
     return productionMaxPromptTokenCount;
   }
-  public void setProductionMaxPromptTokenCount(Long productionMaxPromptTokenCount) {
+  public void setProductionMaxPromptTokenCount(String productionMaxPromptTokenCount) {
     this.productionMaxPromptTokenCount = productionMaxPromptTokenCount;
   }
 
   /**
    * Maximum allowed completion token count for production.
    **/
-  public TokenBaseThrottlingCountHolderDTO productionMaxCompletionTokenCount(Long productionMaxCompletionTokenCount) {
+  public TokenBaseThrottlingCountHolderDTO productionMaxCompletionTokenCount(String productionMaxCompletionTokenCount) {
     this.productionMaxCompletionTokenCount = productionMaxCompletionTokenCount;
     return this;
   }
@@ -53,17 +53,17 @@ public class TokenBaseThrottlingCountHolderDTO   {
   
   @ApiModelProperty(value = "Maximum allowed completion token count for production.")
   @JsonProperty("productionMaxCompletionTokenCount")
-  public Long getProductionMaxCompletionTokenCount() {
+  public String getProductionMaxCompletionTokenCount() {
     return productionMaxCompletionTokenCount;
   }
-  public void setProductionMaxCompletionTokenCount(Long productionMaxCompletionTokenCount) {
+  public void setProductionMaxCompletionTokenCount(String productionMaxCompletionTokenCount) {
     this.productionMaxCompletionTokenCount = productionMaxCompletionTokenCount;
   }
 
   /**
    * Maximum total token count allowed for production.
    **/
-  public TokenBaseThrottlingCountHolderDTO productionMaxTotalTokenCount(Long productionMaxTotalTokenCount) {
+  public TokenBaseThrottlingCountHolderDTO productionMaxTotalTokenCount(String productionMaxTotalTokenCount) {
     this.productionMaxTotalTokenCount = productionMaxTotalTokenCount;
     return this;
   }
@@ -71,17 +71,17 @@ public class TokenBaseThrottlingCountHolderDTO   {
   
   @ApiModelProperty(value = "Maximum total token count allowed for production.")
   @JsonProperty("productionMaxTotalTokenCount")
-  public Long getProductionMaxTotalTokenCount() {
+  public String getProductionMaxTotalTokenCount() {
     return productionMaxTotalTokenCount;
   }
-  public void setProductionMaxTotalTokenCount(Long productionMaxTotalTokenCount) {
+  public void setProductionMaxTotalTokenCount(String productionMaxTotalTokenCount) {
     this.productionMaxTotalTokenCount = productionMaxTotalTokenCount;
   }
 
   /**
    * Maximum allowed prompt token count for sandbox.
    **/
-  public TokenBaseThrottlingCountHolderDTO sandboxMaxPromptTokenCount(Long sandboxMaxPromptTokenCount) {
+  public TokenBaseThrottlingCountHolderDTO sandboxMaxPromptTokenCount(String sandboxMaxPromptTokenCount) {
     this.sandboxMaxPromptTokenCount = sandboxMaxPromptTokenCount;
     return this;
   }
@@ -89,17 +89,17 @@ public class TokenBaseThrottlingCountHolderDTO   {
   
   @ApiModelProperty(value = "Maximum allowed prompt token count for sandbox.")
   @JsonProperty("sandboxMaxPromptTokenCount")
-  public Long getSandboxMaxPromptTokenCount() {
+  public String getSandboxMaxPromptTokenCount() {
     return sandboxMaxPromptTokenCount;
   }
-  public void setSandboxMaxPromptTokenCount(Long sandboxMaxPromptTokenCount) {
+  public void setSandboxMaxPromptTokenCount(String sandboxMaxPromptTokenCount) {
     this.sandboxMaxPromptTokenCount = sandboxMaxPromptTokenCount;
   }
 
   /**
    * Maximum allowed completion token count for sandbox.
    **/
-  public TokenBaseThrottlingCountHolderDTO sandboxMaxCompletionTokenCount(Long sandboxMaxCompletionTokenCount) {
+  public TokenBaseThrottlingCountHolderDTO sandboxMaxCompletionTokenCount(String sandboxMaxCompletionTokenCount) {
     this.sandboxMaxCompletionTokenCount = sandboxMaxCompletionTokenCount;
     return this;
   }
@@ -107,17 +107,17 @@ public class TokenBaseThrottlingCountHolderDTO   {
   
   @ApiModelProperty(value = "Maximum allowed completion token count for sandbox.")
   @JsonProperty("sandboxMaxCompletionTokenCount")
-  public Long getSandboxMaxCompletionTokenCount() {
+  public String getSandboxMaxCompletionTokenCount() {
     return sandboxMaxCompletionTokenCount;
   }
-  public void setSandboxMaxCompletionTokenCount(Long sandboxMaxCompletionTokenCount) {
+  public void setSandboxMaxCompletionTokenCount(String sandboxMaxCompletionTokenCount) {
     this.sandboxMaxCompletionTokenCount = sandboxMaxCompletionTokenCount;
   }
 
   /**
    * Maximum total token count allowed for sandbox.
    **/
-  public TokenBaseThrottlingCountHolderDTO sandboxMaxTotalTokenCount(Long sandboxMaxTotalTokenCount) {
+  public TokenBaseThrottlingCountHolderDTO sandboxMaxTotalTokenCount(String sandboxMaxTotalTokenCount) {
     this.sandboxMaxTotalTokenCount = sandboxMaxTotalTokenCount;
     return this;
   }
@@ -125,10 +125,10 @@ public class TokenBaseThrottlingCountHolderDTO   {
   
   @ApiModelProperty(value = "Maximum total token count allowed for sandbox.")
   @JsonProperty("sandboxMaxTotalTokenCount")
-  public Long getSandboxMaxTotalTokenCount() {
+  public String getSandboxMaxTotalTokenCount() {
     return sandboxMaxTotalTokenCount;
   }
-  public void setSandboxMaxTotalTokenCount(Long sandboxMaxTotalTokenCount) {
+  public void setSandboxMaxTotalTokenCount(String sandboxMaxTotalTokenCount) {
     this.sandboxMaxTotalTokenCount = sandboxMaxTotalTokenCount;
   }
 

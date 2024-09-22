@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderEndpointConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderSummaryResponseListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.LlmProvidersApiService;
@@ -50,6 +51,36 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. LLM Provider ", response = LLMProviderResponseDTO.class) })
     public Response getLLMProvider(@ApiParam(value = "LLM Provider ID ",required=true) @PathParam("llmProviderId") String llmProviderId) throws APIManagementException{
         return delegate.getLLMProvider(llmProviderId, securityContext);
+    }
+
+    @GET
+    @Path("/api-definition")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get LLM Provider's API Definition", notes = "Get LLM Provider's API Definition ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:llm_provider_read", description = "Read LLM Providers")
+        })
+    }, tags={ "LLMProvider",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API Definition ", response = String.class) })
+    public Response getLLMProviderApiDefinition( @NotNull @ApiParam(value = "",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "",required=true)  @QueryParam("apiVersion") String apiVersion) throws APIManagementException{
+        return delegate.getLLMProviderApiDefinition(name, apiVersion, securityContext);
+    }
+
+    @GET
+    @Path("/endpoint-configuration")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get LLM provider's security configurations", notes = "Get LLM provider's endpoint security configurations ", response = LLMProviderEndpointConfigurationDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:llm_provider_read", description = "Read LLM Providers")
+        })
+    }, tags={ "LLMProvider",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API Definition ", response = LLMProviderEndpointConfigurationDTO.class) })
+    public Response getLLMProviderEndpointConfiguration( @NotNull @ApiParam(value = "",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "",required=true)  @QueryParam("apiVersion") String apiVersion) throws APIManagementException{
+        return delegate.getLLMProviderEndpointConfiguration(name, apiVersion, securityContext);
     }
 
     @GET

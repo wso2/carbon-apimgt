@@ -437,9 +437,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      * @param eventJson JSON string containing provider details and configuration.
      */
     private void updateLLMProvider(String eventJson) {
-        LLMProvider provider = extractLLMProviderDetails(eventJson);
-
-        updateProviderConfigurations(provider);
+        String providerId = extractLLMProviderId(eventJson);
+        updateProviderConfigurations(providerId);
     }
 
     /**
@@ -448,8 +447,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      * @param eventJson JSON string containing provider details and configuration.
      */
     private void createLLMProvider(String eventJson) {
-        LLMProvider provider = extractLLMProviderDetails(eventJson);
-        addProviderConfigurations(provider);
+        String providerId = extractLLMProviderId(eventJson);
+        addProviderConfigurations(providerId);
     }
 
     /**
@@ -458,23 +457,13 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      * @param eventJson JSON string containing provider details.
      */
     private void deleteLLMProvider(String eventJson) {
-        LLMProvider provider = extractLLMProviderDetails(eventJson);
-        removeProviderConfigurations(provider);
+        String providerId = extractLLMProviderId(eventJson);
+        removeProviderConfigurations(providerId);
     }
 
-    /**
-     * Extracts the LLM provider details (name, API version, organization) from the JSON string.
-     *
-     * @param eventJson JSON string containing provider details.
-     * @return LLMProvider object populated with name, API version, and organization.
-     */
-    private LLMProvider extractLLMProviderDetails(String eventJson) {
+    private String extractLLMProviderId(String eventJson) {
         JSONObject jsonObject = new JSONObject(eventJson);
-        String name = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_NAME);
-        String apiVersion = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_API_VERSION);
-        String organization = jsonObject.getString(APIConstants.Webhooks.TENANT_DOMAIN);
-
-        return new LLMProvider(name, apiVersion, organization);
+        return jsonObject.getString(AIAPIConstants.LLM_PROVIDER_ID);
     }
 
     /**
@@ -482,10 +471,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      *
      * @param provider LLMProvider object containing provider details.
      */
-    private void updateProviderConfigurations(LLMProvider provider) {
-        String configurations = getProviderConfigurations(provider);
-        String key = createProviderKey(provider);
-        DataHolder.getInstance().updateLLMProviderConfigurations(key, configurations);
+    private void updateProviderConfigurations(String providerId) {
+        String configurations = getProviderConfigurations(providerId);
+        DataHolder.getInstance().updateLLMProviderConfigurations(providerId, configurations);
     }
 
     /**
@@ -493,10 +481,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      *
      * @param provider LLMProvider object containing provider details.
      */
-    private void addProviderConfigurations(LLMProvider provider) {
-        String configurations = getProviderConfigurations(provider);
-        String key = createProviderKey(provider);
-        DataHolder.getInstance().addLLMProviderConfigurations(key, configurations);
+    private void addProviderConfigurations(String providerId) {
+        String configurations = getProviderConfigurations(providerId);
+        DataHolder.getInstance().addLLMProviderConfigurations(providerId, configurations);
     }
 
     /**
@@ -504,9 +491,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      *
      * @param provider LLMProvider object containing provider details.
      */
-    private void removeProviderConfigurations(LLMProvider provider) {
-        String key = createProviderKey(provider);
-        DataHolder.getInstance().removeLLMProviderConfigurations(key);
+    private void removeProviderConfigurations(String providerId) {
+        DataHolder.getInstance().removeLLMProviderConfigurations(providerId);
     }
 
     /**
@@ -515,20 +501,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      * @param provider LLMProvider object containing provider details.
      * @return The configuration string for the provider.
      */
-    private String getProviderConfigurations(LLMProvider provider) {
+    private String getProviderConfigurations(String providerId) {
         return LLMProviderManager.getInstance()
-                .getLLMProviderConfiguration(provider.getName(), provider.getApiVersion(), provider.getOrganization())
-                .getConfigurations();
-    }
-
-    /**
-     * Creates a unique key for the LLM provider based on its details.
-     *
-     * @param provider LLMProvider object containing provider details.
-     * @return A string key in the format "organization:name:apiVersion".
-     */
-    private String createProviderKey(LLMProvider provider) {
-        return provider.getOrganization() + ":" + provider.getName() + ":" + provider.getApiVersion();
+                .getLLMProviderConfiguration(providerId);
     }
 
     private void endTenantFlow() {

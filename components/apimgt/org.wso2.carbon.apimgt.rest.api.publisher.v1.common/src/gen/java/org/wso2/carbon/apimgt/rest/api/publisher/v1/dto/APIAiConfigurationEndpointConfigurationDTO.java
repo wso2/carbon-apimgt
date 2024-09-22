@@ -20,75 +20,8 @@ import javax.validation.Valid;
 
 public class APIAiConfigurationEndpointConfigurationDTO   {
   
-
-    @XmlType(name="AuthTypeEnum")
-    @XmlEnum(String.class)
-    public enum AuthTypeEnum {
-        HEADER("header"),
-        QUERY_PARAMETER("query_parameter");
-        private String value;
-
-        AuthTypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static AuthTypeEnum fromValue(String v) {
-            for (AuthTypeEnum b : AuthTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private AuthTypeEnum authType = null;
-    private String authKey = null;
     private String sandboxAuthValue = null;
     private String productionAuthValue = null;
-
-  /**
-   **/
-  public APIAiConfigurationEndpointConfigurationDTO authType(AuthTypeEnum authType) {
-    this.authType = authType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("authType")
-  public AuthTypeEnum getAuthType() {
-    return authType;
-  }
-  public void setAuthType(AuthTypeEnum authType) {
-    this.authType = authType;
-  }
-
-  /**
-   **/
-  public APIAiConfigurationEndpointConfigurationDTO authKey(String authKey) {
-    this.authKey = authKey;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("authKey")
-  public String getAuthKey() {
-    return authKey;
-  }
-  public void setAuthKey(String authKey) {
-    this.authKey = authKey;
-  }
 
   /**
    **/
@@ -134,15 +67,13 @@ return null;
       return false;
     }
     APIAiConfigurationEndpointConfigurationDTO apIAiConfigurationEndpointConfiguration = (APIAiConfigurationEndpointConfigurationDTO) o;
-    return Objects.equals(authType, apIAiConfigurationEndpointConfiguration.authType) &&
-        Objects.equals(authKey, apIAiConfigurationEndpointConfiguration.authKey) &&
-        Objects.equals(sandboxAuthValue, apIAiConfigurationEndpointConfiguration.sandboxAuthValue) &&
+    return Objects.equals(sandboxAuthValue, apIAiConfigurationEndpointConfiguration.sandboxAuthValue) &&
         Objects.equals(productionAuthValue, apIAiConfigurationEndpointConfiguration.productionAuthValue);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authType, authKey, sandboxAuthValue, productionAuthValue);
+    return Objects.hash(sandboxAuthValue, productionAuthValue);
   }
 
   @Override
@@ -150,8 +81,6 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class APIAiConfigurationEndpointConfigurationDTO {\n");
     
-    sb.append("    authType: ").append(toIndentedString(authType)).append("\n");
-    sb.append("    authKey: ").append(toIndentedString(authKey)).append("\n");
     sb.append("    sandboxAuthValue: ").append(toIndentedString(sandboxAuthValue)).append("\n");
     sb.append("    productionAuthValue: ").append(toIndentedString(productionAuthValue)).append("\n");
     sb.append("}");

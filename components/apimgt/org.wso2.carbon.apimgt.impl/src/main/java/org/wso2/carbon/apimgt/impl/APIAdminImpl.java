@@ -605,7 +605,7 @@ public class APIAdminImpl implements APIAdmin {
 
         LLMProvider result = apiMgtDAO.addLLMProvider(provider);
         if (result != null) {
-            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(),
+            new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
                     result.getOrganization(),
                     APIConstants.EventType.LLM_PROVIDER_CREATE.name());
         }
@@ -613,16 +613,20 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport) throws APIManagementException {
+    public List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion,
+                                             Boolean builtInSupport) throws APIManagementException {
+
         return apiMgtDAO.getLLMProviders(organization, name, apiVersion, builtInSupport);
     }
 
     @Override
-    public LLMProvider deleteLLMProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException {
+    public LLMProvider deleteLLMProvider(String organization, String llmProviderId, boolean builtIn)
+            throws APIManagementException {
 
         LLMProvider result = apiMgtDAO.deleteLLMProvider(organization, llmProviderId, builtIn);
         if (result != null) {
-            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), organization,
+            new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
+                    organization,
                     APIConstants.EventType.LLM_PROVIDER_DELETE.name());
         }
         return result;
@@ -633,7 +637,8 @@ public class APIAdminImpl implements APIAdmin {
 
         LLMProvider result = apiMgtDAO.updateLLMProvider(provider);
         if (result != null) {
-            new LLMProviderNotificationSender().notify(result.getName(), result.getApiVersion(), result.getOrganization(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
+            new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
+                    result.getOrganization(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
         }
         return result;
     }
