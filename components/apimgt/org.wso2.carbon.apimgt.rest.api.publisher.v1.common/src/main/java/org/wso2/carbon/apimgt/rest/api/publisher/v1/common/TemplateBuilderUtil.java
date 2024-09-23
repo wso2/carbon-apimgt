@@ -96,7 +96,6 @@ public class TemplateBuilderUtil {
     private static final String ENDPOINT_SANDBOX = "_SANDBOX_";
 
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
-    private static final ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
                                                            List<ClientCertificateDTO> clientCertificateDTOSProduction,
@@ -573,6 +572,7 @@ public class TemplateBuilderUtil {
                 if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                         endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
                         api.getType().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
+                    ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
                     // To modify the endpoint config string
                     JSONParser parser = new JSONParser();
                     ObjectMapper objectMapper = new ObjectMapper();
@@ -1524,6 +1524,7 @@ public class TemplateBuilderUtil {
             String endpointType, String pathToAchieve) throws APIManagementException {
         GatewayContentDTO customBackendSequenceContentDto = new GatewayContentDTO();
         String customSequence = null;
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         SequenceBackendData data = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(), endpointType);
         if (data != null) {
             String seqExt = data.getName();
@@ -1561,6 +1562,7 @@ public class TemplateBuilderUtil {
 
     private static GatewayContentDTO retrieveCustomBackendSequence(API api, String endpointType, String pathToAchieve)
             throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         GatewayContentDTO customBackendSequenceContentDto = new GatewayContentDTO();
         String customSequence = null;
         SequenceBackendData data = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(), endpointType);
