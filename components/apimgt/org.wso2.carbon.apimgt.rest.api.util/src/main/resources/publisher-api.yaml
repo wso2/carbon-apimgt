@@ -8882,13 +8882,6 @@ components:
               type: string
             llmProviderApiVersion:
               type: string
-            endpointConfiguration:
-              type: object
-              properties:
-                sandboxAuthValue:
-                  type: string
-                productionAuthValue:
-                  type: string
             throttlingConfiguration:
               type: object
               properties:
