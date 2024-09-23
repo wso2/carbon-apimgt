@@ -5592,6 +5592,7 @@ public class ApiMgtDAO {
             prepStmt.setString(13, api.getGatewayVendor());
             prepStmt.setString(14, api.getVersionTimestamp());
             prepStmt.setInt(15, api.isEgress());
+            prepStmt.setString(16, api.getSubtype());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -10009,6 +10010,10 @@ public class ApiMgtDAO {
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
                         String context = resultSet.getString("CONTEXT");
                         String apiType = resultSet.getString("API_TYPE");
+                        String apiSubtype = resultSet.getString("API_SUBTYPE");
+                        if (StringUtils.isEmpty(apiSubtype))  {
+                            apiSubtype = APIConstants.API_SUBTYPE_DEFAULT;
+                        }
                         String version = resultSet.getString("API_VERSION");
                         if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)
                                 && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(version)
@@ -10024,6 +10029,7 @@ public class ApiMgtDAO {
                                 .contextTemplate(contextTemplate)
                                 .status(APIUtil.getApiStatus(resultSet.getString("STATUS")))
                                 .apiType(apiType)
+                                .apiSubtype(apiSubtype)
                                 .createdBy(resultSet.getString("CREATED_BY"))
                                 .createdTime(resultSet.getString("CREATED_TIME"))
                                 .updatedBy(resultSet.getString("UPDATED_BY"))
@@ -14747,9 +14753,9 @@ public class ApiMgtDAO {
     public LLMProvider getLLMProvider(String organization, String name, String apiVersion) throws APIManagementException {
 
         String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
-        try {
-            Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_LLM_PROVIDER_BY_NAME_AND_VERSION_SQL);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        SQLConstants.GET_LLM_PROVIDER_BY_NAME_AND_VERSION_SQL)) {
             preparedStatement.setString(1, organization);
             preparedStatement.setString(2, name);
             preparedStatement.setString(3, apiVersion);
@@ -22428,5 +22434,31 @@ public class ApiMgtDAO {
                     ExceptionCodes.INTERNAL_ERROR);
         }
         return 0;
+    }
+
+    /**
+     * This retrieves the API subtype for the given API UUID.
+     *
+     * @param uuid API UUID
+     * @return API subtype
+     * @throws APIManagementException
+     */
+    public String retrieveAPISubtypeWithUUID(String uuid) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    SQLConstants.RETRIEVE_API_SUBTYPE_WITH_UUID)) {
+                preparedStatement.setString(1, uuid);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getString("API_SUBTYPE");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apimgt connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return APIConstants.API_SUBTYPE_DEFAULT;
     }
 }

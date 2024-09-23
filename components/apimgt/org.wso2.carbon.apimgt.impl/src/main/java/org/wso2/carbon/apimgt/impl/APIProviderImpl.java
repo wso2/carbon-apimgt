@@ -5311,7 +5311,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
                 populateAPILevelPolicies(api);
-                populateAiConfiguration(api);
+                populateAPISubtype(api);
+                if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                    populateAiConfiguration(api);
+                }
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     if (migrationEnabled == null) {
@@ -5419,6 +5422,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     populateDefaultVersion(mappedAPI);
                     populateGatewayVendor(mappedAPI);
                     populateEgressStatus(mappedAPI);
+                    populateAPISubtype(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 result.setApis(apiList);
@@ -5490,6 +5494,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * This method populates the subtype in the API.
+     * @param api API that needs to be populated with the subtype
+     * @throws APIManagementException
+     */
+    private void populateAPISubtype(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getRevisionedApiId()));
+        } else {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getUuid()));
+        }
+    }
+
     public APIProduct getAPIProductbyUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);
@@ -5548,6 +5565,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     populateDefaultVersion(mappedAPI);
                     populateGatewayVendor(mappedAPI);
                     populateEgressStatus(mappedAPI);
+                    populateAPISubtype(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);

@@ -2022,6 +2022,8 @@ public final class APIConstants {
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
             "SSE", "ASYN" +
             "C"};
+    public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
+    public static final String API_SUBTYPE_AI_API = "AIAPI";
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 

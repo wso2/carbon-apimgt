@@ -63,6 +63,7 @@ public class API implements Serializable {
     private String graphQLSchema;
     private String asyncApiDefinition;
     private String type;
+    private String subtype;
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
@@ -1190,6 +1191,18 @@ public class API implements Serializable {
             this.type = "HTTP";
         } else {
             this.type = StringUtils.trim(type).toUpperCase();
+        }
+    }
+
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        if (StringUtils.isEmpty(subtype) || NULL_VALUE.equalsIgnoreCase(StringUtils.trim(subtype))) {
+            this.subtype = "DEFAULT";
+        } else {
+            this.subtype = StringUtils.trim(subtype).toUpperCase();
         }
     }
 

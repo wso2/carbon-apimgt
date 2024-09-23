@@ -1386,6 +1386,9 @@ public class PublisherCommonUtils {
         apiToAdd.setGatewayType(body.getGatewayType());
         if (body.getAiConfiguration() != null) {
             apiToAdd.setAiConfiguration(convertToAiConfiguration(body.getAiConfiguration()));
+            apiToAdd.setSubtype(APIConstants.API_SUBTYPE_AI_API);
+        } else {
+            apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
         }
         apiToAdd.setEgress(body.isEgress() ? 1 : 0);
         return apiToAdd;
