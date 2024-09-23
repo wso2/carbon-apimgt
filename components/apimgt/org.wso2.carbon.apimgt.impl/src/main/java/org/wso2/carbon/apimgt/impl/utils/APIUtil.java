@@ -10058,15 +10058,16 @@ public final class APIUtil {
             customBackendFileName = customBackendFileName + fileExtension;
         }
         String fileName = extractedFolderPath + File.separator + customBackendFileName;
-        InputStream inputStream = null;
         if (checkFileExistence(fileName)) {
             try {
-                inputStream = new FileInputStream(fileName);
+                try (InputStream inputStream = new FileInputStream(fileName)) {
+                    return inputStream;
+                }
             } catch (IOException ex) {
                 handleException("Error reading Custom Backend " + customBackendFileName);
             }
         }
-        return inputStream;
+        return null;
     }
 
     /**

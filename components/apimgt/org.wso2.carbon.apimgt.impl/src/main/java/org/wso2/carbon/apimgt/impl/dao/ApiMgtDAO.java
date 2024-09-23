@@ -21811,27 +21811,8 @@ public class ApiMgtDAO {
                     addPstmt.setString(6, rs.getString("NAME"));
                     addPstmt.addBatch();
                     count++;
-
-                    //                    CustomBackendData customBackendData = new CustomBackendData();
-                    //                    customBackendData.setId(rs.getString("ID"));
-                    //                    customBackendData.setName(rs.getString("NAME"));
-                    //                    customBackendData.setApiUUID(apiRevision.getApiUUID());
-                    //                    customBackendData.setRevisionUUID(apiRevision.getRevisionUUID());
-                    //                    customBackendData.setSequence(rs.getBinaryStream("SEQUENCE"));
-                    //                    customBackendData.setType(rs.getString("TYPE"));
-                    //                    customBackendDataList.add(customBackendData);
                 }
             }
-
-            //            for(CustomBackendData customBackendData: customBackendDataList) {
-            //                addPstmt.setString(1, customBackendData.getId());
-            //                addPstmt.setString(2, customBackendData.getApiUUID());
-            //                addPstmt.setBinaryStream(3, customBackendData.getSequence());
-            //                addPstmt.setString(4, customBackendData.getType());
-            //                addPstmt.setString(5, customBackendData.getRevisionUUID());
-            //                addPstmt.setString(6, customBackendData.getName());
-            //                addPstmt.addBatch();
-            //            }
 
             if (count > 0) {
                 addPstmt.executeBatch();

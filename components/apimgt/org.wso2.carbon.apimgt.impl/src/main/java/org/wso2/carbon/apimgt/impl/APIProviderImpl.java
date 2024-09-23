@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
@@ -1173,18 +1172,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateCustomBackend(String apiUUID, String type, InputStream sequence, String seqName,
             String customBackendUUID) throws APIManagementException {
         apiMgtDAO.updateCustomBackend(apiUUID, seqName, sequence, type, customBackendUUID);
-    }
-
-    @Override
-    public Map<String, Object> getCustomBackendOfAPIByUUID(String customBackendUUID, String apiUUID,
-            String type, boolean isInfoOnly) throws APIManagementException {
-        return apiMgtDAO.getCustomBackendOfAPIByUUID(customBackendUUID, apiUUID, type, isInfoOnly);
-    }
-
-    @Override
-    public String getCustomBackendSequenceOfAPIByUUID(String apiUUID, String type)
-            throws APIManagementException {
-        return apiMgtDAO.getCustomBackendSequenceOfAPIByUUID(apiUUID, type);
     }
 
     @Override

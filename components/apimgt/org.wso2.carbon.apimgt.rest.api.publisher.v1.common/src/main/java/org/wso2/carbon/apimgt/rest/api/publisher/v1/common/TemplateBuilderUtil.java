@@ -568,6 +568,7 @@ public class TemplateBuilderUtil {
         String endpointConfigString = api.getEndpointConfig();
         if (StringUtils.isNotBlank(endpointConfigString)) {
             try {
+                // Avoid number format issues in Endpoint Configuration
                 JsonObject endpointConf = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
                 if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                         endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
@@ -611,7 +612,8 @@ public class TemplateBuilderUtil {
                     }
                 }
             } catch (IOException | ParseException ex) {
-                throw new APIManagementException("Error when updating Endpoint Configuration", ex);
+                throw new APIManagementException("Error when updating Endpoint Configuration of API: " + api.getUuid(),
+                        ex);
             }
         }
 
