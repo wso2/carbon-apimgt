@@ -74,7 +74,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_NAME = "MistralAI";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_VERSION = "1.0.0";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_CONNECTOR = "mistralAi_1.0.0";
-        public static final String LLM_PROVIDER_SERVICE_MISTRALAI_KEY = "ApiKey";
+        public static final String LLM_PROVIDER_SERVICE_MISTRALAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME = "mistral_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION = "Mistral AI service";
         public static final String LLM_PROVIDER_SERVICE_METADATA_MODEL = "model";
