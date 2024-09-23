@@ -141,6 +141,7 @@ public class AiApiHandler extends AbstractHandler {
         if (isRequest) {
             addEndpointConfigurationToMessageContext(messageContext, aiConfiguration.getAiEndpointConfiguration(),
                     providerConfiguration);
+            ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty("TRANSPORT_HEADERS");
         }
 
         LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
@@ -199,6 +200,9 @@ public class AiApiHandler extends AbstractHandler {
                         (Map<String, String>) axCtx.getProperty(org.apache.axis2.context.MessageContext
                                 .TRANSPORT_HEADERS);
                 transportHeaders.put(providerConfiguration.getAuthHeader(), decryptSecret(authValue));
+
+                // TODO: Handle encoded scenario
+                transportHeaders.remove("Accept-Encoding");
             }
 
             if (providerConfiguration.getAuthQueryParameter() != null) {
