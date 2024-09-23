@@ -12,6 +12,7 @@ public class GatewayArtifactSynchronizerProperties {
     private String saverName = APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME;
     private String retrieverName = APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME;
     private Set<String> gatewayLabels = new HashSet<>();
+    private Set<String> fileBasedApiContexts = new HashSet<>();
     private String artifactSynchronizerDataSource = "jdbc/WSO2AM_DB";
     private long retryDuartion = 15000 ;
     private int maxRetryCount = 5;
@@ -75,6 +76,16 @@ public class GatewayArtifactSynchronizerProperties {
     public void setGatewayLabels(Set<String> gatewayLabels) {
 
         this.gatewayLabels = gatewayLabels;
+    }
+
+    public Set<String> getFileBasedApiContexts() {
+
+        return fileBasedApiContexts;
+    }
+
+    public void setFileBasedApiContexts(Set<String> fileBasedApiContexts) {
+
+        this.fileBasedApiContexts = fileBasedApiContexts;
     }
 
     public void setPublishDirectlyToGatewayEnabled(boolean publishDirectlyToGatewayEnabled) {
