@@ -70,13 +70,14 @@ public interface APIProvider extends APIManager {
      * This method is to delete Sequence Backend by type
      *
      * @param apiUUID API Id
-     * @param type Key type
+     * @param type    Key type
      * @throws APIManagementException If failed to delete Sequence Backend
      */
     void deleteCustomBackendByID(String apiUUID, String type) throws APIManagementException;
 
     /**
      * This method is to delete all Sequence Backends by APIID
+     *
      * @param apiUUID API ID
      * @throws APIManagementException If failed to delete Sequence Backend
      */
@@ -343,21 +344,21 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to update Sequence Backend
      *
-     * @param api API
-     * @param type Key Type
-     * @param sequence Sequence Content
-     * @param seqName Sequence Name
+     * @param api               API
+     * @param type              Key Type
+     * @param sequence          Sequence Content
+     * @param seqName           Sequence Name
      * @param customBackendUUID Sequence Id
      * @throws APIManagementException If not updated
      */
-    void updateCustomBackend(String api, String type, InputStream sequence, String seqName, String customBackendUUID)
+    void updateCustomBackend(String api, String type, String sequence, String seqName, String customBackendUUID)
             throws APIManagementException;
 
     /**
      * THis method is to retrieve Sequence Backend data
      *
      * @param apiUUID API Id
-     * @param type Key Type
+     * @param type    Key Type
      * @return SequenceBackendData object
      * @throws APIManagementException If data is not properly retrieved
      */

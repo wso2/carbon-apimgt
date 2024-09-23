@@ -701,24 +701,28 @@ public class ImportUtils {
                 if (endpointConfig.get("sandbox") != null) {
                     String seqFile = endpointConfig.get("sandbox").getAsString();
                     String seqId = UUID.randomUUID().toString();
-                    InputStream seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    String seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
                     if (!StringUtils.isEmpty(seqFile) && !seqFile.contains(
                             APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
                         seqFile = seqFile + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
                     }
-                    apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX, seq, seqFile,
-                            seqId);
+                    if (seq != null) {
+                        apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX, seq, seqFile,
+                                seqId);
+                    }
                 }
                 if (endpointConfig.get("production") != null) {
                     String seqFile = endpointConfig.get("production").getAsString();
                     String seqId = UUID.randomUUID().toString();
-                    InputStream seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    String seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
                     if (!StringUtils.isEmpty(seqFile) && !seqFile.contains(
                             APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
                         seqFile = seqFile + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
                     }
-                    apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION, seq, seqFile,
-                            seqId);
+                    if (seq != null) {
+                        apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION, seq,
+                                seqFile, seqId);
+                    }
                 }
             }
         }

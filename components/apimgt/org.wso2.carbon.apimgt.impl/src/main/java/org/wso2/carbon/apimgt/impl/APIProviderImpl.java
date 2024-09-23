@@ -1169,7 +1169,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateCustomBackend(String apiUUID, String type, InputStream sequence, String seqName,
+    public void updateCustomBackend(String apiUUID, String type, String sequence, String seqName,
             String customBackendUUID) throws APIManagementException {
         apiMgtDAO.updateCustomBackend(apiUUID, seqName, sequence, type, customBackendUUID);
     }

@@ -21511,7 +21511,17 @@ public class ApiMgtDAO {
         }
     }
 
-    public void updateCustomBackend(String apiUUID, String sequenceName, InputStream sequence, String type,
+    /**
+     * This method is to update Sequence Backend data
+     *
+     * @param apiUUID      API Id
+     * @param sequenceName Sequence Name
+     * @param sequence     Sequence Content
+     * @param type         Key type
+     * @param backendUUID  Sequence Id
+     * @throws APIManagementException If not properly updated
+     */
+    public void updateCustomBackend(String apiUUID, String sequenceName, String sequence, String type,
             String backendUUID) throws APIManagementException {
         // delete current working copy
         String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_API_AND_TYPE;
@@ -21586,14 +21596,16 @@ public class ApiMgtDAO {
         }
     }
 
-    public void addCustomBackend(String apiUUID, String sequenceName, String revision, InputStream sequence,
+    public void addCustomBackend(String apiUUID, String sequenceName, String revision, String sequence,
             String type, Connection connection, String backendUUID) throws APIManagementException {
         String insertCustomBackendQuery = SQLConstants.CustomBackendConstants.ADD_CUSTOM_BACKEND;
         try (PreparedStatement prepStmt = connection.prepareStatement(insertCustomBackendQuery)) {
             connection.setAutoCommit(false);
             prepStmt.setString(1, backendUUID);
             prepStmt.setString(2, apiUUID);
-            prepStmt.setBinaryStream(3, sequence);
+            try (InputStream seqStream = new ByteArrayInputStream(sequence.getBytes())) {
+                prepStmt.setBinaryStream(3, seqStream);
+            }
             prepStmt.setString(4, type);
             if (revision == null) {
                 revision = "0";
@@ -21601,7 +21613,7 @@ public class ApiMgtDAO {
             prepStmt.setString(5, revision);
             prepStmt.setString(6, sequenceName);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error while adding Custom Backend for API : " + apiUUID, e);
         }
     }

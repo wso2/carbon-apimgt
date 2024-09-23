@@ -10052,7 +10052,7 @@ public final class APIUtil {
      * @return The Sequence of the Custom Backend as an Input Stream
      * @throws APIManagementException If an error occurs while reading, throws an error
      */
-    public static InputStream getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
+    public static String getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
             String fileExtension) throws APIManagementException {
         if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(fileExtension)) {
             customBackendFileName = customBackendFileName + fileExtension;
@@ -10061,7 +10061,7 @@ public final class APIUtil {
         if (checkFileExistence(fileName)) {
             try {
                 try (InputStream inputStream = new FileInputStream(fileName)) {
-                    return inputStream;
+                    return IOUtils.toString(inputStream);
                 }
             } catch (IOException ex) {
                 handleException("Error reading Custom Backend " + customBackendFileName);

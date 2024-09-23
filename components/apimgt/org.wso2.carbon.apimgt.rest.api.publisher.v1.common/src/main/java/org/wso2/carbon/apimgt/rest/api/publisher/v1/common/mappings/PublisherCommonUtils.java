@@ -31,6 +31,7 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import io.swagger.v3.parser.ObjectMapperFactory;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -221,9 +222,13 @@ public class PublisherCommonUtils {
             throw new APIManagementException(
                     "Error when retrieving Custom Backend file name of API: " + api.getId().getApiName());
         }
-        String seqName = APIUtil.getCustomBackendName(api.getUuid(), endpointType);
         String customBackendUUID = UUID.randomUUID().toString();
-        apiProvider.updateCustomBackend(api.getUuid(), endpointType, customBackend, fileName, customBackendUUID);
+        try {
+            String customBackendStr = IOUtils.toString(customBackend);
+            apiProvider.updateCustomBackend(api.getUuid(), endpointType, customBackendStr, fileName, customBackendUUID);
+        } catch (IOException ex) {
+            throw new APIManagementException("Error retrieving sequence backend of API: " + api.getUuid(), ex);
+        }
     }
 
     private static String getFileNameFromContentDisposition(String contentDisposition) {
