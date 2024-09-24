@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrottlingConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -88,6 +89,7 @@ return null;
         }
     }
     private SandboxTimeUnitEnum sandboxTimeUnit = SandboxTimeUnitEnum.SECOND;
+    private APIMaxTpsTokenBasedThrottlingConfigurationDTO tokenBasedThrottlingConfiguration = null;
 
   /**
    **/
@@ -107,7 +109,7 @@ return null;
   }
 
   /**
-   * Time unit for the production in milliseconds. Possible values are 1sec, 1min, 1hour
+   * Time unit for the production.
    **/
   public APIMaxTpsDTO productionTimeUnit(ProductionTimeUnitEnum productionTimeUnit) {
     this.productionTimeUnit = productionTimeUnit;
@@ -115,7 +117,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Time unit for the production in milliseconds. Possible values are 1sec, 1min, 1hour")
+  @ApiModelProperty(value = "Time unit for the production.")
   @JsonProperty("productionTimeUnit")
   public ProductionTimeUnitEnum getProductionTimeUnit() {
     return productionTimeUnit;
@@ -142,7 +144,7 @@ return null;
   }
 
   /**
-   * Time unit for the sandbox in milliseconds. Possible values are 1sec, 1min, 1hour
+   * Time unit for the sandbox.
    **/
   public APIMaxTpsDTO sandboxTimeUnit(SandboxTimeUnitEnum sandboxTimeUnit) {
     this.sandboxTimeUnit = sandboxTimeUnit;
@@ -150,13 +152,31 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Time unit for the sandbox in milliseconds. Possible values are 1sec, 1min, 1hour")
+  @ApiModelProperty(value = "Time unit for the sandbox.")
   @JsonProperty("sandboxTimeUnit")
   public SandboxTimeUnitEnum getSandboxTimeUnit() {
     return sandboxTimeUnit;
   }
   public void setSandboxTimeUnit(SandboxTimeUnitEnum sandboxTimeUnit) {
     this.sandboxTimeUnit = sandboxTimeUnit;
+  }
+
+  /**
+   **/
+  public APIMaxTpsDTO tokenBasedThrottlingConfiguration(APIMaxTpsTokenBasedThrottlingConfigurationDTO tokenBasedThrottlingConfiguration) {
+    this.tokenBasedThrottlingConfiguration = tokenBasedThrottlingConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("tokenBasedThrottlingConfiguration")
+  public APIMaxTpsTokenBasedThrottlingConfigurationDTO getTokenBasedThrottlingConfiguration() {
+    return tokenBasedThrottlingConfiguration;
+  }
+  public void setTokenBasedThrottlingConfiguration(APIMaxTpsTokenBasedThrottlingConfigurationDTO tokenBasedThrottlingConfiguration) {
+    this.tokenBasedThrottlingConfiguration = tokenBasedThrottlingConfiguration;
   }
 
 
@@ -172,12 +192,13 @@ return null;
     return Objects.equals(production, apIMaxTps.production) &&
         Objects.equals(productionTimeUnit, apIMaxTps.productionTimeUnit) &&
         Objects.equals(sandbox, apIMaxTps.sandbox) &&
-        Objects.equals(sandboxTimeUnit, apIMaxTps.sandboxTimeUnit);
+        Objects.equals(sandboxTimeUnit, apIMaxTps.sandboxTimeUnit) &&
+        Objects.equals(tokenBasedThrottlingConfiguration, apIMaxTps.tokenBasedThrottlingConfiguration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(production, productionTimeUnit, sandbox, sandboxTimeUnit);
+    return Objects.hash(production, productionTimeUnit, sandbox, sandboxTimeUnit, tokenBasedThrottlingConfiguration);
   }
 
   @Override
@@ -189,6 +210,7 @@ return null;
     sb.append("    productionTimeUnit: ").append(toIndentedString(productionTimeUnit)).append("\n");
     sb.append("    sandbox: ").append(toIndentedString(sandbox)).append("\n");
     sb.append("    sandboxTimeUnit: ").append(toIndentedString(sandboxTimeUnit)).append("\n");
+    sb.append("    tokenBasedThrottlingConfiguration: ").append(toIndentedString(tokenBasedThrottlingConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -80,10 +80,11 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
@@ -1485,7 +1486,7 @@ public class PublisherCommonUtils {
         apiToAdd.setOrganization(organization);
         apiToAdd.setGatewayType(body.getGatewayType());
         if (body.getAiConfiguration() != null) {
-            apiToAdd.setAiConfiguration(convertToAiConfiguration(body.getAiConfiguration()));
+            apiToAdd.setAiConfiguration(convertToAiConfiguration(body.getAiConfiguration(), body.getMaxTps()));
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_AI_API);
         } else {
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
@@ -1501,14 +1502,14 @@ public class PublisherCommonUtils {
      * @return The converted AIConfiguration object.
      * @throws APIManagementException If an error occurs during the conversion.
      */
-    public static AIConfiguration convertToAiConfiguration(APIAiConfigurationDTO dto) {
+    public static AIConfiguration convertToAiConfiguration(APIAiConfigurationDTO dto, APIMaxTpsDTO maxTpsDTO) {
 
         AIConfiguration aiConfiguration = new AIConfiguration();
         aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
         aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
-        if (dto.getThrottlingConfiguration() != null
-                && dto.getThrottlingConfiguration().isIsTokenBasedThrottlingEnabled()) {
-            TokenBaseThrottlingCountHolder throttlingConfig = buildThrottlingConfiguration(dto);
+        if (maxTpsDTO != null
+                && maxTpsDTO.getTokenBasedThrottlingConfiguration().isIsTokenBasedThrottlingEnabled()) {
+            TokenBaseThrottlingCountHolder throttlingConfig = buildThrottlingConfiguration(maxTpsDTO);
             aiConfiguration.setTokenBasedThrottlingConfiguration(throttlingConfig);
         }
 
@@ -1521,9 +1522,9 @@ public class PublisherCommonUtils {
      * @param dto The APIAiConfigurationDTO to extract data from.
      * @return The TokenBaseThrottlingCountHolder object.
      */
-    private static TokenBaseThrottlingCountHolder buildThrottlingConfiguration(APIAiConfigurationDTO dto) {
+    private static TokenBaseThrottlingCountHolder buildThrottlingConfiguration(APIMaxTpsDTO dto) {
 
-        APIAiConfigurationThrottlingConfigurationDTO throttlingConfigDTO = dto.getThrottlingConfiguration();
+        APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigDTO = dto.getTokenBasedThrottlingConfiguration();
         TokenBaseThrottlingCountHolder throttlingConfig = new TokenBaseThrottlingCountHolder();
 
         if (throttlingConfigDTO.getProductionMaxPromptTokenCount() != null) {
@@ -1567,12 +1568,6 @@ public class PublisherCommonUtils {
         APIAiConfigurationDTO dto = new APIAiConfigurationDTO();
         dto.setLlmProviderName(aiConfiguration.getLlmProviderName());
         dto.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
-        if (aiConfiguration.getTokenBasedThrottlingConfiguration() != null) {
-            APIAiConfigurationThrottlingConfigurationDTO throttlingConfigurationsDTO =
-                    buildThrottlingConfigurationDTO(aiConfiguration.getTokenBasedThrottlingConfiguration());
-            dto.setThrottlingConfiguration(throttlingConfigurationsDTO);
-        }
-
         return dto;
     }
 
@@ -1581,11 +1576,11 @@ public class PublisherCommonUtils {
      *
      * @return The built APIAiConfigurationThrottlingConfigurationDTO object.
      */
-    private static APIAiConfigurationThrottlingConfigurationDTO buildThrottlingConfigurationDTO(
+    public static APIMaxTpsTokenBasedThrottlingConfigurationDTO buildThrottlingConfigurationDTO(
             TokenBaseThrottlingCountHolder throttlingConfig) {
 
-        APIAiConfigurationThrottlingConfigurationDTO throttlingConfigurationsDTO =
-                new APIAiConfigurationThrottlingConfigurationDTO();
+        APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigurationsDTO =
+                new APIMaxTpsTokenBasedThrottlingConfigurationDTO();
         try {
             if (throttlingConfig.getProductionMaxPromptTokenCount() != null) {
                 throttlingConfigurationsDTO.setProductionMaxPromptTokenCount(

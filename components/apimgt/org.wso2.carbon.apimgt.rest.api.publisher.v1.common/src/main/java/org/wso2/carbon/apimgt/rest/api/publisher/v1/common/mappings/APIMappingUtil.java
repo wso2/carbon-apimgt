@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -78,6 +79,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
@@ -146,6 +148,7 @@ import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getDefaultWebsubSubscriptionConfiguration;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.buildThrottlingConfigurationDTO;
 
 /**
  * This class used for mapping utility to API.
@@ -467,7 +470,8 @@ public class APIMappingUtil {
             model.setAsyncTransportProtocols(asyncTransports);
         }
         if (dto.getAiConfiguration() != null) {
-            model.setAiConfiguration(PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration()));
+            model.setAiConfiguration(
+                    PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration(), dto.getMaxTps()));
         }
         return model;
     }
@@ -1648,6 +1652,13 @@ public class APIMappingUtil {
             if (!StringUtils.isBlank(api.getSandboxTimeUnit())) {
                 maxTpsDTO.setSandboxTimeUnit(APIMaxTpsDTO.SandboxTimeUnitEnum.valueOf(
                         convertFromMilliseconds(api.getSandboxTimeUnit())));
+            }
+            AIConfiguration aiConfiguration = api.getAiConfiguration();
+            if (aiConfiguration.getTokenBasedThrottlingConfiguration() != null
+                    && aiConfiguration.getTokenBasedThrottlingConfiguration().isTokenBasedThrottlingEnabled()) {
+                APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigurationsDTO
+                        = buildThrottlingConfigurationDTO(aiConfiguration.getTokenBasedThrottlingConfiguration());
+                maxTpsDTO.setTokenBasedThrottlingConfiguration(throttlingConfigurationsDTO);
             }
             dto.setMaxTps(maxTpsDTO);
         } catch (NumberFormatException e) {
