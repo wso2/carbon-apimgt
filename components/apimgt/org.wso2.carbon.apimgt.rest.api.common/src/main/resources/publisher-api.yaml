@@ -9505,6 +9505,12 @@ components:
         type:
           type: string
           example: HTTP
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -9835,6 +9841,12 @@ components:
             - SSE
             - WEBHOOK
             - ASYNC
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -10165,13 +10177,6 @@ components:
               type: string
             llmProviderApiVersion:
               type: string
-            endpointConfiguration:
-              type: object
-              properties:
-                sandboxAuthValue:
-                  type: string
-                productionAuthValue:
-                  type: string
             throttlingConfiguration:
               type: object
               required:

@@ -47,7 +47,6 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
-import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -81,7 +80,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationEndpointConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
@@ -242,6 +240,9 @@ public class PublisherCommonUtils {
         String oldProductionApiSecret = null;
         String oldSandboxApiSecret = null;
 
+        String oldProductionApiKeyValue = null;
+        String oldSandboxApiKeyValue = null;
+
         if (oldEndpointConfig != null) {
             if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
                 JSONObject oldEndpointSecurity = (JSONObject) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
@@ -255,6 +256,12 @@ public class PublisherCommonUtils {
                             != null) {
                         oldProductionApiSecret = oldEndpointSecurityProduction
                                 .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                    } else if (oldEndpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                            && oldEndpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
+                            != null) {
+                        oldProductionApiKeyValue = oldEndpointSecurityProduction
+                                .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
                     }
                 }
                 if (oldEndpointSecurity != null &&
@@ -267,6 +274,11 @@ public class PublisherCommonUtils {
                             != null) {
                         oldSandboxApiSecret = oldEndpointSecuritySandbox
                                 .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                    } else if (oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                            && oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
+                            != null) {
+                        oldSandboxApiKeyValue = oldEndpointSecuritySandbox
+                                .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
                     }
                 }
             }
@@ -278,6 +290,9 @@ public class PublisherCommonUtils {
         // OAuth 2.0 backend protection: API Key and API Secret encryption
         encryptEndpointSecurityOAuthCredentials(endpointConfig, cryptoUtil, oldProductionApiSecret, oldSandboxApiSecret,
                 apiDtoToUpdate);
+
+        encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, oldProductionApiKeyValue,
+                oldSandboxApiKeyValue, apiDtoToUpdate);
 
         // AWS Lambda: secret key encryption while updating the API
         if (apiDtoToUpdate.getEndpointConfig() != null) {
@@ -299,7 +314,6 @@ public class PublisherCommonUtils {
                 }
             }
         }
-
         if (!hasClassLevelScope) {
             // Validate per-field scopes
             apiDtoToUpdate = getFieldOverriddenAPIDTO(apiDtoToUpdate, originalAPI, tokenScopes);
@@ -450,6 +464,89 @@ public class PublisherCommonUtils {
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         return apiToUpdate;
+    }
+
+    /**
+     * This method will encrypt the Api Key
+     *
+     * @param endpointConfig         endpoint configuration of API
+     * @param cryptoUtil             cryptography util
+     * @param oldProductionApiSecret existing production API secret
+     * @param oldSandboxApiSecret    existing sandbox API secret
+     * @param apidto                 API DTO
+     * @throws CryptoException        if an error occurs while encrypting and base64 encode
+     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
+     */
+    public static void encryptEndpointSecurityApiKeyCredentials(Map endpointConfig,
+                                                                CryptoUtil cryptoUtil,
+                                                                String oldProductionApiKeyValue,
+                                                                String oldSandboxApiKeyValue, APIDTO apidto)
+            throws CryptoException, APIManagementException {
+
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    Map endpointSecurityProduction = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    String productionEndpointType = (String) endpointSecurityProduction
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(productionEndpointType)) {
+                        if (endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null &&
+                                StringUtils.isNotEmpty(endpointSecurityProduction.get(
+                                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString())) {
+                            String apiKeyValue = endpointSecurityProduction
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                            String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
+                            endpointSecurityProduction
+                                    .put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, encryptedApiKeyValue);
+                        } else if (StringUtils.isNotBlank(oldProductionApiKeyValue)) {
+                            endpointSecurityProduction
+                                    .put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, oldProductionApiKeyValue);
+                        } else {
+                            String errorMessage = "ApiKey value is not provided for production endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityProduction);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+                    String sandboxEndpointType = (String) endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(sandboxEndpointType)) {
+                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                                && StringUtils.isNotEmpty(
+                                endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
+                                        .toString())) {
+                            String apiKeyValue = endpointSecuritySandbox
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                            String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, encryptedApiKeyValue);
+                        } else if (StringUtils.isNotBlank(oldSandboxApiKeyValue)) {
+                            endpointSecuritySandbox
+                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldSandboxApiKeyValue);
+                        } else {
+                            String errorMessage = "ApiKey value is not provided for sandbox endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
     }
 
     /**
@@ -930,6 +1027,9 @@ public class PublisherCommonUtils {
         encryptEndpointSecurityOAuthCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
                 apiDto);
 
+        encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
+                apiDto);
+
         // AWS Lambda: secret key encryption while creating the API
         if (apiDto.getEndpointConfig() != null) {
             if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
@@ -1386,6 +1486,9 @@ public class PublisherCommonUtils {
         apiToAdd.setGatewayType(body.getGatewayType());
         if (body.getAiConfiguration() != null) {
             apiToAdd.setAiConfiguration(convertToAiConfiguration(body.getAiConfiguration()));
+            apiToAdd.setSubtype(APIConstants.API_SUBTYPE_AI_API);
+        } else {
+            apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
         }
         apiToAdd.setEgress(body.isEgress() ? 1 : 0);
         return apiToAdd;
@@ -1403,10 +1506,6 @@ public class PublisherCommonUtils {
         AIConfiguration aiConfiguration = new AIConfiguration();
         aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
         aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
-        if (dto.getEndpointConfiguration() != null) {
-            AIEndpointConfiguration endpointConfiguration = buildEndpointConfiguration(dto);
-            aiConfiguration.setAiEndpointConfiguration(endpointConfiguration);
-        }
         if (dto.getThrottlingConfiguration() != null
                 && dto.getThrottlingConfiguration().isIsTokenBasedThrottlingEnabled()) {
             TokenBaseThrottlingCountHolder throttlingConfig = buildThrottlingConfiguration(dto);
@@ -1414,20 +1513,6 @@ public class PublisherCommonUtils {
         }
 
         return aiConfiguration;
-    }
-
-    /**
-     * Builds the endpoint configuration from APIAiConfigurationDTO.
-     *
-     * @param dto The APIAiConfigurationDTO to extract data from.
-     * @return The AIEndpointConfiguration object.
-     */
-    private static AIEndpointConfiguration buildEndpointConfiguration(APIAiConfigurationDTO dto) {
-
-        AIEndpointConfiguration endpointConfiguration = new AIEndpointConfiguration();
-        endpointConfiguration.setProductionAuthValue(dto.getEndpointConfiguration().getProductionAuthValue());
-        endpointConfiguration.setSandboxAuthValue(dto.getEndpointConfiguration().getSandboxAuthValue());
-        return endpointConfiguration;
     }
 
     /**
@@ -1482,11 +1567,6 @@ public class PublisherCommonUtils {
         APIAiConfigurationDTO dto = new APIAiConfigurationDTO();
         dto.setLlmProviderName(aiConfiguration.getLlmProviderName());
         dto.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
-        if (aiConfiguration.getAiEndpointConfiguration() != null) {
-            APIAiConfigurationEndpointConfigurationDTO endpointConfigurationDTO =
-                    buildEndpointConfigurationDTO(aiConfiguration.getAiEndpointConfiguration());
-            dto.setEndpointConfiguration(endpointConfigurationDTO);
-        }
         if (aiConfiguration.getTokenBasedThrottlingConfiguration() != null) {
             APIAiConfigurationThrottlingConfigurationDTO throttlingConfigurationsDTO =
                     buildThrottlingConfigurationDTO(aiConfiguration.getTokenBasedThrottlingConfiguration());
@@ -1494,23 +1574,6 @@ public class PublisherCommonUtils {
         }
 
         return dto;
-    }
-
-    /**
-     * Builds the endpoint configuration DTO from AIConfiguration.
-     *
-     * @return The built APIAiConfigurationEndpointConfigurationDTO object.
-     */
-    private static APIAiConfigurationEndpointConfigurationDTO buildEndpointConfigurationDTO(
-            AIEndpointConfiguration aiEndpointConfiguration) {
-
-        APIAiConfigurationEndpointConfigurationDTO endpointConfigurationDTO =
-                new APIAiConfigurationEndpointConfigurationDTO();
-        endpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration
-                .getProductionAuthValue());
-        endpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration
-                .getSandboxAuthValue());
-        return endpointConfigurationDTO;
     }
 
     /**

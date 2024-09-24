@@ -66,6 +66,7 @@ public class APIDTO   {
     private String gatewayVendor = null;
     private List<String> asyncTransportProtocols = new ArrayList<String>();
     private Boolean egress = false;
+    private String subtype = "DEFAULT";
 
   /**
    * UUID of the api 
@@ -716,6 +717,24 @@ public class APIDTO   {
     this.egress = egress;
   }
 
+  /**
+   * Subtype of the API.
+   **/
+  public APIDTO subtype(String subtype) {
+    this.subtype = subtype;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "AIAPI", value = "Subtype of the API.")
+  @JsonProperty("subtype")
+  public String getSubtype() {
+    return subtype;
+  }
+  public void setSubtype(String subtype) {
+    this.subtype = subtype;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -761,12 +780,13 @@ public class APIDTO   {
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(gatewayVendor, API.gatewayVendor) &&
         Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols) &&
-        Objects.equals(egress, API.egress);
+        Objects.equals(egress, API.egress) &&
+        Objects.equals(subtype, API.subtype);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, subscriptions, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, egress);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, subscriptions, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, egress, subtype);
   }
 
   @Override
@@ -810,6 +830,7 @@ public class APIDTO   {
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
+    sb.append("    subtype: ").append(toIndentedString(subtype)).append("\n");
     sb.append("}");
     return sb.toString();
   }

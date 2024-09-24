@@ -95,6 +95,7 @@ public class APIMappingUtil {
         dto.setIsDefaultVersion(model.isPublishedDefaultVersion());
         dto.setLifeCycleStatus(model.getStatus());
         dto.setType(model.getType());
+        dto.setSubtype(model.getSubtype());
         dto.setAvgRating(String.valueOf(model.getRating()));
         dto.setEgress(model.isEgress() == 1);
 
@@ -851,6 +852,7 @@ public class APIMappingUtil {
         apiInfoDTO.setProvider(apiId.getProviderName());
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
         apiInfoDTO.setType(api.getType());
+        apiInfoDTO.setSubtype(api.getSubtype());
         apiInfoDTO.setAvgRating(String.valueOf(api.getRating()));
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
