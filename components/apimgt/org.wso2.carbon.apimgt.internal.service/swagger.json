@@ -1346,6 +1346,16 @@
         },
         "aiConfiguration" : {
           "$ref" : "#/definitions/AIConfiguration"
+        },
+        "isEgress" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Indicates if the API is an egress API."
+        },
+        "subtype" : {
+          "type" : "string",
+          "example" : "Default",
+          "description" : "The subtype of the API."
         }
       }
     },
@@ -1538,8 +1548,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
-          "default" : "DIRECT"
+          "default" : "DIRECT",
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
         }
       }
     },

@@ -167,6 +167,8 @@ public class AiApiHandler extends AbstractHandler {
                 providerConfiguration.getMetadata());
 
         if (metadataMap != null && !metadataMap.isEmpty()) {
+            metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_NAME, provider.getName());
+            metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION, provider.getApiVersion());
             String metadataProperty = isRequest
                     ? APIConstants.AIAPIConstants.AI_API_REQUEST_METADATA
                     : APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA;

@@ -1046,6 +1046,15 @@ definitions:
         example: false
       aiConfiguration:
         $ref: '#/definitions/AIConfiguration'
+      isEgress:
+        type: boolean
+        description: Indicates if the API is an egress API.
+        example: false
+      subtype:
+        type: string
+        description: The subtype of the API.
+        example: Default
+
 
   #-----------------------------------------------------
   # The AIConfiguration resource
