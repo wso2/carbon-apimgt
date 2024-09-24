@@ -1832,7 +1832,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (apiIdentifier == null) {
                 throw new APIManagementException("Error while getting the api identifier for the API:" +
-                        apiId, ExceptionCodes.INVALID_API_ID);
+                        apiId, ExceptionCodes.from(ExceptionCodes.INVALID_API_ID, apiId));
             }
             return PublisherCommonUtils.getLifecycleStateInformation(apiIdentifier, organization);
         } catch (APIManagementException e) {
@@ -2885,7 +2885,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
-            RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);
+            throw new APIManagementException("'additionalProperties' is required and should not be null",
+                    ExceptionCodes.ADDITIONAL_PROPERTIES_CANNOT_BE_NULL);
         }
 
         // Convert the 'additionalProperties' json into an APIDTO object
@@ -2903,7 +2904,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
         } catch (IOException e) {
-            throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
+            throw new APIManagementException("Error while parsing 'additionalProperties'", e,
+                    ExceptionCodes.ADDITIONAL_PROPERTIES_PARSE_ERROR);
         }
 
         // validate sandbox and production endpoints
@@ -2937,7 +2939,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage =
                     "Error while encrypting the secret key of API : " + apiDTOFromProperties.getProvider() + "-"
                             + apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.ENDPOINT_SECURITY_CRYPTO_EXCEPTION, errorMessage));
         }
         return null;
     }
@@ -3764,7 +3767,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response containing newly created APIRevision object
      */
     @Override
-    public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) {
+    public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext)
+            throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -3775,8 +3779,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate whether the API is advertise only
             APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
             if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
-                throw new APIManagementException("Creating API Revisions is not supported for third party APIs: "
-                        + apiId);
+                throw new APIManagementException(
+                        "Creating API Revisions is not supported for third party APIs: " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED, apiId));
             }
 
             //validate API update operation permitted based on the LC state
@@ -3798,7 +3803,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API Revision for API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            if ((e.getErrorHandler()
+                    .getErrorCode() == ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED.getErrorCode())
+                    || (e.getErrorHandler().getErrorCode() == ExceptionCodes.MAXIMUM_REVISIONS_REACHED.getErrorCode()))
+            {
+                throw e;
+            } else {
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving created revision API location for API : "
                     + apiId;
@@ -3879,12 +3891,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
         // Reject the request if API lifecycle is 'RETIRED'.
         if (apiDto.getLifeCycleStatus().equals(APIConstants.RETIRED)) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Deploying API Revisions is not supported for retired APIs. ApiId: "
-                    + apiId).build();
+            String errorMessage = "Deploying API Revisions is not supported for retired APIs. ApiId: " + apiId;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
         }
-        if (apiDto != null && apiDto.getAdvertiseInfo() != null && Boolean.TRUE.equals(apiDto.getAdvertiseInfo().isAdvertised())) {
-            throw new APIManagementException("Deploying API Revisions is not supported for third party APIs: "
-                    + apiId);
+        if (apiDto != null && apiDto.getAdvertiseInfo() != null && Boolean.TRUE.equals(
+                apiDto.getAdvertiseInfo().isAdvertised())) {
+            String errorMessage = "Deploying API Revisions is not supported for third party APIs: " + apiId;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
@@ -3942,7 +3957,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (revisionId == null && revisionNum != null) {
             revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
             if (revisionId == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+                throw new APIManagementException(
+                        "No revision found for revision number " + revisionNum + " of API with UUID " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.REVISION_NOT_FOUND_FOR_REVISION_NUMBER, revisionNum));
             }
         }
 

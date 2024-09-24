@@ -10200,6 +10200,7 @@ components:
         displayOnDevportal:
           type: boolean
           example: true
+          default: true
         deployedTime:
           readOnly: true
           type: string

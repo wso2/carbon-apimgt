@@ -1082,6 +1082,7 @@ public final class APIConstants {
     public static final String API_USAGE_DAS_REST_API_PASSWORD = API_ANALYTICS + "StreamProcessorRestApiPassword";
 
     public static final String UNLIMITED_TIER = "Unlimited";
+    public static final String THROTTLING_TIER = "THROTTLING_TIER";
     public static final String UNLIMITED_TIER_DESC = "Allows unlimited requests";
 
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
