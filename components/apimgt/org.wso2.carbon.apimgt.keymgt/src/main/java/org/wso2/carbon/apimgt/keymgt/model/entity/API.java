@@ -45,6 +45,7 @@ public class API implements CacheableEntity<String> {
     private String securityScheme;
     private String revisionId;
     private List<OperationPolicy> apiPolicies = new ArrayList<>();
+    private boolean isSubscriptionValidationDisabled = false;
     private AIConfiguration aiConfiguration;
 
     public API() {
@@ -209,6 +210,7 @@ public class API implements CacheableEntity<String> {
                 ", apiType='" + apiType + '\'' +
                 ", status='" + status + '\'' +
                 ", securityScheme='" + securityScheme + '\'' +
+                ", isSubscriptionValidationDisabled='" + isSubscriptionValidationDisabled + '\'' +
                 ", isDefaultVersion=" + isDefaultVersion +
                 ", urlMappings=" + urlMappings +
                 ", apiPolicies=" + apiPolicies +
@@ -325,6 +327,14 @@ public class API implements CacheableEntity<String> {
 
     public List<OperationPolicy> getApiPolicies() {
         return apiPolicies;
+    }
+
+    public boolean isSubscriptionValidationDisabled() {
+        return isSubscriptionValidationDisabled;
+    }
+
+    public void setSubscriptionValidationDisabled(boolean subscriptionValidationDisabled) {
+        isSubscriptionValidationDisabled = subscriptionValidationDisabled;
     }
 
     public AIConfiguration getAiConfiguration() {

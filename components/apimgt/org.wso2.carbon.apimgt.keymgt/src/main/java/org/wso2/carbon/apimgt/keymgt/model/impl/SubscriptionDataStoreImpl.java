@@ -46,10 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -75,6 +72,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private boolean apiPoliciesInitialized;
     private String tenantDomain;
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE);
+    private final ExecutorService subscriptionExecutorService = Executors.newFixedThreadPool(10,
+            new InternalSubscriptionThreadFactory());
 
     public SubscriptionDataStoreImpl(String tenantDomain) {
 
@@ -103,6 +102,20 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         initializeLoadingTasks();
     }
 
+    @Override
+    public Application getApplicationById(int appId, boolean validationDisabled) {
+        Application application;
+        if (validationDisabled) {
+            try {
+                application = getApplicationById(appId);
+            } catch (Exception e) {
+                application = null;
+            }
+        } else {
+            return getApplicationById(appId);
+        }
+        return application;
+    }
     @Override
     public Application getApplicationById(int appId) {
 
@@ -138,6 +151,22 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             }
         }
         return application;
+    }
+
+    @Override
+    public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager,
+                                                                 boolean validationDisabled) {
+        ApplicationKeyMapping applicationKeyMapping;
+        if (validationDisabled) {
+            try {
+                applicationKeyMapping = getKeyMappingByKeyAndKeyManager(key, keyManager);
+            } catch (Exception e) {
+                applicationKeyMapping = null;
+            }
+        } else {
+            return getKeyMappingByKeyAndKeyManager(key, keyManager);
+        }
+        return applicationKeyMapping;
     }
 
     @Override
@@ -251,6 +280,20 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         return appPolicyMap.get(key);
     }
 
+    @Override
+    public Subscription getSubscriptionById(int appId, int apiId, boolean validationDisabled) {
+        Subscription subscription;
+        if (validationDisabled) {
+            try {
+                subscription = getSubscriptionById(appId, apiId);
+            } catch (Exception e) {
+                subscription = null;
+            }
+        } else {
+            return getSubscriptionById(appId, apiId);
+        }
+        return subscription;
+    }
     @Override
     public Subscription getSubscriptionById(int appId, int apiId) {
 
@@ -465,6 +508,21 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             }
 
         }
+    }
+
+    @Override
+    public void subscribeToAPIInternally(API api, Application app, String tenantDomain) {
+        if (log.isDebugEnabled()) {
+            log.debug("Subscribing internally to API " + api.getApiName() + " with version " + api.getApiVersion() +
+                    " from application " + app.getName());
+        }
+        // Hand over the internal subscription to a separate thread pool to be carried out secretly
+        subscriptionExecutorService.submit(() -> {
+            if (getSubscriptionById(app.getId(), api.getApiId()) != null) {
+                return;
+            }
+            new SubscriptionDataLoaderImpl().subscribeToAPIInternally(api, app, tenantDomain);
+        });
     }
 
     @Override
@@ -806,6 +864,17 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     log.debug("List is null for " + supplier.getClass());
                 }
             }
+        }
+    }
+
+    /**
+     * Thread factory to create internal subscription threads.
+     */
+    private static class InternalSubscriptionThreadFactory implements ThreadFactory {
+        private int count = 0;
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "InternalSubscriptionThread-thread-" + count++);
         }
     }
 }

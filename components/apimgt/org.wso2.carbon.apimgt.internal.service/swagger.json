@@ -256,6 +256,55 @@
         }
       }
     },
+    "/subscribe-internal" : {
+      "post" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Subscribe to a subscription validation disabled API",
+        "description" : "This will allow creating subscriptions from applications to APIs which have\nsubscription validation disabled.\n",
+        "operationId" : "subscribeToAPI",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "appId",
+          "in" : "query",
+          "description" : "Application ID of the subscription\n",
+          "required" : false,
+          "type" : "integer"
+        }, {
+          "name" : "appUuid",
+          "in" : "query",
+          "description" : "Application UUID\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "api",
+          "description" : "The API object",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/API"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Subscription created successfully",
+            "schema" : {
+              "$ref" : "#/definitions/Subscription"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/subscription-policies" : {
       "get" : {
         "tags" : [ "Subscription Validation" ],
@@ -1288,6 +1337,12 @@
           "type" : "string",
           "example" : "Oauth2,api_key",
           "description" : "Available authentication methods of the API."
+        },
+        "isSubscriptionValidationDisabled" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Whether subscription validation is disabled.",
+          "default" : false
         },
         "aiConfiguration" : {
           "$ref" : "#/definitions/AIConfiguration"

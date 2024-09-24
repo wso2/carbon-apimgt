@@ -136,6 +136,8 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_SUBSCRIPTION_TIER = "DefaultSubscriptionLevelTier";
 
     public static final String API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD = "ExposeEndpointPassword";
+    public static final String API_TENANT_CONF_ALLOW_SUBSCRIPTION_VALIDATION_DISABLING
+            = "AllowSubscriptionValidationDisabling";
 
     public static final String API_CATEGORY_FREE = "Free";
 
@@ -755,6 +757,7 @@ public final class APIConstants {
     public static final String API_WEBSUB_GATEWAY_ENDPOINT = "GatewayWebSubEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String API_GATEWAY_TYPE_ENVOY = "Envoy";
     public static final String API_GATEWAY_TYPE_REGULAR = "Regular";
     public static final String API_GATEWAY_TYPE_APK = "APK";
     public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
@@ -821,6 +824,8 @@ public final class APIConstants {
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
     public static final String API_KEY_SUBSCRIPTION_VALIDATION_ENABLED =
             API_KEY_VALIDATOR + "EnableAPIKeySubscriptionValidation";
+    public static final String ALLOW_SUBSCRIPTION_VALIDATION_DISABLING = API_KEY_VALIDATOR +
+            "AllowSubscriptionValidationDisabling";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
@@ -981,6 +986,10 @@ public final class APIConstants {
     public static final String BASIC_AUTH_APPLICATION_OWNER = " BasicAuthApplicationOwner";
     public static final String MUTUAL_SSL_AUTH_APPLICATION_NAME = "MutualSSLAuthApplication";
     public static final String MUTUAL_SSL_AUTH_APPLICATION_OWNER = "MutualSSLAuthApplicationOwner";
+    public static final String SUBSCRIPTIONLESS_APPLICATION_NAME = "SubscriptionLessApplication";
+    public static final String SUBSCRIPTIONLESS_APPLICATION_OWNER = "SubscriptionLessApplicationOwner";
+    public static final String SUBSCRIPTIONLESS_APPLICATION_DESCRIPTION = "This application is used to internally" +
+            " subscribe to APIs when subscription validation is disabled";
 
     public static final QName POLICY_ELEMENT = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy",
             "Policy");
@@ -1242,6 +1251,7 @@ public final class APIConstants {
         public static final String APPLICATIONS = "/applications";
         public static final String SUBSCRIPTIONS = "/subscriptions";
         public static final String SUBSCRIBERS = "/subscribers";
+        public static final String SUBSCRIBE_INTERNAL = "/subscribe-internal";
         public static final String APPLICATION_KEY_MAPPINGS = "/application-key-mappings";
         public static final String APPLICATION_POLICIES = "/application-policies";
         public static final String API_POLICIES = "/api-policies";
@@ -1343,7 +1353,7 @@ public final class APIConstants {
     public static final String REST_METHOD = "REST_METHOD";
 
     // GraphQL related constants
-    public static final String API_TYPE = "API_TYPE";
+    public static final String API_TYPE = "ApiType";
     public static final String HTTP_VERB = "HTTP_VERB";
     public static final String GRAPHQL_API = "GRAPHQL";
     public static final String GRAPHQL_SUBSCRIPTION_REQUEST = "isGraphqlSubscriptionRequest";
@@ -1835,6 +1845,9 @@ public final class APIConstants {
     public static final String REGISTRY_RESOURCE_URL_PREFIX =
             "/registry/resource/_system/governance/apimgt/applicationdata/provider/";
 
+    public static final String APPLICATION_DATA_RESOURCE_URL_PREFIX =
+            "/apimgt/applicationdata/provider/";
+
     public enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
     }
@@ -1923,11 +1936,13 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_BRONZE = "Bronze";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
+    public static final String DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS = "DefaultSubscriptionless";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "AsyncGold";
     public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "AsyncSilver";
     public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "AsyncBronze";
     public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "AsyncUnlimited";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS = "AsyncDefaultSubscriptionless";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "AsyncWHGold";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "AsyncWHSilver";
@@ -1939,11 +1954,15 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 500 request(s) per minute";
+    public static final String DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS_DESC =
+            "Allows 10000 requests per minute when subscription validation is disabled";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC = "Allows 50000 events per day";
     public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC = "Allows 25000 events per day";
     public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC = "Allows 5000 events per day";
     public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC = "Allows unlimited events";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS_DESC =
+            "Allows 10000 events per day when subscription validation is disabled";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC = "Allows 10000 events per month and " +
             "1000 active subscriptions";
@@ -2081,6 +2100,7 @@ public final class APIConstants {
         public static final String TRUE = "true";
         public static final String ADD = "add";
         public static final String ENABLE_POLICY_DEPLOYMENT = "EnablePolicyDeployment";
+        public static final String ENABLE_POLICY_RECREATE = "EnablePolicyRecreationOnStartup";
     }
 
     /**

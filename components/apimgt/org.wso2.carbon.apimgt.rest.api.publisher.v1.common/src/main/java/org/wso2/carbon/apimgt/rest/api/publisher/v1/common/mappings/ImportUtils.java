@@ -234,6 +234,7 @@ public class ImportUtils {
             }
 
             String apiType = importedApiDTO.getType().toString();
+            boolean asyncAPI = PublisherCommonUtils.isStreamingAPI(importedApiDTO);
 
             // Validate swagger content except for streaming APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
@@ -341,6 +342,21 @@ public class ImportUtils {
                 // Initialize to CREATED when import
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
+                if (APIStatus.PUBLISHED.toString().equalsIgnoreCase(targetStatus)
+                        && importedApiDTO.getPolicies() != null
+                        && importedApiDTO.getPolicies().isEmpty()
+                        && importedApiDTO.getSecurityScheme() != null
+                        && importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && APIUtil.isSubscriptionValidationDisablingAllowed(organization)
+                        && !PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
+                   if (asyncAPI) {
+                        importedApiDTO.setPolicies(Arrays
+                                .asList(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS));
+                   } else {
+                       importedApiDTO.setPolicies(Arrays
+                                   .asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+                   }
+                }
                 if (!PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
                     importedApi = PublisherCommonUtils
                             .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
@@ -901,8 +917,10 @@ public class ImportUtils {
                         } else {
                             // set the default vhost of the given environment
                             if (gatewayEnvironment.getVhosts().isEmpty()) {
-                                throw new APIManagementException("No VHosts defined for the environment: "
-                                        + deploymentName);
+                                throw new APIManagementException(
+                                        "No VHosts defined for the environment: " + deploymentName,
+                                        ExceptionCodes.from(ExceptionCodes.NO_VHOSTS_DEFINED_FOR_ENVIRONMENT,
+                                                deploymentName));
                             }
                             deploymentVhost = gatewayEnvironment.getVhosts().get(0).getHost();
                         }
@@ -1496,9 +1514,11 @@ public class ImportUtils {
             APIDefinitionValidationResponse validationResponse =
                     AsyncApiParserUtil.validateAsyncAPISpecification(asyncApiDefinition, true);
             if (!validationResponse.isValid()) {
-                throw new APIManagementException(
-                        "Error occurred while importing the API. Invalid AsyncAPI definition found. "
-                                + validationResponse.getErrorItems());
+                String errorMessage = "Error occurred while importing the API. Invalid AsyncAPI definition found. "
+                        + validationResponse.getErrorItems();
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.IMPORT_ERROR_INVALID_ASYNC_API_SCHEMA,
+                                StringUtils.join(validationResponse.getErrorItems(), ", ")));
             }
             return validationResponse;
         } catch (IOException e) {
@@ -1543,9 +1563,11 @@ public class ImportUtils {
             GraphQLValidationResponseDTO graphQLValidationResponseDTO = PublisherCommonUtils
                     .validateGraphQLSchema(file.getName(), schemaDefinition);
             if (!graphQLValidationResponseDTO.isIsValid()) {
-                throw new APIManagementException(
-                        "Error occurred while importing the API. Invalid GraphQL schema definition found. "
-                                + graphQLValidationResponseDTO.getErrorMessage());
+                String errorMessage = "Error occurred while importing the API. Invalid GraphQL schema definition "
+                        + "found. " + graphQLValidationResponseDTO.getErrorMessage();
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.IMPORT_ERROR_INVALID_GRAPHQL_SCHEMA,
+                                graphQLValidationResponseDTO.getErrorMessage()));
             }
             return graphQLValidationResponseDTO;
         } catch (IOException e) {
@@ -2595,6 +2617,16 @@ public class ImportUtils {
                     log.info("Cannot find : " + importedApiProductDTO.getName() + ". Creating it.");
                 }
                 currentStatus = APIStatus.CREATED.toString();
+                if (APIStatus.PUBLISHED.toString().equalsIgnoreCase(targetStatus)
+                        && importedApiProductDTO.getPolicies() != null
+                        && importedApiProductDTO.getPolicies().isEmpty()
+                        && importedApiProductDTO.getSecurityScheme() != null
+                        && importedApiProductDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && APIUtil.isSubscriptionValidationDisablingAllowed(organization)) {
+                    importedApiProductDTO.setPolicies(Arrays
+                                .asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+
+                }
                 importedApiProduct = PublisherCommonUtils
                         .addAPIProductWithGeneratedSwaggerDefinition(importedApiProductDTO,
                                 importedApiProductDTO.getProvider(), organization);
@@ -2670,7 +2702,7 @@ public class ImportUtils {
                                     importedApiProduct.getId().getVersion());
                         }
                     } else {
-                        throw new APIManagementException(e);
+                        throw e;
                     }
                 }
 
@@ -2762,8 +2794,14 @@ public class ImportUtils {
                         // Product does not have corresponding API resources neither inside the importing directory nor
                         // inside the APIM
                         if (!invalidApiOperations.isEmpty()) {
-                            throw new APIMgtResourceNotFoundException(
-                                    "Cannot find API resources for some API Product resources.");
+                            List<String> invalidOperationList = new ArrayList();
+                            for (APIOperationsDTO dto : invalidApiOperations) {
+                                invalidOperationList.add(dto.getVerb() + ":" + dto.getTarget());
+                            }
+                            String errorMessage = "Cannot find API resources for some API Product resources.";
+                            throw new APIMgtResourceNotFoundException(errorMessage,
+                                        ExceptionCodes.from(ExceptionCodes.INVALID_API_RESOURCES_FOR_API_PRODUCT,
+                                                StringUtils.join(invalidOperationList, ", ")));
                         }
                     }
                 }
