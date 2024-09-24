@@ -35,6 +35,7 @@ public class APIDTO   {
     private List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
     private String securityScheme = null;
+    private Boolean isSubscriptionValidationDisabled = false;
     private AIConfigurationDTO aiConfiguration = null;
 
   /**
@@ -287,13 +288,31 @@ public class APIDTO   {
   }
 
   /**
+   * Whether subscription validation is disabled.
+   **/
+  public APIDTO isSubscriptionValidationDisabled(Boolean isSubscriptionValidationDisabled) {
+    this.isSubscriptionValidationDisabled = isSubscriptionValidationDisabled;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "false", value = "Whether subscription validation is disabled.")
+  @JsonProperty("isSubscriptionValidationDisabled")
+  public Boolean isIsSubscriptionValidationDisabled() {
+    return isSubscriptionValidationDisabled;
+  }
+  public void setIsSubscriptionValidationDisabled(Boolean isSubscriptionValidationDisabled) {
+    this.isSubscriptionValidationDisabled = isSubscriptionValidationDisabled;
+  }
+
+  /**
    **/
   public APIDTO aiConfiguration(AIConfigurationDTO aiConfiguration) {
     this.aiConfiguration = aiConfiguration;
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("aiConfiguration")
   public AIConfigurationDTO getAiConfiguration() {
@@ -327,12 +346,13 @@ public class APIDTO   {
         Objects.equals(apiPolicies, API.apiPolicies) &&
         Objects.equals(urlMappings, API.urlMappings) &&
         Objects.equals(securityScheme, API.securityScheme) &&
+        Objects.equals(isSubscriptionValidationDisabled, API.isSubscriptionValidationDisabled) &&
         Objects.equals(aiConfiguration, API.aiConfiguration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, aiConfiguration);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, isSubscriptionValidationDisabled, aiConfiguration);
   }
 
   @Override
@@ -354,6 +374,7 @@ public class APIDTO   {
     sb.append("    apiPolicies: ").append(toIndentedString(apiPolicies)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("    isSubscriptionValidationDisabled: ").append(toIndentedString(isSubscriptionValidationDisabled)).append("\n");
     sb.append("    aiConfiguration: ").append(toIndentedString(aiConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();

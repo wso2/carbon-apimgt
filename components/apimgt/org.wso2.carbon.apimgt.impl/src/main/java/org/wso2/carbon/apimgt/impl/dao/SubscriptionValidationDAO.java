@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
+import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
@@ -62,10 +63,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.POLICY_ENABLED_FOR_ANALYTICS;
@@ -1609,5 +1613,95 @@ public class SubscriptionValidationDAO {
             log.error("Error in loading APIs", e);
         }
         return apiList;
+    }
+
+    public String getApplicationSubscriber(String uuid) throws APIManagementException {
+        String subscriber = "";
+        String query = SQLConstants.GET_APPLICATION_BY_UUID_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(query)) {
+                ps.setString(1, uuid);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        subscriber = rs.getString("USER_ID");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while getting subscriber info", e);
+        }
+        return subscriber;
+    }
+
+    public Map<String, Object> subscribeToAPI(int apiId, int appId, String tier, String subscriber)
+            throws APIManagementException {
+        Map<String, Object> subscriptionDetails = new HashMap<>();
+        int subscriptionId = -1;
+        String subscriptionUUID = UUID.randomUUID().toString();
+
+        String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
+        String sqlQuery = SQLConstants.ADD_SUBSCRIPTION_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement ps = connection.prepareStatement(checkDuplicateQuery)) {
+                ps.setInt(1, apiId);
+                ps.setInt(2, appId);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    //If the subscription already exists
+                    if (resultSet.next()) {
+                        String subStatus = resultSet.getString("SUB_STATUS");
+                        String subCreationStatus = resultSet.getString("SUBS_CREATE_STATE");
+                        if ((APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) ||
+                                APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus) ||
+                                APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) &&
+                                APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
+
+                            throw new SubscriptionAlreadyExistingException(
+                                    String.format("Subscription already exists for API/API Prouct %s in Application %s",
+                                            apiId, appId));
+                        }
+                    }
+                }
+            }
+
+            String subscriptionIDColumn = "SUBSCRIPTION_ID";
+            if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                subscriptionIDColumn = "subscription_id";
+            }
+            try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
+                    new String[]{subscriptionIDColumn})) {
+                preparedStForInsert.setString(1, tier);
+                preparedStForInsert.setString(10, tier);
+                preparedStForInsert.setInt(2, apiId);
+                preparedStForInsert.setInt(3, appId);
+                preparedStForInsert.setString(4, APIConstants.SubscriptionStatus.UNBLOCKED);
+                preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+                preparedStForInsert.setString(6, subscriber);
+
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                preparedStForInsert.setTimestamp(7, timestamp);
+                preparedStForInsert.setTimestamp(8, timestamp);
+                preparedStForInsert.setString(9, subscriptionUUID);
+
+                preparedStForInsert.executeUpdate();
+                try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
+                    while (rs.next()) {
+                        subscriptionId = Integer.parseInt(rs.getString(1));
+                    }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw new APIManagementException("Error while adding subscription for API/API Product " + apiId +
+                            " in Application " + appId, e);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while adding subscription for API/API Product " + apiId +
+                    " in Application " + appId, e);
+        }
+        subscriptionDetails.put("id", subscriptionId);
+        subscriptionDetails.put("uuid", subscriptionUUID);
+        return subscriptionDetails;
     }
 }

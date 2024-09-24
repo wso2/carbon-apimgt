@@ -4014,6 +4014,12 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: gatewayEnvironment
+          in: query
+          description: |
+            Gateway environment of the exported APIs
+          schema:
+            type: string
       responses:
         200:
           description: |
@@ -10403,6 +10409,7 @@ components:
         displayOnDevportal:
           type: boolean
           example: true
+          default: true
         deployedTime:
           readOnly: true
           type: string
@@ -12599,6 +12606,7 @@ components:
             - DOC
             - API
             - APIProduct
+            - DEFINITION
         transportType:
           type: string
           description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
@@ -12783,6 +12791,38 @@ components:
               type: string
             associatedType:
               type: string
+    APIDefinitionSearchResult:
+      title: API Definition Search Result
+      allOf:
+        - $ref: '#/components/schemas/SearchResult'
+        - properties:
+            apiName:
+              type: string
+              description: The name of the associated API
+              example: TestAPI
+            apiVersion:
+              type: string
+              description: The version of the associated API
+              example: 1.0.0
+            apiContext:
+              type: string
+              description: The context of the associated API
+              example: /test
+            apiUUID:
+              type: string
+              description: The UUID of the associated API
+            apiProvider:
+              type: string
+              description: The provider name of the associated API
+              example: publisher
+            apiType:
+              type: string
+              description: The type of the associated API
+              example: REST
+            associatedType:
+              type: string
+              description: API or APIProduct
+              example: API
     MockResponsePayloadList:
       title: Mock Response Payload list
       type: object
@@ -12939,6 +12979,11 @@ components:
         IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
+        allowSubscriptionValidationDisabling:
+          type: boolean
+          description: |
+            Allow subscription validation disabling for OAuth tokens
+          default: true
         customProperties:
           type: array
           items:
