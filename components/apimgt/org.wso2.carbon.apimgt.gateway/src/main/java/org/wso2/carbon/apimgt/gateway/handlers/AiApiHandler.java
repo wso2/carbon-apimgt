@@ -142,7 +142,8 @@ public class AiApiHandler extends AbstractHandler {
         if (isRequest) {
             addEndpointConfigurationToMessageContext(messageContext, aiConfiguration.getAiEndpointConfiguration(),
                     providerConfiguration);
-            ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty("TRANSPORT_HEADERS");
+            ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(
+                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         }
 
         LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
