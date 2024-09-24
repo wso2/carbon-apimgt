@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class APIAiConfigurationThrottlingConfigurationDTO   {
+public class APIMaxTpsTokenBasedThrottlingConfigurationDTO   {
   
     private Long productionMaxPromptTokenCount = null;
     private Long productionMaxCompletionTokenCount = null;
@@ -31,7 +31,7 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
   /**
    * Maximum prompt token count for production
    **/
-  public APIAiConfigurationThrottlingConfigurationDTO productionMaxPromptTokenCount(Long productionMaxPromptTokenCount) {
+  public APIMaxTpsTokenBasedThrottlingConfigurationDTO productionMaxPromptTokenCount(Long productionMaxPromptTokenCount) {
     this.productionMaxPromptTokenCount = productionMaxPromptTokenCount;
     return this;
   }
@@ -49,7 +49,7 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
   /**
    * Maximum completion token count for production
    **/
-  public APIAiConfigurationThrottlingConfigurationDTO productionMaxCompletionTokenCount(Long productionMaxCompletionTokenCount) {
+  public APIMaxTpsTokenBasedThrottlingConfigurationDTO productionMaxCompletionTokenCount(Long productionMaxCompletionTokenCount) {
     this.productionMaxCompletionTokenCount = productionMaxCompletionTokenCount;
     return this;
   }
@@ -67,7 +67,7 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
   /**
    * Maximum total token count for production
    **/
-  public APIAiConfigurationThrottlingConfigurationDTO productionMaxTotalTokenCount(Long productionMaxTotalTokenCount) {
+  public APIMaxTpsTokenBasedThrottlingConfigurationDTO productionMaxTotalTokenCount(Long productionMaxTotalTokenCount) {
     this.productionMaxTotalTokenCount = productionMaxTotalTokenCount;
     return this;
   }
@@ -85,7 +85,7 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
   /**
    * Maximum prompt token count for sandbox
    **/
-  public APIAiConfigurationThrottlingConfigurationDTO sandboxMaxPromptTokenCount(Long sandboxMaxPromptTokenCount) {
+  public APIMaxTpsTokenBasedThrottlingConfigurationDTO sandboxMaxPromptTokenCount(Long sandboxMaxPromptTokenCount) {
     this.sandboxMaxPromptTokenCount = sandboxMaxPromptTokenCount;
     return this;
   }
@@ -103,7 +103,7 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
   /**
    * Maximum completion token count for sandbox
    **/
-  public APIAiConfigurationThrottlingConfigurationDTO sandboxMaxCompletionTokenCount(Long sandboxMaxCompletionTokenCount) {
+  public APIMaxTpsTokenBasedThrottlingConfigurationDTO sandboxMaxCompletionTokenCount(Long sandboxMaxCompletionTokenCount) {
     this.sandboxMaxCompletionTokenCount = sandboxMaxCompletionTokenCount;
     return this;
   }
@@ -121,7 +121,7 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
   /**
    * Maximum total token count for sandbox
    **/
-  public APIAiConfigurationThrottlingConfigurationDTO sandboxMaxTotalTokenCount(Long sandboxMaxTotalTokenCount) {
+  public APIMaxTpsTokenBasedThrottlingConfigurationDTO sandboxMaxTotalTokenCount(Long sandboxMaxTotalTokenCount) {
     this.sandboxMaxTotalTokenCount = sandboxMaxTotalTokenCount;
     return this;
   }
@@ -139,7 +139,7 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
   /**
    * Whether token-based throttling is enabled
    **/
-  public APIAiConfigurationThrottlingConfigurationDTO isTokenBasedThrottlingEnabled(Boolean isTokenBasedThrottlingEnabled) {
+  public APIMaxTpsTokenBasedThrottlingConfigurationDTO isTokenBasedThrottlingEnabled(Boolean isTokenBasedThrottlingEnabled) {
     this.isTokenBasedThrottlingEnabled = isTokenBasedThrottlingEnabled;
     return this;
   }
@@ -164,14 +164,14 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIAiConfigurationThrottlingConfigurationDTO apIAiConfigurationThrottlingConfiguration = (APIAiConfigurationThrottlingConfigurationDTO) o;
-    return Objects.equals(productionMaxPromptTokenCount, apIAiConfigurationThrottlingConfiguration.productionMaxPromptTokenCount) &&
-        Objects.equals(productionMaxCompletionTokenCount, apIAiConfigurationThrottlingConfiguration.productionMaxCompletionTokenCount) &&
-        Objects.equals(productionMaxTotalTokenCount, apIAiConfigurationThrottlingConfiguration.productionMaxTotalTokenCount) &&
-        Objects.equals(sandboxMaxPromptTokenCount, apIAiConfigurationThrottlingConfiguration.sandboxMaxPromptTokenCount) &&
-        Objects.equals(sandboxMaxCompletionTokenCount, apIAiConfigurationThrottlingConfiguration.sandboxMaxCompletionTokenCount) &&
-        Objects.equals(sandboxMaxTotalTokenCount, apIAiConfigurationThrottlingConfiguration.sandboxMaxTotalTokenCount) &&
-        Objects.equals(isTokenBasedThrottlingEnabled, apIAiConfigurationThrottlingConfiguration.isTokenBasedThrottlingEnabled);
+    APIMaxTpsTokenBasedThrottlingConfigurationDTO apIMaxTpsTokenBasedThrottlingConfiguration = (APIMaxTpsTokenBasedThrottlingConfigurationDTO) o;
+    return Objects.equals(productionMaxPromptTokenCount, apIMaxTpsTokenBasedThrottlingConfiguration.productionMaxPromptTokenCount) &&
+        Objects.equals(productionMaxCompletionTokenCount, apIMaxTpsTokenBasedThrottlingConfiguration.productionMaxCompletionTokenCount) &&
+        Objects.equals(productionMaxTotalTokenCount, apIMaxTpsTokenBasedThrottlingConfiguration.productionMaxTotalTokenCount) &&
+        Objects.equals(sandboxMaxPromptTokenCount, apIMaxTpsTokenBasedThrottlingConfiguration.sandboxMaxPromptTokenCount) &&
+        Objects.equals(sandboxMaxCompletionTokenCount, apIMaxTpsTokenBasedThrottlingConfiguration.sandboxMaxCompletionTokenCount) &&
+        Objects.equals(sandboxMaxTotalTokenCount, apIMaxTpsTokenBasedThrottlingConfiguration.sandboxMaxTotalTokenCount) &&
+        Objects.equals(isTokenBasedThrottlingEnabled, apIMaxTpsTokenBasedThrottlingConfiguration.isTokenBasedThrottlingEnabled);
   }
 
   @Override
@@ -182,7 +182,7 @@ public class APIAiConfigurationThrottlingConfigurationDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIAiConfigurationThrottlingConfigurationDTO {\n");
+    sb.append("class APIMaxTpsTokenBasedThrottlingConfigurationDTO {\n");
     
     sb.append("    productionMaxPromptTokenCount: ").append(toIndentedString(productionMaxPromptTokenCount)).append("\n");
     sb.append("    productionMaxCompletionTokenCount: ").append(toIndentedString(productionMaxCompletionTokenCount)).append("\n");

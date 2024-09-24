@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationThrottlingConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -23,7 +22,6 @@ public class APIAiConfigurationDTO   {
   
     private String llmProviderName = null;
     private String llmProviderApiVersion = null;
-    private APIAiConfigurationThrottlingConfigurationDTO throttlingConfiguration = null;
 
   /**
    **/
@@ -59,24 +57,6 @@ public class APIAiConfigurationDTO   {
     this.llmProviderApiVersion = llmProviderApiVersion;
   }
 
-  /**
-   **/
-  public APIAiConfigurationDTO throttlingConfiguration(APIAiConfigurationThrottlingConfigurationDTO throttlingConfiguration) {
-    this.throttlingConfiguration = throttlingConfiguration;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("throttlingConfiguration")
-  public APIAiConfigurationThrottlingConfigurationDTO getThrottlingConfiguration() {
-    return throttlingConfiguration;
-  }
-  public void setThrottlingConfiguration(APIAiConfigurationThrottlingConfigurationDTO throttlingConfiguration) {
-    this.throttlingConfiguration = throttlingConfiguration;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -88,13 +68,12 @@ public class APIAiConfigurationDTO   {
     }
     APIAiConfigurationDTO apIAiConfiguration = (APIAiConfigurationDTO) o;
     return Objects.equals(llmProviderName, apIAiConfiguration.llmProviderName) &&
-        Objects.equals(llmProviderApiVersion, apIAiConfiguration.llmProviderApiVersion) &&
-        Objects.equals(throttlingConfiguration, apIAiConfiguration.throttlingConfiguration);
+        Objects.equals(llmProviderApiVersion, apIAiConfiguration.llmProviderApiVersion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(llmProviderName, llmProviderApiVersion, throttlingConfiguration);
+    return Objects.hash(llmProviderName, llmProviderApiVersion);
   }
 
   @Override
@@ -104,7 +83,6 @@ public class APIAiConfigurationDTO   {
     
     sb.append("    llmProviderName: ").append(toIndentedString(llmProviderName)).append("\n");
     sb.append("    llmProviderApiVersion: ").append(toIndentedString(llmProviderApiVersion)).append("\n");
-    sb.append("    throttlingConfiguration: ").append(toIndentedString(throttlingConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();
   }
