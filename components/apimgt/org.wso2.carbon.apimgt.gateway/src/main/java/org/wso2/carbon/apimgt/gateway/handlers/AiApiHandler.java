@@ -15,6 +15,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -202,7 +203,7 @@ public class AiApiHandler extends AbstractHandler {
                 transportHeaders.put(providerConfiguration.getAuthHeader(), decryptSecret(authValue));
 
                 // TODO: Handle encoded scenario
-                transportHeaders.remove("Accept-Encoding");
+                transportHeaders.remove(HttpHeaders.ACCEPT_ENCODING);
             }
 
             if (providerConfiguration.getAuthQueryParameter() != null) {
