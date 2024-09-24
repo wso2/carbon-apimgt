@@ -15381,7 +15381,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(14, apiProduct.getVersionTimestamp());
             prepStmtAddAPIProduct.setString(15,
                     APIUtil.setSubscriptionValidationStatusBeforeInsert(apiProduct.getAvailableTiers()));
-            prepStmtAddAPIProduct.setInt(15, apiProduct.isEgress());
+            prepStmtAddAPIProduct.setInt(16, apiProduct.isEgress());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
