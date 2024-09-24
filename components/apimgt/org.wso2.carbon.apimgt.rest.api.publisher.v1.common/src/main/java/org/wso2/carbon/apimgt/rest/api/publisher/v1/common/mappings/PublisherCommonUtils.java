@@ -469,11 +469,11 @@ public class PublisherCommonUtils {
     /**
      * This method will encrypt the Api Key
      *
-     * @param endpointConfig         endpoint configuration of API
-     * @param cryptoUtil             cryptography util
-     * @param oldProductionApiSecret existing production API secret
-     * @param oldSandboxApiSecret    existing sandbox API secret
-     * @param apidto                 API DTO
+     * @param endpointConfig           endpoint configuration of API
+     * @param cryptoUtil               cryptography util
+     * @param oldProductionApiKeyValue existing production API secret
+     * @param oldSandboxApiKeyValue    existing sandbox API secret
+     * @param apidto                   API DTO
      * @throws CryptoException        if an error occurs while encrypting and base64 encode
      * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
      */
