@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConsumerImpl;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -26,6 +27,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
         String organization = RestApiUtil.getOrganization(messageContext);
         try {
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             APIAdmin apiAdmin = new APIAdminImpl();
             APIConsumer apiConsumer = new APIConsumerImpl();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -34,7 +36,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             List<KeyManagerConfigurationDTO> globalKeyManagerConfigurations
                     = apiAdmin.getGlobalKeyManagerConfigurations();
             permittedKeyManagerConfigurations.addAll(globalKeyManagerConfigurations);
-            return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(permittedKeyManagerConfigurations)).build();
+            return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(permittedKeyManagerConfigurations, orgInfo))
+                    .build();
 
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(

@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerApplicationConfigurationDTO;
@@ -22,7 +23,7 @@ import java.util.Map;
 public class KeyManagerMappingUtil {
 
     public static KeyManagerInfoDTO fromKeyManagerConfigurationDtoToKeyManagerInfoDto(
-            KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO, OrganizationInfo orgInfo) {
 
         KeyManagerInfoDTO keyManagerInfoDTO = new KeyManagerInfoDTO();
         keyManagerInfoDTO.setId(keyManagerConfigurationDTO.getUuid());
@@ -62,8 +63,13 @@ public class KeyManagerMappingUtil {
         if (jsonObject.has(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT) &&
                 !jsonObject.get(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT).isJsonNull() &&
                 !jsonObject.get(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT).getAsString().trim().isEmpty()) {
-            keyManagerInfoDTO.setTokenEndpoint(
-                    jsonObject.get(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT).getAsString());
+            if (orgInfo != null && orgInfo.getName() != null && orgInfo.getId() != null) {
+                keyManagerInfoDTO.setTokenEndpoint(jsonObject.get(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT)
+                        .getAsString().replace("{org_name}", orgInfo.getName()).replace("{org_id}", orgInfo.getId()));
+            } else {
+                keyManagerInfoDTO
+                        .setTokenEndpoint(jsonObject.get(APIConstants.KeyManager.DISPLAY_TOKEN_ENDPOINT).getAsString());
+            }
         } else {
             if (jsonObject.has(APIConstants.KeyManager.TOKEN_ENDPOINT)){
                 keyManagerInfoDTO.setTokenEndpoint(
@@ -73,8 +79,17 @@ public class KeyManagerMappingUtil {
         if (jsonObject.has(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT) &&
                 !jsonObject.get(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT).isJsonNull() &&
                 !jsonObject.get(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT).getAsString().trim().isEmpty()) {
-            keyManagerInfoDTO.setRevokeEndpoint(
-                    jsonObject.get(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT).getAsString());
+            if (orgInfo != null && orgInfo.getName() != null && orgInfo.getId() != null) {
+                keyManagerInfoDTO.setRevokeEndpoint(
+                    jsonObject.get(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT)
+                              .getAsString()
+                              .replace("{org_name}", orgInfo.getName())
+                              .replace("{org_id}", orgInfo.getId())
+                );
+            } else {
+                keyManagerInfoDTO.setRevokeEndpoint(
+                        jsonObject.get(APIConstants.KeyManager.DISPLAY_REVOKE_ENDPOINT).getAsString());
+            }
         } else {
             if (jsonObject.has(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
                 keyManagerInfoDTO.setRevokeEndpoint(
@@ -118,12 +133,14 @@ public class KeyManagerMappingUtil {
         return jsonObject;
     }
 
-    public static KeyManagerListDTO toKeyManagerListDto(List<KeyManagerConfigurationDTO> keyManagerConfigurations) {
+    public static KeyManagerListDTO toKeyManagerListDto(List<KeyManagerConfigurationDTO> keyManagerConfigurations,
+            OrganizationInfo orgInfo) {
 
         KeyManagerListDTO keyManagerListDTO = new KeyManagerListDTO();
         List<KeyManagerInfoDTO> keyManagerInfoDTOList = new ArrayList<>();
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurations) {
-            keyManagerInfoDTOList.add(fromKeyManagerConfigurationDtoToKeyManagerInfoDto(keyManagerConfigurationDTO));
+            keyManagerInfoDTOList
+                    .add(fromKeyManagerConfigurationDtoToKeyManagerInfoDto(keyManagerConfigurationDTO, orgInfo));
         }
         keyManagerListDTO.setList(keyManagerInfoDTOList);
         keyManagerListDTO.setCount(keyManagerInfoDTOList.size());
