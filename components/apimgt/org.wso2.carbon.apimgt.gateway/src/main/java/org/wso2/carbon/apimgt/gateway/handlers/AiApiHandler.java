@@ -99,10 +99,10 @@ public class AiApiHandler extends AbstractHandler {
             return processMessage(messageContext, isRequest);
         } catch (APIManagementException | XMLStreamException | IOException e) {
             log.error("Error processing AI API", e);
-            return false;
+            return true;
         } catch (CryptoException | URISyntaxException e) {
             log.error("Error adding security configuration", e);
-            return false;
+            return true;
         }
     }
 
@@ -123,13 +123,13 @@ public class AiApiHandler extends AbstractHandler {
 
         if (selectedAPI == null) {
             log.error("No API found for path: " + path + " in tenant domain: " + tenantDomain);
-            return false;
+            return true;
         }
 
         AIConfiguration aiConfiguration = selectedAPI.getAiConfiguration();
         if (aiConfiguration == null) {
             log.debug("No AI configuration for API: " + selectedAPI.getApiId() + " in tenant domain: " + tenantDomain);
-            return false;
+            return true;
         }
 
         String llmProviderId = aiConfiguration.getLlmProviderId();
@@ -137,7 +137,7 @@ public class AiApiHandler extends AbstractHandler {
 
         if (provider == null) {
             log.error("No LLM provider found for provider ID: " + llmProviderId);
-            return false;
+            return true;
         }
         String config = provider.getConfigurations();
 
@@ -153,7 +153,7 @@ public class AiApiHandler extends AbstractHandler {
                 .getLLMProviderService(providerConfiguration.getConnectorType());
         if (llmProviderService == null) {
             log.error("No LLM provider service for provider: " + llmProviderId);
-            return false;
+            return true;
         }
 
         String payload = extractPayloadFromContext(messageContext, providerConfiguration);
