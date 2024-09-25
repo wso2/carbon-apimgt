@@ -1302,7 +1302,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 policy.append(createPolicyForRole(APIThrottleConstants.PRODUCTION_HARD_LIMIT, productionUnitTime,
                         productionMaxCount));
             }
-            if (isTokenBasedThrottlingEnabled != null) {
+            if (Boolean.parseBoolean(isTokenBasedThrottlingEnabled)) {
                 if (productionMaxTotalTokenCount != null) {
                     policy.append(createPolicyForRole(APIThrottleConstants.PRODUCTION_HARD_LIMIT_TOTAL_TOKEN,
                             productionUnitTime,
@@ -1326,8 +1326,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 policy.append(createPolicyForRole(APIThrottleConstants.SANDBOX_HARD_LIMIT, sandboxUnitTime,
                         sandboxMaxCount));
             }
-            if (isTokenBasedThrottlingEnabled != null) {
-                if (Long.parseLong(sandboxMaxTotalTokenCount) != 0) {
+            if (Boolean.parseBoolean(isTokenBasedThrottlingEnabled)) {
+                if (sandboxMaxTotalTokenCount != null) {
                     policy.append(createPolicyForRole(APIThrottleConstants.SANDBOX_HARD_LIMIT_TOTAL_TOKEN,
                             sandboxUnitTime,
                             sandboxMaxTotalTokenCount));

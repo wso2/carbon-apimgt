@@ -47,6 +47,8 @@ public class API implements CacheableEntity<String> {
     private List<OperationPolicy> apiPolicies = new ArrayList<>();
     private boolean isSubscriptionValidationDisabled = false;
     private AIConfiguration aiConfiguration;
+    private Boolean isEgress = null;
+    private String subtype = null;
 
     public API() {
     }
@@ -343,5 +345,21 @@ public class API implements CacheableEntity<String> {
 
     public void setAiConfiguration(AIConfiguration aiConfiguration) {
         this.aiConfiguration = aiConfiguration;
+    }
+
+    public Boolean getEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(Boolean egress) {
+        isEgress = egress;
+    }
+
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
     }
 }

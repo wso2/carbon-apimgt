@@ -56,12 +56,16 @@ import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -69,6 +73,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_OBJECT;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
@@ -412,7 +417,82 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
         customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
+
+        org.wso2.carbon.apimgt.keymgt.model.entity.API api =
+                (org.wso2.carbon.apimgt.keymgt.model.entity.API) messageContext.getProperty(API_OBJECT);
+        customProperties.put(Constants.IS_EGRESS, api.getEgress());
+        customProperties.put(Constants.SUB_TYPE, api.getSubtype());
+
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+        if (axis2MessageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA) != null) {
+            Object requestStartTimeObj = messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
+            long requestStartTime = requestStartTimeObj == null ? 0L : (long) requestStartTimeObj;
+            int requestStartHour = getHourByUTC(requestStartTime);
+            getAiAnalyticsData(
+                    (Map) axis2MessageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA),
+                    requestStartHour,
+                    customProperties
+            );
+        }
+
         return customProperties;
+    }
+
+    public static int getHourByUTC(long timestampMillis) {
+        OffsetDateTime offsetDateTime = OffsetDateTime
+                .ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneOffset.UTC);
+
+        return offsetDateTime.getHour();
+    }
+
+    private void getAiAnalyticsData(
+            Map aiApiResponseMetadata,
+            int requestStartHour,
+            Map<String, Object> customProperties
+    ) {
+        Map<String, String> aiMetadata = new HashMap<>();
+        Map<String, Integer> aiTokenUsage = new HashMap<>();
+        aiMetadata.put(
+                Constants.AI_VENDOR_NAME,
+                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_NAME).toString()
+        );
+        aiMetadata.put(
+                Constants.AI_VENDOR_VERSION,
+                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_API_VERSION).toString()
+        );
+        aiMetadata.put(
+                Constants.AI_MODEL,
+                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL).toString()
+        );
+        customProperties.put(Constants.AI_METADATA, aiMetadata);
+        aiTokenUsage.put(
+                Constants.AI_PROMPT_TOKEN_USAGE,
+                Integer.parseInt(
+                        aiApiResponseMetadata.get(
+                                AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT
+                        ).toString()
+                )
+        );
+        aiTokenUsage.put(
+                Constants.AI_COMPLETION_TOKEN_USAGE,
+                Integer.parseInt(
+                        aiApiResponseMetadata.get(
+                                AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT
+                        ).toString()
+                )
+        );
+        aiTokenUsage.put(
+                Constants.AI_TOTAL_TOKEN_USAGE,
+                Integer.parseInt(
+                        aiApiResponseMetadata.get(
+                                AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT
+                        ).toString()
+                )
+        );
+        aiTokenUsage.put(Constants.HOUR, requestStartHour);
+        customProperties.put(Constants.AI_TOKEN_USAGE, aiTokenUsage);
     }
 
     private String getApiContext() {

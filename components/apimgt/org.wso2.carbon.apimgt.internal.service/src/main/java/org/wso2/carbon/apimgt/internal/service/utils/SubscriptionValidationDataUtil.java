@@ -146,6 +146,8 @@ public class SubscriptionValidationDataUtil {
                 }
                 apidto.setAiConfiguration(aiConfigurationDTO);
             }
+            apidto.setIsEgress(model.isEgress() != 0);
+            apidto.setSubtype(model.getSubtype());
         }
         return apidto;
     }
@@ -231,6 +233,8 @@ public class SubscriptionValidationDataUtil {
                 }
                 apidto.setAiConfiguration(aiConfigurationDTO);
             }
+            apidto.setIsEgress(model.isEgress() != 0);
+            apidto.setSubtype(model.getSubtype());
             apiListdto.setCount(1);
             apiListdto.getList().add(apidto);
         } else {

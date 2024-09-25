@@ -113,46 +113,39 @@ public class AiApiHandler extends AbstractHandler {
             String tenantDomain = GatewayUtils.getTenantDomain();
             TreeMap<String, API> selectedAPIS = Utils.getSelectedAPIList(path, tenantDomain);
             API selectedAPI = selectedAPIS.get(selectedAPIS.firstKey());
-
             if (selectedAPI == null) {
                 log.error("No API found for path: " + path + " in tenant domain: " + tenantDomain);
                 return true;
             }
-
             AIConfiguration aiConfiguration = selectedAPI.getAiConfiguration();
             if (aiConfiguration == null) {
                 log.debug("No AI configuration for API: " + selectedAPI.getApiId() + " in tenant domain: "
                         + tenantDomain);
                 return true;
             }
-
             String llmProviderId = aiConfiguration.getLlmProviderId();
             LLMProvider provider = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
-
             if (provider == null) {
                 log.error("No LLM provider found for provider ID: " + llmProviderId);
                 return false;
             }
             String config = provider.getConfigurations();
-
             LLMProviderConfiguration providerConfiguration = new Gson().fromJson(config,
                     LLMProviderConfiguration.class);
             if (isRequest) {
                 addEndpointConfigurationToMessageContext(messageContext, aiConfiguration.getAiEndpointConfiguration(),
                         providerConfiguration);
             }
-
             LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
                     .getLLMProviderService(providerConfiguration.getConnectorType());
             if (llmProviderService == null) {
                 log.error("LLM provider service not found for the provider with ID: " + llmProviderId);
                 return false;
             }
-
             String payload = extractPayloadFromContext(messageContext, providerConfiguration);
             Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
             Map<String, String> headers = extractHeadersFromContext(messageContext);
-
+          
             Map<String, String> metadataMap = new HashMap<>();
             metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_NAME, provider.getName());
             metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION, provider.getApiVersion());
