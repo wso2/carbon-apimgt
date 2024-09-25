@@ -58,7 +58,7 @@ public class AnalyticsDataPublisher {
     }
 
     private List<String> getReporterTypesOrNull(String typeConfig) {
-        if (typeConfig == null) {
+        if (typeConfig == null || typeConfig.isEmpty()) {
             return null;
         }
         if (typeConfig.startsWith("[") && typeConfig.endsWith("]")) {
