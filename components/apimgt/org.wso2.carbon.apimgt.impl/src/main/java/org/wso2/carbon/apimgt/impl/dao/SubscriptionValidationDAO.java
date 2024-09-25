@@ -72,6 +72,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.Integer.parseInt;
 import static org.wso2.carbon.apimgt.impl.APIConstants.POLICY_ENABLED_FOR_ANALYTICS;
 
 /**
@@ -1150,6 +1151,14 @@ public class SubscriptionValidationDAO {
                             aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }
+                        if (resultSet.getString("IS_EGRESS") != null) {
+                            api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
+                        }
+                        if (resultSet.getString("API_SUBTYPE") != null) {
+                            api.setSubtype(resultSet.getString("API_SUBTYPE"));
+                        } else {
+                            api.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+                        }
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
@@ -1278,6 +1287,14 @@ public class SubscriptionValidationDAO {
                             aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
                             aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
+                        }
+                        if (resultSet.getString("IS_EGRESS") != null) {
+                            api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
+                        }
+                        if (resultSet.getString("API_SUBTYPE") != null) {
+                            api.setSubtype(resultSet.getString("API_SUBTYPE"));
+                        } else {
+                            api.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
                         }
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
@@ -1493,9 +1510,16 @@ public class SubscriptionValidationDAO {
                             aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }
+                        if (resultSet.getString("IS_EGRESS") != null) {
+                            api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
+                        }
+                        if (resultSet.getString("API_SUBTYPE") != null) {
+                            api.setSubtype(resultSet.getString("API_SUBTYPE"));
+                        } else {
+                            api.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+                        }
                         String revision = resultSet.getString("REVISION_UUID");
                         String publishedDefaultApiVersion = getAPIDefaultVersion(connection, provider, name);
-
                         setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context,
                                 contextTemplate);
                         if (isExpand) {
@@ -1587,6 +1611,14 @@ public class SubscriptionValidationDAO {
                             aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
                             aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
+                        }
+                        if (resultSet.getString("IS_EGRESS") != null) {
+                            api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
+                        }
+                        if (resultSet.getString("API_SUBTYPE") != null) {
+                            api.setSubtype(resultSet.getString("API_SUBTYPE"));
+                        } else {
+                            api.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
                         }
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");

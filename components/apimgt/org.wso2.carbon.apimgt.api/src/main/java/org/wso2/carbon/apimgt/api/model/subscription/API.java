@@ -48,6 +48,8 @@ public class API implements CacheableEntity<String> {
     private Set<OperationPolicy> apiPolicies = new HashSet<>();
     private boolean isSubscriptionValidationDisabled = false;
     private AIConfiguration aiConfiguration;
+    private int isEgress;
+    private String subtype;
 
     public String getRevision() {
 
@@ -231,5 +233,21 @@ public class API implements CacheableEntity<String> {
 
     public void setAiConfiguration(AIConfiguration aiConfiguration) {
         this.aiConfiguration = aiConfiguration;
+    }
+
+    public int isEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(int egress) {
+        isEgress = egress;
+    }
+
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
     }
 }
