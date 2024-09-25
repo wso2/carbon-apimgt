@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.common.analytics.Constants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -61,14 +60,10 @@ public class AnalyticsDataPublisher {
         if (typeConfig == null || typeConfig.isEmpty()) {
             return null;
         }
-        if (typeConfig.startsWith("[") && typeConfig.endsWith("]")) {
-            return Arrays.stream(typeConfig.substring(1, typeConfig.length() - 1).split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .collect(Collectors.toList());
-        } else {
-            return Collections.singletonList(typeConfig);
-        }
+        return Arrays.stream(typeConfig.replaceAll("[\\[\\]]", "").split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
     }
 
     private List<String> getReportersClassesOrNull(Map<String, String> configs) {
