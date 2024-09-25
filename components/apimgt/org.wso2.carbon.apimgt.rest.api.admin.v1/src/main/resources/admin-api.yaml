@@ -3592,6 +3592,44 @@ paths:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
               -H "Content-Type: application/json" "https://127.0.0.1:9443/api/am/admin/v4/provider/admin/apis/33662a62-8db1-4d75-af08-afd63c6bd0b4/change-provider?provider=user1"'
+  ######################################################
+  # The "Transaction Count" resource API
+  ######################################################
+  /transaction-count:
+    get:
+      tags:
+        - "Transaction Records"
+      summary: "Get transaction count"
+      description: "This endpoint retrieves the transaction count based on various filter parameters."
+      parameters:
+        - name: "startTime"
+          in: "query"
+          description: "Start time for the transaction count retrieval"
+          required: true
+          schema:
+            type: "string"
+        - name: "endTime"
+          in: "query"
+          description: "End time for the transaction count retrieval"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Transaction count retrieved successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionCount"
+        default:
+          description: "Unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:admin
 components:
   schemas:
     Error:
@@ -5494,6 +5532,12 @@ components:
           type: string
         id:
           type: string
+    TransactionCount:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 120
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

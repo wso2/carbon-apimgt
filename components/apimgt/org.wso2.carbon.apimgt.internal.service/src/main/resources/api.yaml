@@ -693,6 +693,32 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  #--------------------------------------------
+  # Transaction count related resources
+  #--------------------------------------------
+  /transaction-records:
+    post:
+      summary: Insert Transaction Records
+      description: Inserts a list of transaction records into the database.
+      operationId: insertTransactionRecords
+      parameters:
+        - in: body
+          name: body
+          description: A list of transaction records to be inserted
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TransactionRecord'
+      responses:
+        '200':
+          description: Successfully inserted transaction records
+          schema:
+            type: boolean
+        '400':
+          description: Bad request. Invalid input data.
+        '500':
+          description: Internal server error. Failed to insert transaction records.
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -1717,3 +1743,25 @@ definitions:
         items:
           type: string
           example: "MessageDeliveryTaskPool"
+  #-----------------------------------------------------
+  # The Transaction Count resource
+  #-----------------------------------------------------
+  TransactionRecord:
+    type: object
+    properties:
+      id:
+        type: string
+      serverID:
+        type: string
+      serverType:
+        type: string
+      host:
+        type: string
+      count:
+        type: integer
+      recordedTime:
+        type: string
+    required:
+      - id
+      - count
+      - recordedTime

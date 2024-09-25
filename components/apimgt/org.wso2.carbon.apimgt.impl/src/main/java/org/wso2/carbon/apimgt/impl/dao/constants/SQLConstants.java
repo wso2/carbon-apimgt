@@ -4408,4 +4408,12 @@ public class SQLConstants {
                 + "SET CONFIGURATION = ? WHERE ORGANIZATION = ? AND CONFIG_TYPE = ?";
     }
 
+    /**
+     * Static class to hold database queries related to AM_TRANSACTION_RECORDS table
+     */
+    public static class TransactionCountConstants {
+        public static final String INSERT_TRANSACTION_COUNT = "INSERT INTO AM_TRANSACTION_RECORDS " + "(ID, HOST, SERVER_ID, SERVER_TYPE, COUNT, RECORDED_TIME) " + "VALUES (?,?,?,?,?,?)";
+        public static final String GET_TRANSACTION_COUNT = "SELECT SUM(COUNT) FROM AM_TRANSACTION_RECORDS " + "WHERE RECORDED_TIME >= ? AND RECORDED_TIME <= ?";
+    }
+
 }
