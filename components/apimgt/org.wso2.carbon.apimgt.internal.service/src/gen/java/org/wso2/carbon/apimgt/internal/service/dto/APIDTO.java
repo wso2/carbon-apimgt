@@ -295,7 +295,7 @@ public class APIDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "false", value = "Whether subscription validation is disabled.")
   @JsonProperty("isSubscriptionValidationDisabled")
   public Boolean isIsSubscriptionValidationDisabled() {
@@ -312,7 +312,7 @@ public class APIDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
   @JsonProperty("aiConfiguration")
   public AIConfigurationDTO getAiConfiguration() {

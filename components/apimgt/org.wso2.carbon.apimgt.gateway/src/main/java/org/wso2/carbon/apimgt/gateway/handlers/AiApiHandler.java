@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -132,11 +133,13 @@ public class AiApiHandler extends AbstractHandler {
         }
 
         String llmProviderId = aiConfiguration.getLlmProviderId();
-        String config = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
-        if (config == null) {
-            log.error("No provider configurations found for provider: " + llmProviderId);
+        LLMProvider provider = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
+
+        if (provider == null) {
+            log.error("No LLM provider found for provider ID: " + llmProviderId);
             return false;
         }
+        String config = provider.getConfigurations();
 
         LLMProviderConfiguration providerConfiguration = new Gson().fromJson(config, LLMProviderConfiguration.class);
         if (isRequest) {
@@ -291,7 +294,7 @@ public class AiApiHandler extends AbstractHandler {
 
         String requestPath = (String) axis2MessageContext.getProperty(RESTConstants.REST_SUB_REQUEST_PATH);
         if (requestPath == null || requestPath.isEmpty()) {
-            log.warn("No request path available in the message context.");
+            log.debug("No request path available in the message context.");
             return new HashMap<>();
         }
 
