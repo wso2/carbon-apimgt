@@ -434,8 +434,8 @@
       {% if apim.key_manager.enable_provisioned_app_validation is defined %}
       <EnableProvisionedAppValidation>{{apim.key_manager.enable_provisioned_app_validation}}</EnableProvisionedAppValidation>
       {% endif %}
-      {% if apim.key_manager.enable_apikey_subscription_validation is defined %}
-      <EnableAPIKeySubscriptionValidation>{{apim.key_manager.enable_apikey_subscription_validation}}</EnableAPIKeySubscriptionValidation>
+      {% if apim.key_manager.enable_lightweight_apikey_generation is defined %}
+      <EnableLightWeightAPIKeyGeneration>{{apim.key_manager.enable_lightweight_apikey_generation}}</EnableLightWeightAPIKeyGeneration>
       {% endif %}
       <AllowSubscriptionValidationDisabling>{{apim.key_manager.allow_subscription_validation_disabling}}</AllowSubscriptionValidationDisabling>
     </APIKeyValidator>

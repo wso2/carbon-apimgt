@@ -822,8 +822,8 @@ public final class APIConstants {
     public static final String AUTHSERVER_URL = "ServerURL";
     public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
-    public static final String API_KEY_SUBSCRIPTION_VALIDATION_ENABLED =
-            API_KEY_VALIDATOR + "EnableAPIKeySubscriptionValidation";
+    public static final String LIGHTWEIGHT_API_KEY_GENERATION_ENABLED =
+            API_KEY_VALIDATOR + "EnableLightWeightAPIKeyGeneration";
     public static final String ALLOW_SUBSCRIPTION_VALIDATION_DISABLING = API_KEY_VALIDATOR +
             "AllowSubscriptionValidationDisabling";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
