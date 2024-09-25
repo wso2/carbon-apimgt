@@ -291,7 +291,7 @@ public class AiApiHandler extends AbstractHandler {
 
         String requestPath = (String) axis2MessageContext.getProperty(RESTConstants.REST_SUB_REQUEST_PATH);
         if (requestPath == null || requestPath.isEmpty()) {
-            log.warn("No request path available in the message context.");
+            log.debug("No request path available in the message context.");
             return new HashMap<>();
         }
 
