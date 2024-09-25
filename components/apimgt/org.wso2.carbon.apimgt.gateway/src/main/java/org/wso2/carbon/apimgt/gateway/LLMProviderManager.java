@@ -84,9 +84,17 @@ public class LLMProviderManager {
             JSONArray llmProviderConfigArray = responseJson.getJSONArray("apis");
             for (int i = 0; i < llmProviderConfigArray.length(); i++) {
                 JSONObject apiObj = llmProviderConfigArray.getJSONObject(i);
-                String id = apiObj.getString("id");
+                String id = apiObj.getString(AIAPIConstants.LLM_PROVIDER_ID);
+                String name = apiObj.getString(AIAPIConstants.LLM_PROVIDER_NAME);
+                String apiVersion = apiObj.getString(AIAPIConstants.LLM_PROVIDER_API_VERSION);
                 String configurations = apiObj.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
-                DataHolder.getInstance().addLLMProviderConfigurations(id, configurations);
+
+                LLMProvider provider = new LLMProvider();
+                provider.setId(id);
+                provider.setName(name);
+                provider.setApiVersion(apiVersion);
+                provider.setConfigurations(configurations);
+                DataHolder.getInstance().addLLMProviderConfigurations(provider);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Response : " + responseJson);
