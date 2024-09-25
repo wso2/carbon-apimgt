@@ -95,15 +95,7 @@ public class AiApiHandler extends AbstractHandler {
      */
     private boolean handleMessage(MessageContext messageContext, boolean isRequest) {
 
-        try {
-            return processMessage(messageContext, isRequest);
-        } catch (APIManagementException | XMLStreamException | IOException e) {
-            log.error("Error processing AI API", e);
-            return true;
-        } catch (CryptoException | URISyntaxException e) {
-            log.error("Error adding security configuration", e);
-            return true;
-        }
+        return processMessage(messageContext, isRequest);
     }
 
     /**
@@ -113,93 +105,105 @@ public class AiApiHandler extends AbstractHandler {
      * @param isRequest      true if processing a request, false for response
      * @return true if processing is successful, false otherwise
      */
-    private boolean processMessage(MessageContext messageContext, boolean isRequest)
-            throws APIManagementException, XMLStreamException, IOException, CryptoException, URISyntaxException {
+    private boolean processMessage(MessageContext messageContext, boolean isRequest) {
 
-        String path = ApiUtils.getFullRequestPath(messageContext);
-        String tenantDomain = GatewayUtils.getTenantDomain();
-        TreeMap<String, API> selectedAPIS = Utils.getSelectedAPIList(path, tenantDomain);
-        API selectedAPI = selectedAPIS.get(selectedAPIS.firstKey());
+        try {
 
-        if (selectedAPI == null) {
-            log.error("No API found for path: " + path + " in tenant domain: " + tenantDomain);
-            return true;
-        }
+            String path = ApiUtils.getFullRequestPath(messageContext);
+            String tenantDomain = GatewayUtils.getTenantDomain();
+            TreeMap<String, API> selectedAPIS = Utils.getSelectedAPIList(path, tenantDomain);
+            API selectedAPI = selectedAPIS.get(selectedAPIS.firstKey());
 
-        AIConfiguration aiConfiguration = selectedAPI.getAiConfiguration();
-        if (aiConfiguration == null) {
-            log.debug("No AI configuration for API: " + selectedAPI.getApiId() + " in tenant domain: " + tenantDomain);
-            return true;
-        }
+            if (selectedAPI == null) {
+                log.error("No API found for path: " + path + " in tenant domain: " + tenantDomain);
+                return true;
+            }
 
-        String llmProviderId = aiConfiguration.getLlmProviderId();
-        LLMProvider provider = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
+            AIConfiguration aiConfiguration = selectedAPI.getAiConfiguration();
+            if (aiConfiguration == null) {
+                log.debug("No AI configuration for API: " + selectedAPI.getApiId() + " in tenant domain: "
+                        + tenantDomain);
+                return true;
+            }
 
-        if (provider == null) {
-            log.error("No LLM provider found for provider ID: " + llmProviderId);
-            return true;
-        }
-        String config = provider.getConfigurations();
+            String llmProviderId = aiConfiguration.getLlmProviderId();
+            LLMProvider provider = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
 
-        LLMProviderConfiguration providerConfiguration = new Gson().fromJson(config, LLMProviderConfiguration.class);
-        if (isRequest) {
-            addEndpointConfigurationToMessageContext(messageContext, aiConfiguration.getAiEndpointConfiguration(),
-                    providerConfiguration);
-            ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(
-                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        }
+            if (provider == null) {
+                log.error("No LLM provider found for provider ID: " + llmProviderId);
+                return false;
+            }
+            String config = provider.getConfigurations();
 
-        LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
-                .getLLMProviderService(providerConfiguration.getConnectorType());
-        if (llmProviderService == null) {
-            log.error("No LLM provider service for provider: " + llmProviderId);
-            return true;
-        }
+            LLMProviderConfiguration providerConfiguration = new Gson().fromJson(config,
+                    LLMProviderConfiguration.class);
+            if (isRequest) {
+                addEndpointConfigurationToMessageContext(messageContext, aiConfiguration.getAiEndpointConfiguration(),
+                        providerConfiguration);
+            }
 
-        String payload = extractPayloadFromContext(messageContext, providerConfiguration);
-        Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
-        Map<String, String> headers = extractHeadersFromContext(messageContext);
+            LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
+                    .getLLMProviderService(providerConfiguration.getConnectorType());
+            if (llmProviderService == null) {
+                log.error("LLM provider service not found for the provider with ID: " + llmProviderId);
+                return false;
+            }
 
-        Map<String, String> metadataMap = isRequest
-                ? llmProviderService.getRequestMetadata(payload, headers, queryParams,
-                providerConfiguration.getMetadata())
-                : llmProviderService.getResponseMetadata(payload, headers, queryParams,
-                providerConfiguration.getMetadata());
+            String payload = extractPayloadFromContext(messageContext, providerConfiguration);
+            Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
+            Map<String, String> headers = extractHeadersFromContext(messageContext);
 
-        if (metadataMap != null && !metadataMap.isEmpty()) {
+            Map<String, String> metadataMap = new HashMap<>();
+            metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_NAME, provider.getName());
+            metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION, provider.getApiVersion());
+            if (isRequest) {
+                llmProviderService.getRequestMetadata(payload, headers, queryParams,
+                        providerConfiguration.getMetadata(), metadataMap);
+            } else {
+                llmProviderService.getResponseMetadata(payload, headers, queryParams,
+                        providerConfiguration.getMetadata(), metadataMap);
+            }
             String metadataProperty = isRequest
                     ? APIConstants.AIAPIConstants.AI_API_REQUEST_METADATA
                     : APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA;
-            ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(metadataProperty, metadataMap);
+            ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(metadataProperty,
+                    metadataMap);
+            return true;
+        } catch (Exception e) {
+            if (e instanceof CryptoException) {
+                log.error("Error occurred decrypting API Key.", e);
+            } else if (e instanceof APIManagementException) {
+                log.error("Error occurred while extracting metadata.", e);
+            } else if (e instanceof XMLStreamException || e instanceof IOException) {
+                log.error("Error occurred while reading payload.", e);
+            } else if (e instanceof URISyntaxException) {
+                log.error("Error occurred while adding endpoint security.", e);
+            }
+            return false;
         }
-
-        return true;
     }
 
     /**
      * Adds endpoint configuration to the message context.
      *
-     * @param messageContext        the Synapse MessageContext
-     * @param aiConfiguration       AI endpoint configuration
-     * @param providerConfiguration LLM provider configuration
+     * @param messageContext          the Synapse MessageContext
+     * @param aiEndpointConfiguration AI endpoint configuration
+     * @param providerConfiguration   LLM provider configuration
      */
     private void addEndpointConfigurationToMessageContext(MessageContext messageContext,
-                                                          AIEndpointConfiguration aiConfiguration,
+                                                          AIEndpointConfiguration aiEndpointConfiguration,
                                                           LLMProviderConfiguration providerConfiguration)
             throws CryptoException, URISyntaxException {
 
-        if (aiConfiguration != null) {
+        if (aiEndpointConfiguration != null) {
             org.apache.axis2.context.MessageContext axCtx =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-
             AuthenticationContext authContext =
                     (AuthenticationContext) messageContext.getProperty(APISecurityUtils.API_AUTH_CONTEXT);
-
             String authValue = authContext.getKeyType().equals(org.wso2.carbon.apimgt.impl.
                     APIConstants.API_KEY_TYPE_PRODUCTION)
-                    ? aiConfiguration.getProductionAuthValue()
-                    : aiConfiguration.getSandboxAuthValue();
-
+                    ? aiEndpointConfiguration.getProductionAuthValue()
+                    : aiEndpointConfiguration.getSandboxAuthValue();
             if (providerConfiguration.getAuthHeader() != null) {
                 Map<String, String> transportHeaders =
                         (Map<String, String>) axCtx.getProperty(org.apache.axis2.context.MessageContext
@@ -208,12 +212,11 @@ public class AiApiHandler extends AbstractHandler {
 
                 // TODO: Handle encoded scenario
                 transportHeaders.remove(HttpHeaders.ACCEPT_ENCODING);
-            }
-
-            if (providerConfiguration.getAuthQueryParameter() != null) {
+            } else if (providerConfiguration.getAuthQueryParameter() != null) {
                 URI updatedFullPath =
                         new URIBuilder((String) axCtx.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX))
-                        .addParameter(providerConfiguration.getAuthQueryParameter(), decryptSecret(authValue)).build();
+                                .addParameter(providerConfiguration.getAuthQueryParameter(),
+                                        decryptSecret(authValue)).build();
                 axCtx.setProperty(APIMgtGatewayConstants.REST_URL_POSTFIX, updatedFullPath.toString());
             }
         }

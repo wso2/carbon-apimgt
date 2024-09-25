@@ -35,26 +35,16 @@ import java.util.Map;
  */
 public abstract class BuiltInLLMProviderService implements LLMProviderService {
 
-    /**
-     * Extracts metadata from the payload, headers, or query params.
-     *
-     * @param payload      The request payload.
-     * @param headers      The request headers (not used).
-     * @param queryParams  The request query parameters (not used).
-     * @param metadataList List of metadata to extract.
-     * @return Map of extracted metadata.
-     * @throws APIManagementException If extraction fails.
-     */
     @Override
     public Map<String, String> getResponseMetadata(String payload, Map<String, String> headers,
                                                    Map<String, String> queryParams,
-                                                   List<LLMProviderMetadata> metadataList)
+                                                   List<LLMProviderMetadata> metadataList,
+                                                   Map<String, String> metadataMap)
             throws APIManagementException {
 
-        Map<String, String> extractedMetadata = new HashMap<>();
         if (metadataList == null || metadataList.isEmpty()) {
             log.warn("Metadata list is null or empty.");
-            return extractedMetadata;
+            return metadataMap;
         }
         try {
             for (LLMProviderMetadata metadata : metadataList) {
@@ -65,7 +55,7 @@ public abstract class BuiltInLLMProviderService implements LLMProviderService {
                     if (payload != null) {
                         try {
                             String extractedValue = JsonPath.read(payload, attributeIdentifier).toString();
-                            extractedMetadata.put(attributeName, extractedValue);
+                            metadataMap.put(attributeName, extractedValue);
                         } catch (PathNotFoundException e) {
                             log.warn("Attribute not found in the payload for identifier: " + attributeIdentifier);
                         }
@@ -81,15 +71,17 @@ public abstract class BuiltInLLMProviderService implements LLMProviderService {
         } catch (Exception e) {
             throw new APIManagementException("Error extracting metadata from the payload", e);
         }
-        return extractedMetadata;
+        return metadataMap;
     }
 
     @Override
     public Map<String, String> getRequestMetadata(String payload, Map<String, String> headers,
                                                   Map<String, String> queryParams,
-                                                  List<LLMProviderMetadata> metadataList)
+                                                  List<LLMProviderMetadata> metadataList,
+                                                  Map<String, String> metadataMap)
             throws APIManagementException {
-        return null;
+
+        return metadataMap;
     }
 
     /**

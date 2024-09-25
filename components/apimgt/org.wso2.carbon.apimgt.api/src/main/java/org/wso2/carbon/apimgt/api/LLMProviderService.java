@@ -37,11 +37,13 @@ public interface LLMProviderService {
      * @param header      The response headers.
      * @param queryParams The query parameters.
      * @param metadata    The list of metadata to extract.
+     * @param metadataMap Map of metadata
      * @return Map of extracted response metadata.
      * @throws APIManagementException If extraction fails.
      */
     Map<String, String> getResponseMetadata(String payload, Map<String, String> header,
-                                            Map<String, String> queryParams, List<LLMProviderMetadata> metadata)
+                                            Map<String, String> queryParams, List<LLMProviderMetadata> metadata,
+                                            Map<String, String> metadataMap)
             throws APIManagementException;
 
     /**
@@ -51,11 +53,13 @@ public interface LLMProviderService {
      * @param header      The request headers.
      * @param queryParams The query parameters.
      * @param metadata    The list of metadata to extract.
+     * @param metadataMap Map of metadata
      * @return Map of extracted request metadata.
      * @throws APIManagementException If extraction fails.
      */
     Map<String, String> getRequestMetadata(String payload, Map<String, String> header,
-                                           Map<String, String> queryParams, List<LLMProviderMetadata> metadata)
+                                           Map<String, String> queryParams, List<LLMProviderMetadata> metadata,
+                                           Map<String, String> metadataMap)
             throws APIManagementException;
 
     /**
