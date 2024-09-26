@@ -383,30 +383,4 @@ public class RestApiAdminUtils {
         FileUtils.deleteDirectory(backupDirectory);
         apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
     }
-
-    /**
-     * Override token based quota limits if they are null in the TokenCountLimitDTO.
-     *
-     * @param throttleLimitDTO TokenCountLimitDTO object
-     * @param quotaPolicy    Token count limits of the existing subscription policy
-     * @return Overridden TokenCountLimitDTO object
-     */
-    public static ThrottleLimitDTO overrideTokenBasedQuotaLimits(ThrottleLimitDTO throttleLimitDTO,
-            QuotaPolicy quotaPolicy) {
-
-        AIAPIQuotaLimitDTO aiApiQuotaLimitDTO = throttleLimitDTO.getAiApiQuota();
-        AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) quotaPolicy.getLimit();
-        throttleLimitDTO.setType(throttleLimitDTO.getType());
-        if (throttleLimitDTO.getAiApiQuota().getTotalTokenCount() == null) {
-            aiApiQuotaLimitDTO.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
-        }
-        if (throttleLimitDTO.getAiApiQuota().getPromptTokenCount() == null) {
-            aiApiQuotaLimitDTO.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
-        }
-        if (throttleLimitDTO.getAiApiQuota().getCompletionTokenCount() == null) {
-            aiApiQuotaLimitDTO.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
-        }
-        throttleLimitDTO.setAiApiQuota(aiApiQuotaLimitDTO);
-        return throttleLimitDTO;
-    }
 }

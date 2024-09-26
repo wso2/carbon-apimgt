@@ -13,25 +13,25 @@
 		#if($quotaPolicy != "")
 		FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0)
 		select throttleKey,
-		#if($quotaPolicy.getLimit().getRequestCount() != "")
-		ifThenElse((count(messageID) >= 1000), true,
+		#if($quotaPolicy.getLimit().getRequestCount() != 0)
+		ifThenElse((count(messageID) >= $quotaPolicy.getLimit().getRequestCount()), true,
 		#end
-		#if($quotaPolicy.getLimit().getPromptTokenCount() != "")
-		ifThenElse((sum(cast(map:get(propertiesMap,'promptTokenCount'),'long')) >= 30000L), true,
+		#if($quotaPolicy.getAiApiQuota().getPromptTokenCount() != 0)
+		ifThenElse((sum(cast(map:get(propertiesMap,'PROMPT_TOKENS'),'long')) >= $quotaPolicy.getAiApiQuota().getPromptTokenCount()L), true,
 		#end
-		#if($quotaPolicy.getLimit().getCompletionTokenCount() != "")
-		ifThenElse((sum(cast(map:get(propertiesMap,'completionTokenCount'),'long')) >= 30000L), true,
+		#if($quotaPolicy.getAiApiQuota().getCompletionTokenCount() != 0)
+		ifThenElse((sum(cast(map:get(propertiesMap,'COMPLETION_TOKENS'),'long')) >= $quotaPolicy.getAiApiQuota().getCompletionTokenCount()L), true,
 		#end
-		#if($quotaPolicy.getLimit().getTotalTokenCount() != "")
-		ifThenElse((sum(cast(map:get(propertiesMap,'totalTokenCount'),'long')) >= 30000L), true, false)
+		#if($quotaPolicy.getAiApiQuota().getTotalTokenCount() != 0)
+		ifThenElse((sum(cast(map:get(propertiesMap,'TOTAL_TOKENS'),'long')) >= $quotaPolicy.getAiApiQuota().getTotalTokenCount()L), true, false)
 		#end
-		#if($quotaPolicy.getLimit().getPromptTokenCount() != "")
+		#if($quotaPolicy.getLimit().getPromptTokenCount() != 0)
 		)
 		#end
-		#if($quotaPolicy.getLimit().getCompletionTokenCount() != "")
+		#if($quotaPolicy.getLimit().getCompletionTokenCount() != 0)
 		)
 		#end
-		#if($quotaPolicy.getRequestCountLimit().getRequestCount() != "")
+		#if($quotaPolicy.getRequestCountLimit().getRequestCount() != 0)
 		)
 		#end
 		as isThrottled, expiryTimeStamp
