@@ -533,7 +533,9 @@ public class PublisherCommonUtils {
                     if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(productionEndpointType)) {
                         if (endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null &&
                                 StringUtils.isNotEmpty(endpointSecurityProduction.get(
-                                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString())) {
+                                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString()) &&
+                                !endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
+                                        .equals(oldProductionApiKeyValue)) {
                             String apiKeyValue = endpointSecurityProduction
                                     .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
                             String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
@@ -563,7 +565,9 @@ public class PublisherCommonUtils {
                         if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
                                 && StringUtils.isNotEmpty(
                                 endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
-                                        .toString())) {
+                                        .toString()) &&
+                                !endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).equals(
+                                        oldSandboxApiKeyValue)) {
                             String apiKeyValue = endpointSecuritySandbox
                                     .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
                             String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
