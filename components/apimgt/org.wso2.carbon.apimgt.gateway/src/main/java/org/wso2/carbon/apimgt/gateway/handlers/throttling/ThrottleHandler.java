@@ -414,7 +414,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                             if (isHardLimitThrottled(synCtx, authContext, apiContext, apiVersion)) {
                                                 isThrottled = true;
 
-                                            } else {
+                                            } else if (((Axis2MessageContext)synCtx).getAxis2MessageContext()
+                                                    .getProperty(AI_API_REQUEST_METADATA) == null) {
                                                 ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
                                                         publishNonThrottledEvent(applicationLevelThrottleKey,
                                                                 applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
