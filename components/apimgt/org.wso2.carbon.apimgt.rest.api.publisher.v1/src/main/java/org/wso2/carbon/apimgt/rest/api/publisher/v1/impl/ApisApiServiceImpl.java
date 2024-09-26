@@ -2882,7 +2882,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, String inlineApiDefinition,
                                             MessageContext messageContext) throws APIManagementException {
-
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
             throw new APIManagementException("'additionalProperties' is required and should not be null",
@@ -2920,6 +2919,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             // OAuth 2.0 backend protection: API Key and API Secret encryption
             PublisherCommonUtils
                     .encryptEndpointSecurityOAuthCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
+                            StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
+            PublisherCommonUtils
+                    .encryptEndpointSecurityApiKeyCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
                             StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
 
             // Import the API and Definition
@@ -3617,17 +3619,18 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPISubscriptionPolicies(String apiId, String ifNoneMatch, String xWSO2Tenant,
-                                                     MessageContext messageContext) throws APIManagementException {
+    public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean isAiApi,
+            MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiInfo = getAPIByID(apiId, apiProvider, organization);
-        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true);
+        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl().getThrottlingPolicyList(
+                ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true, isAiApi);
 
-        if (apiInfo != null ) {
+        if (apiInfo != null) {
             List<String> apiPolicies = apiInfo.getPolicies();
-            List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies, availableThrottlingPolicyList);
+            List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
+                    availableThrottlingPolicyList);
             return Response.ok().entity(apiThrottlingPolicies).build();
         }
         return null;

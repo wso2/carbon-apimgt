@@ -22,6 +22,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>

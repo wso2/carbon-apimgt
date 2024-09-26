@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 
 import java.util.ArrayList;
@@ -63,7 +64,9 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;
     private String implementation;
     private String productionMaxTps;
+    private String productionTimeUnit;
     private String sandboxMaxTps;
+    private String sandboxTimeUnit;
     private String authorizationHeader;
     private String apiKeyHeader;
     private String apiSecurity; // ?check whether same to private List<String> securityScheme = new ArrayList<>();
@@ -101,6 +104,17 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String redirectURL;
     private String apiOwner;
     private String vendor;
+    private AIConfiguration aiConfiguration;
+
+    public AIConfiguration getAiConfiguration() {
+
+        return aiConfiguration;
+    }
+
+    public void setAiConfiguration(AIConfiguration aiConfiguration) {
+
+        this.aiConfiguration = aiConfiguration;
+    }
 
     public String getAudience() {
         return audience;
@@ -348,6 +362,23 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setSandboxMaxTps(String sandboxMaxTps) {
         this.sandboxMaxTps = sandboxMaxTps;
+    }
+
+
+    public String getProductionTimeUnit() {
+        return productionTimeUnit;
+    }
+
+    public void setProductionTimeUnit(String productionTimeUnit) {
+        this.productionTimeUnit = productionTimeUnit;
+    }
+
+    public String getSandboxTimeUnit() {
+        return sandboxTimeUnit;
+    }
+
+    public void setSandboxTimeUnit(String sandboxTimeUnit) {
+        this.sandboxTimeUnit = sandboxTimeUnit;
     }
 
     public String getAuthorizationHeader() {

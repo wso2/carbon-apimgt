@@ -30,6 +30,7 @@ public class APIInfo {
     private String contextTemplate;
     private String apiTier;
     private String apiType;
+    private String apiSubtype;
     private String createdTime;
     private String createdBy;
     private String updatedTime;
@@ -38,6 +39,7 @@ public class APIInfo {
     private int revisionsCreated;
     private boolean isRevision;
     private String organization;
+    private int isEgress;
 
     private APIInfo() {
 
@@ -127,6 +129,16 @@ public class APIInfo {
         this.apiType = apiType;
     }
 
+    public String getApiSubtype() {
+
+        return apiSubtype;
+    }
+
+    public void setApiSubtype(String apiSubtype) {
+
+        this.apiSubtype = apiSubtype;
+    }
+
     public String getCreatedTime() {
 
         return createdTime;
@@ -207,6 +219,14 @@ public class APIInfo {
         isRevision = revision;
     }
 
+    public int isEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(int egress) {
+        isEgress = egress;
+    }
+
     public static class Builder {
 
         private String id;
@@ -217,6 +237,7 @@ public class APIInfo {
         private String contextTemplate;
         private String apiTier;
         private String apiType;
+        private String apiSubtype;
         private String createdTime;
         private String createdBy;
         private String updatedTime;
@@ -225,6 +246,7 @@ public class APIInfo {
         private int revisionsCreated;
         private boolean isRevision;
         private String organization;
+        private int isEgress;
 
         public Builder id(String id) {
 
@@ -271,6 +293,12 @@ public class APIInfo {
         public Builder apiType(String apiType) {
 
             this.apiType = apiType;
+            return this;
+        }
+
+        public Builder apiSubtype(String apiSubtype) {
+
+            this.apiSubtype = apiSubtype;
             return this;
         }
 
@@ -327,6 +355,7 @@ public class APIInfo {
             apiInfo.contextTemplate = contextTemplate;
             apiInfo.apiTier = apiTier;
             apiInfo.apiType = apiType;
+            apiInfo.apiSubtype = apiSubtype;
             apiInfo.createdTime = createdTime;
             apiInfo.createdBy = createdBy;
             apiInfo.updatedTime = updatedTime;
@@ -335,11 +364,17 @@ public class APIInfo {
             apiInfo.revisionsCreated = revisionsCreated;
             apiInfo.isRevision = isRevision;
             apiInfo.organization = organization;
+            apiInfo.isEgress = isEgress;
             return apiInfo;
         }
 
         public Builder organization(String organization) {
             this.organization = organization;
+            return this;
+        }
+
+        public Builder isEgress(int isEgress) {
+            this.isEgress = isEgress;
             return this;
         }
     }

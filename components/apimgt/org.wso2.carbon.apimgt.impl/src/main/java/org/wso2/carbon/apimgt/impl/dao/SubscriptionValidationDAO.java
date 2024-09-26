@@ -17,15 +17,20 @@
  */
 package org.wso2.carbon.apimgt.impl.dao;
 
+import com.google.gson.Gson;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
+import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -67,6 +72,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.Integer.parseInt;
 import static org.wso2.carbon.apimgt.impl.APIConstants.POLICY_ENABLED_FOR_ANALYTICS;
 
 /**
@@ -1032,6 +1038,18 @@ public class SubscriptionValidationDAO {
                 eventCountLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
                 eventCountLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
                 quotaPolicy.setLimit(eventCountLimit);
+            } else if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                AIAPIQuotaLimit AIAPIQuotaLimit = new AIAPIQuotaLimit();
+                AIAPIQuotaLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                AIAPIQuotaLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                AIAPIQuotaLimit.setRequestCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+                AIAPIQuotaLimit.setTotalTokenCount(
+                        resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_TOTAL_TOKEN_COUNT));
+                AIAPIQuotaLimit.setPromptTokenCount(
+                        resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_PROMPT_TOKEN_COUNT));
+                AIAPIQuotaLimit.setCompletionTokenCount(
+                        resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_COMPLETION_TOKEN_COUNT));
+                quotaPolicy.setLimit(AIAPIQuotaLimit);
             }
             policy.setQuotaPolicy(quotaPolicy);
         }
@@ -1126,6 +1144,21 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
+                        if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
+                            AIConfiguration aiConfiguration = new AIConfiguration();
+                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
+                            aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
+                            aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
+                            api.setAiConfiguration(aiConfiguration);
+                        }
+                        if (resultSet.getString("IS_EGRESS") != null) {
+                            api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
+                        }
+                        if (resultSet.getString("API_SUBTYPE") != null) {
+                            api.setSubtype(resultSet.getString("API_SUBTYPE"));
+                        } else {
+                            api.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+                        }
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 
@@ -1248,6 +1281,21 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
+                            AIConfiguration aiConfiguration = new AIConfiguration();
+                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
+                            aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
+                            aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
+                            api.setAiConfiguration(aiConfiguration);
+                        }
+                        if (resultSet.getString("IS_EGRESS") != null) {
+                            api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
+                        }
+                        if (resultSet.getString("API_SUBTYPE") != null) {
+                            api.setSubtype(resultSet.getString("API_SUBTYPE"));
+                        } else {
+                            api.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+                        }
                         if (isExpand) {
                             api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                             if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
@@ -1455,9 +1503,23 @@ public class SubscriptionValidationDAO {
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(context);
                         api.setStatus(resultSet.getString("STATUS"));
+                        if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
+                            AIConfiguration aiConfiguration = new AIConfiguration();
+                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
+                            aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
+                            aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
+                            api.setAiConfiguration(aiConfiguration);
+                        }
+                        if (resultSet.getString("IS_EGRESS") != null) {
+                            api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
+                        }
+                        if (resultSet.getString("API_SUBTYPE") != null) {
+                            api.setSubtype(resultSet.getString("API_SUBTYPE"));
+                        } else {
+                            api.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+                        }
                         String revision = resultSet.getString("REVISION_UUID");
                         String publishedDefaultApiVersion = getAPIDefaultVersion(connection, provider, name);
-
                         setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context,
                                 contextTemplate);
                         if (isExpand) {
@@ -1543,6 +1605,21 @@ public class SubscriptionValidationDAO {
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setRevision(revision);
                         api.setEnvironment(deploymentName);
+                        if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
+                            AIConfiguration aiConfiguration = new AIConfiguration();
+                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
+                            aiConfiguration.setAiEndpointConfiguration(new Gson().fromJson(resultSet.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
+                            aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
+                            api.setAiConfiguration(aiConfiguration);
+                        }
+                        if (resultSet.getString("IS_EGRESS") != null) {
+                            api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
+                        }
+                        if (resultSet.getString("API_SUBTYPE") != null) {
+                            api.setSubtype(resultSet.getString("API_SUBTYPE"));
+                        } else {
+                            api.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+                        }
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
 

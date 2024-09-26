@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.AIConfigurationDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import javax.validation.constraints.*;
@@ -35,6 +36,9 @@ public class APIDTO   {
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
     private String securityScheme = null;
     private Boolean isSubscriptionValidationDisabled = false;
+    private AIConfigurationDTO aiConfiguration = null;
+    private Boolean isEgress = null;
+    private String subtype = null;
 
   /**
    * UUID of API
@@ -303,6 +307,59 @@ public class APIDTO   {
     this.isSubscriptionValidationDisabled = isSubscriptionValidationDisabled;
   }
 
+  /**
+   **/
+  public APIDTO aiConfiguration(AIConfigurationDTO aiConfiguration) {
+    this.aiConfiguration = aiConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("aiConfiguration")
+  public AIConfigurationDTO getAiConfiguration() {
+    return aiConfiguration;
+  }
+  public void setAiConfiguration(AIConfigurationDTO aiConfiguration) {
+    this.aiConfiguration = aiConfiguration;
+  }
+
+  /**
+   * Indicates if the API is an egress API.
+   **/
+  public APIDTO isEgress(Boolean isEgress) {
+    this.isEgress = isEgress;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Indicates if the API is an egress API.")
+  @JsonProperty("isEgress")
+  public Boolean isIsEgress() {
+    return isEgress;
+  }
+  public void setIsEgress(Boolean isEgress) {
+    this.isEgress = isEgress;
+  }
+
+  /**
+   * The subtype of the API.
+   **/
+  public APIDTO subtype(String subtype) {
+    this.subtype = subtype;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Default", value = "The subtype of the API.")
+  @JsonProperty("subtype")
+  public String getSubtype() {
+    return subtype;
+  }
+  public void setSubtype(String subtype) {
+    this.subtype = subtype;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -327,12 +384,15 @@ public class APIDTO   {
         Objects.equals(apiPolicies, API.apiPolicies) &&
         Objects.equals(urlMappings, API.urlMappings) &&
         Objects.equals(securityScheme, API.securityScheme) &&
-        Objects.equals(isSubscriptionValidationDisabled, API.isSubscriptionValidationDisabled);
+        Objects.equals(isSubscriptionValidationDisabled, API.isSubscriptionValidationDisabled) &&
+        Objects.equals(aiConfiguration, API.aiConfiguration) &&
+        Objects.equals(isEgress, API.isEgress) &&
+        Objects.equals(subtype, API.subtype);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, isSubscriptionValidationDisabled);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, isSubscriptionValidationDisabled, aiConfiguration, isEgress, subtype);
   }
 
   @Override
@@ -355,6 +415,9 @@ public class APIDTO   {
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    isSubscriptionValidationDisabled: ").append(toIndentedString(isSubscriptionValidationDisabled)).append("\n");
+    sb.append("    aiConfiguration: ").append(toIndentedString(aiConfiguration)).append("\n");
+    sb.append("    isEgress: ").append(toIndentedString(isEgress)).append("\n");
+    sb.append("    subtype: ").append(toIndentedString(subtype)).append("\n");
     sb.append("}");
     return sb.toString();
   }

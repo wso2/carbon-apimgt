@@ -25,14 +25,18 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -418,7 +422,104 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                     }
                 }
             }
+        } else if (EventType.LLM_PROVIDER_CREATE.toString().equals(eventType)) {
+            createLLMProvider(eventJson);
+        } else if (EventType.LLM_PROVIDER_DELETE.toString().equals(eventType)) {
+            deleteLLMProvider(eventJson);
+        } else if (EventType.LLM_PROVIDER_UPDATE.toString().equals(eventType)) {
+            updateLLMProvider(eventJson);
         }
+    }
+
+    /**
+     * Updates the configuration for an existing LLM provider.
+     *
+     * @param eventJson JSON string containing provider details and configuration.
+     */
+    private void updateLLMProvider(String eventJson) {
+        LLMProvider provider = extractLLMProvider(eventJson);
+        updateProviderConfigurations(provider);
+    }
+
+    /**
+     * Creates a new LLM provider with the given configurations.
+     *
+     * @param eventJson JSON string containing provider details and configuration.
+     */
+    private void createLLMProvider(String eventJson) {
+        LLMProvider provider = extractLLMProvider(eventJson);
+        addProviderConfigurations(provider);
+    }
+
+    /**
+     * Deletes an existing LLM provider.
+     *
+     * @param eventJson JSON string containing provider details.
+     */
+    private void deleteLLMProvider(String eventJson) {
+        JSONObject jsonObject = new JSONObject(eventJson);
+        String id = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_ID);
+        removeProviderConfigurations(id);
+    }
+
+    /**
+     * Extracts LLM Provider details from a JSON event string.
+     *
+     * @param eventJson the JSON string containing LLM provider details
+     * @return the LLMProvider object populated with the extracted details
+     */
+    private LLMProvider extractLLMProvider(String eventJson) {
+        JSONObject jsonObject = new JSONObject(eventJson);
+        LLMProvider provider = new LLMProvider();
+        String id = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_ID);
+        String name = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_NAME);
+        String apiVersion = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_API_VERSION);
+        provider.setId(id);
+        provider.setName(name);
+        provider.setApiVersion(apiVersion);
+        return provider;
+    }
+
+    /**
+     * Updates LLM provider configurations in the DataHolder.
+     *
+     * @param provider LLMProvider object containing provider details.
+     */
+    private void updateProviderConfigurations(LLMProvider provider) {
+        String configurations = getProviderConfigurations(provider.getId());
+        provider.setConfigurations(configurations);
+        DataHolder.getInstance().updateLLMProviderConfigurations(provider);
+    }
+
+    /**
+     * Adds new LLM provider configurations to the DataHolder.
+     *
+     * @param provider LLMProvider object containing provider details.
+     */
+    private void addProviderConfigurations(LLMProvider provider) {
+        String configurations = getProviderConfigurations(provider.getId());
+        provider.setConfigurations(configurations);
+        DataHolder.getInstance().addLLMProviderConfigurations(provider);
+    }
+
+    /**
+     * Removes LLM provider configurations from the DataHolder.
+     *
+     * @param providerId LLMProvider ID.
+     */
+    private void removeProviderConfigurations(String providerId) {
+        DataHolder.getInstance().removeLLMProviderConfigurations(providerId);
+    }
+
+    /**
+     * Retrieves provider configurations from the LLMProviderManager.
+     *
+     * @param providerId LLMProvider ID.
+     * @return The configuration string for the provider.
+     */
+    private String getProviderConfigurations(String providerId) {
+        return LLMProviderManager.getInstance()
+                .getLLMProviderConfiguration(providerId);
     }
 
     private void endTenantFlow() {

@@ -368,6 +368,12 @@ public final class APIConstants {
     public static final String PROTOTYPE_OVERVIEW_IMPLEMENTATION = "overview_implementation";
     public static final String API_PRODUCTION_THROTTLE_MAXTPS = "overview_productionTps";
     public static final String API_SANDBOX_THROTTLE_MAXTPS = "overview_sandboxTps";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_SECOND = "SECOND";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_SECOND_MS = "1000";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_MINUTE = "MINUTE";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS = "60000";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_HOUR = "HOUR";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS = "3600000";
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";
@@ -1787,6 +1793,9 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_BASIC = "basic";
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
     public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
+    public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
+    public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
+    public static final String ENDPOINT_SECURITY_API_KEY_VALUE = "apiKeyValue";
     public static final String ENDPOINT_SECURITY_USERNAME = "username";
     public static final String ENDPOINT_SECURITY_CONFIG = "securityConfig";
     public static final String ENDPOINT_SECURITY = "endpoint_security";
@@ -2036,6 +2045,8 @@ public final class APIConstants {
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
             "SSE", "ASYN" +
             "C"};
+    public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
+    public static final String API_SUBTYPE_AI_API = "AIAPI";
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
@@ -2788,11 +2799,15 @@ public final class APIConstants {
         GA_CONFIG,
         KEY_TEMPLATE,
         CORRELATION_CONFIG,
-        GATEWAY_POLICY
+        GATEWAY_POLICY,
+        LLM_PROVIDER
     }
 
     // Supported Event Types
     public enum EventType {
+        LLM_PROVIDER_CREATE,
+        LLM_PROVIDER_UPDATE,
+        LLM_PROVIDER_DELETE,
         API_CREATE,
         API_UPDATE,
         API_DELETE,

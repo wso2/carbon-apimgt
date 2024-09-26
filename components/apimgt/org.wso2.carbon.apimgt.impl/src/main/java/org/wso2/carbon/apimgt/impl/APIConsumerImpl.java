@@ -3862,6 +3862,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         mappedAPI.removeAllTiers();
                         mappedAPI.setAvailableTiers(availableTiers);
                         populateGatewayVendor(mappedAPI);
+                        populateEgressStatus(mappedAPI);
+                        populateAPISubtype(mappedAPI);
                         apiList.add(mappedAPI);
                     } catch (APIManagementException e) {
                         log.warn("Retrieving API details from DB failed for API: " + mappedAPI.getUuid() + " " + e);
@@ -3900,6 +3902,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     populateAPIProductInformation(uuid, organization, apiProduct);
                     populateDefaultVersion(apiProduct);
                     populateAPIStatus(apiProduct);
+                    populateEgressStatus(apiProduct);
                     apiProduct = addTiersToAPI(apiProduct, organization);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
@@ -3908,6 +3911,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     populateDefaultVersion(api);
                     populateAPIStatus(api);
                     populateGatewayVendor(api);
+                    populateEgressStatus(api);
+                    populateAPISubtype(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
@@ -4094,6 +4099,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
+                    populateAPISubtype(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
@@ -4688,5 +4694,35 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
 
         return false;
+    }
+
+    private void populateEgressStatus(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getRevisionedApiId()));
+        } else {
+            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getUuid()));
+        }
+    }
+
+    private void populateEgressStatus(APIProduct apiProduct) throws APIManagementException {
+        if (apiProduct.isRevision()) {
+            apiProduct.setEgress(apiMgtDAO
+                    .checkForEgressAPIWithUUID(apiProduct.getRevisionedApiProductId()));
+        } else {
+            apiProduct.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(apiProduct.getUuid()));
+        }
+    }
+
+    /**
+     * This method populates the subType in the API.
+     * @param api API that needs to be populated with the subtype
+     * @throws APIManagementException
+     */
+    private void populateAPISubtype(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getRevisionedApiId()));
+        } else {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getUuid()));
+        }
     }
 }
