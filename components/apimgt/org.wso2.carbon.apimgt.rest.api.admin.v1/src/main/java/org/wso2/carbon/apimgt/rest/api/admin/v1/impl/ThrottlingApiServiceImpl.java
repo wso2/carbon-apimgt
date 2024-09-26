@@ -811,10 +811,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //overridden properties
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
-            if (PolicyConstants.AI_API_QUOTA_TYPE_ENUM_VALUE.equals(body.getDefaultLimit().getType().toString())) {
-                body.setDefaultLimit(RestApiAdminUtils.overrideTokenBasedQuotaLimits(body.getDefaultLimit(),
-                        existingPolicy.getDefaultQuotaPolicy()));
-            }
 
             // validate if permission info exists and halt the execution in case of an error
             validatePolicyPermissions(body);
