@@ -184,7 +184,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         //Throttled decisions
         boolean isThrottled = false;
         boolean isResourceLevelThrottled = false;
-        boolean isOperationLevelThrottled = false;
         boolean isApplicationLevelThrottled;
         boolean isSubscriptionLevelThrottled;
         boolean isSubscriptionLevelSpikeThrottled = false;
@@ -192,7 +191,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         boolean isBlockedRequest = false;
         boolean apiLevelThrottledTriggered = false;
         boolean policyLevelUserTriggered = false;
-        String ipLevelBlockingKey;
         String appLevelBlockingKey = "";
         String subscriptionLevelBlockingKey = "";
         boolean stopOnQuotaReach = true;
