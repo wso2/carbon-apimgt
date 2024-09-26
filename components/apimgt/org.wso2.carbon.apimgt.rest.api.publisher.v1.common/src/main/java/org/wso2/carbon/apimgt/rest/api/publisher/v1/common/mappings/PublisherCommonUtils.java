@@ -31,6 +31,7 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import io.swagger.v3.parser.ObjectMapperFactory;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -101,9 +102,11 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -204,7 +207,6 @@ public class PublisherCommonUtils {
             }
         }
         return apiUpdated;
-        // TODO use returend api
     }
 
     /**
@@ -1144,23 +1146,6 @@ public class PublisherCommonUtils {
 
         encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
                 apiDto);
-        // update endpointConfig with the provided custom sequence
-        if (endpointConfig != null) {
-                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                try {
-                    if (endpointConfig.get("sequence_path") != null) {
-                        String pathToSequence = endpointConfig.get("sequence_path").toString();
-                        String sequence = FileUtils.readFileToString(new File(pathToSequence),
-                                Charset.defaultCharset());
-                        endpointConfig.put("sequence", sequence);
-                        apiDto.setEndpointConfig(endpointConfig);
-                    }
-                } catch (IOException ex) {
-                    throw new APIManagementException("Error while reading Custom Sequence of API: " + apiDto.getId(),
-                            ex, ExceptionCodes.ERROR_READING_CUSTOM_SEQUENCE);
-                }
-            }
-        }
 
         // AWS Lambda: secret key encryption while creating the API
             if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
@@ -1171,7 +1156,6 @@ public class PublisherCommonUtils {
                     apiDto.setEndpointConfig(endpointConfig);
                 }
             }
-        }
 
        /* if (isWSAPI) {
             ArrayList<String> websocketTransports = new ArrayList<>();
