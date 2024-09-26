@@ -54,6 +54,7 @@ public class APIConstants {
         public static final String CONNECTOR_TYPE = "connectorType";
         public static final String LLM_PROVIDER_ID = "id";
         public static final String LLM_PROVIDER_NAME = "name";
+        public static final String LLM_PROVIDER_IS_EMPTY_PAYLOAD = "IS_EMPTY_PAYLOAD";
         public static final String LLM_PROVIDER_API_VERSION = "apiVersion";
         public static final String LLM_PROVIDER_CONFIGURATIONS = "configurations";
         public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
