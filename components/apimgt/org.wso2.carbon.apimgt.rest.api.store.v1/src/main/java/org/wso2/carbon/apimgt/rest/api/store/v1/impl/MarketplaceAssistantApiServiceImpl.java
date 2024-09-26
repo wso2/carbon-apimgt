@@ -117,9 +117,9 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
         } else {
             configDto = configuration.getMarketplaceAssistantConfigurationDto();
         }
+        CloseableHttpResponse response = null;
         try {
             if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
-                CloseableHttpResponse response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.
                             getMarketplaceChatApiCount(configDto.getEndpoint(),
@@ -155,6 +155,14 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             String errorMessage = "Error encountered while executing the execute statement of Marketplace " +
                     "Assistant service";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } finally {
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    log.error("Error while closing the CloseableHttpResponse", e);
+                }
+            }
         }
         return null;
     }
