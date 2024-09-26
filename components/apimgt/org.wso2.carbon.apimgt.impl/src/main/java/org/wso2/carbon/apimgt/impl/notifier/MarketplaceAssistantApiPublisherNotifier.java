@@ -205,9 +205,16 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                 payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
                 payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
 
-                APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                        marketplaceAssistantConfigurationDto.getAccessToken(),
-                        marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+                if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
+                    APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                            marketplaceAssistantConfigurationDto.getTokenEndpoint(),
+                            marketplaceAssistantConfigurationDto.getKey(),
+                            marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+                } else if (marketplaceAssistantConfigurationDto.isAuthTokenProvided()) {
+                    APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(), null,
+                            marketplaceAssistantConfigurationDto.getAccessToken(),
+                            marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+                }
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Uploading the API with UUID: " +
                         apiId + " to the vector database" + e.getMessage();
@@ -225,9 +232,17 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         @Override
         public void run() {
             try {
-                APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                        marketplaceAssistantConfigurationDto.getAccessToken(),
-                        marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
+                if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
+                    APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                            marketplaceAssistantConfigurationDto.getTokenEndpoint(),
+                            marketplaceAssistantConfigurationDto.getKey(),
+                            marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
+                } else if (marketplaceAssistantConfigurationDto.isAuthTokenProvided()) {
+                    APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                            null,
+                            marketplaceAssistantConfigurationDto.getAccessToken(),
+                            marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
+                }
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Deleting the API with UUID: " +
                         uuid + " from the vector database" + e.getMessage();

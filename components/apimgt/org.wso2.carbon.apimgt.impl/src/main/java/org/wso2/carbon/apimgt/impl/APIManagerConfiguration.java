@@ -2430,6 +2430,22 @@ public class APIManagerConfiguration {
             if (marketplaceAssistantEndpoint != null) {
                 marketplaceAssistantConfigurationDto.setEndpoint(marketplaceAssistantEndpoint.getText());
             }
+            OMElement marketplaceAssistantTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_TOKEN_ENDPOINT));
+            if (marketplaceAssistantTokenEndpoint != null) {
+                marketplaceAssistantConfigurationDto.setTokenEndpoint(marketplaceAssistantTokenEndpoint.getText());
+            }
+            OMElement marketplaceAssistantKey =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_KEY));
+
+            if (marketplaceAssistantKey != null) {
+                String Key = MiscellaneousUtil.resolve(marketplaceAssistantKey, secretResolver);
+                marketplaceAssistantConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
+                    marketplaceAssistantConfigurationDto.setKeyProvided(true);
+                }
+            }
+
             OMElement marketplaceAssistantToken =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_AUTH_TOKEN));
 
@@ -2479,9 +2495,23 @@ public class APIManagerConfiguration {
             if (apiChatEndpoint != null) {
                 apiChatConfigurationDto.setEndpoint(apiChatEndpoint.getText());
             }
+            OMElement apiChatTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_TOKEN_ENDPOINT));
+            if (apiChatEndpoint != null) {
+                apiChatConfigurationDto.setTokenEndpoint(apiChatTokenEndpoint.getText());
+            }
+            OMElement apiChatKey =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_KEY));
+
+            if (apiChatKey != null) {
+                String Key = MiscellaneousUtil.resolve(apiChatKey, secretResolver);
+                apiChatConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
+                    apiChatConfigurationDto.setKeyProvided(true);
+                }
+            }
             OMElement apiChatToken =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_AUTH_TOKEN));
-
             if (apiChatToken != null) {
                 String AccessToken = MiscellaneousUtil.resolve(apiChatToken, secretResolver);
                 apiChatConfigurationDto.setAccessToken(AccessToken);
@@ -2489,7 +2519,6 @@ public class APIManagerConfiguration {
                     apiChatConfigurationDto.setAuthTokenProvided(true);
                 }
             }
-
             OMElement resources =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
 

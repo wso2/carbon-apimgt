@@ -3347,7 +3347,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiChatConfigurationDto();
-        return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+        if (configDto.isKeyProvided()) {
+            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+                    configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+        }
+        return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
                 configDto.getExecuteResource(), requestPayload, apiChatRequestId);
     }
 
@@ -3363,7 +3367,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
-            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+            if (configDto.isKeyProvided()) {
+                return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+                        configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+            }
+            return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
                     configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
         } catch (JsonProcessingException e) {
             String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";

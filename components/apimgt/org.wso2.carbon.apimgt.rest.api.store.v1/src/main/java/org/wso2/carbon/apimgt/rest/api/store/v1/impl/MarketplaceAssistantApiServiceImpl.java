@@ -63,7 +63,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             configDto = configuration.getMarketplaceAssistantConfigurationDto();
         }
         try {
-            if (configDto.isAuthTokenProvided()) {
+            if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
 
                 boolean isChatQueryEmpty = StringUtils.isEmpty(marketplaceAssistantRequestDTO.getQuery());
                 if (isChatQueryEmpty) {
@@ -80,10 +80,14 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 payload.put(APIConstants.QUERY, marketplaceAssistantRequestDTO.getQuery());
                 payload.put(APIConstants.HISTORY, history);
                 payload.put(APIConstants.TENANT_DOMAIN, organization);
-
-                String response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
-                        configDto.getChatResource(), payload.toString(), null);
-
+                String response;
+                if (configDto.isKeyProvided()) {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
+                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
+                } else {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
+                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
+                }
                 ObjectMapper objectMapper = new ObjectMapper();
                 MarketplaceAssistantResponseDTO executeResponseDTO = objectMapper.readValue(response,
                         MarketplaceAssistantResponseDTO.class);
@@ -113,13 +117,22 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
         } else {
             configDto = configuration.getMarketplaceAssistantConfigurationDto();
         }
+        CloseableHttpResponse response = null;
         try {
-            if (configDto.isAuthTokenProvided()) {
-
-                CloseableHttpResponse response = APIUtil.
-                        getMarketplaceChatApiCount(configDto.getEndpoint(),
-                                configDto.getAccessToken(),
-                                configDto.getApiCountResource());
+            if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
+                if (configDto.isKeyProvided()) {
+                    response = APIUtil.
+                            getMarketplaceChatApiCount(configDto.getEndpoint(),
+                                    configDto.getTokenEndpoint(),
+                                    configDto.getKey(),
+                                    configDto.getApiCountResource());
+                } else {
+                    response = APIUtil.
+                            getMarketplaceChatApiCount(configDto.getEndpoint(),
+                                    null,
+                                    configDto.getAccessToken(),
+                                    configDto.getApiCountResource());
+                }
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == HttpStatus.SC_OK) {
                     String responseStr = EntityUtils.toString(response.getEntity());
@@ -142,6 +155,14 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
             String errorMessage = "Error encountered while executing the execute statement of Marketplace " +
                     "Assistant service";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } finally {
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    log.error("Error while closing the CloseableHttpResponse", e);
+                }
+            }
         }
         return null;
     }

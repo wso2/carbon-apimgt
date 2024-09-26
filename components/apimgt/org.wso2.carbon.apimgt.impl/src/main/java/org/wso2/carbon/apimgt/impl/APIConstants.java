@@ -520,7 +520,9 @@ public final class APIConstants {
         public static final String API_CHAT = "APIChat";
         public static final String API_CHAT_ENABLED = "Enabled";
         public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
+        public static final String API_CHAT_KEY = "Key";
         public static final String API_CHAT_ENDPOINT = "Endpoint";
+        public static final String API_CHAT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String RESOURCES = "Resources";
         public static final String API_CHAT_PREPARE_RESOURCE = "PrepareResource";
         public static final String API_CHAT_EXECUTE_RESOURCE = "ExecuteResource";
@@ -531,7 +533,9 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT = "MarketplaceAssistant";
         public static final String MARKETPLACE_ASSISTANT_ENABLED = "Enabled";
         public static final String MARKETPLACE_ASSISTANT_AUTH_TOKEN = "AuthToken";
+        public static final String MARKETPLACE_ASSISTANT_KEY = "Key";
         public static final String MARKETPLACE_ASSISTANT_ENDPOINT = "Endpoint";
+        public static final String MARKETPLACE_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String MARKETPLACE_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
