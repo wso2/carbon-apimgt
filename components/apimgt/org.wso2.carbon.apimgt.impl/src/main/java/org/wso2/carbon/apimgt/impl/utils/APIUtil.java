@@ -10126,7 +10126,7 @@ public final class APIUtil {
             String fileName = extractedFolderPath + File.separator + sequenceName;
             if (checkFileExistence(fileName)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Found policy definition file " + fileName);
+                    log.debug("Found Sequence Backend file " + fileName);
                 }
                 customBackendContent = FileUtils.readFileToString(new File(fileName));
             }
