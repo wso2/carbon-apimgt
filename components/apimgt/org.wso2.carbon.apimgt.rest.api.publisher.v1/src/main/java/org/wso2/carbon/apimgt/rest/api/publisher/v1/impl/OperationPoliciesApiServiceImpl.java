@@ -98,6 +98,7 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                     fileContentType = policySpecFileDetail.getContentType().toString();
                 }
+
                 if (APIConstants.YAML_CONTENT_TYPE.equals(fileContentType)) {
                     jsonContent = CommonUtil.yamlToJson(jsonContent);
                 }
@@ -107,6 +108,14 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                         .prepareOperationPolicyData(policySpecification, organization);
 
                 if (synapsePolicyDefinitionFileInputStream != null) {
+                    String defFileName = synapsePolicyDefinitionFileDetail.getDataHandler().getName();
+                    String defFileContentType = FilenameUtils.getExtension(defFileName);
+                    if (org.apache.commons.lang3.StringUtils.isBlank(defFileContentType)) {
+                        defFileContentType = synapsePolicyDefinitionFileDetail.getContentType().toString();
+                    }
+                    if (!APIConstants.J2_CONTENT_TYPE.equals(defFileContentType)) {
+                        throw new APIManagementException("Unsupported file type for Operation Policy");
+                    }
                     String synapsePolicyDefinition =
                             RestApiPublisherUtils.readInputStream(synapsePolicyDefinitionFileInputStream,
                                     synapsePolicyDefinitionFileDetail);
@@ -117,6 +126,14 @@ public class OperationPoliciesApiServiceImpl implements OperationPoliciesApiServ
                 }
 
                 if (ccPolicyDefinitionFileInputStream != null) {
+                    String defFileName = ccPolicyDefinitionFileDetail.getDataHandler().getName();
+                    String defFileContentType = FilenameUtils.getExtension(defFileName);
+                    if (org.apache.commons.lang3.StringUtils.isBlank(defFileContentType)) {
+                        defFileContentType = ccPolicyDefinitionFileDetail.getContentType().toString();
+                    }
+                    if (!APIConstants.CC_POLICY_DEFINITION_EXTENSION.equals(defFileContentType)) {
+                        throw new APIManagementException("Unsupported file type for Operation Policy");
+                    }
                     String choreoConnectPolicyDefinition = RestApiPublisherUtils
                             .readInputStream(ccPolicyDefinitionFileInputStream, ccPolicyDefinitionFileDetail);
                     ccPolicyDefinition = new OperationPolicyDefinition();
