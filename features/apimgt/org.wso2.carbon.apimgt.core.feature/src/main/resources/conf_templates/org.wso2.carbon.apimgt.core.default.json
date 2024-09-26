@@ -182,6 +182,7 @@
   "apim.event_hub.username": "$ref{apim.throttling.username}",
   "apim.event_hub.password": "$ref{apim.throttling.password}",
   "apim.key_manager.type": "default",
+  "apim.key_manager.enable_lightweight_apikey_generation": true,
   "apim.devportal.enable_cross_tenant_subscriptions": false,
   "apim.devportal.default_reserved_username": "apim_reserved_user",
   "apim.cache_invalidation.enabled":false,

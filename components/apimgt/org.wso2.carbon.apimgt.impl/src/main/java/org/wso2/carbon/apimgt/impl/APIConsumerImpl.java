@@ -110,16 +110,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
-import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
-import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.SimpleContentSearchResultNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
+import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
@@ -397,17 +388,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String generateApiKey(Application application, String userName, long validityPeriod,
                                  String permittedIP, String permittedReferer) throws APIManagementException {
 
-        JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
-                MultitenantUtils.getTenantDomain(userName));
-
+        JwtTokenInfoDTO jwtTokenInfoDTO;
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(application.getId());
-        applicationDTO.setName(application.getName());
-        applicationDTO.setOwner(application.getOwner());
-        applicationDTO.setTier(application.getTier());
         applicationDTO.setUuid(application.getUUID());
-        jwtTokenInfoDTO.setApplication(applicationDTO);
+        if (!APIKeyUtils.isLightweightAPIKeyGenerationEnabled()) {
+            jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
+                    MultitenantUtils.getTenantDomain(userName));
 
+            applicationDTO.setName(application.getName());
+            applicationDTO.setOwner(application.getOwner());
+            applicationDTO.setTier(application.getTier());
+        } else {
+            jwtTokenInfoDTO = new JwtTokenInfoDTO();
+            jwtTokenInfoDTO.setEndUserName(userName);
+            jwtTokenInfoDTO.setContentAware(true);
+        }
+
+        jwtTokenInfoDTO.setApplication(applicationDTO);
         jwtTokenInfoDTO.setSubscriber(userName);
         jwtTokenInfoDTO.setExpirationTime(validityPeriod);
         jwtTokenInfoDTO.setKeyType(application.getKeyType());
