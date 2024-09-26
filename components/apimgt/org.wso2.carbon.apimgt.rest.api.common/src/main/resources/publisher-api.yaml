@@ -1105,6 +1105,7 @@ paths:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/isAiApi'
       responses:
         200:
           description: |
@@ -4013,6 +4014,12 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: gatewayEnvironment
+          in: query
+          description: |
+            Gateway environment of the exported APIs
+          schema:
+            type: string
       responses:
         200:
           description: |
@@ -4442,6 +4449,7 @@ paths:
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/policyLevel'
         - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/isAiApi'
       responses:
         200:
           description: |
@@ -8167,7 +8175,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
+            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F synapsePolicyDefinitionFile=@setHeader.j2
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
 
 
@@ -8291,6 +8299,151 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
+  ######################################################
+  # LLM Providers resource APIs
+  ######################################################
+  /llm-providers:
+    get:
+      tags:
+        - LLMProviders
+      summary: Get all LLM providers
+      description: |
+        Get all LLM providers
+      responses:
+        200:
+          description: |
+            OK.
+            List of LLM providers.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderSummaryResponseList'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers"'
+      operationId: getLLMProviders
+
+  /llm-providers/api-definition:
+    get:
+      tags:
+        - LLMProvider
+      summary: Get LLM Provider's API Definition
+      description: |
+        Get LLM Provider's API Definition
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: apiVersion
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            API Definition
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/api-definition?name=OpenAI&apiVersion=1.0.0"'
+      operationId: getLLMProviderApiDefinition
+
+  /llm-providers/endpoint-configuration:
+    get:
+      tags:
+        - LLMProvider
+      summary: Get LLM provider's security configurations
+      description: |
+        Get LLM provider's endpoint security configurations
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: apiVersion
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            API Definition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderEndpointConfiguration'
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/endpoint-configuration?name=OpenAI&apiVersion=1.0.0"'
+      operationId: getLLMProviderEndpointConfiguration
+
+  ######################################################
+  # The "Individual LLM Provider" resource APIs
+  ######################################################
+  /llm-providers/{llmProviderId}:
+    get:
+      tags:
+        - LLMProvider
+      summary: Get LLM Provider
+      description: |
+        Get a LLM Provider
+      parameters:
+        - name: llmProviderId
+          in: path
+          description: |
+            LLM Provider ID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            LLM Provider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderResponse'
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/openapi-definition"'
+      operationId: getLLMProvider
+
   /operation-policies:
     get:
       tags:
@@ -8411,7 +8564,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
+            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F synapsePolicyDefinitionFile=@setHeader.j2
             "https://127.0.0.1:9443/api/am/publisher/v4/operation-policies"'
 
   /operation-policies/export:
@@ -9358,6 +9511,12 @@ components:
         type:
           type: string
           example: HTTP
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -9420,6 +9579,11 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the API is EGRESS or not
+          default: false
+          example: true
     APIMetadata:
       title: API Info object with basic minimal API details.
       type: object
@@ -9683,6 +9847,12 @@ components:
             - SSE
             - WEBHOOK
             - ASYNC
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -10006,6 +10176,13 @@ components:
             - INLINE
             - ENDPOINT
             - MOCKED_OAS
+        aiConfiguration:
+          type: object
+          properties:
+            llmProviderName:
+              type: string
+            llmProviderApiVersion:
+              type: string
         scopes:
           type: array
           items:
@@ -10088,6 +10265,11 @@ components:
             - https
           items:
             type: string
+        egress:
+          type: boolean
+          description: Whether the API is EGRESS or not
+          default: false
+          example: true
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -10194,6 +10376,7 @@ components:
         displayOnDevportal:
           type: boolean
           example: true
+          default: true
         deployedTime:
           readOnly: true
           type: string
@@ -10309,6 +10492,11 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     APIProduct:
       title: API Product object
       required:
@@ -10573,6 +10761,11 @@ components:
           items:
             type: string
             example: [ "aud1","aud2","aud3" ]
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     ProductAPI:
       title: ProductAPI
       required:
@@ -10933,6 +11126,24 @@ components:
             Unit of data allowed to be transfered. Allowed values are "KB", "MB" and "GB"
           type: string
           example: KB
+        totalTokenCount:
+          type: integer
+          description: |
+            Maximum number of total tokens which can be used within a provided unit time
+          format: int64
+          example: 1000
+        promptTokenCount:
+          type: integer
+          description: |
+            Maximum number of prompt tokens which can be used within a provided unit time
+          format: int64
+          example: 500
+        completionTokenCount:
+          type: integer
+          description: |
+            Maximum number of completion tokens which can be used within a provided unit time
+          format: int64
+          example: 600
         unitTime:
           type: integer
           format: int64
@@ -10955,6 +11166,7 @@ components:
           enum:
             - REQUESTCOUNT
             - BANDWIDTHVOLUME
+            - AIAPIQUOTA
           example: REQUESTCOUNT
         tierPlan:
           type: string
@@ -11438,6 +11650,85 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+    LLMProviderResponse:
+      title: LLMProviderResponse
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: OpenAI
+        apiVersion:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: 1.0.0
+        builtInSupport:
+          type: boolean
+          description: Is built-in support
+        description:
+          maxLength: 1023
+          type: string
+          example: OpenAI LLM
+        configurations:
+          type: string
+          description: LLM Provider configurations
+        apiDefinition:
+          type: string
+          description: OpenAPI specification
+    LLMProviderSummaryResponse:
+      title: LLMProviderSummaryResponse
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: open-ai
+        apiVersion:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: 1.0.0
+        builtInSupport:
+          type: boolean
+          description: Is built-in support
+        description:
+          maxLength: 1023
+          type: string
+          example: OpenAI LLM Provider
+    LLMProviderSummaryResponseList:
+      title: LLMProviderSummaryResponseList
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of LLM Providers returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/LLMProviderSummaryResponse'
+    LLMProviderEndpointConfiguration:
+      title: LLMProviderEndpointConfiguration
+      type: object
+      properties:
+        authHeader:
+          type: string
+          example: Authorization
+        authQueryParameter:
+          type: string
+          example: ApiKey
     AdditionalProperty:
       title: Additional Gateway Properties
       type: object
@@ -11502,10 +11793,59 @@ components:
           type: integer
           format: int64
           example: 1000
+        productionTimeUnit:
+          type: string
+          description: "Time unit for the production."
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
         sandbox:
           type: integer
           format: int64
           example: 1000
+        sandboxTimeUnit:
+          type: string
+          description: "Time unit for the sandbox."
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
+        tokenBasedThrottlingConfiguration:
+          type: object
+          required:
+            - isTokenBasedThrottlingEnabled
+          properties:
+            productionMaxPromptTokenCount:
+              type: integer
+              description: "Maximum prompt token count for production"
+              format: int64
+            productionMaxCompletionTokenCount:
+              type: integer
+              description: "Maximum completion token count for production"
+              format: int64
+            productionMaxTotalTokenCount:
+              type: integer
+              description: "Maximum total token count for production"
+              format: int64
+            sandboxMaxPromptTokenCount:
+              type: integer
+              description: "Maximum prompt token count for sandbox"
+              format: int64
+            sandboxMaxCompletionTokenCount:
+              type: integer
+              description: "Maximum completion token count for sandbox"
+              format: int64
+            sandboxMaxTotalTokenCount:
+              type: integer
+              description: "Maximum total token count for sandbox"
+              format: int64
+            isTokenBasedThrottlingEnabled:
+              type: boolean
+              default: false
+              description: "Whether token-based throttling is enabled"
     APIBusinessInformation:
       type: object
       properties:
@@ -12266,6 +12606,7 @@ components:
             - DOC
             - API
             - APIProduct
+            - DEFINITION
         transportType:
           type: string
           description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
@@ -12375,6 +12716,10 @@ components:
             TechnicalOwnerEmail:
               type: string
               example: technicalowner@abc.com
+            egress:
+              type: boolean
+              description: Whether the API is Egress or not
+              example: false
     APIMonetizationInfo:
       title: API monetization object
       required:
@@ -12446,6 +12791,38 @@ components:
               type: string
             associatedType:
               type: string
+    APIDefinitionSearchResult:
+      title: API Definition Search Result
+      allOf:
+        - $ref: '#/components/schemas/SearchResult'
+        - properties:
+            apiName:
+              type: string
+              description: The name of the associated API
+              example: TestAPI
+            apiVersion:
+              type: string
+              description: The version of the associated API
+              example: 1.0.0
+            apiContext:
+              type: string
+              description: The context of the associated API
+              example: /test
+            apiUUID:
+              type: string
+              description: The UUID of the associated API
+            apiProvider:
+              type: string
+              description: The provider name of the associated API
+              example: publisher
+            apiType:
+              type: string
+              description: The type of the associated API
+              example: REST
+            associatedType:
+              type: string
+              description: API or APIProduct
+              example: API
     MockResponsePayloadList:
       title: Mock Response Payload list
       type: object
@@ -12602,6 +12979,11 @@ components:
         IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
+        allowSubscriptionValidationDisabling:
+          type: boolean
+          description: |
+            Allow subscription validation disabling for OAuth tokens
+          default: true
         customProperties:
           type: array
           items:
@@ -13580,6 +13962,14 @@ components:
       schema:
         type: string
         default: application/json
+    isAiApi:
+      name: isAiApi
+      in: query
+      description: |
+        Indicates the quota policy type to be AI API quota or not.
+      schema:
+        type: boolean
+        default: false
     offset:
       name: offset
       in: query
@@ -13788,3 +14178,4 @@ components:
             apim:api_definition_view: View, Retrieve API definition
             apim:subscription_approval_view: Approve subscription creation requests
             apim:subscription_approval_manage: Approve subscription update requests
+            apim:llm_provider_read: Read LLM Providers

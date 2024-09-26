@@ -18,16 +18,16 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.gateway.webhooks.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
-import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
@@ -45,6 +45,7 @@ public class DataHolder {
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
+    private Map<String, LLMProvider> llmProviderMap = new HashMap<>();
     private boolean isAllGatewayPoliciesDeployed = false;
 
     private DataHolder() {
@@ -54,6 +55,56 @@ public class DataHolder {
     public Map<String, List<String>> getApiToCertificatesMap() {
 
         return apiToCertificatesMap;
+    }
+
+    /**
+     * Retrieves LLM Provider configurations by ID.
+     *
+     * @param id the ID of the LLM provider
+     * @return the LLMProvider if found, otherwise null
+     */
+    public LLMProvider getLLMProviderConfigurations(String id) {
+
+        if (llmProviderMap.containsKey(id)) {
+            return llmProviderMap.get(id);
+        } else {
+            log.warn("LLM Provider key " + id + " not found");
+            return null;
+        }
+    }
+
+    /**
+     * Adds a new LLM Provider configuration.
+     *
+     * @param provider the LLMProvider to add
+     */
+    public void addLLMProviderConfigurations(LLMProvider provider) {
+
+        llmProviderMap.put(provider.getId(), provider);
+    }
+
+    /**
+     * Removes an LLM Provider configuration by ID.
+     *
+     * @param id the ID of the LLM provider to remove
+     */
+    public void removeLLMProviderConfigurations(String id) {
+
+        if (StringUtils.isEmpty(id)) {
+            return;
+        }
+        llmProviderMap.remove(id);
+    }
+
+    /**
+     * Updates an existing LLM Provider configuration.
+     *
+     * @param provider the LLMProvider to update
+     */
+    public void updateLLMProviderConfigurations(LLMProvider provider) {
+
+        this.removeLLMProviderConfigurations(provider.getId());
+        this.addLLMProviderConfigurations(provider);
     }
 
     public void setApiToCertificatesMap(Map<String, List<String>> apiToCertificatesMap) {

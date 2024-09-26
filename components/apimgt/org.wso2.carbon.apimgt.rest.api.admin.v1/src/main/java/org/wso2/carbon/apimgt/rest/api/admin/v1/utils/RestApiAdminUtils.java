@@ -25,10 +25,13 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIAPIQuotaLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
@@ -379,5 +382,31 @@ public class RestApiAdminUtils {
         FileUtils.copyDirectory(backupDirectory, tenantThemeDirectory);
         FileUtils.deleteDirectory(backupDirectory);
         apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
+    }
+
+    /**
+     * Override token based quota limits if they are null in the TokenCountLimitDTO.
+     *
+     * @param throttleLimitDTO TokenCountLimitDTO object
+     * @param quotaPolicy    Token count limits of the existing subscription policy
+     * @return Overridden TokenCountLimitDTO object
+     */
+    public static ThrottleLimitDTO overrideTokenBasedQuotaLimits(ThrottleLimitDTO throttleLimitDTO,
+            QuotaPolicy quotaPolicy) {
+
+        AIAPIQuotaLimitDTO aiApiQuotaLimitDTO = throttleLimitDTO.getAiApiQuota();
+        AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) quotaPolicy.getLimit();
+        throttleLimitDTO.setType(throttleLimitDTO.getType());
+        if (throttleLimitDTO.getAiApiQuota().getTotalTokenCount() == null) {
+            aiApiQuotaLimitDTO.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
+        }
+        if (throttleLimitDTO.getAiApiQuota().getPromptTokenCount() == null) {
+            aiApiQuotaLimitDTO.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
+        }
+        if (throttleLimitDTO.getAiApiQuota().getCompletionTokenCount() == null) {
+            aiApiQuotaLimitDTO.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
+        }
+        throttleLimitDTO.setAiApiQuota(aiApiQuotaLimitDTO);
+        return throttleLimitDTO;
     }
 }

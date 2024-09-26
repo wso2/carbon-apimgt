@@ -27,6 +27,7 @@ import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.xerces.impl.Constants;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
@@ -51,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -111,9 +113,11 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -597,6 +601,55 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
+    public LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException {
+
+        LLMProvider result = apiMgtDAO.addLLMProvider(provider);
+        if (result != null) {
+            new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
+                    result.getOrganization(),
+                    APIConstants.EventType.LLM_PROVIDER_CREATE.name());
+        }
+        return result;
+    }
+
+    @Override
+    public List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion,
+                                             Boolean builtInSupport) throws APIManagementException {
+
+        return apiMgtDAO.getLLMProviders(organization, name, apiVersion, builtInSupport);
+    }
+
+    @Override
+    public LLMProvider deleteLLMProvider(String organization, String llmProviderId, boolean builtIn)
+            throws APIManagementException {
+
+        LLMProvider result = apiMgtDAO.deleteLLMProvider(organization, llmProviderId, builtIn);
+        if (result != null) {
+            new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
+                    organization,
+                    APIConstants.EventType.LLM_PROVIDER_DELETE.name());
+        }
+        return result;
+    }
+
+    @Override
+    public LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException {
+
+        LLMProvider result = apiMgtDAO.updateLLMProvider(provider);
+        if (result != null) {
+            new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
+                    result.getOrganization(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
+        }
+        return result;
+    }
+
+    @Override
+    public LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException {
+
+        return apiMgtDAO.getLLMProvider(organization, llmProviderId);
+    }
+
+    @Override
     public boolean isIDPExistInOrg(String organization, String resourceId) throws APIManagementException {
         return apiMgtDAO.isIDPExistInOrg(organization, resourceId);
     }
@@ -1066,6 +1119,22 @@ public class APIAdminImpl implements APIAdmin {
         try {
             //Parse the message body and extract the content in XML form
             DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
+
+            factory.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE,
+                    true);
+
+            // Enable secure processing
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+            // Enable namespace awareness
+            factory.setNamespaceAware(true);
+
+            // Disable external entities to prevent XXE attacks
+            factory.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE,
+                    false);
+            factory.setFeature(Constants.SAX_FEATURE_PREFIX +
+                    Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
+
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(new InputSource(new StringReader(messageBody)));
             Node bodyContentNode = document.getFirstChild().getFirstChild();
@@ -1074,6 +1143,7 @@ public class APIAdminImpl implements APIAdmin {
             if (bodyContentNode != null) {
                 StringWriter writer = new StringWriter();
                 Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
                 transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
                 String output = writer.toString();
                 content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>

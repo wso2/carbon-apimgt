@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -168,10 +169,14 @@ public class LifeCycleUtils {
                         || api.isAdvertiseOnly() && (api.getApiExternalProductionEndpoint() != null
                         || api.getApiExternalSandboxEndpoint() != null)) {
                     if ((isOauthProtected && (tiers == null || tiers.size() == 0)) && !api.isAdvertiseOnly()) {
-                        throw new APIManagementException("Failed to publish service to API store. No Tiers selected");
+                        throw new APIManagementException("Failed to publish service to API store. No Tiers selected",
+                                ExceptionCodes.from(ExceptionCodes.FAILED_PUBLISHING_API_NO_TIERS_SELECTED,
+                                        api.getUuid()));
                     }
                 } else {
-                    throw new APIManagementException("Failed to publish service to API store. No endpoint selected");
+                    throw new APIManagementException("Failed to publish service to API store. No endpoint selected",
+                            ExceptionCodes.from(ExceptionCodes.FAILED_PUBLISHING_API_NO_ENDPOINT_SELECTED,
+                                    api.getUuid()));
                 }
             }
 

@@ -1233,6 +1233,11 @@ public class APIManagerConfiguration {
             if (enablePolicyDeployElement != null) {
                 throttleProperties.setEnablePolicyDeployment(Boolean.parseBoolean(enablePolicyDeployElement.getText()));
             }
+            OMElement enablePolicyRecreateElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_RECREATE));
+            if (enablePolicyRecreateElement != null) {
+                throttleProperties.setEnablePolicyRecreate(Boolean.parseBoolean(enablePolicyRecreateElement.getText()));
+            }
             // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
@@ -1496,6 +1501,13 @@ public class APIManagerConfiguration {
                         if (unauthenticatedTierElement != null) {
                             defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
                                     Long.parseLong(unauthenticatedTierElement.getText()));
+                        }
+
+                        OMElement subscriptionlessTierElement = subscriptionPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+                        if (subscriptionlessTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS,
+                                    Long.parseLong(subscriptionlessTierElement.getText()));
                         }
                     }
 

@@ -685,8 +685,10 @@ public class OAS2Parser extends APIDefinition {
             // Which is a known issue of Swagger 2.0 parser
             Set<URITemplate> uriTemplates = null;
             uriTemplates = getURITemplates(apiDefinition);
-            if (uriTemplates == null) {
+            if (uriTemplates.size() == 0) {
                 validationResponse.setValid(false);
+                OASParserUtil.addErrorToValidationResponse(validationResponse,
+                        "Empty resource paths found in the swagger definition");
                 return validationResponse;
             } else {
                 for (URITemplate uriTemplate : uriTemplates) {

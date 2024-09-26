@@ -437,6 +437,7 @@
       {% if apim.key_manager.enable_apikey_subscription_validation is defined %}
       <EnableAPIKeySubscriptionValidation>{{apim.key_manager.enable_apikey_subscription_validation}}</EnableAPIKeySubscriptionValidation>
       {% endif %}
+      <AllowSubscriptionValidationDisabling>{{apim.key_manager.allow_subscription_validation_disabling}}</AllowSubscriptionValidationDisabling>
     </APIKeyValidator>
 
 
@@ -1106,6 +1107,7 @@
                 <Silver>2000</Silver>
                 <Bronze>1000</Bronze>
                 <Unauthenticated>60</Unauthenticated>
+                <DefaultSubscriptionless>100000</DefaultSubscriptionless>
             </SubscriptionTierLimits>
             <ApplicationTierLimits>
                 <50PerMin>50</50PerMin>
@@ -1124,6 +1126,7 @@
         <EnableQueryParamConditions>{{apim.throttling.enable_query_param_based_throttling}}</EnableQueryParamConditions>
         <SkipRedeployingPolicies>RequestPreProcessorExecutionPlan{% for policy in apim.throttling.skip_redeploying_policies %}{{ "," if loop.first }}{{policy}}{{ "," if not loop.last }}{% endfor %}</SkipRedeployingPolicies>
         <EnablePolicyDeployment>{{apim.throttling.enable_policy_deployment}}</EnablePolicyDeployment>
+        <EnablePolicyRecreationOnStartup>{{apim.throttling.enable_policy_recreation_on_startup}}</EnablePolicyRecreationOnStartup>
     </ThrottlingConfigurations>
 
     <WorkflowConfigurations>

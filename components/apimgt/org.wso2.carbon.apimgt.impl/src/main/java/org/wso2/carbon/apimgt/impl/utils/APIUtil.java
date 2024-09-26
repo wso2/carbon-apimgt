@@ -85,7 +85,6 @@ import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -121,6 +120,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -288,6 +288,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import java.security.cert.X509Certificate;
 import javax.validation.constraints.NotNull;
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -423,6 +424,8 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEY_TEMPLATE));
             eventPublishers.putIfAbsent(EventPublisherType.KEYMGT_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEYMGT_EVENT));
+            eventPublishers.putIfAbsent(EventPublisherType.LLMPROVIDER_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.LLMPROVIDER_EVENT));
         } catch (EventPublisherException e) {
             log.error("Could not initialize the event publishers. Events might not be published properly.");
             throw new APIManagementException(e);
@@ -2811,16 +2814,19 @@ public final class APIUtil {
             throws APIManagementException {
 
         if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)) {
-            throw new APIManagementException("API name exceeds allowed character length",
-                    ExceptionCodes.LENGTH_EXCEEDS);
+            String errorMessage = "API name exceeds allowed character length";
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.LENGTH_EXCEEDS_ERROR,
+                    errorMessage + " of " + APIConstants.MAX_LENGTH_API_NAME));
         }
         if (!hasValidLength(context, APIConstants.MAX_LENGTH_CONTEXT)) {
-            throw new APIManagementException("API context exceeds allowed character length",
-                    ExceptionCodes.LENGTH_EXCEEDS);
+            String errorMessage = "API context exceeds allowed character length";
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.LENGTH_EXCEEDS_ERROR,
+                    errorMessage + " of " + APIConstants.MAX_LENGTH_CONTEXT));
         }
         if (!hasValidLength(provider, APIConstants.MAX_LENGTH_PROVIDER)) {
-            throw new APIManagementException("API provider name exceeds allowed character length",
-                    ExceptionCodes.LENGTH_EXCEEDS);
+            String errorMessage = "API provider name exceeds allowed character length";
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.LENGTH_EXCEEDS_ERROR,
+                    errorMessage + " of " + APIConstants.MAX_LENGTH_PROVIDER));
         }
     }
 
@@ -2863,13 +2869,15 @@ public final class APIUtil {
         if (context == null || context.isEmpty()) {
             errorMsg = errorMsg + " For API " + apiName + ", context cannot be empty or null";
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            throw new APIManagementException(errorMsg,
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
         }
 
         if (context.endsWith("/")) {
             errorMsg = errorMsg + " For API " + apiName + ", context " + context + " cannot end with /";
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            throw new APIManagementException(errorMsg,
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
         }
 
         Matcher matcher = pattern.matcher(context);
@@ -2882,15 +2890,17 @@ public final class APIUtil {
             for (String param : split) {
                 if (param != null && !APIConstants.VERSION_PLACEHOLDER.equals(param)) {
                     if (param.contains(APIConstants.VERSION_PLACEHOLDER)) {
-                        errorMsg = errorMsg + " For API " + apiName +
-                                ", {version} cannot exist as a substring of a sub-context";
+                        errorMsg = errorMsg + " For API " + apiName + ", {version} cannot exist as a substring of a "
+                                + "sub-context";
                         log.error(errorMsg);
-                        throw new APIManagementException(errorMsg);
+                        throw new APIManagementException(errorMsg,
+                                ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
                     } else if (param.contains("{") || param.contains("}")) {
-                        errorMsg = errorMsg + " For API " + apiName +
-                                ", { or } cannot exist as a substring of a sub-context";
+                        errorMsg = errorMsg + " For API " + apiName + ", { or } cannot exist as a substring of a "
+                                + "sub-context";
                         log.error(errorMsg);
-                        throw new APIManagementException(errorMsg);
+                        throw new APIManagementException(errorMsg,
+                                ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
                     }
                 }
             }
@@ -2900,12 +2910,14 @@ public final class APIUtil {
             if (!isBalanced) {
                 errorMsg = errorMsg + " Unbalanced parenthesis cannot be used in context " + context + " for API "
                         + apiName;
-                throw new APIManagementException(errorMsg);
+                throw new APIManagementException(errorMsg,
+                        ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
             }
         } else {
-            errorMsg = errorMsg + " Special characters cannot be used in context " + context + " for API "+ apiName;
+            errorMsg = errorMsg + " Special characters cannot be used in context " + context + " for API " + apiName;
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            throw new APIManagementException(errorMsg,
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
         }
     }
 
@@ -5317,6 +5329,22 @@ public final class APIUtil {
         return false;
     }
 
+    public static boolean isSubscriptionValidationDisablingAllowed(String tenantDomain) throws APIManagementException {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        boolean subValidationDisablingAllowedGlobal = Boolean.parseBoolean(config.getFirstProperty(
+                APIConstants.ALLOW_SUBSCRIPTION_VALIDATION_DISABLING));
+        boolean subValidationDisablingAllowedTenant = false;
+        JSONObject apiTenantConfig = getTenantConfig(tenantDomain);
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_ALLOW_SUBSCRIPTION_VALIDATION_DISABLING);
+            if (value != null) {
+                subValidationDisablingAllowedTenant = Boolean.parseBoolean(value.toString());
+            }
+        }
+        return subValidationDisablingAllowedGlobal || subValidationDisablingAllowedTenant;
+    }
+
     public static Map<String, Tier> getTiers(String organization) throws APIManagementException {
 
         int requestedTenantId = getInternalOrganizationId(organization);
@@ -6041,13 +6069,12 @@ public final class APIUtil {
     public static void addDefaultTenantAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        boolean recreate = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getThrottleProperties().isEnablePolicyRecreate();
 
-        /* Check if 'Unlimited' policy is available in AM_POLICY_APPLICATION table, to determine whether the default policies are loaded
-         into the database at least once. If yes, default policies won't be added to database again. */
-
-        if (apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_APP, tenantId, APIConstants.DEFAULT_APP_POLICY_UNLIMITED)) {
-            log.debug(
-                    "Default Throttling Policies are not written into the database again, as they were added once at initial server startup");
+        if (!recreate) {
+            log.debug("Default Throttling Policies are not written into the database again, " +
+                    "as they were added once at initial server startup");
             return;
         }
 
@@ -6127,13 +6154,19 @@ public final class APIUtil {
                 defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_GOLD) : 5000;
         long unauthenticatedTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED) : 500;
+        long subscriptionlessTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) ?
+                defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) : 100000;
+
         //Adding Subscription level policies
-        long[] requestCountSubPolicies = new long[]{goldTierLimit, silverTierLimit, bronzeTierLimit, unauthenticatedTierLimit, Integer.MAX_VALUE};
+        long[] requestCountSubPolicies = new long[]{goldTierLimit, silverTierLimit, bronzeTierLimit,
+                unauthenticatedTierLimit, subscriptionlessTierLimit, Integer.MAX_VALUE};
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
-                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
+                APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
         String[] subPolicyDecs = new String[]{
                 APIConstants.DEFAULT_SUB_POLICY_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_SILVER_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
         for (int i = 0; i < subPolicies.length; i++) {
             policyName = subPolicies[i];
             boolean needDeployment = false;
@@ -6182,12 +6215,15 @@ public final class APIUtil {
         }
 
         //Adding Event based subscription level policies for async policies (WS & SSE)
-        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, Integer.MAX_VALUE};
-        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
+        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, 10000, Integer.MAX_VALUE};
+        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS,  APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
         String[] eventCountSubPolicyDescriptions = new String[]{
                 APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
 
         for (int i = 0; i < eventCountSubPolicyNames.length; i++) {
             policyName = eventCountSubPolicyNames[i];
@@ -6481,6 +6517,13 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else if (limit instanceof AIAPIQuotaLimit){
+                    AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
+                    tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
+                    tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
+                    tier.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
+                    tier.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
+                    tier.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());
@@ -6559,6 +6602,11 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else if (limit instanceof AIAPIQuotaLimit) {
+                    // Todo: Need to implement this according to publisher and developer portals' requirements
+                    AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
+                    tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
+                    tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());
@@ -6843,6 +6891,9 @@ public final class APIUtil {
         dbf.setXIncludeAware(false);
         dbf.setExpandEntityReferences(false);
         try {
+            // Enable secure processing
+            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE, true);
             dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
             dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
             dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
@@ -8858,7 +8909,8 @@ public final class APIUtil {
             }
             return endpointSecurityMap;
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing Endpoint Config json", e);
+            String errorMessage = "Error while parsing Endpoint Config json";
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_PARSING_ENDPOINT_CONFIG);
         }
     }
 
@@ -10198,6 +10250,22 @@ public final class APIUtil {
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
+    }
+
+    /**
+     * Get the subscription validation stats before inserting the API
+     *
+     * @param tiers Available business plans for the API
+     * @return true if the subscription validation is enabled
+     */
+    public static String setSubscriptionValidationStatusBeforeInsert(Set<Tier> tiers) {
+        if (tiers != null && tiers.size() == 1) {
+            Tier tier = tiers.iterator().next();
+            if(tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+                return "DISABLED";
+            }
+        }
+        return "ENABLED";
     }
 
     /**

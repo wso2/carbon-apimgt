@@ -21,9 +21,11 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.impl.LLMProviderRegistrationService;
 import org.wso2.carbon.apimgt.impl.correlation.CorrelationConfigManager;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -59,6 +61,11 @@ public class ServerStartupListener implements ServerStartupObserver {
                 Map<String, TokenIssuerDto> tokenIssuerDtoMap =
                         apiManagerConfiguration.getJwtConfigurationDto().getTokenIssuerDtoMap();
                 tokenIssuerDtoMap.forEach((issuer, tokenIssuer) -> KeyManagerHolder.addGlobalJWTValidators(tokenIssuer));
+                try {
+                    LLMProviderRegistrationService.registerDefaultLLMProviders(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                } catch (APIManagementException e) {
+                    log.error("Error occurred during onboarding pre defined LLM Providers", e);
+                }
             }
         } else {
             log.info("Running on migration enabled mode: Stopped at ServerStartupListener completed");

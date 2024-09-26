@@ -41,6 +41,7 @@ public class SettingsDTO   {
     private String defaultSubscriptionPolicy = null;
     private String authorizationHeader = null;
     private Boolean isJWTEnabledForLoginTokens = false;
+    private Boolean allowSubscriptionValidationDisabling = true;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
@@ -311,6 +312,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * Allow subscription validation disabling for OAuth tokens 
+   **/
+  public SettingsDTO allowSubscriptionValidationDisabling(Boolean allowSubscriptionValidationDisabling) {
+    this.allowSubscriptionValidationDisabling = allowSubscriptionValidationDisabling;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Allow subscription validation disabling for OAuth tokens ")
+  @JsonProperty("allowSubscriptionValidationDisabling")
+  public Boolean isAllowSubscriptionValidationDisabling() {
+    return allowSubscriptionValidationDisabling;
+  }
+  public void setAllowSubscriptionValidationDisabling(Boolean allowSubscriptionValidationDisabling) {
+    this.allowSubscriptionValidationDisabling = allowSubscriptionValidationDisabling;
+  }
+
+  /**
    **/
   public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
@@ -353,12 +372,13 @@ public class SettingsDTO   {
         Objects.equals(defaultSubscriptionPolicy, settings.defaultSubscriptionPolicy) &&
         Objects.equals(authorizationHeader, settings.authorizationHeader) &&
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
+        Objects.equals(allowSubscriptionValidationDisabling, settings.allowSubscriptionValidationDisabling) &&
         Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, allowSubscriptionValidationDisabling, customProperties);
   }
 
   @Override
@@ -381,6 +401,7 @@ public class SettingsDTO   {
     sb.append("    defaultSubscriptionPolicy: ").append(toIndentedString(defaultSubscriptionPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
+    sb.append("    allowSubscriptionValidationDisabling: ").append(toIndentedString(allowSubscriptionValidationDisabling)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();

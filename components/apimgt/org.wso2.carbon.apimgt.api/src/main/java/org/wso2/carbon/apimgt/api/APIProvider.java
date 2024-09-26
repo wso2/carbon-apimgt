@@ -1702,6 +1702,15 @@ public interface APIProvider extends APIManager {
     String getSecuritySchemeOfAPI(String uuid, String organization) throws APIManagementException;
 
     /**
+     * Returns whether subscription validation is disabled for an API
+     *
+     * @param uuid         UUID of the API
+     * @return whether subscription validation is disabled
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    boolean isSubscriptionValidationDisabled(String uuid) throws APIManagementException;
+
+    /**
      * Returns details of an API
      * @param uuid         UUID of the API's registry artifact
      * @param organization Identifier of an organization
