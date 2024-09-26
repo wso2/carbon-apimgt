@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.impl.dto.ai;
  */
 public class MarketplaceAssistantConfigurationDTO {
 
+    private String accessToken;
     private String key;
     private String endpoint;
     private String tokenEndpoint;
@@ -31,10 +32,19 @@ public class MarketplaceAssistantConfigurationDTO {
     private String apiDeleteResource;
     private String apiCountResource;
     private boolean isEnabled;
+    private boolean isAuthTokenProvided;
     private boolean isKeyProvided;
+
+    public String getAccessToken() {
+        return accessToken;
+    }
 
     public String getKey() {
         return key;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     public void setKey(String key) {
@@ -97,8 +107,16 @@ public class MarketplaceAssistantConfigurationDTO {
         this.isEnabled = enabled;
     }
 
+    public boolean isAuthTokenProvided() {
+        return isAuthTokenProvided;
+    }
+
     public boolean isKeyProvided() {
         return isKeyProvided;
+    }
+
+    public void setAuthTokenProvided(boolean authTokenProvided) {
+        this.isAuthTokenProvided = authTokenProvided;
     }
 
     public void setKeyProvided(boolean keyProvided) {

@@ -10499,12 +10499,19 @@ public final class APIUtil {
             String payload, String requestId) throws APIManagementException {
 
         try {
-            if (tokenGenerator == null) {
-                tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
-            }
-            String token = tokenGenerator.getAccessToken();
             HttpPost preparePost = new HttpPost(endpoint + resource);
-            preparePost.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BEARER + token);
+            if (tokenEndpoint != null ) {
+                // AI Subscription Portal flow
+                if (tokenGenerator == null) {
+                    tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
+                }
+                String token = tokenGenerator.getAccessToken();
+                preparePost.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                        APIConstants.AUTHORIZATION_BEARER + token);
+            } else {
+                // Choreo on-prem flow
+                preparePost.setHeader(APIConstants.API_KEY_AUTH, key);
+            }
             preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             if (StringUtils.isNotEmpty(requestId)) {
                 preparePost.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
@@ -10563,12 +10570,19 @@ public final class APIUtil {
             String key, String resource) throws APIManagementException {
 
         try {
-            if (tokenGenerator == null) {
-                tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
-            }
-            String token = tokenGenerator.getAccessToken();
             HttpGet apiCountGet = new HttpGet(endpoint + resource);
-            apiCountGet.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BEARER + token);
+            if (tokenEndpoint != null ) {
+                // AI Subscription Portal flow
+                if (tokenGenerator == null) {
+                    tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
+                }
+                String token = tokenGenerator.getAccessToken();
+                apiCountGet.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                        APIConstants.AUTHORIZATION_BEARER + token);
+            } else {
+                // Choreo on-prem flow
+                apiCountGet.setHeader(APIConstants.API_KEY_AUTH, key);
+            }
             URL url = new URL(endpoint);
             int port = url.getPort();
             String protocol = url.getProtocol();
@@ -10595,16 +10609,21 @@ public final class APIUtil {
             String resource, String uuid) throws APIManagementException {
 
         try {
-            if (tokenGenerator == null) {
-                tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
-            }
-            String token = tokenGenerator.getAccessToken();
             String resourceWithPathParam = endpoint + resource + "/{uuid}";
             resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
-
             HttpDelete prepareDelete = new HttpDelete(resourceWithPathParam);
-            prepareDelete.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BEARER + token);
-
+            if (tokenEndpoint != null ) {
+                // AI Subscription Portal flow
+                if (tokenGenerator == null) {
+                    tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
+                }
+                String token = tokenGenerator.getAccessToken();
+                prepareDelete.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                        APIConstants.AUTHORIZATION_BEARER + token);
+            } else {
+                // Choreo on-prem flow
+                prepareDelete.setHeader(APIConstants.API_KEY_AUTH, key);
+            }
             URL url = new URL(endpoint);
             int port = url.getPort();
             String protocol = url.getProtocol();
