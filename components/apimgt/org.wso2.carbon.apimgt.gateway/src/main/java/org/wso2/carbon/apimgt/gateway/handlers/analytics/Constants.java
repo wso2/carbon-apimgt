@@ -73,7 +73,6 @@ public class Constants {
     public static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
     public static final String BUILD_RESPONSE_MESSAGE_CONFIG = "build_response_message";
 
-
     public static final String CERTIFICATE_COMMON_NAME = "commonName";
     public static final String NOT_APPLICABLE_VALUE = "N/A";
 
