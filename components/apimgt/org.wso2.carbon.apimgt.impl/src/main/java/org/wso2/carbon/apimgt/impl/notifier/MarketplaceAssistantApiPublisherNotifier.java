@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+
 /**
  * The default API notification service implementation in which API creation, update, delete and LifeCycle change
  * events are published to gateway.
@@ -189,13 +190,13 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                 payload.put(APIConstants.API_SPEC_NAME, api.getId().getApiName());
                 payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
                 payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
-                payload.put(APIConstants.VISIBILITY, apiEvent.getApiVisibility());
 
                 String visibleRoles = apiEvent.getApiVisibleRoles();
                 if (visibleRoles == null) {
                     visibleRoles = "";  // Assign an empty string if null
                 }
                 payload.put(APIConstants.VISIBILITYROLES, visibleRoles.toLowerCase());
+                payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
 
                 if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
                     APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),

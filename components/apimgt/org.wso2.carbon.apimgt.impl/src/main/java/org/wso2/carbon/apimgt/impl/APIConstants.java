@@ -1753,6 +1753,7 @@ public final class APIConstants {
     public static final String HISTORY = "history";
     public static final String VERSION = "version";
     public static final String VISIBILITYROLES = "visibility_roles";
+    public static final String APIM_VERSION = "apim_version";
     public static final String DESCRIPTION = "description";
     public static final String USERROLES = "user_roles";
 

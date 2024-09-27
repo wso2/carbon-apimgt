@@ -49,6 +49,7 @@ import java.io.IOException;
 
 import javax.ws.rs.core.Response;
 
+
 public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantApiService {
 
     private static final Log log = LogFactory.getLog(MarketplaceAssistantApiServiceImpl.class);
@@ -88,6 +89,7 @@ public class MarketplaceAssistantApiServiceImpl implements MarketplaceAssistantA
                 payload.put(APIConstants.HISTORY, history);
                 payload.put(APIConstants.TENANT_DOMAIN, organization);
                 payload.put(APIConstants.USERROLES, userRoles.toLowerCase());
+                payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
 
                 String response;
                 if (configDto.isKeyProvided()) {
