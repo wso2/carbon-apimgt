@@ -63,6 +63,7 @@ public class LifeCycleUtils {
         String uuid = apiTypeWrapper.getUuid();
         String currentStatus = apiTypeWrapper.getStatus();
         String apiVisibility = apiTypeWrapper.getVisibility();
+        String apiVisibleRoles = apiTypeWrapper.getVisibleRoles();
         targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
 
         // Update lifecycle state in the registry
@@ -79,7 +80,8 @@ public class LifeCycleUtils {
         // Add LC state change event to the event queue
         sendLCStateChangeNotification(apiName, apiType, apiContext, apiTypeWrapper.getId().getVersion(), targetStatus,
                 apiTypeWrapper.getId().getProviderName(), apiTypeWrapper.getId().getId(), uuid, orgId,
-                apiTypeWrapper.getApi() != null ? apiTypeWrapper.getApi().getApiSecurity() : null, action, currentStatus, apiVisibility);
+                apiTypeWrapper.getApi() != null ? apiTypeWrapper.getApi().getApiSecurity() : null, action,
+                                      currentStatus, apiVisibility, apiVisibleRoles);
 
         // Remove revisions and subscriptions after API retire
         if (!apiTypeWrapper.isAPIProduct()) {
@@ -399,14 +401,15 @@ public class LifeCycleUtils {
      */
     private static void sendLCStateChangeNotification(String apiName, String apiType, String apiContext,
             String apiVersion, String targetStatus, String provider, int apiOrApiProductId, String uuid,
-            String organization, String securityScheme, String action, String currentStatus, String apiVisibility)
+            String organization, String securityScheme, String action, String currentStatus, String apiVisibility,
+                                                      String apiVisibleRoles)
             throws APIManagementException {
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), APIUtil.getInternalOrganizationId(organization),
                 organization, apiName, apiOrApiProductId, uuid, apiVersion, apiType, apiContext,
                 APIUtil.replaceEmailDomainBack(provider), targetStatus, securityScheme, action, currentStatus,
-                apiVisibility);
+                apiVisibility, apiVisibleRoles);
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 

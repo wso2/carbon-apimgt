@@ -1140,7 +1140,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action, api.getApiSecurity(), api.getVisibility());
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action,
+                                         api.getApiSecurity(), api.getVisibility(), api.getVisibleRoles());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         // Extracting API details for the recommendation system
@@ -2679,7 +2680,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                     APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                    api.getStatus(), api.getApiSecurity(), api.getStatus(), api.getVisibility());
+                    api.getStatus(), api.getApiSecurity(), api.getStatus(), api.getVisibility(), api.getVisibleRoles());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         } else {
             log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
