@@ -82,6 +82,7 @@ import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
@@ -168,6 +169,48 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
+    public Response getSequenceBackendData(String apiId, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
+        List<SequenceBackendData> data = apiProvider.getAllSequenceBackendsByAPIUUID(apiId);
+        if (data == null) {
+            throw new APIMgtResourceNotFoundException(
+                    "Couldn't retrieve an existing Sequence Backend for API " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, apiId));
+        }
+        SequenceBackendListDTO respObj = APIMappingUtil.fromSequenceDataToDTO(data);
+        return Response.ok().entity(respObj).build();
+    }
+
+    @Override
+    public Response getSequenceBackendContent(String type, String apiId, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        CommonUtils.validateAPIExistence(apiId);
+
+        SequenceBackendData data = apiProvider.getCustomBackendByAPIUUID(apiId, type);
+        if (data == null) {
+            throw new APIMgtResourceNotFoundException(
+                    "Couldn't retrieve an existing Sequence Backend for API: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, apiId));
+        }
+        File file = RestApiPublisherUtils.exportCustomBackendData(data.getSequence(), data.getName());
+        return Response.ok(file)
+                .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                .build();
+    }
+
+    @Override
+    public Response sequenceBackendDelete(String type, String apiId, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
+        apiProvider.deleteCustomBackendByID(apiId, type);
+        return Response.ok().build();
+    }
+
+    @Override
     public Response createAPI(APIDTO body, String oasVersion, MessageContext messageContext)
             throws APIManagementException{
         URI createdApiUri;
@@ -200,6 +243,21 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
         return Response.ok().entity(apiToReturn).build();
+    }
+
+    @Override
+    public Response sequenceBackendUpdate(String apiId, InputStream sequenceInputStream,
+            Attachment sequenceDetail, String type, MessageContext messageContext) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        api.setOrganization(organization);
+        MultivaluedMap<String, String> headers = sequenceDetail.getHeaders();
+        String contentDecomp = headers.getFirst("Content-Disposition");
+
+        PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream, contentDecomp);
+        return Response.ok().build();
     }
 
     @Override
@@ -2882,7 +2940,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, String inlineApiDefinition,
                                             MessageContext messageContext) throws APIManagementException {
-
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
             throw new APIManagementException("'additionalProperties' is required and should not be null",
@@ -2920,6 +2977,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             // OAuth 2.0 backend protection: API Key and API Secret encryption
             PublisherCommonUtils
                     .encryptEndpointSecurityOAuthCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
+                            StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
+            PublisherCommonUtils
+                    .encryptEndpointSecurityApiKeyCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
                             StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
 
             // Import the API and Definition
@@ -3617,17 +3677,18 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPISubscriptionPolicies(String apiId, String ifNoneMatch, String xWSO2Tenant,
-                                                     MessageContext messageContext) throws APIManagementException {
+    public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean isAiApi,
+            MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiInfo = getAPIByID(apiId, apiProvider, organization);
-        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true);
+        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl().getThrottlingPolicyList(
+                ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true, isAiApi);
 
-        if (apiInfo != null ) {
+        if (apiInfo != null) {
             List<String> apiPolicies = apiInfo.getPolicies();
-            List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies, availableThrottlingPolicyList);
+            List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
+                    availableThrottlingPolicyList);
             return Response.ok().entity(apiThrottlingPolicies).build();
         }
         return null;
@@ -3889,6 +3950,15 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //validate whether the API is advertise only
         APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+
+        // Cannot deploy an API with custom sequence to the APK gateway
+        Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
+        if (endpointConfigMap != null && !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(apiDto.getGatewayType())
+                && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Cannot Deploy an API with a Custom Sequence to APK Gateway: " + apiId).build();
+        }
         // Reject the request if API lifecycle is 'RETIRED'.
         if (apiDto.getLifeCycleStatus().equals(APIConstants.RETIRED)) {
             String errorMessage = "Deploying API Revisions is not supported for retired APIs. ApiId: " + apiId;

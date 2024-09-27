@@ -34,6 +34,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     private String businessOwnerEmail = null;
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
+    private Boolean egress = null;
 
   /**
    * A brief description about the API
@@ -244,6 +245,24 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     this.technicalOwnerEmail = technicalOwnerEmail;
   }
 
+  /**
+   * Whether the API is Egress or not
+   **/
+  public APIProductSearchResultDTO egress(Boolean egress) {
+    this.egress = egress;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether the API is Egress or not")
+  @JsonProperty("egress")
+  public Boolean isEgress() {
+    return egress;
+  }
+  public void setEgress(Boolean egress) {
+    this.egress = egress;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -265,12 +284,13 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
         Objects.equals(businessOwner, apIProductSearchResult.businessOwner) &&
         Objects.equals(businessOwnerEmail, apIProductSearchResult.businessOwnerEmail) &&
         Objects.equals(technicalOwner, apIProductSearchResult.technicalOwner) &&
-        Objects.equals(technicalOwnerEmail, apIProductSearchResult.technicalOwnerEmail);
+        Objects.equals(technicalOwnerEmail, apIProductSearchResult.technicalOwnerEmail) &&
+        Objects.equals(egress, apIProductSearchResult.egress);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    return Objects.hash(description, context, version, provider, status, thumbnailUri, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
   }
 
   @Override
@@ -290,6 +310,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
     sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
     sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
+    sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");
     return sb.toString();
   }

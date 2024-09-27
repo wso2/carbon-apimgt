@@ -278,7 +278,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             MessageContext messageContext) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
-        if (configDto.isAuthTokenProvided()) {
+        if (configDto.isAuthTokenProvided() || configDto.isKeyProvided()) {
             // Check the action
             if (apiChatAction.equals(APIConstants.AI.API_CHAT_ACTION_PREPARE)) {
                 // Determine whether the request body is valid. Request body should have a request UUID.

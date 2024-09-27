@@ -123,6 +123,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -263,6 +264,10 @@ public class ImportUtils {
             // validate the API context
             APIUtil.validateAPIContext(importedApiDTO.getContext(), importedApiDTO.getName());
 
+            // Get the endpoint config object updated
+            APIUtil.validateAPIEndpointConfig(importedApiDTO.getEndpointConfig(), importedApiDTO.getType().toString(),
+                    importedApiDTO.getName());
+
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE, organization);
 
@@ -383,6 +388,13 @@ public class ImportUtils {
 
             populateAPIWithPolicies(importedApi, apiProvider, extractedFolderPath, extractedPoliciesMap,
                     extractedAPIPolicies, currentTenantDomain);
+            // Update Custom Backend Data if endpoint type is selected to "custom_backend"
+            Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
+            if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConf.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                updateAPIWithCustomBackend(importedApi, extractedFolderPath, apiProvider);
+            }
+
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
             apiProvider.updateAPI(importedApi, oldAPI);
 
@@ -668,6 +680,51 @@ public class ImportUtils {
             // If still the policy specification is not found, user has used a wrong policy name
             throw new APIManagementException("Invalid API policy added as " + policyFileName,
                     ExceptionCodes.INVALID_OPERATION_POLICY);
+        }
+    }
+
+    /**
+     * Method is used to Update the Custom Backend of the API
+     *
+     * @param api                 API Object
+     * @param extractedFolderPath Extracted folder path
+     * @param apiProvider         API Provider
+     * @throws APIManagementException Throws an error occurs while reading the sequence as an Input Stream
+     */
+    public static void updateAPIWithCustomBackend(API api, String extractedFolderPath, APIProvider apiProvider)
+            throws APIManagementException {
+        String customBackendDir = extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
+        if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
+            JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+
+            if (endpointConfig != null) {
+                if (endpointConfig.get("sandbox") != null) {
+                    String seqFile = endpointConfig.get("sandbox").getAsString();
+                    String seqId = UUID.randomUUID().toString();
+                    String seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    if (!StringUtils.isEmpty(seqFile) && !seqFile.contains(
+                            APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                        seqFile = seqFile + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+                    }
+                    if (seq != null) {
+                        apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX, seq, seqFile,
+                                seqId);
+                    }
+                }
+                if (endpointConfig.get("production") != null) {
+                    String seqFile = endpointConfig.get("production").getAsString();
+                    String seqId = UUID.randomUUID().toString();
+                    String seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    if (!StringUtils.isEmpty(seqFile) && !seqFile.contains(
+                            APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                        seqFile = seqFile + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+                    }
+                    if (seq != null) {
+                        apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION, seq,
+                                seqFile, seqId);
+                    }
+                }
+            }
         }
     }
 

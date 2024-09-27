@@ -3979,6 +3979,17 @@ components:
         monetizedInfo:
           type: boolean
           example: true
+        egress:
+          type: boolean
+          description: Whether the API is Egress or not
+          default: false
+          example: true
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
     APIInfoList:
       title: API Info List
       type: object
@@ -4255,6 +4266,17 @@ components:
             - mqtt
           items:
             type: string
+        egress:
+          type: boolean
+          description: Whether the API is egress or not
+          default: false
+          example: true
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
     APIMonetizationInfo:
       title: API monetization object
       required:

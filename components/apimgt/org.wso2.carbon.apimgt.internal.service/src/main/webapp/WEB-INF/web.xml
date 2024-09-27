@@ -57,7 +57,9 @@
                 org.wso2.carbon.apimgt.internal.service.ApiLoggingConfigsApi,
                 org.wso2.carbon.apimgt.internal.service.CorrelationConfigsApi,
                 org.wso2.carbon.apimgt.internal.service.GatewayPolicyArtifactsApi,
-                org.wso2.carbon.apimgt.internal.service.SubscribeInternalApi
+                org.wso2.carbon.apimgt.internal.service.SubscribeInternalApi,
+                org.wso2.carbon.apimgt.internal.service.LlmProvidersApi,
+                org.wso2.carbon.apimgt.internal.service.TransactionRecordsApi
             </param-value>
         </init-param>
         <init-param>

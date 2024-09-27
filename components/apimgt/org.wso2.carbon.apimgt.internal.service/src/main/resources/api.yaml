@@ -677,6 +677,60 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /llm-providers:
+    get:
+      summary: Retrieve persisted LLM Providers
+      description: |
+        This retrieve the persisted LLM Providers.
+      tags:
+        - 'LLMProviders'
+      parameters:
+        - name: name
+          in: query
+          required: false
+          type: string
+        - name: apiVersion
+          in: query
+          required: false
+          type: string
+        - name: organization
+          in: query
+          required: false
+          type: string
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            $ref: '#/definitions/LLMProviderList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      operationId: getLLMProviders
+
+  /llm-providers/{llmProviderId}:
+    get:
+      summary: Retrieve persisted LLM Providers
+      description: |
+        This retrieve the persisted LLM Providers.
+      tags:
+        - 'LLMProviders'
+      parameters:
+        - name: llmProviderId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            $ref: '#/definitions/LLMProviderList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      operationId: getLLMProviderById
+
   /correlation-configs:
     get:
       summary: Retrieve persisted correlation configs data.
@@ -693,6 +747,32 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  #--------------------------------------------
+  # Transaction count related resources
+  #--------------------------------------------
+  /transaction-records:
+    post:
+      summary: Insert Transaction Records
+      description: Inserts a list of transaction records into the database.
+      operationId: insertTransactionRecords
+      parameters:
+        - in: body
+          name: body
+          description: A list of transaction records to be inserted
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TransactionRecord'
+      responses:
+        '200':
+          description: Successfully inserted transaction records
+          schema:
+            type: boolean
+        '400':
+          description: Bad request. Invalid input data.
+        '500':
+          description: Internal server error. Failed to insert transaction records.
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -990,6 +1070,71 @@ definitions:
         description: Whether subscription validation is disabled.
         default: false
         example: false
+      aiConfiguration:
+        $ref: '#/definitions/AIConfiguration'
+      isEgress:
+        type: boolean
+        description: Indicates if the API is an egress API.
+        example: false
+      subtype:
+        type: string
+        description: The subtype of the API.
+        example: Default
+
+
+  #-----------------------------------------------------
+  # The AIConfiguration resource
+  #-----------------------------------------------------
+  AIConfiguration:
+    properties:
+      aiEndpointConfiguration:
+        $ref: '#/definitions/AIEndpointConfiguration'
+        description: Configuration for AI endpoints, including sandbox and production.
+      llmProviderId:
+        type: string
+        description: UUID of the LLM (Large Language Model) provider.
+      tokenBasedThrottlingConfiguration:
+        $ref: '#/definitions/TokenBaseThrottlingCountHolder'
+        description: Configuration for token-based throttling for AI features.
+
+  #-----------------------------------------------------
+  # The AIEndpointConfiguration resource
+  #-----------------------------------------------------
+  AIEndpointConfiguration:
+    properties:
+      sandboxAuthValue:
+        type: string
+        description: Authorization value for the sandbox environment.
+      productionAuthValue:
+        type: string
+        description: Authorization value for the production environment.
+
+  #-----------------------------------------------------
+  # The TokenBaseThrottlingCountHolder resource
+  #-----------------------------------------------------
+  TokenBaseThrottlingCountHolder:
+    properties:
+      productionMaxPromptTokenCount:
+        type: string
+        description: Maximum allowed prompt token count for production.
+      productionMaxCompletionTokenCount:
+        type: string
+        description: Maximum allowed completion token count for production.
+      productionMaxTotalTokenCount:
+        type: string
+        description: Maximum total token count allowed for production.
+      sandboxMaxPromptTokenCount:
+        type: string
+        description: Maximum allowed prompt token count for sandbox.
+      sandboxMaxCompletionTokenCount:
+        type: string
+        description: Maximum allowed completion token count for sandbox.
+      sandboxMaxTotalTokenCount:
+        type: string
+        description: Maximum total token count allowed for sandbox.
+      isTokenBasedThrottlingEnabled:
+        type: boolean
+        description: Whether token-based throttling is enabled.
 
   #-----------------------------------------------------
   # synapse Artifact resource
@@ -1588,6 +1733,8 @@ definitions:
         $ref: '#/definitions/BandwidthLimit'
       eventCount:
         $ref: '#/definitions/EventCountLimit'
+      aiApiQuota:
+        $ref: '#/definitions/AIAPIQuotaLimit'
 
   BurstLimit:
     title: Burst Limit object
@@ -1654,6 +1801,62 @@ definitions:
             description: Maximum number of events allowed
             format: int64
             example: 3000
+
+  #-----------------------------------------------------
+  # The Throttling AI API Quota Limit resource
+  #-----------------------------------------------------
+  AIAPIQuotaLimit:
+    title: AI Quota Limit object
+    allOf:
+      - $ref: '#/definitions/ThrottleLimitBase'
+      - required:
+          - requestCount
+        properties:
+          requestCount:
+            type: integer
+            format: int64
+            description: Maximum number of requests allowed
+            example: 1000
+          totalTokenCount:
+            type: integer
+            description: Maximum number of total tokens allowed
+            format: int64
+            example: 1000
+          promptTokenCount:
+            type: integer
+            description: Maximum number of prompt tokens allowed
+            format: int64
+            example: 300
+          completionTokenCount:
+            type: integer
+            description: Maximum number of completion tokens allowed
+            format: int64
+            example: 300
+
+  #-----------------------------------------------------
+  # LLM Provider Config List
+  #-----------------------------------------------------
+  LLMProviderList:
+    title: LLM Provider Config List
+    properties:
+      apis:
+        type: array
+        items:
+          $ref: '#/definitions/LLMProvider'
+  LLMProvider:
+    title: LLM Provider
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      apiVersion:
+        type: string
+      organization:
+        type: string
+      configurations:
+        type: string
+
   #-----------------------------------------------------
   # API Logging detail list
   #-----------------------------------------------------
@@ -1717,3 +1920,25 @@ definitions:
         items:
           type: string
           example: "MessageDeliveryTaskPool"
+  #-----------------------------------------------------
+  # The Transaction Count resource
+  #-----------------------------------------------------
+  TransactionRecord:
+    type: object
+    properties:
+      id:
+        type: string
+      serverID:
+        type: string
+      serverType:
+        type: string
+      host:
+        type: string
+      count:
+        type: integer
+      recordedTime:
+        type: string
+    required:
+      - id
+      - count
+      - recordedTime

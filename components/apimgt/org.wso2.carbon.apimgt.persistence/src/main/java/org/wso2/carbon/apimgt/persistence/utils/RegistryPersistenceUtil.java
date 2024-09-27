@@ -28,6 +28,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -167,7 +169,9 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION, api.getImplementation());
 
             artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
+            artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_TIMEUNIT, api.getProductionTimeUnit());
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
+            artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_TIMEUNIT, api.getSandboxTimeUnit());
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, api.getAuthorizationHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_KEY_HEADER, api.getApiKeyHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
@@ -204,6 +208,40 @@ public class RegistryPersistenceUtil {
             for (Tier tier : api.getAvailableTiers()) {
                 policyBuilder.append(tier.getName());
                 policyBuilder.append("||");
+            }
+
+            if (api.getAiConfiguration() != null
+                    && api.getAiConfiguration().getTokenBasedThrottlingConfiguration() != null
+                    && api.getAiConfiguration().getTokenBasedThrottlingConfiguration()
+                    .isTokenBasedThrottlingEnabled()) {
+                TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = api.getAiConfiguration()
+                        .getTokenBasedThrottlingConfiguration();
+                artifact.setAttribute(APIConstants.AI_TOKEN_BASED_THROTTLING_ENABLED,
+                        tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled().toString());
+                if (tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.AI_PRODUCTION_MAX_PROMPT_TOKEN_COUNT,
+                            tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount());
+                }
+                if (tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.AI_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT,
+                            tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount());
+                }
+                if (tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.AI_PRODUCTION_MAX_TOTAL_TOKEN_COUNT,
+                            tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount());
+                }
+                if (tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.AI_SANDBOX_MAX_PROMPT_TOKEN_COUNT,
+                            tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount());
+                }
+                if (tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.AI_SANDBOX_MAX_COMPLETION_TOKEN_COUNT,
+                            tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
+                }
+                if (tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.AI_SANDBOX_MAX_TOTAL_TOKEN_COUNT,
+                            tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount());
+                }
             }
 
             String policies = policyBuilder.toString();
@@ -298,7 +336,6 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUDIENCE, api.getAudience());
             //set audiences for jwt audience validation
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUDIENCES, new Gson().toJson(api.getAudiences()));
-
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
             log.error(msg, e);
@@ -623,7 +660,30 @@ public class RegistryPersistenceUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
+            api.setProductionTimeUnit(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_TIMEUNIT));
             api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
+            api.setSandboxTimeUnit(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_TIMEUNIT));
+
+            if (artifact.getAttribute(APIConstants.AI_TOKEN_BASED_THROTTLING_ENABLED) != null && Boolean.parseBoolean(
+                    artifact.getAttribute(APIConstants.AI_TOKEN_BASED_THROTTLING_ENABLED))) {
+                TokenBaseThrottlingCountHolder aiThrottlingConfiguration = new TokenBaseThrottlingCountHolder();
+                aiThrottlingConfiguration.setTokenBasedThrottlingEnabled(true);
+                aiThrottlingConfiguration.setProductionMaxPromptTokenCount(
+                        artifact.getAttribute(APIConstants.AI_PRODUCTION_MAX_PROMPT_TOKEN_COUNT));
+                aiThrottlingConfiguration.setProductionMaxCompletionTokenCount(
+                        artifact.getAttribute(APIConstants.AI_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT));
+                aiThrottlingConfiguration.setProductionMaxTotalTokenCount(
+                        artifact.getAttribute(APIConstants.AI_PRODUCTION_MAX_TOTAL_TOKEN_COUNT));
+                aiThrottlingConfiguration.setSandboxMaxPromptTokenCount(
+                        artifact.getAttribute(APIConstants.AI_SANDBOX_MAX_PROMPT_TOKEN_COUNT));
+                aiThrottlingConfiguration.setSandboxMaxCompletionTokenCount(
+                        artifact.getAttribute(APIConstants.AI_SANDBOX_MAX_COMPLETION_TOKEN_COUNT));
+                aiThrottlingConfiguration.setSandboxMaxTotalTokenCount(
+                        artifact.getAttribute(APIConstants.AI_SANDBOX_MAX_TOTAL_TOKEN_COUNT));
+                AIConfiguration aiConfiguration = new AIConfiguration();
+                aiConfiguration.setTokenBasedThrottlingConfiguration(aiThrottlingConfiguration);
+                api.setAiConfiguration(aiConfiguration);
+            }
             api.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
             api.setAsyncTransportProtocols(artifact.getAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS));
 

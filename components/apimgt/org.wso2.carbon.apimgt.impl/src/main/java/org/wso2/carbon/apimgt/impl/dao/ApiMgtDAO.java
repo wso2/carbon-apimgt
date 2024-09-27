@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
+import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
@@ -40,6 +41,7 @@ import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -59,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
@@ -66,7 +69,9 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -88,6 +93,7 @@ import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -2791,9 +2797,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param apiName    Name of the API
-     * @param apiVersion Version of the API
-     * @param provider   Name of API creator
+     * @param apiUUID    UUID of the API
+     * @param organization Organization of the API
      * @return All subscriptions of a given API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
@@ -5588,6 +5593,8 @@ public class ApiMgtDAO {
             prepStmt.setString(14, api.getVersionTimestamp());
             prepStmt.setString(15,
                     APIUtil.setSubscriptionValidationStatusBeforeInsert(api.getAvailableTiers()));
+            prepStmt.setInt(16, api.isEgress());
+            prepStmt.setString(17, api.getSubtype());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -10036,6 +10043,10 @@ public class ApiMgtDAO {
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
                         String context = resultSet.getString("CONTEXT");
                         String apiType = resultSet.getString("API_TYPE");
+                        String apiSubtype = resultSet.getString("API_SUBTYPE");
+                        if (StringUtils.isEmpty(apiSubtype))  {
+                            apiSubtype = APIConstants.API_SUBTYPE_DEFAULT;
+                        }
                         String version = resultSet.getString("API_VERSION");
                         if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)
                                 && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(version)
@@ -10051,12 +10062,14 @@ public class ApiMgtDAO {
                                 .contextTemplate(contextTemplate)
                                 .status(APIUtil.getApiStatus(resultSet.getString("STATUS")))
                                 .apiType(apiType)
+                                .apiSubtype(apiSubtype)
                                 .createdBy(resultSet.getString("CREATED_BY"))
                                 .createdTime(resultSet.getString("CREATED_TIME"))
                                 .updatedBy(resultSet.getString("UPDATED_BY"))
                                 .updatedTime(resultSet.getString("UPDATED_TIME"))
                                 .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
                                 .organization(resultSet.getString("ORGANIZATION"))
+                                .isEgress(resultSet.getInt("IS_EGRESS"))
                                 .isRevision(apiRevision != null).organization(resultSet.getString("ORGANIZATION"));
                         if (apiRevision != null) {
                             apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,
@@ -11201,6 +11214,167 @@ public class ApiMgtDAO {
     }
 
     /**
+     *
+     * @param apiUUID UUID of API
+     * @param revisionUUID Revision ID of the API
+     * @return A HashMap with Custom Backend data
+     * @throws APIManagementException
+     */
+    public Map<String, Object> retrieveCustomBackendOfAPIRevision(String apiUUID, String revisionUUID) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_CUSTOM_BACKEND_OF_API_REVISION;
+        Map<String, Object> map = new HashMap<>();
+        ResultSet resultSet = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            ps.setString(2, revisionUUID);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                map.put("sequence", resultSet.getString("SEQUENCE"));
+                map.put("endpoint_type", resultSet.getString("TYPE"));
+                map.put("sequence_name", resultSet.getString("NAME"));
+            }
+        } catch (SQLException ex) {
+            handleException("Error retrieving Custom Backend of an API: " + apiUUID, ex);
+        }
+        return map;
+    }
+
+    public SequenceBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
+        SequenceBackendData sequenceBackendData = null;
+        try (Connection con = APIMgtDBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            ps.setString(2, type);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    sequenceBackendData = new SequenceBackendData();
+                    sequenceBackendData.setApiUUID(apiUUID);
+                    sequenceBackendData.setRevisionUUID("0");
+                    sequenceBackendData.setSequence(IOUtils.toString(rs.getBinaryStream("SEQUENCE")));
+                    sequenceBackendData.setId(rs.getString("ID"));
+                    sequenceBackendData.setName(rs.getString("NAME"));
+                    sequenceBackendData.setType(type);
+                }
+            }
+        } catch (SQLException | IOException ex) {
+            handleException("Error when fetching Custom Backend data for API: " + apiUUID, ex);
+        }
+        return sequenceBackendData;
+    }
+
+    public List<SequenceBackendData> getSequenceBackendsByAPIUUID(String apiUUID) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_ALL_API_SPECIFIC_CUSTOM_BACKENDS;
+        List<SequenceBackendData> backendDataList = new ArrayList<>();
+        try (Connection con = APIMgtDBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    SequenceBackendData sqBackend = new SequenceBackendData();
+                    sqBackend.setApiUUID(apiUUID);
+                    sqBackend.setId(rs.getString("ID"));
+                    sqBackend.setName(rs.getString("NAME"));
+                    sqBackend.setType(rs.getString("TYPE"));
+                    backendDataList.add(sqBackend);
+                }
+            }
+            return backendDataList;
+        } catch (SQLException ex) {
+            handleException("Error when retrieving Sequence Backends of API: " + apiUUID, ex);
+        }
+        return null;
+    }
+
+    public String getCustomBackendSequenceOfAPIByUUID(String apiUUID, String type) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
+        String sequence = null;
+        try (Connection con = APIMgtDBUtil.getConnection(); PreparedStatement ps = con.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            ps.setString(2, type);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    try (InputStream in = rs.getBinaryStream("SEQUENCE")) {
+                        sequence = IOUtils.toString(in);
+                    } catch (IOException ex) {
+                        handleException("Error reading the sequence of Custom Backend API: " + apiUUID, ex);
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            handleException("Error when fetching Custom Backend data of API: " + apiUUID, ex);
+        }
+
+        if (sequence == null) {
+            throw new APIManagementException("Custom Backend Content cannot be empty");
+        }
+        return sequence;
+    }
+
+    public Map<String, Object> getCustomBackendOfAPIByUUID(String backendUUID, String apiUUID, String type,
+            boolean isInfo) throws APIManagementException {
+        String sqlQuery;
+        Map<String, Object> endpointConfig = new HashMap<>();
+        boolean isRevisioned = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
+        if (isRevisioned) {
+            sqlQuery = SQLConstants.CustomBackendConstants.GET_REVISION_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
+        } else {
+            sqlQuery = SQLConstants.CustomBackendConstants.GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID;
+        }
+        ResultSet resultSet = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+            ps.setString(1, backendUUID);
+            ps.setString(2, apiUUID);
+            ps.setString(3, type);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                if (!isInfo) {
+                    try (InputStream in = resultSet.getBinaryStream("SEQUENCE")) {
+                        endpointConfig.put("sequence", in);
+                    } catch (IOException ex) {
+                        handleException(
+                                "Error reading Sequence Content of Custom Backend: " + backendUUID + " API: " + apiUUID,
+                                ex);
+                    }
+                }
+                endpointConfig.put("type", resultSet.getString("TYPE"));
+                endpointConfig.put("sequence_name", resultSet.getString("NAME"));
+                endpointConfig.put("endpoint_type", "custom_backend");
+                endpointConfig.put("sequence_id", resultSet.getString("ID"));
+            }
+        } catch (SQLException ex) {
+            handleException("Error when retrieving Custom Backend of API: " + apiUUID, ex);
+        }
+        return endpointConfig;
+    }
+
+    /**
+     *
+     * @param apiUUID API UUID
+     * @return HashMap with Custom Backend data
+     * @throws APIManagementException
+     */
+    public Map<String, Object> retrieveCustomBackendOfAPI(String apiUUID) throws APIManagementException {
+        String sqlQuery = SQLConstants.CustomBackendConstants.GET_CUSTOM_BACKEND_OF_API_DEFAULT_REVISION;
+        Map<String, Object> map = new HashMap<>();
+        ResultSet resultSet = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+            ps.setString(1, apiUUID);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                map.put("type", resultSet.getString("TYPE"));
+                map.put("sequence_name", resultSet.getString("NAME"));
+                map.put("endpoint_type", "custom_backend");
+            }
+        } catch (SQLException ex) {
+            handleException("Error retrieving Custom Backend of an API: " + apiUUID, ex);
+        }
+        return map;
+    }
+
+    /**
      * This method will delete all email alert subscriptions details from tables
      *
      * @param userName
@@ -11492,29 +11666,39 @@ public class ApiMgtDAO {
             policyStatement.setInt(15, policy.getGraphQLMaxDepth());
             policyStatement.setInt(16, policy.getGraphQLMaxComplexity());
             policyStatement.setString(17, policy.getBillingPlan());
-            if (hasCustomAttrib) {
-                policyStatement.setBytes(18, policy.getCustomAttributes());
-                policyStatement.setString(19, policy.getMonetizationPlan());
-                policyStatement.setString(20,
-                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                policyStatement.setString(21,
-                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                policyStatement.setString(22,
-                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                policyStatement.setString(23,
-                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                policyStatement.setInt(24, policy.getSubscriberCount());
+            if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                AIAPIQuotaLimit limit = (AIAPIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
+                policyStatement.setLong(18, limit.getTotalTokenCount());
+                policyStatement.setLong(19, limit.getPromptTokenCount());
+                policyStatement.setLong(20, limit.getCompletionTokenCount());
             } else {
-                policyStatement.setString(18, policy.getMonetizationPlan());
-                policyStatement.setString(19,
+                policyStatement.setLong(18, 0);
+                policyStatement.setLong(19, 0);
+                policyStatement.setLong(20, 0);
+            }
+            if (hasCustomAttrib) {
+                policyStatement.setBytes(21, policy.getCustomAttributes());
+                policyStatement.setString(22, policy.getMonetizationPlan());
+                policyStatement.setString(23,
                         policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                policyStatement.setString(20,
+                policyStatement.setString(24,
                         policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                policyStatement.setString(21,
+                policyStatement.setString(25,
                         policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
-                policyStatement.setString(22,
+                policyStatement.setString(26,
                         policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                policyStatement.setInt(23, policy.getSubscriberCount());
+                policyStatement.setInt(27, policy.getSubscriberCount());
+            } else {
+                policyStatement.setString(21, policy.getMonetizationPlan());
+                policyStatement.setString(22,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                policyStatement.setString(23,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                policyStatement.setString(24,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                policyStatement.setString(25,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                policyStatement.setInt(26, policy.getSubscriberCount());
             }
             policyStatement.executeUpdate();
             conn.commit();
@@ -13127,81 +13311,98 @@ public class ApiMgtDAO {
                 RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(4, limit.getRequestCount());
                 updateStatement.setString(5, null);
+                updateStatement.setLong(6, 0);
+                updateStatement.setLong(7, 0);
+                updateStatement.setLong(8, 0);
             } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(4, limit.getDataAmount());
                 updateStatement.setString(5, limit.getDataUnit());
+                updateStatement.setLong(6, 0);
+                updateStatement.setLong(7, 0);
+                updateStatement.setLong(8, 0);
             } else if (PolicyConstants.EVENT_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
                 EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(4, limit.getEventCount());
                 updateStatement.setString(5, null);
+                updateStatement.setLong(6, 0);
+                updateStatement.setLong(7, 0);
+                updateStatement.setLong(8, 0);
+            } else if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                AIAPIQuotaLimit limit = (AIAPIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
+                updateStatement.setLong(4, limit.getRequestCount());
+                updateStatement.setString(5, null);
+                updateStatement.setLong(6, limit.getTotalTokenCount());
+                updateStatement.setLong(7, limit.getPromptTokenCount());
+                updateStatement.setLong(8, limit.getCompletionTokenCount());
             }
 
-            updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            updateStatement.setInt(8, policy.getRateLimitCount());
-            updateStatement.setString(9, policy.getRateLimitTimeUnit());
-            updateStatement.setBoolean(10, policy.isStopOnQuotaReach());
-            updateStatement.setInt(11, policy.getGraphQLMaxDepth());
-            updateStatement.setInt(12, policy.getGraphQLMaxComplexity());
-            updateStatement.setString(13, policy.getBillingPlan());
+            updateStatement.setLong(9, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            updateStatement.setString(10, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            updateStatement.setInt(11, policy.getRateLimitCount());
+            updateStatement.setString(12, policy.getRateLimitTimeUnit());
+            updateStatement.setBoolean(13, policy.isStopOnQuotaReach());
+            updateStatement.setInt(14, policy.getGraphQLMaxDepth());
+            updateStatement.setInt(15, policy.getGraphQLMaxComplexity());
+            updateStatement.setString(16, policy.getBillingPlan());
+
             if (hasCustomAttrib) {
                 long lengthOfStream = policy.getCustomAttributes().length;
-                updateStatement.setBinaryStream(14, new ByteArrayInputStream(policy.getCustomAttributes()),
+                updateStatement.setBinaryStream(17, new ByteArrayInputStream(policy.getCustomAttributes()),
                         lengthOfStream);
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(15, policy.getMonetizationPlan());
-                    updateStatement.setString(16,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(17,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(18,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(18, policy.getMonetizationPlan());
                     updateStatement.setString(19,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(20,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(21,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(22,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setInt(20, policy.getSubscriberCount());
-                    updateStatement.setString(21, policy.getPolicyName());
-                    updateStatement.setInt(22, policy.getTenantId());
+                    updateStatement.setInt(23, policy.getSubscriberCount());
+                    updateStatement.setString(24, policy.getPolicyName());
+                    updateStatement.setInt(25, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(15, policy.getMonetizationPlan());
-                    updateStatement.setString(16,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(17,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(18,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(18, policy.getMonetizationPlan());
                     updateStatement.setString(19,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(20,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(21,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(22,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setInt(20, policy.getSubscriberCount());
-                    updateStatement.setString(21, policy.getUUID());
+                    updateStatement.setInt(23, policy.getSubscriberCount());
+                    updateStatement.setString(24, policy.getUUID());
                 }
             } else {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(14, policy.getMonetizationPlan());
-                    updateStatement.setString(15,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(16,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(17,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlan());
                     updateStatement.setString(18,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(19,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(20,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(21,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setInt(19, policy.getSubscriberCount());
-                    updateStatement.setString(20, policy.getPolicyName());
-                    updateStatement.setInt(21, policy.getTenantId());
+                    updateStatement.setInt(22, policy.getSubscriberCount());
+                    updateStatement.setString(23, policy.getPolicyName());
+                    updateStatement.setInt(24, policy.getTenantId());
 
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(14, policy.getMonetizationPlan());
-                    updateStatement.setString(15,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
-                    updateStatement.setString(16,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
-                    updateStatement.setString(17,
-                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlan());
                     updateStatement.setString(18,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(19,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(20,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(21,
                             policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setInt(19, policy.getSubscriberCount());
-                    updateStatement.setString(20, policy.getUUID());
+                    updateStatement.setInt(22, policy.getSubscriberCount());
+                    updateStatement.setString(23, policy.getUUID());
                 }
             }
             updateStatement.executeUpdate();
@@ -13411,6 +13612,10 @@ public class ApiMgtDAO {
             EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
             policyStatement.setLong(6, limit.getEventCount());
             policyStatement.setString(7, null);
+        } else if (PolicyConstants.AI_API_QUOTA_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            AIAPIQuotaLimit limit = (AIAPIQuotaLimit) policy.getDefaultQuotaPolicy().getLimit();
+            policyStatement.setLong(6, limit.getRequestCount());
+            policyStatement.setString(7, null);
         }
 
         policyStatement.setLong(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
@@ -13471,6 +13676,16 @@ public class ApiMgtDAO {
             eventCountLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
             eventCountLimit.setEventCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
             quotaPolicy.setLimit(eventCountLimit);
+        } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.AI_API_QUOTA_TYPE)) {
+            AIAPIQuotaLimit AIAPIQuotaLimit = new AIAPIQuotaLimit();
+            AIAPIQuotaLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            AIAPIQuotaLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            AIAPIQuotaLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            AIAPIQuotaLimit.setTotalTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_TOTAL_TOKEN_COUNT));
+            AIAPIQuotaLimit.setPromptTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_PROMPT_TOKEN_COUNT));
+            AIAPIQuotaLimit.setCompletionTokenCount(resultSet.getLong(prefix + ThrottlePolicyConstants.COLUMN_COMPLETION_TOKEN_COUNT));
+            quotaPolicy.setLimit(AIAPIQuotaLimit);
         }
 
         policy.setUUID(resultSet.getString(ThrottlePolicyConstants.COLUMN_UUID));
@@ -14418,6 +14633,345 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Adds a new LLM (Large Language Model) provider to the system for a specified organization.
+     *
+     * @param provider The LLMProvider object containing details of the provider to be added.
+     * @return The LLMProvider object that was added, with its ID set.
+     * @throws APIManagementException If an error occurs while adding the LLM provider to the database.
+     */
+    public LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException {
+
+        String providerId = UUID.randomUUID().toString();
+        provider.setId(providerId);
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            String insertProviderQuery = SQLConstants.INSERT_LLM_PROVIDER_SQL;
+            try (PreparedStatement prepStmt = conn.prepareStatement(insertProviderQuery)) {
+                prepStmt.setString(1, providerId);
+                prepStmt.setString(2, provider.getName());
+                prepStmt.setString(3, provider.getApiVersion());
+                prepStmt.setString(4, String.valueOf(provider.isBuiltInSupport()));
+                prepStmt.setString(5, provider.getOrganization());
+                prepStmt.setString(6, provider.getDescription());
+                prepStmt.setString(7, provider.getApiDefinition());
+                prepStmt.setString(8, provider.getConfigurations());
+                int rowsAffected = prepStmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    conn.commit();
+                    return provider;
+                } else {
+                    conn.rollback();
+                    return null;
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to add LLM Provider with ID: " + providerId, e);
+        }
+    }
+
+    /**
+     * Retrieves LLM provider configurations based on optional filters.
+     *
+     * @param organization   the organization (optional)
+     * @param name           the provider name (optional)
+     * @param apiVersion     the API version (optional)
+     * @param builtInSupport whether the API has built-in support (optional)
+     * @return list of LLM providers matching the filters
+     * @throws APIManagementException if a database error occurs
+     */
+    public List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion,
+                                             Boolean builtInSupport)
+            throws APIManagementException {
+
+        List<LLMProvider> providerList = new ArrayList<>();
+        String query = buildGetLLMProvidersSql(organization, name, apiVersion, builtInSupport);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            setQueryParameters(preparedStatement, name, organization, apiVersion, builtInSupport);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    LLMProvider provider = new LLMProvider();
+                    provider.setId(resultSet.getString("UUID"));
+                    provider.setName(resultSet.getString("NAME"));
+                    provider.setApiVersion(resultSet.getString("API_VERSION"));
+                    provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
+                    provider.setOrganization(resultSet.getString("ORGANIZATION"));
+                    provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
+                    provider.setDescription(resultSet.getString("DESCRIPTION"));
+                    provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+                    providerList.add(provider);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to get LLM Providers.", e);
+        }
+        return providerList;
+    }
+
+    /**
+     * Builds the SQL query with optional filters for organization, name, API version, and built-in support.
+     *
+     * @param organization   the organization (optional)
+     * @param name           the provider name (optional)
+     * @param apiVersion     the API version (optional)
+     * @param builtInSupport whether the API has built-in support (optional)
+     * @return the constructed SQL query string
+     */
+    private String buildGetLLMProvidersSql(String organization, String name, String apiVersion,
+                                           Boolean builtInSupport) {
+
+        StringBuilder queryBuilder = new StringBuilder(SQLConstants.GET_LLM_PROVIDERS_SQL);
+        if (organization != null && !organization.isEmpty()) {
+            queryBuilder.append(" AND ORGANIZATION = ?");
+        }
+        if (name != null && !name.isEmpty()) {
+            queryBuilder.append(" AND NAME = ?");
+        }
+        if (apiVersion != null && !apiVersion.isEmpty()) {
+            queryBuilder.append(" AND API_VERSION = ?");
+        }
+        if (builtInSupport != null) {
+            queryBuilder.append(" AND BUILT_IN_SUPPORT = ?");
+        }
+        return queryBuilder.toString();
+    }
+
+    /**
+     * Sets query parameters for the prepared statement.
+     *
+     * @param preparedStatement the statement to set parameters for
+     * @param name              the API name (optional)
+     * @param organization      the organization name (optional)
+     * @param apiVersion        the API version (optional)
+     * @param builtInSupport    whether the API has built-in support (optional)
+     * @throws SQLException if a database access error occurs
+     */
+    private void setQueryParameters(PreparedStatement preparedStatement, String name, String organization,
+                                    String apiVersion, Boolean builtInSupport)
+            throws SQLException {
+
+        int paramIndex = 1;
+        if (organization != null && !organization.isEmpty()) {
+            preparedStatement.setString(paramIndex++, organization);
+        }
+        if (name != null && !name.isEmpty()) {
+            preparedStatement.setString(paramIndex++, name);
+        }
+        if (apiVersion != null && !apiVersion.isEmpty()) {
+            preparedStatement.setString(paramIndex++, apiVersion);
+        }
+        if (builtInSupport != null) {
+            preparedStatement.setString(paramIndex, String.valueOf(builtInSupport));
+        }
+    }
+
+    /**
+     * Deletes an LLM Provider and its associated parameters from the database.
+     *
+     * @param organization  the tenant domain or organization identifier
+     * @param llmProviderId the unique identifier of the LLM provider to be deleted
+     * @throws APIManagementException if an error occurs while accessing the database or deleting the data
+     */
+    public LLMProvider deleteLLMProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException {
+
+        LLMProvider provider = getLLMProvider(organization, llmProviderId);
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement deleteProviderStmt =
+                         connection.prepareStatement(SQLConstants.DELETE_LLM_PROVIDER_SQL)) {
+                deleteProviderStmt.setString(1, organization);
+                deleteProviderStmt.setString(2, llmProviderId);
+                deleteProviderStmt.setBoolean(3, builtIn);
+                int rowsAffected = deleteProviderStmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    connection.commit();
+                    return provider;
+                } else {
+                    connection.rollback();
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to delete LLM Provider in tenant domain: "
+                    + organization, e);
+        }
+    }
+
+    /**
+     * Updates an LLM Provider's details in the database for a given organization.
+     *
+     * @param provider the LLM provider object containing updated details
+     * @return LlmProvider the updated LLM provider object
+     * @throws APIManagementException if an error occurs while accessing the database or updating data
+     */
+    public LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement checkStmt = connection.prepareStatement(SQLConstants.CHECK_LLM_PROVIDER_BUILT_IN_SUPPORT_SQL)) {
+                checkStmt.setString(1, provider.getOrganization());
+                checkStmt.setString(2, provider.getId());
+                try (ResultSet resultSet = checkStmt.executeQuery()) {
+                    if (resultSet.next()) {
+                        provider.setName(resultSet.getString("NAME"));
+                        provider.setApiVersion(resultSet.getString("API_VERSION"));
+                        provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
+                    }
+                }
+            }
+            String updateSql = buildUpdateSql(provider);
+            List<Object> params = buildUpdateParams(provider);
+            try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
+                for (int i = 0; i < params.size(); i++) {
+                    updateStmt.setObject(i + 1, params.get(i));
+                }
+                int rowsAffected = updateStmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    connection.commit();
+                    return provider;
+                } else {
+                    connection.rollback();
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to update LLM Provider in tenant domain: "
+                    + provider.getOrganization(), e);
+        }
+    }
+
+    /**
+     * Builds the SQL update query for an LLM provider.
+     *
+     * @param provider the LLM provider to update
+     * @return the SQL update query string
+     */
+    private String buildUpdateSql(LLMProvider provider) {
+        StringBuilder updateSqlBuilder = new StringBuilder("UPDATE AM_LLM_PROVIDER SET ");
+        if (provider.isBuiltInSupport()) {
+            if (provider.getApiDefinition() != null) {
+                updateSqlBuilder.append("API_DEFINITION = ? ");
+            }
+        } else {
+            if (provider.getDescription() != null) {
+                updateSqlBuilder.append("DESCRIPTION = ?, ");
+            }
+            if (provider.getApiDefinition() != null) {
+                updateSqlBuilder.append("API_DEFINITION = ?, ");
+            }
+            if (provider.getConfigurations() != null) {
+                updateSqlBuilder.append("CONFIGURATIONS = ?, ");
+            }
+            if (updateSqlBuilder.toString().endsWith(", ")) {
+                updateSqlBuilder.setLength(updateSqlBuilder.length() - 2);
+            }
+        }
+        updateSqlBuilder.append(" WHERE ORGANIZATION = ? AND UUID = ?");
+        if (!provider.isBuiltInSupport()) {
+            updateSqlBuilder.append(" AND BUILT_IN_SUPPORT = 'false'");
+        }
+        return updateSqlBuilder.toString();
+    }
+
+    /**
+     * Builds parameters for the LLM provider update SQL.
+     *
+     * @param provider the LLM provider to update
+     * @return list of SQL update parameters
+     */
+    private List<Object> buildUpdateParams(LLMProvider provider) {
+        List<Object> params = new ArrayList<>();
+
+        if (provider.isBuiltInSupport()) {
+            if (provider.getApiDefinition() != null) {
+                params.add(provider.getApiDefinition());
+            }
+        } else {
+            if (provider.getDescription() != null) {
+                params.add(provider.getDescription());
+            }
+            if (provider.getApiDefinition() != null) {
+                params.add(provider.getApiDefinition());
+            }
+            if (provider.getConfigurations() != null) {
+                params.add(provider.getConfigurations());
+            }
+        }
+        params.add(provider.getOrganization());
+        params.add(provider.getId());
+        return params;
+    }
+
+    /**
+     * Fetches an LLM provider by organization and provider ID.
+     *
+     * @param organization  the organization identifier
+     * @param llmProviderId the LLM provider ID
+     * @return the LLM provider or {@code null} if not found
+     * @throws APIManagementException if a database access error occurs
+     */
+    public LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException {
+
+        String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
+        String getLlmProviderSql = SQLConstants.GET_LLM_PROVIDER_SQL;
+        if (organization != null) {
+            getLlmProviderSql += " AND ORGANIZATION = ?";
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(getLlmProviderSql)) {
+            preparedStatement.setString(1, llmProviderId);
+            if (organization != null) {
+                preparedStatement.setString(2, organization);
+            }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
+            }
+            LLMProvider provider = new LLMProvider();
+            provider.setId(resultSet.getString("UUID"));
+            provider.setName(resultSet.getString("NAME"));
+            provider.setApiVersion(resultSet.getString("API_VERSION"));
+            provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
+            provider.setDescription(resultSet.getString("DESCRIPTION"));
+            provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
+            provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+            return provider;
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    public LLMProvider getLLMProvider(String organization, String name, String apiVersion) throws APIManagementException {
+
+        String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        SQLConstants.GET_LLM_PROVIDER_BY_NAME_AND_VERSION_SQL)) {
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, name);
+            preparedStatement.setString(3, apiVersion);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
+            }
+            LLMProvider provider = new LLMProvider();
+            provider.setId(resultSet.getString("UUID"));
+            provider.setName(resultSet.getString("NAME"));
+            provider.setApiVersion(resultSet.getString("API_VERSION"));
+            provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
+            provider.setDescription(resultSet.getString("DESCRIPTION"));
+            provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
+            provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+            return provider;
+
+        } catch (SQLException e) {
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    /**
      * Returns the Environments List for the TenantId.
      *
      * @param tenantDomain The tenant domain.
@@ -15017,6 +15571,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(14, apiProduct.getVersionTimestamp());
             prepStmtAddAPIProduct.setString(15,
                     APIUtil.setSubscriptionValidationStatusBeforeInsert(apiProduct.getAvailableTiers()));
+            prepStmtAddAPIProduct.setInt(16, apiProduct.isEgress());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -17009,6 +17564,9 @@ public class ApiMgtDAO {
 
                 // Retrieve API ID
                 APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+
+                // Insert Custom Backend if Provided
+
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
                 int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
@@ -17208,6 +17766,8 @@ public class ApiMgtDAO {
                 insertGraphQLComplexityStatement.executeBatch();
                 updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 addAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+                // Add Custom Backend
+                revisionCustomBackend(apiRevision, connection);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -18059,6 +18619,7 @@ public class ApiMgtDAO {
                 }
 
                 restoreAPIPolicies(apiRevision, tenantDomain, uriTemplateMap, connection);
+                restoreCustomBackend(apiRevision, connection);
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
 
@@ -18196,6 +18757,9 @@ public class ApiMgtDAO {
                 // Removing related revision entries from operation policies
                 deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
 
+                // Removing related Custom Backend entries
+                deleteAllCustomBackendsOfAPIRevision(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), connection);
+
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -18205,6 +18769,18 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to delete API Revision entry of API UUID "
                     + apiRevision.getApiUUID(), e);
+        }
+    }
+
+    private void deleteAllCustomBackendsOfAPIRevision(String apiUUID, String revisionUUID, Connection connection) throws APIManagementException {
+        String deleteSqlQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;
+        try (PreparedStatement pstmt = connection.prepareStatement(deleteSqlQuery)) {
+            connection.setAutoCommit(false);
+            pstmt.setString(1, apiUUID);
+            pstmt.setString(2, revisionUUID);
+            pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            handleException("Error when deleting Custom Backend of API: " + apiUUID, ex);
         }
     }
 
@@ -19218,6 +19794,129 @@ public class ApiMgtDAO {
         }
 
         return false;
+    }
+
+    /**
+     * Adds AI configuration for the given API UUID and revision UUID.
+     *
+     * @param apiUUID        The UUID of the API.
+     * @param revisionUUID   The revision UUID of the API (can be null).
+     * @param aiConfiguration The AI configuration to be added.
+     * @throws APIManagementException If an error occurs while adding the AI configuration.
+     */
+    public void addAIConfiguration(String apiUUID, String revisionUUID, AIConfiguration aiConfiguration, String organization)
+            throws APIManagementException {
+
+        LLMProvider provider = getLLMProvider(organization, aiConfiguration.getLlmProviderName(), aiConfiguration.getLlmProviderApiVersion());
+
+        String sql = SQLConstants.INSERT_AI_CONFIGURATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(false);
+            stmt.setString(1, java.util.UUID.randomUUID().toString());
+            stmt.setString(2, apiUUID);
+            stmt.setString(3, revisionUUID);
+            stmt.setString(4, provider.getId());
+            stmt.setString(5, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
+            stmt.setString(6, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
+            stmt.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while adding AI API configuration for API: " + apiUUID, e);
+        }
+    }
+
+    /**
+     * Updates AI configuration for the given API UUID.
+     *
+     * @param apiUUID        The UUID of the API.
+     * @param aiConfiguration The AI configuration to be updated.
+     * @throws APIManagementException If an error occurs while updating the AI configuration.
+     */
+    public void updateAIConfiguration(String apiUUID, AIConfiguration aiConfiguration)
+            throws APIManagementException {
+
+        String sql = SQLConstants.UPDATE_AI_CONFIGURATION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(false);
+            stmt.setString(1, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
+            stmt.setString(2, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
+            stmt.setString(3, apiUUID);
+            stmt.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while updating AI API configuration for API: " + apiUUID, e);
+        }
+    }
+
+    /**
+     * Deletes AI configuration for the given API UUID and optionally a revision UUID.
+     *
+     * @param apiUUID      The UUID of the API.
+     * @param revisionUUID The revision UUID of the API (can be null).
+     * @throws APIManagementException If an error occurs while deleting the LLM configuration.
+     */
+    public void deleteAIConfiguration(String apiUUID, String revisionUUID)
+            throws APIManagementException {
+        String query = (revisionUUID != null)
+                ? SQLConstants.DELETE_AI_CONFIGURATION_REVISION
+                : SQLConstants.DELETE_AI_CONFIGURATIONS;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            stmt.setString(1, apiUUID);
+            if (revisionUUID != null) {
+                stmt.setString(2, revisionUUID);
+            }
+            stmt.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while deleting AI API configuration for API: " + apiUUID, e);
+        }
+    }
+
+    /**
+     * Retrieves the AI configuration for the given API UUID and optionally a revision UUID.
+     *
+     * @param uuid         The UUID of the API.
+     * @param revisionUUID The revision UUID of the API (can be null).
+     * @return The AIConfiguration object if found, or null if no configuration exists.
+     * @throws APIManagementException If an error occurs while retrieving the AI configuration.
+     */
+    public AIConfiguration getAIConfiguration(String uuid, String revisionUUID, String organization) throws APIManagementException {
+
+
+        AIConfiguration aiConfiguration = null;
+        String query = (revisionUUID == null)
+                ? SQLConstants.GET_AI_CONFIGURATION
+                : SQLConstants.GET_AI_CONFIGURATION_REVISION;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ps.setString(1, uuid);
+            if (revisionUUID != null) {
+                ps.setString(2, revisionUUID);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    aiConfiguration = new AIConfiguration();
+                    aiConfiguration.setAiEndpointConfiguration(
+                            new Gson().fromJson(rs.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
+                    aiConfiguration.setTokenBasedThrottlingConfiguration(
+                            new Gson().fromJson(rs.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
+
+                    String providerId = rs.getString("LLM_PROVIDER_UUID");
+                    LLMProvider provider = getLLMProvider(organization, providerId);
+                    aiConfiguration.setLlmProviderName(provider.getName());
+                    aiConfiguration.setLlmProviderApiVersion(provider.getApiVersion());
+                }
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving AI API configuration for API: " + uuid, e);
+        }
+        return aiConfiguration;
     }
 
     private class SubscriptionInfo {
@@ -20813,6 +21512,115 @@ public class ApiMgtDAO {
     }
 
     /**
+     * This method is to update Sequence Backend data
+     *
+     * @param apiUUID      API Id
+     * @param sequenceName Sequence Name
+     * @param sequence     Sequence Content
+     * @param type         Key type
+     * @param backendUUID  Sequence Id
+     * @throws APIManagementException If not properly updated
+     */
+    public void updateCustomBackend(String apiUUID, String sequenceName, String sequence, String type,
+            String backendUUID) throws APIManagementException {
+        // delete current working copy
+        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_API_AND_TYPE;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
+            try {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, apiUUID);
+                prepStmt.setString(2, type);
+                prepStmt.executeUpdate();
+                addCustomBackend(apiUUID, sequenceName, null, sequence, type, connection, backendUUID);
+                connection.commit();
+            } catch (SQLException ex) {
+                connection.rollback();
+                handleException("Error while adding Custom Backend for API : " + apiUUID, ex);
+            }
+        } catch (SQLException e) {
+            handleException("Error while adding Custom Backend for API : " + apiUUID, e);
+        }
+    }
+
+    public void deleteCustomBackend(String apiUUID, String type) throws APIManagementException {
+        String deleteCustomBackedQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackedQuery)) {
+            try {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, apiUUID);
+                prepStmt.setString(2, type);
+                prepStmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException ex) {
+                connection.rollback();
+                handleException("Error while deleting Custom Backend for API : " + apiUUID, ex);
+            }
+        } catch (SQLException e) {
+            handleException("Error while deleting Custom Backend for API : " + apiUUID, e);
+        }
+    }
+
+    public void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException {
+        String deleteCustomBackendSql = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_API;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(deleteCustomBackendSql)) {
+            try {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, apiUUID);
+                connection.commit();
+            } catch (SQLException ex) {
+                connection.rollback();
+                handleException("Error while deleting Custom Backend for API: " + apiUUID, ex);
+            }
+        } catch (SQLException ex) {
+            handleException("Error while deleting Custom Backend for API: " + apiUUID, ex);
+        }
+    }
+
+    public void deleteCustomBackendByRevision(String apiUUID, String revisionUUID) throws APIManagementException {
+        String deleteSqlQuery = SQLConstants.CustomBackendConstants.DELETE_CUSTOM_BACKEND_BY_REVISION;
+        try (Connection con = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(deleteSqlQuery)) {
+            try {
+                con.setAutoCommit(false);
+                ps.setString(1, apiUUID);
+                ps.setString(2, revisionUUID);
+                ps.executeUpdate();
+                con.commit();
+            } catch (SQLException ex) {
+                con.rollback();
+                handleException("Error deleting Custom Backend for Revision: " + apiUUID, ex);
+            }
+        } catch (SQLException ex) {
+            handleException("Error deleting Custom Backend for Revision: " + apiUUID, ex);
+        }
+    }
+
+    public void addCustomBackend(String apiUUID, String sequenceName, String revision, String sequence,
+            String type, Connection connection, String backendUUID) throws APIManagementException {
+        String insertCustomBackendQuery = SQLConstants.CustomBackendConstants.ADD_CUSTOM_BACKEND;
+        try (PreparedStatement prepStmt = connection.prepareStatement(insertCustomBackendQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, backendUUID);
+            prepStmt.setString(2, apiUUID);
+            try (InputStream seqStream = new ByteArrayInputStream(sequence.getBytes())) {
+                prepStmt.setBinaryStream(3, seqStream);
+            }
+            prepStmt.setString(4, type);
+            if (revision == null) {
+                revision = "0";
+            }
+            prepStmt.setString(5, revision);
+            prepStmt.setString(6, sequenceName);
+            prepStmt.executeUpdate();
+        } catch (SQLException | IOException e) {
+            handleException("Error while adding Custom Backend for API : " + apiUUID, e);
+        }
+    }
+
+    /**
      * This method will add API level policy mappings to the database.
      *
      * @param policies      List of API policies
@@ -20996,6 +21804,39 @@ public class ApiMgtDAO {
         return policyList;
     }
 
+    private void revisionCustomBackend(APIRevision apiRevision, Connection connection)
+            throws SQLException, APIManagementException {
+        String addCBSqlQuery = SQLConstants.CustomBackendConstants.ADD_CUSTOM_BACKEND;
+        String getCBSQLQuery = SQLConstants.CustomBackendConstants.GET_ALL_API_SPECIFIC_CUSTOM_BACKENDS;
+        try (PreparedStatement getPstmt = connection.prepareStatement(getCBSQLQuery);
+                PreparedStatement addPstmt = connection.prepareStatement(addCBSqlQuery)) {
+            connection.setAutoCommit(false);
+            getPstmt.setString(1, apiRevision.getApiUUID());
+            List<SequenceBackendData> sequenceBackendDataList = new ArrayList<>();
+            int count = 0;
+
+            try (ResultSet rs = getPstmt.executeQuery()) {
+                while (rs.next()) {
+                    addPstmt.setString(1, rs.getString("ID"));
+                    addPstmt.setString(2, apiRevision.getApiUUID());
+                    addPstmt.setBinaryStream(3, rs.getBinaryStream("SEQUENCE"));
+                    addPstmt.setString(4, rs.getString("TYPE"));
+                    addPstmt.setString(5, apiRevision.getRevisionUUID());
+                    addPstmt.setString(6, rs.getString("NAME"));
+                    addPstmt.addBatch();
+                    count++;
+                }
+            }
+
+            if (count > 0) {
+                addPstmt.executeBatch();
+            }
+        } catch (SQLException ex) {
+            handleException("Error while adding Custom Backends to the database of API: " + apiRevision.getApiUUID(),
+                    ex);
+        }
+    }
+
     /**
      * Create a revision of API policis. This will clone the policy and policy mapping with each revision
      *
@@ -21100,6 +21941,35 @@ public class ApiMgtDAO {
             // policy ID is stored in a map as same policy can be applied to multiple operations
             // and we only need to create the policy once.
             clonedPolicyMap.put(policy.getPolicyId(), clonedPolicyId);
+        }
+    }
+
+    private void restoreCustomBackend(APIRevision apiRevision, Connection connection) throws SQLException {
+        String deleteSql = SQLConstants.CustomBackendConstants.DELETE_WORKING_COPY_OF_CUSTOM_BACKEND;
+        String getSql = SQLConstants.CustomBackendConstants.GET_CUSTOM_BACKEND_OF_API_REVISION;
+        String addSql = SQLConstants.CustomBackendConstants.ADD_CUSTOM_BACKEND;
+        try (PreparedStatement pstmt = connection.prepareStatement(deleteSql);
+            PreparedStatement pstmtGet = connection.prepareStatement(getSql);
+            PreparedStatement pstmtAdd = connection.prepareStatement(addSql)) {
+            connection.setAutoCommit(false);
+            pstmt.setString(1, apiRevision.getApiUUID());
+            pstmt.executeUpdate();
+
+            pstmtGet.setString(1, apiRevision.getApiUUID());
+            pstmtGet.setString(2, apiRevision.getRevisionUUID());
+
+            try(ResultSet rs = pstmtGet.executeQuery()) {
+                while(rs.next()) {
+                    pstmtAdd.setString(1, rs.getString("ID"));
+                    pstmtAdd.setString(2, apiRevision.getApiUUID());
+                    pstmtAdd.setBinaryStream(3, rs.getBinaryStream("SEQUENCE"));
+                    pstmtAdd.setString(4, rs.getString("TYPE"));
+                    pstmtAdd.setString(5, "0");
+                    pstmtAdd.setString(6, rs.getString("NAME"));
+                    pstmtAdd.addBatch();
+                }
+            }
+            pstmtAdd.executeBatch();
         }
     }
 
@@ -21960,5 +22830,57 @@ public class ApiMgtDAO {
         blockConditionsDTO.setUUID(resultSet.getString("UUID"));
         blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
         return blockConditionsDTO;
+    }
+
+    /**
+     * This returns whether the API is Egress or not (1 or 0)
+     *
+     * @param uuid
+     * @return
+     * @throws APIManagementException
+     */
+    public int checkForEgressAPIWithUUID(String uuid) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SQLConstants.CHECK_API_EGRESS_WITH_UUID)) {
+                preparedStatement.setString(1, uuid);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getInt("IS_EGRESS");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apimgt connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return 0;
+    }
+
+    /**
+     * This retrieves the API subtype for the given API UUID.
+     *
+     * @param uuid API UUID
+     * @return API subtype
+     * @throws APIManagementException
+     */
+    public String retrieveAPISubtypeWithUUID(String uuid) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    SQLConstants.RETRIEVE_API_SUBTYPE_WITH_UUID)) {
+                preparedStatement.setString(1, uuid);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getString("API_SUBTYPE");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apimgt connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return APIConstants.API_SUBTYPE_DEFAULT;
     }
 }

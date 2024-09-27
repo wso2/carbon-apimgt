@@ -368,6 +368,12 @@ public final class APIConstants {
     public static final String PROTOTYPE_OVERVIEW_IMPLEMENTATION = "overview_implementation";
     public static final String API_PRODUCTION_THROTTLE_MAXTPS = "overview_productionTps";
     public static final String API_SANDBOX_THROTTLE_MAXTPS = "overview_sandboxTps";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_SECOND = "SECOND";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_SECOND_MS = "1000";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_MINUTE = "MINUTE";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS = "60000";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_HOUR = "HOUR";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS = "3600000";
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";
@@ -514,7 +520,9 @@ public final class APIConstants {
         public static final String API_CHAT = "APIChat";
         public static final String API_CHAT_ENABLED = "Enabled";
         public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
+        public static final String API_CHAT_KEY = "Key";
         public static final String API_CHAT_ENDPOINT = "Endpoint";
+        public static final String API_CHAT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String RESOURCES = "Resources";
         public static final String API_CHAT_PREPARE_RESOURCE = "PrepareResource";
         public static final String API_CHAT_EXECUTE_RESOURCE = "ExecuteResource";
@@ -525,7 +533,9 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT = "MarketplaceAssistant";
         public static final String MARKETPLACE_ASSISTANT_ENABLED = "Enabled";
         public static final String MARKETPLACE_ASSISTANT_AUTH_TOKEN = "AuthToken";
+        public static final String MARKETPLACE_ASSISTANT_KEY = "Key";
         public static final String MARKETPLACE_ASSISTANT_ENDPOINT = "Endpoint";
+        public static final String MARKETPLACE_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String MARKETPLACE_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
@@ -816,8 +826,8 @@ public final class APIConstants {
     public static final String AUTHSERVER_URL = "ServerURL";
     public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
-    public static final String API_KEY_SUBSCRIPTION_VALIDATION_ENABLED =
-            API_KEY_VALIDATOR + "EnableAPIKeySubscriptionValidation";
+    public static final String LIGHTWEIGHT_API_KEY_GENERATION_ENABLED =
+            API_KEY_VALIDATOR + "EnableLightWeightAPIKeyGeneration";
     public static final String ALLOW_SUBSCRIPTION_VALIDATION_DISABLING = API_KEY_VALIDATOR +
             "AllowSubscriptionValidationDisabling";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
@@ -1778,6 +1788,8 @@ public final class APIConstants {
     public static final String ENDPOINT_TYPE_SERVICE = "service";
     public static final String ENDPOINT_TYPE_ADDRESS = "address";
     public static final String ENDPOINT_TYPE_AWSLAMBDA = "awslambda";
+    public static final String ENDPOINT_TYPE_SEQUENCE = "sequence_backend";
+    public static final String SEQUENCE_DATA = "sequence";
     public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
     public static final String ENDPOINT_SANDBOX_FAILOVERS = "sandbox_failovers";
     public static final String ENDPOINT_PRODUCTION_ENDPOINTS = "production_endpoints";
@@ -1788,6 +1800,9 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_BASIC = "basic";
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
     public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
+    public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
+    public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
+    public static final String ENDPOINT_SECURITY_API_KEY_VALUE = "apiKeyValue";
     public static final String ENDPOINT_SECURITY_USERNAME = "username";
     public static final String ENDPOINT_SECURITY_CONFIG = "securityConfig";
     public static final String ENDPOINT_SECURITY = "endpoint_security";
@@ -2038,6 +2053,8 @@ public final class APIConstants {
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
             "SSE", "ASYN" +
             "C"};
+    public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
+    public static final String API_SUBTYPE_AI_API = "AIAPI";
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
@@ -2790,11 +2807,15 @@ public final class APIConstants {
         GA_CONFIG,
         KEY_TEMPLATE,
         CORRELATION_CONFIG,
-        GATEWAY_POLICY
+        GATEWAY_POLICY,
+        LLM_PROVIDER
     }
 
     // Supported Event Types
     public enum EventType {
+        LLM_PROVIDER_CREATE,
+        LLM_PROVIDER_UPDATE,
+        LLM_PROVIDER_DELETE,
         API_CREATE,
         API_UPDATE,
         API_DELETE,

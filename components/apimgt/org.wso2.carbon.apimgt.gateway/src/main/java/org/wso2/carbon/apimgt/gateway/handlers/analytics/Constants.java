@@ -72,4 +72,16 @@ public class Constants {
     public static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
     public static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
     public static final String BUILD_RESPONSE_MESSAGE_CONFIG = "build_response_message";
+
+    public static final String AI_METADATA = "aiMetadata";
+    public static final String AI_VENDOR_NAME = "vendor_name";
+    public static final String AI_VENDOR_VERSION = "vendor_version";
+    public static final String AI_MODEL = "model";
+    public static final String AI_TOKEN_USAGE = "aiTokenUsage";
+    public static final String AI_PROMPT_TOKEN_USAGE = "promptTokens";
+    public static final String AI_COMPLETION_TOKEN_USAGE = "completionTokens";
+    public static final String HOUR = "hour";
+    public static final String AI_TOTAL_TOKEN_USAGE = "totalTokens";
+    public static final String IS_EGRESS = "isEgress";
+    public static final String SUB_TYPE = "subtype";
 }

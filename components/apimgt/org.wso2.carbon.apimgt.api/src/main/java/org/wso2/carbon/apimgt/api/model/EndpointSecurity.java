@@ -40,6 +40,10 @@ public class EndpointSecurity {
 
     private String clientSecret = null;
 
+    private String apiKeyIdentifier = null;
+
+    private String apiKeyValue = null;
+
     private String customParameters = null;
 
     private Map additionalProperties = new HashMap();
@@ -181,6 +185,25 @@ public class EndpointSecurity {
 
         this.additionalProperties = additionalProperties;
     }
+    public String getApiKeyIdentifier() {
+
+        return apiKeyIdentifier;
+    }
+
+    public void setApiKeyIdentifier(String apiKeyIdentifier) {
+
+        this.apiKeyIdentifier = apiKeyIdentifier;
+    }
+
+    public String getApiKeyValue() {
+
+        return apiKeyValue;
+    }
+
+    public void setApiKeyValue(String apiKeyValue) {
+
+        this.apiKeyValue = apiKeyValue;
+    }
 
     public int getConnectionTimeoutDuration() {
         return connectionTimeoutDuration;
@@ -209,12 +232,23 @@ public class EndpointSecurity {
     @Override
     public String toString() {
 
-        return "EndpointSecurity{" + "uniqueIdentifier='" + uniqueIdentifier + '\'' + ", password='" + password + '\''
-                + ", type='" + type + '\'' + ", enabled=" + enabled + ", username='" + username + '\'' + ", grantType='"
-                + grantType + '\'' + ", tokenUrl='" + tokenUrl + '\'' + ", clientId='" + clientId + '\''
-                + ", clientSecret='" + clientSecret + '\'' + ", customParameters='" + customParameters + '\''
-                + ", additionalProperties=" + additionalProperties + ", connectionTimeoutDuration=" +
-                connectionTimeoutDuration + ", connectionRequestTimeoutDuration=" + connectionRequestTimeoutDuration +
-                ", socketTimeoutDuration=" + socketTimeoutDuration + '}';
+        return "EndpointSecurity{" +
+                "uniqueIdentifier='" + uniqueIdentifier + '\'' +
+                ", password='" + password + '\'' +
+                ", type='" + type + '\'' +
+                ", enabled=" + enabled +
+                ", username='" + username + '\'' +
+                ", grantType='" + grantType + '\'' +
+                ", tokenUrl='" + tokenUrl + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", clientSecret='" + clientSecret + '\'' +
+                ", apiKeyIdentifier='" + apiKeyIdentifier + '\'' +
+                ", apiKeyValue='" + apiKeyValue + '\'' +
+                ", customParameters='" + customParameters + '\'' +
+                ", additionalProperties=" + additionalProperties +
+                ", connectionTimeoutDuration=" + connectionTimeoutDuration +
+                ", connectionRequestTimeoutDuration=" + connectionRequestTimeoutDuration +
+                ", socketTimeoutDuration=" + socketTimeoutDuration +
+                '}';
     }
 }

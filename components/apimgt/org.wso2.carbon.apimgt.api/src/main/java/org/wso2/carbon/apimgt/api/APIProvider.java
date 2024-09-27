@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,6 +65,31 @@ public interface APIProvider extends APIManager {
      */
     Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException;
+
+    /**
+     * This method is to delete Sequence Backend by type
+     *
+     * @param apiUUID API Id
+     * @param type    Key type
+     * @throws APIManagementException If failed to delete Sequence Backend
+     */
+    void deleteCustomBackendByID(String apiUUID, String type) throws APIManagementException;
+
+    /**
+     * This method is to delete all Sequence Backends by APIID
+     *
+     * @param apiUUID API ID
+     * @throws APIManagementException If failed to delete Sequence Backend
+     */
+    void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException;
+
+    /**
+     * This method is to delete Sequence Backends of a specific revision
+     * @param apiUUID API Id
+     * @param revisionId Revision Id
+     * @throws APIManagementException If failed to delete Sequence Backend
+     */
+    void deleteSequenceBackendByRevision(String apiUUID, String revisionId) throws APIManagementException;
 
     /**
      * @param apiTypeWrapper  Api type wrapper
@@ -314,6 +340,39 @@ public interface APIProvider extends APIManager {
      * @return updated API
      */
     API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
+
+    /**
+     * This method is to update Sequence Backend
+     *
+     * @param api               API
+     * @param type              Key Type
+     * @param sequence          Sequence Content
+     * @param seqName           Sequence Name
+     * @param customBackendUUID Sequence Id
+     * @throws APIManagementException If not updated
+     */
+    void updateCustomBackend(String api, String type, String sequence, String seqName, String customBackendUUID)
+            throws APIManagementException;
+
+    /**
+     * THis method is to retrieve Sequence Backend data
+     *
+     * @param apiUUID API Id
+     * @param type    Key Type
+     * @return SequenceBackendData object
+     * @throws APIManagementException If data is not properly retrieved
+     */
+    SequenceBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException;
+
+    /**
+     * This method is to retrieve all Sequence Backends of an API
+     *
+     * @param apiUUID API Id
+     * @return List of Sequence Backends
+     * @throws APIManagementException If not found
+     */
+
+    List<SequenceBackendData> getAllSequenceBackendsByAPIUUID(String apiUUID) throws APIManagementException;
 
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>

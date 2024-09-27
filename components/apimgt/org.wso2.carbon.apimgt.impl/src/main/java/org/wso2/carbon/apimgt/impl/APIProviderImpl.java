@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -71,6 +72,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
@@ -83,6 +85,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -202,6 +205,8 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -611,6 +616,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
+        addAIConfiguration(api);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -630,6 +636,125 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAPIPolicyParameters(api, tenantDomain);
         // Add API level and operation level policies
         apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
+    }
+
+    /**
+     * Adds AI Configuration to the given API.
+     *
+     * @param api API object to add the AI configuration for
+     * @throws APIManagementException if an error occurs during the process
+     */
+    private void addAIConfiguration(API api) throws APIManagementException {
+
+        AIConfiguration aiConfig = api.getAiConfiguration();
+        if (aiConfig != null) {
+            try {
+                processEndpointConfig(api, aiConfig);
+                apiMgtDAO.addAIConfiguration(api.getUuid(), null, aiConfig, api.getOrganization());
+            } catch (ParseException e) {
+                throw new APIManagementException("Error parsing endpoint configuration", e);
+            }
+        }
+    }
+
+    /**
+     * Updates AI Configuration of the given API.
+     *
+     * @param api API object to update the AI configuration for
+     * @throws APIManagementException if an error occurs during the process
+     */
+    private void updateAIConfiguration(API api) throws APIManagementException {
+
+        AIConfiguration aiConfig = api.getAiConfiguration();
+        if (aiConfig != null) {
+            try {
+                processEndpointConfig(api, aiConfig);
+                apiMgtDAO.updateAIConfiguration(api.getUuid(), aiConfig);
+            } catch (ParseException e) {
+                throw new APIManagementException("Error parsing endpoint configuration", e);
+            }
+        }
+    }
+
+    /**
+     * Processes the endpoint security configuration for both add and update operations.
+     *
+     * @param api      API object
+     * @param aiConfig AI Configuration to update or add
+     * @throws ParseException         if parsing the endpoint configuration fails
+     * @throws APIManagementException if an error occurs during the process
+     */
+    private void processEndpointConfig(API api, AIConfiguration aiConfig) throws ParseException,
+            APIManagementException {
+
+        String endpointConfig = api.getEndpointConfig();
+        if (StringUtils.isNotEmpty(endpointConfig)) {
+            JSONObject endpointConfigJson = parseEndpointConfig(endpointConfig);
+            if (endpointConfigJson.containsKey(APIConstants.ENDPOINT_SECURITY)) {
+                updateEndpointSecurityConfig(api, aiConfig,
+                        (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY));
+            }
+        }
+    }
+
+    /**
+     * Updates the endpoint security configuration for production and sandbox environments.
+     *
+     * @param api                  API object
+     * @param aiConfig             AI Configuration to update
+     * @param endpointSecurityJson JSON object containing endpoint security details
+     * @throws APIManagementException if an error occurs during the process
+     */
+    private void updateEndpointSecurityConfig(API api, AIConfiguration aiConfig, JSONObject endpointSecurityJson)
+            throws APIManagementException {
+
+        AIEndpointConfiguration aiEndpointConfig = aiConfig.getAiEndpointConfiguration();
+        if (aiEndpointConfig == null) {
+            aiEndpointConfig = new AIEndpointConfiguration();
+        }
+        if (endpointSecurityJson.containsKey(APIConstants.ENDPOINT_SECURITY_PRODUCTION)) {
+            processEndpointSecurity(api, aiEndpointConfig,
+                    (JSONObject) endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION), true);
+        }
+        if (endpointSecurityJson.containsKey(APIConstants.ENDPOINT_SECURITY_SANDBOX)) {
+            processEndpointSecurity(api, aiEndpointConfig,
+                    (JSONObject) endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX), false);
+        }
+        aiConfig.setAiEndpointConfiguration(aiEndpointConfig);
+    }
+
+    /**
+     * Processes the endpoint security configuration for a specific environment (production or sandbox).
+     *
+     * @param api              API object
+     * @param aiEndpointConfig AI endpoint configuration to update or add
+     * @param securityJson     JSON object containing security details
+     * @param isProduction     flag indicating if it's for production
+     * @throws APIManagementException if an error occurs during encryption or invalid config
+     */
+    private void processEndpointSecurity(API api, AIEndpointConfiguration aiEndpointConfig, JSONObject securityJson,
+                                         boolean isProduction) throws APIManagementException {
+
+        EndpointSecurity endpointSecurity = new ObjectMapper().convertValue(securityJson, EndpointSecurity.class);
+        if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(endpointSecurity.getType())) {
+            if (isProduction) {
+                aiEndpointConfig.setProductionAuthValue(endpointSecurity.getApiKeyValue());
+            } else {
+                aiEndpointConfig.setSandboxAuthValue(endpointSecurity.getApiKeyValue());
+            }
+        }
+    }
+
+    /**
+     * Parses the endpoint configuration string to a JSON object.
+     *
+     * @param endpointConfig the endpoint configuration as a string
+     * @return parsed JSON object
+     * @throws ParseException if parsing fails
+     */
+    private JSONObject parseEndpointConfig(String endpointConfig) throws ParseException {
+
+        return (JSONObject) new JSONParser().parse(endpointConfig);
     }
 
     /**
@@ -910,7 +1035,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public API updateAPI(API api, API existingAPI) throws APIManagementException {
-
         if (!existingAPI.getStatus().equals(api.getStatus())) {
             throw new APIManagementException("Invalid API update operation involving API status changes");
         }
@@ -972,6 +1096,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         updateProductResourceMappings(api, organization, productResources);
 
         updateAPIPolicies(api, tenantDomain);
+        updateAIConfiguration(api);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -1041,6 +1166,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAPIPolicyParameters(api, tenantDomain);
         // Update API level and operation level policies
         apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
+    }
+
+    @Override
+    public void updateCustomBackend(String apiUUID, String type, String sequence, String seqName,
+            String customBackendUUID) throws APIManagementException {
+        apiMgtDAO.updateCustomBackend(apiUUID, seqName, sequence, type, customBackendUUID);
+    }
+
+    @Override
+    public SequenceBackendData getCustomBackendByAPIUUID(String apiUUID, String type) throws APIManagementException {
+        return apiMgtDAO.getCustomBackendByAPIUUID(apiUUID, type);
+    }
+
+    public List<SequenceBackendData> getAllSequenceBackendsByAPIUUID(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getSequenceBackendsByAPIUUID(apiUUID);
+    }
+
+    @Override
+    public void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException {
+        apiMgtDAO.deleteCustomBackendByAPIID(apiUUID);
+    }
+    @Override
+    public void deleteCustomBackendByID(String apiUUID, String type) throws APIManagementException {
+        apiMgtDAO.deleteCustomBackend(apiUUID, type);
     }
 
     private void validateKeyManagers(API api) throws APIManagementException {
@@ -2437,6 +2586,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // DB delete operations
         if (!isError && api != null) {
             try {
+                // Remove Custom Backend entries of the API
+                deleteCustomBackendByAPIID(apiUuid);
                 deleteAPIRevisions(apiUuid, organization);
                 deleteAPIFromDB(api);
                 if (log.isDebugEnabled()) {
@@ -5238,6 +5389,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public void deleteSequenceBackendByRevision(String apiUUID, String revisionId)
+            throws APIManagementException {
+        apiMgtDAO.deleteCustomBackendByRevision(apiUUID, "0");
+    }
+
+    @Override
     public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
         Organization org = new Organization(organization);
         try {
@@ -5255,6 +5412,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
                 populateAPILevelPolicies(api);
+                populateAPISubtype(api);
+                if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                    populateAiConfiguration(api);
+                }
+
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     if (migrationEnabled == null) {
@@ -5264,6 +5426,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
                 populateAPIStatus(api);
+                populateEgressStatus(api);
                 populateDefaultVersion(api);
                 return api;
             } else {
@@ -5282,6 +5445,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (AsyncSpecPersistenceException e) {
             throw new APIManagementException("Error while retrieving the Async API definition", e,
                     ExceptionCodes.from(ExceptionCodes.ASYNCAPI_RETRIEVAL_ERROR, uuid));
+        }
+    }
+
+    /**
+     * Populates the AI configuration for the given API.
+     *
+     * @param api The API object to which the AI configuration will be added.
+     * @throws APIManagementException If an error occurs while populating the AI configuration.
+     */
+    private void populateAiConfiguration(API api) throws APIManagementException {
+
+        String apiUuid = api.getUuid();
+        String revisionUuid = null;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            apiUuid = apiRevision.getApiUUID();
+            revisionUuid = apiRevision.getRevisionUUID();
+        }
+        AIConfiguration configurations = apiMgtDAO.getAIConfiguration(apiUuid, revisionUuid, api.getOrganization());
+        if (configurations != null) {
+            api.setAiConfiguration(configurations);
+        } else {
+            log.debug("No AI configuration found for API: " + apiUuid);
         }
     }
 
@@ -5341,6 +5527,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     populateAPIStatus(mappedAPI);
                     populateDefaultVersion(mappedAPI);
                     populateGatewayVendor(mappedAPI);
+                    populateEgressStatus(mappedAPI);
+                    populateAPISubtype(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 result.setApis(apiList);
@@ -5395,6 +5583,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    private void populateEgressStatus(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getRevisionedApiId()));
+        } else {
+            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getUuid()));
+        }
+    }
+
+    private void populateEgressStatus(APIProduct apiProduct) throws APIManagementException {
+        if (apiProduct.isRevision()) {
+            apiProduct.setEgress(apiMgtDAO.
+                    checkForEgressAPIWithUUID(apiProduct.getRevisionedApiProductId()));
+        } else {
+            apiProduct.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(apiProduct.getUuid()));
+        }
+    }
+
+    /**
+     * This method populates the subtype in the API.
+     * @param api API that needs to be populated with the subtype
+     * @throws APIManagementException
+     */
+    private void populateAPISubtype(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getRevisionedApiId()));
+        } else {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getUuid()));
+        }
+    }
+
     public APIProduct getAPIProductbyUUID(String uuid, String organization) throws APIManagementException {
         try {
             Organization org = new Organization(organization);
@@ -5409,6 +5627,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIProductInformation(uuid, organization, product);
                 populateAPIStatus(product);
                 populateAPITier(product);
+                populateEgressStatus(product);
                 if (migrationEnabled == null) {
                     populateDefaultVersion(product);
                 }
@@ -5451,6 +5670,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     populateAPIStatus(mappedAPI);
                     populateDefaultVersion(mappedAPI);
                     populateGatewayVendor(mappedAPI);
+                    populateEgressStatus(mappedAPI);
+                    populateAPISubtype(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -5852,6 +6073,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setContextTemplate(publisherAPIInfo.getContext());
                     populateDefaultVersion(mappedAPI);
                     populateAPIStatus(mappedAPI);
+                    populateEgressStatus(mappedAPI);
                     productList.add(mappedAPI);
                 }
                 productSet.addAll(productList);
@@ -5911,8 +6133,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
         apiRevision.setRevisionUUID(revisionUUID);
+
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
+            AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null, organization);
+            if (configuration != null) {
+                apiMgtDAO.addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), configuration, organization);
+            }
         } catch (APIManagementException e) {
             try {
                     apiPersistenceInstance.deleteAPIRevision(new Organization(organization), apiId.getUUID(), revisionUUID,
@@ -6110,6 +6337,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
+
         WorkflowExecutor revisionDeploymentWFExecutor = getWorkflowExecutor(
                 WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
 
@@ -6447,6 +6675,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIRevision(apiRevision);
+        AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), organization);
+        if (configuration != null) {
+            apiMgtDAO.updateAIConfiguration(apiRevision.getApiUUID(), configuration);
+        }
     }
 
     /**

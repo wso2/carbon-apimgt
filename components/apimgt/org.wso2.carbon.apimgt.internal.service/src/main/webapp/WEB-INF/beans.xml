@@ -36,6 +36,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.ApiLoggingConfigsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.CorrelationConfigsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.GatewayPolicyArtifactsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.TransactionRecordsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.SubscribeInternalApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
