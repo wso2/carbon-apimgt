@@ -73,6 +73,9 @@ public class Constants {
     public static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
     public static final String BUILD_RESPONSE_MESSAGE_CONFIG = "build_response_message";
 
+    public static final String CERTIFICATE_COMMON_NAME = "commonName";
+    public static final String NOT_APPLICABLE_VALUE = "N/A";
+
     public static final String AI_METADATA = "aiMetadata";
     public static final String AI_VENDOR_NAME = "vendor_name";
     public static final String AI_VENDOR_VERSION = "vendor_version";
@@ -84,4 +87,5 @@ public class Constants {
     public static final String AI_TOTAL_TOKEN_USAGE = "totalTokens";
     public static final String IS_EGRESS = "isEgress";
     public static final String SUB_TYPE = "subtype";
+
 }
