@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -86,6 +87,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPOINTS;
@@ -216,6 +218,33 @@ public class ExportUtils {
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
                 api, currentApiUuid);
+
+        if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
+            JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+            if (endpointConfig != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
+                    apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
+                if (apiDtoToReturn.getEndpointConfig() != null) {
+                    Map endpointConf = (Map) apiDtoToReturn.getEndpointConfig();
+                    if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                            endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                        SequenceBackendData sqData = apiProvider.getCustomBackendByAPIUUID(currentApiUuid,
+                                APIConstants.API_KEY_TYPE_SANDBOX);
+                        if (sqData != null) {
+                            endpointConf.put("sandbox", sqData.getName());
+                        }
+                        sqData = apiProvider.getCustomBackendByAPIUUID(currentApiUuid,
+                                APIConstants.API_KEY_TYPE_PRODUCTION);
+                        if (sqData != null) {
+                            endpointConf.put("production", sqData.getName());
+                        }
+                        apiDtoToReturn.setEndpointConfig(endpointConf);
+                    }
+                }
+                addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid);
+            }
+        }
+
         addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
         if (migrationEnabled != null) {
@@ -628,6 +657,31 @@ public class ExportUtils {
         }
     }
 
+    public static void addCustomBackendToArchive(String archivePath, APIProvider apiProvider, String apiUUID)
+            throws APIManagementException {
+        try {
+            CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY);
+
+            // Add production Backend Sequences
+            SequenceBackendData data = apiProvider.getCustomBackendByAPIUUID(apiUUID,
+                    APIConstants.API_KEY_TYPE_PRODUCTION);
+            if (data != null) {
+                String seqName = data.getName();
+                exportCustomBackend(seqName, data.getSequence(), archivePath);
+            }
+
+            // Add sandbox Backend Sequences
+            data = apiProvider.getCustomBackendByAPIUUID(apiUUID, APIConstants.API_KEY_TYPE_SANDBOX);
+            if (data != null) {
+                String seqName = data.getName();
+                exportCustomBackend(seqName, data.getSequence(), archivePath);
+            }
+
+        } catch (IOException | APIImportExportException ex) {
+            throw new APIManagementException("Error adding Custom Backends to the API Directory: " + apiUUID, ex);
+        }
+    }
+
     /**
      * Retrieve the operation policies and store those in the archive directory.
      *
@@ -734,6 +788,27 @@ public class ExportUtils {
             CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
                     policyData.getCcPolicyDefinition().getContent());
         }
+    }
+
+    /**
+     * Method is used to write Custom Backend file to the Directory
+     *
+     * @param customBackendFileName Custom Backend file name
+     * @param sequence              Content of the Custom Backend
+     * @param archivePath           Archived path
+     * @throws APIImportExportException Import/Export error if exists
+     * @throws IOException              IO Error when reading/writing to the file
+     */
+    public static void exportCustomBackend(String customBackendFileName, String sequence, String archivePath)
+            throws APIImportExportException, IOException {
+        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(
+                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+            customBackendFileName = customBackendFileName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+        }
+        String customBackendName =
+                archivePath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY + File.separator
+                        + customBackendFileName;
+        CommonUtil.writeFile(customBackendName, sequence);
     }
 
     /**

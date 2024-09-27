@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -29,6 +31,8 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import io.swagger.v3.parser.ObjectMapperFactory;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -98,9 +102,11 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -110,6 +116,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -189,10 +196,56 @@ public class PublisherCommonUtils {
 
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
         apiProvider.updateAPI(apiToUpdate, originalAPI);
-
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
-        // TODO use returend api
+        API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+        if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
+            JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
+            if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && (
+                    APIConstants.API_TYPE_HTTP.equals(apiUpdated.getType()) || APIConstants.API_TYPE_SOAPTOREST.equals(
+                            apiUpdated.getType()))) {
+                apiProvider.deleteSequenceBackendByRevision(apiUpdated.getUuid(), "0");
+            }
+        }
+        return apiUpdated;
     }
+
+    /**
+     * @param api           API of the Custom Backend
+     * @param apiProvider   API Provider
+     * @param endpointType  Endpoint Type of the Custom Backend (SANDBOX, PRODUCTION)
+     * @param customBackend Custom Backend
+     * @param contentDecomp Header Content of the Request
+     * @throws APIManagementException If an error occurs while updating the API and API definition
+     */
+    public static void updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
+            InputStream customBackend, String contentDecomp) throws APIManagementException {
+        String fileName = getFileNameFromContentDisposition(contentDecomp);
+        if (fileName == null) {
+            throw new APIManagementException(
+                    "Error when retrieving Custom Backend file name of API: " + api.getId().getApiName());
+        }
+        String customBackendUUID = UUID.randomUUID().toString();
+        try {
+            String customBackendStr = IOUtils.toString(customBackend);
+            apiProvider.updateCustomBackend(api.getUuid(), endpointType, customBackendStr, fileName, customBackendUUID);
+        } catch (IOException ex) {
+            throw new APIManagementException("Error retrieving sequence backend of API: " + api.getUuid(), ex);
+        }
+    }
+
+    private static String getFileNameFromContentDisposition(String contentDisposition) {
+        // Split the Content-Disposition header to get the file name
+        String[] parts = contentDisposition.split(";");
+        for (String part : parts) {
+            if (part.trim().startsWith("filename")) {
+                // Extract the file name value
+                return part.split("=")[1].trim().replace("\"", "");
+            }
+        }
+        return null;
+    }
+
+
 
     /**
      * Prepare for API object before updating the API.
@@ -216,6 +269,8 @@ public class PublisherCommonUtils {
                     + " as the token information hasn't been correctly set internally",
                     ExceptionCodes.TOKEN_SCOPES_NOT_SET);
         }
+        APIUtil.validateAPIEndpointConfig(apiDtoToUpdate.getEndpointConfig(), apiDtoToUpdate.getType().toString(),
+                apiDtoToUpdate.getName());
         if (apiDtoToUpdate.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && apiDtoToUpdate.getVisibleRoles()
                 .isEmpty()) {
             throw new APIManagementException("Access control roles cannot be empty when visibility is restricted",
@@ -294,6 +349,25 @@ public class PublisherCommonUtils {
 
         encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, oldProductionApiKeyValue,
                 oldSandboxApiKeyValue, apiDtoToUpdate);
+        // update endpointConfig with the provided custom sequence
+        if (endpointConfig != null) {
+            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                try {
+                    if (endpointConfig.get("sequence_path") != null) {
+                        String pathToSequence = endpointConfig.get("sequence_path").toString();
+                        String sequence = FileUtils.readFileToString(new File(pathToSequence),
+                                Charset.defaultCharset());
+                        endpointConfig.put("sequence", sequence);
+                        apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                    }
+                } catch (IOException ex) {
+                    throw new APIManagementException(
+                            "Error while reading Custom Sequence of API: " + apiDtoToUpdate.getId(), ex,
+                            ExceptionCodes.ERROR_READING_CUSTOM_SEQUENCE);
+                }
+            }
+        }
 
         // AWS Lambda: secret key encryption while updating the API
         if (apiDtoToUpdate.getEndpointConfig() != null) {
@@ -1074,7 +1148,6 @@ public class PublisherCommonUtils {
                 apiDto);
 
         // AWS Lambda: secret key encryption while creating the API
-        if (apiDto.getEndpointConfig() != null) {
             if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
                 String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                 if (!StringUtils.isEmpty(secretKey)) {
@@ -1083,7 +1156,6 @@ public class PublisherCommonUtils {
                     apiDto.setEndpointConfig(endpointConfig);
                 }
             }
-        }
 
        /* if (isWSAPI) {
             ArrayList<String> websocketTransports = new ArrayList<>();

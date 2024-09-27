@@ -33,7 +33,6 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.transport.dynamicconfigurations.DynamicProfileReloaderHolder;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
@@ -330,6 +329,8 @@ public class InMemoryAPIDeployer {
                                 gatewayAPIDTO);
                         GatewayUtils.setEndpointsToBeRemoved(apiProductIdentifier, associatedApi.getUuid(),
                                 gatewayAPIDTO);
+                        GatewayUtils.setCustomBackendToBeRemoved(apiProductIdentifier, associatedApi.getUuid(),
+                                gatewayAPIDTO);
                     }
                 } else {
                     API api = new API(new APIIdentifier(gatewayEvent.getProvider(), gatewayEvent.getName(),
@@ -350,6 +351,8 @@ public class InMemoryAPIDeployer {
                     }
 
                     GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
+                    GatewayUtils.setCustomBackendToBeRemoved(gatewayAPIDTO);
+
                 }
                 gatewayAPIDTO.setLocalEntriesToBeRemove(
                         GatewayUtils
