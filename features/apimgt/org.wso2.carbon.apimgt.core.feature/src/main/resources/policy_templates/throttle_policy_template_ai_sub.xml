@@ -23,15 +23,19 @@
 		ifThenElse((sum(cast(map:get(propertiesMap,'COMPLETION_TOKENS'),'long')) >= $quotaPolicy.getAiApiQuota().getCompletionTokenCount()L), true,
 		#end
 		#if($quotaPolicy.getAiApiQuota().getTotalTokenCount() != 0)
-		ifThenElse((sum(cast(map:get(propertiesMap,'TOTAL_TOKENS'),'long')) >= $quotaPolicy.getAiApiQuota().getTotalTokenCount()L), true, false)
+		ifThenElse((sum(cast(map:get(propertiesMap,'TOTAL_TOKENS'),'long')) >= $quotaPolicy.getAiApiQuota().getTotalTokenCount()L), true,
 		#end
-		#if($quotaPolicy.getLimit().getPromptTokenCount() != 0)
+				false)
+		#if($quotaPolicy.getAiApiQuota().getPromptTokenCount() != 0)
 		)
 		#end
-		#if($quotaPolicy.getLimit().getCompletionTokenCount() != 0)
+		#if($quotaPolicy.getAiApiQuota().getCompletionTokenCount() != 0)
 		)
 		#end
 		#if($quotaPolicy.getRequestCountLimit().getRequestCount() != 0)
+		)
+		#end
+		#if($quotaPolicy.getAiApiQuota().getTotalTokenCount() != 0)
 		)
 		#end
 		as isThrottled, expiryTimeStamp
