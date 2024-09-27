@@ -867,8 +867,7 @@ public class CertificateMgtUtils {
                     Document doc = builder.parse(new InputSource(new StringReader(xml)));
                     DOMSource source = new DOMSource(doc);
                     StreamResult result = new StreamResult(new File(fullPath));
-                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                    transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                    TransformerFactory transformerFactory = APIUtil.getSecuredTransformerFactory();
                     Transformer transformer = transformerFactory.newTransformer();
                     transformer.setOutputProperty(OutputKeys.INDENT, "yes");
                     transformer.setOutputProperty(SOAPToRESTConstants.SequenceGen.INDENT_PROPERTY,

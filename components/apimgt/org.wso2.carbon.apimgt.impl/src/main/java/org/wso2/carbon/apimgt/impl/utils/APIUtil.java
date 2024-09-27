@@ -298,6 +298,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -6957,6 +6959,28 @@ public final class APIUtil {
         dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
 
         return dbf;
+    }
+
+
+    /**
+     * Returns a secured TransformerFactory instance
+     * https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#transformerfactory
+     *
+     * @return TransformerFactory
+     */
+    public static TransformerFactory getSecuredTransformerFactory() {
+        TransformerFactory trfactory = TransformerFactory.newInstance();
+
+        try {
+            trfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (TransformerConfigurationException var2) {
+            log.error("Failed to load XML Processor Feature " +
+                    XMLConstants.FEATURE_SECURE_PROCESSING + " for secure-processing.");
+        }
+
+        trfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        trfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        return trfactory;
     }
 
     /**
