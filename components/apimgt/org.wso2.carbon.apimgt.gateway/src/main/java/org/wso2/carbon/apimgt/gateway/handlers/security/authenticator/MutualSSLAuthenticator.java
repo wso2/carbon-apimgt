@@ -379,6 +379,7 @@ public class MutualSSLAuthenticator implements Authenticator {
             for (Rdn rdn : ldapDN.getRdns()) {
                 if (APIConstants.CERTIFICATE_COMMON_NAME.equalsIgnoreCase(rdn.getType())) {
                     authContext.setUsername((String) rdn.getValue());
+                    messageContext.setProperty(APIConstants.CERTIFICATE_COMMON_NAME, rdn.getValue());
                 }
             }
         } catch (InvalidNameException e) {

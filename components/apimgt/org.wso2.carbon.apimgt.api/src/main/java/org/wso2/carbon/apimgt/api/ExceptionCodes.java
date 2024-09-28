@@ -482,6 +482,9 @@ public enum ExceptionCodes implements ErrorHandler {
     // API import/export related codes
     ERROR_READING_META_DATA(900907, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
+
+    ERROR_READING_CUSTOM_SEQUENCE(900908, "Error while reading Custom Sequence from the API Endpoint Configuration",
+            400, "Error while reading Custom Sequence from the API Endpoint Configuration"),
     ERROR_READING_PARAMS_FILE(900908, "Error while reading meta information from the params file", 400,
             "Error while reading meta information from the params file"),
     ERROR_FETCHING_DEFINITION_FILE(900909, "Cannot find the definition file of the project", 400,
@@ -531,6 +534,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Required attributes(s) %s for api policy specification %s are either missing or empty"),
     OPERATION_POLICY_NOT_FOUND(902010, "API Policy Not Found", 404,
             "Requested api policy with id '%s' not found"),
+    CUSTOM_BACKEND_NOT_FOUND(903250, "Sequence Backend not found",
+            404, "Requested Sequence Backend of API '%s' not found"),
 
     OPERATION_POLICY_ALREADY_EXISTS(903001, "The API Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
 

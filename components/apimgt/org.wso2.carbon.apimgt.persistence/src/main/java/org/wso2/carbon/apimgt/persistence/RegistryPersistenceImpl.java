@@ -392,6 +392,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 registry.put(apiPath, newAPIArtifact);
                 GenericArtifact artifact = getAPIArtifact(apiUUID, registry);
                 artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, lifecycleStatus);
+                // Update with the modified artifact
                 artifactManager.updateGenericArtifact(apiArtifact);
                 RegistryPersistenceUtil.clearResourcePermissions(apiPath, api.getId(),
                         ((UserRegistry) registry).getTenantId());

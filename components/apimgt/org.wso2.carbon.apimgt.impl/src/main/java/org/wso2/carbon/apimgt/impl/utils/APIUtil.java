@@ -2926,6 +2926,27 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to validate the endpoint configuration for API
+     *
+     * @param endpointConfigObject Endpoint Configuratioj of the API
+     * @param apiType API Type
+     * @param apiName Name of the API
+     * @throws APIManagementException Throws an error if endpoint configuration is not valid
+     */
+    public static void validateAPIEndpointConfig(Object endpointConfigObject, String apiType, String apiName)
+            throws APIManagementException {
+        if (endpointConfigObject != null) {
+            Map endpointConfigMap = (Map) endpointConfigObject;
+            if (endpointConfigMap != null && endpointConfigMap.containsKey("endpoint_type")
+                    && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
+                    && !APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiType)) {
+                throw new APIManagementException("Invalid endpoint configuration provided for the API " + apiName);
+            }
+        }
+    }
+
+    /**
      * Check whether the parentheses are balanced
      *
      * @param input API Context
@@ -4290,6 +4311,17 @@ public final class APIUtil {
     public static String getSequenceExtensionName(API api) {
 
         return api.getId().getApiName() + ":v" + api.getId().getVersion();
+    }
+
+    /**
+     * Return the Custom Backend name
+     *
+     * @param apiUUID API Id
+     * @param type    Type of the custom backend used for (SANDBOX, PRODUCTION)
+     * @return The name of the Custom Backend
+     */
+    public static String getCustomBackendName(String apiUUID, String type) {
+        return apiUUID + "-" + type;
     }
 
     /**
@@ -10016,6 +10048,33 @@ public final class APIUtil {
     }
 
     /**
+     * Method is used to retrieve the Custom Backend sequence
+     *
+     * @param extractedFolderPath   Extracted folder path of the APICTL project
+     * @param customBackendFileName Custom Backend name
+     * @param fileExtension         .xml
+     * @return The Sequence of the Custom Backend as an Input Stream
+     * @throws APIManagementException If an error occurs while reading, throws an error
+     */
+    public static String getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
+            String fileExtension) throws APIManagementException {
+        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(fileExtension)) {
+            customBackendFileName = customBackendFileName + fileExtension;
+        }
+        String fileName = extractedFolderPath + File.separator + customBackendFileName;
+        if (checkFileExistence(fileName)) {
+            try {
+                try (InputStream inputStream = new FileInputStream(fileName)) {
+                    return IOUtils.toString(inputStream);
+                }
+            } catch (IOException ex) {
+                handleException("Error reading Custom Backend " + customBackendFileName);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Read the operation policy definition from the provided path and return the definition object
      *
      * @param extractedFolderPath   Location of the policy definition
@@ -10049,6 +10108,37 @@ public final class APIUtil {
                     + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
         }
         return policyDefinition;
+    }
+
+    /**
+     * Method is used to get Custom Backend Sequence from the APICTL project
+     *
+     * @param extractedFolderPath Extracted Folder path
+     * @param sequenceName        Sequence File name
+     * @param fileExtension       File extension of the Custom Backend
+     * @return Custom Backend sequence as a String
+     * @throws APIManagementException Throws if an error occurs when reading the file
+     */
+    public static String getCustomBackendSequenceFromFile(String extractedFolderPath, String sequenceName,
+            String fileExtension) throws APIManagementException {
+
+        String customBackendContent = null;
+        try {
+            if(!StringUtils.isEmpty(sequenceName) && !sequenceName.contains(".xml")) {
+                sequenceName = sequenceName + fileExtension;
+            }
+            String fileName = extractedFolderPath + File.separator + sequenceName;
+            if (checkFileExistence(fileName)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found Sequence Backend file " + fileName);
+                }
+                customBackendContent = FileUtils.readFileToString(new File(fileName));
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Custom Backend from path: " + extractedFolderPath, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
+        }
+        return customBackendContent;
     }
 
     /**
@@ -10248,6 +10338,10 @@ public final class APIUtil {
             policyVersion = "v1";
         }
         return policyName + "_" + policyVersion;
+    }
+
+    public static String getCustomBackendFileName(String apiUUID, String endpointType) {
+        return apiUUID + "-" + endpointType;
     }
 
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
@@ -10654,5 +10748,9 @@ public final class APIUtil {
             return Collections.emptyList();
         }
         return applications.subList(offset, endIndex);
+    }
+
+    public static String getAPIMVersion() {
+        return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
     }
 }

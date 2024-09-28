@@ -142,11 +142,18 @@ public class AiApiHandler extends AbstractHandler {
                 log.error("LLM provider service not found for the provider with ID: " + llmProviderId);
                 return false;
             }
-            String payload = extractPayloadFromContext(messageContext, providerConfiguration);
+            String payload = null;
+            Map<String, String> metadataMap = new HashMap<>();
+            if (!extractPayloadFromContext(messageContext, providerConfiguration, payload)) {
+                log.error("Error occurred while reading payload for API with path: " + path + " in tenant domain: "
+                        + tenantDomain);
+                metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_IS_EMPTY_PAYLOAD, Boolean.toString(true));
+            } else {
+                metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_IS_EMPTY_PAYLOAD, Boolean.toString(false));
+            }
             Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
             Map<String, String> headers = extractHeadersFromContext(messageContext);
-          
-            Map<String, String> metadataMap = new HashMap<>();
+
             metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_NAME, provider.getName());
             metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION, provider.getApiVersion());
             if (isRequest) {
@@ -231,9 +238,11 @@ public class AiApiHandler extends AbstractHandler {
      *
      * @param messageContext the Synapse MessageContext
      * @param config         LLM provider configuration
-     * @return the extracted payload
+     * @param payload        Payload
+     * @return whether payload is extracted successfully
      */
-    private String extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config)
+    private boolean extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config,
+                                              String payload)
             throws XMLStreamException, IOException {
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
@@ -241,10 +250,11 @@ public class AiApiHandler extends AbstractHandler {
 
         for (LLMProviderMetadata metadata : config.getMetadata()) {
             if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equals(metadata.getInputSource())) {
-                return getPayload(axis2MessageContext);
+                payload = getPayload(axis2MessageContext);
+                break;
             }
         }
-        return null;
+        return payload != null;
     }
 
     /**

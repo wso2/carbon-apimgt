@@ -1752,7 +1752,10 @@ public final class APIConstants {
     public static final String QUERY = "query";
     public static final String HISTORY = "history";
     public static final String VERSION = "version";
+    public static final String VISIBILITYROLES = "visibility_roles";
+    public static final String APIM_VERSION = "apim_version";
     public static final String DESCRIPTION = "description";
+    public static final String USERROLES = "user_roles";
 
     public static final String DEMOTE_TO_CREATED= "Demote to Created";
     public static final String BLOCK = "Block";
@@ -1787,6 +1790,8 @@ public final class APIConstants {
     public static final String ENDPOINT_TYPE_SERVICE = "service";
     public static final String ENDPOINT_TYPE_ADDRESS = "address";
     public static final String ENDPOINT_TYPE_AWSLAMBDA = "awslambda";
+    public static final String ENDPOINT_TYPE_SEQUENCE = "sequence_backend";
+    public static final String SEQUENCE_DATA = "sequence";
     public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
     public static final String ENDPOINT_SANDBOX_FAILOVERS = "sandbox_failovers";
     public static final String ENDPOINT_PRODUCTION_ENDPOINTS = "production_endpoints";
