@@ -1148,6 +1148,7 @@ public class PublisherCommonUtils {
                 apiDto);
 
         // AWS Lambda: secret key encryption while creating the API
+        if (apiDto.getEndpointConfig() != null) {
             if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
                 String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                 if (!StringUtils.isEmpty(secretKey)) {
@@ -1156,13 +1157,8 @@ public class PublisherCommonUtils {
                     apiDto.setEndpointConfig(endpointConfig);
                 }
             }
+        }
 
-       /* if (isWSAPI) {
-            ArrayList<String> websocketTransports = new ArrayList<>();
-            websocketTransports.add(APIConstants.WS_PROTOCOL);
-            websocketTransports.add(APIConstants.WSS_PROTOCOL);
-            apiDto.setTransport(websocketTransports);
-        }*/
         API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organization);
         validateScopes(apiToAdd);
         //validate API categories
