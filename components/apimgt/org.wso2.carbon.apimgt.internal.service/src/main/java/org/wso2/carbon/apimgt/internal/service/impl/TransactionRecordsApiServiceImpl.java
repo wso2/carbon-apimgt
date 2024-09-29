@@ -32,7 +32,10 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import java.util.List;
 
 import org.wso2.carbon.apimgt.internal.service.dto.TransactionRecordDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.List;
 
@@ -47,7 +50,7 @@ public class TransactionRecordsApiServiceImpl implements TransactionRecordsApiSe
 
     public Response insertTransactionRecords(List<TransactionRecordDTO> body, MessageContext messageContext) {
         TransactionCountDAO transactionCountDAO = TransactionCountDAO.getInstance();
-
+        checkTenantDomain();
         try {
             TransactionCountDTO[] transactionCountDTOArray = body.stream().map(recordDTO -> {
                 TransactionCountDTO transactionCountDTO = new TransactionCountDTO();
@@ -67,5 +70,13 @@ public class TransactionRecordsApiServiceImpl implements TransactionRecordsApiSe
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+    private void checkTenantDomain() throws ForbiddenException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
+                    new APIManagementException("Tenant " + tenantDomain + " is not allowed to insert transaction " +
+                            "records. Only super tenant is allowed"), log);
+        }
     }
 }
