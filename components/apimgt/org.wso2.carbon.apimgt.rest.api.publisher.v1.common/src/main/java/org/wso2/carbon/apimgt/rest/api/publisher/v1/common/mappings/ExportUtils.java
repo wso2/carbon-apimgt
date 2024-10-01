@@ -711,7 +711,7 @@ public class ExportUtils {
                     for (OperationPolicy policy : operationPolicies) {
                         if (!exportedPolicies.contains(policy.getPolicyName() + "_" + policy.getPolicyVersion())) {
                             String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
-                                    policy.getPolicyVersion());
+                                    policy.getPolicyVersion(), policy.getPolicyType());
                             if (policy.getPolicyId() != null) {
                                 OperationPolicyData policyData =
                                         apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
@@ -748,7 +748,7 @@ public class ExportUtils {
             if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
                 for (OperationPolicy policy : api.getApiPolicies()) {
                     String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
-                            policy.getPolicyVersion());
+                            policy.getPolicyVersion(), policy.getPolicyType());
                     if (!exportedPolicies.contains(policyFileName)) {
                         OperationPolicyData policyData =
                                 apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
