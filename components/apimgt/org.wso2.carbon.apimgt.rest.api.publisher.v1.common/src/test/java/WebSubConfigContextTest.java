@@ -50,8 +50,6 @@ public class WebSubConfigContextTest {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.OAUTH_CONFIGS +
-                APIConstants.OAuthConstants.ENABLE_RETRY_CALL_WITH_NEW_TOKEN)).thenReturn("true");
     }
 
     @Test
