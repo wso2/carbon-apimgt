@@ -7126,19 +7126,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     getAPISpecificOperationPolicyByPolicyName(importedSpec.getName(), importedSpec.getVersion(),
                             importedPolicyData.getApiUUID(), null, organization, false);
 
-            if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Matching API specific policy found for imported policy and MD5 hashes match.");
+            if (existingOperationPolicy != null) {
+                if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Matching API specific policy found for imported policy and MD5 hashes match.");
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Even though existing API specific policy name match with imported policy, "
+                                + "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId()
+                                + ".Therefore updating the existing policy");
+                    }
+                    updateOperationPolicy(existingOperationPolicy.getPolicyId(), importedPolicyData, organization);
                 }
+                policyId = existingOperationPolicy.getPolicyId();
             } else {
+                policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
+                        organization);
                 if (log.isDebugEnabled()) {
-                    log.debug("Even though existing API specific policy name match with imported policy, "
-                            + "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId()
-                            + ".Therefore updating the existing policy");
+                    log.debug(
+                            "There aren't any existing policies for the imported policy. A new policy created with ID "
+                                    + policyId);
                 }
-                updateOperationPolicy(existingOperationPolicy.getPolicyId(), importedPolicyData, organization);
             }
-            policyId = existingOperationPolicy.getPolicyId();
         }
 
         return policyId;
