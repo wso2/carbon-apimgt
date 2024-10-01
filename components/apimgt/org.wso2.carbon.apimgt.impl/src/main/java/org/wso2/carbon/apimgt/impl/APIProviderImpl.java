@@ -135,6 +135,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.lifecycle.LCManagerFactory;
@@ -5299,6 +5300,52 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    public String getPolicyType(OperationPolicy policy, String apiUUId, String tenantDomain)
+            throws APIManagementException {
+        String policyType = null;
+        if (policy.getPolicyId() == null) {
+            policyType = ImportExportConstants.POLICY_TYPE_API;
+        } else {
+            OperationPolicyData basicPolicyData =
+                    getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
+                            apiUUId, tenantDomain, false);
+            if (basicPolicyData.getClonedCommonPolicyId() == null) {
+                policyType = ImportExportConstants.POLICY_TYPE_API;
+            } else {
+                policyType = ImportExportConstants.POLICY_TYPE_COMMON;
+            }
+        }
+        return policyType;
+    }
+
+    public API addPolicyTypeFieldToApi(API api, String tenantDomain)
+            throws APIManagementException {
+
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        for (URITemplate uriTemplate : uriTemplates) {
+            List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+            if (!operationPolicies.isEmpty()) {
+                for (OperationPolicy operationPolicy : operationPolicies) {
+                    String policyType = getPolicyType(operationPolicy, api.getUuid(),
+                            tenantDomain);
+                    operationPolicy.setPolicyType(policyType);
+                }
+            }
+        }
+        api.setUriTemplates(uriTemplates);
+
+        if (isAPILevelPolicySupportEnabled) {
+            List<OperationPolicy> apiPolicies = api.getApiPolicies();
+            for (OperationPolicy policy : apiPolicies) {
+                String policyType = getPolicyType(policy, api.getUuid(),
+                        tenantDomain);
+                policy.setPolicyType(policyType);
+            }
+            api.setApiPolicies(apiPolicies);
+        }
+        return api;
+    }
+
     @Override
     public boolean isSubscriptionValidationDisabled(String uuid) throws APIManagementException {
         String status = apiMgtDAO.getSubscriptionValidationStatus(uuid);
@@ -5341,6 +5388,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateApiInfo(api);
                 populateSubtypeConfiguration(api);
                 populateDefaultVersion(api);
+                api = addPolicyTypeFieldToApi(api, organization);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -7102,6 +7150,84 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + ". A new policy created with ID " + policyId);
                     }
                 }
+            } else {
+                policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
+                        organization);
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "There aren't any existing policies for the imported policy. A new policy created with ID "
+                                    + policyId);
+                }
+            }
+        }
+
+        return policyId;
+    }
+    @Override
+    public String importOperationPolicyOfGivenType(OperationPolicyData importedPolicyData, String policyType,
+                                                   String organization)
+            throws APIManagementException {
+
+        OperationPolicySpecification importedSpec = importedPolicyData.getSpecification();
+        OperationPolicyData existingOperationPolicy;
+
+        String policyId = null;
+        if (policyType == null) {
+            /*To handle scenarios where api is exported from a previous U2 version. API and Common policies with same name
+             and same version is not supported there
+             */
+            importOperationPolicy(importedPolicyData, organization);
+        } else if (policyType.equalsIgnoreCase(ImportExportConstants.POLICY_TYPE_COMMON)) {
+            existingOperationPolicy = getCommonOperationPolicyByPolicyName(importedSpec.getName(),
+                    importedSpec.getVersion(),organization, false);
+
+            if (existingOperationPolicy != null) {
+                if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Matching common policy found for imported policy and Md5 hashes match.");
+                    }
+                    policyId = existingOperationPolicy.getPolicyId();
+                } else {
+                    importedSpec.setName(importedSpec.getName() + "_imported");
+                    importedSpec.setDisplayName(importedSpec.getDisplayName() + " Imported");
+                    importedPolicyData.setSpecification(importedSpec);
+                    importedPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(importedPolicyData));
+                    policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
+                            organization);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Even though existing common policy name match with imported policy, "
+                                + "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId()
+                                + ". A new policy created with ID " + policyId);
+                    }
+                }
+            } else {
+                policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
+                        organization);
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "There aren't any existing policies for the imported policy. A new policy created with ID "
+                                    + policyId);
+                }
+            }
+        } else { //api level policy by default
+            existingOperationPolicy =
+                    getAPISpecificOperationPolicyByPolicyName(importedSpec.getName(), importedSpec.getVersion(),
+                            importedPolicyData.getApiUUID(), null, organization, false);
+
+            if (existingOperationPolicy != null) {
+                if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Matching API specific policy found for imported policy and MD5 hashes match.");
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Even though existing API specific policy name match with imported policy, "
+                                + "the MD5 hashes does not match in the policy " + existingOperationPolicy.getPolicyId()
+                                + ".Therefore updating the existing policy");
+                    }
+                    updateOperationPolicy(existingOperationPolicy.getPolicyId(), importedPolicyData, organization);
+                }
+                policyId = existingOperationPolicy.getPolicyId();
             } else {
                 policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
                         organization);

@@ -1553,6 +1553,9 @@ public interface APIProvider extends APIManager {
      */
     String importOperationPolicy(OperationPolicyData operationPolicyData, String organization)
             throws APIManagementException;
+    String importOperationPolicyOfGivenType(OperationPolicyData operationPolicyData, String policyType,
+                                            String organization) throws APIManagementException;
+
 
     /**
      * Add an API specific operation policy

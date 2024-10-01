@@ -125,6 +125,7 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -21273,7 +21274,13 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     String policyName = rs.getString("POLICY_NAME");
                     String policyVersion = rs.getString("POLICY_VERSION");
-                    policyNames.add(APIUtil.getOperationPolicyFileName(policyName, policyVersion));
+                    policyNames.add(APIUtil.getOperationPolicyFileName(policyName, policyVersion, null));
+                    /*since the only usage of this method is to load the common operation policies from the
+                     specifications and we are keeping only the common policies without appending the string "common"
+                     to the file name, it's not required to append the policyType string
+                     (policyNames.add(APIUtil.getOperationPolicyFileName(policyName, policyVersion,
+                     ImportExportConstants.POLICY_TYPE_COMMON));)here as well.
+                     */
                 }
             }
         } catch (SQLException e) {
