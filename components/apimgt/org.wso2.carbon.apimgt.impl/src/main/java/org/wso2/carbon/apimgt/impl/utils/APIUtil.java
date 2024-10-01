@@ -168,6 +168,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -10079,7 +10080,7 @@ public final class APIUtil {
                                 policyData.setSpecification(policySpec);
                                 policyData.setOrganization(organization);
                                 String policyFileName = getOperationPolicyFileName(policySpec.getName(),
-                                        policySpec.getVersion());
+                                        policySpec.getVersion(), ImportExportConstants.POLICY_TYPE_COMMON);
                                 OperationPolicyDefinition synapsePolicyDefinition =
                                         getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
                                                 policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
@@ -10399,11 +10400,14 @@ public final class APIUtil {
     }
 
 
-    public static String getOperationPolicyFileName(String policyName, String policyVersion) {
+    public static String getOperationPolicyFileName(String policyName, String policyVersion, String policyType) {
         if (StringUtils.isEmpty(policyVersion)) {
             policyVersion = "v1";
         }
-        return policyName + "_" + policyVersion;
+        if (policyType == null) {
+            return policyName + "_" + policyVersion;
+        }
+        return policyName + "_" + policyVersion + "_" + policyType;
     }
 
     public static String getCustomBackendFileName(String apiUUID, String endpointType) {
