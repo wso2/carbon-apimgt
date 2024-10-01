@@ -10762,4 +10762,8 @@ public final class APIUtil {
         }
         return applications.subList(offset, endIndex);
     }
+
+    public static String getAPIMVersion() {
+        return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
+    }
 }

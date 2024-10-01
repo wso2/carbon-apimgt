@@ -417,6 +417,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
         customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
         customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
+        customProperties.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
         org.wso2.carbon.apimgt.keymgt.model.entity.API api =
                 (org.wso2.carbon.apimgt.keymgt.model.entity.API) messageContext.getProperty(API_OBJECT);
@@ -436,7 +437,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     customProperties
             );
         }
-
         return customProperties;
     }
 
@@ -636,5 +636,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return headers.get(HttpHeaders.CONTENT_TYPE).toString();
         }
         return UNKNOWN_VALUE;
+    }
+
+    private String getCommonName() {
+        if (messageContext.getPropertyKeySet().contains(APIConstants.CERTIFICATE_COMMON_NAME)) {
+            return (String) messageContext.getProperty(APIConstants.CERTIFICATE_COMMON_NAME);
+        }
+        return Constants.NOT_APPLICABLE_VALUE;
     }
 }
