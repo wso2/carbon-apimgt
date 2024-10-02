@@ -63,7 +63,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -71,6 +70,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -1155,6 +1155,15 @@ public class APIMappingUtil {
                             }
                         }
 
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(productionEndpointType)) {
+                            String apiKeyValue = (String) productionEndpointSecurity
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                            if (StringUtils.isNotEmpty(apiKeyValue)) {
+                                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                                        new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                            }
+                        }
+
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                                 productionEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1181,6 +1190,15 @@ public class APIMappingUtil {
                                 sandboxEndpointSecurity.put(APIConstants
                                                 .OAuthConstants.OAUTH_CLIENT_SECRET,
                                         new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret)));
+                            }
+                        }
+
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(sandboxEndpointType)) {
+                            String apiKeyValue = (String) sandboxEndpointSecurity
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                            if (StringUtils.isNotEmpty(apiKeyValue)) {
+                                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                                        new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
                             }
                         }
 
@@ -3266,6 +3284,9 @@ public class APIMappingUtil {
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
             }
+            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
+            }
         }
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
             JSONObject productionEndpointSecurity =
@@ -3276,6 +3297,9 @@ public class APIMappingUtil {
             }
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+            }
+            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
         }
         return endpointSecurityElement;

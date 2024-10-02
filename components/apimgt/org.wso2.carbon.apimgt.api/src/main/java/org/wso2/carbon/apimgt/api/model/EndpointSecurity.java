@@ -48,6 +48,12 @@ public class EndpointSecurity {
 
     private Map additionalProperties = new HashMap();
 
+    private int connectionTimeoutDuration = -1;
+
+    private int connectionRequestTimeoutDuration = -1;
+
+    private int socketTimeoutDuration = -1;
+
     public EndpointSecurity(EndpointSecurity endpointSecurity) {
 
         this.uniqueIdentifier = endpointSecurity.uniqueIdentifier;
@@ -61,7 +67,9 @@ public class EndpointSecurity {
         this.clientSecret = endpointSecurity.clientSecret;
         this.customParameters = endpointSecurity.customParameters;
         this.additionalProperties = endpointSecurity.additionalProperties;
-
+        this.connectionTimeoutDuration = endpointSecurity.connectionTimeoutDuration;
+        this.connectionRequestTimeoutDuration = endpointSecurity.connectionRequestTimeoutDuration;
+        this.socketTimeoutDuration = endpointSecurity.socketTimeoutDuration;
     }
 
     public EndpointSecurity() {
@@ -197,6 +205,30 @@ public class EndpointSecurity {
         this.apiKeyValue = apiKeyValue;
     }
 
+    public int getConnectionTimeoutDuration() {
+        return connectionTimeoutDuration;
+    }
+
+    public void setConnectionTimeoutDuration(int connectionTimeoutDuration) {
+        this.connectionTimeoutDuration = connectionTimeoutDuration;
+    }
+
+    public int getConnectionRequestTimeoutDuration() {
+        return connectionRequestTimeoutDuration;
+    }
+
+    public void setConnectionRequestTimeoutDuration(int connectionRequestTimeoutDuration) {
+        this.connectionRequestTimeoutDuration = connectionRequestTimeoutDuration;
+    }
+
+    public int getSocketTimeoutDuration() {
+        return socketTimeoutDuration;
+    }
+
+    public void setSocketTimeoutDuration(int socketTimeoutDuration) {
+        this.socketTimeoutDuration = socketTimeoutDuration;
+    }
+
     @Override
     public String toString() {
 
@@ -214,6 +246,9 @@ public class EndpointSecurity {
                 ", apiKeyValue='" + apiKeyValue + '\'' +
                 ", customParameters='" + customParameters + '\'' +
                 ", additionalProperties=" + additionalProperties +
+                ", connectionTimeoutDuration=" + connectionTimeoutDuration +
+                ", connectionRequestTimeoutDuration=" + connectionRequestTimeoutDuration +
+                ", socketTimeoutDuration=" + socketTimeoutDuration +
                 '}';
     }
 }

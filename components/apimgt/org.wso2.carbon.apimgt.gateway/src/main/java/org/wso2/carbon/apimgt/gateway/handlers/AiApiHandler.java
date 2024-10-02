@@ -142,15 +142,8 @@ public class AiApiHandler extends AbstractHandler {
                 log.error("LLM provider service not found for the provider with ID: " + llmProviderId);
                 return false;
             }
-            String payload = null;
             Map<String, String> metadataMap = new HashMap<>();
-            if (!extractPayloadFromContext(messageContext, providerConfiguration, payload)) {
-                log.error("Error occurred while reading payload for API with path: " + path + " in tenant domain: "
-                        + tenantDomain);
-                metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_IS_EMPTY_PAYLOAD, Boolean.toString(true));
-            } else {
-                metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_IS_EMPTY_PAYLOAD, Boolean.toString(false));
-            }
+            String payload = extractPayloadFromContext(messageContext, providerConfiguration);
             Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
             Map<String, String> headers = extractHeadersFromContext(messageContext);
 
@@ -238,11 +231,9 @@ public class AiApiHandler extends AbstractHandler {
      *
      * @param messageContext the Synapse MessageContext
      * @param config         LLM provider configuration
-     * @param payload        Payload
-     * @return whether payload is extracted successfully
+     * @return extracted payload
      */
-    private boolean extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config,
-                                              String payload)
+    private String extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config)
             throws XMLStreamException, IOException {
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
@@ -250,11 +241,10 @@ public class AiApiHandler extends AbstractHandler {
 
         for (LLMProviderMetadata metadata : config.getMetadata()) {
             if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equals(metadata.getInputSource())) {
-                payload = getPayload(axis2MessageContext);
-                break;
+                return getPayload(axis2MessageContext);
             }
         }
-        return payload != null;
+        return null;
     }
 
     /**
