@@ -39,8 +39,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             permittedKeyManagerConfigurations.addAll(globalKeyManagerConfigurations);
             permittedKeyManagerConfigurations = APIUtils
                     .filterAllowedKeyManagersForOrganizations(permittedKeyManagerConfigurations, orgInfo);
-            return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(permittedKeyManagerConfigurations, orgInfo))
-                    .build();
+            return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(permittedKeyManagerConfigurations)).build();
 
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
