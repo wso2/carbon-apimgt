@@ -2061,9 +2061,9 @@ public class ApiMgtDAO {
      * @throws APIManagementException if failed to get subscribers for given provider
      */
     public Set<Subscriber> getSubscribersOfAPIWithoutDuplicates(Identifier identifier,
-            Map<Integer, Integer> subscriberMap) throws APIManagementException {
+            List<String> subscriberMap) throws APIManagementException {
 
-        Set<Subscriber> subscribers = new HashSet<Subscriber>();
+        Set<Subscriber> subscribers = new HashSet<>();
 
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_SUBSCRIBERS_OF_API_SQL);) {
@@ -2077,9 +2077,9 @@ public class ApiMgtDAO {
                     Subscriber subscriber = new Subscriber(resultSet.getString(APIConstants.SUBSCRIBER_FIELD_USER_ID));
                     subscriber.setSubscribedDate(resultSet.getTimestamp(APIConstants.SUBSCRIBER_FIELD_DATE_SUBSCRIBED));
 
-                    if (!subscriberMap.containsKey(subscriber.getId())) {
+                    if (!subscriberMap.contains(subscriber.getName())) {
                         subscribers.add(subscriber);
-                        subscriberMap.put(subscriber.getId(), 1);
+                        subscriberMap.add(subscriber.getName());
                     }
                 }
             }

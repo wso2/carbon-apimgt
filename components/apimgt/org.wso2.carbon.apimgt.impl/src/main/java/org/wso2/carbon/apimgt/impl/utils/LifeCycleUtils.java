@@ -348,7 +348,7 @@ public class LifeCycleUtils {
             }
 
             if (JavaUtils.isTrueExplicitly(isNotificationEnabled)) {
-                Map<Integer, Integer> subscriberMap = new HashMap<>();
+                List<String> subscriberMap = new ArrayList<>();
                 List<Identifier> identifiers = getOldPublishedAPIOrAPIProductList(apiTypeWrapper);
 
                 for (Identifier identifier : identifiers) {
