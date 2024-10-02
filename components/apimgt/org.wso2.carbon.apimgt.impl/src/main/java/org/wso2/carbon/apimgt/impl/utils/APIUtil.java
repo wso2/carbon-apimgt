@@ -2073,6 +2073,19 @@ public final class APIUtil {
     }
 
     /**
+     * Check if Retry Call With New OAuth Token is enabled
+     *
+     * @return True if Retry Call With New OAuth Token is enabled
+     */
+    public static boolean isRetryCallWithNewOAuthTokenEnabled() {
+        String property = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.MEDIATOR_CONFIG + APIConstants.
+                        OAuthConstants.OAUTH_MEDIATION_CONFIG + APIConstants.OAuthConstants.
+                        ENABLE_RETRY_CALL_WITH_NEW_TOKEN);
+        return Boolean.parseBoolean(property);
+    }
+
+    /**
      * Check if an issuer for internal keys has been defined
      *
      * @return String internalKeyIssuer

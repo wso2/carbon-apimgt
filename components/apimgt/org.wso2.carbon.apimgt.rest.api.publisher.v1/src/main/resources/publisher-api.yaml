@@ -13183,6 +13183,12 @@ components:
             Is Portal Configuration Only Mode enabled
           example: false
           default: false
+        retryCallWithNewOAuthTokenEnabled:
+          type: boolean
+          description: |
+            Is Retry Call With New OAuth Token Enabled
+          example: true
+          default: true
         crossTenantSubscriptionEnabled:
           type: boolean
           description: |

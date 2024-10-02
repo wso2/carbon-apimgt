@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 
 /**
  * This will initialise a velocity context to used in the template and populate it with api name, version and context
@@ -98,6 +99,9 @@ public class APIConfigContext extends ConfigContext {
         }
         // API test key
         context.put("testKey", api.getTestKey());
+
+        // Set the enable retry call with new Oauth token property
+        context.put(APIConstants.ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN, isRetryCallWithNewOAuthTokenEnabled());
     }
 
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
@@ -134,9 +138,25 @@ public class APIConfigContext extends ConfigContext {
         }
         // API test key
         context.put("testKey", apiProduct.getTestKey());
+
+
+        // Set the enable retry call with new Oauth token property
+        context.put(APIConstants.ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN, isRetryCallWithNewOAuthTokenEnabled());
     }
 
     public String getAPIName(API api) {
         return api.getId().getApiName();
+    }
+
+    /**
+     * Checks whether retrying with a new OAuth token is enabled based on the configuration.
+     *
+     * @return {@code true} if retry with a new OAuth token is enabled; {@code false} otherwise.
+     */
+    protected boolean isRetryCallWithNewOAuthTokenEnabled() {
+        String property = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getFirstProperty(
+                APIConstants.MEDIATOR_CONFIG + APIConstants.OAuthConstants.OAUTH_MEDIATION_CONFIG + APIConstants.
+                        OAuthConstants.ENABLE_RETRY_CALL_WITH_NEW_TOKEN);
+        return Boolean.parseBoolean(property);
     }
 }
