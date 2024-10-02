@@ -1057,7 +1057,13 @@ public class RegistryPersistenceUtil {
                                     isRoleEveryOne = true;
                                 }
                                 authManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
-                                publisherAccessRoles.append(",").append(role.trim().toLowerCase());
+                                if (APIConstants.NULL_USER_ROLE_LIST
+                                        .equals(publisherAccessRoles.toString())) {
+                                    // skip appending roles to "null" and start new list
+                                    publisherAccessRoles = new StringBuilder(role.trim().toLowerCase());
+                                } else {
+                                    publisherAccessRoles.append(",").append(role.trim().toLowerCase());
+                                }
                             }
                         }
                     }
@@ -1095,7 +1101,13 @@ public class RegistryPersistenceUtil {
                                 isRoleEveryOne = true;
                             }
                             authorizationManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
-                            publisherAccessRoles.append(",").append(role.toLowerCase());
+                            if (APIConstants.NULL_USER_ROLE_LIST
+                                    .equals(publisherAccessRoles.toString())) {
+                                // skip appending roles to "null" and start new list
+                                publisherAccessRoles = new StringBuilder(role.trim().toLowerCase());
+                            } else {
+                                publisherAccessRoles.append(",").append(role.trim().toLowerCase());
+                            }
                         }
                     }
                     if (!isRoleEveryOne) {
