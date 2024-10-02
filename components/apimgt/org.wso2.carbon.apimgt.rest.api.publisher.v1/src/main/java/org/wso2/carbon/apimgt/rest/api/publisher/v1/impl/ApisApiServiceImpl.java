@@ -3436,8 +3436,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param providerName       Provider name of the API that needs to be exported
      * @param format             Format of output documents. Can be YAML or JSON
      * @param preserveStatus     Preserve API status on export
-     * @param gatewayEnvironment
-     * @return
+     * @param gatewayEnvironment Gateway environment of the API to be exported
+     * @return API export response as an archive
      */
     @Override public Response exportAPI(String apiId, String name, String version, String revisionNum,
                                         String providerName, String format, Boolean preserveStatus,
@@ -3470,12 +3470,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIIdentifier apiIdentifier = new APIIdentifier(providerName, name, version);
                 apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
             }
-            RuntimeArtifactDto runtimeArtifactDto;
-            if (StringUtils.isNotEmpty(organization) && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
-                    .equalsIgnoreCase(organization)) {
-                runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(apiId, gatewayEnvironment,
-                        APIConstants.API_GATEWAY_TYPE_ENVOY);
-            } else {
+            RuntimeArtifactDto runtimeArtifactDto = null;
+            if (StringUtils.isNotEmpty(organization)) {
                 runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, gatewayEnvironment,
                         APIConstants.API_GATEWAY_TYPE_ENVOY, organization);
             }
