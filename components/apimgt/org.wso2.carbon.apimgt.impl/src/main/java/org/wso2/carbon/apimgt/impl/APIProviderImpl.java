@@ -5281,10 +5281,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public String getPolicyType(OperationPolicy policy, String apiUUId, String tenantDomain) throws APIManagementException {
+    public String getPolicyType(OperationPolicy policy, String apiUUId, String tenantDomain)
+            throws APIManagementException {
         String policyType = null;
         if (policy.getPolicyId() == null) {
-            policyType = ImportExportConstants.POLICY_TYPE_MEDIATION;
+            policyType = ImportExportConstants.POLICY_TYPE_API;
         } else {
             OperationPolicyData basicPolicyData =
                     getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
@@ -5317,8 +5318,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (isAPILevelPolicySupportEnabled) {
             List<OperationPolicy> apiPolicies = api.getApiPolicies();
             for (OperationPolicy policy : apiPolicies) {
-                // TODO : confirm whether common polices were there in previous versions,
-                //  if not this is always of api type
                 String policyType = getPolicyType(policy, api.getUuid(),
                         tenantDomain);
                 policy.setPolicyType(policyType);
