@@ -14653,8 +14653,10 @@ public class ApiMgtDAO {
                 prepStmt.setString(4, String.valueOf(provider.isBuiltInSupport()));
                 prepStmt.setString(5, provider.getOrganization());
                 prepStmt.setString(6, provider.getDescription());
-                prepStmt.setString(7, provider.getApiDefinition());
-                prepStmt.setString(8, provider.getConfigurations());
+                prepStmt.setBinaryStream(7, new ByteArrayInputStream(provider
+                        .getApiDefinition().getBytes()));
+                prepStmt.setBinaryStream(8, new ByteArrayInputStream(provider
+                        .getConfigurations().getBytes()));
                 int rowsAffected = prepStmt.executeUpdate();
                 if (rowsAffected > 0) {
                     conn.commit();
@@ -14699,7 +14701,13 @@ public class ApiMgtDAO {
                     provider.setOrganization(resultSet.getString("ORGANIZATION"));
                     provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
                     provider.setDescription(resultSet.getString("DESCRIPTION"));
-                    provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+                    try (InputStream configStream = resultSet.getBinaryStream("CONFIGURATIONS")) {
+                        if (configStream != null) {
+                            provider.setConfigurations(IOUtils.toString(configStream));
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while retrieving LLM configuration", e);
+                    }
                     providerList.add(provider);
                 }
             }
@@ -14934,8 +14942,20 @@ public class ApiMgtDAO {
             provider.setApiVersion(resultSet.getString("API_VERSION"));
             provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
             provider.setDescription(resultSet.getString("DESCRIPTION"));
-            provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
-            provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+            try (InputStream apiDefStream = resultSet.getBinaryStream("API_DEFINITION")) {
+                if (apiDefStream != null) {
+                    provider.setApiDefinition(IOUtils.toString(apiDefStream));
+                }
+            } catch (IOException e) {
+                log.error("Error while retrieving LLM API definition", e);
+            }
+            try (InputStream configStream = resultSet.getBinaryStream("CONFIGURATIONS")) {
+                if (configStream != null) {
+                    provider.setConfigurations(IOUtils.toString(configStream));
+                }
+            } catch (IOException e) {
+                log.error("Error while retrieving LLM configuration", e);
+            }
             return provider;
 
         } catch (SQLException e) {
@@ -14962,8 +14982,20 @@ public class ApiMgtDAO {
             provider.setApiVersion(resultSet.getString("API_VERSION"));
             provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
             provider.setDescription(resultSet.getString("DESCRIPTION"));
-            provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
-            provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+            try (InputStream apiDefStream = resultSet.getBinaryStream("API_DEFINITION")) {
+                if (apiDefStream != null) {
+                    provider.setApiDefinition(IOUtils.toString(apiDefStream));
+                }
+            } catch (IOException e) {
+                log.error("Error while retrieving LLM API definition", e);
+            }
+            try (InputStream configStream = resultSet.getBinaryStream("CONFIGURATIONS")) {
+                if (configStream != null) {
+                    provider.setConfigurations(IOUtils.toString(configStream));
+                }
+            } catch (IOException e) {
+                log.error("Error while retrieving LLM configuration", e);
+            }
             return provider;
 
         } catch (SQLException e) {
