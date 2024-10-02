@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.impl.APIConsumerImpl;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.KeyManagerMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;
@@ -36,6 +37,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             List<KeyManagerConfigurationDTO> globalKeyManagerConfigurations
                     = apiAdmin.getGlobalKeyManagerConfigurations();
             permittedKeyManagerConfigurations.addAll(globalKeyManagerConfigurations);
+            permittedKeyManagerConfigurations = APIUtils
+                    .filterAllowedKeyManagersForOrganizations(permittedKeyManagerConfigurations, orgInfo);
             return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(permittedKeyManagerConfigurations, orgInfo))
                     .build();
 

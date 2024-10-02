@@ -9431,6 +9431,7 @@ public class ApiMgtDAO {
                         log.error("Error while converting configurations in " + uuid, e);
                     }
                     keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(keyManagerConfigurationDTO.getUuid()));
+                    keyManagerConfigurationDTO.setAllowedOrganizations(getKeymanagerVisibleOrgs(uuid));
                     keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
                 }
             }
@@ -9470,6 +9471,7 @@ public class ApiMgtDAO {
                         keyManagerConfigurationDTO.setAdditionalProperties(map);
                     }
                     keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(keyManagerConfigurationDTO.getUuid()));
+                    keyManagerConfigurationDTO.setAllowedOrganizations(getKeymanagerVisibleOrgs(uuid));
                     return keyManagerConfigurationDTO;
                 }
             }
@@ -9541,6 +9543,7 @@ public class ApiMgtDAO {
                         keyManagerConfigurationDTO.setAdditionalProperties(map);
                     }
                     keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(uuid));
+                    keyManagerConfigurationDTO.setAllowedOrganizations(getKeymanagerVisibleOrgs(uuid));
                     return keyManagerConfigurationDTO;
                 }
             }
@@ -9583,6 +9586,7 @@ public class ApiMgtDAO {
                         keyManagerConfigurationDTO.setAdditionalProperties(map);
                     }
                     keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(uuid));
+                    keyManagerConfigurationDTO.setAllowedOrganizations(getKeymanagerVisibleOrgs(uuid));
                     return keyManagerConfigurationDTO;
                 }
             }
@@ -9621,6 +9625,18 @@ public class ApiMgtDAO {
                             addPermissionStatement.addBatch();
                         }
                         addPermissionStatement.executeBatch();
+                    }
+                }
+                List<String> allowedOrgs = keyManagerConfigurationDTO.getAllowedOrganizations();
+                if (allowedOrgs != null && !allowedOrgs.isEmpty()) {
+                    try (PreparedStatement addVisibleOrgsStatement = conn.prepareStatement(
+                            SQLConstants.KeyManagerOrgVisibilitySqlConstants.ADD_KEY_MANAGER_ORG_VISIBILITY_SQL)) {
+                        for (String org : allowedOrgs) {
+                            addVisibleOrgsStatement.setString(1, keyManagerConfigurationDTO.getUuid());
+                            addVisibleOrgsStatement.setString(2, org);
+                            addVisibleOrgsStatement.addBatch();
+                        }
+                        addVisibleOrgsStatement.executeBatch();
                     }
                 }
                 conn.commit();
@@ -9703,6 +9719,23 @@ public class ApiMgtDAO {
                         addPermissionStatement.executeBatch();
                     }
                 }
+                try (PreparedStatement deleteOrgStatement = conn.prepareStatement(SQLConstants
+                        .KeyManagerOrgVisibilitySqlConstants.DELETE_ALL_KEY_MANAGER_ORG_VISIBILITY_SQL)) {
+                    deleteOrgStatement.setString(1, keyManagerConfigurationDTO.getUuid());
+                    deleteOrgStatement.executeUpdate();
+                }
+                List<String> allowedOrgs = keyManagerConfigurationDTO.getAllowedOrganizations();
+                if (allowedOrgs != null && !allowedOrgs.isEmpty()) {
+                    try (PreparedStatement addVisibleOrgsStatement = conn.prepareStatement(
+                            SQLConstants.KeyManagerOrgVisibilitySqlConstants.ADD_KEY_MANAGER_ORG_VISIBILITY_SQL)) {
+                        for (String org : allowedOrgs) {
+                            addVisibleOrgsStatement.setString(1, keyManagerConfigurationDTO.getUuid());
+                            addVisibleOrgsStatement.setString(2, org);
+                            addVisibleOrgsStatement.addBatch();
+                        }
+                        addVisibleOrgsStatement.executeBatch();
+                    }
+                }
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -9775,6 +9808,30 @@ public class ApiMgtDAO {
         }
         return keyManagerPermissions;
     }
+    
+    public List<String> getKeymanagerVisibleOrgs(String keyManagerUUID) throws APIManagementException {
+        List<String> orgList = new ArrayList<String>();
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try {
+                String getKeyManagerPermissionQuery = SQLConstants.KeyManagerOrgVisibilitySqlConstants.GET_KEY_MANAGER_ORG_VISIBILITY_SQL;
+                PreparedStatement ps = conn.prepareStatement(getKeyManagerPermissionQuery);
+                ps.setString(1, keyManagerUUID);
+                ResultSet resultSet = ps.executeQuery();
+                while (resultSet.next()) {
+                    orgList.add(resultSet.getString("ALLOWED_ORGANIZATIONS"));
+                }
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Failed to get Key Manager organizations information for Key Manager " + keyManagerUUID,
+                        e);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager organizations with id " + keyManagerUUID, e);
+        }
+        return orgList;
+    }
+    
     public List<KeyManagerConfigurationDTO> getKeyManagerConfigurations() throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
@@ -9802,6 +9859,7 @@ public class ApiMgtDAO {
                         log.error("Error while converting configurations in " + uuid, e);
                     }
                     keyManagerConfigurationDTO.setPermissions(getKeyManagerPermissions(uuid));
+                    keyManagerConfigurationDTO.setAllowedOrganizations(getKeymanagerVisibleOrgs(uuid));
                     keyManagerConfigurationDTOS.add(keyManagerConfigurationDTO);
                 }
             }

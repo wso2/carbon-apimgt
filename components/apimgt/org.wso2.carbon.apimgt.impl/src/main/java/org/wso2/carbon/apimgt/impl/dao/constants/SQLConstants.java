@@ -3778,6 +3778,24 @@ public class SQLConstants {
     }
 
     /**
+     * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
+     */
+    public static class KeyManagerOrgVisibilitySqlConstants {
+
+        public static final String ADD_KEY_MANAGER_ORG_VISIBILITY_SQL =
+                " INSERT INTO" +
+                        " AM_KEY_MANAGER_ALLOWED_ORGS (KEY_MANAGER_UUID, ALLOWED_ORGANIZATIONS)" +
+                        " VALUES(?, ?)";
+
+        public static final String DELETE_ALL_KEY_MANAGER_ORG_VISIBILITY_SQL = "DELETE FROM AM_KEY_MANAGER_ALLOWED_ORGS" +
+                " WHERE KEY_MANAGER_UUID = ?";
+
+        public static final String GET_KEY_MANAGER_ORG_VISIBILITY_SQL =
+                "SELECT ALLOWED_ORGANIZATIONS" +
+                        " FROM AM_KEY_MANAGER_ALLOWED_ORGS " +
+                        " WHERE KEY_MANAGER_UUID = ?";
+    }
+    /**
      * Static class to hold database queries related to AM_TENANT_THEMES table
      */
     public static class TenantThemeConstants {

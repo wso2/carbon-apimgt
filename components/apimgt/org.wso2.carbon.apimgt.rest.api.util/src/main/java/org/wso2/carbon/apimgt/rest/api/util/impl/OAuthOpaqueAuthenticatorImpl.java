@@ -259,7 +259,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
             orgNameClaim = "http://wso2.org/claims/organization";
         }
         if (StringUtils.isBlank(orgIdClaim)) {
-            orgIdClaim = "http://wso2.org/claims/organizationid";
+            orgIdClaim = "http://wso2.org/claims/organizationId";
         }
         
         String organization = null;

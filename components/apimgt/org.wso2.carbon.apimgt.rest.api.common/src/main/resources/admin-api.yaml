@@ -4958,7 +4958,10 @@ components:
             - EXCHANGED
             - DIRECT
             - BOTH
-
+        allowedOrganizations:
+          type: array
+          items:
+            type: string
     KeyManagerEndpoint:
       title: Key Manager Endpoint.
       required:
