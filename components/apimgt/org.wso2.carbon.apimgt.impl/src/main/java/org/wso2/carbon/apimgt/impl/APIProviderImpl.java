@@ -2753,6 +2753,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         deleteScopes(localScopeKeysToDelete, tenantId);
+        if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            apiMgtDAO.deleteAIConfiguration(api.getUuid(), null);
+        }
         apiMgtDAO.deleteAPI(api.getUuid());
         if (log.isDebugEnabled()) {
             log.debug("API : " + apiIdentifier + " is successfully deleted from the database and Key Manager.");
@@ -6722,6 +6725,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
+        apiMgtDAO.deleteAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {
