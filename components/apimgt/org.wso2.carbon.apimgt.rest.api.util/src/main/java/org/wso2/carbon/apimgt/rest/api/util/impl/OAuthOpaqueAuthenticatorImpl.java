@@ -253,11 +253,17 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
         int tenantId = MultitenantConstants.SUPER_TENANT_ID;
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String claim = config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_CLAIM_URI);
-        if (StringUtils.isBlank(claim)) {
-            claim = "http://wso2.org/claims/organization";
+        String orgNameClaim = config.getOrgAccessControl().getOrgNameLocalClaim();
+        String orgIdClaim = config.getOrgAccessControl().getOrgIdLocalClaim();
+        if (StringUtils.isBlank(orgNameClaim)) {
+            orgNameClaim = "http://wso2.org/claims/organization";
         }
+        if (StringUtils.isBlank(orgIdClaim)) {
+            orgIdClaim = "http://wso2.org/claims/organizationId";
+        }
+        
         String organization = null;
+        String organizationId = null;
         String[] groupIdArray = null;
         try {
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -276,7 +282,9 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
             UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
             UserStoreManager manager = realm.getUserStoreManager();
             organization =
-                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
+                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgNameClaim, null);
+            organizationId =
+                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgIdClaim, null);
             if (organization != null) {
                 if (organization.contains(",")) {
                     groupIdArray = organization.split(",");
@@ -287,6 +295,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     organization = organization.trim();
                     groupIdArray = new String[] {organization};
                     orgInfo.setName(organization); // check for multiple orgs
+                    orgInfo.setId(organizationId);
                 }
             } else {
                 // If claim is null then returning a empty string
