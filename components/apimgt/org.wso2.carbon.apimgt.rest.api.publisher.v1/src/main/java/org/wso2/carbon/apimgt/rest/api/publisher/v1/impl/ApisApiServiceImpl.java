@@ -2630,7 +2630,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
             //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().getStatus());
+            validateAPIOperationsPerLC(apiInfo.getStatus());
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //Handle URL and file based definition imports
