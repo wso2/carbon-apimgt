@@ -273,7 +273,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "    SUB.TENANT_ID = ?"+
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
-                    " AND APP.NAME like ?"+
+                    " OR APP.NAME like ?"+
                     " )) a " +
                     " )" +
                     " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
