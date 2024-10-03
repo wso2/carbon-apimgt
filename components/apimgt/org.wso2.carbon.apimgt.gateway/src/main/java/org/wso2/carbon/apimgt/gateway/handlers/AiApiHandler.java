@@ -19,7 +19,6 @@ import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -28,14 +27,11 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.XML;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
-import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
@@ -48,7 +44,6 @@ import org.wso2.carbon.core.util.CryptoUtil;
 import javax.ws.rs.core.MediaType;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -133,7 +128,7 @@ public class AiApiHandler extends AbstractHandler {
             LLMProviderConfiguration providerConfiguration = new Gson().fromJson(config,
                     LLMProviderConfiguration.class);
             if (isRequest) {
-                addEndpointConfigurationToMessageContext(messageContext, aiConfiguration.getAiEndpointConfiguration(),
+                addEndpointConfigurationToMessageContext(messageContext,
                         providerConfiguration);
             }
             LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
@@ -179,39 +174,24 @@ public class AiApiHandler extends AbstractHandler {
     /**
      * Adds endpoint configuration to the message context.
      *
-     * @param messageContext          the Synapse MessageContext
-     * @param aiEndpointConfiguration AI endpoint configuration
-     * @param providerConfiguration   LLM provider configuration
+     * @param messageContext        the Synapse MessageContext
+     * @param providerConfiguration LLM provider configuration
      */
     private void addEndpointConfigurationToMessageContext(MessageContext messageContext,
-                                                          AIEndpointConfiguration aiEndpointConfiguration,
-                                                          LLMProviderConfiguration providerConfiguration)
-            throws CryptoException, URISyntaxException {
+                                                          LLMProviderConfiguration providerConfiguration) {
 
-        if (aiEndpointConfiguration != null) {
-            org.apache.axis2.context.MessageContext axCtx =
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            AuthenticationContext authContext =
-                    (AuthenticationContext) messageContext.getProperty(APISecurityUtils.API_AUTH_CONTEXT);
-            String authValue = authContext.getKeyType().equals(org.wso2.carbon.apimgt.impl.
-                    APIConstants.API_KEY_TYPE_PRODUCTION)
-                    ? aiEndpointConfiguration.getProductionAuthValue()
-                    : aiEndpointConfiguration.getSandboxAuthValue();
-            if (providerConfiguration.getAuthHeader() != null) {
-                Map<String, String> transportHeaders =
-                        (Map<String, String>) axCtx.getProperty(org.apache.axis2.context.MessageContext
-                                .TRANSPORT_HEADERS);
-                transportHeaders.put(providerConfiguration.getAuthHeader(), decryptSecret(authValue));
-
-                // TODO: Handle encoded scenario
-                transportHeaders.remove(HttpHeaders.ACCEPT_ENCODING);
-            } else if (providerConfiguration.getAuthQueryParameter() != null) {
-                URI updatedFullPath =
-                        new URIBuilder((String) axCtx.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX))
-                                .addParameter(providerConfiguration.getAuthQueryParameter(),
-                                        decryptSecret(authValue)).build();
-                axCtx.setProperty(APIMgtGatewayConstants.REST_URL_POSTFIX, updatedFullPath.toString());
-            }
+        org.apache.axis2.context.MessageContext axCtx =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map<String, String> transportHeaders =
+                (Map<String, String>) axCtx.getProperty(org.apache.axis2.context.MessageContext
+                        .TRANSPORT_HEADERS);
+        transportHeaders.remove(HttpHeaders.ACCEPT_ENCODING);
+        if (providerConfiguration.getAuthHeader() != null) {
+            axCtx.setProperty(APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE,
+                    APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_HEADER);
+        } else if (providerConfiguration.getAuthQueryParameter() != null) {
+            axCtx.setProperty(APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE,
+                    APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER);
         }
     }
 
