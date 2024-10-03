@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -3868,8 +3869,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         mappedAPI.removeAllTiers();
                         mappedAPI.setAvailableTiers(availableTiers);
                         populateGatewayVendor(mappedAPI);
-                        populateEgressStatus(mappedAPI);
-                        populateAPISubtype(mappedAPI);
+                        populateApiInfo(mappedAPI, false);
                         apiList.add(mappedAPI);
                     } catch (APIManagementException e) {
                         log.warn("Retrieving API details from DB failed for API: " + mappedAPI.getUuid() + " " + e);
@@ -3907,18 +3907,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
                     populateAPIProductInformation(uuid, organization, apiProduct);
                     populateDefaultVersion(apiProduct);
-                    populateAPIStatus(apiProduct);
-                    populateEgressStatus(apiProduct);
+                    populateApiInfo(apiProduct);
                     apiProduct = addTiersToAPI(apiProduct, organization);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
-                    populateAPIStatus(api);
+                    populateApiInfo(api, true);
                     populateGatewayVendor(api);
-                    populateEgressStatus(api);
-                    populateAPISubtype(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
@@ -3930,16 +3927,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
         }
-    }
-
-    private void populateAPIStatus(API api) throws APIManagementException {
-
-        api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getUuid()));
-    }
-
-    private void populateAPIStatus(APIProduct apiProduct) throws APIManagementException {
-
-        apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getUuid()));
     }
 
     protected void checkVisibilityPermission(String userNameWithTenantDomain, String visibility, String visibilityRoles)
@@ -4702,20 +4689,28 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return false;
     }
 
-    private void populateEgressStatus(API api) throws APIManagementException {
-        if (api.isRevision()) {
-            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getRevisionedApiId()));
-        } else {
-            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getUuid()));
+    private void populateApiInfo(API api, boolean setStatus) throws APIManagementException {
+
+        String apiId = api.isRevision() ? api.getRevisionedApiId() : api.getUuid();
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+
+        if (apiInfo == null) {
+            return;
+        }
+        api.setEgress(apiInfo.isEgress());
+        api.setSubtype(apiInfo.getApiSubtype());
+        if (setStatus) {
+            api.setStatus(apiInfo.getStatus());
         }
     }
 
-    private void populateEgressStatus(APIProduct apiProduct) throws APIManagementException {
-        if (apiProduct.isRevision()) {
-            apiProduct.setEgress(apiMgtDAO
-                    .checkForEgressAPIWithUUID(apiProduct.getRevisionedApiProductId()));
-        } else {
-            apiProduct.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(apiProduct.getUuid()));
+    private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
+
+        String apiId = apiProduct.isRevision() ? apiProduct.getRevisionedApiProductId() : apiProduct.getUuid();
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+        if (apiInfo != null) {
+            apiProduct.setEgress(apiInfo.isEgress());
+            apiProduct.setState(apiInfo.getStatus());
         }
     }
 

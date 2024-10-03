@@ -35,7 +35,7 @@ public class APIInfo {
     private String createdBy;
     private String updatedTime;
     private String updatedBy;
-    private APIStatus status;
+    private String status;
     private int revisionsCreated;
     private boolean isRevision;
     private String organization;
@@ -179,12 +179,12 @@ public class APIInfo {
         this.updatedBy = updatedBy;
     }
 
-    public APIStatus getStatus() {
+    public String getStatus() {
 
         return status;
     }
 
-    public void setStatus(APIStatus status) {
+    public void setStatus(String status) {
 
         this.status = status;
     }
@@ -242,7 +242,7 @@ public class APIInfo {
         private String createdBy;
         private String updatedTime;
         private String updatedBy;
-        private APIStatus status;
+        private String status;
         private int revisionsCreated;
         private boolean isRevision;
         private String organization;
@@ -326,7 +326,7 @@ public class APIInfo {
             return this;
         }
 
-        public Builder status(APIStatus status) {
+        public Builder status(String status) {
 
             this.status = status;
             return this;

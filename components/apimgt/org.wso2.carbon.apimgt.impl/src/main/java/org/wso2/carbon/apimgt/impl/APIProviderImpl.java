@@ -225,6 +225,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -5413,10 +5414,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateRevisionInformation(api, uuid);
                 populateAPIInformation(uuid, organization, api);
                 populateAPILevelPolicies(api);
-                populateAPISubtype(api);
-                if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
-                    populateAiConfiguration(api);
-                }
 
                 if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
@@ -5426,8 +5423,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         loadMediationPoliciesToAPI(api, organization);
                     }
                 }
-                populateAPIStatus(api);
-                populateEgressStatus(api);
+                populateApiInfo(api);
+                if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                    populateAiConfiguration(api);
+                }
                 populateDefaultVersion(api);
                 return api;
             } else {
@@ -5525,11 +5524,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 List<API> apiList = new ArrayList<>(list.size());
                 for (PublisherAPIInfo publisherAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
-                    populateAPIStatus(mappedAPI);
+                    populateApiInfo(mappedAPI);
                     populateDefaultVersion(mappedAPI);
                     populateGatewayVendor(mappedAPI);
-                    populateEgressStatus(mappedAPI);
-                    populateAPISubtype(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 result.setApis(apiList);
@@ -5558,6 +5555,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setRevisionId(apiRevision.getId());
         }
     }
+
     private void populateRevisionInformation(APIProduct apiProduct, String revisionUUID) throws APIManagementException {
         APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(revisionUUID);
         if (apiRevision != null && !StringUtils.isEmpty(apiRevision.getApiUUID())) {
@@ -5567,50 +5565,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void populateAPIStatus(API api) throws APIManagementException {
-        if (api.isRevision()) {
-            api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getRevisionedApiId()));
-        } else {
-            api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getUuid()));
+    private void populateApiInfo(API api) throws APIManagementException {
+
+        String apiId = api.isRevision() ? api.getRevisionedApiId() : api.getUuid();
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+
+        if (apiInfo == null) {
+            return;
         }
+        api.setEgress(apiInfo.isEgress());
+        api.setStatus(apiInfo.getStatus());
+        api.setSubtype(apiInfo.getApiSubtype());
     }
 
+    private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
 
-    private void populateAPIStatus(APIProduct apiProduct) throws APIManagementException {
+        APIInfo apiInfo;
         if (apiProduct.isRevision()) {
-            apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getRevisionedApiProductId()));
+            apiInfo = apiMgtDAO.getAPIInfoByUUID(apiProduct.getRevisionedApiProductId());
         } else {
-            apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getUuid()));
+            apiInfo = apiMgtDAO.getAPIInfoByUUID(apiProduct.getUuid());
         }
-    }
-
-    private void populateEgressStatus(API api) throws APIManagementException {
-        if (api.isRevision()) {
-            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getRevisionedApiId()));
-        } else {
-            api.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(api.getUuid()));
-        }
-    }
-
-    private void populateEgressStatus(APIProduct apiProduct) throws APIManagementException {
-        if (apiProduct.isRevision()) {
-            apiProduct.setEgress(apiMgtDAO.
-                    checkForEgressAPIWithUUID(apiProduct.getRevisionedApiProductId()));
-        } else {
-            apiProduct.setEgress(apiMgtDAO.checkForEgressAPIWithUUID(apiProduct.getUuid()));
-        }
-    }
-
-    /**
-     * This method populates the subtype in the API.
-     * @param api API that needs to be populated with the subtype
-     * @throws APIManagementException
-     */
-    private void populateAPISubtype(API api) throws APIManagementException {
-        if (api.isRevision()) {
-            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getRevisionedApiId()));
-        } else {
-            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getUuid()));
+        if (apiInfo != null) {
+            apiProduct.setEgress(apiInfo.isEgress());
+            apiProduct.setState(apiInfo.getStatus());
         }
     }
 
@@ -5626,9 +5604,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         product.getAccessControlRoles());
                 populateRevisionInformation(product, uuid);
                 populateAPIProductInformation(uuid, organization, product);
-                populateAPIStatus(product);
                 populateAPITier(product);
-                populateEgressStatus(product);
+                populateApiInfo(product);
                 if (migrationEnabled == null) {
                     populateDefaultVersion(product);
                 }
@@ -5668,11 +5645,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 List<Object> apiList = new ArrayList<>();
                 for (PublisherAPIInfo publisherAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
-                    populateAPIStatus(mappedAPI);
+                    populateApiInfo(mappedAPI);
                     populateDefaultVersion(mappedAPI);
                     populateGatewayVendor(mappedAPI);
-                    populateEgressStatus(mappedAPI);
-                    populateAPISubtype(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -6073,8 +6048,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setMonetizationEnabled(publisherAPIInfo.getMonetizationStatus());
                     mappedAPI.setContextTemplate(publisherAPIInfo.getContext());
                     populateDefaultVersion(mappedAPI);
-                    populateAPIStatus(mappedAPI);
-                    populateEgressStatus(mappedAPI);
+                    populateApiInfo(mappedAPI);
                     productList.add(mappedAPI);
                 }
                 productSet.addAll(productList);

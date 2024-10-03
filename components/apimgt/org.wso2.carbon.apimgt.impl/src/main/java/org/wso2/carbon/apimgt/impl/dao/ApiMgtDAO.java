@@ -10060,7 +10060,7 @@ public class ApiMgtDAO {
                                 .provider(resultSet.getString("API_PROVIDER"))
                                 .context(context)
                                 .contextTemplate(contextTemplate)
-                                .status(APIUtil.getApiStatus(resultSet.getString("STATUS")))
+                                .status(resultSet.getString("STATUS"))
                                 .apiType(apiType)
                                 .apiSubtype(apiSubtype)
                                 .createdBy(resultSet.getString("CREATED_BY"))
@@ -22830,32 +22830,6 @@ public class ApiMgtDAO {
         blockConditionsDTO.setUUID(resultSet.getString("UUID"));
         blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
         return blockConditionsDTO;
-    }
-
-    /**
-     * This returns whether the API is Egress or not (1 or 0)
-     *
-     * @param uuid
-     * @return
-     * @throws APIManagementException
-     */
-    public int checkForEgressAPIWithUUID(String uuid) throws APIManagementException {
-
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            try (PreparedStatement preparedStatement =
-                         connection.prepareStatement(SQLConstants.CHECK_API_EGRESS_WITH_UUID)) {
-                preparedStatement.setString(1, uuid);
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        return resultSet.getInt("IS_EGRESS");
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error while retrieving apimgt connection", e,
-                    ExceptionCodes.INTERNAL_ERROR);
-        }
-        return 0;
     }
 
     /**
