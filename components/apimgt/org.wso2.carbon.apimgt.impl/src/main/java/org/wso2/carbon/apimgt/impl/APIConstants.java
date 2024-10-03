@@ -473,6 +473,7 @@ public final class APIConstants {
     public static final String X5T256_PARAMETER = "x5t#S256";
     public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
+    public static final String ENCODE_X5T_WITHOUT_PADDING = "EncodeX5tWithoutPadding";
     public static final String TOKEN_ISSUERS = "TokenIssuers";
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
     public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "ExcludedClaims";

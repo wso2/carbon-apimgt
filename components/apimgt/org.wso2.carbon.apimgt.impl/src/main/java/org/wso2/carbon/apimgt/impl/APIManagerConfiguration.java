@@ -1727,6 +1727,12 @@ public class APIManagerConfiguration {
                 OMElement configurationElement =
                         gatewayJWTConfigurationElement
                                 .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_CONFIGURATION));
+                OMElement encodeX5tWithoutPaddingElement = gatewayJWTConfigurationElement
+                        .getFirstChildWithName(new QName(APIConstants.ENCODE_X5T_WITHOUT_PADDING));
+                if (encodeX5tWithoutPaddingElement != null) {
+                    jwtConfigurationDto.setEncodeX5tWithoutPadding(Boolean.parseBoolean(
+                            encodeX5tWithoutPaddingElement.getText()));
+                }
                 if (configurationElement != null) {
                     OMElement claimsElement =
                             configurationElement
