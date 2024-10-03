@@ -47,6 +47,7 @@ public class JWTConfigurationDto {
     private boolean enableBase64Padding = false;
 
     private boolean useKid;
+    private boolean isEncodeX5tWithoutPadding;
 
     public boolean useKid() {
         return useKid;
@@ -208,5 +209,13 @@ public class JWTConfigurationDto {
 
     public boolean isEnableBase64Padding() {
         return enableBase64Padding;
+    }
+
+    public boolean isEncodeX5tWithoutPadding() {
+        return isEncodeX5tWithoutPadding;
+    }
+
+    public void setEncodeX5tWithoutPadding(boolean encodeX5tWithoutPadding) {
+        isEncodeX5tWithoutPadding = encodeX5tWithoutPadding;
     }
 }
