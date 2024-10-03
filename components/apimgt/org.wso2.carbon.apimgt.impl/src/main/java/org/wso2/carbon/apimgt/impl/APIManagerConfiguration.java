@@ -1233,6 +1233,11 @@ public class APIManagerConfiguration {
             if (enablePolicyDeployElement != null) {
                 throttleProperties.setEnablePolicyDeployment(Boolean.parseBoolean(enablePolicyDeployElement.getText()));
             }
+            OMElement enablePolicyRecreateElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_RECREATE));
+            if (enablePolicyRecreateElement != null) {
+                throttleProperties.setEnablePolicyRecreate(Boolean.parseBoolean(enablePolicyRecreateElement.getText()));
+            }
             // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
@@ -1497,6 +1502,13 @@ public class APIManagerConfiguration {
                             defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
                                     Long.parseLong(unauthenticatedTierElement.getText()));
                         }
+
+                        OMElement subscriptionlessTierElement = subscriptionPolicyLimits.getFirstChildWithName(new
+                                QName(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+                        if (subscriptionlessTierElement != null) {
+                            defaultThrottleTierLimits.put(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS,
+                                    Long.parseLong(subscriptionlessTierElement.getText()));
+                        }
                     }
 
                     OMElement applicationPolicyLimits = defaultTierLimits
@@ -1715,6 +1727,12 @@ public class APIManagerConfiguration {
                 OMElement configurationElement =
                         gatewayJWTConfigurationElement
                                 .getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_CONFIGURATION));
+                OMElement encodeX5tWithoutPaddingElement = gatewayJWTConfigurationElement
+                        .getFirstChildWithName(new QName(APIConstants.ENCODE_X5T_WITHOUT_PADDING));
+                if (encodeX5tWithoutPaddingElement != null) {
+                    jwtConfigurationDto.setEncodeX5tWithoutPadding(Boolean.parseBoolean(
+                            encodeX5tWithoutPaddingElement.getText()));
+                }
                 if (configurationElement != null) {
                     OMElement claimsElement =
                             configurationElement
@@ -2418,6 +2436,22 @@ public class APIManagerConfiguration {
             if (marketplaceAssistantEndpoint != null) {
                 marketplaceAssistantConfigurationDto.setEndpoint(marketplaceAssistantEndpoint.getText());
             }
+            OMElement marketplaceAssistantTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_TOKEN_ENDPOINT));
+            if (marketplaceAssistantTokenEndpoint != null) {
+                marketplaceAssistantConfigurationDto.setTokenEndpoint(marketplaceAssistantTokenEndpoint.getText());
+            }
+            OMElement marketplaceAssistantKey =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_KEY));
+
+            if (marketplaceAssistantKey != null) {
+                String Key = MiscellaneousUtil.resolve(marketplaceAssistantKey, secretResolver);
+                marketplaceAssistantConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
+                    marketplaceAssistantConfigurationDto.setKeyProvided(true);
+                }
+            }
+
             OMElement marketplaceAssistantToken =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.MARKETPLACE_ASSISTANT_AUTH_TOKEN));
 
@@ -2467,9 +2501,23 @@ public class APIManagerConfiguration {
             if (apiChatEndpoint != null) {
                 apiChatConfigurationDto.setEndpoint(apiChatEndpoint.getText());
             }
+            OMElement apiChatTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_TOKEN_ENDPOINT));
+            if (apiChatEndpoint != null) {
+                apiChatConfigurationDto.setTokenEndpoint(apiChatTokenEndpoint.getText());
+            }
+            OMElement apiChatKey =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_KEY));
+
+            if (apiChatKey != null) {
+                String Key = MiscellaneousUtil.resolve(apiChatKey, secretResolver);
+                apiChatConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
+                    apiChatConfigurationDto.setKeyProvided(true);
+                }
+            }
             OMElement apiChatToken =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_AUTH_TOKEN));
-
             if (apiChatToken != null) {
                 String AccessToken = MiscellaneousUtil.resolve(apiChatToken, secretResolver);
                 apiChatConfigurationDto.setAccessToken(AccessToken);
@@ -2477,7 +2525,6 @@ public class APIManagerConfiguration {
                     apiChatConfigurationDto.setAuthTokenProvided(true);
                 }
             }
-
             OMElement resources =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
 

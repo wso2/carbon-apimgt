@@ -1251,7 +1251,7 @@ public class APIMgtDAOTest {
         Set<APIStore> apiStoreSet = new HashSet<APIStore>();
         APIStore apiStore = new APIStore();
         apiStore.setDisplayName("wso2");
-        apiStore.setEndpoint("http://localhost:9433/store");
+        apiStore.setEndpoint("http://localhost:9433/devportal");
         apiStore.setName("wso2");
         apiStore.setType("wso2");
         apiStoreSet.add(apiStore);

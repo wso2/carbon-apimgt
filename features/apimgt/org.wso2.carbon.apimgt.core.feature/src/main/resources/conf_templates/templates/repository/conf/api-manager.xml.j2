@@ -89,6 +89,7 @@
         {% endif %}
         <GatewayJWTGeneration>
             <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
+            <EncodeX5tWithoutPadding>{{apim.jwt.encode_x5t_without_padding}}</EncodeX5tWithoutPadding>
             <Configuration>
             <ExcludedClaims>
                 {%- for claim in apim.jwt.gateway_generator.excluded_claims -%}
@@ -375,7 +376,11 @@
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
+        <Key>{{apim.ai.key}}</Key>
+
         <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
 
         <Resources>
             <PrepareResource>{{apim.ai.api_chat_prepare_resource}}</PrepareResource>
@@ -402,7 +407,11 @@
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
+        <Key>{{apim.ai.key}}</Key>
+
         <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
 
         <Resources>
             <ChatResource>{{apim.ai.marketplace_assistant_chat_resource}}</ChatResource>
@@ -434,9 +443,10 @@
       {% if apim.key_manager.enable_provisioned_app_validation is defined %}
       <EnableProvisionedAppValidation>{{apim.key_manager.enable_provisioned_app_validation}}</EnableProvisionedAppValidation>
       {% endif %}
-      {% if apim.key_manager.enable_apikey_subscription_validation is defined %}
-      <EnableAPIKeySubscriptionValidation>{{apim.key_manager.enable_apikey_subscription_validation}}</EnableAPIKeySubscriptionValidation>
+      {% if apim.key_manager.enable_lightweight_apikey_generation is defined %}
+      <EnableLightWeightAPIKeyGeneration>{{apim.key_manager.enable_lightweight_apikey_generation}}</EnableLightWeightAPIKeyGeneration>
       {% endif %}
+      <AllowSubscriptionValidationDisabling>{{apim.key_manager.allow_subscription_validation_disabling}}</AllowSubscriptionValidationDisabling>
     </APIKeyValidator>
 
 
@@ -1106,6 +1116,7 @@
                 <Silver>2000</Silver>
                 <Bronze>1000</Bronze>
                 <Unauthenticated>60</Unauthenticated>
+                <DefaultSubscriptionless>100000</DefaultSubscriptionless>
             </SubscriptionTierLimits>
             <ApplicationTierLimits>
                 <50PerMin>50</50PerMin>
@@ -1124,6 +1135,7 @@
         <EnableQueryParamConditions>{{apim.throttling.enable_query_param_based_throttling}}</EnableQueryParamConditions>
         <SkipRedeployingPolicies>RequestPreProcessorExecutionPlan{% for policy in apim.throttling.skip_redeploying_policies %}{{ "," if loop.first }}{{policy}}{{ "," if not loop.last }}{% endfor %}</SkipRedeployingPolicies>
         <EnablePolicyDeployment>{{apim.throttling.enable_policy_deployment}}</EnablePolicyDeployment>
+        <EnablePolicyRecreationOnStartup>{{apim.throttling.enable_policy_recreation_on_startup}}</EnablePolicyRecreationOnStartup>
     </ThrottlingConfigurations>
 
     <WorkflowConfigurations>
@@ -1689,6 +1701,8 @@
         <OAuth>
         <!-- If the access token expires, the server should reply with the duration of time the access token is granted for. -->
                  <ExpiresIn>{{apim.mediator_config.oauth.expires_in}}</ExpiresIn>
+                 <!-- Enable/Disable retry API calls with new access token when the access token is invalid. Default is true. -->
+                 <EnableRetryCallWithNewToken>{{apim.mediator_config.oauth.enable_retry_call_with_new_token}}</EnableRetryCallWithNewToken>
              </OAuth>
           </MediatorConfigs>
       {% endif %}

@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.EndpointSecurityModel;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.SecurityConfigContext;
@@ -63,7 +62,7 @@ public class SecurityConfigContextTest {
         api.setContextTemplate("/");
         api.setTransports(Constants.TRANSPORT_HTTP);
         api.setEndpointConfig(json);
-        ConfigContext configcontext = new APIConfigContext(api);
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
         SecurityConfigContext securityConfigContext =
                 new SecurityConfigContextWrapper(configcontext, api, apiManagerConfiguration);
@@ -110,7 +109,7 @@ public class SecurityConfigContextTest {
         api.setContextTemplate("/");
         api.setTransports(Constants.TRANSPORT_HTTP);
         api.setEndpointConfig(json);
-        ConfigContext configcontext = new APIConfigContext(api);
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
         SecurityConfigContext securityConfigContext =
                 new SecurityConfigContextWrapper(configcontext, api, apiManagerConfiguration);
@@ -167,7 +166,7 @@ public class SecurityConfigContextTest {
         api.setContextTemplate("/");
         api.setTransports(Constants.TRANSPORT_HTTP);
         api.setEndpointConfig(json);
-        ConfigContext configcontext = new APIConfigContext(api);
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
         SecurityConfigContext securityConfigContext =
                 new SecurityConfigContextWrapper(configcontext, api, apiManagerConfiguration);
@@ -208,7 +207,7 @@ public class SecurityConfigContextTest {
         api.setContextTemplate("/");
         api.setTransports(Constants.TRANSPORT_HTTP);
         api.setEndpointConfig(json);
-        ConfigContext configcontext = new APIConfigContext(api);
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
         SecurityConfigContext securityConfigContext =
                 new SecurityConfigContextWrapper(configcontext, api, apiManagerConfiguration);
@@ -253,7 +252,7 @@ public class SecurityConfigContextTest {
         apiProductResource.setEndpointSecurityMap(endpointSecurityMap);
         apiProductResourceList.add(apiProductResource);
         apiProduct.setProductResources(apiProductResourceList);
-        ConfigContext configcontext = new APIConfigContext(apiProduct);
+        ConfigContext configcontext = new APIConfigContextWrapper(apiProduct);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
         Map<String, APIDTO> apidtoMap = new HashMap<>();
         apidtoMap.put(apiid, new APIDTO().name("api1").version("v1").provider("admin"));
@@ -301,7 +300,7 @@ public class SecurityConfigContextTest {
         apiProductResource.setEndpointSecurityMap(endpointSecurityMap);
         apiProductResourceList.add(apiProductResource);
         apiProduct.setProductResources(apiProductResourceList);
-        ConfigContext configcontext = new APIConfigContext(apiProduct);
+        ConfigContext configcontext = new APIConfigContextWrapper(apiProduct);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
         Map<String, APIDTO> apidtoMap = new HashMap<>();
         apidtoMap.put(apiid,

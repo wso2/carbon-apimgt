@@ -459,6 +459,7 @@ public class SQLConstants {
                     " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND SUBS.APPLICATION_ID = APP.APPLICATION_ID" +
                     "   AND API.API_ID = SUBS.API_ID" +
+                    "   AND API.SUB_VALIDATION = 'ENABLED'" +
                     "   AND APP.APPLICATION_ID = ?" +
                     "   AND API.ORGANIZATION = ?";
 
@@ -963,6 +964,9 @@ public class SQLConstants {
                     "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
                     " ORDER BY " +
                     "   APP.NAME";
+
+    public static final String GET_SUBSCRIPTION_VALIDATION_STATUS_SQL =
+            " SELECT SUB_VALIDATION FROM AM_API WHERE API_UUID = ?";
 
     public static final String GET_API_RATING_SQL =
             "SELECT RATING FROM AM_API_RATINGS WHERE API_ID= ? AND SUBSCRIBER_ID=? ";
@@ -1470,8 +1474,9 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-                    "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE)" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE," +
+                    "SUB_VALIDATION, IS_EGRESS, API_SUBTYPE)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_GATEWAY_TYPE_SQL_BY_UUID =
             "SELECT API.GATEWAY_TYPE FROM AM_API API WHERE API.API_UUID = ?";
@@ -1706,7 +1711,8 @@ public class SQLConstants {
                     "   UPDATED_TIME = ?, " +
                     "   API_TIER = ?, " +
                     "   API_TYPE = ?, " +
-                    "   GATEWAY_VENDOR = ? " +
+                    "   GATEWAY_VENDOR = ?, " +
+                    "   SUB_VALIDATION = ? " +
                     " WHERE " +
                     "   API_UUID = ? ";
 
@@ -2353,16 +2359,17 @@ public class SQLConstants {
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " BILLING_PLAN, TOTAL_TOKEN_COUNT, PROMPT_TOKEN_COUNT, COMPLETION_TOKEN_COUNT, \n" +
+                    " MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, \n" +
+                    " CONNECTIONS_COUNT) \n" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
+                    " BILLING_PLAN, TOTAL_TOKEN_COUNT, PROMPT_TOKEN_COUNT, COMPLETION_TOKEN_COUNT, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
                     " FIXED_RATE, BILLING_CYCLE, PRICE_PER_REQUEST, CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -2570,6 +2577,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2594,6 +2604,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2601,8 +2614,8 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
-                    "CUSTOM_ATTRIBUTES = ?, "+
+                    "BILLING_PLAN = ?, " +
+                    "CUSTOM_ATTRIBUTES = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2619,6 +2632,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2626,7 +2642,7 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
+                    "BILLING_PLAN = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2643,6 +2659,9 @@ public class SQLConstants {
                     "QUOTA_TYPE = ?, " +
                     "QUOTA = ?, " +
                     "QUOTA_UNIT = ?, " +
+                    "TOTAL_TOKEN_COUNT = ?, " +
+                    "PROMPT_TOKEN_COUNT = ?, " +
+                    "COMPLETION_TOKEN_COUNT = ?, " +
                     "UNIT_TIME = ?, " +
                     "TIME_UNIT = ?, " +
                     "RATE_LIMIT_COUNT = ?," +
@@ -2650,8 +2669,8 @@ public class SQLConstants {
                     "STOP_ON_QUOTA_REACH = ?, " +
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
-                    "BILLING_PLAN = ?, "+
-                    "CUSTOM_ATTRIBUTES = ?, "+
+                    "BILLING_PLAN = ?, " +
+                    "CUSTOM_ATTRIBUTES = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2742,6 +2761,50 @@ public class SQLConstants {
             "SET DISPLAY_NAME = ?, DESCRIPTION = ? " +
             "WHERE UUID = ?";
 
+    public static final String INSERT_LLM_PROVIDER_SQL =
+            "INSERT INTO AM_LLM_PROVIDER (UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, ORGANIZATION, DESCRIPTION, " +
+                    "API_DEFINITION, CONFIGURATIONS) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    public static final String GET_LLM_PROVIDERS_SQL =
+            "SELECT UUID, NAME, API_VERSION, API_DEFINITION, BUILT_IN_SUPPORT, DESCRIPTION, ORGANIZATION, CONFIGURATIONS " +
+                    "FROM AM_LLM_PROVIDER WHERE 1=1";
+
+    public static final String GET_LLM_PROVIDER_SQL =
+            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, CONFIGURATIONS " +
+                    "FROM AM_LLM_PROVIDER PROVIDER WHERE UUID = ?";
+
+    public static final String GET_LLM_PROVIDER_BY_NAME_AND_VERSION_SQL =
+            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, CONFIGURATIONS " +
+                    "FROM AM_LLM_PROVIDER PROVIDER WHERE ORGANIZATION = ? AND NAME = ? AND API_VERSION = ?";
+
+    public static final String DELETE_LLM_PROVIDER_SQL =
+            "DELETE FROM AM_LLM_PROVIDER WHERE ORGANIZATION = ? AND UUID = ? AND BUILT_IN_SUPPORT = ?";
+
+    public static final String CHECK_LLM_PROVIDER_BUILT_IN_SUPPORT_SQL =
+            "SELECT NAME, API_VERSION, BUILT_IN_SUPPORT FROM AM_LLM_PROVIDER WHERE ORGANIZATION = ? AND UUID = ?";
+
+    public static final String INSERT_AI_CONFIGURATION =
+            "INSERT INTO AM_API_AI_CONFIGURATION (AI_CONFIGURATION_UUID, API_UUID, API_REVISION_UUID, " +
+                    "LLM_PROVIDER_UUID, ENDPOINT_CONFIGURATION, THROTTLING_CONFIGURATIONS) VALUES (?, ?, ?, ?, ?, ?)";
+
+    public static final String UPDATE_AI_CONFIGURATION =
+            "UPDATE AM_API_AI_CONFIGURATION SET ENDPOINT_CONFIGURATION = ?, THROTTLING_CONFIGURATIONS = ? " +
+                    "WHERE API_UUID = ? AND API_REVISION_UUID IS NULL";
+
+    public static final String GET_AI_CONFIGURATION =
+            "SELECT AI_CONFIGURATION_UUID, LLM_PROVIDER_UUID, ENDPOINT_CONFIGURATION, THROTTLING_CONFIGURATIONS " +
+                    "FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ? AND API_REVISION_UUID IS NULL";
+
+    public static final String GET_AI_CONFIGURATION_REVISION =
+            "SELECT AI_CONFIGURATION_UUID, LLM_PROVIDER_UUID, ENDPOINT_CONFIGURATION, THROTTLING_CONFIGURATIONS " +
+                    "FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ? AND API_REVISION_UUID = ?";
+
+    public static final String DELETE_AI_CONFIGURATION_REVISION =
+            "DELETE FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ? AND API_REVISION_UUID = ?";
+
+    public static final String DELETE_AI_CONFIGURATIONS =
+            "DELETE FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ?";
+
     public static final String DELETE_API_PRODUCT_SQL =
             "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
                     + APIConstants.API_PRODUCT + "'";
@@ -2752,7 +2815,8 @@ public class SQLConstants {
             "   API_TIER=?," +
             "   UPDATED_BY=?," +
             "   UPDATED_TIME=?," +
-            "   GATEWAY_VENDOR=?" +
+            "   GATEWAY_VENDOR=?," +
+            "   SUB_VALIDATION=?" +
             " WHERE" +
             "   API_NAME=? AND API_PROVIDER=? AND API_VERSION=? AND API_TYPE='" + APIConstants.API_PRODUCT +"'";
 
@@ -2771,7 +2835,7 @@ public class SQLConstants {
 
     public static final String ADD_API_PRODUCT = "INSERT INTO " + "AM_API(API_PROVIDER, API_NAME, API_VERSION, " +
             "CONTEXT, CONTEXT_TEMPLATE, API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, " +
-            "ORGANIZATION, GATEWAY_VENDOR, VERSION_COMPARABLE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            "ORGANIZATION, GATEWAY_VENDOR, VERSION_COMPARABLE, SUB_VALIDATION, IS_EGRESS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
@@ -3049,9 +3113,11 @@ public class SQLConstants {
 
     public static final String UPDATE_API_STATUS = "UPDATE AM_API SET STATUS = ? WHERE API_ID = ?";
     public static final String RETRIEVE_API_STATUS_FROM_UUID = "SELECT STATUS FROM AM_API WHERE API_UUID = ?";
+    public static final String CHECK_API_EGRESS_WITH_UUID = "SELECT IS_EGRESS FROM AM_API WHERE API_UUID = ?";
+    public static final String RETRIEVE_API_SUBTYPE_WITH_UUID = "SELECT API_SUBTYPE FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_API_INFO_FROM_UUID = "SELECT API_UUID, API_PROVIDER, API_NAME, API_VERSION, " +
             "CONTEXT, CONTEXT_TEMPLATE, API_TIER, API_TYPE, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, " +
-            " ORGANIZATION, REVISIONS_CREATED, STATUS FROM AM_API WHERE API_UUID = ?";
+            " ORGANIZATION, REVISIONS_CREATED, STATUS, IS_EGRESS, API_SUBTYPE FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
             "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
 
@@ -4402,6 +4468,33 @@ public class SQLConstants {
                 + "WHERE ORGANIZATION = ? AND CONFIG_TYPE = ?";
         public static final String UPDATE_SYSTEM_CONFIG_SQL = "UPDATE AM_SYSTEM_CONFIGS "
                 + "SET CONFIGURATION = ? WHERE ORGANIZATION = ? AND CONFIG_TYPE = ?";
+    }
+
+    /**
+     * Static class to hold database queries related to AM_TRANSACTION_RECORDS table
+     */
+    public static class TransactionCountConstants {
+        public static final String INSERT_TRANSACTION_COUNT =
+                "INSERT INTO AM_TRANSACTION_RECORDS " + "(ID, HOST, SERVER_ID, SERVER_TYPE, COUNT, RECORDED_TIME) "
+                        + "VALUES (?,?,?,?,?,?)";
+        public static final String GET_TRANSACTION_COUNT =
+                "SELECT SUM(COUNT) FROM AM_TRANSACTION_RECORDS " + "WHERE RECORDED_TIME >= ? AND RECORDED_TIME <= ?";
+    }
+
+    public static class CustomBackendConstants {
+        public static final String ADD_CUSTOM_BACKEND =
+                "INSERT INTO AM_API_SEQUENCE_BACKEND (ID,API_UUID,SEQUENCE,TYPE,REVISION_UUID,NAME) "
+                        + "VALUES (?,?,?,?,?,?)";
+        public static final String DELETE_WORKING_COPY_OF_CUSTOM_BACKEND = "DELETE FROM AM_API_SEQUENCE_BACKEND WHERE API_UUID = ? AND REVISION_UUID = '0'";
+        public static final String DELETE_CUSTOM_BACKEND = "DELETE FROM AM_API_SEQUENCE_BACKEND WHERE API_UUID = ? AND TYPE = ? AND REVISION_UUID = '0'";
+        public static final String DELETE_CUSTOM_BACKEND_BY_API_AND_TYPE = "DELETE FROM AM_API_SEQUENCE_BACKEND WHERE API_UUID = ? AND TYPE = ? AND REVISION_UUID = '0'";
+        public static final String DELETE_CUSTOM_BACKEND_BY_REVISION = "DELETE FROM AM_API_SEQUENCE_BACKEND WHERE API_UUID = ? AND REVISION_UUID = ?";
+        public static final String DELETE_CUSTOM_BACKEND_BY_API = "DELETE FROM AM_API_SEQUENCE_BACKEND WHERE API_UUID = ?";
+        public static final String GET_CUSTOM_BACKEND_OF_API_REVISION = "SELECT ID, NAME, SEQUENCE, TYPE FROM AM_API_SEQUENCE_BACKEND WHERE API_UUID = ? AND REVISION_UUID = ?";
+        public static final String GET_CUSTOM_BACKEND_OF_API_DEFAULT_REVISION = "SELECT ACB.NAME, ACB.TYPE FROM AM_API_SEQUENCE_BACKEND WHERE API_UUID = ? AND REVISION_UUID = '0'";
+        public static final String GET_REVISION_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID = "SELECT ACB.ID, ACB.NAME, ACB.SEQUENCE, ACB.TYPE FROM AM_API_SEQUENCE_BACKEND ACB WHERE ACB.ID = ? AND ACB.REVISION_UUID = ? AND ACB.TYPE = ?";
+        public static final String GET_API_SPECIFIC_CUSTOM_BACKEND_FROM_SEQUENCE_ID = "SELECT ACB.ID, ACB.NAME, ACB.SEQUENCE, ACB.TYPE FROM AM_API_SEQUENCE_BACKEND ACB WHERE ACB.API_UUID = ? AND ACB.REVISION_UUID = '0' AND ACB.TYPE = ?";
+        public static final String GET_ALL_API_SPECIFIC_CUSTOM_BACKENDS = "SELECT ACB.ID, ACB.NAME, ACB.SEQUENCE, ACB.TYPE FROM AM_API_SEQUENCE_BACKEND ACB WHERE ACB.API_UUID = ? AND ACB.REVISION_UUID = '0'";
     }
 
 }

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
@@ -44,6 +45,10 @@ public class API implements CacheableEntity<String> {
     private String securityScheme;
     private String revisionId;
     private List<OperationPolicy> apiPolicies = new ArrayList<>();
+    private boolean isSubscriptionValidationDisabled = false;
+    private AIConfiguration aiConfiguration;
+    private Boolean isEgress = null;
+    private String subtype = null;
 
     public API() {
     }
@@ -207,6 +212,7 @@ public class API implements CacheableEntity<String> {
                 ", apiType='" + apiType + '\'' +
                 ", status='" + status + '\'' +
                 ", securityScheme='" + securityScheme + '\'' +
+                ", isSubscriptionValidationDisabled='" + isSubscriptionValidationDisabled + '\'' +
                 ", isDefaultVersion=" + isDefaultVersion +
                 ", urlMappings=" + urlMappings +
                 ", apiPolicies=" + apiPolicies +
@@ -323,5 +329,37 @@ public class API implements CacheableEntity<String> {
 
     public List<OperationPolicy> getApiPolicies() {
         return apiPolicies;
+    }
+
+    public boolean isSubscriptionValidationDisabled() {
+        return isSubscriptionValidationDisabled;
+    }
+
+    public void setSubscriptionValidationDisabled(boolean subscriptionValidationDisabled) {
+        isSubscriptionValidationDisabled = subscriptionValidationDisabled;
+    }
+
+    public AIConfiguration getAiConfiguration() {
+        return aiConfiguration;
+    }
+
+    public void setAiConfiguration(AIConfiguration aiConfiguration) {
+        this.aiConfiguration = aiConfiguration;
+    }
+
+    public Boolean getEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(Boolean egress) {
+        isEgress = egress;
+    }
+
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
     }
 }

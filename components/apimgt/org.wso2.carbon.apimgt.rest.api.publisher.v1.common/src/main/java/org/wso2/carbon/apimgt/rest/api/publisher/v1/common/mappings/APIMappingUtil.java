@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -61,7 +63,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -69,6 +70,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -78,6 +80,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
@@ -114,6 +117,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceBackendDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceBackendListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
@@ -146,6 +151,7 @@ import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getDefaultWebsubSubscriptionConfiguration;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.buildThrottlingConfigurationDTO;
 
 /**
  * This class used for mapping utility to API.
@@ -466,7 +472,10 @@ public class APIMappingUtil {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
         }
-
+        if (dto.getAiConfiguration() != null) {
+            model.setAiConfiguration(
+                    PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration(), dto.getMaxTps()));
+        }
         return model;
     }
 
@@ -501,6 +510,22 @@ public class APIMappingUtil {
         mockResponsePayloadInfoDTO.setVerb(model.getVerb());
         mockResponsePayloadInfoDTO.setContent(model.getContent());
         return mockResponsePayloadInfoDTO;
+    }
+
+    public static SequenceBackendListDTO fromSequenceDataToDTO(List<SequenceBackendData> list) {
+        SequenceBackendListDTO res = new SequenceBackendListDTO();
+        res.setCount(list.size());
+        List<SequenceBackendDTO> backends = new ArrayList<>();
+
+        for (SequenceBackendData backend : list) {
+            SequenceBackendDTO dto = new SequenceBackendDTO();
+            dto.sequenceId(backend.getId());
+            dto.setSequenceName(backend.getName());
+            dto.setSequenceType(backend.getType());
+            backends.add(dto);
+        }
+        res.setList(backends);
+        return res;
     }
 
     /**
@@ -741,6 +766,8 @@ public class APIMappingUtil {
         apiInfoDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiInfoDTO.setGatewayType(api.getGatewayType());
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
+        apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
+        apiInfoDTO.setSubtype(api.getSubtype());
         return apiInfoDTO;
     }
 
@@ -977,9 +1004,47 @@ public class APIMappingUtil {
             if (maxTpsDTO.getProduction() != null) {
                 api.setProductionMaxTps(maxTpsDTO.getProduction().toString());
             }
+            if (maxTpsDTO.getProductionTimeUnit() != null) {
+                api.setProductionTimeUnit(getTimeUnitInMilliseconds(maxTpsDTO.getProductionTimeUnit().toString()));
+            }
             if (maxTpsDTO.getSandbox() != null) {
                 api.setSandboxMaxTps(maxTpsDTO.getSandbox().toString());
             }
+            if (maxTpsDTO.getSandboxTimeUnit() != null) {
+                api.setSandboxTimeUnit(getTimeUnitInMilliseconds(maxTpsDTO.getSandboxTimeUnit().toString()));
+            }
+        }
+    }
+
+    /**
+     * Retrieves millisecond value for pre-defined time units.
+     * @param timeUnit String value of the time unit
+     * @return Millisecond value of the time unit
+     */
+    private static String getTimeUnitInMilliseconds(String timeUnit) {
+        switch(timeUnit) {
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS;
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS;
+        default:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND_MS;
+        }
+    }
+
+    /**
+     * Retrieved predefined strings for millisecond value.
+     * @param timeUnitInMillis Time in milliseconds
+     * @return  Time unit string for the given milliseconds value
+     */
+    private static String convertFromMilliseconds(String timeUnitInMillis) {
+        switch(timeUnitInMillis) {
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE;
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR;
+        default:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND;
         }
     }
 
@@ -1090,6 +1155,15 @@ public class APIMappingUtil {
                             }
                         }
 
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(productionEndpointType)) {
+                            String apiKeyValue = (String) productionEndpointSecurity
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                            if (StringUtils.isNotEmpty(apiKeyValue)) {
+                                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                                        new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                            }
+                        }
+
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                                 productionEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1116,6 +1190,15 @@ public class APIMappingUtil {
                                 sandboxEndpointSecurity.put(APIConstants
                                                 .OAuthConstants.OAUTH_CLIENT_SECRET,
                                         new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret)));
+                            }
+                        }
+
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(sandboxEndpointType)) {
+                            String apiKeyValue = (String) sandboxEndpointSecurity
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                            if (StringUtils.isNotEmpty(apiKeyValue)) {
+                                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                                        new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
                             }
                         }
 
@@ -1424,6 +1507,8 @@ public class APIMappingUtil {
         String gatewayVendor = StringUtils.toRootLowerCase(model.getGatewayVendor());
         dto.setGatewayVendor(gatewayVendor);
         dto.setGatewayType(model.getGatewayType());
+        dto.setEgress(model.isEgress() == 1); //true - 1, false - 0
+        dto.setSubtype(model.getSubtype());
 
         if (model.getGatewayVendor() == null) {
             dto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
@@ -1432,7 +1517,9 @@ public class APIMappingUtil {
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
-
+        if (model.getAiConfiguration() != null) {
+            dto.setAiConfiguration(PublisherCommonUtils.convertToApiAiConfigurationDTO(model.getAiConfiguration()));
+        }
         return dto;
     }
 
@@ -1594,6 +1681,21 @@ public class APIMappingUtil {
             }
             if (!StringUtils.isBlank(api.getSandboxMaxTps())) {
                 maxTpsDTO.setSandbox(Long.parseLong(api.getSandboxMaxTps()));
+            }
+            if (!StringUtils.isBlank(api.getProductionTimeUnit())) {
+                maxTpsDTO.setProductionTimeUnit(APIMaxTpsDTO.ProductionTimeUnitEnum.valueOf(
+                        convertFromMilliseconds(api.getProductionTimeUnit())));
+            }
+            if (!StringUtils.isBlank(api.getSandboxTimeUnit())) {
+                maxTpsDTO.setSandboxTimeUnit(APIMaxTpsDTO.SandboxTimeUnitEnum.valueOf(
+                        convertFromMilliseconds(api.getSandboxTimeUnit())));
+            }
+            AIConfiguration aiConfiguration = api.getAiConfiguration();
+            if (aiConfiguration.getTokenBasedThrottlingConfiguration() != null
+                    && aiConfiguration.getTokenBasedThrottlingConfiguration().isTokenBasedThrottlingEnabled()) {
+                APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigurationsDTO
+                        = buildThrottlingConfigurationDTO(aiConfiguration.getTokenBasedThrottlingConfiguration());
+                maxTpsDTO.setTokenBasedThrottlingConfiguration(throttlingConfigurationsDTO);
             }
             dto.setMaxTps(maxTpsDTO);
         } catch (NumberFormatException e) {
@@ -2360,6 +2462,7 @@ public class APIMappingUtil {
             productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
             productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
             productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
+            productDto.setEgress(apiProduct.isEgress() == 1);
 
             list.add(productDto);
         }
@@ -2404,6 +2507,7 @@ public class APIMappingUtil {
         productDto.setIsRevision(product.isRevision());
         productDto.setRevisionedApiProductId(product.getRevisionedApiProductId());
         productDto.setRevisionId(product.getRevisionId());
+        productDto.setEgress(product.isEgress() == 1);
 
         if (product.getAudiences() != null) {
             Set<String> audiences = product.getAudiences();
@@ -2791,6 +2895,7 @@ public class APIMappingUtil {
         product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
         product.setApiKeyHeader(dto.getApiKeyHeader());
+        product.setEgress(dto.isEgress() ? 1 : 0);
         if (product.getApiKeyHeader() == null) {
             product.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }
@@ -3179,6 +3284,9 @@ public class APIMappingUtil {
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
             }
+            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
+            }
         }
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
             JSONObject productionEndpointSecurity =
@@ -3189,6 +3297,9 @@ public class APIMappingUtil {
             }
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+            }
+            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
         }
         return endpointSecurityElement;

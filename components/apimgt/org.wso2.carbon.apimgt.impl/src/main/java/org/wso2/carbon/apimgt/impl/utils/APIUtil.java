@@ -52,6 +52,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.RegexValidator;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -85,7 +87,6 @@ import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -121,6 +122,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -252,6 +254,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -319,6 +322,7 @@ public final class APIUtil {
     private static final int DEFAULT_TENANT_IDLE_MINS = 30;
     private static long tenantIdleTimeMillis;
     private static Set<String> currentLoadingTenants = new HashSet<String>();
+    private static AccessTokenGenerator tokenGenerator;
 
     private static volatile Set<String> allowedScopes;
     private static boolean isPublisherRoleCacheEnabled = true;
@@ -424,6 +428,8 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEY_TEMPLATE));
             eventPublishers.putIfAbsent(EventPublisherType.KEYMGT_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEYMGT_EVENT));
+            eventPublishers.putIfAbsent(EventPublisherType.LLMPROVIDER_EVENT,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.LLMPROVIDER_EVENT));
         } catch (EventPublisherException e) {
             log.error("Could not initialize the event publishers. Events might not be published properly.");
             throw new APIManagementException(e);
@@ -2067,6 +2073,19 @@ public final class APIUtil {
     }
 
     /**
+     * Check if Retry Call With New OAuth Token is enabled
+     *
+     * @return True if Retry Call With New OAuth Token is enabled
+     */
+    public static boolean isRetryCallWithNewOAuthTokenEnabled() {
+        String property = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.MEDIATOR_CONFIG + APIConstants.
+                        OAuthConstants.OAUTH_MEDIATION_CONFIG + APIConstants.OAuthConstants.
+                        ENABLE_RETRY_CALL_WITH_NEW_TOKEN);
+        return Boolean.parseBoolean(property);
+    }
+
+    /**
      * Check if an issuer for internal keys has been defined
      *
      * @return String internalKeyIssuer
@@ -2812,16 +2831,19 @@ public final class APIUtil {
             throws APIManagementException {
 
         if (!hasValidLength(apiName, APIConstants.MAX_LENGTH_API_NAME)) {
-            throw new APIManagementException("API name exceeds allowed character length",
-                    ExceptionCodes.LENGTH_EXCEEDS);
+            String errorMessage = "API name exceeds allowed character length";
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.LENGTH_EXCEEDS_ERROR,
+                    errorMessage + " of " + APIConstants.MAX_LENGTH_API_NAME));
         }
         if (!hasValidLength(context, APIConstants.MAX_LENGTH_CONTEXT)) {
-            throw new APIManagementException("API context exceeds allowed character length",
-                    ExceptionCodes.LENGTH_EXCEEDS);
+            String errorMessage = "API context exceeds allowed character length";
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.LENGTH_EXCEEDS_ERROR,
+                    errorMessage + " of " + APIConstants.MAX_LENGTH_CONTEXT));
         }
         if (!hasValidLength(provider, APIConstants.MAX_LENGTH_PROVIDER)) {
-            throw new APIManagementException("API provider name exceeds allowed character length",
-                    ExceptionCodes.LENGTH_EXCEEDS);
+            String errorMessage = "API provider name exceeds allowed character length";
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.LENGTH_EXCEEDS_ERROR,
+                    errorMessage + " of " + APIConstants.MAX_LENGTH_PROVIDER));
         }
     }
 
@@ -2864,13 +2886,15 @@ public final class APIUtil {
         if (context == null || context.isEmpty()) {
             errorMsg = errorMsg + " For API " + apiName + ", context cannot be empty or null";
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            throw new APIManagementException(errorMsg,
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
         }
 
         if (context.endsWith("/")) {
             errorMsg = errorMsg + " For API " + apiName + ", context " + context + " cannot end with /";
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            throw new APIManagementException(errorMsg,
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
         }
 
         Matcher matcher = pattern.matcher(context);
@@ -2883,15 +2907,17 @@ public final class APIUtil {
             for (String param : split) {
                 if (param != null && !APIConstants.VERSION_PLACEHOLDER.equals(param)) {
                     if (param.contains(APIConstants.VERSION_PLACEHOLDER)) {
-                        errorMsg = errorMsg + " For API " + apiName +
-                                ", {version} cannot exist as a substring of a sub-context";
+                        errorMsg = errorMsg + " For API " + apiName + ", {version} cannot exist as a substring of a "
+                                + "sub-context";
                         log.error(errorMsg);
-                        throw new APIManagementException(errorMsg);
+                        throw new APIManagementException(errorMsg,
+                                ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
                     } else if (param.contains("{") || param.contains("}")) {
-                        errorMsg = errorMsg + " For API " + apiName +
-                                ", { or } cannot exist as a substring of a sub-context";
+                        errorMsg = errorMsg + " For API " + apiName + ", { or } cannot exist as a substring of a "
+                                + "sub-context";
                         log.error(errorMsg);
-                        throw new APIManagementException(errorMsg);
+                        throw new APIManagementException(errorMsg,
+                                ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
                     }
                 }
             }
@@ -2901,12 +2927,35 @@ public final class APIUtil {
             if (!isBalanced) {
                 errorMsg = errorMsg + " Unbalanced parenthesis cannot be used in context " + context + " for API "
                         + apiName;
-                throw new APIManagementException(errorMsg);
+                throw new APIManagementException(errorMsg,
+                        ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
             }
         } else {
-            errorMsg = errorMsg + " Special characters cannot be used in context " + context + " for API "+ apiName;
+            errorMsg = errorMsg + " Special characters cannot be used in context " + context + " for API " + apiName;
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            throw new APIManagementException(errorMsg,
+                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, errorMsg));
+        }
+    }
+
+    /**
+     * This method is used to validate the endpoint configuration for API
+     *
+     * @param endpointConfigObject Endpoint Configuratioj of the API
+     * @param apiType API Type
+     * @param apiName Name of the API
+     * @throws APIManagementException Throws an error if endpoint configuration is not valid
+     */
+    public static void validateAPIEndpointConfig(Object endpointConfigObject, String apiType, String apiName)
+            throws APIManagementException {
+        if (endpointConfigObject != null) {
+            Map endpointConfigMap = (Map) endpointConfigObject;
+            if (endpointConfigMap != null && endpointConfigMap.containsKey("endpoint_type")
+                    && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
+                    && !APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiType)) {
+                throw new APIManagementException("Invalid endpoint configuration provided for the API " + apiName);
+            }
         }
     }
 
@@ -4278,6 +4327,17 @@ public final class APIUtil {
     }
 
     /**
+     * Return the Custom Backend name
+     *
+     * @param apiUUID API Id
+     * @param type    Type of the custom backend used for (SANDBOX, PRODUCTION)
+     * @return The name of the Custom Backend
+     */
+    public static String getCustomBackendName(String apiUUID, String type) {
+        return apiUUID + "-" + type;
+    }
+
+    /**
      * Return the sequence extension name.
      * eg: admin--testAPi--v1.00
      *
@@ -5318,6 +5378,22 @@ public final class APIUtil {
         return false;
     }
 
+    public static boolean isSubscriptionValidationDisablingAllowed(String tenantDomain) throws APIManagementException {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        boolean subValidationDisablingAllowedGlobal = Boolean.parseBoolean(config.getFirstProperty(
+                APIConstants.ALLOW_SUBSCRIPTION_VALIDATION_DISABLING));
+        boolean subValidationDisablingAllowedTenant = false;
+        JSONObject apiTenantConfig = getTenantConfig(tenantDomain);
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_ALLOW_SUBSCRIPTION_VALIDATION_DISABLING);
+            if (value != null) {
+                subValidationDisablingAllowedTenant = Boolean.parseBoolean(value.toString());
+            }
+        }
+        return subValidationDisablingAllowedGlobal || subValidationDisablingAllowedTenant;
+    }
+
     public static Map<String, Tier> getTiers(String organization) throws APIManagementException {
 
         int requestedTenantId = getInternalOrganizationId(organization);
@@ -6042,13 +6118,12 @@ public final class APIUtil {
     public static void addDefaultTenantAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        boolean recreate = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getThrottleProperties().isEnablePolicyRecreate();
 
-        /* Check if 'Unlimited' policy is available in AM_POLICY_APPLICATION table, to determine whether the default policies are loaded
-         into the database at least once. If yes, default policies won't be added to database again. */
-
-        if (apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_APP, tenantId, APIConstants.DEFAULT_APP_POLICY_UNLIMITED)) {
-            log.debug(
-                    "Default Throttling Policies are not written into the database again, as they were added once at initial server startup");
+        if (!recreate) {
+            log.debug("Default Throttling Policies are not written into the database again, " +
+                    "as they were added once at initial server startup");
             return;
         }
 
@@ -6128,13 +6203,19 @@ public final class APIUtil {
                 defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_GOLD) : 5000;
         long unauthenticatedTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED) : 500;
+        long subscriptionlessTierLimit = defualtLimits.containsKey(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) ?
+                defualtLimits.get(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) : 100000;
+
         //Adding Subscription level policies
-        long[] requestCountSubPolicies = new long[]{goldTierLimit, silverTierLimit, bronzeTierLimit, unauthenticatedTierLimit, Integer.MAX_VALUE};
+        long[] requestCountSubPolicies = new long[]{goldTierLimit, silverTierLimit, bronzeTierLimit,
+                unauthenticatedTierLimit, subscriptionlessTierLimit, Integer.MAX_VALUE};
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
-                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
+                APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
         String[] subPolicyDecs = new String[]{
                 APIConstants.DEFAULT_SUB_POLICY_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_SILVER_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS_DESC, APIConstants.DEFAULT_SUB_POLICY_UNLIMITED_DESC};
         for (int i = 0; i < subPolicies.length; i++) {
             policyName = subPolicies[i];
             boolean needDeployment = false;
@@ -6183,12 +6264,15 @@ public final class APIUtil {
         }
 
         //Adding Event based subscription level policies for async policies (WS & SSE)
-        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, Integer.MAX_VALUE};
-        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
+        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, 10000, Integer.MAX_VALUE};
+        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS,  APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
         String[] eventCountSubPolicyDescriptions = new String[]{
                 APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
 
         for (int i = 0; i < eventCountSubPolicyNames.length; i++) {
             policyName = eventCountSubPolicyNames[i];
@@ -6482,6 +6566,13 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else if (limit instanceof AIAPIQuotaLimit){
+                    AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
+                    tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
+                    tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
+                    tier.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
+                    tier.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
+                    tier.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());
@@ -6560,6 +6651,11 @@ public final class APIUtil {
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else if (limit instanceof AIAPIQuotaLimit) {
+                    // Todo: Need to implement this according to publisher and developer portals' requirements
+                    AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
+                    tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
+                    tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
                 } else {
                     EventCountLimit eventCountLimit = (EventCountLimit) limit;
                     tier.setRequestCount(eventCountLimit.getEventCount());
@@ -8862,7 +8958,8 @@ public final class APIUtil {
             }
             return endpointSecurityMap;
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing Endpoint Config json", e);
+            String errorMessage = "Error while parsing Endpoint Config json";
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_PARSING_ENDPOINT_CONFIG);
         }
     }
 
@@ -9964,6 +10061,33 @@ public final class APIUtil {
     }
 
     /**
+     * Method is used to retrieve the Custom Backend sequence
+     *
+     * @param extractedFolderPath   Extracted folder path of the APICTL project
+     * @param customBackendFileName Custom Backend name
+     * @param fileExtension         .xml
+     * @return The Sequence of the Custom Backend as an Input Stream
+     * @throws APIManagementException If an error occurs while reading, throws an error
+     */
+    public static String getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
+            String fileExtension) throws APIManagementException {
+        if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(fileExtension)) {
+            customBackendFileName = customBackendFileName + fileExtension;
+        }
+        String fileName = extractedFolderPath + File.separator + customBackendFileName;
+        if (checkFileExistence(fileName)) {
+            try {
+                try (InputStream inputStream = new FileInputStream(fileName)) {
+                    return IOUtils.toString(inputStream);
+                }
+            } catch (IOException ex) {
+                handleException("Error reading Custom Backend " + customBackendFileName);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Read the operation policy definition from the provided path and return the definition object
      *
      * @param extractedFolderPath   Location of the policy definition
@@ -9997,6 +10121,37 @@ public final class APIUtil {
                     + extractedFolderPath, e, ExceptionCodes.ERROR_READING_META_DATA);
         }
         return policyDefinition;
+    }
+
+    /**
+     * Method is used to get Custom Backend Sequence from the APICTL project
+     *
+     * @param extractedFolderPath Extracted Folder path
+     * @param sequenceName        Sequence File name
+     * @param fileExtension       File extension of the Custom Backend
+     * @return Custom Backend sequence as a String
+     * @throws APIManagementException Throws if an error occurs when reading the file
+     */
+    public static String getCustomBackendSequenceFromFile(String extractedFolderPath, String sequenceName,
+            String fileExtension) throws APIManagementException {
+
+        String customBackendContent = null;
+        try {
+            if(!StringUtils.isEmpty(sequenceName) && !sequenceName.contains(".xml")) {
+                sequenceName = sequenceName + fileExtension;
+            }
+            String fileName = extractedFolderPath + File.separator + sequenceName;
+            if (checkFileExistence(fileName)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found Sequence Backend file " + fileName);
+                }
+                customBackendContent = FileUtils.readFileToString(new File(fileName));
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Custom Backend from path: " + extractedFolderPath, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
+        }
+        return customBackendContent;
     }
 
     /**
@@ -10198,10 +10353,30 @@ public final class APIUtil {
         return policyName + "_" + policyVersion;
     }
 
+    public static String getCustomBackendFileName(String apiUUID, String endpointType) {
+        return apiUUID + "-" + endpointType;
+    }
+
     public static void initializeVelocityContext(VelocityEngine velocityEngine){
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
         velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
+    }
+
+    /**
+     * Get the subscription validation stats before inserting the API
+     *
+     * @param tiers Available business plans for the API
+     * @return true if the subscription validation is enabled
+     */
+    public static String setSubscriptionValidationStatusBeforeInsert(Set<Tier> tiers) {
+        if (tiers != null && tiers.size() == 1) {
+            Tier tier = tiers.iterator().next();
+            if(tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+                return "DISABLED";
+            }
+        }
+        return "ENABLED";
     }
 
     /**
@@ -10415,36 +10590,74 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used to invoke the Choreo deployed AI service. This can handle both API Chat and Marketplace
-     * Assistant related POST calls.
+     * Executes an HTTP request (POST, GET, DELETE) to the AI service, adding the required headers and handling
+     * token generation for authentication if necessary
      *
-     * @param endpoint  Endpoint to be invoked
-     * @param authToken OnPremKey for the organization
-     * @param resource  Specifies the backend resource the request should be forwarded to
-     * @param payload   Request payload that needs to be attached to the request
-     * @param requestId UUID of the request, so that AI service can track the progress
-     * @return returns the response if invocation is successful
+     * @param request       The prepared HTTP request (HttpPost, HttpGet, HttpDelete, etc.) to be executed
+     * @param endpoint      The base endpoint to be invoked
+     * @param tokenEndpoint The endpoint used to obtain the access token (if applicable)
+     * @param key           The AI Subscription key Choreo on-prem Key to be used
+     * @param requestId     Optional ID of the request to track
+     * @param payload       Optional payload for POST
+     * @return CloseableHttpResponse containing the response from the AI service
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
-    public static String invokeAIService(String endpoint, String authToken, String resource, String payload,
-            String requestId) throws APIManagementException {
-
+    private static CloseableHttpResponse executeAIRequest(HttpRequestBase request, String endpoint,
+        String tokenEndpoint, String key, String requestId, String payload) throws APIManagementException {
         try {
-            HttpPost preparePost = new HttpPost(endpoint + resource);
-            preparePost.setHeader(APIConstants.API_KEY_AUTH, authToken);
-            preparePost.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            if (StringUtils.isNotEmpty(requestId)) {
-                preparePost.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
+            if (tokenEndpoint != null) {
+                if (tokenGenerator == null) {
+                    tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
+                }
+                String token = tokenGenerator.getAccessToken();
+                request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                        APIConstants.AUTHORIZATION_BEARER + token);
+            } else {
+                request.setHeader(APIConstants.API_KEY_AUTH, key);
             }
-            StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
-            preparePost.setEntity(requestEntity);
+            request.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            if (StringUtils.isNotEmpty(requestId)) {
+                request.setHeader(APIConstants.AI.API_CHAT_REQUEST_ID, requestId);
+            }
+
+            // Set Payload
+            if (request instanceof HttpPost && StringUtils.isNotEmpty(payload)) {
+                StringEntity requestEntity = new StringEntity(payload, ContentType.APPLICATION_JSON);
+                ((HttpPost) request).setEntity(requestEntity);
+            }
 
             URL url = new URL(endpoint);
             int port = url.getPort();
             String protocol = url.getProtocol();
             HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
 
-            CloseableHttpResponse response = executeHTTPRequest(preparePost, httpClient);
+            return executeHTTPRequest(request, httpClient);
+
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error encountered while connecting to service", e);
+        }
+    }
+
+    /**
+     * This method is used to invoke the Choreo deployed AI service. This can handle both API Chat and Marketplace
+     * Assistant related POST calls.
+     *
+     * @param endpoint      Endpoint to be invoked
+     * @param tokenEndpoint Endpoint to be invoked to get the token using key
+     * @param key           AI Subscription key
+     * @param resource      Specifies the backend resource the request should be forwarded to
+     * @param payload       Request payload that needs to be attached to the request
+     * @param requestId     UUID of the request, so that AI service can track the progress
+     * @return returns the response if invocation is successful
+     * @throws APIManagementException if an error occurs while invoking the AI service
+     */
+    public static String invokeAIService(String endpoint, String tokenEndpoint, String key, String resource,
+            String payload, String requestId) throws APIManagementException {
+        HttpPost preparePost = new HttpPost(endpoint + resource);
+        try (CloseableHttpResponse response = executeAIRequest(preparePost, endpoint,
+                tokenEndpoint, key, requestId, payload)){
             int statusCode = response.getStatusLine().getStatusCode();
             String responseStr = EntityUtils.toString(response.getEntity());
             if (statusCode == HttpStatus.SC_CREATED) {
@@ -10479,26 +10692,20 @@ public final class APIUtil {
     /**
      * This method is used to get the no of apis in the vector db for an organization
      *
-     * @param endpoint  Endpoint to be invoked
-     * @param authToken OnPremKey for the organization
-     * @param resource  Resource that we should forward the request to
+     * @param endpoint      Endpoint to be invoked
+     * @param tokenEndpoint Endpoint to be invoked to get the token using key
+     * @param key           AI Subscription key
+     * @param resource      Resource that we should forward the request to
      * @return CloseableHttpResponse of the GET call
      * @throws APIManagementException if an error occurs while retrieving API count
      */
-    public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String authToken, String resource)
-            throws APIManagementException {
-
+    public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String tokenEndpoint,
+            String key, String resource) throws APIManagementException {
+        HttpGet apiCountGet = new HttpGet(endpoint + resource);
         try {
-            HttpGet apiCountGet = new HttpGet(endpoint + resource);
-            apiCountGet.setHeader(APIConstants.API_KEY_AUTH, authToken);
-            URL url = new URL(endpoint);
-            int port = url.getPort();
-            String protocol = url.getProtocol();
-            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
-            return executeHTTPRequest(apiCountGet, httpClient);
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Invalid/malformed URL encountered. URL: " + endpoint, e);
-        } catch (APIManagementException | IOException e) {
+            return executeAIRequest(apiCountGet, endpoint,
+                    tokenEndpoint, key, null, null);
+        } catch (APIManagementException e) {
             throw new APIManagementException("Error encountered while connecting to service", e);
         }
     }
@@ -10506,28 +10713,20 @@ public final class APIUtil {
     /**
      * This method is used to delete an API from the vector database service to accommodate the Marketplace assistant
      *
-     * @param endpoint  Endpoint to be invoked
-     * @param authToken OnPremKey for the organization
-     * @param resource  Resource that we should forward the request to
-     * @param uuid      UUID of the API to be deleted
+     * @param endpoint      Endpoint to be invoked
+     * @param tokenEndpoint Endpoint to be invoked to get the token using key
+     * @param key           AI Subscription key
+     * @param resource      Resource that we should forward the request to
+     * @param uuid          UUID of the API to be deleted
      * @throws APIManagementException if an error occurs while deleting the API
      */
-    public static void marketplaceAssistantDeleteService(String endpoint, String authToken, String resource, String uuid)
-            throws APIManagementException {
-
-        try {
-            String resourceWithPathParam = endpoint + resource + "/{uuid}";
-            resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
-
-            HttpDelete prepareDelete = new HttpDelete(resourceWithPathParam);
-            prepareDelete.setHeader(APIConstants.API_KEY_AUTH, authToken);
-
-            URL url = new URL(endpoint);
-            int port = url.getPort();
-            String protocol = url.getProtocol();
-            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
-
-            CloseableHttpResponse response = executeHTTPRequest(prepareDelete, httpClient);
+    public static void marketplaceAssistantDeleteService(String endpoint, String tokenEndpoint, String key,
+            String resource, String uuid) throws APIManagementException {
+        String resourceWithPathParam = endpoint + resource + "/{uuid}";
+        resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
+        HttpDelete prepareDelete = new HttpDelete(resourceWithPathParam);
+        try (CloseableHttpResponse response = executeAIRequest(prepareDelete, endpoint,
+                tokenEndpoint, key, null, null)) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK) {
                 if (log.isDebugEnabled()) {
@@ -10562,5 +10761,9 @@ public final class APIUtil {
             return Collections.emptyList();
         }
         return applications.subList(offset, endIndex);
+    }
+
+    public static String getAPIMVersion() {
+        return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
     }
 }

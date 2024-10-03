@@ -63,6 +63,7 @@ public class API implements Serializable {
     private String graphQLSchema;
     private String asyncApiDefinition;
     private String type;
+    private String subtype;
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
@@ -85,6 +86,7 @@ public class API implements Serializable {
     private boolean apiResourcePatternsChanged;
 
     private String status;
+    private String sequence;
 
     private String technicalOwner;
     private String technicalOwnerEmail;
@@ -93,7 +95,9 @@ public class API implements Serializable {
 
     // Used for keeping Production & Sandbox Throttling limits.
     private String productionMaxTps;
+    private String productionTimeUnit = "1000";
     private String sandboxMaxTps;
+    private String sandboxTimeUnit = "1000";
 
     private String visibility;
     private String visibleRoles;
@@ -225,10 +229,22 @@ public class API implements Serializable {
      * Property to hold revision id
      */
     private int revisionId;
-    
+
     private String audience;
 
     private Set<String> audiences;
+
+    private AIConfiguration aiConfiguration;
+
+    public AIConfiguration getAiConfiguration() {
+
+        return aiConfiguration;
+    }
+
+    public void setAiConfiguration(AIConfiguration AiConfiguration) {
+
+        this.aiConfiguration = AiConfiguration;
+    }
 
     public String getAudience() {
         return audience;
@@ -472,8 +488,24 @@ public class API implements Serializable {
         this.productionMaxTps = productionMaxTps;
     }
 
+    public String getProductionTimeUnit() {
+        return productionTimeUnit;
+    }
+
+    public void setProductionTimeUnit(String productionTimeUnit) {
+        this.productionTimeUnit = productionTimeUnit;
+    }
+
     public String getSandboxMaxTps() {
         return sandboxMaxTps;
+    }
+
+    public String getSandboxTimeUnit() {
+        return sandboxTimeUnit;
+    }
+
+    public void setSandboxTimeUnit(String sandboxTimeUnit) {
+        this.sandboxTimeUnit = sandboxTimeUnit;
     }
 
     public void setSandboxMaxTps(String sandboxMaxTps) {
@@ -753,6 +785,14 @@ public class API implements Serializable {
 
     public void setRating(float rating) {
         this.rating = rating;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
+    }
+
+    public String getSequence() {
+        return sequence;
     }
 
     public void setLatest(boolean latest) {
@@ -1163,6 +1203,18 @@ public class API implements Serializable {
         }
     }
 
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        if (StringUtils.isEmpty(subtype) || NULL_VALUE.equalsIgnoreCase(StringUtils.trim(subtype))) {
+            this.subtype = "DEFAULT";
+        } else {
+            this.subtype = StringUtils.trim(subtype).toUpperCase();
+        }
+    }
+
     public String getCreatedTime() {
         return createdTime;
     }
@@ -1498,5 +1550,18 @@ public class API implements Serializable {
 
     public void setApiPolicies(List<OperationPolicy> apiPolicies) {
         this.apiPolicies = apiPolicies;
+    }
+
+    /**
+     * Property to hold whether the API isEGRESS (1)
+     */
+    private int isEgress;
+
+    public int isEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(int egress) {
+        isEgress = egress;
     }
 }

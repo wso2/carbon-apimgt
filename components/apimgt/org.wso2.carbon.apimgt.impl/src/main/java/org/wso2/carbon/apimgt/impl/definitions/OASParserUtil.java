@@ -274,7 +274,8 @@ public class OASParserUtil {
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
             destOpenAPI = ((OAS3Parser) oas3Parser).getOpenAPI(destinationSwagger);
         } else {
-            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+            String errorMessage = "Cannot update destination swagger because it is not in OpenAPI format";
+            throw new APIManagementException(errorMessage, ExceptionCodes.NOT_IN_OPEN_API_FORMAT);
         }
 
         SwaggerUpdateContext context = new SwaggerUpdateContext();

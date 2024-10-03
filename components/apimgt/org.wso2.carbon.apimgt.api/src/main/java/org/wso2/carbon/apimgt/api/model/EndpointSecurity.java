@@ -40,9 +40,19 @@ public class EndpointSecurity {
 
     private String clientSecret = null;
 
+    private String apiKeyIdentifier = null;
+
+    private String apiKeyValue = null;
+
     private String customParameters = null;
 
     private Map additionalProperties = new HashMap();
+
+    private int connectionTimeoutDuration = -1;
+
+    private int connectionRequestTimeoutDuration = -1;
+
+    private int socketTimeoutDuration = -1;
 
     public EndpointSecurity(EndpointSecurity endpointSecurity) {
 
@@ -57,7 +67,9 @@ public class EndpointSecurity {
         this.clientSecret = endpointSecurity.clientSecret;
         this.customParameters = endpointSecurity.customParameters;
         this.additionalProperties = endpointSecurity.additionalProperties;
-
+        this.connectionTimeoutDuration = endpointSecurity.connectionTimeoutDuration;
+        this.connectionRequestTimeoutDuration = endpointSecurity.connectionRequestTimeoutDuration;
+        this.socketTimeoutDuration = endpointSecurity.socketTimeoutDuration;
     }
 
     public EndpointSecurity() {
@@ -173,14 +185,70 @@ public class EndpointSecurity {
 
         this.additionalProperties = additionalProperties;
     }
+    public String getApiKeyIdentifier() {
+
+        return apiKeyIdentifier;
+    }
+
+    public void setApiKeyIdentifier(String apiKeyIdentifier) {
+
+        this.apiKeyIdentifier = apiKeyIdentifier;
+    }
+
+    public String getApiKeyValue() {
+
+        return apiKeyValue;
+    }
+
+    public void setApiKeyValue(String apiKeyValue) {
+
+        this.apiKeyValue = apiKeyValue;
+    }
+
+    public int getConnectionTimeoutDuration() {
+        return connectionTimeoutDuration;
+    }
+
+    public void setConnectionTimeoutDuration(int connectionTimeoutDuration) {
+        this.connectionTimeoutDuration = connectionTimeoutDuration;
+    }
+
+    public int getConnectionRequestTimeoutDuration() {
+        return connectionRequestTimeoutDuration;
+    }
+
+    public void setConnectionRequestTimeoutDuration(int connectionRequestTimeoutDuration) {
+        this.connectionRequestTimeoutDuration = connectionRequestTimeoutDuration;
+    }
+
+    public int getSocketTimeoutDuration() {
+        return socketTimeoutDuration;
+    }
+
+    public void setSocketTimeoutDuration(int socketTimeoutDuration) {
+        this.socketTimeoutDuration = socketTimeoutDuration;
+    }
 
     @Override
     public String toString() {
 
-        return "EndpointSecurity{" + "uniqueIdentifier='" + uniqueIdentifier + '\'' + ", password='" + password + '\''
-                + ", type='" + type + '\'' + ", enabled=" + enabled + ", username='" + username + '\'' + ", grantType='"
-                + grantType + '\'' + ", tokenUrl='" + tokenUrl + '\'' + ", clientId='" + clientId + '\''
-                + ", clientSecret='" + clientSecret + '\'' + ", customParameters='" + customParameters + '\''
-                + ", additionalProperties=" + additionalProperties + '}';
+        return "EndpointSecurity{" +
+                "uniqueIdentifier='" + uniqueIdentifier + '\'' +
+                ", password='" + password + '\'' +
+                ", type='" + type + '\'' +
+                ", enabled=" + enabled +
+                ", username='" + username + '\'' +
+                ", grantType='" + grantType + '\'' +
+                ", tokenUrl='" + tokenUrl + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", clientSecret='" + clientSecret + '\'' +
+                ", apiKeyIdentifier='" + apiKeyIdentifier + '\'' +
+                ", apiKeyValue='" + apiKeyValue + '\'' +
+                ", customParameters='" + customParameters + '\'' +
+                ", additionalProperties=" + additionalProperties +
+                ", connectionTimeoutDuration=" + connectionTimeoutDuration +
+                ", connectionRequestTimeoutDuration=" + connectionRequestTimeoutDuration +
+                ", socketTimeoutDuration=" + socketTimeoutDuration +
+                '}';
     }
 }

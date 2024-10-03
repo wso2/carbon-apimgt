@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.*;
+
 /**
  * This class is responsible for executing data publishing logic. This class implements runnable interface and
  * need to execute using thread pool executor. Primary task of this class it is accept message context as parameter
@@ -68,6 +70,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
     String apiName;
     String appId;
     String ipAddress;
+    Long totalTokens;
+    Long promptTokens;
+    Long completionTokens;
     Map<String, String> headersMap;
     Map<String, Object> customPropertyMap;
     private AuthenticationContext authenticationContext;
@@ -103,6 +108,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.apiName = null;
         this.ipAddress = null;
         this.headersMap = null;
+        this.totalTokens = null;
+        this.promptTokens = null;
+        this.completionTokens = null;
         this.messageSizeInBytes = 0;
         this.customPropertyMap = Collections.emptyMap();
     }
@@ -138,6 +146,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.appId = appId;
         this.apiName = GatewayUtils.getAPINameFromContextAndVersion(messageContext);
         this.messageSizeInBytes = 0;
+        this.totalTokens = null;
+        this.promptTokens = null;
+        this.completionTokens = null;
 
         ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
         boolean isVerbInfoContentAware = false;
@@ -199,6 +210,26 @@ public class DataProcessAndPublishingAgent implements Runnable {
                         messageSizeInBytes = size.length;
                     }
                 } 
+            }
+        }
+
+        if (((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(AI_API_RESPONSE_METADATA) != null) {
+            Map<String, String> responseMetadata = (Map<String, String>) ((Axis2MessageContext) messageContext)
+                    .getAxis2MessageContext().getProperty(AI_API_RESPONSE_METADATA);
+            if (responseMetadata != null) {
+                if (null != responseMetadata.get(LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT)) {
+                    totalTokens =
+                            Long.parseLong(responseMetadata.get(LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT));
+                }
+                if (null != responseMetadata.get(LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT)) {
+                    promptTokens =
+                            Long.parseLong(responseMetadata.get(LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT));
+                }
+                if (null != responseMetadata.get(LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT)) {
+                    completionTokens =
+                            Long.parseLong(responseMetadata.get(LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT));
+                }
             }
         }
     }
@@ -280,6 +311,16 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 jsonObMap.put(APIThrottleConstants.SUBSCRIPTION_TYPE, APIConstants.API_SUBSCRIPTION_TYPE);
             }
 
+        }
+
+        if (totalTokens != null) {
+            jsonObMap.put(APIThrottleConstants.TOTAL_TOKENS, totalTokens);
+        }
+        if (promptTokens != null) {
+            jsonObMap.put(APIThrottleConstants.PROMPT_TOKENS, promptTokens);
+        }
+        if (completionTokens != null) {
+            jsonObMap.put(APIThrottleConstants.COMPLETION_TOKENS, completionTokens);
         }
 
         Object[] objects = new Object[]{messageContext.getMessageID(),

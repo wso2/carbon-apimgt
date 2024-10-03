@@ -277,6 +277,20 @@ public class RestApiPublisherUtils {
         return fileContentType;
     }
 
+    public static File exportCustomBackendData(String seq, String seqName) throws APIManagementException {
+        try {
+            // Provided Sequence Name by the user
+            String customBackendName = seqName;
+            if (!customBackendName.contains(".xml")) {
+                customBackendName = seqName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+            }
+            CommonUtil.writeFile(customBackendName, seq);
+            return new File(customBackendName);
+        } catch (APIImportExportException ex) {
+            throw new APIManagementException("Error when exporting Custom Backend: " + seqName, ex);
+        }
+    }
+
     public static File exportOperationPolicyData(OperationPolicyData policyData, String format)
             throws APIManagementException {
 
