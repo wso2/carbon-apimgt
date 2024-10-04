@@ -528,7 +528,7 @@ public class OASParserUtilTest {
                 "    }\n" + 
                 "  }\n" + 
                 "}";
-        
+
         // Content aware tiers TierX and Tier2.
         // Test 1: API level content-aware tier: TierX
         contentAwareTiersList = new ArrayList<String>();
@@ -581,5 +581,33 @@ public class OASParserUtilTest {
         Assert.assertFalse(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on resource level",
                 pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
 
+    }
+
+    @Test
+    public void testSwaggerWithScopesInDefaultSecuritySchemeWithPasswordFlow()
+            throws IOException, APIManagementException {
+        String swaggerPath = "definitions" + File.separator + "oas3" + File.separator + "default_password_oauth_flow_scopes.yaml";
+        String swagger = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(swaggerPath), "UTF-8");
+
+        String responsePath = "definitions" + File.separator + "oas3" + File.separator + "default_password_oauth_flow_scopes_response.json";
+        String expectedSwaggerResponse = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(responsePath),
+                "UTF-8");
+
+        String actualSwaggerResponse = OASParserUtil.preProcess(swagger);
+        Assert.assertEquals(expectedSwaggerResponse.trim(), actualSwaggerResponse);
+    }
+
+    @Test
+    public void testSwaggerWithScopesInDefaultSecuritySchemeWithMultipleFlows()
+            throws IOException, APIManagementException {
+        String swaggerPath = "definitions" + File.separator + "oas3" + File.separator + "default_multiple_oauth_flows_scopes.yaml";
+        String swagger = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(swaggerPath), "UTF-8");
+
+        String responsePath = "definitions" + File.separator + "oas3" + File.separator + "default_multiple_oauth_flows_scopes_response.json";
+        String expectedSwaggerResponse = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(responsePath),
+                "UTF-8");
+
+        String actualSwaggerResponse = OASParserUtil.preProcess(swagger);
+        Assert.assertEquals(expectedSwaggerResponse.trim(), actualSwaggerResponse);
     }
 }
