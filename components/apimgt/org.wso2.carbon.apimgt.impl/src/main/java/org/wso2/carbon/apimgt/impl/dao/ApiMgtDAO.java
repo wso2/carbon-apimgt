@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -19873,8 +19872,7 @@ public class ApiMgtDAO {
             stmt.setString(2, apiUUID);
             stmt.setString(3, revisionUUID);
             stmt.setString(4, provider.getId());
-            stmt.setString(5, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
-            stmt.setString(6, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
+            stmt.setString(5, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
             stmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -19896,9 +19894,8 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
-            stmt.setString(1, new Gson().toJson(aiConfiguration.getAiEndpointConfiguration()));
-            stmt.setString(2, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
-            stmt.setString(3, apiUUID);
+            stmt.setString(1, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
+            stmt.setString(2, apiUUID);
             stmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -19957,11 +19954,8 @@ public class ApiMgtDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     aiConfiguration = new AIConfiguration();
-                    aiConfiguration.setAiEndpointConfiguration(
-                            new Gson().fromJson(rs.getString("ENDPOINT_CONFIGURATION"), AIEndpointConfiguration.class));
                     aiConfiguration.setTokenBasedThrottlingConfiguration(
                             new Gson().fromJson(rs.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
-
                     String providerId = rs.getString("LLM_PROVIDER_UUID");
                     LLMProvider provider = getLLMProvider(organization, providerId);
                     aiConfiguration.setLlmProviderName(provider.getName());

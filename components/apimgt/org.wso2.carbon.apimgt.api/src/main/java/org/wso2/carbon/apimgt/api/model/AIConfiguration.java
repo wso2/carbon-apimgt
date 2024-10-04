@@ -22,20 +22,9 @@ import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 
 public class AIConfiguration {
     private String llmProviderId;
-    private AIEndpointConfiguration aiEndpointConfiguration;
     private String llmProviderName;
     private String llmProviderApiVersion;
     private TokenBaseThrottlingCountHolder tokenBasedThrottlingConfiguration;
-
-    public AIEndpointConfiguration getAiEndpointConfiguration() {
-
-        return aiEndpointConfiguration;
-    }
-
-    public void setAiEndpointConfiguration(AIEndpointConfiguration aiEndpointConfiguration) {
-
-        this.aiEndpointConfiguration = aiEndpointConfiguration;
-    }
 
     public TokenBaseThrottlingCountHolder getTokenBasedThrottlingConfiguration() {
 

@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.wso2.carbon.apimgt.internal.service.dto.AIEndpointConfigurationDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.TokenBaseThrottlingCountHolderDTO;
 import javax.validation.constraints.*;
 
@@ -18,27 +17,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class AIConfigurationDTO   {
   
-    private AIEndpointConfigurationDTO aiEndpointConfiguration = null;
     private String llmProviderId = null;
     private TokenBaseThrottlingCountHolderDTO tokenBasedThrottlingConfiguration = null;
-
-  /**
-   * Configuration for AI endpoints, including sandbox and production.
-   **/
-  public AIConfigurationDTO aiEndpointConfiguration(AIEndpointConfigurationDTO aiEndpointConfiguration) {
-    this.aiEndpointConfiguration = aiEndpointConfiguration;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Configuration for AI endpoints, including sandbox and production.")
-  @JsonProperty("aiEndpointConfiguration")
-  public AIEndpointConfigurationDTO getAiEndpointConfiguration() {
-    return aiEndpointConfiguration;
-  }
-  public void setAiEndpointConfiguration(AIEndpointConfigurationDTO aiEndpointConfiguration) {
-    this.aiEndpointConfiguration = aiEndpointConfiguration;
-  }
 
   /**
    * UUID of the LLM (Large Language Model) provider.
@@ -86,14 +66,13 @@ public class AIConfigurationDTO   {
       return false;
     }
     AIConfigurationDTO aiConfiguration = (AIConfigurationDTO) o;
-    return Objects.equals(aiEndpointConfiguration, aiConfiguration.aiEndpointConfiguration) &&
-        Objects.equals(llmProviderId, aiConfiguration.llmProviderId) &&
+    return Objects.equals(llmProviderId, aiConfiguration.llmProviderId) &&
         Objects.equals(tokenBasedThrottlingConfiguration, aiConfiguration.tokenBasedThrottlingConfiguration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(aiEndpointConfiguration, llmProviderId, tokenBasedThrottlingConfiguration);
+    return Objects.hash(llmProviderId, tokenBasedThrottlingConfiguration);
   }
 
   @Override
@@ -101,7 +80,6 @@ public class AIConfigurationDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class AIConfigurationDTO {\n");
     
-    sb.append("    aiEndpointConfiguration: ").append(toIndentedString(aiEndpointConfiguration)).append("\n");
     sb.append("    llmProviderId: ").append(toIndentedString(llmProviderId)).append("\n");
     sb.append("    tokenBasedThrottlingConfiguration: ").append(toIndentedString(tokenBasedThrottlingConfiguration)).append("\n");
     sb.append("}");

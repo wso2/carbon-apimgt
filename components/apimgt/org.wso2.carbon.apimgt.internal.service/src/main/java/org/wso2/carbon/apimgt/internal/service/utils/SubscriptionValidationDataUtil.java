@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
-import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -124,13 +123,6 @@ public class SubscriptionValidationDataUtil {
             AIConfiguration aiConfiguration = model.getAiConfiguration();
             if (aiConfiguration != null) {
                 AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
-                AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
-                if (aiEndpointConfiguration != null) {
-                    AIEndpointConfigurationDTO aiEndpointConfigurationDTO = new AIEndpointConfigurationDTO();
-                    aiEndpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration.getSandboxAuthValue());
-                    aiEndpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration.getProductionAuthValue());
-                    aiConfigurationDTO.setAiEndpointConfiguration(aiEndpointConfigurationDTO);
-                }
                 aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
                 TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
                 if (tokenBaseThrottlingCountHolder != null) {
@@ -211,13 +203,6 @@ public class SubscriptionValidationDataUtil {
             AIConfiguration aiConfiguration = model.getAiConfiguration();
             if (aiConfiguration != null) {
                 AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
-                AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
-                if (aiEndpointConfiguration != null) {
-                    AIEndpointConfigurationDTO aiEndpointConfigurationDTO = new AIEndpointConfigurationDTO();
-                    aiEndpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration.getSandboxAuthValue());
-                    aiEndpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration.getProductionAuthValue());
-                    aiConfigurationDTO.setAiEndpointConfiguration(aiEndpointConfigurationDTO);
-                }
                 aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
                 TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
                 if (tokenBaseThrottlingCountHolder != null) {

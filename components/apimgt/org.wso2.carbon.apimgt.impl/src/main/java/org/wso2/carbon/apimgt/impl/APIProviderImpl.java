@@ -54,7 +54,6 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -649,12 +648,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         AIConfiguration aiConfig = api.getAiConfiguration();
         if (aiConfig != null) {
-            try {
-                processEndpointConfig(api, aiConfig);
-                apiMgtDAO.addAIConfiguration(api.getUuid(), null, aiConfig, api.getOrganization());
-            } catch (ParseException e) {
-                throw new APIManagementException("Error parsing endpoint configuration", e);
-            }
+            apiMgtDAO.addAIConfiguration(api.getUuid(), null, aiConfig, api.getOrganization());
         }
     }
 
@@ -668,94 +662,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         AIConfiguration aiConfig = api.getAiConfiguration();
         if (aiConfig != null) {
-            try {
-                processEndpointConfig(api, aiConfig);
-                apiMgtDAO.updateAIConfiguration(api.getUuid(), aiConfig);
-            } catch (ParseException e) {
-                throw new APIManagementException("Error parsing endpoint configuration", e);
-            }
+            apiMgtDAO.updateAIConfiguration(api.getUuid(), aiConfig);
         }
-    }
-
-    /**
-     * Processes the endpoint security configuration for both add and update operations.
-     *
-     * @param api      API object
-     * @param aiConfig AI Configuration to update or add
-     * @throws ParseException         if parsing the endpoint configuration fails
-     * @throws APIManagementException if an error occurs during the process
-     */
-    private void processEndpointConfig(API api, AIConfiguration aiConfig) throws ParseException,
-            APIManagementException {
-
-        String endpointConfig = api.getEndpointConfig();
-        if (StringUtils.isNotEmpty(endpointConfig)) {
-            JSONObject endpointConfigJson = parseEndpointConfig(endpointConfig);
-            if (endpointConfigJson.containsKey(APIConstants.ENDPOINT_SECURITY)) {
-                updateEndpointSecurityConfig(api, aiConfig,
-                        (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY));
-            }
-        }
-    }
-
-    /**
-     * Updates the endpoint security configuration for production and sandbox environments.
-     *
-     * @param api                  API object
-     * @param aiConfig             AI Configuration to update
-     * @param endpointSecurityJson JSON object containing endpoint security details
-     * @throws APIManagementException if an error occurs during the process
-     */
-    private void updateEndpointSecurityConfig(API api, AIConfiguration aiConfig, JSONObject endpointSecurityJson)
-            throws APIManagementException {
-
-        AIEndpointConfiguration aiEndpointConfig = aiConfig.getAiEndpointConfiguration();
-        if (aiEndpointConfig == null) {
-            aiEndpointConfig = new AIEndpointConfiguration();
-        }
-        if (endpointSecurityJson.containsKey(APIConstants.ENDPOINT_SECURITY_PRODUCTION)) {
-            processEndpointSecurity(api, aiEndpointConfig,
-                    (JSONObject) endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION), true);
-        }
-        if (endpointSecurityJson.containsKey(APIConstants.ENDPOINT_SECURITY_SANDBOX)) {
-            processEndpointSecurity(api, aiEndpointConfig,
-                    (JSONObject) endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX), false);
-        }
-        aiConfig.setAiEndpointConfiguration(aiEndpointConfig);
-    }
-
-    /**
-     * Processes the endpoint security configuration for a specific environment (production or sandbox).
-     *
-     * @param api              API object
-     * @param aiEndpointConfig AI endpoint configuration to update or add
-     * @param securityJson     JSON object containing security details
-     * @param isProduction     flag indicating if it's for production
-     * @throws APIManagementException if an error occurs during encryption or invalid config
-     */
-    private void processEndpointSecurity(API api, AIEndpointConfiguration aiEndpointConfig, JSONObject securityJson,
-                                         boolean isProduction) throws APIManagementException {
-
-        EndpointSecurity endpointSecurity = new ObjectMapper().convertValue(securityJson, EndpointSecurity.class);
-        if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(endpointSecurity.getType())) {
-            if (isProduction) {
-                aiEndpointConfig.setProductionAuthValue(endpointSecurity.getApiKeyValue());
-            } else {
-                aiEndpointConfig.setSandboxAuthValue(endpointSecurity.getApiKeyValue());
-            }
-        }
-    }
-
-    /**
-     * Parses the endpoint configuration string to a JSON object.
-     *
-     * @param endpointConfig the endpoint configuration as a string
-     * @return parsed JSON object
-     * @throws ParseException if parsing fails
-     */
-    private JSONObject parseEndpointConfig(String endpointConfig) throws ParseException {
-
-        return (JSONObject) new JSONParser().parse(endpointConfig);
     }
 
     /**
