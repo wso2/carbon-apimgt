@@ -3469,6 +3469,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.isEmpty(apiId) && (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version))) {
                 APIIdentifier apiIdentifier = new APIIdentifier(providerName, name, version);
                 apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
+                if (StringUtils.isEmpty(apiId)) {
+                    throw new APIManagementException("API not found for the given name: " + name + ", and version : "
+                            + version, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, name + "-" + version));
+                }
             }
             RuntimeArtifactDto runtimeArtifactDto = null;
             if (StringUtils.isNotEmpty(organization)) {
