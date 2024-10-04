@@ -25,7 +25,7 @@
 		#if($quotaPolicy.getAiApiQuota().getTotalTokenCount() != 0)
 		ifThenElse((sum(cast(map:get(propertiesMap,'TOTAL_TOKENS'),'long')) >= $quotaPolicy.getAiApiQuota().getTotalTokenCount()L), true,
 		#end
-				false)
+				false
 		#if($quotaPolicy.getAiApiQuota().getPromptTokenCount() != 0)
 		)
 		#end
