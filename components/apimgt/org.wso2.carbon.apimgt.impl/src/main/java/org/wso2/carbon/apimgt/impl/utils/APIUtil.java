@@ -10577,7 +10577,7 @@ public final class APIUtil {
         for (Tier tier : tiers) {
             for (SubscriptionPolicy policy : policies) {
                 if (policy.getPolicyName().equals(tier.getName())
-                        && (policy.getAllowedOrganizations().contains(APIConstants.ALLOWED_ORGANIZATIONS_DEFAULT)
+                        && (policy.getAllowedOrganizations().isEmpty()
                                 || policy.getAllowedOrganizations().contains(organization))) {
                     allowedTiers.add(tier);
                 }
