@@ -17146,8 +17146,13 @@ public class ApiMgtDAO {
                     String revisionUuid = apiUsageResultSet.getString("REVISION_UUID");
                     String GET_SHARED_SCOPE_URI_USAGE_BY_TENANT = SQLConstants.GET_SHARED_SCOPE_URI_USAGE_IN_CURRENT_APIS_BY_TENANT;
                     if (StringUtils.isNotEmpty(revisionUuid)) {
-                        usedApi.setRevision(true);
-                        GET_SHARED_SCOPE_URI_USAGE_BY_TENANT = SQLConstants.GET_SHARED_SCOPE_URI_USAGE_IN_REVISIONS_BY_TENANT;
+                        APIRevision revision = getRevisionByRevisionUUID(connection, revisionUuid);
+                        // This check is done to make sure this does not belong to a Current API entry of an
+                        // API Product url mapping in the AM_API_URL_MAPPING table
+                        if (revision != null) {
+                            usedApi.setRevision(true);
+                            GET_SHARED_SCOPE_URI_USAGE_BY_TENANT = SQLConstants.GET_SHARED_SCOPE_URI_USAGE_IN_REVISIONS_BY_TENANT;
+                        }
                     }
 
                     try (PreparedStatement psForUriUsage = connection
