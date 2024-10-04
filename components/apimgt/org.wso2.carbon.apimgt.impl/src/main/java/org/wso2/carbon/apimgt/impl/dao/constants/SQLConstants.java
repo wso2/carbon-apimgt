@@ -2355,16 +2355,16 @@ public class SQLConstants {
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID, RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY, \n" +
-                    " BILLING_PLAN,ALLOWED_ORGANIZATIONS,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " BILLING_PLAN,MONETIZATION_PLAN,FIXED_RATE,BILLING_CYCLE,PRICE_PER_REQUEST,CURRENCY, CONNECTIONS_COUNT) \n" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
                     " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, MAX_DEPTH, MAX_COMPLEXITY,\n" +
-                    " BILLING_PLAN, ALLOWED_ORGANIZATIONS, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
+                    " BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
                     " FIXED_RATE, BILLING_CYCLE, PRICE_PER_REQUEST, CURRENCY, CONNECTIONS_COUNT) \n" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -2580,7 +2580,6 @@ public class SQLConstants {
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, " +
-                    "ALLOWED_ORGANIZATIONS = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2605,7 +2604,6 @@ public class SQLConstants {
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, "+
-                    "ALLOWED_ORGANIZATIONS = ?, " +
                     "CUSTOM_ATTRIBUTES = ?, "+
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
@@ -2631,7 +2629,6 @@ public class SQLConstants {
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, "+
-                    "ALLOWED_ORGANIZATIONS = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
@@ -2656,7 +2653,6 @@ public class SQLConstants {
                     "MAX_DEPTH = ?, " +
                     "MAX_COMPLEXITY = ?, " +
                     "BILLING_PLAN = ?, "+
-                    "ALLOWED_ORGANIZATIONS = ?, " +
                     "CUSTOM_ATTRIBUTES = ?, "+
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
@@ -3794,6 +3790,22 @@ public class SQLConstants {
                 "SELECT ALLOWED_ORGANIZATIONS" +
                         " FROM AM_KEY_MANAGER_ALLOWED_ORGS " +
                         " WHERE KEY_MANAGER_UUID = ?";
+    }
+    
+    public static class PolicyOrgVisibilitySqlConstants {
+
+        public static final String ADD_POLICY_ORG_VISIBILITY_SQL =
+                " INSERT INTO" +
+                        " AM_POLICY_ALLOWED_ORGS (POLICY_UUID, ALLOWED_ORGANIZATIONS)" +
+                        " VALUES(?, ?)";
+
+        public static final String DELETE_ALL_POLICY_ORG_VISIBILITY_SQL = "DELETE FROM AM_POLICY_ALLOWED_ORGS" +
+                " WHERE POLICY_UUID = ?";
+
+        public static final String GET_POLICY_ORG_VISIBILITY_SQL =
+                "SELECT ALLOWED_ORGANIZATIONS" +
+                        " FROM AM_POLICY_ALLOWED_ORGS " +
+                        " WHERE POLICY_UUID = ?";
     }
     /**
      * Static class to hold database queries related to AM_TENANT_THEMES table
