@@ -14030,12 +14030,10 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    throw new APIManagementException("Failed to rollback getting Block conditions.",
-                            ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
+                    handleException("Failed to rollback getting Block conditions.", ex);
                 }
             }
-            throw new APIManagementException("Failed to retrieve all block conditions for the tenant " + tenantDomain,
-                    ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
+            handleException("Failed to retrieve all block conditions for the tenant " + tenantDomain, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
@@ -14086,9 +14084,9 @@ public class ApiMgtDAO {
                 blockConditionsDTOList.add(blockConditionsDTO);
             }
         } catch (SQLException e) {
-            throw new APIManagementException(
-                    "Failed to get Block conditions by condition type: " + conditionType + " and condition value: "
-                            + conditionValue, ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
+            handleException(
+                    "Failed to get Block conditions by condition type: " + conditionType + " and condition value: " + conditionValue,
+                    e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
