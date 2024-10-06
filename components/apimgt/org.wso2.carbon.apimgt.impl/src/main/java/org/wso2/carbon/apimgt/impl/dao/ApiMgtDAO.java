@@ -14708,10 +14708,16 @@ public class ApiMgtDAO {
                     provider.setId(resultSet.getString("UUID"));
                     provider.setName(resultSet.getString("NAME"));
                     provider.setApiVersion(resultSet.getString("API_VERSION"));
-                    provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
                     provider.setOrganization(resultSet.getString("ORGANIZATION"));
                     provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
                     provider.setDescription(resultSet.getString("DESCRIPTION"));
+                    try (InputStream apiDefStream = resultSet.getBinaryStream("API_DEFINITION")) {
+                        if (apiDefStream != null) {
+                            provider.setApiDefinition(IOUtils.toString(apiDefStream));
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading API definition", e);
+                    }
                     try (InputStream configStream = resultSet.getBinaryStream("CONFIGURATIONS")) {
                         if (configStream != null) {
                             provider.setConfigurations(IOUtils.toString(configStream));
