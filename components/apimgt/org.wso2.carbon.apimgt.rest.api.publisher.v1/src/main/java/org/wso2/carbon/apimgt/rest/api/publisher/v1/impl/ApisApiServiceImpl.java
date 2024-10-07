@@ -2630,7 +2630,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
             //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().getStatus());
+            validateAPIOperationsPerLC(apiInfo.getStatus());
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //Handle URL and file based definition imports
@@ -3436,8 +3436,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param providerName       Provider name of the API that needs to be exported
      * @param format             Format of output documents. Can be YAML or JSON
      * @param preserveStatus     Preserve API status on export
-     * @param gatewayEnvironment
-     * @return
+     * @param gatewayEnvironment Gateway environment of the API to be exported
+     * @return API export response as an archive
      */
     @Override public Response exportAPI(String apiId, String name, String version, String revisionNum,
                                         String providerName, String format, Boolean preserveStatus,
@@ -3469,13 +3469,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.isEmpty(apiId) && (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version))) {
                 APIIdentifier apiIdentifier = new APIIdentifier(providerName, name, version);
                 apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
+                if (StringUtils.isEmpty(apiId)) {
+                    throw new APIManagementException("API not found for the given name: " + name + ", and version : "
+                            + version, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, name + "-" + version));
+                }
             }
-            RuntimeArtifactDto runtimeArtifactDto;
-            if (StringUtils.isNotEmpty(organization) && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
-                    .equalsIgnoreCase(organization)) {
-                runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateAllRuntimeArtifact(apiId, gatewayEnvironment,
-                        APIConstants.API_GATEWAY_TYPE_ENVOY);
-            } else {
+            RuntimeArtifactDto runtimeArtifactDto = null;
+            if (StringUtils.isNotEmpty(organization)) {
                 runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, gatewayEnvironment,
                         APIConstants.API_GATEWAY_TYPE_ENVOY, organization);
             }

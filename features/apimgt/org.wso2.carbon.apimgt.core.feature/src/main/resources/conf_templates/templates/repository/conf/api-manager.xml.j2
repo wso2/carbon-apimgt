@@ -89,6 +89,7 @@
         {% endif %}
         <GatewayJWTGeneration>
             <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
+            <EncodeX5tWithoutPadding>{{apim.jwt.encode_x5t_without_padding}}</EncodeX5tWithoutPadding>
             <Configuration>
             <ExcludedClaims>
                 {%- for claim in apim.jwt.gateway_generator.excluded_claims -%}

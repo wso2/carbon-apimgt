@@ -1638,8 +1638,8 @@ public class GatewayUtils {
      *
      * @return List of eager loading enabled tenants
      */
-    public static List<String> getTenantsToBeDeployed() throws APIManagementException {
-        List<String> tenantsToBeDeployed = new ArrayList<>();
+    public static Set<String> getTenantsToBeDeployed() throws APIManagementException {
+        Set<String> tenantsToBeDeployed = new HashSet<>();
         tenantsToBeDeployed.add(APIConstants.SUPER_TENANT_DOMAIN);
 
         //Read eager loading config from carbon server config, and extract include and exclude tenant lists

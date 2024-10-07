@@ -1691,7 +1691,8 @@ public class APIMappingUtil {
                         convertFromMilliseconds(api.getSandboxTimeUnit())));
             }
             AIConfiguration aiConfiguration = api.getAiConfiguration();
-            if (aiConfiguration.getTokenBasedThrottlingConfiguration() != null
+            if (aiConfiguration != null
+                    && aiConfiguration.getTokenBasedThrottlingConfiguration() != null
                     && aiConfiguration.getTokenBasedThrottlingConfiguration().isTokenBasedThrottlingEnabled()) {
                 APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigurationsDTO
                         = buildThrottlingConfigurationDTO(aiConfiguration.getTokenBasedThrottlingConfiguration());

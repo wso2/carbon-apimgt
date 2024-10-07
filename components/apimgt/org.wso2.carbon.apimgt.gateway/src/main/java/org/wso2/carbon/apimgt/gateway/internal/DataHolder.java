@@ -286,7 +286,7 @@ public class DataHolder {
 
     private void initializeTenantDeploymentStatusMap() {
         try {
-            List<String> tenants = GatewayUtils.getTenantsToBeDeployed();
+            Set<String> tenants = GatewayUtils.getTenantsToBeDeployed();
             tenantDeployStatus = tenants.stream().collect(Collectors.toMap(str -> str, str -> false));
         } catch (APIManagementException e) {
             log.error("Error while initializing tenant deployment status map", e);

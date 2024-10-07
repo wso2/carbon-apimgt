@@ -10060,7 +10060,7 @@ public class ApiMgtDAO {
                                 .provider(resultSet.getString("API_PROVIDER"))
                                 .context(context)
                                 .contextTemplate(contextTemplate)
-                                .status(APIUtil.getApiStatus(resultSet.getString("STATUS")))
+                                .status(resultSet.getString("STATUS"))
                                 .apiType(apiType)
                                 .apiSubtype(apiSubtype)
                                 .createdBy(resultSet.getString("CREATED_BY"))
@@ -14030,12 +14030,10 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    throw new APIManagementException("Failed to rollback getting Block conditions.",
-                            ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
+                    handleException("Failed to rollback getting Block conditions.", ex);
                 }
             }
-            throw new APIManagementException("Failed to retrieve all block conditions for the tenant " + tenantDomain,
-                    ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
+            handleException("Failed to retrieve all block conditions for the tenant " + tenantDomain, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
@@ -14043,11 +14041,12 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Retrieves block conditions based on the specified condition type and condition value.
+     * Retrieves block conditions based on the specified condition type and condition value. If the condition value is
+     * wrapped in double quotes (""), an exact match is performed; otherwise, a partial match is applied.
      *
-     * @param conditionType     type of the condition
-     * @param conditionValue    condition value
-     * @param tenantDomain      tenant domain
+     * @param conditionType  type of the condition
+     * @param conditionValue condition value
+     * @param tenantDomain   tenant domain
      * @return list of block conditions
      * @throws APIManagementException
      */
@@ -14058,24 +14057,36 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
         List<BlockConditionsDTO> blockConditionsDTOList = new ArrayList<>();
         try {
-            String query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL;
+            String query;
+            boolean isExactMatch = conditionValue != null && conditionValue.startsWith("\"") && conditionValue.endsWith(
+                    "\"");
+            if (isExactMatch) {
+                query = ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_EXACT_VALUE_SQL;
+                conditionValue = conditionValue.substring(1, conditionValue.length() - 1);
+            } else {
+                query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL;
+            }
             connection = APIMgtDBUtil.getConnection();
             selectPreparedStatement = connection.prepareStatement(query);
             String conditionTypeUpper = conditionType != null ? conditionType.toUpperCase() : null;
             selectPreparedStatement.setString(1, conditionTypeUpper);
             selectPreparedStatement.setString(2, conditionTypeUpper);
             selectPreparedStatement.setString(3, conditionValue);
-            selectPreparedStatement.setString(4, conditionValue);
-            selectPreparedStatement.setString(5, tenantDomain);
+            if (isExactMatch) {
+                selectPreparedStatement.setString(4, tenantDomain);
+            } else {
+                selectPreparedStatement.setString(4, conditionValue);
+                selectPreparedStatement.setString(5, tenantDomain);
+            }
             resultSet = selectPreparedStatement.executeQuery();
             while (resultSet.next()) {
                 BlockConditionsDTO blockConditionsDTO = populateBlockConditionsDataWithRS(resultSet);
                 blockConditionsDTOList.add(blockConditionsDTO);
             }
         } catch (SQLException e) {
-            throw new APIManagementException(
-                    "Failed to get Block conditions by condition type: " + conditionType + " and condition value: "
-                            + conditionValue, ExceptionCodes.BLOCK_CONDITION_RETRIEVE_FAILED);
+            handleException(
+                    "Failed to get Block conditions by condition type: " + conditionType + " and condition value: " + conditionValue,
+                    e);
         } finally {
             APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
@@ -14653,8 +14664,10 @@ public class ApiMgtDAO {
                 prepStmt.setString(4, String.valueOf(provider.isBuiltInSupport()));
                 prepStmt.setString(5, provider.getOrganization());
                 prepStmt.setString(6, provider.getDescription());
-                prepStmt.setString(7, provider.getApiDefinition());
-                prepStmt.setString(8, provider.getConfigurations());
+                prepStmt.setBinaryStream(7, new ByteArrayInputStream(provider
+                        .getApiDefinition().getBytes()));
+                prepStmt.setBinaryStream(8, new ByteArrayInputStream(provider
+                        .getConfigurations().getBytes()));
                 int rowsAffected = prepStmt.executeUpdate();
                 if (rowsAffected > 0) {
                     conn.commit();
@@ -14695,11 +14708,23 @@ public class ApiMgtDAO {
                     provider.setId(resultSet.getString("UUID"));
                     provider.setName(resultSet.getString("NAME"));
                     provider.setApiVersion(resultSet.getString("API_VERSION"));
-                    provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
                     provider.setOrganization(resultSet.getString("ORGANIZATION"));
                     provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
                     provider.setDescription(resultSet.getString("DESCRIPTION"));
-                    provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+                    try (InputStream apiDefStream = resultSet.getBinaryStream("API_DEFINITION")) {
+                        if (apiDefStream != null) {
+                            provider.setApiDefinition(IOUtils.toString(apiDefStream));
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading API definition", e);
+                    }
+                    try (InputStream configStream = resultSet.getBinaryStream("CONFIGURATIONS")) {
+                        if (configStream != null) {
+                            provider.setConfigurations(IOUtils.toString(configStream));
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while retrieving LLM configuration", e);
+                    }
                     providerList.add(provider);
                 }
             }
@@ -14934,8 +14959,20 @@ public class ApiMgtDAO {
             provider.setApiVersion(resultSet.getString("API_VERSION"));
             provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
             provider.setDescription(resultSet.getString("DESCRIPTION"));
-            provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
-            provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+            try (InputStream apiDefStream = resultSet.getBinaryStream("API_DEFINITION")) {
+                if (apiDefStream != null) {
+                    provider.setApiDefinition(IOUtils.toString(apiDefStream));
+                }
+            } catch (IOException e) {
+                log.error("Error while retrieving LLM API definition", e);
+            }
+            try (InputStream configStream = resultSet.getBinaryStream("CONFIGURATIONS")) {
+                if (configStream != null) {
+                    provider.setConfigurations(IOUtils.toString(configStream));
+                }
+            } catch (IOException e) {
+                log.error("Error while retrieving LLM configuration", e);
+            }
             return provider;
 
         } catch (SQLException e) {
@@ -14962,8 +14999,20 @@ public class ApiMgtDAO {
             provider.setApiVersion(resultSet.getString("API_VERSION"));
             provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
             provider.setDescription(resultSet.getString("DESCRIPTION"));
-            provider.setApiDefinition(resultSet.getString("API_DEFINITION"));
-            provider.setConfigurations(resultSet.getString("CONFIGURATIONS"));
+            try (InputStream apiDefStream = resultSet.getBinaryStream("API_DEFINITION")) {
+                if (apiDefStream != null) {
+                    provider.setApiDefinition(IOUtils.toString(apiDefStream));
+                }
+            } catch (IOException e) {
+                log.error("Error while retrieving LLM API definition", e);
+            }
+            try (InputStream configStream = resultSet.getBinaryStream("CONFIGURATIONS")) {
+                if (configStream != null) {
+                    provider.setConfigurations(IOUtils.toString(configStream));
+                }
+            } catch (IOException e) {
+                log.error("Error while retrieving LLM configuration", e);
+            }
             return provider;
 
         } catch (SQLException e) {
@@ -22830,32 +22879,6 @@ public class ApiMgtDAO {
         blockConditionsDTO.setUUID(resultSet.getString("UUID"));
         blockConditionsDTO.setTenantDomain(resultSet.getString("DOMAIN"));
         return blockConditionsDTO;
-    }
-
-    /**
-     * This returns whether the API is Egress or not (1 or 0)
-     *
-     * @param uuid
-     * @return
-     * @throws APIManagementException
-     */
-    public int checkForEgressAPIWithUUID(String uuid) throws APIManagementException {
-
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            try (PreparedStatement preparedStatement =
-                         connection.prepareStatement(SQLConstants.CHECK_API_EGRESS_WITH_UUID)) {
-                preparedStatement.setString(1, uuid);
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        return resultSet.getInt("IS_EGRESS");
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error while retrieving apimgt connection", e,
-                    ExceptionCodes.INTERNAL_ERROR);
-        }
-        return 0;
     }
 
     /**

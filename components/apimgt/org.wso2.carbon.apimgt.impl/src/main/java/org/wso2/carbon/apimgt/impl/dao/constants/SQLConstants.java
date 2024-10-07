@@ -2803,7 +2803,7 @@ public class SQLConstants {
             "DELETE FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ? AND API_REVISION_UUID = ?";
 
     public static final String DELETE_AI_CONFIGURATIONS =
-            "DELETE FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ? AND API_REVISION_UUID IS NULL";
+            "DELETE FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ?";
 
     public static final String DELETE_API_PRODUCT_SQL =
             "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
@@ -3113,7 +3113,6 @@ public class SQLConstants {
 
     public static final String UPDATE_API_STATUS = "UPDATE AM_API SET STATUS = ? WHERE API_ID = ?";
     public static final String RETRIEVE_API_STATUS_FROM_UUID = "SELECT STATUS FROM AM_API WHERE API_UUID = ?";
-    public static final String CHECK_API_EGRESS_WITH_UUID = "SELECT IS_EGRESS FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_API_SUBTYPE_WITH_UUID = "SELECT API_SUBTYPE FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_API_INFO_FROM_UUID = "SELECT API_UUID, API_PROVIDER, API_NAME, API_VERSION, " +
             "CONTEXT, CONTEXT_TEMPLATE, API_TIER, API_TYPE, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, " +
@@ -3395,6 +3394,9 @@ public class SQLConstants {
         public static final String GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL =
                 "SELECT CONDITION_ID, TYPE, BLOCK_CONDITION, ENABLED, DOMAIN, UUID FROM AM_BLOCK_CONDITIONS WHERE "
                         + "(TYPE = ? OR ? IS NULL) AND (BLOCK_CONDITION LIKE CONCAT('%', ?, '%') OR ? IS NULL) AND DOMAIN = ?";
+        public static final String GET_BLOCK_CONDITIONS_BY_TYPE_AND_EXACT_VALUE_SQL =
+                "SELECT CONDITION_ID, TYPE, BLOCK_CONDITION, ENABLED, DOMAIN, UUID FROM AM_BLOCK_CONDITIONS WHERE "
+                        + "(TYPE = ? OR ? IS NULL) AND (BLOCK_CONDITION = ?) AND DOMAIN = ?";
 
         public static final String TIER_HAS_SUBSCRIPTION = " select count(sub.TIER_ID) as c from AM_SUBSCRIPTION sub, AM_API api "
         		+ " where sub.TIER_ID = ? and api.API_PROVIDER like ? and sub.API_ID = api.API_ID ";

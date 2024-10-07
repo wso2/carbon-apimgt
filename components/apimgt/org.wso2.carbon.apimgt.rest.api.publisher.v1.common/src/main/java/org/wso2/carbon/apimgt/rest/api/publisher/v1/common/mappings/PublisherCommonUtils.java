@@ -649,7 +649,7 @@ public class PublisherCommonUtils {
                                     .put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, encryptedApiKeyValue);
                         } else if (StringUtils.isNotBlank(oldSandboxApiKeyValue)) {
                             endpointSecuritySandbox
-                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldSandboxApiKeyValue);
+                                    .put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, oldSandboxApiKeyValue);
                         } else {
                             String errorMessage = "ApiKey value is not provided for sandbox endpoint security";
                             throw new APIManagementException(
