@@ -389,7 +389,8 @@ public class APIAdminImpl implements APIAdmin {
             if (APIUtil.isInternalOrganization(organization)) {
                 KeyMgtRegistrationService.registerDefaultKeyManager(organization);
             } else {
-                tenantDomain = APIUtil.getInternalOrganizationDomain(organization);
+                tenantDomain = !APIConstants.KeyManager.ALL_KEY_MANAGERS.equals(organization) ?
+                        APIUtil.getInternalOrganizationDomain(organization) : organization;
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while retrieving tenant id for organization "

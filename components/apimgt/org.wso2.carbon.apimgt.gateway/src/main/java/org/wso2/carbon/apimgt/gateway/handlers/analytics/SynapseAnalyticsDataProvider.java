@@ -71,6 +71,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_OBJECT;
@@ -452,34 +453,48 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     ) {
         Map<String, String> aiMetadata = new HashMap<>();
         Map<String, Integer> aiTokenUsage = new HashMap<>();
-        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_NAME) != null) {
-            aiMetadata.put(Constants.AI_VENDOR_NAME,
-                    aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_NAME).toString());
-        }
-        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_API_VERSION) != null) {
-            aiMetadata.put(Constants.AI_VENDOR_VERSION,
-                    aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_API_VERSION).toString());
-        }
-        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL) != null) {
-            aiMetadata.put(Constants.AI_MODEL,
-                    aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL).toString());
-        }
+        aiMetadata.put(
+                Constants.AI_VENDOR_NAME,
+                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_NAME).toString()
+        );
+        aiMetadata.put(
+                Constants.AI_VENDOR_VERSION,
+                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_API_VERSION).toString()
+        );
+        aiMetadata.put(
+                Constants.AI_MODEL,
+                Optional.ofNullable(aiApiResponseMetadata.get(
+                            AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL)
+                        )
+                        .map(Object::toString)
+                        .orElse(null)
+        );
         customProperties.put(Constants.AI_METADATA, aiMetadata);
-        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT) != null) {
-            aiTokenUsage.put(Constants.AI_PROMPT_TOKEN_USAGE,
-                    Integer.parseInt(aiApiResponseMetadata
-                            .get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT).toString()));
-        }
-        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT) != null) {
-            aiTokenUsage.put(Constants.AI_COMPLETION_TOKEN_USAGE,
-                    Integer.parseInt(aiApiResponseMetadata
-                            .get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT).toString()));
-        }
-        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT) != null) {
-            aiTokenUsage.put(Constants.AI_TOTAL_TOKEN_USAGE,
-                    Integer.parseInt(aiApiResponseMetadata
-                            .get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT).toString()));
-        }
+        aiTokenUsage.put(
+                Constants.AI_PROMPT_TOKEN_USAGE,
+                Optional.ofNullable(aiApiResponseMetadata.get(
+                            AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT)
+                        )
+                        .map(tokenCount -> Integer.parseInt(tokenCount.toString()))
+                        .orElse(0)
+        );
+        aiTokenUsage.put(
+                Constants.AI_COMPLETION_TOKEN_USAGE,
+                Optional.ofNullable(aiApiResponseMetadata.get(
+                            AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT)
+                        )
+                        .map(tokenCount -> Integer.parseInt(tokenCount.toString()))
+                        .orElse(0)
+        );
+
+        aiTokenUsage.put(
+                Constants.AI_TOTAL_TOKEN_USAGE,
+                Optional.ofNullable(aiApiResponseMetadata.get(
+                            AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT)
+                        )
+                        .map(tokenCount -> Integer.parseInt(tokenCount.toString()))
+                        .orElse(0)
+        );
         aiTokenUsage.put(Constants.HOUR, requestStartHour);
         customProperties.put(Constants.AI_TOKEN_USAGE, aiTokenUsage);
     }
