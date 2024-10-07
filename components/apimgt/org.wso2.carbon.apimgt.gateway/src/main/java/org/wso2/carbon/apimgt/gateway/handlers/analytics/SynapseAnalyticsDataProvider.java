@@ -447,50 +447,39 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return offsetDateTime.getHour();
     }
 
-    private void getAiAnalyticsData(
-            Map aiApiResponseMetadata,
-            int requestStartHour,
-            Map<String, Object> customProperties
+    private void getAiAnalyticsData(Map aiApiResponseMetadata, int requestStartHour,
+                                    Map<String, Object> customProperties
     ) {
         Map<String, String> aiMetadata = new HashMap<>();
         Map<String, Integer> aiTokenUsage = new HashMap<>();
-        aiMetadata.put(
-                Constants.AI_VENDOR_NAME,
-                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_NAME).toString()
-        );
-        aiMetadata.put(
-                Constants.AI_VENDOR_VERSION,
-                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_API_VERSION).toString()
-        );
-        aiMetadata.put(
-                Constants.AI_MODEL,
-                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL).toString()
-        );
+        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_NAME) != null) {
+            aiMetadata.put(Constants.AI_VENDOR_NAME,
+                    aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_NAME).toString());
+        }
+        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_API_VERSION) != null) {
+            aiMetadata.put(Constants.AI_VENDOR_VERSION,
+                    aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_API_VERSION).toString());
+        }
+        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL) != null) {
+            aiMetadata.put(Constants.AI_MODEL,
+                    aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL).toString());
+        }
         customProperties.put(Constants.AI_METADATA, aiMetadata);
-        aiTokenUsage.put(
-                Constants.AI_PROMPT_TOKEN_USAGE,
-                Integer.parseInt(
-                        aiApiResponseMetadata.get(
-                                AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT
-                        ).toString()
-                )
-        );
-        aiTokenUsage.put(
-                Constants.AI_COMPLETION_TOKEN_USAGE,
-                Integer.parseInt(
-                        aiApiResponseMetadata.get(
-                                AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT
-                        ).toString()
-                )
-        );
-        aiTokenUsage.put(
-                Constants.AI_TOTAL_TOKEN_USAGE,
-                Integer.parseInt(
-                        aiApiResponseMetadata.get(
-                                AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT
-                        ).toString()
-                )
-        );
+        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT) != null) {
+            aiTokenUsage.put(Constants.AI_PROMPT_TOKEN_USAGE,
+                    Integer.parseInt(aiApiResponseMetadata
+                            .get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT).toString()));
+        }
+        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT) != null) {
+            aiTokenUsage.put(Constants.AI_COMPLETION_TOKEN_USAGE,
+                    Integer.parseInt(aiApiResponseMetadata
+                            .get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT).toString()));
+        }
+        if (aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT) != null) {
+            aiTokenUsage.put(Constants.AI_TOTAL_TOKEN_USAGE,
+                    Integer.parseInt(aiApiResponseMetadata
+                            .get(AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT).toString()));
+        }
         aiTokenUsage.put(Constants.HOUR, requestStartHour);
         customProperties.put(Constants.AI_TOKEN_USAGE, aiTokenUsage);
     }
@@ -602,7 +591,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                 buildResponseMessage = false;
             }
         }
-        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
+        Map headers = (Map) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(TRANSPORT_HEADERS);
         if (headers != null  && headers.get(HttpHeaders.CONTENT_LENGTH) != null) {
             responseSize = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH).toString());
         }
@@ -631,7 +621,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     public String getResponseContentType() {
-        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
+        Map headers = (Map) ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(TRANSPORT_HEADERS);
         if (headers != null && headers.get(HttpHeaders.CONTENT_TYPE) != null) {
             return headers.get(HttpHeaders.CONTENT_TYPE).toString();
         }

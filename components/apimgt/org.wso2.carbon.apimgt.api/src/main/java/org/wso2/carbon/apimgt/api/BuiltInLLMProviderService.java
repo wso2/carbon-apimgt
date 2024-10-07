@@ -42,7 +42,7 @@ public abstract class BuiltInLLMProviderService implements LLMProviderService {
             throws APIManagementException {
 
         if (metadataList == null || metadataList.isEmpty()) {
-            log.warn("Metadata list is null or empty.");
+            log.debug("Metadata list is null or empty.");
             return metadataMap;
         }
         try {
@@ -56,13 +56,13 @@ public abstract class BuiltInLLMProviderService implements LLMProviderService {
                             String extractedValue = JsonPath.read(payload, attributeIdentifier).toString();
                             metadataMap.put(attributeName, extractedValue);
                         } catch (PathNotFoundException e) {
-                            log.warn("Attribute not found in the payload for identifier: " + attributeIdentifier);
+                            log.debug("Attribute not found in the payload for identifier: " + attributeIdentifier);
                         }
                     } else {
-                        log.warn("Payload is null, cannot extract metadata for attribute: " + attributeName);
+                        log.debug("Payload is null, cannot extract metadata for attribute: " + attributeName);
                     }
                 } else {
-                    log.warn("Unsupported input source: " + inputSource + " for attribute: " + attributeName);
+                    log.debug("Unsupported input source: " + inputSource + " for attribute: " + attributeName);
                 }
             }
         } catch (PathNotFoundException e) {
