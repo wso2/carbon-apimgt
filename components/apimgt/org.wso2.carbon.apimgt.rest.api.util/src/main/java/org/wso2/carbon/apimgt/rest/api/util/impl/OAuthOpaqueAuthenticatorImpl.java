@@ -155,7 +155,10 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     carbonContext.setUsername(username);
                     message.put(RestApiConstants.AUTH_TOKEN_INFO, tokenInfo);
                     message.put(RestApiConstants.SUB_ORGANIZATION, tenantDomain);
-                    message.put(RestApiConstants.ORGANIZATION_INFO, getOrganizationInfo(tenantDomain, username)); // TODO cache
+                    if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getOrgAccessControl().isEnabled()) {
+                        message.put(RestApiConstants.ORGANIZATION_INFO, getOrganizationInfo(tenantDomain, username));
+                    }
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                     }

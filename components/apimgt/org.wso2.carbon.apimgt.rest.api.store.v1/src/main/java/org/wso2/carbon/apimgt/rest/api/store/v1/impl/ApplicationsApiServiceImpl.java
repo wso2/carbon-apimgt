@@ -918,16 +918,19 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * Used to get all keys of an application
      *
      * @param applicationUUID Id of the application
+     * @param orgInfo 
      * @return List of application keys
      */
-    private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain) {
+    private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain, OrganizationInfo orgInfo) {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationUUID);
             if (application != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)
+                        || (orgInfo != null && orgInfo.getName() != null
+                                && orgInfo.getName().equals(application.getSharedOrganization()))) {
                     return apiConsumer.getApplicationKeysOfApplication(application.getId(), tenantDomain);
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUID, log);
@@ -949,7 +952,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     private Set<APIKey> getApplicationKeys(String applicationUUID) {
 
-        return getApplicationKeys(applicationUUID, null);
+        return getApplicationKeys(applicationUUID, null, null);
     }
 
     @Override
@@ -1225,7 +1228,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                           String xWso2Tenant, MessageContext messageContext)
             throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, organization);
+        OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, organization, orgInfo);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
         ApplicationKeyListDTO applicationKeyListDTO = new ApplicationKeyListDTO();
         applicationKeyListDTO.setCount(0);
