@@ -2890,6 +2890,10 @@ public class SQLConstants {
     public static final String GET_SCOPE_KEYS_BY_URL_MAPPING_ID =
             "SELECT SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE URL_MAPPING_ID = ?" ;
 
+    public static final String GET_ALL_KEY_MANAGERS = "SELECT * FROM AM_KEY_MANAGER";
+
+    public static final String GET_KEY_MANAGERS_BY_ORGANIZATION = "SELECT * FROM AM_KEY_MANAGER WHERE ORGANIZATION IN (?)";
+
     /** API Categories related constants **/
 
     public static final String ADD_CATEGORY_SQL = "INSERT INTO AM_API_CATEGORIES "

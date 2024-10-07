@@ -2762,6 +2762,7 @@ public final class APIConstants {
         public static final String PERMISSIONS = "permissions";
         public static final String ROLES = "roles";
         public static final String PERMISSION_TYPE = "permissionType";
+        public static final String ALL_KEY_MANAGERS = "ALL";
 
         public static class KeyManagerEvent {
 

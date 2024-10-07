@@ -9421,10 +9421,13 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         List<KeyManagerConfigurationDTO> keyManagerConfigurationDTOS = new ArrayList<>();
-        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE ORGANIZATION IN (?)";
+        final String query = !APIConstants.KeyManager.ALL_KEY_MANAGERS.equals(organization) ?
+                SQLConstants.GET_KEY_MANAGERS_BY_ORGANIZATION : SQLConstants.GET_ALL_KEY_MANAGERS;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = conn.prepareStatement(query)) {
-            preparedStatement.setString(1, organization);
+            if (!APIConstants.KeyManager.ALL_KEY_MANAGERS.equals(organization)) {
+                preparedStatement.setString(1, organization);
+            }
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
