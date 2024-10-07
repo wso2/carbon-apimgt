@@ -653,20 +653,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Updates AI Configuration of the given API.
-     *
-     * @param api API object to update the AI configuration for
-     * @throws APIManagementException if an error occurs during the process
-     */
-    private void updateAIConfiguration(API api) throws APIManagementException {
-
-        AIConfiguration aiConfig = api.getAiConfiguration();
-        if (aiConfig != null) {
-            apiMgtDAO.updateAIConfiguration(api.getUuid(), aiConfig);
-        }
-    }
-
-    /**
      * Add local scopes for the API if the scopes does not exist as shared scopes. The local scopes to add will be
      * take from the URI templates.
      *
@@ -1005,7 +991,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         updateProductResourceMappings(api, organization, productResources);
 
         updateAPIPolicies(api, tenantDomain);
-        updateAIConfiguration(api);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -6561,10 +6546,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIRevision(apiRevision);
-        AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), organization);
-        if (configuration != null) {
-            apiMgtDAO.updateAIConfiguration(apiRevision.getApiUUID(), configuration);
-        }
     }
 
     /**

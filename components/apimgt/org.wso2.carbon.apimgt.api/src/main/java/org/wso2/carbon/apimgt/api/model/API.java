@@ -236,6 +236,8 @@ public class API implements Serializable {
 
     private AIConfiguration aiConfiguration;
 
+    private BackendThrottlingConfiguration backendThrottlingConfiguration;
+
     public AIConfiguration getAiConfiguration() {
 
         return aiConfiguration;
@@ -244,6 +246,14 @@ public class API implements Serializable {
     public void setAiConfiguration(AIConfiguration AiConfiguration) {
 
         this.aiConfiguration = AiConfiguration;
+    }
+
+    public BackendThrottlingConfiguration getBackendThrottlingConfiguration() {
+        return backendThrottlingConfiguration;
+    }
+
+    public void setBackendThrottlingConfiguration(BackendThrottlingConfiguration backendThrottlingConfiguration) {
+        this.backendThrottlingConfiguration = backendThrottlingConfiguration;
     }
 
     public String getAudience() {

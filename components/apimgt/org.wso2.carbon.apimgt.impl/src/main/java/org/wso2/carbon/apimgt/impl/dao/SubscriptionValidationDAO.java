@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
@@ -1146,7 +1145,6 @@ public class SubscriptionValidationDAO {
                         if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
                             AIConfiguration aiConfiguration = new AIConfiguration();
                             aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
-                            aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }
                         if (resultSet.getString("IS_EGRESS") != null) {
@@ -1282,7 +1280,6 @@ public class SubscriptionValidationDAO {
                         if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
                             AIConfiguration aiConfiguration = new AIConfiguration();
                             aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
-                            aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }
                         if (resultSet.getString("IS_EGRESS") != null) {
@@ -1503,7 +1500,6 @@ public class SubscriptionValidationDAO {
                         if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
                             AIConfiguration aiConfiguration = new AIConfiguration();
                             aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
-                            aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }
                         if (resultSet.getString("IS_EGRESS") != null) {
@@ -1604,7 +1600,6 @@ public class SubscriptionValidationDAO {
                         if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
                             AIConfiguration aiConfiguration = new AIConfiguration();
                             aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
-                            aiConfiguration.setTokenBasedThrottlingConfiguration(new Gson().fromJson(resultSet.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                             api.setAiConfiguration(aiConfiguration);
                         }
                         if (resultSet.getString("IS_EGRESS") != null) {

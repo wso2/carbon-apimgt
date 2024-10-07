@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
-import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
@@ -19872,34 +19871,10 @@ public class ApiMgtDAO {
             stmt.setString(2, apiUUID);
             stmt.setString(3, revisionUUID);
             stmt.setString(4, provider.getId());
-            stmt.setString(5, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
             stmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
             throw new APIManagementException("Error while adding AI API configuration for API: " + apiUUID, e);
-        }
-    }
-
-    /**
-     * Updates AI configuration for the given API UUID.
-     *
-     * @param apiUUID        The UUID of the API.
-     * @param aiConfiguration The AI configuration to be updated.
-     * @throws APIManagementException If an error occurs while updating the AI configuration.
-     */
-    public void updateAIConfiguration(String apiUUID, AIConfiguration aiConfiguration)
-            throws APIManagementException {
-
-        String sql = SQLConstants.UPDATE_AI_CONFIGURATION;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-            connection.setAutoCommit(false);
-            stmt.setString(1, new Gson().toJson(aiConfiguration.getTokenBasedThrottlingConfiguration()));
-            stmt.setString(2, apiUUID);
-            stmt.executeUpdate();
-            connection.commit();
-        } catch (SQLException e) {
-            throw new APIManagementException("Error while updating AI API configuration for API: " + apiUUID, e);
         }
     }
 
@@ -19954,8 +19929,6 @@ public class ApiMgtDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     aiConfiguration = new AIConfiguration();
-                    aiConfiguration.setTokenBasedThrottlingConfiguration(
-                            new Gson().fromJson(rs.getString("THROTTLING_CONFIGURATIONS"), TokenBaseThrottlingCountHolder.class));
                     String providerId = rs.getString("LLM_PROVIDER_UUID");
                     LLMProvider provider = getLLMProvider(organization, providerId);
                     aiConfiguration.setLlmProviderName(provider.getName());

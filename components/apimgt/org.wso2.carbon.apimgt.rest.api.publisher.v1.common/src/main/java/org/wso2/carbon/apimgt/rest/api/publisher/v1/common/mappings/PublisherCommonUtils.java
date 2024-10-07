@@ -48,7 +48,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
-import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
+import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -87,7 +87,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
@@ -1598,7 +1597,7 @@ public class PublisherCommonUtils {
         apiToAdd.setOrganization(organization);
         apiToAdd.setGatewayType(body.getGatewayType());
         if (body.getAiConfiguration() != null) {
-            apiToAdd.setAiConfiguration(convertToAiConfiguration(body.getAiConfiguration(), body.getMaxTps()));
+            apiToAdd.setAiConfiguration(convertToAiConfiguration(body.getAiConfiguration()));
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_AI_API);
         } else {
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
@@ -1614,30 +1613,24 @@ public class PublisherCommonUtils {
      * @return The converted AIConfiguration object.
      * @throws APIManagementException If an error occurs during the conversion.
      */
-    public static AIConfiguration convertToAiConfiguration(APIAiConfigurationDTO dto, APIMaxTpsDTO maxTpsDTO) {
+    public static AIConfiguration convertToAiConfiguration(APIAiConfigurationDTO dto) {
 
         AIConfiguration aiConfiguration = new AIConfiguration();
         aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
         aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
-        if (maxTpsDTO != null
-                && maxTpsDTO.getTokenBasedThrottlingConfiguration().isIsTokenBasedThrottlingEnabled()) {
-            TokenBaseThrottlingCountHolder throttlingConfig = buildThrottlingConfiguration(maxTpsDTO);
-            aiConfiguration.setTokenBasedThrottlingConfiguration(throttlingConfig);
-        }
-
         return aiConfiguration;
     }
 
     /**
-     * Builds the throttling configuration from APIAiConfigurationDTO.
+     * Builds the token based throttling configuration from APIMaxTpsTokenBasedThrottlingConfigurationDTO.
      *
-     * @param dto The APIAiConfigurationDTO to extract data from.
-     * @return The TokenBaseThrottlingCountHolder object.
+     * @param throttlingConfigDTO The APIMaxTpsTokenBasedThrottlingConfigurationDTO to extract data from.
+     * @return The TokenBasedThrottlingCountHolder object.
      */
-    private static TokenBaseThrottlingCountHolder buildThrottlingConfiguration(APIMaxTpsDTO dto) {
+    public static TokenBasedThrottlingCountHolder buildThrottlingConfiguration (
+            APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigDTO) {
 
-        APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigDTO = dto.getTokenBasedThrottlingConfiguration();
-        TokenBaseThrottlingCountHolder throttlingConfig = new TokenBaseThrottlingCountHolder();
+        TokenBasedThrottlingCountHolder throttlingConfig = new TokenBasedThrottlingCountHolder();
 
         if (throttlingConfigDTO.getProductionMaxPromptTokenCount() != null) {
             throttlingConfig.setProductionMaxPromptTokenCount(
@@ -1689,7 +1682,7 @@ public class PublisherCommonUtils {
      * @return The built APIAiConfigurationThrottlingConfigurationDTO object.
      */
     public static APIMaxTpsTokenBasedThrottlingConfigurationDTO buildThrottlingConfigurationDTO(
-            TokenBaseThrottlingCountHolder throttlingConfig) {
+            TokenBasedThrottlingCountHolder throttlingConfig) {
 
         APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigurationsDTO =
                 new APIMaxTpsTokenBasedThrottlingConfigurationDTO();

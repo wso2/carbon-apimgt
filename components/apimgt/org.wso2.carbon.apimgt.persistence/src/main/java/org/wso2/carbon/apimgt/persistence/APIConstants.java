@@ -115,13 +115,13 @@ public final class APIConstants {
     public static final String API_PRODUCTION_THROTTLE_TIMEUNIT = "overview_productionTimeUnit";
     public static final String API_SANDBOX_THROTTLE_MAXTPS = "overview_sandboxTps";
     public static final String API_SANDBOX_THROTTLE_TIMEUNIT = "overview_sandboxTimeUnit";
-    public static final String AI_PRODUCTION_MAX_PROMPT_TOKEN_COUNT = "overview_aiProductionMaxPromptTokenCount";
-    public static final String AI_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT = "overview_aiProductionMaxCompletionTokenCount";
-    public static final String AI_PRODUCTION_MAX_TOTAL_TOKEN_COUNT = "overview_aiProductionMaxTotalTokenCount";
-    public static final String AI_SANDBOX_MAX_PROMPT_TOKEN_COUNT = "overview_aiSandboxMaxPromptTokenCount";
-    public static final String AI_SANDBOX_MAX_COMPLETION_TOKEN_COUNT = "overview_aiSandboxMaxCompletionTokenCount";
-    public static final String AI_SANDBOX_MAX_TOTAL_TOKEN_COUNT = "overview_aiSandboxMaxTotalTokenCount";
-    public static final String AI_TOKEN_BASED_THROTTLING_ENABLED = "overview_aiTokenBasedThrottlingEnabled";
+    public static final String API_PRODUCTION_MAX_PROMPT_TOKEN_COUNT = "overview_productionMaxPromptTokenCount";
+    public static final String API_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT = "overview_productionMaxCompletionTokenCount";
+    public static final String API_PRODUCTION_MAX_TOTAL_TOKEN_COUNT = "overview_productionMaxTotalTokenCount";
+    public static final String API_SANDBOX_MAX_PROMPT_TOKEN_COUNT = "overview_sandboxMaxPromptTokenCount";
+    public static final String API_SANDBOX_MAX_COMPLETION_TOKEN_COUNT = "overview_sandboxMaxCompletionTokenCount";
+    public static final String API_SANDBOX_MAX_TOTAL_TOKEN_COUNT = "overview_sandboxMaxTotalTokenCount";
+    public static final String API_TOKEN_BASED_THROTTLING_ENABLED = "overview_isTokenBasedThrottlingEnabled";
     public static final String SUPER_TENANT_DOMAIN = "carbon.super";
     public static final String VERSION_PLACEHOLDER = "{version}";
     public static final String TENANT_PREFIX = "/t/";
@@ -396,6 +396,10 @@ public final class APIConstants {
     public static final String API_TYPE_WS = "WS";
     public static final String API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String API_TYPE_SOAP = "SOAP";
+
+    // API Subtype constants
+    public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
+    public static final String API_SUBTYPE_AI_API = "AIAPI";
 
     public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.json";
 

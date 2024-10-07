@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
@@ -124,18 +123,6 @@ public class SubscriptionValidationDataUtil {
             if (aiConfiguration != null) {
                 AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
                 aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
-                TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
-                if (tokenBaseThrottlingCountHolder != null) {
-                    TokenBaseThrottlingCountHolderDTO tokenBaseThrottlingCountHolderDTO = new TokenBaseThrottlingCountHolderDTO();
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setIsTokenBasedThrottlingEnabled(tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled());
-                    aiConfigurationDTO.setTokenBasedThrottlingConfiguration(tokenBaseThrottlingCountHolderDTO);
-                }
                 apidto.setAiConfiguration(aiConfigurationDTO);
             }
             apidto.setIsEgress(model.isEgress() != 0);
@@ -204,18 +191,6 @@ public class SubscriptionValidationDataUtil {
             if (aiConfiguration != null) {
                 AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
                 aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
-                TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
-                if (tokenBaseThrottlingCountHolder != null) {
-                    TokenBaseThrottlingCountHolderDTO tokenBaseThrottlingCountHolderDTO = new TokenBaseThrottlingCountHolderDTO();
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setIsTokenBasedThrottlingEnabled(tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled());
-                    aiConfigurationDTO.setTokenBasedThrottlingConfiguration(tokenBaseThrottlingCountHolderDTO);
-                }
                 apidto.setAiConfiguration(aiConfigurationDTO);
             }
             apidto.setIsEgress(model.isEgress() != 0);
