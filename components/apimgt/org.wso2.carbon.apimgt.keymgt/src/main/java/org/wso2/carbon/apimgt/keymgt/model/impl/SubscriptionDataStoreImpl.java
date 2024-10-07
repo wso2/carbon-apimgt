@@ -775,8 +775,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             apiContextAPIMap.put(api.getContext(), api);
             if (api.isDefaultVersion()) {
                 String context = api.getContext();
+                String defaultContext = context;
                 int index =  context.lastIndexOf("/" + api.getApiVersion());
-                apiContextAPIMap.put(context.substring(0, index), api);
+                if (index != -1) {
+                    defaultContext = context.substring(0, index);
+                }
+                apiContextAPIMap.put(defaultContext, api);
             }
         }
         return apiContextAPIMap;

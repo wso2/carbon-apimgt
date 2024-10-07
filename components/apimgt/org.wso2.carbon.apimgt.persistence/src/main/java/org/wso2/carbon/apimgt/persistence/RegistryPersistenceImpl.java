@@ -3968,6 +3968,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         String type;
                         if (apiArtifactId != null) {
                             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                            if (apiArtifact == null) {
+                                // This is a document resource
+                                continue;
+                            }
                             if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
                                     equals(APIConstants.API_PRODUCT)) {
                                 type = APIConstants.API_PRODUCT;
