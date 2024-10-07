@@ -319,6 +319,4 @@ public final class ImportExportConstants {
 
     public static final String POLICY_TYPE_API = "api";
     public static final String POLICY_TYPE_COMMON = "common";
-    public static final String POLICY_TYPE_MEDIATION = "mediation";
-
 }
