@@ -204,7 +204,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
                     // Keep tiers where QuotaPolicyType is AI_API_QUOTA_TYPE or is null
                     tierList = tierList.stream()
                             .filter(tier -> PolicyConstants.AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType())
-                                    || APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS.equals(tier.getName())
+                                    || tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)
                                     || tier.getQuotaPolicyType() == null).collect(Collectors.toList());
                 } else {
                     // Remove tiers where QuotaPolicyType is AI_API_QUOTA_TYPE
