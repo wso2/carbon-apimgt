@@ -135,6 +135,7 @@ public class APIManagerConfiguration {
     private JSONObject subscriberAttributes = new JSONObject();
     private static Map<String, String> analyticsMaskProps;
     private TokenValidationDto tokenValidationDto = new TokenValidationDto();
+    private boolean enableAiConfiguration;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -658,6 +659,8 @@ public class APIManagerConfiguration {
                 setMarketplaceAssistantConfiguration(element);
             } else if (APIConstants.AI.API_CHAT.equals(localName)) {
                 setApiChatConfiguration(element);
+            } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)){
+                setAiConfiguration(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
             }
@@ -2489,9 +2492,28 @@ public class APIManagerConfiguration {
         }
     }
 
+    private void setAiConfiguration(OMElement omElement) {
+
+        OMElement aiConfigurationEnabled =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.ENABLED));
+        if (aiConfigurationEnabled != null) {
+            setEnableAiConfiguration(Boolean.parseBoolean(aiConfigurationEnabled.getText()));
+        }
+    }
+
+    public boolean isEnableAiConfiguration() {
+
+        return enableAiConfiguration;
+    }
+
+    public void setEnableAiConfiguration(boolean enableAiConfiguration) {
+
+        this.enableAiConfiguration = enableAiConfiguration;
+    }
+
     public void setApiChatConfiguration(OMElement omElement){
         OMElement apiChatEnableElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.AI.API_CHAT_ENABLED));
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.ENABLED));
         if (apiChatEnableElement != null) {
             apiChatConfigurationDto.setEnabled(Boolean.parseBoolean(apiChatEnableElement.getText()));
         }
