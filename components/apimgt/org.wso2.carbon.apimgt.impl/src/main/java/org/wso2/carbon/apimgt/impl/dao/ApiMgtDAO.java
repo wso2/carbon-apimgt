@@ -14074,10 +14074,12 @@ public class ApiMgtDAO {
             String conditionTypeUpper = conditionType != null ? conditionType.toUpperCase() : null;
             selectPreparedStatement.setString(1, conditionTypeUpper);
             selectPreparedStatement.setString(2, conditionTypeUpper);
-            selectPreparedStatement.setString(3, conditionValue);
             if (isExactMatch) {
+                selectPreparedStatement.setString(3, conditionValue);
                 selectPreparedStatement.setString(4, tenantDomain);
             } else {
+                String conditionValuePattern = "%" + conditionValue + "%";
+                selectPreparedStatement.setString(3, conditionValuePattern);
                 selectPreparedStatement.setString(4, conditionValue);
                 selectPreparedStatement.setString(5, tenantDomain);
             }
