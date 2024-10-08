@@ -358,9 +358,6 @@ paths:
                   - model
                   - data
                   - usage
-      x-ms-examples:
-        Create a embeddings.:
-          $ref: ./examples/embeddings.yaml
   /deployments/{deployment-id}/chat/completions:
     post:
       summary: Creates a completion for the chat message
@@ -408,15 +405,6 @@ paths:
               description: Request ID for troubleshooting purposes
               schema:
                 type: string
-      x-ms-examples:
-        Create a chat completion.:
-          $ref: ./examples/chat_completions.yaml
-        Creates a completion based on Azure Search data and system-assigned managed identity.:
-          $ref: ./examples/chat_completions_azure_search_minimum.yaml
-        Creates a completion based on Azure Search vector data, previous assistant message and user-assigned managed identity.:
-          $ref: ./examples/chat_completions_azure_search_advanced.yaml
-        Creates a completion for the provided Azure Cosmos DB.:
-          $ref: ./examples/chat_completions_cosmos_db.yaml
   /deployments/{deployment-id}/audio/transcriptions:
     post:
       summary: Transcribes audio into the input language.
@@ -455,11 +443,6 @@ paths:
               schema:
                 type: string
                 description: Transcribed text in the output format (when response_format was one of text, vtt or srt).
-      x-ms-examples:
-        Create an audio transcription with json response format.:
-          $ref: ./examples/audio_transcription_object.yaml
-        Create an audio transcription with text response format.:
-          $ref: ./examples/audio_transcription_text.yaml
   /deployments/{deployment-id}/audio/translations:
     post:
       summary: Transcribes and translates input audio into English text.
@@ -498,11 +481,6 @@ paths:
               schema:
                 type: string
                 description: Transcribed text in the output format (when response_format was one of text, vtt or srt).
-      x-ms-examples:
-        Create an audio translation with json response format.:
-          $ref: ./examples/audio_translation_object.yaml
-        Create an audio translation with text response format.:
-          $ref: ./examples/audio_translation_text.yaml
   /deployments/{deployment-id}/images/generations:
     post:
       summary: Generates a batch of images from a text caption on a given DALLE model deployment
@@ -541,9 +519,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/dalleErrorResponse'
-      x-ms-examples:
-        Create an image.:
-          $ref: ./examples/image_generation.yaml
 components:
   schemas:
     errorResponse:
