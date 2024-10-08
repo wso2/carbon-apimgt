@@ -89,5 +89,6 @@ public class APIConstants {
                 ".completion_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT = "$.usage.total_tokens";
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
+        public static final String NULL = "null";
     }
 }
