@@ -211,7 +211,8 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                 workflowDTO.setAttributes(body.getAttributes());
             }
             String workflowType = workflowDTO.getWorkflowType();
-            if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equals(workflowType)) {
+            if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equals(workflowType) ||
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType)) {
                 WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(
                         workflowType);
                 workflowExecutor.complete(workflowDTO);
