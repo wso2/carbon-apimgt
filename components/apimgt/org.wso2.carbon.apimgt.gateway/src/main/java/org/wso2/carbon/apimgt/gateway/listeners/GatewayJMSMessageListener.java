@@ -423,10 +423,25 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                 }
             }
         } else if (EventType.LLM_PROVIDER_CREATE.toString().equals(eventType)) {
-            createLLMProvider(eventJson);
+            try {
+                createLLMProvider(eventJson);
+            } catch (Exception e) {
+                log.error("Error while handling LLM_PROVIDER_CREATE event", e);
+            }
+
         } else if (EventType.LLM_PROVIDER_DELETE.toString().equals(eventType)) {
+            try {
+                deleteLLMProvider(eventJson);
+            } catch (Exception e) {
+                log.error("Error while handling LLM_PROVIDER_DELETE event", e);
+            }
             deleteLLMProvider(eventJson);
         } else if (EventType.LLM_PROVIDER_UPDATE.toString().equals(eventType)) {
+            try {
+                updateLLMProvider(eventJson);
+            } catch (Exception e) {
+                log.error("Error while handling LLM_PROVIDER_UPDATE event", e);
+            }
             updateLLMProvider(eventJson);
         }
     }
