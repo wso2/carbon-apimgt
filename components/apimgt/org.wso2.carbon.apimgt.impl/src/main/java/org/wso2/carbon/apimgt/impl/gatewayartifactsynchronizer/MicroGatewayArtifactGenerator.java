@@ -116,13 +116,15 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             // adding env_properties.json
             Map<String, Map<String, Environment>> environmentSpecificAPIProperties =
                     getEnvironmentSpecificAPIProperties(apiRuntimeArtifactDtoList);
-            String environmentSpecificAPIPropertyFile = Paths.get(tempDirectory.getAbsolutePath(),
-                    APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE).toString();
-            CommonUtil.writeDtoToFile(environmentSpecificAPIPropertyFile, ExportFormat.JSON,
-                    APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE,
-                    APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME,
-                    environmentSpecificAPIProperties);
 
+            if (environmentSpecificAPIProperties != null) {
+                String environmentSpecificAPIPropertyFile = Paths.get(tempDirectory.getAbsolutePath(),
+                        APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE).toString();
+                CommonUtil.writeDtoToFile(environmentSpecificAPIPropertyFile, ExportFormat.JSON,
+                        APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_FILE,
+                        APIConstants.GatewayArtifactConstants.ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME,
+                        environmentSpecificAPIProperties);
+            }
             CommonUtil.archiveDirectory(tempDirectory.getAbsolutePath());
             FileUtils.deleteQuietly(tempDirectory);
             RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
@@ -150,7 +152,10 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         List<String> apiIds = apiRuntimeArtifactDtoList.stream()
                 .map(APIRuntimeArtifactDto::getApiId)
                 .collect(Collectors.toList());
-        return environmentSpecificAPIPropertyDao.getEnvironmentSpecificAPIPropertiesOfAPIs(apiIds);
+        if (!apiIds.isEmpty()) {
+            return environmentSpecificAPIPropertyDao.getEnvironmentSpecificAPIPropertiesOfAPIs(apiIds);
+        }
+        return null;
     }
 
     @Override
