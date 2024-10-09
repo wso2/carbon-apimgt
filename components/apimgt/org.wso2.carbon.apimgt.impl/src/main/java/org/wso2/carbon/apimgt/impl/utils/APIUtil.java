@@ -6316,6 +6316,59 @@ public final class APIUtil {
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
             deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
         }
+
+        //Adding AI API Quota based subscription level policies
+        long[] totalTokenCountValues = new long[]{50000, 10000, 1000};
+        long[] aiPolicyRequestCount =  new long[]{500, 100, 10};
+        String[] aiApiQuotaSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_AI_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_AI_SILVER, APIConstants.DEFAULT_SUB_POLICY_AI_BRONZE};
+        String[] aiApiQuotaSubPolicyDescriptions = new String[]{
+                APIConstants.DEFAULT_SUB_POLICY_AI_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_AI_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_AI_BRONZE_DESC};
+
+        for (int i = 0; i < aiApiQuotaSubPolicyNames.length; i++) {
+            policyName = aiApiQuotaSubPolicyNames[i];
+            boolean needDeployment = false;
+            SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+            subscriptionPolicy.setDisplayName(policyName);
+            subscriptionPolicy.setDescription(aiApiQuotaSubPolicyDescriptions[i]);
+            subscriptionPolicy.setTenantId(tenantId);
+            subscriptionPolicy.setDeployed(true);
+            QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+            AIAPIQuotaLimit aiApiQuotaLimit = new AIAPIQuotaLimit();
+            aiApiQuotaLimit.setRequestCount(aiPolicyRequestCount[i]);
+            aiApiQuotaLimit.setTotalTokenCount(totalTokenCountValues[i]);
+            aiApiQuotaLimit.setUnitTime(1);
+            aiApiQuotaLimit.setTimeUnit(APIConstants.TIME_UNIT_MINUTE);
+            defaultQuotaPolicy.setType(PolicyConstants.AI_API_QUOTA_TYPE);
+            defaultQuotaPolicy.setLimit(aiApiQuotaLimit);
+            subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+            subscriptionPolicy.setStopOnQuotaReach(true);
+            subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
+
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
+                needDeployment = true;
+            }
+
+            if (!needDeployment) {
+                continue;
+            }
+            String superTenantDomain = null;
+            try {
+                superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                        getSuperTenantDomain();
+            } catch (UserStoreException e) {
+                handleInternalException("Error in getting the super tenant domain", e);
+            }
+
+            boolean isSuperTenant = tenantDomain.equals(superTenantDomain);
+            if (isSuperTenant) {
+                continue;
+            }
+            SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
+            deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
+        }
         
         long tenThousandPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) : 10000;

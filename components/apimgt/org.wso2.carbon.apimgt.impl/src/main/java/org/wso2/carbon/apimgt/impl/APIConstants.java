@@ -1964,6 +1964,10 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE = "AsyncWHBronze";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED = "AsyncWHUnlimited";
 
+    public static final String DEFAULT_SUB_POLICY_AI_GOLD = "AIGold";
+    public static final String DEFAULT_SUB_POLICY_AI_SILVER = "AISilver";
+    public static final String DEFAULT_SUB_POLICY_AI_BRONZE = "AIBronze";
+
     public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 5000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 2000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
@@ -1987,6 +1991,10 @@ public final class APIConstants {
             "500 active subscriptions";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC = "Allows unlimited events and " +
             "unlimited active subscriptions";
+
+    public static final String DEFAULT_SUB_POLICY_AI_GOLD_DESC = "Allows 50000 total tokens and 500 requests per minute";
+    public static final String DEFAULT_SUB_POLICY_AI_SILVER_DESC = "Allows 10000 total tokens and 100 requests per minute";
+    public static final String DEFAULT_SUB_POLICY_AI_BRONZE_DESC = "Allows 1000 total tokens and 10 requests per minute";
 
     public static final String DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN = "50KPerMin";
     public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
