@@ -193,7 +193,7 @@ public class LoggingMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve API logging for organization" + organization, e);
+            handleException("Failed to retrieve API logging for organization " + organization, e);
         }
         return apiLogInfoDTOList;
     }
