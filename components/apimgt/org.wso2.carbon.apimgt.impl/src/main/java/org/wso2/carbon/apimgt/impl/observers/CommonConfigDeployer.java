@@ -121,10 +121,13 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever =
                 new KeyManagerConfigurationDataRetriever(tenantDomain);
         keyManagerConfigurationDataRetriever.startLoadKeyManagerConfigurations();
-        try {
-            LLMProviderRegistrationService.registerDefaultLLMProviders(tenantDomain);
-        } catch (APIManagementException e) {
-            log.error("Error occurred during onboarding pre defined LLM Providers");
+        if (configuration.isEnableAiConfiguration()) {
+            try {
+                LLMProviderRegistrationService.registerDefaultLLMProviders(tenantDomain);
+            } catch (APIManagementException e) {
+                log.error("Error occurred during onboarding pre defined LLM Providers in tenant domain "
+                        + tenantDomain, e);
+            }
         }
     }
 }

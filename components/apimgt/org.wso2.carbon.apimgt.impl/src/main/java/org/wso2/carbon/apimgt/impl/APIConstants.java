@@ -519,7 +519,7 @@ public final class APIConstants {
     public static class AI {
 
         public static final String API_CHAT = "APIChat";
-        public static final String API_CHAT_ENABLED = "Enabled";
+        public static final String ENABLED = "Enabled";
         public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
         public static final String API_CHAT_KEY = "Key";
         public static final String API_CHAT_ENDPOINT = "Endpoint";
@@ -541,6 +541,7 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
+        public static final String AI_CONFIGURATION = "AiConfiguration";
 
         private AI() {
 
