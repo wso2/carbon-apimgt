@@ -55,17 +55,19 @@ public class ApiKeyMediator extends AbstractMediator implements ManagedLifecycle
         if (log.isDebugEnabled()) {
             log.debug("ApiKey Mediator is invoked...");
         }
-        if (apiKeyIdentifier != null && apiKeyValue != null && apiKeyIdentifierType != null) {
+        if (apiKeyIdentifier != null && apiKeyValue != null) {
             try {
                 org.apache.axis2.context.MessageContext axCtx = ((Axis2MessageContext) messageContext)
                         .getAxis2MessageContext();
-                if (APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_HEADER.equals(apiKeyIdentifierType)) {
+                if (APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_HEADER
+                        .equals(apiKeyIdentifierType)) {
                     Map<String, Object> transportHeaders =
                             (Map<String, Object>) ((Axis2MessageContext) messageContext)
                                     .getAxis2MessageContext()
                                     .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                     transportHeaders.put(apiKeyIdentifier, apiKeyValue);
-                } else if (APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER.equals(apiKeyIdentifierType)) {
+                } else if (APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER
+                        .equals(apiKeyIdentifierType)) {
                     URI updatedFullPath =
                             new URIBuilder((String) axCtx.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX))
                                     .addParameter(apiKeyIdentifier, apiKeyValue).build();
@@ -102,5 +104,15 @@ public class ApiKeyMediator extends AbstractMediator implements ManagedLifecycle
     public void setApiKeyValue(String apiKeyValue) {
 
         this.apiKeyValue = apiKeyValue;
+    }
+
+    public String getApiKeyIdentifierType() {
+
+        return apiKeyIdentifierType;
+    }
+
+    public void setApiKeyIdentifierType(String apiKeyIdentifierType) {
+
+        this.apiKeyIdentifierType = apiKeyIdentifierType;
     }
 }

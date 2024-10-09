@@ -256,7 +256,7 @@ public class EndpointSecurity {
                 ", clientSecret='" + clientSecret + '\'' +
                 ", apiKeyIdentifier='" + apiKeyIdentifier + '\'' +
                 ", apiKeyValue='" + apiKeyValue + '\'' +
-                ", apiKeyType='" + apiKeyIdentifierType + '\'' +
+                ", apiKeyIdentifierType='" + apiKeyIdentifierType + '\'' +
                 ", customParameters='" + customParameters + '\'' +
                 ", additionalProperties=" + additionalProperties +
                 ", connectionTimeoutDuration=" + connectionTimeoutDuration +
