@@ -44,6 +44,8 @@ public class EndpointSecurity {
 
     private String apiKeyValue = null;
 
+    private String apiKeyIdentifierType = null;
+
     private String customParameters = null;
 
     private Map additionalProperties = new HashMap();
@@ -205,6 +207,16 @@ public class EndpointSecurity {
         this.apiKeyValue = apiKeyValue;
     }
 
+    public String getApiKeyIdentifierType() {
+
+        return apiKeyIdentifierType;
+    }
+
+    public void setApiKeyIdentifierType(String apiKeyIdentifierType) {
+
+        this.apiKeyIdentifierType = apiKeyIdentifierType;
+    }
+
     public int getConnectionTimeoutDuration() {
         return connectionTimeoutDuration;
     }
@@ -244,6 +256,7 @@ public class EndpointSecurity {
                 ", clientSecret='" + clientSecret + '\'' +
                 ", apiKeyIdentifier='" + apiKeyIdentifier + '\'' +
                 ", apiKeyValue='" + apiKeyValue + '\'' +
+                ", apiKeyType='" + apiKeyIdentifierType + '\'' +
                 ", customParameters='" + customParameters + '\'' +
                 ", additionalProperties=" + additionalProperties +
                 ", connectionTimeoutDuration=" + connectionTimeoutDuration +

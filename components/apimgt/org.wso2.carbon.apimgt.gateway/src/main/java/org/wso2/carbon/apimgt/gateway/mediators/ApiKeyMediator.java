@@ -36,6 +36,7 @@ public class ApiKeyMediator extends AbstractMediator implements ManagedLifecycle
     private static final Log log = LogFactory.getLog(OAuthMediator.class);
     private String apiKeyIdentifier;
     private String apiKeyValue;
+    private String apiKeyIdentifierType;
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -54,24 +55,21 @@ public class ApiKeyMediator extends AbstractMediator implements ManagedLifecycle
         if (log.isDebugEnabled()) {
             log.debug("ApiKey Mediator is invoked...");
         }
-        if (apiKeyIdentifier != null && apiKeyValue != null) {
+        if (apiKeyIdentifier != null && apiKeyValue != null && apiKeyIdentifierType != null) {
             try {
                 org.apache.axis2.context.MessageContext axCtx = ((Axis2MessageContext) messageContext)
                         .getAxis2MessageContext();
-                if (axCtx.getProperty(APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE) != null) {
-                    String apiKeyIdentifierType =
-                            (String) axCtx.getProperty(APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE);
-                    if (APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_HEADER.equals(apiKeyIdentifierType)) {
-                        Map<String, Object> transportHeaders =
-                                (Map<String, Object>) ((Axis2MessageContext) messageContext)
-                                .getAxis2MessageContext().getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                        transportHeaders.put(apiKeyIdentifier, apiKeyValue);
-                    } else if (APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER.equals(apiKeyIdentifierType)) {
-                        URI updatedFullPath =
-                                new URIBuilder((String) axCtx.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX))
-                                        .addParameter(apiKeyIdentifier, apiKeyValue).build();
-                        axCtx.setProperty(APIMgtGatewayConstants.REST_URL_POSTFIX, updatedFullPath.toString());
-                    }
+                if (APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_HEADER.equals(apiKeyIdentifierType)) {
+                    Map<String, Object> transportHeaders =
+                            (Map<String, Object>) ((Axis2MessageContext) messageContext)
+                                    .getAxis2MessageContext()
+                                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    transportHeaders.put(apiKeyIdentifier, apiKeyValue);
+                } else if (APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER.equals(apiKeyIdentifierType)) {
+                    URI updatedFullPath =
+                            new URIBuilder((String) axCtx.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX))
+                                    .addParameter(apiKeyIdentifier, apiKeyValue).build();
+                    axCtx.setProperty(APIMgtGatewayConstants.REST_URL_POSTFIX, updatedFullPath.toString());
                 }
             } catch (URISyntaxException e) {
                 log.error("Error occurred during parsing query parameters for AI API.");

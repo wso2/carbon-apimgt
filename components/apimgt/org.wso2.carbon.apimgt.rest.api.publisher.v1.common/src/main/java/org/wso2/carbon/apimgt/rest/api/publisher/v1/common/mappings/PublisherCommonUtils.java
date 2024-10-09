@@ -314,8 +314,9 @@ public class PublisherCommonUtils {
                                 .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
                     } else if (oldEndpointSecurityProduction
                             .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
-                            && oldEndpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
-                            != null) {
+                            && oldEndpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                            && oldEndpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
                         oldProductionApiKeyValue = oldEndpointSecurityProduction
                                 .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
                     }
@@ -331,8 +332,9 @@ public class PublisherCommonUtils {
                         oldSandboxApiSecret = oldEndpointSecuritySandbox
                                 .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
                     } else if (oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
-                            && oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
-                            != null) {
+                            && oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                            && oldEndpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
                         oldSandboxApiKeyValue = oldEndpointSecuritySandbox
                                 .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
                     }

@@ -128,8 +128,11 @@ public class AiApiHandler extends AbstractHandler {
             LLMProviderConfiguration providerConfiguration = new Gson().fromJson(config,
                     LLMProviderConfiguration.class);
             if (isRequest) {
-                addEndpointConfigurationToMessageContext(messageContext,
-                        providerConfiguration);
+                Map<String, String> transportHeaders =
+                        (Map<String, String>) ((Axis2MessageContext) messageContext)
+                                .getAxis2MessageContext()
+                                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                transportHeaders.remove(HttpHeaders.ACCEPT_ENCODING);
             }
             LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
                     .getLLMProviderService(providerConfiguration.getConnectorType());
@@ -168,30 +171,6 @@ public class AiApiHandler extends AbstractHandler {
                 log.error("Error occurred while adding endpoint security.", e);
             }
             return false;
-        }
-    }
-
-    /**
-     * Adds endpoint configuration to the message context.
-     *
-     * @param messageContext        the Synapse MessageContext
-     * @param providerConfiguration LLM provider configuration
-     */
-    private void addEndpointConfigurationToMessageContext(MessageContext messageContext,
-                                                          LLMProviderConfiguration providerConfiguration) {
-
-        org.apache.axis2.context.MessageContext axCtx =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Map<String, String> transportHeaders =
-                (Map<String, String>) axCtx.getProperty(org.apache.axis2.context.MessageContext
-                        .TRANSPORT_HEADERS);
-        transportHeaders.remove(HttpHeaders.ACCEPT_ENCODING);
-        if (providerConfiguration.getAuthHeader() != null) {
-            axCtx.setProperty(APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE,
-                    APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_HEADER);
-        } else if (providerConfiguration.getAuthQueryParameter() != null) {
-            axCtx.setProperty(APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE,
-                    APIConstants.AIAPIConstants.API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER);
         }
     }
 
