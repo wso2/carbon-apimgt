@@ -108,9 +108,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.apiName = null;
         this.ipAddress = null;
         this.headersMap = null;
-        this.totalTokens = null;
-        this.promptTokens = null;
-        this.completionTokens = null;
+        this.totalTokens = 0L;
+        this.promptTokens = 0L;
+        this.completionTokens = 0L;
         this.messageSizeInBytes = 0;
         this.customPropertyMap = Collections.emptyMap();
     }

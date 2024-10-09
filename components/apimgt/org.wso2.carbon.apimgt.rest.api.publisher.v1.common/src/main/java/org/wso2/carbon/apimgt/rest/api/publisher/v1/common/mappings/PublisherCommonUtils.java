@@ -1617,7 +1617,7 @@ public class PublisherCommonUtils {
         AIConfiguration aiConfiguration = new AIConfiguration();
         aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
         aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
-        if (maxTpsDTO != null
+        if (maxTpsDTO != null && maxTpsDTO.getTokenBasedThrottlingConfiguration() != null
                 && maxTpsDTO.getTokenBasedThrottlingConfiguration().isIsTokenBasedThrottlingEnabled()) {
             TokenBaseThrottlingCountHolder throttlingConfig = buildThrottlingConfiguration(maxTpsDTO);
             aiConfiguration.setTokenBasedThrottlingConfiguration(throttlingConfig);
