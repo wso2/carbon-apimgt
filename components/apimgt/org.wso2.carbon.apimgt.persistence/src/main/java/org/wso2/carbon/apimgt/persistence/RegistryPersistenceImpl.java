@@ -1090,8 +1090,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
                     isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayAPIsWithMultipleVersions());
             if (!PersistenceUtil.isAdminUser(ctx)) {
+                String orgName = ctx.getOrganization().getName();
+                if (orgName != null && orgName.contains(" ")) {
+                    orgName = "\"" + orgName + "\"";
+                }
                 modifiedQuery = modifiedQuery + "&visible_organizations=(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR *"
-                        + ctx.getOrganization().getName() + "*)";
+                        + orgName + "*)";
             }
             log.debug("Modified query for devportal search: " + modifiedQuery);
             String userNameLocal;
