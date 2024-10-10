@@ -3393,7 +3393,7 @@ public class SQLConstants {
                         + "BLOCK_CONDITION = ? AND DOMAIN = ? ";
         public static final String GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL =
                 "SELECT CONDITION_ID, TYPE, BLOCK_CONDITION, ENABLED, DOMAIN, UUID FROM AM_BLOCK_CONDITIONS WHERE "
-                        + "(TYPE = ? OR ? IS NULL) AND (BLOCK_CONDITION LIKE CONCAT('%', ?, '%') OR ? IS NULL) AND DOMAIN = ?";
+                        + "(TYPE = ? OR ? IS NULL) AND (BLOCK_CONDITION LIKE ? OR ? IS NULL) AND DOMAIN = ?";
         public static final String GET_BLOCK_CONDITIONS_BY_TYPE_AND_EXACT_VALUE_SQL =
                 "SELECT CONDITION_ID, TYPE, BLOCK_CONDITION, ENABLED, DOMAIN, UUID FROM AM_BLOCK_CONDITIONS WHERE "
                         + "(TYPE = ? OR ? IS NULL) AND (BLOCK_CONDITION = ?) AND DOMAIN = ?";
