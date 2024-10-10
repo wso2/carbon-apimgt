@@ -1394,61 +1394,9 @@
     },
     "AIConfiguration" : {
       "properties" : {
-        "aiEndpointConfiguration" : {
-          "description" : "Configuration for AI endpoints, including sandbox and production.",
-          "$ref" : "#/definitions/AIEndpointConfiguration"
-        },
         "llmProviderId" : {
           "type" : "string",
           "description" : "UUID of the LLM (Large Language Model) provider."
-        },
-        "tokenBasedThrottlingConfiguration" : {
-          "description" : "Configuration for token-based throttling for AI features.",
-          "$ref" : "#/definitions/TokenBaseThrottlingCountHolder"
-        }
-      }
-    },
-    "AIEndpointConfiguration" : {
-      "properties" : {
-        "sandboxAuthValue" : {
-          "type" : "string",
-          "description" : "Authorization value for the sandbox environment."
-        },
-        "productionAuthValue" : {
-          "type" : "string",
-          "description" : "Authorization value for the production environment."
-        }
-      }
-    },
-    "TokenBaseThrottlingCountHolder" : {
-      "properties" : {
-        "productionMaxPromptTokenCount" : {
-          "type" : "string",
-          "description" : "Maximum allowed prompt token count for production."
-        },
-        "productionMaxCompletionTokenCount" : {
-          "type" : "string",
-          "description" : "Maximum allowed completion token count for production."
-        },
-        "productionMaxTotalTokenCount" : {
-          "type" : "string",
-          "description" : "Maximum total token count allowed for production."
-        },
-        "sandboxMaxPromptTokenCount" : {
-          "type" : "string",
-          "description" : "Maximum allowed prompt token count for sandbox."
-        },
-        "sandboxMaxCompletionTokenCount" : {
-          "type" : "string",
-          "description" : "Maximum allowed completion token count for sandbox."
-        },
-        "sandboxMaxTotalTokenCount" : {
-          "type" : "string",
-          "description" : "Maximum total token count allowed for sandbox."
-        },
-        "isTokenBasedThrottlingEnabled" : {
-          "type" : "boolean",
-          "description" : "Whether token-based throttling is enabled."
         }
       }
     },

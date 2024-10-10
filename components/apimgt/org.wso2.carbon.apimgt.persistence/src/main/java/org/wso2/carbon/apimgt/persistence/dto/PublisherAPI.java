@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.persistence.dto;
 
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
+import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 
 import java.util.ArrayList;
@@ -105,6 +106,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String apiOwner;
     private String vendor;
     private AIConfiguration aiConfiguration;
+    private BackendThrottlingConfiguration backendThrottlingConfiguration;
 
     public AIConfiguration getAiConfiguration() {
 
@@ -114,6 +116,14 @@ public class PublisherAPI extends PublisherAPIInfo {
     public void setAiConfiguration(AIConfiguration aiConfiguration) {
 
         this.aiConfiguration = aiConfiguration;
+    }
+
+    public BackendThrottlingConfiguration getBackendThrottlingConfiguration() {
+        return backendThrottlingConfiguration;
+    }
+
+    public void setBackendThrottlingConfiguration(BackendThrottlingConfiguration backendThrottlingConfiguration) {
+        this.backendThrottlingConfiguration = backendThrottlingConfiguration;
     }
 
     public String getAudience() {

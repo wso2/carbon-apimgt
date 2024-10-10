@@ -28,13 +28,13 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
-import org.wso2.carbon.apimgt.api.model.AIConfiguration;
+import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -214,37 +214,37 @@ public class RegistryPersistenceUtil {
                 policyBuilder.append("||");
             }
 
-            if (api.getAiConfiguration() != null
-                    && api.getAiConfiguration().getTokenBasedThrottlingConfiguration() != null
-                    && api.getAiConfiguration().getTokenBasedThrottlingConfiguration()
+            if (api.getBackendThrottlingConfiguration() != null
+                    && api.getBackendThrottlingConfiguration().getTokenBasedThrottlingConfiguration() != null
+                    && api.getBackendThrottlingConfiguration().getTokenBasedThrottlingConfiguration()
                     .isTokenBasedThrottlingEnabled()) {
-                TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = api.getAiConfiguration()
+                TokenBasedThrottlingCountHolder tokenBasedThrottlingCountHolder = api.getBackendThrottlingConfiguration()
                         .getTokenBasedThrottlingConfiguration();
-                artifact.setAttribute(APIConstants.AI_TOKEN_BASED_THROTTLING_ENABLED,
-                        tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled().toString());
-                if (tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.AI_PRODUCTION_MAX_PROMPT_TOKEN_COUNT,
-                            tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount());
+                artifact.setAttribute(APIConstants.API_TOKEN_BASED_THROTTLING_ENABLED,
+                        tokenBasedThrottlingCountHolder.isTokenBasedThrottlingEnabled().toString());
+                if (tokenBasedThrottlingCountHolder.getProductionMaxPromptTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.API_PRODUCTION_MAX_PROMPT_TOKEN_COUNT,
+                            tokenBasedThrottlingCountHolder.getProductionMaxPromptTokenCount());
                 }
-                if (tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.AI_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT,
-                            tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount());
+                if (tokenBasedThrottlingCountHolder.getProductionMaxCompletionTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.API_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT,
+                            tokenBasedThrottlingCountHolder.getProductionMaxCompletionTokenCount());
                 }
-                if (tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.AI_PRODUCTION_MAX_TOTAL_TOKEN_COUNT,
-                            tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount());
+                if (tokenBasedThrottlingCountHolder.getProductionMaxTotalTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.API_PRODUCTION_MAX_TOTAL_TOKEN_COUNT,
+                            tokenBasedThrottlingCountHolder.getProductionMaxTotalTokenCount());
                 }
-                if (tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.AI_SANDBOX_MAX_PROMPT_TOKEN_COUNT,
-                            tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount());
+                if (tokenBasedThrottlingCountHolder.getSandboxMaxPromptTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.API_SANDBOX_MAX_PROMPT_TOKEN_COUNT,
+                            tokenBasedThrottlingCountHolder.getSandboxMaxPromptTokenCount());
                 }
-                if (tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.AI_SANDBOX_MAX_COMPLETION_TOKEN_COUNT,
-                            tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
+                if (tokenBasedThrottlingCountHolder.getSandboxMaxCompletionTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.API_SANDBOX_MAX_COMPLETION_TOKEN_COUNT,
+                            tokenBasedThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
                 }
-                if (tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.AI_SANDBOX_MAX_TOTAL_TOKEN_COUNT,
-                            tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount());
+                if (tokenBasedThrottlingCountHolder.getSandboxMaxTotalTokenCount() != null) {
+                    artifact.setAttribute(APIConstants.API_SANDBOX_MAX_TOTAL_TOKEN_COUNT,
+                            tokenBasedThrottlingCountHolder.getSandboxMaxTotalTokenCount());
                 }
             }
 
@@ -676,26 +676,31 @@ public class RegistryPersistenceUtil {
             api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
             api.setSandboxTimeUnit(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_TIMEUNIT));
 
-            if (artifact.getAttribute(APIConstants.AI_TOKEN_BASED_THROTTLING_ENABLED) != null && Boolean.parseBoolean(
-                    artifact.getAttribute(APIConstants.AI_TOKEN_BASED_THROTTLING_ENABLED))) {
-                TokenBaseThrottlingCountHolder aiThrottlingConfiguration = new TokenBaseThrottlingCountHolder();
-                aiThrottlingConfiguration.setTokenBasedThrottlingEnabled(true);
-                aiThrottlingConfiguration.setProductionMaxPromptTokenCount(
-                        artifact.getAttribute(APIConstants.AI_PRODUCTION_MAX_PROMPT_TOKEN_COUNT));
-                aiThrottlingConfiguration.setProductionMaxCompletionTokenCount(
-                        artifact.getAttribute(APIConstants.AI_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT));
-                aiThrottlingConfiguration.setProductionMaxTotalTokenCount(
-                        artifact.getAttribute(APIConstants.AI_PRODUCTION_MAX_TOTAL_TOKEN_COUNT));
-                aiThrottlingConfiguration.setSandboxMaxPromptTokenCount(
-                        artifact.getAttribute(APIConstants.AI_SANDBOX_MAX_PROMPT_TOKEN_COUNT));
-                aiThrottlingConfiguration.setSandboxMaxCompletionTokenCount(
-                        artifact.getAttribute(APIConstants.AI_SANDBOX_MAX_COMPLETION_TOKEN_COUNT));
-                aiThrottlingConfiguration.setSandboxMaxTotalTokenCount(
-                        artifact.getAttribute(APIConstants.AI_SANDBOX_MAX_TOTAL_TOKEN_COUNT));
-                AIConfiguration aiConfiguration = new AIConfiguration();
-                aiConfiguration.setTokenBasedThrottlingConfiguration(aiThrottlingConfiguration);
-                api.setAiConfiguration(aiConfiguration);
+            BackendThrottlingConfiguration backendThrottlingConfiguration = new BackendThrottlingConfiguration();
+            backendThrottlingConfiguration.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
+            backendThrottlingConfiguration.setProductionTimeUnit(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_TIMEUNIT));
+            backendThrottlingConfiguration.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
+            backendThrottlingConfiguration.setSandboxTimeUnit(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_TIMEUNIT));
+
+            if (artifact.getAttribute(APIConstants.API_TOKEN_BASED_THROTTLING_ENABLED) != null && Boolean.parseBoolean(
+                    artifact.getAttribute(APIConstants.API_TOKEN_BASED_THROTTLING_ENABLED))) {
+                TokenBasedThrottlingCountHolder tokenBasedThrottlingCountHolder = new TokenBasedThrottlingCountHolder();
+                tokenBasedThrottlingCountHolder.setTokenBasedThrottlingEnabled(true);
+                tokenBasedThrottlingCountHolder.setProductionMaxPromptTokenCount(
+                        artifact.getAttribute(APIConstants.API_PRODUCTION_MAX_PROMPT_TOKEN_COUNT));
+                tokenBasedThrottlingCountHolder.setProductionMaxCompletionTokenCount(
+                        artifact.getAttribute(APIConstants.API_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT));
+                tokenBasedThrottlingCountHolder.setProductionMaxTotalTokenCount(
+                        artifact.getAttribute(APIConstants.API_PRODUCTION_MAX_TOTAL_TOKEN_COUNT));
+                tokenBasedThrottlingCountHolder.setSandboxMaxPromptTokenCount(
+                        artifact.getAttribute(APIConstants.API_SANDBOX_MAX_PROMPT_TOKEN_COUNT));
+                tokenBasedThrottlingCountHolder.setSandboxMaxCompletionTokenCount(
+                        artifact.getAttribute(APIConstants.API_SANDBOX_MAX_COMPLETION_TOKEN_COUNT));
+                tokenBasedThrottlingCountHolder.setSandboxMaxTotalTokenCount(
+                        artifact.getAttribute(APIConstants.API_SANDBOX_MAX_TOTAL_TOKEN_COUNT));
+                backendThrottlingConfiguration.setTokenBasedThrottlingConfiguration(tokenBasedThrottlingCountHolder);
             }
+            api.setBackendThrottlingConfiguration(backendThrottlingConfiguration);
             api.setGatewayVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
             api.setAsyncTransportProtocols(artifact.getAttribute(APIConstants.ASYNC_API_TRANSPORT_PROTOCOLS));
 
