@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
@@ -72,7 +73,12 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             provider.setBuiltInSupport(false);
             provider.setConfigurations(configurations);
             if (apiDefinitionInputStream != null) {
-                provider.setApiDefinition(IOUtils.toString(apiDefinitionInputStream, StandardCharsets.UTF_8));
+                String apiDefinition = IOUtils.toString(apiDefinitionInputStream, StandardCharsets.UTF_8);
+                if (StringUtils.isNotEmpty(apiDefinition)
+                        && !StringUtils.equals(
+                                org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.NULL, apiDefinition)) {
+                    provider.setApiDefinition(apiDefinition);
+                }
             }
             LLMProvider result = apiAdmin.addLLMProvider(provider);
             if (result != null) {
@@ -174,7 +180,12 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             provider.setId(llmProviderId);
             provider.setDescription(description);
             if (apiDefinitionInputStream != null) {
-                provider.setApiDefinition(IOUtils.toString(apiDefinitionInputStream, StandardCharsets.UTF_8));
+                String apiDefinition = IOUtils.toString(apiDefinitionInputStream, StandardCharsets.UTF_8);
+                if (StringUtils.isNotEmpty(apiDefinition)
+                        && !StringUtils.equals(
+                        org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.NULL, apiDefinition)) {
+                    provider.setApiDefinition(apiDefinition);
+                }
             }
             provider.setOrganization(RestApiUtil.getValidatedOrganization(messageContext));
             provider.setConfigurations(configurations);

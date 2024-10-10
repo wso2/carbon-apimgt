@@ -48,6 +48,9 @@ public class APIConstants {
     public static final String ENDPOINT_CONFIG_SESSION_TIMEOUT = "sessionTimeOut";
 
     public static class AIAPIConstants {
+        public static final String API_KEY_IDENTIFIER_TYPE = "API_KEY_IDENTIFIER_TYPE";
+        public static final String API_KEY_IDENTIFIER_TYPE_HEADER = "HEADER";
+        public static final String API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER = "QUERY_PARAMETER";
         public static final String AI_API_REQUEST_METADATA = "AI_API_REQUEST_METADATA";
         public static final String AI_API_RESPONSE_METADATA = "AI_API_RESPONSE_METADATA";
         public static final String INPUT_SOURCE_PAYLOAD = "payload";
@@ -89,5 +92,6 @@ public class APIConstants {
                 ".completion_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT = "$.usage.total_tokens";
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
+        public static final String NULL = "null";
     }
 }

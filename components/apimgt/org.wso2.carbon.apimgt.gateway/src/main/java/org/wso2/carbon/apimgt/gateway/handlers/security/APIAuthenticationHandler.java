@@ -598,6 +598,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 // Update authentication status only if the authentication is a mandatory one
                 authenticated = authenticationResponse.isAuthenticated();
                 mandatoryAuthFailed = !(authenticationResponse.isAuthenticated());
+            } else if (!authenticated && !mandatoryAuthFailed) {
+                // Update authentication status if the authentication is optional and
+                // the request hasn't been authenticated yet
+                authenticated = authenticationResponse.isAuthenticated();
             }
             if (!authenticationResponse.isAuthenticated()) {
                 authResponses.add(authenticationResponse);

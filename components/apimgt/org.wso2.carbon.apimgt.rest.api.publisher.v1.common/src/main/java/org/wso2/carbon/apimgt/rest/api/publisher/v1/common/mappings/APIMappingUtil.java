@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
-import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -48,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -151,6 +151,7 @@ import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getDefaultWebsubSubscriptionConfiguration;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.buildThrottlingConfiguration;
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.buildThrottlingConfigurationDTO;
 
 /**
@@ -474,7 +475,7 @@ public class APIMappingUtil {
         }
         if (dto.getAiConfiguration() != null) {
             model.setAiConfiguration(
-                    PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration(), dto.getMaxTps()));
+                    PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration()));
         }
         return model;
     }
@@ -1000,20 +1001,35 @@ public class APIMappingUtil {
     private static void setMaxTpsFromApiDTOToModel(APIDTO dto, API api) {
 
         APIMaxTpsDTO maxTpsDTO = dto.getMaxTps();
+        BackendThrottlingConfiguration backendThrottlingConfiguration = new BackendThrottlingConfiguration();
         if (maxTpsDTO != null) {
             if (maxTpsDTO.getProduction() != null) {
                 api.setProductionMaxTps(maxTpsDTO.getProduction().toString());
+                backendThrottlingConfiguration.setProductionMaxTps(maxTpsDTO.getProduction().toString());
             }
             if (maxTpsDTO.getProductionTimeUnit() != null) {
                 api.setProductionTimeUnit(getTimeUnitInMilliseconds(maxTpsDTO.getProductionTimeUnit().toString()));
+                backendThrottlingConfiguration.setProductionTimeUnit(
+                        getTimeUnitInMilliseconds(maxTpsDTO.getProductionTimeUnit().toString()));
             }
             if (maxTpsDTO.getSandbox() != null) {
                 api.setSandboxMaxTps(maxTpsDTO.getSandbox().toString());
+                backendThrottlingConfiguration.setSandboxMaxTps(maxTpsDTO.getSandbox().toString());
             }
             if (maxTpsDTO.getSandboxTimeUnit() != null) {
                 api.setSandboxTimeUnit(getTimeUnitInMilliseconds(maxTpsDTO.getSandboxTimeUnit().toString()));
+                backendThrottlingConfiguration.setSandboxTimeUnit(
+                        getTimeUnitInMilliseconds(maxTpsDTO.getSandboxTimeUnit().toString()));
+            }
+            APIMaxTpsTokenBasedThrottlingConfigurationDTO tokenBasedThrottlingConfigurationDTO
+                    = maxTpsDTO.getTokenBasedThrottlingConfiguration();
+            if (tokenBasedThrottlingConfigurationDTO != null
+                    && tokenBasedThrottlingConfigurationDTO.isIsTokenBasedThrottlingEnabled()) {
+                backendThrottlingConfiguration.setTokenBasedThrottlingConfiguration(
+                        buildThrottlingConfiguration(tokenBasedThrottlingConfigurationDTO));
             }
         }
+        api.setBackendThrottlingConfiguration(backendThrottlingConfiguration);
     }
 
     /**
@@ -1060,8 +1076,7 @@ public class APIMappingUtil {
     }
 
     public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials,
-                                      APIProvider apiProviderParam)
-            throws APIManagementException {
+                                      APIProvider apiProviderParam) throws APIManagementException {
 
         APIProvider apiProvider;
         if (apiProviderParam != null) {
@@ -1154,7 +1169,6 @@ public class APIMappingUtil {
                                         new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret)));
                             }
                         }
-
                         if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(productionEndpointType)) {
                             String apiKeyValue = (String) productionEndpointSecurity
                                     .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
@@ -1163,7 +1177,6 @@ public class APIMappingUtil {
                                         new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
                             }
                         }
-
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                                 productionEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1173,7 +1186,6 @@ public class APIMappingUtil {
                                 .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                         String sandboxEndpointType = (String) sandboxEndpointSecurity
                                 .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
-
                         if (sandboxEndpointSecurity
                                 .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
                             String customParametersString = (String) sandboxEndpointSecurity
@@ -1182,7 +1194,6 @@ public class APIMappingUtil {
                             sandboxEndpointSecurity.put(
                                     APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
                         }
-
                         if (APIConstants.OAuthConstants.OAUTH.equals(sandboxEndpointType)) {
                             String clientSecret = (String) sandboxEndpointSecurity
                                     .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET);
@@ -1192,7 +1203,6 @@ public class APIMappingUtil {
                                         new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret)));
                             }
                         }
-
                         if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(sandboxEndpointType)) {
                             String apiKeyValue = (String) sandboxEndpointSecurity
                                     .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
@@ -1201,7 +1211,6 @@ public class APIMappingUtil {
                                         new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
                             }
                         }
-
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX,
                                 sandboxEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1690,12 +1699,14 @@ public class APIMappingUtil {
                 maxTpsDTO.setSandboxTimeUnit(APIMaxTpsDTO.SandboxTimeUnitEnum.valueOf(
                         convertFromMilliseconds(api.getSandboxTimeUnit())));
             }
-            AIConfiguration aiConfiguration = api.getAiConfiguration();
-            if (aiConfiguration != null
-                    && aiConfiguration.getTokenBasedThrottlingConfiguration() != null
-                    && aiConfiguration.getTokenBasedThrottlingConfiguration().isTokenBasedThrottlingEnabled()) {
+            BackendThrottlingConfiguration backendThrottlingConfiguration = api.getBackendThrottlingConfiguration();
+            if (backendThrottlingConfiguration != null
+                    && backendThrottlingConfiguration.getTokenBasedThrottlingConfiguration() != null
+                    && backendThrottlingConfiguration.getTokenBasedThrottlingConfiguration()
+                    .isTokenBasedThrottlingEnabled()) {
                 APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigurationsDTO
-                        = buildThrottlingConfigurationDTO(aiConfiguration.getTokenBasedThrottlingConfiguration());
+                        = buildThrottlingConfigurationDTO(backendThrottlingConfiguration
+                        .getTokenBasedThrottlingConfiguration());
                 maxTpsDTO.setTokenBasedThrottlingConfiguration(throttlingConfigurationsDTO);
             }
             dto.setMaxTps(maxTpsDTO);

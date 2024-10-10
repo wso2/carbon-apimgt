@@ -23,11 +23,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.TokenBaseThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
-import org.wso2.carbon.apimgt.api.model.AIEndpointConfiguration;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -124,26 +122,7 @@ public class SubscriptionValidationDataUtil {
             AIConfiguration aiConfiguration = model.getAiConfiguration();
             if (aiConfiguration != null) {
                 AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
-                AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
-                if (aiEndpointConfiguration != null) {
-                    AIEndpointConfigurationDTO aiEndpointConfigurationDTO = new AIEndpointConfigurationDTO();
-                    aiEndpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration.getSandboxAuthValue());
-                    aiEndpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration.getProductionAuthValue());
-                    aiConfigurationDTO.setAiEndpointConfiguration(aiEndpointConfigurationDTO);
-                }
                 aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
-                TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
-                if (tokenBaseThrottlingCountHolder != null) {
-                    TokenBaseThrottlingCountHolderDTO tokenBaseThrottlingCountHolderDTO = new TokenBaseThrottlingCountHolderDTO();
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setIsTokenBasedThrottlingEnabled(tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled());
-                    aiConfigurationDTO.setTokenBasedThrottlingConfiguration(tokenBaseThrottlingCountHolderDTO);
-                }
                 apidto.setAiConfiguration(aiConfigurationDTO);
             }
             apidto.setIsEgress(model.isEgress() != 0);
@@ -211,26 +190,7 @@ public class SubscriptionValidationDataUtil {
             AIConfiguration aiConfiguration = model.getAiConfiguration();
             if (aiConfiguration != null) {
                 AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
-                AIEndpointConfiguration aiEndpointConfiguration = aiConfiguration.getAiEndpointConfiguration();
-                if (aiEndpointConfiguration != null) {
-                    AIEndpointConfigurationDTO aiEndpointConfigurationDTO = new AIEndpointConfigurationDTO();
-                    aiEndpointConfigurationDTO.setSandboxAuthValue(aiEndpointConfiguration.getSandboxAuthValue());
-                    aiEndpointConfigurationDTO.setProductionAuthValue(aiEndpointConfiguration.getProductionAuthValue());
-                    aiConfigurationDTO.setAiEndpointConfiguration(aiEndpointConfigurationDTO);
-                }
                 aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
-                TokenBaseThrottlingCountHolder tokenBaseThrottlingCountHolder = aiConfiguration.getTokenBasedThrottlingConfiguration();
-                if (tokenBaseThrottlingCountHolder != null) {
-                    TokenBaseThrottlingCountHolderDTO tokenBaseThrottlingCountHolderDTO = new TokenBaseThrottlingCountHolderDTO();
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxPromptTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxCompletionTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setProductionMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getProductionMaxTotalTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxPromptTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxPromptTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxCompletionTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setSandboxMaxTotalTokenCount(tokenBaseThrottlingCountHolder.getSandboxMaxTotalTokenCount());
-                    tokenBaseThrottlingCountHolderDTO.setIsTokenBasedThrottlingEnabled(tokenBaseThrottlingCountHolder.isTokenBasedThrottlingEnabled());
-                    aiConfigurationDTO.setTokenBasedThrottlingConfiguration(tokenBaseThrottlingCountHolderDTO);
-                }
                 apidto.setAiConfiguration(aiConfigurationDTO);
             }
             apidto.setIsEgress(model.isEgress() != 0);

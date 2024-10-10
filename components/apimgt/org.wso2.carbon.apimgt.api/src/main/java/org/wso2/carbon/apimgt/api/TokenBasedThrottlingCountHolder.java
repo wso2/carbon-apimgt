@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
-public class TokenBaseThrottlingCountHolder {
+public class TokenBasedThrottlingCountHolder {
 
     private String productionMaxPromptTokenCount;
     private String productionMaxCompletionTokenCount;
@@ -28,11 +28,11 @@ public class TokenBaseThrottlingCountHolder {
     private String sandboxMaxTotalTokenCount;
     private Boolean isTokenBasedThrottlingEnabled = false;
 
-    public TokenBaseThrottlingCountHolder() {
+    public TokenBasedThrottlingCountHolder() {
 
     }
 
-    public TokenBaseThrottlingCountHolder(String productionMaxPromptTokenCount, String productionMaxCompletionTokenCount,
+    public TokenBasedThrottlingCountHolder(String productionMaxPromptTokenCount, String productionMaxCompletionTokenCount,
             String productionMaxTotalTokenCount, String sandboxMaxPromptTokenCount,
             String sandboxMaxCompletionTokenCount, String sandboxMaxTotalTokenCount,
                                           boolean isTokenBasedThrottlingEnabled) {

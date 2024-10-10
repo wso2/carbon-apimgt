@@ -519,7 +519,7 @@ public final class APIConstants {
     public static class AI {
 
         public static final String API_CHAT = "APIChat";
-        public static final String API_CHAT_ENABLED = "Enabled";
+        public static final String ENABLED = "Enabled";
         public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
         public static final String API_CHAT_KEY = "Key";
         public static final String API_CHAT_ENDPOINT = "Endpoint";
@@ -541,6 +541,7 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
+        public static final String AI_CONFIGURATION = "AiConfiguration";
 
         private AI() {
 
@@ -1807,6 +1808,7 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
     public static final String ENDPOINT_SECURITY_API_KEY_VALUE = "apiKeyValue";
+    public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE = "apiKeyIdentifierType";
     public static final String ENDPOINT_SECURITY_USERNAME = "username";
     public static final String ENDPOINT_SECURITY_CONFIG = "securityConfig";
     public static final String ENDPOINT_SECURITY = "endpoint_security";
@@ -1962,6 +1964,10 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE = "AsyncWHBronze";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED = "AsyncWHUnlimited";
 
+    public static final String DEFAULT_SUB_POLICY_AI_GOLD = "AIGold";
+    public static final String DEFAULT_SUB_POLICY_AI_SILVER = "AISilver";
+    public static final String DEFAULT_SUB_POLICY_AI_BRONZE = "AIBronze";
+
     public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 5000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 2000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
@@ -1985,6 +1991,10 @@ public final class APIConstants {
             "500 active subscriptions";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC = "Allows unlimited events and " +
             "unlimited active subscriptions";
+
+    public static final String DEFAULT_SUB_POLICY_AI_GOLD_DESC = "Allows 50000 total tokens and 500 requests per minute";
+    public static final String DEFAULT_SUB_POLICY_AI_SILVER_DESC = "Allows 10000 total tokens and 100 requests per minute";
+    public static final String DEFAULT_SUB_POLICY_AI_BRONZE_DESC = "Allows 1000 total tokens and 10 requests per minute";
 
     public static final String DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN = "50KPerMin";
     public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
