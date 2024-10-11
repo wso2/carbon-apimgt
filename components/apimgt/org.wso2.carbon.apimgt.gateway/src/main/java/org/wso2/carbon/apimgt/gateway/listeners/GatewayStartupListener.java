@@ -471,6 +471,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     public void createdConfigurationContext(ConfigurationContext configContext) {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
         log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
@@ -482,7 +483,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         cleanDeployment(configContext.getAxisConfiguration().getRepository().getPath());
         new Thread(() -> {
             try {
-                new EndpointCertificateDeployer(tenantDomain).deployAllTenantCertificatesAtStartup();
+                new EndpointCertificateDeployer(tenantDomain, tenantId).deployAllTenantCertificatesAtStartup();
                 new GoogleAnalyticsConfigDeployer(tenantDomain).deploy();
             } catch (APIManagementException e) {
                 log.error(e);

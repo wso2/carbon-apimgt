@@ -49,6 +49,7 @@ import java.util.List;
 public class EndpointCertificateDeployer {
 
     private static final Log log = LogFactory.getLog(EndpointCertificateDeployer.class);
+    private int tenantId;
     private String tenantDomain;
     private final EventHubConfigurationDto eventHubConfigurationDto =
             ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
@@ -61,7 +62,11 @@ public class EndpointCertificateDeployer {
 
         this.tenantDomain = tenantDomain;
     }
+    public EndpointCertificateDeployer(String tenantDomain,int tenantId) {
 
+        this.tenantDomain = tenantDomain;
+        this.tenantId= tenantId;
+    }
     public void deployCertificatesAtStartup() throws APIManagementException {
 
         String endpoint = baseURL + APIConstants.CERTIFICATE_RETRIEVAL_ENDPOINT;
@@ -97,9 +102,6 @@ public class EndpointCertificateDeployer {
             certificateMetadataDTOList = new Gson().fromJson(content, listType);
 
             try {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                tenantFlowStarted = true;
                 synchronized (certificateManager) {
                     for (CertificateMetadataDTO certificateMetadataDTO : certificateMetadataDTOList) {
                         CertificateManagerImpl.getInstance()
@@ -170,24 +172,15 @@ public class EndpointCertificateDeployer {
 
     private void retrieveAllTenantCertificatesAndDeploy(CloseableHttpResponse closeableHttpResponse) throws IOException {
 
-        boolean tenantFlowStarted = false;
         if (closeableHttpResponse.getStatusLine().getStatusCode() == 200) {
             String content = EntityUtils.toString(closeableHttpResponse.getEntity());
             List<CertificateMetadataDTO> certificateMetadataDTOList;
-            Type listType = new TypeToken<List<CertificateMetadataDTO>>() {
+                Type listType = new TypeToken<List<CertificateMetadataDTO>>() {
             }.getType();
             certificateMetadataDTOList = new Gson().fromJson(content, listType);
 
-            try {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                tenantFlowStarted = true;
-                CertificateManagerImpl.getInstance().addAllTenantCertificatesToGateway(certificateMetadataDTOList);
-            } finally {
-                if (tenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-            }
+            CertificateManagerImpl.getInstance().addAllTenantCertificatesToGateway(certificateMetadataDTOList,
+                    tenantId);
         }
     }
 

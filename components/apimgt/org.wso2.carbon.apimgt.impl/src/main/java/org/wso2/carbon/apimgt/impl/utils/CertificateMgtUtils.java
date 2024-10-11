@@ -971,11 +971,12 @@ public class CertificateMgtUtils {
         return Optional.ofNullable(null);
     }
 
-    public void deployTenantCertsToGatewaySenderInABatch(List<CertificateMetadataDTO> certificateMetadataDTOList) {
+    public void deployTenantCertsToGatewaySenderInABatch(List<CertificateMetadataDTO> certificateMetadataDTOList,
+                                                         int tenantId) {
         //add cert to sender profile truststore
         try {
             TrustStoreDTO trustStoreDTO = getSenderProfileTrustStore();
-            addCertificatesToTrustStore(trustStoreDTO, certificateMetadataDTOList);
+            addCertificatesToTrustStore(trustStoreDTO, certificateMetadataDTOList,tenantId);
         } catch (FileNotFoundException | XMLStreamException e) {
             log.error("Error reading/writing to the truststore file.", e);
         } catch (CertificateManagementException e) {
@@ -984,10 +985,10 @@ public class CertificateMgtUtils {
     }
 
     private void addCertificatesToTrustStore(TrustStoreDTO trustStoreDTO,
-                                             List<CertificateMetadataDTO> certificateMetadataDTOList) throws CertificateManagementException {
+                                             List<CertificateMetadataDTO> certificateMetadataDTOList,
+                                             int tenantId) throws CertificateManagementException {
         //Read the client-truststore.jks into a KeyStore.
         File trustStoreFile = new File(trustStoreDTO.getLocation());
-        int loggedInTenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
             KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
             trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
@@ -996,8 +997,8 @@ public class CertificateMgtUtils {
             for (CertificateMetadataDTO dto : certificateMetadataDTOList) {
                 base64Cert = dto.getCertificate();
                 alias = dto.getAlias();
-                if (loggedInTenantId != MultitenantConstants.SUPER_TENANT_ID) {
-                    alias = alias + "_" + loggedInTenantId;
+                if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+                    alias = alias + "_" + tenantId;
                 }
 
                 byte[] cert = (Base64.decodeBase64(base64Cert.getBytes(StandardCharsets.UTF_8)));

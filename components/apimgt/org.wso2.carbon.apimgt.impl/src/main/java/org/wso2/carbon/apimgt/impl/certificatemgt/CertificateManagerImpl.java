@@ -578,8 +578,9 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public void addAllTenantCertificatesToGateway(List<CertificateMetadataDTO> certificateMetadataDTOList) {
-        certificateMgtUtils.deployTenantCertsToGatewaySenderInABatch(certificateMetadataDTOList);
+    public void addAllTenantCertificatesToGateway(List<CertificateMetadataDTO> certificateMetadataDTOList,int tenantId) {
+
+        certificateMgtUtils.deployTenantCertsToGatewaySenderInABatch(certificateMetadataDTOList, tenantId);
         touchSSLSenderConfigFile();
     }
 

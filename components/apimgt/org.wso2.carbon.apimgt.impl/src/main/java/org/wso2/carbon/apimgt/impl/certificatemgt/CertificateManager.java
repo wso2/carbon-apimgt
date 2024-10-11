@@ -268,7 +268,7 @@ public interface CertificateManager {
      *
      * @param certificateMetadataDTOList : The list of all certificates of a tenant
      */
-    void addAllTenantCertificatesToGateway(List<CertificateMetadataDTO> certificateMetadataDTOList);
+    void addAllTenantCertificatesToGateway(List<CertificateMetadataDTO> certificateMetadataDTOList,int tenantId);
 
 
     /**
