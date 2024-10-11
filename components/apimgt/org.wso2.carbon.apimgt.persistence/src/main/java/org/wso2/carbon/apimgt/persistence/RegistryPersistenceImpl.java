@@ -1092,10 +1092,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (!PersistenceUtil.isAdminUser(ctx)) {
                 String orgName = ctx.getOrganization().getName();
                 if (orgName != null && orgName.contains(" ")) {
-                    orgName = "\"" + orgName + "\"";
+                    orgName = orgName.replace(" ", "+");
                 }
-                modifiedQuery = modifiedQuery + "&visible_organizations=(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR *"
-                        + orgName + "*)";
+                modifiedQuery = modifiedQuery + "&visible_organizations=(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR "
+                        + orgName + ")";
             }
             log.debug("Modified query for devportal search: " + modifiedQuery);
             String userNameLocal;
@@ -3088,6 +3088,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             // the roles that were specified can be maintained.
             apiResource.setProperty(APIConstants.DISPLAY_PUBLISHER_ROLES, publisherAccessControlRoles);
             apiResource.setProperty(APIConstants.ACCESS_CONTROL, publisherAccessControl);
+            if (!StringUtils.isEmpty(visibleOrganizations) && visibleOrganizations.contains(" ")) {
+                visibleOrganizations = visibleOrganizations.replace(" ", "+");
+            }
             apiResource.setProperty(APIConstants.VISIBLE_ORGANIZATIONS, visibleOrganizations);
             apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
             if (additionalProperties != null && additionalProperties.size() != 0) {

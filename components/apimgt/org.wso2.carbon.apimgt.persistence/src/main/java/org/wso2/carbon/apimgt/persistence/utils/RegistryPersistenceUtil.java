@@ -800,7 +800,11 @@ public class RegistryPersistenceUtil {
             }
         }
         api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
-        api.setVisibleOrganizations(apiResource.getProperty(APIConstants.VISIBLE_ORGANIZATIONS));
+        String visibleOrg = apiResource.getProperty(APIConstants.VISIBLE_ORGANIZATIONS);
+        if (visibleOrg != null) {
+            visibleOrg = visibleOrg.replace("+", " ");
+        }
+        api.setVisibleOrganizations(visibleOrg);
 
         String accessControlRoles = null;
 
