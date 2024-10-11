@@ -7178,7 +7178,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             /*To handle scenarios where api is exported from a previous U2 version. API and Common policies with same name
              and same version is not supported there
              */
-            importOperationPolicy(importedPolicyData, organization);
+            policyId = importOperationPolicy(importedPolicyData, organization);
         } else if (policyType.equalsIgnoreCase(ImportExportConstants.POLICY_TYPE_COMMON)) {
             existingOperationPolicy = getCommonOperationPolicyByPolicyName(importedSpec.getName(),
                     importedSpec.getVersion(),organization, false);
