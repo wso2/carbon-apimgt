@@ -175,7 +175,7 @@ public class EndpointCertificateDeployer {
         if (closeableHttpResponse.getStatusLine().getStatusCode() == 200) {
             String content = EntityUtils.toString(closeableHttpResponse.getEntity());
             List<CertificateMetadataDTO> certificateMetadataDTOList;
-                Type listType = new TypeToken<List<CertificateMetadataDTO>>() {
+            Type listType = new TypeToken<List<CertificateMetadataDTO>>() {
             }.getType();
             certificateMetadataDTOList = new Gson().fromJson(content, listType);
 
