@@ -976,7 +976,7 @@ public class CertificateMgtUtils {
         //add cert to sender profile truststore
         try {
             TrustStoreDTO trustStoreDTO = getSenderProfileTrustStore();
-            addCertificatesToTrustStore(trustStoreDTO, certificateMetadataDTOList,tenantId);
+            addCertificatesToTrustStore(trustStoreDTO, certificateMetadataDTOList, tenantId);
         } catch (FileNotFoundException | XMLStreamException e) {
             log.error("Error reading/writing to the truststore file.", e);
         } catch (CertificateManagementException e) {
