@@ -14682,8 +14682,9 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to add LLM Provider with ID: " + providerId, e);
+            handleException("Failed to add LLM Provider with ID: " + providerId, e);
         }
+        return null;
     }
 
     /**
@@ -14732,7 +14733,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to get LLM Providers.", e);
+            handleException("Failed to get LLM Providers.", e);
         }
         return providerList;
     }
@@ -14821,9 +14822,9 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to delete LLM Provider in tenant domain: "
-                    + organization, e);
+            handleException("Failed to delete LLM Provider in tenant domain: " + organization, e);
         }
+        return null;
     }
 
     /**
@@ -14864,9 +14865,9 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to update LLM Provider in tenant domain: "
-                    + provider.getOrganization(), e);
+            handleException("Failed to update LLM Provider in tenant domain: " + provider.getOrganization(), e);
         }
+        return null;
     }
 
     /**
@@ -14941,7 +14942,6 @@ public class ApiMgtDAO {
      */
     public LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException {
 
-        String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
         String getLlmProviderSql = SQLConstants.GET_LLM_PROVIDER_SQL;
         if (organization != null) {
             getLlmProviderSql += " AND ORGANIZATION = ?";
@@ -14979,13 +14979,13 @@ public class ApiMgtDAO {
             return provider;
 
         } catch (SQLException e) {
-            throw new APIManagementException(errorMessage, e);
+            handleException("Failed to get LLM Provider in tenant domain: " + organization, e);
         }
+        return null;
     }
 
     public LLMProvider getLLMProvider(String organization, String name, String apiVersion) throws APIManagementException {
 
-        String errorMessage = "Failed to get LLM Provider in tenant domain: " + organization;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(
                         SQLConstants.GET_LLM_PROVIDER_BY_NAME_AND_VERSION_SQL)) {
@@ -15019,8 +15019,9 @@ public class ApiMgtDAO {
             return provider;
 
         } catch (SQLException e) {
-            throw new APIManagementException(errorMessage, e);
+            handleException("Failed to get LLM Provider in tenant domain: " + organization, e);
         }
+        return null;
     }
 
     /**
@@ -19876,7 +19877,7 @@ public class ApiMgtDAO {
             stmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
-            throw new APIManagementException("Error while adding AI API configuration for API: " + apiUUID, e);
+            handleException("Error while adding AI API configuration for API: " + apiUUID, e);
         }
     }
 
@@ -19902,7 +19903,7 @@ public class ApiMgtDAO {
             stmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
-            throw new APIManagementException("Error while deleting AI API configuration for API: " + apiUUID, e);
+            handleException("Error while deleting AI API configuration for API: " + apiUUID, e);
         }
     }
 
@@ -19939,7 +19940,7 @@ public class ApiMgtDAO {
             }
             connection.commit();
         } catch (SQLException e) {
-            throw new APIManagementException("Error while retrieving AI API configuration for API: " + uuid, e);
+            handleException("Error while retrieving AI API configuration for API: " + uuid, e);
         }
         return aiConfiguration;
     }
