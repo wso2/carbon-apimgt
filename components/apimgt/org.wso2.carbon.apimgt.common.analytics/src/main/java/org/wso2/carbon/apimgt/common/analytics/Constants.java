@@ -39,4 +39,6 @@ public class Constants {
     public static final String USERNAME_MASK_VALUE = "*****";
 
     public static final String AUTH_API_URL = "auth.api.url";
+
+    public static final String CHOREO_REPORTER_NAME = "choreo";
 }
