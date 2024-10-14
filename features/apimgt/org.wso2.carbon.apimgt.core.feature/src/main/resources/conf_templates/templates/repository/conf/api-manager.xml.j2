@@ -1663,6 +1663,13 @@
          {% endif %}
         </LocalEntries>
         </SkipList>
+        <FileBasedApiContexts>
+            {% if apim.sync_runtime_artifacts.gateway.file_based_api_contexts is defined %}
+                {%- for context in apim.sync_runtime_artifacts.gateway.file_based_api_contexts -%}
+                    <FileBasedApiContext>{{context}}</FileBasedApiContext>
+                {% endfor %}
+            {% endif %}
+        </FileBasedApiContexts>
         <EnableOnDemandLoadingAPIS>{{apim.sync_runtime_artifacts.gateway.enable_on_demand_loading}}</EnableOnDemandLoadingAPIS>
     </SyncRuntimeArtifactsGateway>
     {% endif %}
