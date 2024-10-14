@@ -161,28 +161,13 @@ public class AiApiHandler extends AbstractHandler {
                     metadataMap);
             return true;
         } catch (Exception e) {
-            if (e instanceof CryptoException) {
-                log.error("Error occurred decrypting API Key.", e);
-            } else if (e instanceof APIManagementException) {
+            if (e instanceof APIManagementException) {
                 log.error("Error occurred while extracting metadata.", e);
             } else if (e instanceof XMLStreamException || e instanceof IOException) {
                 log.error("Error occurred while reading payload.", e);
-            } else if (e instanceof URISyntaxException) {
-                log.error("Error occurred while adding endpoint security.", e);
             }
             return false;
         }
-    }
-
-    /**
-     * Decrypts the secret value.
-     *
-     * @param cipherText the encrypted value
-     * @return decrypted value
-     */
-    private String decryptSecret(String cipherText) throws CryptoException {
-
-        return new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(cipherText));
     }
 
     /**
