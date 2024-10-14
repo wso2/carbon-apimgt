@@ -5334,17 +5334,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         api.setUriTemplates(uriTemplates);
 
-        if (isAPILevelPolicySupportEnabled) {
-            List<OperationPolicy> apiPolicies = api.getApiPolicies();
-            if (apiPolicies != null && !apiPolicies.isEmpty()) {
-                for (OperationPolicy policy : apiPolicies) {
-                    String policyType = getPolicyType(policy, api.getUuid(),
-                            tenantDomain);
-                    policy.setPolicyType(policyType);
-                }
+        List<OperationPolicy> apiPolicies = api.getApiPolicies();
+        if (apiPolicies != null && !apiPolicies.isEmpty()) {
+            for (OperationPolicy policy : apiPolicies) {
+                String policyType = getPolicyType(policy, api.getUuid(),
+                        tenantDomain);
+                policy.setPolicyType(policyType);
             }
-            api.setApiPolicies(apiPolicies);
         }
+        api.setApiPolicies(apiPolicies);
+
         return api;
     }
 
