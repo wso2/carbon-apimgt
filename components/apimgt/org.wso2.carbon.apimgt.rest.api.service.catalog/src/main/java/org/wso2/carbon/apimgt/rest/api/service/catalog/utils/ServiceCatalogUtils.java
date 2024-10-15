@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 
 import java.io.ByteArrayInputStream;
@@ -36,7 +37,7 @@ public class ServiceCatalogUtils {
         return serviceCatalog.getMD5HashByKey(serviceKey, tenantId) != null;
     }
 
-    public static ServiceEntry createServiceFromDTO(ServiceDTO serviceDTO, byte[] definitionFileByteArray) {
+    public static ServiceEntry createServiceFromDTO(ServiceDTO serviceDTO, byte[] definitionFileByteArray) throws APIManagementException {
         ServiceEntry service = new ServiceEntry();
         service.setName(serviceDTO.getName());
         service.setVersion(serviceDTO.getVersion());
@@ -50,8 +51,8 @@ public class ServiceCatalogUtils {
         service.setServiceKey(serviceKey);
         service.setMutualSSLEnabled(serviceDTO.isMutualSSLEnabled());
         service.setEndpointDef(new ByteArrayInputStream(definitionFileByteArray));
-        service.setMd5(Md5HashGenerator.calculateMD5Hash(serviceDTO.toString().getBytes()) + Md5HashGenerator
-                .calculateMD5Hash(definitionFileByteArray));
+        service.setMd5(APIUtil.generateHashValue(APIUtil.joinByteArrays(serviceDTO.toString().getBytes(),
+                definitionFileByteArray)));
         return service;
     }
 }

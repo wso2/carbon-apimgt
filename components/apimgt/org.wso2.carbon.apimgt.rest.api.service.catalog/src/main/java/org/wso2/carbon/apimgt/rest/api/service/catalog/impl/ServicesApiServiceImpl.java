@@ -256,7 +256,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             RestApiUtil.handleResourceAlreadyExistsError("Error while importing Service", e, log);
         }
 
-        newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
+            newResourcesHash = Md5HashGenerator.generateHash(tempDirPath, serviceCatalog.hashingAlgorithm());
         serviceEntries = ServiceEntryMappingUtil.fromDirToServiceEntryMap(tempDirPath);
         Map<String, Boolean> validationResults = new HashMap<>();
         if (overwrite && StringUtils.isNotEmpty(verifier)) {

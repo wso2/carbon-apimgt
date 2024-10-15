@@ -3611,7 +3611,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiPolicy = apiMgtDAO.updateAPIPolicy(apiPolicy);
             //TODO rename level to  resource or appropriate name
 
-            APIManagerConfiguration config = getAPIManagerConfiguration();
             if (log.isDebugEnabled()) {
                 log.debug("Calling invalidation cache for API Policy for tenant ");
             }
@@ -6981,7 +6980,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         importedPolicyData.getApiUUID(), null, organization, false);
         String policyId = null;
         if (existingOperationPolicy != null) {
-            if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
+            if (APIUtil.verifyHashValues(existingOperationPolicy, importedPolicyData)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Matching API specific policy found for imported policy and MD5 hashes match.");
                 }
@@ -6998,7 +6997,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             existingOperationPolicy = getCommonOperationPolicyByPolicyName(importedSpec.getName(),
                     importedSpec.getVersion(),organization, false);
             if (existingOperationPolicy != null) {
-                if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
+                if (APIUtil.verifyHashValues(existingOperationPolicy, importedPolicyData)) {
                     if (log.isDebugEnabled()) {
                         log.debug("Matching common policy found for imported policy and Md5 hashes match.");
                     }

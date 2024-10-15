@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
@@ -69,9 +70,10 @@ public class OperationPoliciesApiServiceImplUtils {
      * @param definition       Policy definition
      * @param gatewayType      Policy gateway type
      */
-    public static void preparePolicyDefinition(
-            OperationPolicyData policyData, OperationPolicyDefinition policyDefinition,
-            String definition, OperationPolicyDefinition.GatewayType gatewayType) {
+    public static void preparePolicyDefinition(OperationPolicyData policyData,
+                                               OperationPolicyDefinition policyDefinition, String definition,
+                                               OperationPolicyDefinition.GatewayType gatewayType)
+            throws APIManagementException {
         policyDefinition.setContent(definition);
         policyDefinition.setGatewayType(gatewayType);
         policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));

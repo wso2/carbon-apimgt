@@ -191,8 +191,7 @@ public class ApiMgtDAO {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
+        String caseSensitiveComparison = configuration.getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
         if (caseSensitiveComparison != null) {
             forceCaseInsensitiveComparisons = Boolean.parseBoolean(caseSensitiveComparison);
         }
@@ -20615,7 +20614,7 @@ public class ApiMgtDAO {
                     revisionedPolicy.getSpecification().getName(), revisionedPolicy.getSpecification().getVersion(),
                     revisionedPolicy.getApiUUID(), null, organization, false);
             if (apiSpecificPolicy != null) {
-                if (apiSpecificPolicy.getMd5Hash().equals(revisionedPolicy.getMd5Hash())) {
+                if (APIUtil.verifyHashValues(apiSpecificPolicy, revisionedPolicy)) {
                     if (log.isDebugEnabled()) {
                         log.debug("Matching API specific operation policy found for the revisioned policy and " +
                                 "MD5 hashes match");
@@ -20637,8 +20636,8 @@ public class ApiMgtDAO {
                     OperationPolicyData commonPolicy = getCommonOperationPolicyByPolicyID(connection,
                             revisionedPolicy.getClonedCommonPolicyId(), organization, false);
                     if (commonPolicy != null) {
-                        if (commonPolicy.getMd5Hash().equals(revisionedPolicy.getMd5Hash())) {
-                            if (log.isDebugEnabled()) {
+                        if (APIUtil.verifyHashValues(commonPolicy, revisionedPolicy)) {
+                                if (log.isDebugEnabled()) {
                                 log.debug("Matching common operation policy found. MD5 hash match");
                             }
                             //This means the common policy is same with our revision. A clone is created and original

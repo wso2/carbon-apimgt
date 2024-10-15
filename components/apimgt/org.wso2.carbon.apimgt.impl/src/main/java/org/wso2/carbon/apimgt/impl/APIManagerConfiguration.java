@@ -136,6 +136,7 @@ public class APIManagerConfiguration {
     private static Map<String, String> analyticsMaskProps;
     private TokenValidationDto tokenValidationDto = new TokenValidationDto();
     private boolean enableAiConfiguration;
+    private String hashingAlgorithm;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -663,6 +664,8 @@ public class APIManagerConfiguration {
                 setAiConfiguration(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
+            } else if (APIConstants.HASHING.equals(localName)) {
+                setHashingAlgorithm(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2509,6 +2512,25 @@ public class APIManagerConfiguration {
     public void setEnableAiConfiguration(boolean enableAiConfiguration) {
 
         this.enableAiConfiguration = enableAiConfiguration;
+    }
+
+    private void setHashingAlgorithm(OMElement omElement) {
+
+        OMElement hashingAlgorithm =
+                omElement.getFirstChildWithName(new QName(APIConstants.HASGING_ALGORITHM));
+        if (hashingAlgorithm != null) {
+            setHashingAlgorithm(hashingAlgorithm.getText());
+        }
+    }
+
+    public String getHashingAlgorithm() {
+
+        return hashingAlgorithm;
+    }
+
+    public void setHashingAlgorithm(String hashingAlgorithm) {
+
+        this.hashingAlgorithm = hashingAlgorithm;
     }
 
     public void setApiChatConfiguration(OMElement omElement){

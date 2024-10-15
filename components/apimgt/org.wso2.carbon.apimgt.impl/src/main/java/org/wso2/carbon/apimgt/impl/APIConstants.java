@@ -514,6 +514,8 @@ public final class APIConstants {
     public static final String ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN = OAUTH_CONFIGS + "EnableCertificateBoundAccessToken";
     public static final String DIGEST = "x5t#S256";
     public static final String CNF = "cnf";
+    public static final String HASHING = "Hashing";
+    public static final String HASGING_ALGORITHM= "HashingAlgorithm";
 
     // Constants related to AI features: API chat and Marketplace Assistant
     public static class AI {
@@ -1417,6 +1419,7 @@ public final class APIConstants {
     public static final String SHA_1 = "SHA-1";
 
     public static final String US_ASCII = "US-ASCII";
+    public static final String HASH = "hash";
 
     public static class DigestAuthConstants {
 
