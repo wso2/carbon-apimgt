@@ -356,7 +356,12 @@ public class ExportUtils {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String localImagePath = archivePath + File.separator + ImportExportConstants.IMAGE_RESOURCE;
         try {
-            ResourceFile thumbnailResource = apiProvider.getIcon(currentUuid, tenantDomain);
+            ResourceFile thumbnailResource;
+            if (currentUuid == null) {
+                thumbnailResource = apiProvider.getIcon(identifier.getUUID(), tenantDomain);
+            } else {
+                thumbnailResource = apiProvider.getIcon(currentUuid, tenantDomain);
+            }
             if (thumbnailResource != null) {
                 String mediaType = thumbnailResource.getContentType();
                 String extension = ImportExportConstants.fileExtensionMapping.get(mediaType);
