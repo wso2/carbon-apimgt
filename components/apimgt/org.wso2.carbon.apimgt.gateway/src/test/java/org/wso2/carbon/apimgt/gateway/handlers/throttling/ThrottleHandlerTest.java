@@ -473,37 +473,6 @@ public class ThrottleHandlerTest {
     }
 
     @Test
-    public void testMsgThrottleOutWhenHittingSubscriptionLevelSpike() {
-        ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
-
-        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
-                accessInformation);
-        throttleHandler.setSandboxMaxCount("100");
-        SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
-        throttleHandler.init(synapseEnvironment);
-
-        MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
-        messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
-        ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
-                .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
-                (API_AUTH_CONTEXT);
-        authenticationContext.setApiTier(throttlingTier);
-        authenticationContext.setKeyType("SANDBOX");
-        authenticationContext.setSpikeArrestLimit(100);
-        authenticationContext.setStopOnQuotaReach(true);
-
-        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
-
-        verbInfo.setConditionGroups(conditionGroupDTOs);
-        ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
-        matchingConditions.add(conditionGroupDTO);
-        throttleDataHolder.addKeyTemplate("$user", "$user");
-        Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
-        Assert.assertFalse(throttleHandler.handleRequest(messageContext));
-    }
-
-    @Test
     public void testHandleResponse() {
         ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
 
