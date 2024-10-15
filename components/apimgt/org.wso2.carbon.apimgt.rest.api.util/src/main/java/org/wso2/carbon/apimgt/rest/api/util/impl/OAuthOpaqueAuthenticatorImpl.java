@@ -258,6 +258,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String orgNameClaim = config.getOrgAccessControl().getOrgNameLocalClaim();
         String orgIdClaim = config.getOrgAccessControl().getOrgIdLocalClaim();
+        String orgSelectorClaim = config.getOrgAccessControl().getOrgSelectorClaim();
         if (StringUtils.isBlank(orgNameClaim)) {
             orgNameClaim = "http://wso2.org/claims/organization";
         }
@@ -267,6 +268,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
         
         String organization = null;
         String organizationId = null;
+        String orgSelector = null;
         String[] groupIdArray = null;
         try {
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -288,6 +290,12 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgNameClaim, null);
             organizationId =
                     manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgIdClaim, null);
+            if (StringUtils.isBlank(orgSelectorClaim)) {
+                orgSelector = organization; // default selector will be organization name
+            } else {
+                orgSelector = manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username),
+                        orgSelectorClaim, null);
+            }
             if (organization != null) {
                 if (organization.contains(",")) {
                     groupIdArray = organization.split(",");
@@ -299,6 +307,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     groupIdArray = new String[] {organization};
                     orgInfo.setName(organization); // check for multiple orgs
                     orgInfo.setId(organizationId);
+                    orgInfo.setOrganizationSelector(orgSelector);
                 }
             } else {
                 // If claim is null then returning a empty string
