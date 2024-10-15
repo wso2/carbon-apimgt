@@ -103,6 +103,6 @@ public abstract class BuiltInLLMProviderService implements LLMProviderService {
     public abstract String getType();
 
     @Override
-    public abstract LLMProvider registerLLMProvider(String apiDefinitionFilePath)
+    public abstract LLMProvider getLLMProvider()
             throws APIManagementException;
 }

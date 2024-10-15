@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class MistralAiLLMProviderService extends BuiltInLLMProviderService {
     }
 
     @Override
-    public LLMProvider registerLLMProvider(String apiDefinitionFilePath)
+    public LLMProvider getLLMProvider()
             throws APIManagementException {
 
         try {
@@ -51,10 +52,10 @@ public class MistralAiLLMProviderService extends BuiltInLLMProviderService {
             llmProvider.setDescription(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION);
             llmProvider.setBuiltInSupport(true);
 
-            llmProvider.setApiDefinition(readApiDefinition(
-                    apiDefinitionFilePath
-                            + APIConstants.AIAPIConstants
-                            .LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME));
+            llmProvider.setApiDefinition(readApiDefinition("repository" + File.separator + "resources"
+                    + File.separator + "api_definitions" + File.separator
+                    + APIConstants.AIAPIConstants
+                    .LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME));
 
             LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
             llmProviderConfiguration.setAuthHeader(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_KEY);

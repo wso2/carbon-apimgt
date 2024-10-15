@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
     }
 
     @Override
-    public LLMProvider registerLLMProvider(String apiDefinitionFilePath)
+    public LLMProvider getLLMProvider()
             throws APIManagementException {
 
         try {
@@ -52,8 +53,8 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_DESCRIPTION);
             llmProvider.setBuiltInSupport(true);
 
-            llmProvider.setApiDefinition(readApiDefinition(
-                    apiDefinitionFilePath
+            llmProvider.setApiDefinition(readApiDefinition("repository" + File.separator + "resources"
+                    + File.separator + "api_definitions" + File.separator
                             + APIConstants.AIAPIConstants
                             .LLM_PROVIDER_SERVICE_AZURE_OPENAI_API_DEFINITION_FILE_NAME));
 
