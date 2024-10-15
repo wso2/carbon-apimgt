@@ -114,6 +114,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -10822,7 +10823,14 @@ public final class APIUtil {
         return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
     }
 
+    /**
+     * This method will generate the hash value of the given byte[] payload
+     * @param payload
+     * @return
+     * @throws APIManagementException
+     */
     public static String generateHashValue(byte[] payload) throws APIManagementException {
+
         try {
             MessageDigest md5Digest = MessageDigest.getInstance(hashingAlgorithm);
             byte[] md5Bytes = md5Digest.digest(payload);
@@ -10832,12 +10840,19 @@ public final class APIUtil {
             }
             return hashToJson(sb.toString());
         } catch (NoSuchAlgorithmException e) {
-            throw new APIManagementException("Error when calculating the MD5 hash", e);
+            throw new APIManagementException("Error when calculating the " + hashingAlgorithm + " hash", e);
         }
     }
 
-
+    /**
+     * This method is used to generate the hash value of the given payload
+     *
+     * @param payload payload to generate the hash value
+     * @return hash value
+     * @throws APIManagementException if an error occurs while generating the hash value
+     */
     public static String generateHashValue(String payload) throws APIManagementException {
+
         try {
             MessageDigest md5Digest = MessageDigest.getInstance(hashingAlgorithm);
             byte[] md5Bytes = md5Digest.digest(payload.getBytes());
@@ -10847,12 +10862,20 @@ public final class APIUtil {
             }
             return hashToJson(sb.toString());
         } catch (NoSuchAlgorithmException e) {
-            throw new APIManagementException("Error when calculating the MD5 hash", e);
+            throw new APIManagementException("Error when calculating the " + hashingAlgorithm + " hash", e);
         }
     }
 
+    /**
+     * This method is used to verify the hash values of the operation policies
+     *
+     * @param policy1 existing operation policy
+     * @param policy2 new operation policy
+     * @return true if the hash values are equal
+     */
     public static boolean verifyHashValues(OperationPolicyData policy1, OperationPolicyData policy2)
             throws APIManagementException {
+
         if (policy1.getMd5Hash().startsWith("{") == policy2.getMd5Hash().startsWith("{")) {
             return policy1.getMd5Hash().equals(policy2.getMd5Hash());
         } else if (policy1.getMd5Hash().startsWith("{")) {
@@ -10862,6 +10885,34 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * This method is used to verify the hash values of the service catalog entries
+     *
+     * @param existingService existing service catalog entry
+     * @param newService new service catalog entry
+     * @return true if the hash values are equal
+     */
+    public static boolean verifyHashValues(ServiceEntry existingService, ServiceEntry newService)
+            throws APIManagementException {
+
+        if (existingService.getMd5().startsWith("{") == newService.getMd5().startsWith("{")) {
+            return existingService.getMd5().equals(newService.getMd5());
+        } else {
+            try {
+                return generateHashValue(toByteArray(existingService.getEndpointDef()))
+                        .equals(generateHashValue(toByteArray(newService.getEndpointDef())));
+            } catch (IOException e) {
+                throw new APIManagementException("Error when calculating the hash values tp compare the service " +
+                        "catalog update ", e);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param hashValue
+     * @return
+     */
     private static String hashToJson(String hashValue) {
 
         Map<String, String> hashValueMap = new HashMap<>();
@@ -10870,7 +10921,15 @@ public final class APIUtil {
         return new Gson().toJson(hashValueMap);
     }
 
+    /**
+     * This method is join two byte arrays
+     *
+     * @param array1 first byte array
+     * @param array2 second byte array
+     * @return joined byte array
+     */
     public static byte[] joinByteArrays(byte[] array1, byte[] array2) {
+
         byte[] result = new byte[array1.length + array2.length];
         System.arraycopy(array1, 0, result, 0, array1.length);
         System.arraycopy(array2, 0, result, array1.length, array2.length);
