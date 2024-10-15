@@ -22,6 +22,7 @@ public class OrgAccessControl {
     private boolean isEnabled;
     private String orgNameLocalClaim;
     private String orgIdLocalClaim;
+    private String orgselectorClaim;
     public boolean isEnabled() {
         return isEnabled;
     }
@@ -39,5 +40,11 @@ public class OrgAccessControl {
     }
     public void setOrgIdLocalClaim(String orgIdLocalClaim) {
         this.orgIdLocalClaim = orgIdLocalClaim;
+    }
+    public String getOrgSelectorClaim() {
+        return orgselectorClaim;
+    }
+    public void setOrgSelectorClaim(String orgselectorClaim) {
+        this.orgselectorClaim = orgselectorClaim;
     }
 }

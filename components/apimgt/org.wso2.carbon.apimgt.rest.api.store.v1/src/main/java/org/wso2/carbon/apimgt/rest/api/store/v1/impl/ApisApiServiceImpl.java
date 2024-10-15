@@ -1178,7 +1178,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!api.isAPIProduct()) {
                     // Add only organization specific tiers
                     Set<Tier> tiers = APIUtil.getAllowedTiersForTheOrganization(api.getApi().getAvailableTiers(),
-                            userOrgInfo.getName(), userOrgInfo.getSuperOrganization());
+                            userOrgInfo.getOrganizationSelector(), userOrgInfo.getSuperOrganization());
                     api.getApi().removeAllTiers();
                     api.getApi().setAvailableTiers(tiers);
                 }

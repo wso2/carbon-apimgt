@@ -3849,10 +3849,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
-		UserContext userCtx = new UserContext(userNameWithoutChange, new Organization(organizationInfo.getName()),
-				properties, roles);
-    	
-    	return searchPaginatedAPIs(searchQuery, start, end, org, userCtx);
+        UserContext userCtx = new UserContext(userNameWithoutChange,
+                new Organization(organizationInfo.getOrganizationSelector()), properties, roles);
+
+        return searchPaginatedAPIs(searchQuery, start, end, org, userCtx);
     }
 
 	private Map<String, Object> searchPaginatedAPIs(String searchQuery, int start, int end, Organization org,
