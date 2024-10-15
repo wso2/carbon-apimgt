@@ -47,7 +47,8 @@ public class LLMProviderRegistrationService {
     public static void registerDefaultLLMProviders(String organization) throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
-        List<LLMProvider> builtInLLMProviders = apiAdmin.getLLMProviders(organization, null, null, true);
+        List<LLMProvider> builtInLLMProviders = apiAdmin
+                .getLLMProviders(organization, null, null, true);
         Map<String, String> llmProviderMap = mapLLMProviders(builtInLLMProviders);
 
         Map<String, LLMProviderService> llmProviderServiceMap =
