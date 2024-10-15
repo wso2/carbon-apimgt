@@ -448,10 +448,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return offsetDateTime.getHour();
     }
 
-    private void getAiAnalyticsData(
-            Map aiApiResponseMetadata,
-            int requestStartHour,
-            Map<String, Object> customProperties
+    private void getAiAnalyticsData(Map aiApiResponseMetadata, int requestStartHour,
+                                    Map<String, Object> customProperties
     ) {
         Map<String, String> aiMetadata = new HashMap<>();
         Map<String, Integer> aiTokenUsage = new HashMap<>();
@@ -608,7 +606,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                 buildResponseMessage = false;
             }
         }
-        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
+        Map headers = (Map) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(TRANSPORT_HEADERS);
         if (headers != null  && headers.get(HttpHeaders.CONTENT_LENGTH) != null) {
             responseSize = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH).toString());
         }
@@ -637,7 +636,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     public String getResponseContentType() {
-        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
+        Map headers = (Map) ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(TRANSPORT_HEADERS);
         if (headers != null && headers.get(HttpHeaders.CONTENT_TYPE) != null) {
             return headers.get(HttpHeaders.CONTENT_TYPE).toString();
         }
