@@ -545,11 +545,12 @@ public interface APIAdmin  {
     /**
      * Adds a new LLM Provider for the given organization.
      *
+     * @param organization the organization name to filter
      * @param provider The LLM Provider to add.
      * @return The added LLM Provider.
      * @throws APIManagementException If adding fails.
      */
-    LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException;
+    LLMProvider addLLMProvider(String organization, LLMProvider provider) throws APIManagementException;
 
     /**
      * Retrieves a list of LLM providers based on the given filters.
@@ -577,11 +578,12 @@ public interface APIAdmin  {
     /**
      * Updates an LLM Provider for the given organization.
      *
+     * @param organization  The organization name.
      * @param provider The LLM Provider with updated data.
      * @return Updated LLM Provider.
      * @throws APIManagementException If update fails.
      */
-    LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException;
+    LLMProvider updateLLMProvider(String organization, LLMProvider provider) throws APIManagementException;
 
     /**
      * Retrieves an LLM Provider by ID for the given organization.

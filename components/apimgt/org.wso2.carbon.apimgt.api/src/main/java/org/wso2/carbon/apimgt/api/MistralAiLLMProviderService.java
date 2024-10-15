@@ -41,14 +41,13 @@ public class MistralAiLLMProviderService extends BuiltInLLMProviderService {
     }
 
     @Override
-    public LLMProvider registerLLMProvider(String organization, String apiDefinitionFilePath)
+    public LLMProvider registerLLMProvider(String apiDefinitionFilePath)
             throws APIManagementException {
 
         try {
             LLMProvider llmProvider = new LLMProvider();
             llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_NAME);
             llmProvider.setApiVersion(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_VERSION);
-            llmProvider.setOrganization(organization);
             llmProvider.setDescription(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION);
             llmProvider.setBuiltInSupport(true);
 

@@ -14680,7 +14680,7 @@ public class ApiMgtDAO {
      * @return The LLMProvider object that was added, with its ID set.
      * @throws APIManagementException If an error occurs while adding the LLM provider to the database.
      */
-    public LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException {
+    public LLMProvider addLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
         String providerId = UUID.randomUUID().toString();
         provider.setId(providerId);
@@ -14692,7 +14692,7 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, provider.getName());
                 prepStmt.setString(3, provider.getApiVersion());
                 prepStmt.setString(4, String.valueOf(provider.isBuiltInSupport()));
-                prepStmt.setString(5, provider.getOrganization());
+                prepStmt.setString(5, organization);
                 prepStmt.setString(6, provider.getDescription());
                 prepStmt.setBinaryStream(7, new ByteArrayInputStream(provider
                         .getApiDefinition().getBytes()));
@@ -14738,7 +14738,6 @@ public class ApiMgtDAO {
                     provider.setId(resultSet.getString("UUID"));
                     provider.setName(resultSet.getString("NAME"));
                     provider.setApiVersion(resultSet.getString("API_VERSION"));
-                    provider.setOrganization(resultSet.getString("ORGANIZATION"));
                     provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
                     provider.setDescription(resultSet.getString("DESCRIPTION"));
                     try (InputStream apiDefStream = resultSet.getBinaryStream("API_DEFINITION")) {
@@ -14860,12 +14859,12 @@ public class ApiMgtDAO {
      * @return LlmProvider the updated LLM provider object
      * @throws APIManagementException if an error occurs while accessing the database or updating data
      */
-    public LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException {
+    public LLMProvider updateLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement checkStmt = connection.prepareStatement(SQLConstants.CHECK_LLM_PROVIDER_BUILT_IN_SUPPORT_SQL)) {
-                checkStmt.setString(1, provider.getOrganization());
+                checkStmt.setString(1, organization);
                 checkStmt.setString(2, provider.getId());
                 try (ResultSet resultSet = checkStmt.executeQuery()) {
                     if (resultSet.next()) {
@@ -14876,7 +14875,7 @@ public class ApiMgtDAO {
                 }
             }
             String updateSql = buildUpdateSql(provider);
-            List<Object> params = buildUpdateParams(provider);
+            List<Object> params = buildUpdateParams(organization, provider);
             try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
                 for (int i = 0; i < params.size(); i++) {
                     updateStmt.setObject(i + 1, params.get(i));
@@ -14892,7 +14891,7 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             throw new APIManagementException("Failed to update LLM Provider in tenant domain: "
-                    + provider.getOrganization(), e);
+                    + organization, e);
         }
     }
 
@@ -14932,10 +14931,12 @@ public class ApiMgtDAO {
     /**
      * Builds parameters for the LLM provider update SQL.
      *
-     * @param provider the LLM provider to update
+     * @param organization the organization of the LLM Provider
+     * @param provider     the LLM provider to update
      * @return list of SQL update parameters
      */
-    private List<Object> buildUpdateParams(LLMProvider provider) {
+    private List<Object> buildUpdateParams(String organization, LLMProvider provider) {
+
         List<Object> params = new ArrayList<>();
 
         if (provider.isBuiltInSupport()) {
@@ -14953,7 +14954,7 @@ public class ApiMgtDAO {
                 params.add(provider.getConfigurations());
             }
         }
-        params.add(provider.getOrganization());
+        params.add(organization);
         params.add(provider.getId());
         return params;
     }

@@ -72,10 +72,9 @@ public interface LLMProviderService {
     /**
      * Registers a new LLM Provider for the given organization.
      *
-     * @param organization          The organization name.
      * @param apiDefinitionFilePath The path to the API definition file.
      * @return The registered LLM Provider.
      * @throws APIManagementException If registration fails.
      */
-    LLMProvider registerLLMProvider(String organization, String apiDefinitionFilePath) throws APIManagementException;
+    LLMProvider registerLLMProvider(String apiDefinitionFilePath) throws APIManagementException;
 }

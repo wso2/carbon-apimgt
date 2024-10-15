@@ -602,12 +602,12 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException {
+    public LLMProvider addLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
-        LLMProvider result = apiMgtDAO.addLLMProvider(provider);
+        LLMProvider result = apiMgtDAO.addLLMProvider(organization, provider);
         if (result != null) {
             new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
-                    result.getOrganization(),
+                    organization,
                     APIConstants.EventType.LLM_PROVIDER_CREATE.name());
         }
         return result;
@@ -634,12 +634,12 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException {
+    public LLMProvider updateLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
-        LLMProvider result = apiMgtDAO.updateLLMProvider(provider);
+        LLMProvider result = apiMgtDAO.updateLLMProvider(organization, provider);
         if (result != null) {
             new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
-                    result.getOrganization(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
+                    organization, APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
         }
         return result;
     }

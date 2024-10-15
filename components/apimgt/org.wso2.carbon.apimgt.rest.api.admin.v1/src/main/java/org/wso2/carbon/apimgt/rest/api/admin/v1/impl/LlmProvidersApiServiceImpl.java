@@ -63,12 +63,12 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                                    String configurations, InputStream apiDefinitionInputStream,
                                    Attachment apiDefinitionDetail, MessageContext messageContext) throws APIManagementException {
 
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             LLMProvider provider = new LLMProvider();
             provider.setName(name);
             provider.setApiVersion(apiVersion);
-            provider.setOrganization(RestApiUtil.getValidatedOrganization(messageContext));
             provider.setDescription(description);
             provider.setBuiltInSupport(false);
             provider.setConfigurations(configurations);
@@ -80,7 +80,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                     provider.setApiDefinition(apiDefinition);
                 }
             }
-            LLMProvider result = apiAdmin.addLLMProvider(provider);
+            LLMProvider result = apiAdmin.addLLMProvider(organization, provider);
             if (result != null) {
                 LLMProviderResponseDTO llmProviderResponseDTO =
                         LLMProviderMappingUtil.fromProviderToProviderResponseDTO(result);
@@ -174,6 +174,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                                       String description, String configurations, InputStream apiDefinitionInputStream
             , Attachment apiDefinitionDetail, MessageContext messageContext) throws APIManagementException {
 
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             LLMProvider provider = new LLMProvider();
@@ -187,9 +188,8 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                     provider.setApiDefinition(apiDefinition);
                 }
             }
-            provider.setOrganization(RestApiUtil.getValidatedOrganization(messageContext));
             provider.setConfigurations(configurations);
-            LLMProvider result = apiAdmin.updateLLMProvider(provider);
+            LLMProvider result = apiAdmin.updateLLMProvider(organization, provider);
             if (result != null) {
                 LLMProviderResponseDTO llmProviderResponseDTO =
                         LLMProviderMappingUtil.fromProviderToProviderResponseDTO(result);

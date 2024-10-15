@@ -50,7 +50,6 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         llmProviderDto.setId(llmProvider.getId());
         llmProviderDto.setName(llmProvider.getName());
         llmProviderDto.setApiVersion(llmProvider.getApiVersion());
-        llmProviderDto.setOrganization(llmProvider.getOrganization());
         llmProviderDto.setConfigurations(llmProvider.getConfigurations());
         return Response.ok().entity(llmProviderDto).build();
     }
@@ -75,7 +74,6 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                     llmProviderDto.setId(llmProvider.getId());
                     llmProviderDto.setName(llmProvider.getName());
                     llmProviderDto.setApiVersion(llmProvider.getApiVersion());
-                    llmProviderDto.setOrganization(llmProvider.getOrganization());
                     llmProviderDto.setConfigurations(llmProvider.getConfigurations());
                     return llmProviderDto;
                 })

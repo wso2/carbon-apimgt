@@ -39,7 +39,7 @@ public class DefaultLLMProviderService extends BuiltInLLMProviderService {
     }
 
     @Override
-    public LLMProvider registerLLMProvider(String organization, String apiDefinitionFilePath) {
+    public LLMProvider registerLLMProvider(String apiDefinitionFilePath) {
 
         return null;
     }

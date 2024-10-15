@@ -72,9 +72,9 @@ public class LLMProviderRegistrationService {
                 LLMProviderService llmProviderService = llmProviderServiceMap.get(connectorType);
                 if (llmProviderService instanceof BuiltInLLMProviderService) {
                     LLMProvider llmProvider = llmProviderService
-                            .registerLLMProvider(organization, apiDefinitionFilePath);
+                            .registerLLMProvider(apiDefinitionFilePath);
                     if (llmProvider != null) {
-                        apiAdmin.addLLMProvider(llmProvider);
+                        apiAdmin.addLLMProvider(organization, llmProvider);
                     }
                 } else {
                     log.debug("Skipping non-built-in LLM service provider: "
