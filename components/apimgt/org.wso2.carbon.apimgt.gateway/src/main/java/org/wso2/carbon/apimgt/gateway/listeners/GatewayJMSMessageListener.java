@@ -484,8 +484,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         JSONObject jsonObject = new JSONObject(eventJson);
         LLMProvider provider = new LLMProvider();
         String id = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_ID);
-        String name = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_NAME);
-        String apiVersion = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_API_VERSION);
+        String name = jsonObject.getString(AIAPIConstants.NAME);
+        String apiVersion = jsonObject.getString(AIAPIConstants.API_VERSION);
         provider.setId(id);
         provider.setName(name);
         provider.setApiVersion(apiVersion);

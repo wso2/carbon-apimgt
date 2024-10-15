@@ -10406,6 +10406,19 @@ components:
               type: string
             llmProviderApiVersion:
               type: string
+        subtypeConfiguration:
+          type: object
+          description: Configuration settings for the API subtype.
+          properties:
+            subtype:
+              type: string
+              description: The designated name of the API subtype.
+              default: DEFAULT
+              example: AIAPI
+              readOnly: true
+            configuration:
+              type: object
+              description: Specific configuration properties related to the API subtype.
         scopes:
           type: array
           items:

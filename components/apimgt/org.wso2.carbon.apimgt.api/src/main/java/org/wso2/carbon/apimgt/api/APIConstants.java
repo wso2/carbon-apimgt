@@ -56,8 +56,8 @@ public class APIConstants {
         public static final String INPUT_SOURCE_PAYLOAD = "payload";
         public static final String CONNECTOR_TYPE = "connectorType";
         public static final String LLM_PROVIDER_ID = "id";
-        public static final String LLM_PROVIDER_NAME = "name";
-        public static final String LLM_PROVIDER_API_VERSION = "apiVersion";
+        public static final String NAME = "name";
+        public static final String API_VERSION = "apiVersion";
         public static final String LLM_PROVIDER_CONFIGURATIONS = "configurations";
         public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
         public static final String CONFIGURATIONS = "configurations";
@@ -94,5 +94,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
         public static final String NULL = "null";
         public static final String LLM_PROVIDER = "LLM_PROVIDER";
+        public static final String LLM_PROVIDER_NAME = "llmProviderName";
+        public static final String LLM_PROVIDER_API_VERSION = "llmProviderApiVersion";
     }
 }

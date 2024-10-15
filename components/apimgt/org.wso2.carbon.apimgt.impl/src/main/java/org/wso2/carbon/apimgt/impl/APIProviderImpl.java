@@ -71,6 +71,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -237,6 +238,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
 import static org.wso2.carbon.apimgt.impl.APIConstants.COMMERCIAL_TIER_PLAN;
 
 /**
@@ -612,7 +614,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
-        addAIConfiguration(api);
+        addSubtypeConfiguration(api);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -640,11 +642,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API object to add the AI configuration for
      * @throws APIManagementException if an error occurs during the process
      */
-    private void addAIConfiguration(API api) throws APIManagementException {
+    private void addSubtypeConfiguration(API api) throws APIManagementException {
 
-        AIConfiguration aiConfig = api.getAiConfiguration();
-        if (aiConfig != null) {
-            apiMgtDAO.addAIConfiguration(api.getUuid(), null, aiConfig, api.getOrganization());
+        if (api.getSubtypeConfiguration() != null && api.getSubtypeConfiguration().getSubtype() != null
+                && API_SUBTYPE_AI_API.equals(api.getSubtypeConfiguration().getSubtype())) {
+            AIConfiguration aiConfiguration = new AIConfiguration();
+            aiConfiguration.setLlmProviderName(api.getSubtypeConfiguration().getConfiguration().get(
+                    org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER_NAME));
+            aiConfiguration.setLlmProviderApiVersion(api.getSubtypeConfiguration().getConfiguration().get(
+                    org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION));
+            addAIConfiguration(api.getUuid(), null, aiConfiguration, api.getOrganization());
         }
     }
 
@@ -2643,7 +2650,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         deleteScopes(localScopeKeysToDelete, tenantId);
-        if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+        if (api.getSubtypeConfiguration() != null && api.getSubtypeConfiguration().getSubtype() != null
+                && API_SUBTYPE_AI_API.equals(api.getSubtypeConfiguration().getSubtype())) {
             apiMgtDAO.deleteAIConfiguration(api.getUuid(), null);
         }
         apiMgtDAO.deleteAPI(api.getUuid());
@@ -6002,9 +6010,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
-            AIConfiguration configuration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null, organization);
-            if (configuration != null) {
-                apiMgtDAO.addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), configuration, organization);
+            AIConfiguration aiConfiguration = apiMgtDAO
+                    .getAIConfiguration(apiRevision.getApiUUID(), null, organization);
+            if (aiConfiguration != null) {
+                addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), aiConfiguration,
+                        organization);
             }
         } catch (APIManagementException e) {
             try {
@@ -6040,6 +6050,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return revisionUUID;
+    }
+
+    private void addAIConfiguration(String uuid, String revisionUuid, AIConfiguration aiConfiguration,
+                                    String organization) throws APIManagementException {
+
+        LLMProvider provider = apiMgtDAO.getLLMProvider(organization, aiConfiguration.getLlmProviderName(),
+                aiConfiguration.getLlmProviderApiVersion());
+        apiMgtDAO.addAIConfiguration(uuid, revisionUuid, aiConfiguration, provider.getId(), organization);
     }
 
     /**

@@ -145,8 +145,8 @@ public class AiApiHandler extends AbstractHandler {
             Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
             Map<String, String> headers = extractHeadersFromContext(messageContext);
 
-            metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_NAME, provider.getName());
-            metadataMap.put(APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION, provider.getApiVersion());
+            metadataMap.put(APIConstants.AIAPIConstants.NAME, provider.getName());
+            metadataMap.put(APIConstants.AIAPIConstants.API_VERSION, provider.getApiVersion());
             if (isRequest) {
                 llmProviderService.getRequestMetadata(payload, headers, queryParams,
                         providerConfiguration.getMetadata(), metadataMap);

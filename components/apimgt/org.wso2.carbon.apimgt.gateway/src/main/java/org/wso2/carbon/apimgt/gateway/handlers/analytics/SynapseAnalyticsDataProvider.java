@@ -455,11 +455,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         Map<String, Integer> aiTokenUsage = new HashMap<>();
         aiMetadata.put(
                 Constants.AI_VENDOR_NAME,
-                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_NAME).toString()
+                aiApiResponseMetadata.get(AIAPIConstants.NAME).toString()
         );
         aiMetadata.put(
                 Constants.AI_VENDOR_VERSION,
-                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_API_VERSION).toString()
+                aiApiResponseMetadata.get(AIAPIConstants.API_VERSION).toString()
         );
         aiMetadata.put(
                 Constants.AI_MODEL,

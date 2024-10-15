@@ -14682,6 +14682,8 @@ public class ApiMgtDAO {
      */
     public LLMProvider addLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
+        String providerId = UUID.randomUUID().toString();
+        provider.setId(providerId);
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             String insertProviderQuery = SQLConstants.INSERT_LLM_PROVIDER_SQL;
@@ -14883,6 +14885,68 @@ public class ApiMgtDAO {
             handleException("Failed to update LLM Provider in tenant domain: " + organization, e);
         }
         return null;
+    }
+
+    /**
+     * Builds the SQL update query for an LLM provider.
+     *
+     * @param provider the LLM provider to update
+     * @return the SQL update query string
+     */
+    private String buildUpdateSql(LLMProvider provider) {
+        StringBuilder updateSqlBuilder = new StringBuilder("UPDATE AM_LLM_PROVIDER SET ");
+        if (provider.isBuiltInSupport()) {
+            if (provider.getApiDefinition() != null) {
+                updateSqlBuilder.append("API_DEFINITION = ? ");
+            }
+        } else {
+            if (provider.getDescription() != null) {
+                updateSqlBuilder.append("DESCRIPTION = ?, ");
+            }
+            if (provider.getApiDefinition() != null) {
+                updateSqlBuilder.append("API_DEFINITION = ?, ");
+            }
+            if (provider.getConfigurations() != null) {
+                updateSqlBuilder.append("CONFIGURATIONS = ?, ");
+            }
+            if (updateSqlBuilder.toString().endsWith(", ")) {
+                updateSqlBuilder.setLength(updateSqlBuilder.length() - 2);
+            }
+        }
+        updateSqlBuilder.append(" WHERE ORGANIZATION = ? AND UUID = ?");
+        if (!provider.isBuiltInSupport()) {
+            updateSqlBuilder.append(" AND BUILT_IN_SUPPORT = 'false'");
+        }
+        return updateSqlBuilder.toString();
+    }
+
+    /**
+     * Builds parameters for the LLM provider update SQL.
+     *
+     * @param provider the LLM provider to update
+     * @return list of SQL update parameters
+     */
+    private List<Object> buildUpdateParams(LLMProvider provider) {
+        List<Object> params = new ArrayList<>();
+
+        if (provider.isBuiltInSupport()) {
+            if (provider.getApiDefinition() != null) {
+                params.add(provider.getApiDefinition());
+            }
+        } else {
+            if (provider.getDescription() != null) {
+                params.add(provider.getDescription());
+            }
+            if (provider.getApiDefinition() != null) {
+                params.add(provider.getApiDefinition());
+            }
+            if (provider.getConfigurations() != null) {
+                params.add(provider.getConfigurations());
+            }
+        }
+        params.add(provider.getOrganization());
+        params.add(provider.getId());
+        return params;
     }
 
     /**
@@ -19809,13 +19873,16 @@ public class ApiMgtDAO {
     /**
      * Adds AI configuration for the given API UUID and revision UUID.
      *
-     * @param apiUUID        The UUID of the API.
-     * @param revisionUUID   The revision UUID of the API (can be null).
+     * @param apiUUID         The UUID of the API.
+     * @param revisionUUID    The revision UUID of the API (can be null).
      * @param aiConfiguration The AI configuration to be added.
+     * @param providerId      The LLM Provider UUID
      * @throws APIManagementException If an error occurs while adding the AI configuration.
      */
     public void addAIConfiguration(String apiUUID, String revisionUUID, AIConfiguration aiConfiguration,
                                    String organization)
+    public void addAIConfiguration(String apiUUID, String revisionUUID, AIConfiguration aiConfiguration,
+                                   String providerId, String organization)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -19835,8 +19902,22 @@ public class ApiMgtDAO {
                 connection.rollback();
                 throw e;
             }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            String sql = SQLConstants.INSERT_AI_CONFIGURATION;
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setString(1, java.util.UUID.randomUUID().toString());
+                stmt.setString(2, apiUUID);
+                stmt.setString(3, revisionUUID);
+                stmt.setString(4, providerId);
+                stmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
-            throw new APIManagementException("Error while adding AI API configuration for API: " + apiUUID, e);
+            handleException("Error while adding AI API configuration for API: " + apiUUID, e);
         }
     }
 
@@ -19849,20 +19930,25 @@ public class ApiMgtDAO {
      */
     public void deleteAIConfiguration(String apiUUID, String revisionUUID)
             throws APIManagementException {
-        String query = (revisionUUID != null)
-                ? SQLConstants.DELETE_AI_CONFIGURATION_REVISION
-                : SQLConstants.DELETE_AI_CONFIGURATIONS;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(query)) {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            stmt.setString(1, apiUUID);
-            if (revisionUUID != null) {
-                stmt.setString(2, revisionUUID);
+            String query = (revisionUUID != null)
+                    ? SQLConstants.DELETE_AI_CONFIGURATION_REVISION
+                    : SQLConstants.DELETE_AI_CONFIGURATIONS;
+            try (PreparedStatement stmt = connection.prepareStatement(query)) {
+                stmt.setString(1, apiUUID);
+                if (revisionUUID != null) {
+                    stmt.setString(2, revisionUUID);
+                }
+                stmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
             }
-            stmt.executeUpdate();
-            connection.commit();
         } catch (SQLException e) {
-            throw new APIManagementException("Error while deleting AI API configuration for API: " + apiUUID, e);
+            handleException("Error while deleting AI API configuration for API: " + apiUUID, e);
         }
     }
 
