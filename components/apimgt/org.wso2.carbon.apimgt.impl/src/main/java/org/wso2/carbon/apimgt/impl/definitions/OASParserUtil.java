@@ -799,7 +799,8 @@ public class OASParserUtil {
                                 }
                             }
                         }
-                    } else if (((ComposedSchema) schema).getAnyOf() != null) {
+                    }
+                    if (((ComposedSchema) schema).getAnyOf() != null) {
                         for (Schema sc : ((ComposedSchema) schema).getAnyOf()) {
                             if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
                                 references.addAll(addSchemaOfSchema(sc));
@@ -812,7 +813,8 @@ public class OASParserUtil {
                                 }
                             }
                         }
-                    } else if (((ComposedSchema) schema).getOneOf() != null) {
+                    }
+                    if (((ComposedSchema) schema).getOneOf() != null) {
                         for (Schema sc : ((ComposedSchema) schema).getOneOf()) {
                             if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
                                 references.addAll(addSchemaOfSchema(sc));
@@ -825,7 +827,10 @@ public class OASParserUtil {
                                 }
                             }
                         }
-                    } else {
+                    }
+                    if (((ComposedSchema) schema).getAllOf() == null &&
+                            ((ComposedSchema) schema).getAnyOf() == null &&
+                            ((ComposedSchema) schema).getOneOf() == null) {
                         log.error("Unidentified schema. The schema is not available in the API definition.");
                     }
                 }
