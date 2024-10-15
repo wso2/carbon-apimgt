@@ -1752,7 +1752,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/LLMProvider'
+              $ref: '#/components/schemas/LLMProviderRequest'
         required: true
       responses:
         201:
@@ -1793,7 +1793,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/LLMProvider'
+              $ref: '#/components/schemas/LLMProviderRequest'
         required: true
       responses:
         200:
@@ -4705,14 +4705,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
-    LLMProvider:
+    LLMProviderRequest:
       title: LLMProvider
       type: object
       properties:
-        id:
-          type: string
-          readOnly: true
-          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
         name:
           maxLength: 255
           minLength: 1
@@ -4734,6 +4730,37 @@ components:
           type: string
           description: OpenAPI specification
           format: binary
+    LLMProviderResponse:
+      title: LLMProviderResponse
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: OpenAI
+        apiVersion:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: 1.0.0
+        builtInSupport:
+          type: boolean
+          description: Is built-in support
+        description:
+          maxLength: 1023
+          type: string
+          example: OpenAI LLM
+        configurations:
+          type: string
+          description: LLM Provider configurations
+        apiDefinition:
+          type: string
+          description: OpenAPI specification
     LLMProviderSummaryResponse:
       title: LLMProviderSummaryResponse
       type: object
@@ -4772,37 +4799,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LLMProviderSummaryResponse'
-    LLMProviderResponse:
-      title: LLMProviderResponse
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
-        name:
-          maxLength: 255
-          minLength: 1
-          type: string
-          example: OpenAI
-        apiVersion:
-          maxLength: 255
-          minLength: 1
-          type: string
-          example: 1.0.0
-        builtInSupport:
-          type: boolean
-          description: Is built-in support
-        description:
-          maxLength: 1023
-          type: string
-          example: OpenAI LLM
-        configurations:
-          type: string
-          description: LLM Provider configurations
-        apiDefinition:
-          type: string
-          description: OpenAPI specification
     VHost:
       title: Virtual Host
       required:

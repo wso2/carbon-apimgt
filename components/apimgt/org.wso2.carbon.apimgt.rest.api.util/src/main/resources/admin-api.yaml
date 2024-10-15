@@ -1526,7 +1526,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/LLMProvider'
+              $ref: '#/components/schemas/LLMProviderRequest'
         required: true
       responses:
         201:
@@ -1567,7 +1567,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/LLMProvider'
+              $ref: '#/components/schemas/LLMProviderRequest'
         required: true
       responses:
         200:
@@ -4114,14 +4114,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
-    LLMProvider:
+    LLMProviderRequest:
       title: LLMProvider
       type: object
       properties:
-        id:
-          type: string
-          readOnly: true
-          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
         name:
           maxLength: 255
           minLength: 1
