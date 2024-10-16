@@ -1293,4 +1293,21 @@ public class RestApiUtil {
         String organization = resolver.resolve(properties);
         return  organization;
     }
+    
+    public static boolean isOrganizationVisibilityAllowed(String visibleOrgs, String userOrg) {
+        boolean allowed = false;
+
+        if (StringUtils.isEmpty(visibleOrgs) || APIConstants.DEFAULT_VISIBLE_ORG.equals(visibleOrgs)) {
+            allowed = true;
+        } else {
+            List<String> visibleOrgList = Arrays.asList(visibleOrgs.split(","));
+            
+            if(visibleOrgList.contains(userOrg)) {
+                allowed = true;
+            } else {
+                allowed = false;
+            }
+        }
+        return allowed;
+    }
 }
