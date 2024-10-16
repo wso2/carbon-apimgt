@@ -98,7 +98,7 @@ public class ImportUtilsTest {
         String md5Hash = RandomStringUtils.randomAlphanumeric(30);
 
         PowerMockito.stub(
-                PowerMockito.method(APIUtil.class, "getMd5OfOperationPolicy", OperationPolicyData.class)).
+                PowerMockito.method(APIUtil.class, "getHashOfOperationPolicy", OperationPolicyData.class)).
                 toReturn(md5Hash);
 
         String policyId = RandomStringUtils.randomAlphanumeric(10);

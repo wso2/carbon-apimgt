@@ -76,7 +76,7 @@ public class OperationPoliciesApiServiceImplUtils {
             throws APIManagementException {
         policyDefinition.setContent(definition);
         policyDefinition.setGatewayType(gatewayType);
-        policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
+        policyDefinition.setMd5Hash(APIUtil.getHashOfOperationPolicyDefinition(policyDefinition));
 
         if (OperationPolicyDefinition.GatewayType.Synapse.equals(gatewayType)) {
             policyData.setSynapsePolicyDefinition(policyDefinition);
@@ -84,7 +84,7 @@ public class OperationPoliciesApiServiceImplUtils {
             policyData.setCcPolicyDefinition(policyDefinition);
         }
 
-        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+        policyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(policyData));
     }
 
     /**

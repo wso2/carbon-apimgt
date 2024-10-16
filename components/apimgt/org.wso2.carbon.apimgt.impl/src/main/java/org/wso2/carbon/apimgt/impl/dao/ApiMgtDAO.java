@@ -20653,7 +20653,7 @@ public class ApiMgtDAO {
                             revisionedPolicy.getSpecification()
                                     .setDisplayName(revisionedPolicy.getSpecification().getDisplayName()
                                             + " Restored from revision " + revisionId);
-                            revisionedPolicy.setMd5Hash(APIUtil.getMd5OfOperationPolicy(revisionedPolicy));
+                            revisionedPolicy.setMd5Hash(APIUtil.getHashOfOperationPolicy(revisionedPolicy));
                             revisionedPolicy.setRevisionUUID(null);
                             restoredPolicyId = addAPISpecificOperationPolicy(connection, revisionedPolicy, apiUUID, null,
                                     null, null);
@@ -20672,7 +20672,7 @@ public class ApiMgtDAO {
                             revisionedPolicy.getSpecification()
                                     .setDisplayName(revisionedPolicy.getSpecification().getDisplayName()
                                             + " Restored from revision " + revisionId);
-                            revisionedPolicy.setMd5Hash(APIUtil.getMd5OfOperationPolicy(revisionedPolicy));
+                            revisionedPolicy.setMd5Hash(APIUtil.getHashOfOperationPolicy(revisionedPolicy));
                             revisionedPolicy.setRevisionUUID(null);
                             restoredPolicyId = addAPISpecificOperationPolicy(connection, revisionedPolicy, apiUUID, null,
                                     null, null);

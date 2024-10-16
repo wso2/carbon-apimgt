@@ -1528,7 +1528,7 @@ public class APIMgtDAOTest {
     }
 
     @Test
-    public void testAPISpecificOperationPolicyAddition() throws Exception {
+    public void     testAPISpecificOperationPolicyAddition() throws Exception {
 
         String org = "org1";
         String apiUUID = "12345";
@@ -2030,7 +2030,7 @@ public class APIMgtDAOTest {
         OperationPolicyDefinition synapseDefinition = new OperationPolicyDefinition();
         synapseDefinition.setContent(jsonDef);
         synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-        synapseDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(synapseDefinition));
+        synapseDefinition.setMd5Hash(APIUtil.getHashOfOperationPolicyDefinition(synapseDefinition));
 
         OperationPolicyData operationPolicyData = new OperationPolicyData();
         operationPolicyData.setSpecification(policySpec);
@@ -2038,7 +2038,7 @@ public class APIMgtDAOTest {
 
         operationPolicyData.setOrganization(org);
         operationPolicyData.setApiUUID(apiUUID);
-        operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+        operationPolicyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(operationPolicyData));
 
         return operationPolicyData;
     }

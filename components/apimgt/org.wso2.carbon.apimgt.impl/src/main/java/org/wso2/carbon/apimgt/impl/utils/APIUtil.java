@@ -346,7 +346,7 @@ public final class APIUtil {
     private static Schema tenantConfigJsonSchema;
     private static Schema operationPolicySpecSchema;
     private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
-    private static String hashingAlgorithm;
+    private static String hashingAlgorithm = "sha256";
 
     private APIUtil() {
 
@@ -10095,7 +10095,7 @@ public final class APIUtil {
                                     policyData.setCcPolicyDefinition(ccPolicyDefinition);
                                 }
 
-                                policyData.setMd5Hash(getMd5OfOperationPolicy(policyData));
+                                policyData.setMd5Hash(getHashOfOperationPolicy(policyData));
                                 apiMgtDAO.addCommonOperationPolicy(policyData);
                                 log.info("Common operation policy " + policySpec.getName() + "_" + policySpec.getVersion()
                                         + " was added to the organization " + organization + " successfully");
@@ -10164,7 +10164,7 @@ public final class APIUtil {
                 String yamlContent = FileUtils.readFileToString(new File(fileName));
                 policyDefinition = new OperationPolicyDefinition();
                 policyDefinition.setContent(yamlContent);
-                policyDefinition.setMd5Hash(getMd5OfOperationPolicyDefinition(policyDefinition));
+                policyDefinition.setMd5Hash(getHashOfOperationPolicyDefinition(policyDefinition));
                 if (StringUtils.equals(APIConstants.CC_POLICY_DEFINITION_EXTENSION, fileExtension)) {
                     policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
                 }
@@ -10271,13 +10271,13 @@ public final class APIUtil {
     }
 
     /**
-     * Return the md5 hash of the provided policy. To generate the md5 hash, policy Specification and the
+     * Return the hash value of the provided policy. To generate the hash, policy Specification and the
      * two definitions are used
      *
      * @param policyData  Operation policy data
-     * @return md5 hash
+     * @return hash
      */
-    public static String getMd5OfOperationPolicy(OperationPolicyData policyData)
+    public static String getHashOfOperationPolicy(OperationPolicyData policyData)
             throws APIManagementException {
 
         String policySpecificationAsString = "";
@@ -10299,22 +10299,22 @@ public final class APIUtil {
     }
 
     /**
-     * Return the md5 hash of the policy definition string
+     * Return the hash of the policy definition string
      *
      * @param policyDefinition  Operation policy definition
-     * @return md5 hash of the definition content
+     * @return hash of the definition content
      */
-    public static String getMd5OfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition)
+    public static String getHashOfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition)
             throws APIManagementException {
 
-        String md5Hash = "";
+        String hash = "";
 
         if (policyDefinition != null) {
             if (policyDefinition.getContent() != null) {
-                md5Hash = generateHashValue(policyDefinition.getContent());
+                hash = generateHashValue(policyDefinition.getContent());
             }
         }
-        return md5Hash;
+        return hash;
     }
 
     /**
@@ -10393,11 +10393,11 @@ public final class APIUtil {
             OperationPolicyDefinition policyDefinition = new OperationPolicyDefinition();
             policyDefinition.setContent(policyDefinitionString);
             policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-            policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
+            policyDefinition.setMd5Hash(APIUtil.getHashOfOperationPolicyDefinition(policyDefinition));
             policyData.setSynapsePolicyDefinition(policyDefinition);
         }
 
-        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+        policyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(policyData));
 
         return policyData;
     }
@@ -10833,11 +10833,11 @@ public final class APIUtil {
     public static String generateHashValue(byte[] payload) throws APIManagementException {
 
         try {
-            MessageDigest md5Digest = MessageDigest.getInstance(hashingAlgorithm);
-            byte[] md5Bytes = md5Digest.digest(payload);
+            MessageDigest messageDigest = MessageDigest.getInstance(hashingAlgorithm);
+            byte[] hashByteArray = messageDigest.digest(payload);
             StringBuilder sb = new StringBuilder();
-            for (byte md5byte : md5Bytes) {
-                sb.append(Integer.toString((md5byte & 0xff) + 0x100, 16).substring(1));
+            for (byte hashByte : hashByteArray) {
+                sb.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
             }
             return hashToJson(sb.toString());
         } catch (NoSuchAlgorithmException e) {
@@ -10855,11 +10855,11 @@ public final class APIUtil {
     public static String generateHashValue(String payload) throws APIManagementException {
 
         try {
-            MessageDigest md5Digest = MessageDigest.getInstance(hashingAlgorithm);
-            byte[] md5Bytes = md5Digest.digest(payload.getBytes());
+            MessageDigest messageDigest = MessageDigest.getInstance(hashingAlgorithm);
+            byte[] hashByteArray = messageDigest.digest(payload.getBytes());
             StringBuilder sb = new StringBuilder();
-            for (byte md5byte : md5Bytes) {
-                sb.append(Integer.toString((md5byte & 0xff) + 0x100, 16).substring(1));
+            for (byte hashByte : hashByteArray) {
+                sb.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
             }
             return hashToJson(sb.toString());
         } catch (NoSuchAlgorithmException e) {
@@ -10880,9 +10880,9 @@ public final class APIUtil {
         if (policy1.getMd5Hash().startsWith("{") == policy2.getMd5Hash().startsWith("{")) {
             return policy1.getMd5Hash().equals(policy2.getMd5Hash());
         } else if (policy1.getMd5Hash().startsWith("{")) {
-            return policy1.getMd5Hash().equals(APIUtil.getMd5OfOperationPolicy(policy2));
+            return policy1.getMd5Hash().equals(APIUtil.getHashOfOperationPolicy(policy2));
         } else {
-            return policy2.getMd5Hash().equals(APIUtil.getMd5OfOperationPolicy(policy1));
+            return policy2.getMd5Hash().equals(APIUtil.getHashOfOperationPolicy(policy1));
         }
     }
 

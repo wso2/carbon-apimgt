@@ -165,7 +165,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
-import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
 import org.wso2.carbon.apimgt.impl.utils.SimpleContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
@@ -204,8 +203,6 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -224,7 +221,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7006,7 +7002,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     importedSpec.setName(importedSpec.getName() + "_imported");
                     importedSpec.setDisplayName(importedSpec.getDisplayName() + " Imported");
                     importedPolicyData.setSpecification(importedSpec);
-                    importedPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(importedPolicyData));
+                    importedPolicyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(importedPolicyData));
                     policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
                             organization);
                     if (log.isDebugEnabled()) {

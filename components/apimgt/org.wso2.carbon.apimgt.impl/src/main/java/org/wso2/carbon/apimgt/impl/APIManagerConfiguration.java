@@ -136,7 +136,7 @@ public class APIManagerConfiguration {
     private static Map<String, String> analyticsMaskProps;
     private TokenValidationDto tokenValidationDto = new TokenValidationDto();
     private boolean enableAiConfiguration;
-    private String hashingAlgorithm;
+    private String hashingAlgorithm = "sha256";
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;

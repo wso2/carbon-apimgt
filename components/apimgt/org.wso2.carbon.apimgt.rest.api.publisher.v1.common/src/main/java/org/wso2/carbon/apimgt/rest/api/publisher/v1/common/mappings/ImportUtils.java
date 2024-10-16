@@ -823,7 +823,7 @@ public class ImportUtils {
                             operationPolicyData.setCcPolicyDefinition(ccDefinition);
                         }
                         operationPolicyData.setMd5Hash(
-                                APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+                                APIUtil.getHashOfOperationPolicy(operationPolicyData));
                         policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
                         importedPolicies.put(policyFileName, policyID);
                         policyImported = true;
@@ -1262,7 +1262,7 @@ public class ImportUtils {
                     operationPolicyData.setSynapsePolicyDefinition(synapseGatewayDefinition);
                 }
 
-                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+                operationPolicyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(operationPolicyData));
                 policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
                 if (log.isDebugEnabled()) {
                     log.debug("A common operation policy has been added with name " + policySpecification.getName());
