@@ -25,12 +25,15 @@ import org.wso2.carbon.apimgt.impl.dao.TransactionCountDAO;
 import org.wso2.carbon.apimgt.impl.dto.TransactionCountDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -48,6 +51,7 @@ public class TransactionCountApiServiceImpl implements TransactionCountApiServic
     private static final Log log = LogFactory.getLog(TransactionCountApiServiceImpl.class);
 
     public Response transactionCountGet(String startTime, String endTime, MessageContext messageContext) {
+        checkTenantDomain();
         try {
             ZoneId zoneId = ZoneId.systemDefault();
             // Convert start and end times to the start and end of the respective days
@@ -68,4 +72,13 @@ public class TransactionCountApiServiceImpl implements TransactionCountApiServic
         }
         return null;
     }
+    private void checkTenantDomain() throws ForbiddenException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
+                    new APIManagementException("Tenant " + tenantDomain + " is not allowed to retrieve transaction " +
+                            "count. Only super tenant is allowed"), log);
+        }
+    }
+
 }
