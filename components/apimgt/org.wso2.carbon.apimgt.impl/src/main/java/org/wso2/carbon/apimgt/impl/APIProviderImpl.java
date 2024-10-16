@@ -239,6 +239,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_DEFAULT;
 import static org.wso2.carbon.apimgt.impl.APIConstants.COMMERCIAL_TIER_PLAN;
 
 /**
@@ -644,14 +645,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void addSubtypeConfiguration(API api) throws APIManagementException {
 
-        if (api.getSubtypeConfiguration() != null && api.getSubtypeConfiguration().getSubtype() != null
-                && API_SUBTYPE_AI_API.equals(api.getSubtypeConfiguration().getSubtype())) {
-            AIConfiguration aiConfiguration = new AIConfiguration();
-            aiConfiguration.setLlmProviderName(api.getSubtypeConfiguration().getConfiguration().get(
-                    org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER_NAME));
-            aiConfiguration.setLlmProviderApiVersion(api.getSubtypeConfiguration().getConfiguration().get(
-                    org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER_API_VERSION));
-            addAIConfiguration(api.getUuid(), null, aiConfiguration, api.getOrganization());
+        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            AIConfiguration aiConfiguration = api.getAiConfiguration();
+            addAIConfiguration(api.getUuid(), null, aiConfiguration);
         }
     }
 
@@ -2650,9 +2646,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         deleteScopes(localScopeKeysToDelete, tenantId);
-        if (api.getSubtypeConfiguration() != null && api.getSubtypeConfiguration().getSubtype() != null
-                && API_SUBTYPE_AI_API.equals(api.getSubtypeConfiguration().getSubtype())) {
-            apiMgtDAO.deleteAIConfiguration(api.getUuid(), null);
+        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            apiMgtDAO.deleteAIConfiguration(api.getUuid());
         }
         apiMgtDAO.deleteAPI(api.getUuid());
         if (log.isDebugEnabled()) {
@@ -5323,9 +5318,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
                 populateApiInfo(api);
-                if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
-                    populateAiConfiguration(api);
-                }
+                populateSubtypeConfiguration(api);
                 populateDefaultVersion(api);
                 return api;
             } else {
@@ -5353,7 +5346,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api The API object to which the AI configuration will be added.
      * @throws APIManagementException If an error occurs while populating the AI configuration.
      */
-    private void populateAiConfiguration(API api) throws APIManagementException {
+    private void populateSubtypeConfiguration(API api) throws APIManagementException {
 
         String apiUuid = api.getUuid();
         String revisionUuid = null;
@@ -5365,8 +5358,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         AIConfiguration configurations = apiMgtDAO.getAIConfiguration(apiUuid, revisionUuid, api.getOrganization());
         if (configurations != null) {
             api.setAiConfiguration(configurations);
-        } else {
-            log.debug("No AI configuration found for API: " + apiUuid);
         }
     }
 
@@ -6010,11 +6001,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
-            AIConfiguration aiConfiguration = apiMgtDAO
-                    .getAIConfiguration(apiRevision.getApiUUID(), null, organization);
+            AIConfiguration aiConfiguration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null,
+                    organization);
             if (aiConfiguration != null) {
-                addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), aiConfiguration,
-                        organization);
+                addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), aiConfiguration);
             }
         } catch (APIManagementException e) {
             try {
@@ -6052,12 +6042,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return revisionUUID;
     }
 
-    private void addAIConfiguration(String uuid, String revisionUuid, AIConfiguration aiConfiguration,
-                                    String organization) throws APIManagementException {
+    /**
+     * Adds AI configuration for an API by generating a unique configuration ID.
+     *
+     * @param uuid            API identifier.
+     * @param revisionUuid    API revision identifier.
+     * @param aiConfiguration AI configuration details.
+     * @throws APIManagementException On failure to add AI configuration.
+     */
+    private void addAIConfiguration(String uuid, String revisionUuid, AIConfiguration aiConfiguration)
+            throws APIManagementException {
 
-        LLMProvider provider = apiMgtDAO.getLLMProvider(organization, aiConfiguration.getLlmProviderName(),
-                aiConfiguration.getLlmProviderApiVersion());
-        apiMgtDAO.addAIConfiguration(uuid, revisionUuid, aiConfiguration, provider.getId(), organization);
+        String aiConfigurationId = java.util.UUID.randomUUID().toString();
+        apiMgtDAO.addAIConfiguration(uuid, revisionUuid, aiConfiguration.getLlmProviderId(), aiConfigurationId);
     }
 
     /**
@@ -6601,7 +6598,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
-        apiMgtDAO.deleteAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+        apiMgtDAO.deleteAIConfigurationRevision(apiRevision.getRevisionUUID());
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {

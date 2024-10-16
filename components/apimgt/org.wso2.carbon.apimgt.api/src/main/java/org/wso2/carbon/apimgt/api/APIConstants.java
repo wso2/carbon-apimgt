@@ -74,7 +74,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_OPENAI_CONNECTOR = "openAi_1.0.0";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_API_DEFINITION_FILE_NAME = "openai_api.yaml";
-        public static final String LLM_PROVIDER_SERVICE_OPENAI_DESCRIPTION = "New OpenAI service";
+        public static final String LLM_PROVIDER_SERVICE_OPENAI_DESCRIPTION = "OpenAI service";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_NAME = "MistralAI";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_VERSION = "1.0.0";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_CONNECTOR = "mistralAi_1.0.0";
@@ -94,7 +94,5 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
         public static final String NULL = "null";
         public static final String LLM_PROVIDER = "LLM_PROVIDER";
-        public static final String LLM_PROVIDER_NAME = "llmProviderName";
-        public static final String LLM_PROVIDER_API_VERSION = "llmProviderApiVersion";
     }
 }

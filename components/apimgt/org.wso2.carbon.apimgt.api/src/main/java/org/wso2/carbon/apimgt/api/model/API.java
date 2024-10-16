@@ -235,7 +235,6 @@ public class API implements Serializable {
     private Set<String> audiences;
 
     private AIConfiguration aiConfiguration;
-    private SubtypeConfiguration subtypeConfiguration;
 
     private BackendThrottlingConfiguration backendThrottlingConfiguration;
 
@@ -247,16 +246,6 @@ public class API implements Serializable {
     public void setAiConfiguration(AIConfiguration AiConfiguration) {
 
         this.aiConfiguration = AiConfiguration;
-    }
-
-    public SubtypeConfiguration getSubtypeConfiguration() {
-
-        return subtypeConfiguration;
-    }
-
-    public void setSubtypeConfiguration(SubtypeConfiguration subtypeConfiguration) {
-
-        this.subtypeConfiguration = subtypeConfiguration;
     }
 
     public BackendThrottlingConfiguration getBackendThrottlingConfiguration() {

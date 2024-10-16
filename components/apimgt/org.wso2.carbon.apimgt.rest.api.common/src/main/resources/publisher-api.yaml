@@ -8526,7 +8526,7 @@ paths:
             "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers"'
       operationId: getLLMProviders
 
-  /llm-providers/api-definition:
+  /llm-providers/{llmProviderId}/api-definition:
     get:
       tags:
         - LLMProvider
@@ -8534,13 +8534,8 @@ paths:
       description: |
         Get LLM Provider's API Definition
       parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: apiVersion
-          in: query
+        - name: llmProviderId
+          in: path
           required: true
           schema:
             type: string
@@ -8562,7 +8557,7 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/api-definition?name=OpenAI&apiVersion=1.0.0"'
       operationId: getLLMProviderApiDefinition
 
-  /llm-providers/endpoint-configuration:
+  /llm-providers/{llmProviderId}/endpoint-configuration:
     get:
       tags:
         - LLMProvider
@@ -8570,13 +8565,8 @@ paths:
       description: |
         Get LLM provider's endpoint security configurations
       parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: apiVersion
-          in: query
+        - name: llmProviderId
+          in: path
           required: true
           schema:
             type: string
@@ -10070,12 +10060,6 @@ components:
             - SSE
             - WEBHOOK
             - ASYNC
-        subtype:
-          type: string
-          description: Subtype of the API.
-          default: DEFAULT
-          example: AIAPI
-          readOnly: true
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -10399,13 +10383,6 @@ components:
             - INLINE
             - ENDPOINT
             - MOCKED_OAS
-        aiConfiguration:
-          type: object
-          properties:
-            llmProviderName:
-              type: string
-            llmProviderApiVersion:
-              type: string
         subtypeConfiguration:
           type: object
           description: Configuration settings for the API subtype.

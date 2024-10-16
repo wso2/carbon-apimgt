@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import graphql.schema.GraphQLSchema;
@@ -83,7 +84,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
@@ -1077,7 +1077,6 @@ public class PublisherCommonUtils {
                 }
             }
         }
-
         apiProvider.validateSharedScopes(sharedAPIScopes, tenantDomain);
     }
 
@@ -1596,29 +1595,16 @@ public class PublisherCommonUtils {
         }
         apiToAdd.setOrganization(organization);
         apiToAdd.setGatewayType(body.getGatewayType());
-        if (body.getAiConfiguration() != null) {
-            apiToAdd.setAiConfiguration(convertToAiConfiguration(body.getAiConfiguration()));
+        if (body.getSubtypeConfiguration() != null && body.getSubtypeConfiguration().getSubtype() != null
+                && APIConstants.API_SUBTYPE_AI_API.equals(body.getSubtypeConfiguration().getSubtype())) {
+            apiToAdd.setAiConfiguration(new Gson().fromJson(
+                    body.getSubtypeConfiguration().getConfiguration().toString(), AIConfiguration.class));
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_AI_API);
         } else {
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
         }
         apiToAdd.setEgress(body.isEgress() ? 1 : 0);
         return apiToAdd;
-    }
-
-    /**
-     * Converts an APIAiConfigurationDTO object to an AIConfiguration object.
-     *
-     * @param dto The APIAiConfigurationDTO to be converted.
-     * @return The converted AIConfiguration object.
-     * @throws APIManagementException If an error occurs during the conversion.
-     */
-    public static AIConfiguration convertToAiConfiguration(APIAiConfigurationDTO dto) {
-
-        AIConfiguration aiConfiguration = new AIConfiguration();
-        aiConfiguration.setLlmProviderName(dto.getLlmProviderName());
-        aiConfiguration.setLlmProviderApiVersion(dto.getLlmProviderApiVersion());
-        return aiConfiguration;
     }
 
     /**
@@ -1660,20 +1646,6 @@ public class PublisherCommonUtils {
                 .isIsTokenBasedThrottlingEnabled());
 
         return throttlingConfig;
-    }
-
-    /**
-     * Converts an AIConfiguration object to an APIAiConfigurationDTO object.
-     *
-     * @param aiConfiguration The AIConfiguration to be converted.
-     * @return The converted APIAiConfigurationDTO object.
-     */
-    public static APIAiConfigurationDTO convertToApiAiConfigurationDTO(AIConfiguration aiConfiguration) {
-
-        APIAiConfigurationDTO dto = new APIAiConfigurationDTO();
-        dto.setLlmProviderName(aiConfiguration.getLlmProviderName());
-        dto.setLlmProviderApiVersion(aiConfiguration.getLlmProviderApiVersion());
-        return dto;
     }
 
     /**

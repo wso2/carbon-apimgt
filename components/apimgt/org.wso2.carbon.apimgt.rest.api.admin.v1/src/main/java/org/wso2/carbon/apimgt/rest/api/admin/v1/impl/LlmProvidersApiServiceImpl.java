@@ -68,13 +68,18 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
     @Override
     public Response addLLMProvider(String name, String apiVersion, String description,
                                    String configurations, InputStream apiDefinitionInputStream,
-                                   Attachment apiDefinitionDetail, MessageContext messageContext) throws APIManagementException {
+                                   Attachment apiDefinitionDetail, MessageContext messageContext)
+            throws APIManagementException {
 
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        APIAdmin apiAdmin = new APIAdminImpl();
         try {
             LLMProvider provider = buildLLMProvider(name, apiVersion, description, configurations,
                     apiDefinitionInputStream);
+            if (provider == null) {
+                log.warn("Invalid provider configurations");
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIAdmin apiAdmin = new APIAdminImpl();
             LLMProvider addedLLMProvider = apiAdmin.addLLMProvider(organization, provider);
             if (addedLLMProvider != null) {
                 LLMProviderResponseDTO llmProviderResponseDTO =
@@ -113,19 +118,20 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @throws IOException If an error occurs while reading the API definition from the InputStream.
      */
     private LLMProvider buildLLMProvider(String name, String apiVersion, String description,
-                                         String configurations, InputStream apiDefinitionInputStream) throws IOException {
+                                         String configurations, InputStream apiDefinitionInputStream)
+            throws IOException {
 
+        String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
+        if (name == null || apiVersion == null || configurations == null || apiDefinition == null) {
+            return null;
+        }
         LLMProvider provider = new LLMProvider();
         provider.setName(name);
         provider.setApiVersion(apiVersion);
         provider.setDescription(description);
         provider.setBuiltInSupport(false);
         provider.setConfigurations(configurations);
-
-        String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
-        if (apiDefinition != null) {
-            provider.setApiDefinition(apiDefinition);
-        }
+        provider.setApiDefinition(apiDefinition);
 
         return provider;
     }
@@ -139,7 +145,8 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @throws APIManagementException If an error occurs while deleting the LLM provider.
      */
     @Override
-    public Response deleteLLMProvider(String llmProviderId, MessageContext messageContext) throws APIManagementException {
+    public Response deleteLLMProvider(String llmProviderId, MessageContext messageContext)
+            throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -175,15 +182,11 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        try {
-            List<LLMProvider> LLMProviderList = apiAdmin.getLLMProviders(organization, null, null, null);
-            LLMProviderSummaryResponseListDTO providerListDTO =
-                    LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LLMProviderList);
-            return Response.ok().entity(providerListDTO).build();
-        } catch (APIManagementException e) {
-            log.warn("Error while trying to retrieve LLM Providers");
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
+        List<LLMProvider> LLMProviderList = apiAdmin.getLLMProviders(
+                organization, null, null, null);
+        LLMProviderSummaryResponseListDTO providerListDTO =
+                LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LLMProviderList);
+        return Response.ok().entity(providerListDTO).build();
     }
 
     /**
@@ -214,7 +217,8 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             LLMProvider provider = buildUpdatedLLMProvider(retrievedProvider, llmProviderId, description,
                     configurations, apiDefinitionInputStream);
 
-            if (provider.getApiDefinition() == null) {
+            if (provider == null) {
+                log.warn("Invalid provider configurations");
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
@@ -223,7 +227,8 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             if (updatedProvider != null) {
                 LLMProviderResponseDTO llmProviderResponseDTO =
                         LLMProviderMappingUtil.fromProviderToProviderResponseDTO(updatedProvider);
-                URI location = new URI(RestApiConstants.RESOURCE_PATH_LLM_PROVIDER + "/" + updatedProvider.getId());
+                URI location = new URI(
+                        RestApiConstants.RESOURCE_PATH_LLM_PROVIDER + "/" + updatedProvider.getId());
                 String info = "{'id':'" + llmProviderId + "'}";
                 APIUtil.logAuditMessage(
                         org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER,
@@ -261,20 +266,21 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
         LLMProvider provider = new LLMProvider();
         provider.setId(llmProviderId);
-
+        provider.setName(retrievedProvider.getName());
+        provider.setApiVersion(retrievedProvider.getApiVersion());
+        provider.setBuiltInSupport(retrievedProvider.isBuiltInSupport());
         String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
+        boolean isBuiltIn = retrievedProvider.isBuiltInSupport();
 
-        if (retrievedProvider.isBuiltInSupport()) {
-            if (apiDefinition != null) {
-                provider.setApiDefinition(apiDefinition);
-            }
-            provider.setDescription(retrievedProvider.getDescription());
-            provider.setConfigurations(retrievedProvider.getConfigurations());
-        } else {
-            provider.setApiDefinition(apiDefinition != null ? apiDefinition : retrievedProvider.getApiDefinition());
-            provider.setDescription(description != null ? description : retrievedProvider.getDescription());
-            provider.setConfigurations(configurations != null ? configurations : retrievedProvider.getConfigurations());
+        if (isBuiltIn && apiDefinition == null) {
+            return null;
         }
+
+        provider.setApiDefinition(apiDefinition != null ? apiDefinition : retrievedProvider.getApiDefinition());
+        provider.setDescription(isBuiltIn ? retrievedProvider.getDescription() :
+                (description != null ? description : retrievedProvider.getDescription()));
+        provider.setConfigurations(isBuiltIn ? retrievedProvider.getConfigurations() :
+                (configurations != null ? configurations : retrievedProvider.getConfigurations()));
 
         return provider;
     }
@@ -306,7 +312,8 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @throws APIManagementException If an error occurs while retrieving the LLM provider.
      */
     @Override
-    public Response getLLMProvider(String llmProviderId, MessageContext messageContext) throws APIManagementException {
+    public Response getLLMProvider(String llmProviderId, MessageContext messageContext)
+            throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);

@@ -7760,7 +7760,7 @@ paths:
             "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers"'
       operationId: getLLMProviders
 
-  /llm-providers/api-definition:
+  /llm-providers/{llmProviderId}/api-definition:
     get:
       tags:
         - LLMProvider
@@ -7768,14 +7768,9 @@ paths:
       description: |
         Get LLM Provider's API Definition
       parameters:
-        - name: name
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: apiVersion
-          in: query
-          required: false
+        - name: llmProviderId
+          in: path
+          required: true
           schema:
             type: string
       responses:
@@ -7796,7 +7791,7 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/api-definition?name=OpenAI&apiVersion=1.0.0"'
       operationId: getLLMProviderApiDefinition
 
-  /llm-providers/endpoint-configuration:
+  /llm-providers/{llmProviderId}/endpoint-configuration:
     get:
       tags:
         - LLMProvider
@@ -7804,13 +7799,8 @@ paths:
       description: |
         Get LLM provider's endpoint security configurations
       parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: apiVersion
-          in: query
+        - name: llmProviderId
+          in: path
           required: true
           schema:
             type: string
@@ -8881,44 +8871,19 @@ components:
             - INLINE
             - ENDPOINT
             - MOCKED_OAS
-        aiConfiguration:
+        subtypeConfiguration:
           type: object
+          description: Configuration settings for the API subtype.
           properties:
-            llmProviderName:
+            subtype:
               type: string
-            llmProviderApiVersion:
-              type: string
-            throttlingConfiguration:
+              description: The designated name of the API subtype.
+              default: DEFAULT
+              example: AIAPI
+              readOnly: true
+            configuration:
               type: object
-              properties:
-                productionMaxPromptTokenCount:
-                  type: integer
-                  description: "Maximum prompt token count for production"
-                  format: int64
-                productionMaxCompletionTokenCount:
-                  type: integer
-                  description: "Maximum completion token count for production"
-                  format: int64
-                productionMaxTotalTokenCount:
-                  type: integer
-                  description: "Maximum total token count for production"
-                  format: int64
-                sandboxMaxPromptTokenCount:
-                  type: integer
-                  description: "Maximum prompt token count for sandbox"
-                  format: int64
-                sandboxMaxCompletionTokenCount:
-                  type: integer
-                  description: "Maximum completion token count for sandbox"
-                  format: int64
-                sandboxMaxTotalTokenCount:
-                  type: integer
-                  description: "Maximum total token count for sandbox"
-                  format: int64
-                isTokenBasedThrottlingEnabled:
-                  type: boolean
-                  default: false
-                  description: "Whether token-based throttling is enabled"
+              description: Specific configuration properties related to the API subtype.
         scopes:
           type: array
           items:
