@@ -231,6 +231,7 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10898,12 +10899,28 @@ public final class APIUtil {
         if (existingService.getMd5().startsWith("{") == newService.getMd5().startsWith("{")) {
             return existingService.getMd5().equals(newService.getMd5());
         } else {
+            ByteArrayOutputStream existingServiceEndpointClone = new ByteArrayOutputStream();
+            ByteArrayOutputStream newServiceEndpointClone = new ByteArrayOutputStream();
+
             try {
-                return generateHashValue(toByteArray(existingService.getEndpointDef()))
-                        .equals(generateHashValue(toByteArray(newService.getEndpointDef())));
+                existingService.getEndpointDef().transferTo(existingServiceEndpointClone);
+                newService.getEndpointDef().transferTo(newServiceEndpointClone);
+
+                return generateHashValue(existingServiceEndpointClone.toByteArray())
+                        .equals(generateHashValue(newServiceEndpointClone.toByteArray()));
             } catch (IOException e) {
-                throw new APIManagementException("Error when calculating the hash values tp compare the service " +
+                throw new APIManagementException("Error when calculating the hash values to compare the service " +
                         "catalog update ", e);
+            } finally {
+                existingService.setEndpointDef(new ByteArrayInputStream(existingServiceEndpointClone.toByteArray()));
+                newService.setEndpointDef(new ByteArrayInputStream(newServiceEndpointClone.toByteArray()));
+
+                try {
+                    existingServiceEndpointClone.close();
+                    newServiceEndpointClone.close();
+                } catch (IOException e) {
+                    log.error("Error occurred while closing the byte array output streams", e);
+                }
             }
         }
     }
