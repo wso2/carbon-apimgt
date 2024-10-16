@@ -4415,8 +4415,22 @@ public class ApiMgtDAO {
             sqlQuery = sqlQuery.replace("$2", sortOrder);
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setString(2, "%" + owner + "%");
-            prepStmt.setString(3, "%" + appName + "%");
+
+            if (owner.isEmpty() && appName.isEmpty()) {
+                owner = "%";
+                appName = "%";
+            } else {
+                if (!owner.isEmpty()) {
+                    owner = "%" + owner + "%";
+                }
+                if (!appName.isEmpty()){
+                    appName = "%" + appName + "%";
+                }
+            }
+
+            prepStmt.setString(2, owner);
+            prepStmt.setString(3, appName);
+
             prepStmt.setInt(4, offset);
             prepStmt.setInt(5, limit);
             rs = prepStmt.executeQuery();
@@ -4457,8 +4471,22 @@ public class ApiMgtDAO {
             sqlQuery = SQLConstants.GET_APPLICATIONS_COUNT;
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setString(2, "%" + searchOwner + "%");
-            prepStmt.setString(3, "%" + searchApplication + "%");
+
+            if (searchOwner.isEmpty() && searchApplication.isEmpty()) {
+                searchOwner = "%";
+                searchApplication = "%";
+            } else {
+                if (!searchOwner.isEmpty()) {
+                    searchOwner = "%" + searchOwner + "%";
+                }
+                if (!searchApplication.isEmpty()){
+                    searchApplication = "%" + searchApplication + "%";
+                }
+            }
+
+            prepStmt.setString(2, searchOwner);
+            prepStmt.setString(3, searchApplication);
+
             resultSet = prepStmt.executeQuery();
             int applicationCount = 0;
             if (resultSet != null) {
