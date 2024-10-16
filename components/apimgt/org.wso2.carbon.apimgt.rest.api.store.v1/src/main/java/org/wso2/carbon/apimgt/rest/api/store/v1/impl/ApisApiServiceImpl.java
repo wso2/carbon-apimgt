@@ -1168,6 +1168,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String status = api.getStatus();
+            String visibleOrgs = api.getApi().getVisibleOrganizations();
+            String userOrg = userOrgInfo.getOrganizationSelector();
+            
+            if (!api.isAPIProduct() && !RestApiUtil.isOrganizationVisibilityAllowed(visibleOrgs, userOrg)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
+            }
 
             // Extracting clicked API name by the user, for the recommendation system
             String userName = RestApiCommonUtil.getLoggedInUsername();

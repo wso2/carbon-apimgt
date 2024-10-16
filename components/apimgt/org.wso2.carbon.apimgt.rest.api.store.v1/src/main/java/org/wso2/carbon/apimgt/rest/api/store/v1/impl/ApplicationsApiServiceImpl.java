@@ -1297,9 +1297,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
         Application application = apiConsumer.getApplicationByUUID(applicationId);
+        OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
 
         if (application != null) {
-            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application) || (orgInfo.getOrganizationSelector() != null
+                    && orgInfo.getOrganizationSelector().equals(application.getSharedOrganization()))) {
                 ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
                 if (appKey != null) {
                     String jsonInput = null;
