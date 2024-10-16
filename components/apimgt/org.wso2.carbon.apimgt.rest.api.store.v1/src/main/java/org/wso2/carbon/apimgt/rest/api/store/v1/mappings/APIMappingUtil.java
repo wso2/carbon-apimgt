@@ -1109,4 +1109,33 @@ public class APIMappingUtil {
         apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
     }
 
+    /**
+     * Retrieves the value of the specified query parameter from a query string.
+     *
+     * @param query The query string containing key-value pairs.
+     * @return The value of the "kmId" parameter, or null if not found or if the query is empty or null.
+     */
+    public static String getKmIdValue(String query) {
+
+        if (StringUtils.isBlank(query)) {
+            return null;
+        }
+
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split(":");
+            if (keyValue.length > 0) {
+                String key = keyValue[0].trim();
+                if (key.equals("kmId")) {
+                    if (keyValue.length > 1) {
+                        return keyValue[1].trim();
+                    } else {
+                        return "";
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
 }

@@ -229,7 +229,7 @@ public class OAS31ParserTest extends OASTestBase {
         api.setScopes(new HashSet<>());
         api.setScopes(getAPITestScopes());
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth,oauth2");
-        String response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        String response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         String oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_default_allsecurity_response.json"),
@@ -241,7 +241,7 @@ public class OAS31ParserTest extends OASTestBase {
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
                         + "publisher" + File.separator + "oas31_with_apikey_basic_oauth_security_u2.json"),
                 String.valueOf(StandardCharsets.UTF_8));
-        response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_apikey_basic_oauth_security_u2_response.json"),
@@ -254,7 +254,7 @@ public class OAS31ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas31_with_basic_apisec.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth");
-        response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_basic_apisec_response.json"),
@@ -266,7 +266,7 @@ public class OAS31ParserTest extends OASTestBase {
                         + "devportal" + File.separator + "oas31_with_basic.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,basic_auth");
-        response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_basic_response.json"),
@@ -278,7 +278,7 @@ public class OAS31ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas31_with_apikey.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key");
-        response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31"
                         + File.separator + "devportal" + File.separator + "oas31_with_apikey_response.json"),
