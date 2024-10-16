@@ -4821,11 +4821,19 @@ public final class APIUtil {
      */
     public static void loadTenantConfigBlockingMode(String tenantDomain) {
 
+        boolean isTenantFlowStarted = false;
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            isTenantFlowStarted = true;
             ConfigurationContext ctx = ServiceReferenceHolder.getContextService().getServerConfigContext();
             TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, ctx);
         } catch (Exception e) {
             log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
