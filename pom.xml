@@ -2021,7 +2021,9 @@
         <carbon.apimgt.version>9.30.52-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.3.14</carbon.analytics.common.version>
+
+        <carbon.analytics.common.version>5.3.15</carbon.analytics.common.version>
+
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.9.27-beta</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
@@ -2195,8 +2197,8 @@
         <fasterxml.jackson.version>2.17.2</fasterxml.jackson.version>
         <javax.validation-api>2.0.1.Final</javax.validation-api>
         <javax.inject.version>1</javax.inject.version>
-        <carbon.broker.version>3.3.33</carbon.broker.version>
-        <andes.version>3.3.29</andes.version>
+        <carbon.broker.version>3.3.35</carbon.broker.version>
+        <andes.version>3.3.33</andes.version>
         <waffle-jna.version>1.6.wso2v7</waffle-jna.version>
         <version.snake.yaml>2.2</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
