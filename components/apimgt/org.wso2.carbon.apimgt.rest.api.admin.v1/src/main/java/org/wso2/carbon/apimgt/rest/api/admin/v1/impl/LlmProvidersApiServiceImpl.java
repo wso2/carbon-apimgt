@@ -122,7 +122,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             throws IOException {
 
         String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
-        if (name == null || apiVersion == null || configurations == null || apiDefinition == null) {
+        if (apiDefinition == null) {
             return null;
         }
         LLMProvider provider = new LLMProvider();
