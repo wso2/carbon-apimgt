@@ -1528,7 +1528,7 @@ public class APIMgtDAOTest {
     }
 
     @Test
-    public void     testAPISpecificOperationPolicyAddition() throws Exception {
+    public void testAPISpecificOperationPolicyAddition() throws Exception {
 
         String org = "org1";
         String apiUUID = "12345";
