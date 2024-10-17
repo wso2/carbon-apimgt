@@ -40,7 +40,6 @@ import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -52,8 +51,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.RegexValidator;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -117,6 +114,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -233,6 +231,7 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -254,7 +253,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -348,6 +346,7 @@ public final class APIUtil {
     private static Schema tenantConfigJsonSchema;
     private static Schema operationPolicySpecSchema;
     private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
+    private static String hashingAlgorithm = "sha256";
 
     private APIUtil() {
 
@@ -430,6 +429,7 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEYMGT_EVENT));
             eventPublishers.putIfAbsent(EventPublisherType.LLMPROVIDER_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.LLMPROVIDER_EVENT));
+            hashingAlgorithm = apiManagerConfiguration.getHashingAlgorithm();
         } catch (EventPublisherException e) {
             log.error("Could not initialize the event publishers. Events might not be published properly.");
             throw new APIManagementException(e);
@@ -4419,8 +4419,8 @@ public final class APIUtil {
                     "Error while retrieving MessageDigest for the provided hash algorithm: " + hashAlgorithm, e);
         }
         JSONObject object = new JSONObject();
-        object.put("algorithm", hashAlgorithm);
-        object.put("hash", bytesToHex(hash));
+        object.put(APIConstants.DigestAuthConstants.ALGORITHM, hashAlgorithm);
+        object.put(APIConstants.HASH, bytesToHex(hash));
 
         return object.toString();
     }
@@ -10103,7 +10103,7 @@ public final class APIUtil {
                                     policyData.setCcPolicyDefinition(ccPolicyDefinition);
                                 }
 
-                                policyData.setMd5Hash(getMd5OfOperationPolicy(policyData));
+                                policyData.setMd5Hash(getHashOfOperationPolicy(policyData));
                                 apiMgtDAO.addCommonOperationPolicy(policyData);
                                 log.info("Common operation policy " + policySpec.getName() + "_" + policySpec.getVersion()
                                         + " was added to the organization " + organization + " successfully");
@@ -10172,7 +10172,7 @@ public final class APIUtil {
                 String yamlContent = FileUtils.readFileToString(new File(fileName));
                 policyDefinition = new OperationPolicyDefinition();
                 policyDefinition.setContent(yamlContent);
-                policyDefinition.setMd5Hash(getMd5OfOperationPolicyDefinition(policyDefinition));
+                policyDefinition.setMd5Hash(getHashOfOperationPolicyDefinition(policyDefinition));
                 if (StringUtils.equals(APIConstants.CC_POLICY_DEFINITION_EXTENSION, fileExtension)) {
                     policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
                 }
@@ -10279,13 +10279,14 @@ public final class APIUtil {
     }
 
     /**
-     * Return the md5 hash of the provided policy. To generate the md5 hash, policy Specification and the
+     * Return the hash value of the provided policy. To generate the hash, policy Specification and the
      * two definitions are used
      *
      * @param policyData  Operation policy data
-     * @return md5 hash
+     * @return hash
      */
-    public static String getMd5OfOperationPolicy(OperationPolicyData policyData) {
+    public static String getHashOfOperationPolicy(OperationPolicyData policyData)
+            throws APIManagementException {
 
         String policySpecificationAsString = "";
         String synapsePolicyDefinitionAsString = "";
@@ -10301,26 +10302,27 @@ public final class APIUtil {
             ccPolicyDefinitionAsString = new Gson().toJson(policyData.getCcPolicyDefinition());
         }
 
-        return DigestUtils.md5Hex(policySpecificationAsString + synapsePolicyDefinitionAsString
+        return generateHashValue(policySpecificationAsString + synapsePolicyDefinitionAsString
                 + ccPolicyDefinitionAsString);
     }
 
     /**
-     * Return the md5 hash of the policy definition string
+     * Return the hash of the policy definition string
      *
      * @param policyDefinition  Operation policy definition
-     * @return md5 hash of the definition content
+     * @return hash of the definition content
      */
-    public static String getMd5OfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition) {
+    public static String getHashOfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition)
+            throws APIManagementException {
 
-        String md5Hash = "";
+        String hash = "";
 
         if (policyDefinition != null) {
             if (policyDefinition.getContent() != null) {
-                md5Hash = DigestUtils.md5Hex(policyDefinition.getContent());
+                hash = generateHashValue(policyDefinition.getContent());
             }
         }
-        return md5Hash;
+        return hash;
     }
 
     /**
@@ -10332,7 +10334,8 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static OperationPolicyData getPolicyDataForMediationFlow(API api, String policyDirection,
-                                                                    String organization) {
+                                                                    String organization)
+            throws APIManagementException {
 
         OperationPolicyData policyData = null;
         switch (policyDirection) {
@@ -10363,7 +10366,8 @@ public final class APIUtil {
 
     public static OperationPolicyData generateOperationPolicyDataObject(String apiUuid, String organization,
                                                                         String policyName,
-                                                                        String policyDefinitionString) {
+                                                                        String policyDefinitionString)
+            throws APIManagementException {
 
         OperationPolicySpecification policySpecification = new OperationPolicySpecification();
         policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
@@ -10397,11 +10401,11 @@ public final class APIUtil {
             OperationPolicyDefinition policyDefinition = new OperationPolicyDefinition();
             policyDefinition.setContent(policyDefinitionString);
             policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-            policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
+            policyDefinition.setMd5Hash(APIUtil.getHashOfOperationPolicyDefinition(policyDefinition));
             policyData.setSynapsePolicyDefinition(policyDefinition);
         }
 
-        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+        policyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(policyData));
 
         return policyData;
     }
@@ -10826,5 +10830,134 @@ public final class APIUtil {
 
     public static String getAPIMVersion() {
         return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
+    }
+
+    /**
+     * This method will generate the hash value of the given byte[] payload
+     * @param payload
+     * @return
+     * @throws APIManagementException
+     */
+    public static String generateHashValue(byte[] payload) throws APIManagementException {
+
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(hashingAlgorithm);
+            byte[] hashByteArray = messageDigest.digest(payload);
+            StringBuilder sb = new StringBuilder();
+            for (byte hashByte : hashByteArray) {
+                sb.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
+            }
+            return hashToJson(sb.toString());
+        } catch (NoSuchAlgorithmException e) {
+            throw new APIManagementException("Error when calculating the " + hashingAlgorithm + " hash", e);
+        }
+    }
+
+    /**
+     * This method is used to generate the hash value of the given payload
+     *
+     * @param payload payload to generate the hash value
+     * @return hash value
+     * @throws APIManagementException if an error occurs while generating the hash value
+     */
+    public static String generateHashValue(String payload) throws APIManagementException {
+
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(hashingAlgorithm);
+            byte[] hashByteArray = messageDigest.digest(payload.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte hashByte : hashByteArray) {
+                sb.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
+            }
+            return hashToJson(sb.toString());
+        } catch (NoSuchAlgorithmException e) {
+            throw new APIManagementException("Error when calculating the " + hashingAlgorithm + " hash", e);
+        }
+    }
+
+    /**
+     * This method is used to verify the hash values of the operation policies
+     *
+     * @param policy1 existing operation policy
+     * @param policy2 new operation policy
+     * @return true if the hash values are equal
+     */
+    public static boolean verifyHashValues(OperationPolicyData policy1, OperationPolicyData policy2)
+            throws APIManagementException {
+
+        if (policy1.getMd5Hash().startsWith("{") == policy2.getMd5Hash().startsWith("{")) {
+            return policy1.getMd5Hash().equals(policy2.getMd5Hash());
+        } else if (policy1.getMd5Hash().startsWith("{")) {
+            return policy1.getMd5Hash().equals(APIUtil.getHashOfOperationPolicy(policy2));
+        } else {
+            return policy2.getMd5Hash().equals(APIUtil.getHashOfOperationPolicy(policy1));
+        }
+    }
+
+    /**
+     * This method is used to verify the hash values of the service catalog entries
+     *
+     * @param existingService existing service catalog entry
+     * @param newService new service catalog entry
+     * @return true if the hash values are equal
+     */
+    public static boolean verifyHashValues(ServiceEntry existingService, ServiceEntry newService)
+            throws APIManagementException {
+
+        if (existingService.getMd5().startsWith("{") == newService.getMd5().startsWith("{")) {
+            return existingService.getMd5().equals(newService.getMd5());
+        } else {
+            ByteArrayOutputStream existingServiceEndpointClone = new ByteArrayOutputStream();
+            ByteArrayOutputStream newServiceEndpointClone = new ByteArrayOutputStream();
+
+            try {
+                existingService.getEndpointDef().transferTo(existingServiceEndpointClone);
+                newService.getEndpointDef().transferTo(newServiceEndpointClone);
+
+                return generateHashValue(existingServiceEndpointClone.toByteArray())
+                        .equals(generateHashValue(newServiceEndpointClone.toByteArray()));
+            } catch (IOException e) {
+                throw new APIManagementException("Error when calculating the hash values to compare the service " +
+                        "catalog update ", e);
+            } finally {
+                existingService.setEndpointDef(new ByteArrayInputStream(existingServiceEndpointClone.toByteArray()));
+                newService.setEndpointDef(new ByteArrayInputStream(newServiceEndpointClone.toByteArray()));
+
+                try {
+                    existingServiceEndpointClone.close();
+                    newServiceEndpointClone.close();
+                } catch (IOException e) {
+                    log.error("Error occurred while closing the byte array output streams", e);
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param hashValue
+     * @return
+     */
+    private static String hashToJson(String hashValue) {
+
+        Map<String, String> hashValueMap = new HashMap<>();
+        hashValueMap.put(APIConstants.HASH, hashValue);
+        hashValueMap.put(APIConstants.DigestAuthConstants.ALGORITHM, hashingAlgorithm);
+        return new Gson().toJson(hashValueMap);
+    }
+
+    /**
+     * This method is join two byte arrays
+     *
+     * @param array1 first byte array
+     * @param array2 second byte array
+     * @return joined byte array
+     */
+    public static byte[] joinByteArrays(byte[] array1, byte[] array2) {
+
+        byte[] result = new byte[array1.length + array2.length];
+        System.arraycopy(array1, 0, result, 0, array1.length);
+        System.arraycopy(array2, 0, result, array1.length, array2.length);
+        return result;
     }
 }

@@ -1802,7 +1802,8 @@ public class APIMgtDAOTest {
      * Checks whether all the API revision deployment mapping details are retrieved correctly
      * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
      */
-    @Test public void testRetrieveAllWorkflowFromInternalReference() throws Exception {
+    @Test
+    public void testRetrieveAllWorkflowFromInternalReference() throws Exception {
         WorkflowStatus workflowStatus = WorkflowStatus.CREATED;
         String revisionUUID = "821b9664-eeca-4173-9f56-3dc6d46bd6eb";
         String wfType = "AM_REVISION_DEPLOYMENT";
@@ -1821,11 +1822,13 @@ public class APIMgtDAOTest {
      * Checks whether the API revision deployment mapping details are retrieved correctly
      * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
      */
-    @Test public void testGetAPIRevisionDeploymentsByWorkflowStatusAndApiUUID() throws Exception {
+    @Test
+    public void testGetAPIRevisionDeploymentsByWorkflowStatusAndApiUUID() throws Exception {
         String workflowStatus = "CREATED";
         String apiUUID = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2";
         String revisionUUID = "821b9664-eeca-4173-9f56-3dc6d46bd6eb";
         String deployment = "default";
+        Thread.sleep(1000);
         List<APIRevisionDeployment> apiRevisionDeployments = apiMgtDAO.getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(
                 apiUUID, workflowStatus);
         Assert.assertNotNull(apiRevisionDeployments);
@@ -2030,7 +2033,7 @@ public class APIMgtDAOTest {
         OperationPolicyDefinition synapseDefinition = new OperationPolicyDefinition();
         synapseDefinition.setContent(jsonDef);
         synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-        synapseDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(synapseDefinition));
+        synapseDefinition.setMd5Hash(APIUtil.getHashOfOperationPolicyDefinition(synapseDefinition));
 
         OperationPolicyData operationPolicyData = new OperationPolicyData();
         operationPolicyData.setSpecification(policySpec);
@@ -2038,7 +2041,7 @@ public class APIMgtDAOTest {
 
         operationPolicyData.setOrganization(org);
         operationPolicyData.setApiUUID(apiUUID);
-        operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+        operationPolicyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(operationPolicyData));
 
         return operationPolicyData;
     }
