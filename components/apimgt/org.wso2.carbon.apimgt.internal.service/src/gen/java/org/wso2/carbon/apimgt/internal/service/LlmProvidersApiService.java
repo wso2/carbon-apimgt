@@ -21,6 +21,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface LlmProvidersApiService {
-      public Response getLLMProviderById(String llmProviderId, MessageContext messageContext) throws APIManagementException;
-      public Response getLLMProviders(String name, String apiVersion, String organization, MessageContext messageContext) throws APIManagementException;
+      public Response getLLMProviderById(String llmProviderId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response getLLMProviders(String xWSO2Tenant, String name, String apiVersion, MessageContext messageContext) throws APIManagementException;
 }

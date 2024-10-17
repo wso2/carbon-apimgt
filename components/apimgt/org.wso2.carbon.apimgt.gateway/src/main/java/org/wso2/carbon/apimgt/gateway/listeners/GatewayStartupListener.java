@@ -223,7 +223,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     new GatewayJMSMessageListener());
             copyTenantArtifacts();
             APILoggerManager.getInstance().initializeAPILoggerList();
-            LLMProviderManager.getInstance().initializeLLMProviderConfigurations();
+            LLMProviderManager.getInstance().initializeLLMProviderConfigurations(
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         } else {
             log.info("Running on migration enabled mode: Stopped at Gateway Startup listener completed");
         }
@@ -489,6 +490,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             }
         }).start();
         retrieveAndDeployArtifacts(tenantDomain);
+        LLMProviderManager.getInstance().initializeLLMProviderConfigurations(tenantDomain);
         ServiceReferenceHolder.getInstance().addLoadedTenant(tenantDomain);
     }
 

@@ -54,7 +54,7 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     }
 
     @GET
-    @Path("/api-definition")
+    @Path("/{llmProviderId}/api-definition")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Get LLM Provider's API Definition", notes = "Get LLM Provider's API Definition ", response = String.class, authorizations = {
@@ -64,12 +64,12 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     }, tags={ "LLMProvider",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API Definition ", response = String.class) })
-    public Response getLLMProviderApiDefinition( @NotNull @ApiParam(value = "",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "",required=true)  @QueryParam("apiVersion") String apiVersion) throws APIManagementException{
-        return delegate.getLLMProviderApiDefinition(name, apiVersion, securityContext);
+    public Response getLLMProviderApiDefinition(@ApiParam(value = "",required=true) @PathParam("llmProviderId") String llmProviderId) throws APIManagementException{
+        return delegate.getLLMProviderApiDefinition(llmProviderId, securityContext);
     }
 
     @GET
-    @Path("/endpoint-configuration")
+    @Path("/{llmProviderId}/endpoint-configuration")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Get LLM provider's security configurations", notes = "Get LLM provider's endpoint security configurations ", response = LLMProviderEndpointConfigurationDTO.class, authorizations = {
@@ -79,8 +79,8 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     }, tags={ "LLMProvider",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API Definition ", response = LLMProviderEndpointConfigurationDTO.class) })
-    public Response getLLMProviderEndpointConfiguration( @NotNull @ApiParam(value = "",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "",required=true)  @QueryParam("apiVersion") String apiVersion) throws APIManagementException{
-        return delegate.getLLMProviderEndpointConfiguration(name, apiVersion, securityContext);
+    public Response getLLMProviderEndpointConfiguration(@ApiParam(value = "",required=true) @PathParam("llmProviderId") String llmProviderId) throws APIManagementException{
+        return delegate.getLLMProviderEndpointConfiguration(llmProviderId, securityContext);
     }
 
     @GET

@@ -19,9 +19,8 @@ import javax.validation.Valid;
 
 
 
-public class LLMProviderDTO   {
+public class LLMProviderRequestDTO   {
   
-    private String id = null;
     private String name = null;
     private String apiVersion = null;
     private String description = null;
@@ -30,24 +29,7 @@ public class LLMProviderDTO   {
 
   /**
    **/
-  public LLMProviderDTO id(String id) {
-    this.id = id;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "ece92bdc-e1e6-325c-b6f4-656208a041e9", value = "")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   **/
-  public LLMProviderDTO name(String name) {
+  public LLMProviderRequestDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -64,7 +46,7 @@ public class LLMProviderDTO   {
 
   /**
    **/
-  public LLMProviderDTO apiVersion(String apiVersion) {
+  public LLMProviderRequestDTO apiVersion(String apiVersion) {
     this.apiVersion = apiVersion;
     return this;
   }
@@ -81,7 +63,7 @@ public class LLMProviderDTO   {
 
   /**
    **/
-  public LLMProviderDTO description(String description) {
+  public LLMProviderRequestDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -99,7 +81,7 @@ public class LLMProviderDTO   {
   /**
    * LLM Provider configurations
    **/
-  public LLMProviderDTO configurations(String configurations) {
+  public LLMProviderRequestDTO configurations(String configurations) {
     this.configurations = configurations;
     return this;
   }
@@ -117,7 +99,7 @@ public class LLMProviderDTO   {
   /**
    * OpenAPI specification
    **/
-  public LLMProviderDTO apiDefinition(File apiDefinition) {
+  public LLMProviderRequestDTO apiDefinition(File apiDefinition) {
     this.apiDefinition = apiDefinition;
     return this;
   }
@@ -141,26 +123,24 @@ public class LLMProviderDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    LLMProviderDTO llMProvider = (LLMProviderDTO) o;
-    return Objects.equals(id, llMProvider.id) &&
-        Objects.equals(name, llMProvider.name) &&
-        Objects.equals(apiVersion, llMProvider.apiVersion) &&
-        Objects.equals(description, llMProvider.description) &&
-        Objects.equals(configurations, llMProvider.configurations) &&
-        Objects.equals(apiDefinition, llMProvider.apiDefinition);
+    LLMProviderRequestDTO llMProviderRequest = (LLMProviderRequestDTO) o;
+    return Objects.equals(name, llMProviderRequest.name) &&
+        Objects.equals(apiVersion, llMProviderRequest.apiVersion) &&
+        Objects.equals(description, llMProviderRequest.description) &&
+        Objects.equals(configurations, llMProviderRequest.configurations) &&
+        Objects.equals(apiDefinition, llMProviderRequest.apiDefinition);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, apiVersion, description, configurations, apiDefinition);
+    return Objects.hash(name, apiVersion, description, configurations, apiDefinition);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class LLMProviderDTO {\n");
+    sb.append("class LLMProviderRequestDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");

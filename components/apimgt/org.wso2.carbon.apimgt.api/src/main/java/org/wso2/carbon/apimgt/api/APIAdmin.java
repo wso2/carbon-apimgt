@@ -545,11 +545,12 @@ public interface APIAdmin  {
     /**
      * Adds a new LLM Provider for the given organization.
      *
+     * @param organization the organization name to filter
      * @param provider The LLM Provider to add.
      * @return The added LLM Provider.
      * @throws APIManagementException If adding fails.
      */
-    LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException;
+    LLMProvider addLLMProvider(String organization, LLMProvider provider) throws APIManagementException;
 
     /**
      * Retrieves a list of LLM providers based on the given filters.
@@ -566,22 +567,23 @@ public interface APIAdmin  {
     /**
      * Deletes an LLM Provider by ID for the given organization.
      *
-     * @param organization  The organization name.
-     * @param llmProviderId The ID of the LLM Provider.
-     * @param builtIn       Whether the provider is built-in.
-     * @return Deleted LLM Provider.
+     * @param organization The organization name.
+     * @param provider     LLM Provider.
+     * @param builtIn      Whether the provider is built-in.
+     * @return Deleted LLM Provider UUID.
      * @throws APIManagementException If deletion fails.
      */
-    LLMProvider deleteLLMProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException;
+    String deleteLLMProvider(String organization, LLMProvider provider, boolean builtIn) throws APIManagementException;
 
     /**
      * Updates an LLM Provider for the given organization.
      *
+     * @param organization  The organization name.
      * @param provider The LLM Provider with updated data.
      * @return Updated LLM Provider.
      * @throws APIManagementException If update fails.
      */
-    LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException;
+    LLMProvider updateLLMProvider(String organization, LLMProvider provider) throws APIManagementException;
 
     /**
      * Retrieves an LLM Provider by ID for the given organization.

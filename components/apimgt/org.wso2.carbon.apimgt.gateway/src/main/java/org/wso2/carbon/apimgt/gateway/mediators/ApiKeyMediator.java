@@ -31,9 +31,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+/**
+ * ApiKeyMediator is responsible for handling API key injection into
+ * requests. It supports adding API keys as either HTTP headers or query parameters
+ * based on the provided identifier type.
+ */
 public class ApiKeyMediator extends AbstractMediator implements ManagedLifecycle {
 
-    private static final Log log = LogFactory.getLog(OAuthMediator.class);
+    private static final Log log = LogFactory.getLog(ApiKeyMediator.class);
     private String apiKeyIdentifier;
     private String apiKeyValue;
     private String apiKeyIdentifierType;
@@ -49,6 +54,12 @@ public class ApiKeyMediator extends AbstractMediator implements ManagedLifecycle
 
     }
 
+    /**
+     * Executes the mediation logic for injecting the API key into the request.
+     *
+     * @param messageContext Synapse message context for the current request.
+     * @return true if mediation is successful, false otherwise.
+     */
     @Override
     public boolean mediate(MessageContext messageContext) {
 

@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiSecurityScheme;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -95,6 +97,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
@@ -473,9 +476,13 @@ public class APIMappingUtil {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
         }
-        if (dto.getAiConfiguration() != null) {
-            model.setAiConfiguration(
-                    PublisherCommonUtils.convertToAiConfiguration(dto.getAiConfiguration()));
+        if (dto.getSubtypeConfiguration() != null && dto.getSubtypeConfiguration().getSubtype() != null
+                && APIConstants.API_SUBTYPE_AI_API.equals(dto.getSubtypeConfiguration().getSubtype())) {
+            model.setSubtype(APIConstants.API_SUBTYPE_AI_API);
+            model.setAiConfiguration(new Gson().fromJson(dto.getSubtypeConfiguration().getConfiguration().toString(),
+                    AIConfiguration.class));
+        } else {
+            model.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
         }
         return model;
     }
@@ -1517,7 +1524,6 @@ public class APIMappingUtil {
         dto.setGatewayVendor(gatewayVendor);
         dto.setGatewayType(model.getGatewayType());
         dto.setEgress(model.isEgress() == 1); //true - 1, false - 0
-        dto.setSubtype(model.getSubtype());
 
         if (model.getGatewayVendor() == null) {
             dto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
@@ -1526,9 +1532,14 @@ public class APIMappingUtil {
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
+        APISubtypeConfigurationDTO subtypeConfigurationDTO = new APISubtypeConfigurationDTO();
+        subtypeConfigurationDTO.setSubtype(model.getSubtype());
         if (model.getAiConfiguration() != null) {
-            dto.setAiConfiguration(PublisherCommonUtils.convertToApiAiConfigurationDTO(model.getAiConfiguration()));
+            subtypeConfigurationDTO.setSubtype(model.getSubtype());
+            subtypeConfigurationDTO.setConfiguration(new Gson().toJson(model.getAiConfiguration()));
+            dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         }
+        dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         return dto;
     }
 

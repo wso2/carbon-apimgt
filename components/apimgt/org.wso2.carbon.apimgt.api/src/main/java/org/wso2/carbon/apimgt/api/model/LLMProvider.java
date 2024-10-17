@@ -31,16 +31,14 @@ public class LLMProvider implements Serializable {
     private String name = null;
     private String description = null;
     private String apiVersion = null;
-    private String organization = null;
     private String apiDefinition = null;
     private String configurations = null;
     private boolean builtInSupport = false;
 
-    public LLMProvider(String name, String apiVersion, String organization) {
+    public LLMProvider(String name, String apiVersion) {
 
         this.name = name;
         this.apiVersion = apiVersion;
-        this.organization = organization;
     }
 
     public LLMProvider() {}
@@ -63,14 +61,6 @@ public class LLMProvider implements Serializable {
     public void setConfigurations(String configurations) {
 
         this.configurations = configurations;
-    }
-
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
     }
 
     public String getId() {
@@ -111,19 +101,5 @@ public class LLMProvider implements Serializable {
 
     public void setApiDefinition(String apiDefinition) {
         this.apiDefinition = apiDefinition;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        LLMProvider that = (LLMProvider) o;
-        return Objects.equals(name, that.name) && Objects.equals(apiVersion, that.apiVersion) &&
-                Objects.equals(organization, that.organization);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, apiVersion, organization);
     }
 }

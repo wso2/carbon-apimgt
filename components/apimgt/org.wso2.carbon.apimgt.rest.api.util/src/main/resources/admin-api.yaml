@@ -1526,7 +1526,12 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/LLMProvider'
+              required:
+                - name
+                - apiVersion
+                - configurations
+                - apiDefinition
+              $ref: '#/components/schemas/LLMProviderRequest'
         required: true
       responses:
         201:
@@ -1567,7 +1572,9 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/LLMProvider'
+              required:
+                - apiDefinition
+              $ref: '#/components/schemas/LLMProviderRequest'
         required: true
       responses:
         200:
@@ -1615,7 +1622,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v4/environments/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
+          "https://127.0.0.1:9443/api/am/admin/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
       operationId: deleteLLMProvider
 
     get:
@@ -1641,7 +1648,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/openapi-definition"'
+          "https://127.0.0.1:9443/api/am/admin/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
       operationId: getLLMProvider
 
   ######################################################
@@ -4114,14 +4121,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
-    LLMProvider:
+    LLMProviderRequest:
       title: LLMProvider
       type: object
       properties:
-        id:
-          type: string
-          readOnly: true
-          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
         name:
           maxLength: 255
           minLength: 1
