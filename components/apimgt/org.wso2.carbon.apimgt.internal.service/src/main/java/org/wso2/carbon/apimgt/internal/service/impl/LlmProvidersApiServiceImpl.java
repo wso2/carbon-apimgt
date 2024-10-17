@@ -43,14 +43,9 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
     @Override
     public Response getLLMProviderById(String llmProviderId, MessageContext messageContext) throws APIManagementException {
-
         APIAdmin admin = new APIAdminImpl();
         LLMProvider llmProvider = admin.getLLMProvider(null, llmProviderId);
-        LLMProviderDTO llmProviderDto = new LLMProviderDTO();
-        llmProviderDto.setId(llmProvider.getId());
-        llmProviderDto.setName(llmProvider.getName());
-        llmProviderDto.setApiVersion(llmProvider.getApiVersion());
-        llmProviderDto.setConfigurations(llmProvider.getConfigurations());
+        LLMProviderDTO llmProviderDto = convertToDTO(llmProvider);
         return Response.ok().entity(llmProviderDto).build();
     }
 
@@ -62,26 +57,32 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @throws APIManagementException If retrieval fails.
      */
     @Override
-    public Response getLLMProviders(String name, String apiVersion, String organization,
-                                    MessageContext messageContext) throws APIManagementException {
-
+    public Response getLLMProviders(String name, String apiVersion, String organization, MessageContext messageContext) throws APIManagementException {
         APIAdmin admin = new APIAdminImpl();
-        List<LLMProvider> LLMProviderList = admin.getLLMProviders(organization, name, apiVersion, null);
+        List<LLMProvider> llmProviderList = admin.getLLMProviders(organization, name, apiVersion, null);
 
-        List<LLMProviderDTO> llmProviderDtoList = LLMProviderList.stream()
-                .map(llmProvider -> {
-                    LLMProviderDTO llmProviderDto = new LLMProviderDTO();
-                    llmProviderDto.setId(llmProvider.getId());
-                    llmProviderDto.setName(llmProvider.getName());
-                    llmProviderDto.setApiVersion(llmProvider.getApiVersion());
-                    llmProviderDto.setConfigurations(llmProvider.getConfigurations());
-                    return llmProviderDto;
-                })
+        List<LLMProviderDTO> llmProviderDtoList = llmProviderList.stream()
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
 
         LLMProviderListDTO llmProviderListDTO = new LLMProviderListDTO();
         llmProviderListDTO.setApis(llmProviderDtoList);
 
         return Response.ok().entity(llmProviderListDTO).build();
+    }
+
+    /**
+     * Helper method to convert LLMProvider to LLMProviderDTO.
+     *
+     * @param llmProvider The LLMProvider object to convert.
+     * @return The corresponding LLMProviderDTO.
+     */
+    private LLMProviderDTO convertToDTO(LLMProvider llmProvider) {
+        LLMProviderDTO llmProviderDto = new LLMProviderDTO();
+        llmProviderDto.setId(llmProvider.getId());
+        llmProviderDto.setName(llmProvider.getName());
+        llmProviderDto.setApiVersion(llmProvider.getApiVersion());
+        llmProviderDto.setConfigurations(llmProvider.getConfigurations());
+        return llmProviderDto;
     }
 }
