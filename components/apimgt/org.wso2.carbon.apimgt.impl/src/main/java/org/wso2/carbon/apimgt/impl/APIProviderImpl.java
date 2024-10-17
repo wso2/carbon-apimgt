@@ -647,7 +647,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             AIConfiguration aiConfiguration = api.getAiConfiguration();
-            addAIConfiguration(api.getUuid(), null, aiConfiguration);
+            addAIConfiguration(api.getUuid(), null, aiConfiguration, api.getOrganization());
         }
     }
 
@@ -6004,7 +6004,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             AIConfiguration aiConfiguration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null,
                     organization);
             if (aiConfiguration != null) {
-                addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), aiConfiguration);
+                addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), aiConfiguration,
+                        organization);
             }
         } catch (APIManagementException e) {
             try {
@@ -6043,18 +6044,69 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Adds AI configuration for an API by generating a unique configuration ID.
+     * Adds AI configuration for the specified API revision. Validates the LLM provider details and
+     * assigns a unique AI configuration ID.
      *
-     * @param uuid            API identifier.
-     * @param revisionUuid    API revision identifier.
-     * @param aiConfiguration AI configuration details.
-     * @throws APIManagementException On failure to add AI configuration.
+     * @param uuid              API UUID
+     * @param revisionUuid      Revision UUID
+     * @param aiConfiguration   AI configuration object containing LLM provider details
+     * @param organization      Organization to which the API belongs
+     * @throws APIManagementException if the LLM provider details are invalid or an error occurs while adding the configuration
      */
-    private void addAIConfiguration(String uuid, String revisionUuid, AIConfiguration aiConfiguration)
+    private void addAIConfiguration(String uuid, String revisionUuid, AIConfiguration aiConfiguration,
+                                    String organization) throws APIManagementException {
+
+        String aiConfigurationId = UUID.randomUUID().toString();
+        String llmProviderId = aiConfiguration.getLlmProviderId();
+
+        if (llmProviderId == null) {
+            llmProviderId = resolveLlmProviderId(aiConfiguration, organization);
+        } else {
+            validateLlmProviderById(llmProviderId, organization);
+        }
+
+        if (llmProviderId != null) {
+            apiMgtDAO.addAIConfiguration(uuid, revisionUuid, llmProviderId, aiConfigurationId);
+        } else {
+            throw new APIManagementException("Invalid AI configuration: LLM provider details missing.");
+        }
+    }
+
+    /**
+     * Resolves the LLM provider ID based on the provider's name and API version.
+     *
+     * @param aiConfiguration AI configuration object containing LLM provider details
+     * @param organization    Organization to which the API belongs
+     * @return Resolved LLM provider ID or null if provider not found
+     * @throws APIManagementException if LLM provider is not found
+     */
+    private String resolveLlmProviderId(AIConfiguration aiConfiguration, String organization)
             throws APIManagementException {
 
-        String aiConfigurationId = java.util.UUID.randomUUID().toString();
-        apiMgtDAO.addAIConfiguration(uuid, revisionUuid, aiConfiguration.getLlmProviderId(), aiConfigurationId);
+        if (aiConfiguration.getLlmProviderName() != null && aiConfiguration.getLlmProviderApiVersion() != null) {
+            LLMProvider provider = apiMgtDAO.getLLMProvider(organization,
+                    aiConfiguration.getLlmProviderName(), aiConfiguration.getLlmProviderApiVersion());
+            if (provider != null) {
+                return provider.getId();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Validates if the provided LLM provider ID exists in the organization.
+     *
+     * @param llmProviderId LLM provider UUID
+     * @param organization  Organization to which the API belongs
+     * @throws APIManagementException if the LLM provider is not found
+     */
+    private void validateLlmProviderById(String llmProviderId, String organization)
+            throws APIManagementException {
+
+        LLMProvider provider = apiMgtDAO.getLLMProvider(organization, llmProviderId);
+        if (provider == null) {
+            throw new APIManagementException("Incorrect LLM Provider UUID: " + llmProviderId);
+        }
     }
 
     /**
