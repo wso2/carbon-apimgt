@@ -5300,18 +5300,47 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    public String getPolicyType(OperationPolicy policy, Map<String, String> apiOperationPolicyIdToClonedPolicyIdMap)
+            throws APIManagementException {
+        String policyType = null;
+        if (policy.getPolicyId() == null) {
+            policyType = ImportExportConstants.POLICY_TYPE_API;
+        } else {
+            // In an api product resource update scenario, when existing policy has been removed from an api,
+            // there's no entry attached to api policy id and apiId in AM_API_OPERATION_POLICY table
+            if (!apiOperationPolicyIdToClonedPolicyIdMap.containsKey(policy.getPolicyId())) {
+                return null;
+            }
+            // check if cloned policy id is null
+            if (apiOperationPolicyIdToClonedPolicyIdMap.get(policy.getPolicyId()) == null) {
+                policyType = ImportExportConstants.POLICY_TYPE_API;
+            } else {
+                policyType = ImportExportConstants.POLICY_TYPE_COMMON;
+            }
+        }
+        return policyType;
+    }
+
+    public String getProductPolicyType(OperationPolicy policy, String apiUUID,
+                                       Map<String, String> apiProductOperationPolicyIdToClonedPolicyIdMap)
+            throws APIManagementException {
+
+        String originatedPolicyId = apiProductOperationPolicyIdToClonedPolicyIdMap.get(policy.getPolicyId());
+        Map<String, String> apiOperationPolicyIdToClonedPolicyIdMap =
+                getClonedAPISpecificOperationPolicyIdsList(apiUUID);
+        policy.setPolicyId(originatedPolicyId);
+        return getPolicyType(policy, apiOperationPolicyIdToClonedPolicyIdMap);
+    }
+
     public API addPolicyTypeFieldToApi(API api) throws APIManagementException {
 
-        List<String> apiOperationPolicyIds = getClonedAPISpecificOperationPolicyIdsList(api.getUuid());
+        Map<String, String> apiOperationPolicyIdToClonedPolicyIdMap = getClonedAPISpecificOperationPolicyIdsList(api.getUuid());
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         for (URITemplate uriTemplate : uriTemplates) {
             List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
             if (!operationPolicies.isEmpty()) {
                 for (OperationPolicy operationPolicy : operationPolicies) {
-                    String policyType = ImportExportConstants.POLICY_TYPE_API;
-                    if (apiOperationPolicyIds.contains(operationPolicy.getPolicyId())) {
-                        policyType = ImportExportConstants.POLICY_TYPE_COMMON;
-                    }
+                    String policyType = getPolicyType(operationPolicy, apiOperationPolicyIdToClonedPolicyIdMap);
                     operationPolicy.setPolicyType(policyType);
                 }
             }
@@ -5321,16 +5350,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiPolicies = api.getApiPolicies();
         if (apiPolicies != null && !apiPolicies.isEmpty()) {
             for (OperationPolicy policy : apiPolicies) {
-                String policyType = ImportExportConstants.POLICY_TYPE_API;
-                if (apiOperationPolicyIds.contains(policy.getPolicyId())) {
-                    policyType = ImportExportConstants.POLICY_TYPE_COMMON;
-                }
+                String policyType = getPolicyType(policy, apiOperationPolicyIdToClonedPolicyIdMap);
                 policy.setPolicyType(policyType);
             }
         }
         api.setApiPolicies(apiPolicies);
 
         return api;
+    }
+
+    public APIProduct addPolicyTypeFieldToApiProduct(APIProduct product) throws APIManagementException {
+
+        Map<String, String> apiProductOperationPolicyIdToClonedPolicyIdMap =
+                getClonedAPISpecificOperationPolicyIdsList(product.getUuid());
+        List<APIProductResource> productResources = product.getProductResources();
+        for (APIProductResource resource : productResources) {
+            URITemplate uriTemplate = resource.getUriTemplate();
+            List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
+            if (!operationPolicies.isEmpty()) {
+                for (OperationPolicy operationPolicy : operationPolicies) {
+                    String policyType = getProductPolicyType(operationPolicy, resource.getApiId(),
+                            apiProductOperationPolicyIdToClonedPolicyIdMap);
+                    operationPolicy.setPolicyType(policyType);
+                }
+            }
+            uriTemplate.setOperationPolicies(operationPolicies);
+            resource.setUriTemplate(uriTemplate);
+        }
+        product.setProductResources(productResources);
+        return product;
     }
 
     @Override
@@ -5555,6 +5603,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (migrationEnabled == null) {
                     populateDefaultVersion(product);
                 }
+                product = addPolicyTypeFieldToApiProduct(product);
                 return product;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
@@ -7286,7 +7335,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getAPISpecificOperationPolicyByPolicyID(policyId, apiUUID, organization, isWithPolicyDefinition);
     }
 
-    public List<String> getClonedAPISpecificOperationPolicyIdsList(String apiUUID)
+    public Map<String, String> getClonedAPISpecificOperationPolicyIdsList(String apiUUID)
             throws APIManagementException {
 
         return apiMgtDAO

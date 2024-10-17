@@ -20911,11 +20911,10 @@ public class ApiMgtDAO {
      * given API.
      *
      * @param apiUUID                UUID of the API
-     * @param organization           Organization name
      * @return operation policy
      * @throws APIManagementException
      */
-    public List<String> getClonedAPISpecificOperationPolicyIdsList(String apiUUID)
+    public Map<String, String> getClonedAPISpecificOperationPolicyIdsList(String apiUUID)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -20927,7 +20926,7 @@ public class ApiMgtDAO {
         return null;
     }
 
-    private List<String> getClonedAPISpecificOperationPolicyIdsList(Connection connection, String apiUUID)
+    private Map<String, String> getClonedAPISpecificOperationPolicyIdsList(Connection connection, String apiUUID)
             throws SQLException, APIManagementException {
 
         String dbQuery;
@@ -20938,17 +20937,17 @@ public class ApiMgtDAO {
         } else {
             dbQuery = SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_LIST_FROM_API_UUID;
         }
-        List<String> policyIdList = null;
+        Map<String, String> policyMap = null;
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
-                    policyIdList = new ArrayList<>();
-                    policyIdList.add(rs.getString("POLICY_UUID"));
+                    policyMap = new HashMap<>();
+                    policyMap.put(rs.getString("POLICY_UUID"), rs.getString("CLONED_POLICY_UUID"));
                 }
             }
         }
-        return policyIdList;
+        return policyMap;
     }
 
     private List<OperationPolicyDefinition> getPolicyDefinitionForPolicyId(Connection connection, String policyId)
