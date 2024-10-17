@@ -77,6 +77,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
+
 /**
  * Global API Manager configuration. This is generally populated from a special XML descriptor
  * file at system startup. Once successfully populated, this class does not allow more parameters
@@ -136,7 +138,7 @@ public class APIManagerConfiguration {
     private static Map<String, String> analyticsMaskProps;
     private TokenValidationDto tokenValidationDto = new TokenValidationDto();
     private boolean enableAiConfiguration;
-    private String hashingAlgorithm = "sha256";
+    private String hashingAlgorithm = SHA_256;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;

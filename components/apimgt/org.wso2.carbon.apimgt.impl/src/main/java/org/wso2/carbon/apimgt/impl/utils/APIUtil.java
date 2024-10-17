@@ -297,6 +297,8 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
+
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
  * and APIConsumer interfaces.
@@ -346,7 +348,7 @@ public final class APIUtil {
     private static Schema tenantConfigJsonSchema;
     private static Schema operationPolicySpecSchema;
     private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
-    private static String hashingAlgorithm = "sha256";
+    private static String hashingAlgorithm = SHA_256;
 
     private APIUtil() {
 
@@ -10512,7 +10514,7 @@ public final class APIUtil {
     public static String generateCodeChallenge(String codeVerifier) throws UnsupportedEncodingException,
             NoSuchAlgorithmException {
         byte[] bytes = codeVerifier.getBytes(APIConstants.US_ASCII);
-        MessageDigest messageDigest = MessageDigest.getInstance(APIConstants.SHA_256);
+        MessageDigest messageDigest = MessageDigest.getInstance(SHA_256);
         messageDigest.update(bytes, 0, bytes.length);
         byte[] digest = messageDigest.digest();
         return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
