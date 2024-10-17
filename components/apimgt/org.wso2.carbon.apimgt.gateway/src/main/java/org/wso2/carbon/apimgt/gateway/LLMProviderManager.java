@@ -72,13 +72,14 @@ public class LLMProviderManager {
      * Fetches and initializes LLM Provider configurations from an internal service.
      * Adds the configurations to the data holder.
      *
+     * @param tenantDomain Tenant domain
      * @throws IOException            If there is an issue invoking the service.
      * @throws APIManagementException If there is an issue processing the response.
      */
-    public void initializeLLMProviderConfigurations() {
+    public void initializeLLMProviderConfigurations(String tenantDomain) {
 
         try {
-            String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT);
+            String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT, tenantDomain);
             JSONObject responseJson = new JSONObject(responseString);
 
             JSONArray llmProviderConfigArray = responseJson.getJSONArray("apis");
@@ -104,9 +105,11 @@ public class LLMProviderManager {
         }
     }
 
-    public String getLLMProviderConfiguration(String providerId) {
+    public String getLLMProviderConfiguration(String providerId, String tenantDomain) {
+
         try {
-            String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT + "/" + providerId);
+            String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT + "/" + providerId,
+                    tenantDomain);
             JSONObject responseJson = new JSONObject(responseString);
             String configurations = responseJson.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
             if (log.isDebugEnabled()) {
@@ -122,12 +125,13 @@ public class LLMProviderManager {
     /**
      * Invokes an internal service at the specified path and returns the response as a string.
      *
-     * @param path The endpoint path to invoke.
+     * @param path         The endpoint path to invoke.
+     * @param tenantDomain Tenant domain
      * @return The response from the service.
      * @throws IOException            If there's an I/O error.
      * @throws APIManagementException If an error occurs during the service call.
      */
-    private String invokeService(String path) throws IOException, APIManagementException {
+    private String invokeService(String path, String tenantDomain) throws IOException, APIManagementException {
 
         String serviceURLStr = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
         HttpGet method = new HttpGet(serviceURLStr + path);
@@ -138,6 +142,7 @@ public class LLMProviderManager {
         String serviceProtocol = serviceURL.getProtocol();
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
                 + new String(credentials, StandardCharsets.UTF_8));
+        method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
         HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
         try (CloseableHttpResponse httpResponse = APIUtil.executeHTTPRequestWithRetries(method, httpClient)) {
             return EntityUtils.toString(httpResponse.getEntity(), UTF8);

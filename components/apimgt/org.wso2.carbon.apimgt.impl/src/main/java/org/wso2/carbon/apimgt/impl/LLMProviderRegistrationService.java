@@ -56,9 +56,6 @@ public class LLMProviderRegistrationService {
 
         Set<String> llmProviderConnectorTypes = llmProviderMap.keySet();
         Set<String> llmProviderServiceConnectorTypes = llmProviderServiceMap.keySet();
-
-        String apiDefinitionFilePath = CarbonUtils.getCarbonHome()
-                + APIConstants.AIAPIConstants.AI_API_DEFINITION_FILE_PATH;
         for (String connectorType : llmProviderConnectorTypes) {
             if (!llmProviderServiceConnectorTypes.contains(connectorType)) {
                 LLMProvider retrievedProvider = apiAdmin

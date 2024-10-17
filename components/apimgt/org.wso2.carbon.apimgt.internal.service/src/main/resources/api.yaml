@@ -693,10 +693,13 @@ paths:
           in: query
           required: false
           type: string
-        - name: organization
-          in: query
-          required: false
+        - name: xWSO2Tenant
+          in: header
+          description: |
+            This is used to specify the tenant domain, where the resource need to be
+                        retrieved from.
           type: string
+          required: true
       responses:
         200:
           description: 'Event Received success'
@@ -720,6 +723,13 @@ paths:
           in: path
           required: true
           type: string
+        - name: xWSO2Tenant
+          in: header
+          description: |
+            This is used to specify the tenant domain, where the resource need to be
+                        retrieved from.
+          type: string
+          required: true
       responses:
         200:
           description: 'Event Received success'
@@ -1806,6 +1816,8 @@ definitions:
       name:
         type: string
       apiVersion:
+        type: string
+      organization:
         type: string
       configurations:
         type: string

@@ -44,8 +44,8 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Event Received success", response = LLMProviderListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response getLLMProviderById(@ApiParam(value = "",required=true) @PathParam("llmProviderId") String llmProviderId) throws APIManagementException{
-        return delegate.getLLMProviderById(llmProviderId, securityContext);
+    public Response getLLMProviderById(@ApiParam(value = "",required=true) @PathParam("llmProviderId") String llmProviderId, @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be             retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.getLLMProviderById(llmProviderId, xWSO2Tenant, securityContext);
     }
 
     @GET
@@ -56,7 +56,7 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Event Received success", response = LLMProviderListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response getLLMProviders( @ApiParam(value = "")  @QueryParam("name") String name,  @ApiParam(value = "")  @QueryParam("apiVersion") String apiVersion,  @ApiParam(value = "")  @QueryParam("organization") String organization) throws APIManagementException{
-        return delegate.getLLMProviders(name, apiVersion, organization, securityContext);
+    public Response getLLMProviders(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be             retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "")  @QueryParam("name") String name,  @ApiParam(value = "")  @QueryParam("apiVersion") String apiVersion) throws APIManagementException{
+        return delegate.getLLMProviders(xWSO2Tenant, name, apiVersion, securityContext);
     }
 }
