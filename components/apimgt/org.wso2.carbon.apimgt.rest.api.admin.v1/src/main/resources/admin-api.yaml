@@ -1874,7 +1874,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/openapi-definition"'
+          "https://127.0.0.1:9443/api/am/admin/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
       operationId: getLLMProvider
 
   ######################################################
