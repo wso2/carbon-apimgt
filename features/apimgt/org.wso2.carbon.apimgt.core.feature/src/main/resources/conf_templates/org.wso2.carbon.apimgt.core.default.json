@@ -204,6 +204,7 @@
   "apim.sync_runtime_artifacts.gateway.enable": true,
   "apim.sync_runtime_artifacts.gateway.enable_on_demand_loading": false,
   "apim.correlation_logs.components": ["http","jdbc","ldap","synapse","method-calls"],
+  "apim.transaction_counter.enable": false,
   "apim.transaction_counter.producer_counting_thread_pool_size":"10",
   "apim.transaction_counter.producer_scheduled_interval":"10",
   "apim.transaction_counter.max_transaction_count_per_record":"20",
