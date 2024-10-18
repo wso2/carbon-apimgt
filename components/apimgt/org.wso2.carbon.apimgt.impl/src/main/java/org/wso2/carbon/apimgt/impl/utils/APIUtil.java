@@ -10962,4 +10962,14 @@ public final class APIUtil {
         System.arraycopy(array2, 0, result, array1.length, array2.length);
         return result;
     }
+
+    /**
+     * This method checks whether the transaction counter feature is enabled.
+     *
+     * @return true if the transaction counter is enabled, false otherwise
+     */
+    public static boolean getTransactionCounterEnable() {
+       return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getTransactionCounterProperties();
+    }
 }

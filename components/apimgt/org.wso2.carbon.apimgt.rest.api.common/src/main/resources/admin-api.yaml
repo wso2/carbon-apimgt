@@ -5047,6 +5047,10 @@ components:
           type: boolean
           description: To determine whether analytics is enabled or not
           example: false
+        transactionCounterEnable:
+          type: boolean
+          description: To determine whether the transaction counter is enabled or not
+          example: false
     ScopeList:
       title: Scope Role Mapping List
       type: object

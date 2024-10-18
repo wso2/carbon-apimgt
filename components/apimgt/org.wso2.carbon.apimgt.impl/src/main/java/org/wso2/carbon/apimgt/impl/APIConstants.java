@@ -3240,4 +3240,10 @@ public final class APIConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
     }
+
+    public static class TransactionCounter {
+
+        public static final String TRANSACTIONCOUNTER = "TransactionCounter";
+        public static final String COUNTER_ENABLED = "Enabled";
+    }
 }
