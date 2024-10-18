@@ -49,6 +49,7 @@ public class APIConstants {
 
     public static class AIAPIConstants {
         public static final String LLM_PROVIDERS = "llmProviders";
+        public static final String LLM_PROVIDER_ID = "llmProviderId";
         public static final String API_KEY_IDENTIFIER_TYPE_HEADER = "HEADER";
         public static final String API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER = "QUERY_PARAMETER";
         public static final String AI_API_REQUEST_METADATA = "AI_API_REQUEST_METADATA";

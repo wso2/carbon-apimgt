@@ -32,6 +32,7 @@ import org.json.JSONException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -273,9 +274,17 @@ public class TemplateBuilderUtil {
                     Collections.emptyMap());
         }
 
-        vtb.addHandler(
-                "org.wso2.carbon.apimgt.gateway.handlers.AiApiHandler"
-                , Collections.emptyMap());
+        if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            Map<String, String> aiProperties = new HashMap<>();
+            try {
+                aiProperties.put(AIAPIConstants.LLM_PROVIDER_ID, api.getAiConfiguration().getLlmProviderId());
+                vtb.addHandler(
+                        "org.wso2.carbon.apimgt.gateway.handlers.AiApiHandler"
+                        , aiProperties);
+            } catch (Exception e) {
+                throw new APIManagementException(e);
+            }
+        }
 
         if (!APIUtil.isStreamingApi(api)) {
             Map<String, String> properties = new HashMap<String, String>();

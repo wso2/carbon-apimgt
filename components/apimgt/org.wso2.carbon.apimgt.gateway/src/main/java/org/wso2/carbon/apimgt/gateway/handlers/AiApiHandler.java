@@ -52,6 +52,7 @@ import java.util.TreeMap;
 public class AiApiHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(AiApiHandler.class);
+    private String llmProviderId;
 
     /**
      * Processes the request flow.
@@ -99,23 +100,11 @@ public class AiApiHandler extends AbstractHandler {
     private boolean processMessage(MessageContext messageContext, boolean isRequest) {
 
         try {
-
-            String path = ApiUtils.getFullRequestPath(messageContext);
-            String tenantDomain = GatewayUtils.getTenantDomain();
-            TreeMap<String, API> selectedAPIS = Utils.getSelectedAPIList(path, tenantDomain);
-            API selectedAPI = selectedAPIS.get(selectedAPIS.firstKey());
-            if (selectedAPI == null) {
-                log.error("No API found for path: " + path + " in tenant domain: " + tenantDomain);
+            if (this.llmProviderId == null) {
+                log.error("No LLM provider ID provided by TemplateBuilderUtil");
                 return true;
             }
-            AIConfiguration aiConfiguration = selectedAPI.getAiConfiguration();
-            if (aiConfiguration == null) {
-                log.debug("No AI configuration for API: " + selectedAPI.getApiId() + " in tenant domain: "
-                        + tenantDomain);
-                return true;
-            }
-            String llmProviderId = aiConfiguration.getLlmProviderId();
-            LLMProviderInfo provider = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
+            LLMProviderInfo provider = DataHolder.getInstance().getLLMProviderConfigurations(this.llmProviderId);
             if (provider == null) {
                 log.error("No LLM provider found for provider ID: " + llmProviderId);
                 return false;
@@ -271,5 +260,14 @@ public class AiApiHandler extends AbstractHandler {
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         return (Map<String, String>) axis2MessageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+    }
+
+    /**
+     * Sets the LLM provider ID.
+     *
+     * @param llmProviderId the LLM provider ID
+     */
+    public void setLlmProviderId(String llmProviderId) {
+        this.llmProviderId = llmProviderId;
     }
 }
