@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
@@ -63,16 +64,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? APIConstants.CHAR_ASTERIX : query;
-        APIAdmin apiAdmin = new APIAdminImpl();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getOrganization(messageContext);
-        Map<String, Object> result = apiAdmin
-                .searchPaginatedApis(query, organization, offset, limit);
+        Map<String, Object> result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit, RestApiConstants.DEFAULT_SORT_BY, RestApiConstants.DEFAULT_SORT_ORDER);
         List<Object> apis = SearchApiServiceImplUtil.getAPIListFromAPISearchResult(result);
         List<ApiResultDTO> allMatchedResults = getAllMatchedResults(apis);
         resultListDTO.setApis(allMatchedResults);
         resultListDTO.setCount(allMatchedResults.size());
-        APIInfoMappingUtil.setPaginationParams(resultListDTO, limit, offset, (Integer) result
-                .get(APIConstants.ADMIN_API_LIST_RESPONSE_PARAMS_TOTAL));
         return Response.ok().entity(resultListDTO).build();
     }
 
