@@ -207,8 +207,7 @@ public class AiApiHandler extends AbstractHandler {
             return axis2MessageContext.getEnvelope().getBody().getFirstElement().toString();
         } else if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
             if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
-                String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
-                return XML.toJSONObject(jsonPayload).toString();
+                return JsonUtil.jsonPayloadToString(axis2MessageContext);
             }
             return null;
         } else if (normalizedContentType.contains(MediaType.TEXT_PLAIN)) {
