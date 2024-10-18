@@ -19,39 +19,40 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.wso2.carbon.apimgt.api.APIAdmin;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.internal.service.*;
-import org.wso2.carbon.apimgt.internal.service.dto.*;
-
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.wso2.carbon.apimgt.internal.service.LlmProvidersApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-
-import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderListDTO;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import java.io.InputStream;
-import java.util.stream.Collectors;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
+    /**
+     * Retrieves LLM provider details for the given ID.
+     *
+     * @param llmProviderId  LLM provider UUID
+     * @param xWSO2Tenant    Tenant identifier
+     * @param messageContext Message context of the API call
+     * @return Response containing the LLM provider details in DTO format
+     * @throws APIManagementException if an error occurs while retrieving the LLM provider
+     */
     @Override
-    public Response getLLMProviderById(String llmProviderId, MessageContext messageContext) throws APIManagementException {
+    public Response getLLMProviderById(String llmProviderId, String xWSO2Tenant, MessageContext messageContext)
+            throws APIManagementException {
 
         APIAdmin admin = new APIAdminImpl();
-        LLMProvider llmProvider = admin.getLLMProvider(null, llmProviderId);
-        LLMProviderDTO llmProviderDto = new LLMProviderDTO();
-        llmProviderDto.setId(llmProvider.getId());
-        llmProviderDto.setName(llmProvider.getName());
-        llmProviderDto.setApiVersion(llmProvider.getApiVersion());
-        llmProviderDto.setOrganization(llmProvider.getOrganization());
-        llmProviderDto.setConfigurations(llmProvider.getConfigurations());
+        String organization = getOrganizationXWSO2Tenant(xWSO2Tenant);
+        LLMProvider llmProvider = admin.getLLMProvider(organization, llmProviderId);
+        LLMProviderDTO llmProviderDto = convertToDTO(llmProvider);
         return Response.ok().entity(llmProviderDto).build();
     }
 
@@ -63,27 +64,44 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @throws APIManagementException If retrieval fails.
      */
     @Override
-    public Response getLLMProviders(String name, String apiVersion, String organization,
+    public Response getLLMProviders(String xWSO2Tenant, String name, String apiVersion,
                                     MessageContext messageContext) throws APIManagementException {
 
         APIAdmin admin = new APIAdminImpl();
-        List<LLMProvider> LLMProviderList = admin.getLLMProviders(organization, name, apiVersion, null);
+        String organization = getOrganizationXWSO2Tenant(xWSO2Tenant);
+        List<LLMProvider> llmProviderList = admin.getLLMProviders(organization, name,
+                apiVersion, null);
 
-        List<LLMProviderDTO> llmProviderDtoList = LLMProviderList.stream()
-                .map(llmProvider -> {
-                    LLMProviderDTO llmProviderDto = new LLMProviderDTO();
-                    llmProviderDto.setId(llmProvider.getId());
-                    llmProviderDto.setName(llmProvider.getName());
-                    llmProviderDto.setApiVersion(llmProvider.getApiVersion());
-                    llmProviderDto.setOrganization(llmProvider.getOrganization());
-                    llmProviderDto.setConfigurations(llmProvider.getConfigurations());
-                    return llmProviderDto;
-                })
-                .collect(Collectors.toList());
+        List<LLMProviderDTO> llmProviderListDTO = new ArrayList<>();
+        for (LLMProvider provider : llmProviderList) {
+            llmProviderListDTO.add(convertToDTO(provider));
+        }
+        return Response.ok().entity(new LLMProviderListDTO().llmProviders(llmProviderListDTO)).build();
+    }
 
-        LLMProviderListDTO llmProviderListDTO = new LLMProviderListDTO();
-        llmProviderListDTO.setApis(llmProviderDtoList);
+    /**
+     * Helper method to convert LLMProvider to LLMProviderDTO.
+     *
+     * @param llmProvider The LLMProvider object to convert.
+     * @return The corresponding LLMProviderDTO.
+     */
+    private LLMProviderDTO convertToDTO(LLMProvider llmProvider) {
 
-        return Response.ok().entity(llmProviderListDTO).build();
+        LLMProviderDTO llmProviderDto = new LLMProviderDTO();
+        llmProviderDto.setId(llmProvider.getId());
+        llmProviderDto.setName(llmProvider.getName());
+        llmProviderDto.setOrganization(llmProvider.getOrganization());
+        llmProviderDto.setApiVersion(llmProvider.getApiVersion());
+        llmProviderDto.setConfigurations(llmProvider.getConfigurations());
+        return llmProviderDto;
+    }
+
+    private String getOrganizationXWSO2Tenant(String xWSO2Tenant) {
+
+        return (xWSO2Tenant == null)
+                ? MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                : (!APIConstants.AIAPIConstants.LLM_PROVIDER_TENANT_ALL.equals(xWSO2Tenant))
+                ? xWSO2Tenant
+                : null;
     }
 }

@@ -48,16 +48,17 @@ public class APIConstants {
     public static final String ENDPOINT_CONFIG_SESSION_TIMEOUT = "sessionTimeOut";
 
     public static class AIAPIConstants {
-        public static final String API_KEY_IDENTIFIER_TYPE = "API_KEY_IDENTIFIER_TYPE";
+        public static final String LLM_PROVIDERS = "llmProviders";
+        public static final String LLM_PROVIDER_ID = "llmProviderId";
         public static final String API_KEY_IDENTIFIER_TYPE_HEADER = "HEADER";
         public static final String API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER = "QUERY_PARAMETER";
         public static final String AI_API_REQUEST_METADATA = "AI_API_REQUEST_METADATA";
         public static final String AI_API_RESPONSE_METADATA = "AI_API_RESPONSE_METADATA";
         public static final String INPUT_SOURCE_PAYLOAD = "payload";
         public static final String CONNECTOR_TYPE = "connectorType";
-        public static final String LLM_PROVIDER_ID = "id";
-        public static final String LLM_PROVIDER_NAME = "name";
-        public static final String LLM_PROVIDER_API_VERSION = "apiVersion";
+        public static final String ID = "id";
+        public static final String NAME = "name";
+        public static final String API_VERSION = "apiVersion";
         public static final String LLM_PROVIDER_CONFIGURATIONS = "configurations";
         public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
         public static final String CONFIGURATIONS = "configurations";
@@ -74,7 +75,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_OPENAI_CONNECTOR = "openAi_1.0.0";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_API_DEFINITION_FILE_NAME = "openai_api.yaml";
-        public static final String LLM_PROVIDER_SERVICE_OPENAI_DESCRIPTION = "New OpenAI service";
+        public static final String LLM_PROVIDER_SERVICE_OPENAI_DESCRIPTION = "OpenAI service";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_NAME = "MistralAI";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_VERSION = "1.0.0";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_CONNECTOR = "mistralAi_1.0.0";
@@ -93,5 +94,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT = "$.usage.total_tokens";
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
         public static final String NULL = "null";
+        public static final String LLM_PROVIDER = "LLM_PROVIDER";
+        public static final String LLM_PROVIDER_TENANT_ALL = "ALL";
     }
 }

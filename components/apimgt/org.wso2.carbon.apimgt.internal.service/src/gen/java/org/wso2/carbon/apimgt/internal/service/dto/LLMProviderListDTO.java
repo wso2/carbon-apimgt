@@ -19,23 +19,23 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class LLMProviderListDTO   {
   
-    private List<LLMProviderDTO> apis = new ArrayList<>();
+    private List<LLMProviderDTO> llmProviders = new ArrayList<>();
 
   /**
    **/
-  public LLMProviderListDTO apis(List<LLMProviderDTO> apis) {
-    this.apis = apis;
+  public LLMProviderListDTO llmProviders(List<LLMProviderDTO> llmProviders) {
+    this.llmProviders = llmProviders;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("apis")
-  public List<LLMProviderDTO> getApis() {
-    return apis;
+  @JsonProperty("llmProviders")
+  public List<LLMProviderDTO> getLlmProviders() {
+    return llmProviders;
   }
-  public void setApis(List<LLMProviderDTO> apis) {
-    this.apis = apis;
+  public void setLlmProviders(List<LLMProviderDTO> llmProviders) {
+    this.llmProviders = llmProviders;
   }
 
 
@@ -48,12 +48,12 @@ public class LLMProviderListDTO   {
       return false;
     }
     LLMProviderListDTO llMProviderList = (LLMProviderListDTO) o;
-    return Objects.equals(apis, llMProviderList.apis);
+    return Objects.equals(llmProviders, llMProviderList.llmProviders);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apis);
+    return Objects.hash(llmProviders);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class LLMProviderListDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class LLMProviderListDTO {\n");
     
-    sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
+    sb.append("    llmProviders: ").append(toIndentedString(llmProviders)).append("\n");
     sb.append("}");
     return sb.toString();
   }

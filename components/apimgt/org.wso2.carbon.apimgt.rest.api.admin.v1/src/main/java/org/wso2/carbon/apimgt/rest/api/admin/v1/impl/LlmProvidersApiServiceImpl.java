@@ -53,38 +53,46 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
     private static final Log log = LogFactory.getLog(LlmProvidersApiServiceImpl.class);
 
     /**
-     * Adds a new LLM Provider.
+     * Adds a new LLMProvider to the system and returns a response indicating the result.
      *
-     * @return Response containing the created LLM Provider or an error message.
-     * @throws APIManagementException If an error occurs while adding the provider.
+     * @param name                     The name of the LLMProvider.
+     * @param apiVersion               The API version of the LLMProvider.
+     * @param description              The description of the LLMProvider.
+     * @param configurations           The configurations for the LLMProvider.
+     * @param apiDefinitionInputStream InputStream containing the API definition.
+     * @param apiDefinitionDetail      Attachment with additional details for the API definition.
+     * @param messageContext           The MessageContext for the request.
+     * @return Response indicating success or failure of the LLMProvider creation.
+     * @throws APIManagementException If an error occurs while adding the LLMProvider.
      */
     @Override
-    public Response addLLMProvider(String id, String name, String apiVersion, String description,
+    public Response addLLMProvider(String name, String apiVersion, String description,
                                    String configurations, InputStream apiDefinitionInputStream,
-                                   Attachment apiDefinitionDetail, MessageContext messageContext) throws APIManagementException {
+                                   Attachment apiDefinitionDetail, MessageContext messageContext)
+            throws APIManagementException {
 
-        APIAdmin apiAdmin = new APIAdminImpl();
         try {
-            LLMProvider provider = new LLMProvider();
-            provider.setName(name);
-            provider.setApiVersion(apiVersion);
-            provider.setOrganization(RestApiUtil.getValidatedOrganization(messageContext));
-            provider.setDescription(description);
-            provider.setBuiltInSupport(false);
-            provider.setConfigurations(configurations);
-            if (apiDefinitionInputStream != null) {
-                String apiDefinition = IOUtils.toString(apiDefinitionInputStream, StandardCharsets.UTF_8);
-                if (StringUtils.isNotEmpty(apiDefinition)
-                        && !StringUtils.equals(
-                                org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.NULL, apiDefinition)) {
-                    provider.setApiDefinition(apiDefinition);
-                }
+            LLMProvider provider = buildLLMProvider(name, apiVersion, description, configurations,
+                    apiDefinitionInputStream);
+            if (provider == null) {
+                log.warn("Invalid provider configurations");
+                return Response.status(Response.Status.BAD_REQUEST).build();
             }
-            LLMProvider result = apiAdmin.addLLMProvider(provider);
-            if (result != null) {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIAdmin apiAdmin = new APIAdminImpl();
+            LLMProvider addedLLMProvider = apiAdmin.addLLMProvider(organization, provider);
+            if (addedLLMProvider != null) {
                 LLMProviderResponseDTO llmProviderResponseDTO =
-                        LLMProviderMappingUtil.fromProviderToProviderResponseDTO(result);
-                URI location = new URI(RestApiConstants.RESOURCE_PATH_LLM_PROVIDER + "/" + result.getId());
+                        LLMProviderMappingUtil.fromProviderToProviderResponseDTO(addedLLMProvider);
+                URI location = new URI(RestApiConstants.RESOURCE_PATH_LLM_PROVIDER + "/"
+                        + addedLLMProvider.getId());
+                String info = "{'id':'" + addedLLMProvider.getId() + "'}";
+                APIUtil.logAuditMessage(
+                        org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER,
+                        info,
+                        APIConstants.AuditLogConstants.UPDATED,
+                        RestApiCommonUtil.getLoggedInUsername()
+                );
                 return Response.created(location).entity(llmProviderResponseDTO).build();
             } else {
                 return Response.status(Response.Status.NO_CONTENT).build();
@@ -99,6 +107,36 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
     }
 
     /**
+     * Builds and returns a new LLMProvider object with the given details.
+     *
+     * @param name                     The name of the LLMProvider.
+     * @param apiVersion               The API version of the LLMProvider.
+     * @param description              The description of the LLMProvider.
+     * @param configurations           The configurations for the LLMProvider.
+     * @param apiDefinitionInputStream InputStream containing the API definition, if available.
+     * @return A new LLMProvider object populated with the provided data.
+     * @throws IOException If an error occurs while reading the API definition from the InputStream.
+     */
+    private LLMProvider buildLLMProvider(String name, String apiVersion, String description,
+                                         String configurations, InputStream apiDefinitionInputStream)
+            throws IOException {
+
+        String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
+        if (apiDefinition == null) {
+            return null;
+        }
+        LLMProvider provider = new LLMProvider();
+        provider.setName(name);
+        provider.setApiVersion(apiVersion);
+        provider.setDescription(description);
+        provider.setBuiltInSupport(false);
+        provider.setConfigurations(configurations);
+        provider.setApiDefinition(apiDefinition);
+
+        return provider;
+    }
+
+    /**
      * Deletes a LLM provider by its ID.
      *
      * @param llmProviderId  The ID of the LLM provider to be deleted.
@@ -107,27 +145,28 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @throws APIManagementException If an error occurs while deleting the LLM provider.
      */
     @Override
-    public Response deleteLLMProvider(String llmProviderId, MessageContext messageContext) throws APIManagementException {
+    public Response deleteLLMProvider(String llmProviderId, MessageContext messageContext)
+            throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        try {
-            LLMProvider provider = apiAdmin.deleteLLMProvider(organization, llmProviderId, false);
-            if (provider != null) {
-                String info = String.format("{\"id\":\"%s\"}", llmProviderId);
-                APIUtil.logAuditMessage(
-                        APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS,
-                        info,
-                        APIConstants.AuditLogConstants.DELETED,
-                        RestApiCommonUtil.getLoggedInUsername()
-                );
-                return Response.ok().build();
-            } else {
-                return Response.status(Response.Status.NO_CONTENT).build();
-            }
-        } catch (APIManagementException e) {
-            log.warn("Error while deleting LLM Provider");
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        LLMProvider retrievedProvider = apiAdmin.getLLMProvider(organization, llmProviderId);
+        if (retrievedProvider == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        String deletedLLMProviderId = apiAdmin
+                .deleteLLMProvider(organization, retrievedProvider, false);
+        if (deletedLLMProviderId != null) {
+            String info = String.format("{\"id\":\"%s\"}", llmProviderId);
+            APIUtil.logAuditMessage(
+                    org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER,
+                    info,
+                    APIConstants.AuditLogConstants.DELETED,
+                    RestApiCommonUtil.getLoggedInUsername()
+            );
+            return Response.ok().build();
+        } else {
+            return Response.status(Response.Status.NO_CONTENT).build();
         }
     }
 
@@ -143,74 +182,125 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        try {
-            List<LLMProvider> LLMProviderList = apiAdmin.getLLMProviders(organization, null, null, null);
-            LLMProviderSummaryResponseListDTO providerListDTO =
-                    LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LLMProviderList);
-            return Response.ok().entity(providerListDTO).build();
-        } catch (APIManagementException e) {
-            log.warn("Error while trying to retrieve LLM Providers");
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
+        List<LLMProvider> LLMProviderList = apiAdmin.getLLMProviders(
+                organization, null, null, null);
+        LLMProviderSummaryResponseListDTO providerListDTO =
+                LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LLMProviderList);
+        return Response.ok().entity(providerListDTO).build();
     }
 
     /**
      * Updates an existing LLM Provider.
      *
-     * @param llmProviderId The ID of the LLM Provider to update.
-     * @param id The ID of the provider (unused in logic).
-     * @param name The name of the provider (unused in logic).
-     * @param apiVersion The API version of the provider (unused in logic).
-     * @param description The description of the provider.
-     * @param configurations The configurations of the provider.
+     * @param llmProviderId            The ID of the LLM Provider to update.
+     * @param name                     The name of the provider (unused in logic).
+     * @param apiVersion               The API version of the provider (unused in logic).
+     * @param description              The description of the provider.
+     * @param configurations           The configurations of the provider.
      * @param apiDefinitionInputStream The InputStream for the API definition.
-     * @param apiDefinitionDetail The attachment containing API definition details.
-     * @param messageContext The message context for the request.
+     * @param apiDefinitionDetail      The attachment containing API definition details.
+     * @param messageContext           The message context for the request.
      * @return The response with the updated LLM Provider or an error message.
      * @throws APIManagementException If an error occurs while updating the provider.
      */
     @Override
-    public Response updateLLMProvider(String llmProviderId, String id, String name, String apiVersion,
-                                      String description, String configurations, InputStream apiDefinitionInputStream
-            , Attachment apiDefinitionDetail, MessageContext messageContext) throws APIManagementException {
+    public Response updateLLMProvider(String llmProviderId, String name, String apiVersion,
+                                      String description, String configurations, InputStream apiDefinitionInputStream,
+                                      Attachment apiDefinitionDetail, MessageContext messageContext)
+            throws APIManagementException {
 
-        APIAdmin apiAdmin = new APIAdminImpl();
         try {
-            LLMProvider provider = new LLMProvider();
-            provider.setId(llmProviderId);
-            provider.setDescription(description);
-            if (apiDefinitionInputStream != null) {
-                String apiDefinition = IOUtils.toString(apiDefinitionInputStream, StandardCharsets.UTF_8);
-                if (StringUtils.isNotEmpty(apiDefinition)
-                        && !StringUtils.equals(
-                        org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.NULL, apiDefinition)) {
-                    provider.setApiDefinition(apiDefinition);
-                }
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIAdmin apiAdmin = new APIAdminImpl();
+            LLMProvider retrievedProvider = apiAdmin.getLLMProvider(organization, llmProviderId);
+
+            LLMProvider provider = buildUpdatedLLMProvider(retrievedProvider, llmProviderId, description,
+                    configurations, apiDefinitionInputStream);
+
+            if (provider == null) {
+                log.warn("Invalid provider configurations");
+                return Response.status(Response.Status.BAD_REQUEST).build();
             }
-            provider.setOrganization(RestApiUtil.getValidatedOrganization(messageContext));
-            provider.setConfigurations(configurations);
-            LLMProvider result = apiAdmin.updateLLMProvider(provider);
-            if (result != null) {
+
+            LLMProvider updatedProvider = apiAdmin.updateLLMProvider(organization, provider);
+
+            if (updatedProvider != null) {
                 LLMProviderResponseDTO llmProviderResponseDTO =
-                        LLMProviderMappingUtil.fromProviderToProviderResponseDTO(result);
-                URI location = new URI(RestApiConstants.RESOURCE_PATH_LLM_PROVIDER + "/" + result.getId());
+                        LLMProviderMappingUtil.fromProviderToProviderResponseDTO(updatedProvider);
+                URI location = new URI(
+                        RestApiConstants.RESOURCE_PATH_LLM_PROVIDER + "/" + updatedProvider.getId());
                 String info = "{'id':'" + llmProviderId + "'}";
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, info,
-                        APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
+                APIUtil.logAuditMessage(
+                        org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER,
+                        info,
+                        APIConstants.AuditLogConstants.UPDATED,
+                        RestApiCommonUtil.getLoggedInUsername()
+                );
                 return Response.ok(location).entity(llmProviderResponseDTO).build();
-            } else {
-                return Response.status(Response.Status.NO_CONTENT).build();
             }
+            return Response.status(Response.Status.NO_CONTENT).build();
+
         } catch (IOException e) {
-            log.warn("Error occurred trying to read api definition file");
+            log.warn("Error occurred while reading the API definition file", e);
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (URISyntaxException e) {
-            log.warn("Error occurred while creating URI for new LLM Provider");
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (APIManagementException e) {
-            log.warn("Error occurred while update LLM Provider");
+            log.warn("Error occurred while creating URI for new LLM Provider", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    /**
+     * Builds and returns an updated LLMProvider based on the retrieved provider details.
+     *
+     * @param retrievedProvider        The existing LLMProvider to update.
+     * @param llmProviderId            The ID of the LLMProvider.
+     * @param description              The new description to update, if provided.
+     * @param configurations           The new configurations to update, if provided.
+     * @param apiDefinitionInputStream InputStream containing the updated API definition, if any.
+     * @return An updated LLMProvider object with the modified or retained properties.
+     * @throws IOException If an error occurs while reading the API definition from the InputStream.
+     */
+    private LLMProvider buildUpdatedLLMProvider(LLMProvider retrievedProvider, String llmProviderId,
+                                                String description, String configurations,
+                                                InputStream apiDefinitionInputStream) throws IOException {
+
+        LLMProvider provider = new LLMProvider();
+        provider.setId(llmProviderId);
+        provider.setName(retrievedProvider.getName());
+        provider.setApiVersion(retrievedProvider.getApiVersion());
+        provider.setBuiltInSupport(retrievedProvider.isBuiltInSupport());
+        String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
+        boolean isBuiltIn = retrievedProvider.isBuiltInSupport();
+
+        if (isBuiltIn && apiDefinition == null) {
+            return null;
+        }
+
+        provider.setApiDefinition(apiDefinition != null ? apiDefinition : retrievedProvider.getApiDefinition());
+        provider.setDescription(isBuiltIn ? retrievedProvider.getDescription() :
+                (description != null ? description : retrievedProvider.getDescription()));
+        provider.setConfigurations(isBuiltIn ? retrievedProvider.getConfigurations() :
+                (configurations != null ? configurations : retrievedProvider.getConfigurations()));
+
+        return provider;
+    }
+
+    /**
+     * Reads the API definition from an InputStream and returns it as a String.
+     *
+     * @param apiDefinitionInputStream InputStream containing the API definition.
+     * @return A non-empty API definition String if valid; null otherwise.
+     * @throws IOException If an error occurs while reading from the InputStream.
+     */
+    private String getApiDefinitionFromStream(InputStream apiDefinitionInputStream) throws IOException {
+
+        if (apiDefinitionInputStream == null) {
+            return null;
+        }
+        String apiDefinition = IOUtils.toString(apiDefinitionInputStream, StandardCharsets.UTF_8);
+        return StringUtils.isNotEmpty(apiDefinition) &&
+                !StringUtils.equals(org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.NULL, apiDefinition)
+                ? apiDefinition : null;
     }
 
     /**
@@ -222,18 +312,14 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @throws APIManagementException If an error occurs while retrieving the LLM provider.
      */
     @Override
-    public Response getLLMProvider(String llmProviderId, MessageContext messageContext) throws APIManagementException {
+    public Response getLLMProvider(String llmProviderId, MessageContext messageContext)
+            throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        try {
-            LLMProviderResponseDTO result =
-                    LLMProviderMappingUtil.fromProviderToProviderResponseDTO(apiAdmin.getLLMProvider(organization,
-                            llmProviderId));
-            return Response.ok().entity(result).build();
-        } catch (APIManagementException e) {
-            log.warn("Error while retrieving LLM Provider");
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
+        LLMProviderResponseDTO result =
+                LLMProviderMappingUtil.fromProviderToProviderResponseDTO(apiAdmin.getLLMProvider(organization,
+                        llmProviderId));
+        return Response.ok().entity(result).build();
     }
 }

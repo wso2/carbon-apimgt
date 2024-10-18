@@ -8526,7 +8526,7 @@ paths:
             "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers"'
       operationId: getLLMProviders
 
-  /llm-providers/api-definition:
+  /llm-providers/{llmProviderId}/api-definition:
     get:
       tags:
         - LLMProvider
@@ -8534,13 +8534,8 @@ paths:
       description: |
         Get LLM Provider's API Definition
       parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: apiVersion
-          in: query
+        - name: llmProviderId
+          in: path
           required: true
           schema:
             type: string
@@ -8559,10 +8554,10 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/api-definition?name=OpenAI&apiVersion=1.0.0"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/api-definition"'
       operationId: getLLMProviderApiDefinition
 
-  /llm-providers/endpoint-configuration:
+  /llm-providers/{llmProviderId}/endpoint-configuration:
     get:
       tags:
         - LLMProvider
@@ -8570,13 +8565,8 @@ paths:
       description: |
         Get LLM provider's endpoint security configurations
       parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: apiVersion
-          in: query
+        - name: llmProviderId
+          in: path
           required: true
           schema:
             type: string
@@ -8595,7 +8585,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/endpoint-configuration?name=OpenAI&apiVersion=1.0.0"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/endpoint-configuration"'
       operationId: getLLMProviderEndpointConfiguration
 
   ######################################################
@@ -8631,7 +8621,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/openapi-definition"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
       operationId: getLLMProvider
 
   /operation-policies:
@@ -10070,12 +10060,6 @@ components:
             - SSE
             - WEBHOOK
             - ASYNC
-        subtype:
-          type: string
-          description: Subtype of the API.
-          default: DEFAULT
-          example: AIAPI
-          readOnly: true
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -10399,13 +10383,19 @@ components:
             - INLINE
             - ENDPOINT
             - MOCKED_OAS
-        aiConfiguration:
+        subtypeConfiguration:
           type: object
+          description: Configuration settings for the API subtype.
           properties:
-            llmProviderName:
+            subtype:
               type: string
-            llmProviderApiVersion:
-              type: string
+              description: The designated name of the API subtype.
+              default: DEFAULT
+              example: AIAPI
+              readOnly: true
+            configuration:
+              type: object
+              description: Specific configuration properties related to the API subtype.
         scopes:
           type: array
           items:
