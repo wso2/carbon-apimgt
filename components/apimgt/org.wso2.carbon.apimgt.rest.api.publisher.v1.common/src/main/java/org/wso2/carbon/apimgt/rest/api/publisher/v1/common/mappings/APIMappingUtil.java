@@ -477,7 +477,8 @@ public class APIMappingUtil {
             model.setAsyncTransportProtocols(asyncTransports);
         }
         if (dto.getSubtypeConfiguration() != null && dto.getSubtypeConfiguration().getSubtype() != null
-                && APIConstants.API_SUBTYPE_AI_API.equals(dto.getSubtypeConfiguration().getSubtype())) {
+                && APIConstants.API_SUBTYPE_AI_API.equals(dto.getSubtypeConfiguration().getSubtype())
+                && dto.getSubtypeConfiguration().getConfiguration() != null) {
             model.setSubtype(APIConstants.API_SUBTYPE_AI_API);
             model.setAiConfiguration(new Gson().fromJson(dto.getSubtypeConfiguration().getConfiguration().toString(),
                     AIConfiguration.class));

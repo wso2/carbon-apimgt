@@ -1596,7 +1596,8 @@ public class PublisherCommonUtils {
         apiToAdd.setOrganization(organization);
         apiToAdd.setGatewayType(body.getGatewayType());
         if (body.getSubtypeConfiguration() != null && body.getSubtypeConfiguration().getSubtype() != null
-                && APIConstants.API_SUBTYPE_AI_API.equals(body.getSubtypeConfiguration().getSubtype())) {
+                && APIConstants.API_SUBTYPE_AI_API.equals(body.getSubtypeConfiguration().getSubtype())
+                && body.getSubtypeConfiguration().getConfiguration() != null) {
             apiToAdd.setAiConfiguration(new Gson().fromJson(
                     body.getSubtypeConfiguration().getConfiguration().toString(), AIConfiguration.class));
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_AI_API);
