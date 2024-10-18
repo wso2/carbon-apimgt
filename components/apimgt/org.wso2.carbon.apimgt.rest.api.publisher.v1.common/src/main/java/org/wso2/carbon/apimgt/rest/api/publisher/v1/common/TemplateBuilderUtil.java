@@ -279,7 +279,7 @@ public class TemplateBuilderUtil {
             try {
                 aiProperties.put(AIAPIConstants.LLM_PROVIDER_ID, api.getAiConfiguration().getLlmProviderId());
                 vtb.addHandler(
-                        "org.wso2.carbon.apimgt.gateway.handlers.AiApiHandler"
+                        "org.wso2.carbon.apimgt.gateway.handlers.AIAPIHandler"
                         , aiProperties);
             } catch (Exception e) {
                 throw new APIManagementException(e);
