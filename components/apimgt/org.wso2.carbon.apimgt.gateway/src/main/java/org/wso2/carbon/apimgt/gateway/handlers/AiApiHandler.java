@@ -16,11 +16,11 @@
 package org.wso2.carbon.apimgt.gateway.handlers;
 
 import com.google.common.net.HttpHeaders;
-import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
-import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -38,13 +38,10 @@ import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import org.wso2.carbon.apimgt.api.LLMProviderMetadata;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
-import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.core.util.CryptoUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -55,7 +52,6 @@ import java.util.TreeMap;
 public class AiApiHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(AiApiHandler.class);
-    private static final String JSON_OBJECT = "</jsonObject>";
 
     /**
      * Processes the request flow.
@@ -119,14 +115,11 @@ public class AiApiHandler extends AbstractHandler {
                 return true;
             }
             String llmProviderId = aiConfiguration.getLlmProviderId();
-            LLMProvider provider = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
+            LLMProviderInfo provider = DataHolder.getInstance().getLLMProviderConfigurations(llmProviderId);
             if (provider == null) {
                 log.error("No LLM provider found for provider ID: " + llmProviderId);
                 return false;
             }
-            String config = provider.getConfigurations();
-            LLMProviderConfiguration providerConfiguration = new Gson().fromJson(config,
-                    LLMProviderConfiguration.class);
             if (isRequest) {
                 Map<String, String> transportHeaders =
                         (Map<String, String>) ((Axis2MessageContext) messageContext)
@@ -134,6 +127,7 @@ public class AiApiHandler extends AbstractHandler {
                                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                 transportHeaders.remove(HttpHeaders.ACCEPT_ENCODING);
             }
+            LLMProviderConfiguration providerConfiguration = provider.getConfigurations();
             LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
                     .getLLMProviderService(providerConfiguration.getConnectorType());
             if (llmProviderService == null) {
@@ -161,28 +155,13 @@ public class AiApiHandler extends AbstractHandler {
                     metadataMap);
             return true;
         } catch (Exception e) {
-            if (e instanceof CryptoException) {
-                log.error("Error occurred decrypting API Key.", e);
-            } else if (e instanceof APIManagementException) {
+            if (e instanceof APIManagementException) {
                 log.error("Error occurred while extracting metadata.", e);
             } else if (e instanceof XMLStreamException || e instanceof IOException) {
                 log.error("Error occurred while reading payload.", e);
-            } else if (e instanceof URISyntaxException) {
-                log.error("Error occurred while adding endpoint security.", e);
             }
             return false;
         }
-    }
-
-    /**
-     * Decrypts the secret value.
-     *
-     * @param cipherText the encrypted value
-     * @return decrypted value
-     */
-    private String decryptSecret(String cipherText) throws CryptoException {
-
-        return new String(CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(cipherText));
     }
 
     /**
@@ -227,9 +206,11 @@ public class AiApiHandler extends AbstractHandler {
                 contains(MediaType.TEXT_XML)) {
             return axis2MessageContext.getEnvelope().getBody().getFirstElement().toString();
         } else if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
-            String jsonString = axis2MessageContext.getEnvelope().getBody().getFirstElement().toString();
-            jsonString = jsonString.substring(jsonString.indexOf(">") + 1, jsonString.lastIndexOf(JSON_OBJECT));
-            return XML.toJSONObject(jsonString).toString();
+            if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+                String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
+                return XML.toJSONObject(jsonPayload).toString();
+            }
+            return null;
         } else if (normalizedContentType.contains(MediaType.TEXT_PLAIN)) {
             return axis2MessageContext.getEnvelope().getBody().getFirstElement().getText();
         }

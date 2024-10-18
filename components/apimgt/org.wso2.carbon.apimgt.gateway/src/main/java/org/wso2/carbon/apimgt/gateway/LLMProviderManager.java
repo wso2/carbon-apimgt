@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
+import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +29,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
+import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -42,9 +44,14 @@ import java.nio.charset.StandardCharsets;
 
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.UTF8;
 
+/**
+ * Manages the retrieval and initialization of Large Language Model (LLM) provider configurations.
+ * This class invokes internal services to fetch provider data, processes JSON responses,
+ * and stores configurations in the {@code DataHolder}.
+ *
+ */
 public class LLMProviderManager {
 
-    private final EventHubConfigurationDto eventHubConfigurationDto;
     private static final LLMProviderManager llmProviderManager = new LLMProviderManager();
 
     private static final Log log = LogFactory.getLog(LLMProviderManager.class);
@@ -60,11 +67,11 @@ public class LLMProviderManager {
     }
 
     /**
-     * Initializes LlmProviderManager with the EventHub configuration.
+     * @return EventHub configuration.
      */
-    public LLMProviderManager() {
+    private EventHubConfigurationDto getEventHubConfiguration() {
 
-        this.eventHubConfigurationDto = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+        return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
                 .getAPIManagerConfiguration().getEventHubConfigurationDto();
     }
 
@@ -82,44 +89,24 @@ public class LLMProviderManager {
             String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT, tenantDomain);
             JSONObject responseJson = new JSONObject(responseString);
 
-            JSONArray llmProviderConfigArray = responseJson.getJSONArray("apis");
+            JSONArray llmProviderConfigArray = responseJson.getJSONArray(AIAPIConstants.LLM_PROVIDERS);
             for (int i = 0; i < llmProviderConfigArray.length(); i++) {
                 JSONObject apiObj = llmProviderConfigArray.getJSONObject(i);
-                String id = apiObj.getString(AIAPIConstants.LLM_PROVIDER_ID);
-                String name = apiObj.getString(AIAPIConstants.NAME);
-                String apiVersion = apiObj.getString(AIAPIConstants.API_VERSION);
-                String configurations = apiObj.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
-
-                LLMProvider provider = new LLMProvider();
-                provider.setId(id);
-                provider.setName(name);
-                provider.setApiVersion(apiVersion);
+                LLMProviderInfo provider = new LLMProviderInfo();
+                provider.setId(apiObj.get(AIAPIConstants.ID).toString());
+                provider.setName(apiObj.get(AIAPIConstants.NAME).toString());
+                provider.setApiVersion(apiObj.get(AIAPIConstants.API_VERSION).toString());
+                String configurationsString = apiObj.get(AIAPIConstants.CONFIGURATIONS).toString();
+                LLMProviderConfiguration configurations = new Gson().fromJson(configurationsString, LLMProviderConfiguration.class);
                 provider.setConfigurations(configurations);
                 DataHolder.getInstance().addLLMProviderConfigurations(provider);
             }
             if (log.isDebugEnabled()) {
-                log.debug("Response : " + responseJson);
+                log.debug("Received LLM provider: " + responseJson);
             }
         } catch (IOException | APIManagementException ex) {
-            log.error("Error while calling internal service API", ex);
+            log.error("Error while retrieving LLM provider info", ex);
         }
-    }
-
-    public String getLLMProviderConfiguration(String providerId, String tenantDomain) {
-
-        try {
-            String responseString = invokeService(AIAPIConstants.LLM_CONFIGS_ENDPOINT + "/" + providerId,
-                    tenantDomain);
-            JSONObject responseJson = new JSONObject(responseString);
-            String configurations = responseJson.getString(AIAPIConstants.LLM_PROVIDER_CONFIGURATIONS);
-            if (log.isDebugEnabled()) {
-                log.debug("Response : " + responseJson);
-            }
-            return configurations;
-        } catch (IOException | APIManagementException ex) {
-            log.error("Error while calling internal service API", ex);
-        }
-        return null;
     }
 
     /**
@@ -133,11 +120,11 @@ public class LLMProviderManager {
      */
     private String invokeService(String path, String tenantDomain) throws IOException, APIManagementException {
 
-        String serviceURLStr = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
+        String serviceURLStr = getEventHubConfiguration().getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
         HttpGet method = new HttpGet(serviceURLStr + path);
 
         URL serviceURL = new URL(serviceURLStr + path);
-        byte[] credentials = getServiceCredentials(eventHubConfigurationDto);
+        byte[] credentials = getServiceCredentials(getEventHubConfiguration());
         int servicePort = serviceURL.getPort();
         String serviceProtocol = serviceURL.getProtocol();
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC

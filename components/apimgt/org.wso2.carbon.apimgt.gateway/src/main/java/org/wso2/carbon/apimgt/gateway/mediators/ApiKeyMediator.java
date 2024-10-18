@@ -85,7 +85,7 @@ public class ApiKeyMediator extends AbstractMediator implements ManagedLifecycle
                     axCtx.setProperty(APIMgtGatewayConstants.REST_URL_POSTFIX, updatedFullPath.toString());
                 }
             } catch (URISyntaxException e) {
-                log.error("Error occurred during parsing query parameters for AI API.");
+                log.error("Error occurred during parsing query parameters.");
             }
         }
         return true;

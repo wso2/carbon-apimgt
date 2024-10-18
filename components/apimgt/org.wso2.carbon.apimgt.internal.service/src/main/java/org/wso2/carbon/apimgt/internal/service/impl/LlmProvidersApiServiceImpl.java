@@ -22,23 +22,15 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.internal.service.*;
-import org.wso2.carbon.apimgt.internal.service.dto.*;
-
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.wso2.carbon.apimgt.internal.service.LlmProvidersApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-
-import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import java.io.InputStream;
-import java.util.stream.Collectors;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
@@ -79,7 +71,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         for (LLMProvider provider : llmProviderList) {
             llmProviderListDTO.add(convertToDTO(provider, xWSO2Tenant));
         }
-        return Response.ok().entity(new LLMProviderListDTO().apis(llmProviderListDTO)).build();
+        return Response.ok().entity(new LLMProviderListDTO().llmProviders(llmProviderListDTO)).build();
     }
 
     /**

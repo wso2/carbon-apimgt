@@ -54,7 +54,7 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve persisted LLM Providers", notes = "This retrieve the persisted LLM Providers. ", response = LLMProviderListDTO.class, tags={ "LLMProviders" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Event Received success", response = LLMProviderListDTO.class),
+        @ApiResponse(code = 200, message = "LLM providers received success", response = LLMProviderListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
     public Response getLLMProviders(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be             retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "")  @QueryParam("name") String name,  @ApiParam(value = "")  @QueryParam("apiVersion") String apiVersion) throws APIManagementException{
         return delegate.getLLMProviders(xWSO2Tenant, name, apiVersion, securityContext);

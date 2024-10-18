@@ -18,90 +18,61 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-import org.apache.commons.lang3.StringUtils;
-
+import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * This class represents a LLM (Large Language Model) Provider.
  */
-public class LLMProvider implements Serializable {
+public class LLMProviderInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private String id = null;
     private String name = null;
-    private String description = StringUtils.EMPTY;
     private String apiVersion = null;
-    private String apiDefinition = StringUtils.EMPTY;
-    private String configurations = null;
-    private boolean builtInSupport = false;
+    private LLMProviderConfiguration configurations = null;
 
-    public LLMProvider(String name, String apiVersion) {
+    public LLMProviderInfo() {
 
-        this.name = name;
-        this.apiVersion = apiVersion;
     }
 
-    public LLMProvider() {}
-
-    public boolean isBuiltInSupport() {
-
-        return builtInSupport;
-    }
-
-    public void setBuiltInSupport(boolean builtInSupport) {
-
-        this.builtInSupport = builtInSupport;
-    }
-
-    public String getConfigurations() {
+    public LLMProviderConfiguration getConfigurations() {
 
         return this.configurations;
     }
 
-    public void setConfigurations(String configurations) {
+    public void setConfigurations(LLMProviderConfiguration configurations) {
 
         this.configurations = configurations;
     }
 
     public String getId() {
+
         return id;
     }
 
     public void setId(String id) {
+
         this.id = id;
     }
 
     public String getName() {
+
         return name;
     }
 
     public void setName(String name) {
+
         this.name = name;
     }
 
     public String getApiVersion() {
+
         return apiVersion;
     }
 
     public void setApiVersion(String apiVersion) {
+
         this.apiVersion = apiVersion;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getApiDefinition() {
-        return apiDefinition;
-    }
-
-    public void setApiDefinition(String apiDefinition) {
-        this.apiDefinition = apiDefinition;
     }
 }

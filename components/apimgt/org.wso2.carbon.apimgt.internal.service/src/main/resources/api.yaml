@@ -702,7 +702,7 @@ paths:
           required: true
       responses:
         200:
-          description: 'Event Received success'
+          description: 'LLM providers received success'
           schema:
             $ref: '#/definitions/LLMProviderList'
         default:
@@ -1804,7 +1804,7 @@ definitions:
   LLMProviderList:
     title: LLM Provider Config List
     properties:
-      apis:
+      llmProviders:
         type: array
         items:
           $ref: '#/definitions/LLMProvider'
