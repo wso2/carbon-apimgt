@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.wso2.carbon.apimgt.api.APIAdmin;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
@@ -26,6 +27,7 @@ import org.wso2.carbon.apimgt.internal.service.LlmProvidersApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.LLMProviderListDTO;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +50,9 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             throws APIManagementException {
 
         APIAdmin admin = new APIAdminImpl();
-        LLMProvider llmProvider = admin.getLLMProvider(xWSO2Tenant, llmProviderId);
-        LLMProviderDTO llmProviderDto = convertToDTO(llmProvider, xWSO2Tenant);
+        String organization = getOrganizationXWSO2Tenant(xWSO2Tenant);
+        LLMProvider llmProvider = admin.getLLMProvider(organization, llmProviderId);
+        LLMProviderDTO llmProviderDto = convertToDTO(llmProvider);
         return Response.ok().entity(llmProviderDto).build();
     }
 
@@ -65,11 +68,13 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                                     MessageContext messageContext) throws APIManagementException {
 
         APIAdmin admin = new APIAdminImpl();
-        List<LLMProvider> llmProviderList = admin.getLLMProviders(xWSO2Tenant, name, apiVersion, null);
+        String organization = getOrganizationXWSO2Tenant(xWSO2Tenant);
+        List<LLMProvider> llmProviderList = admin.getLLMProviders(organization, name,
+                apiVersion, null);
 
         List<LLMProviderDTO> llmProviderListDTO = new ArrayList<>();
         for (LLMProvider provider : llmProviderList) {
-            llmProviderListDTO.add(convertToDTO(provider, xWSO2Tenant));
+            llmProviderListDTO.add(convertToDTO(provider));
         }
         return Response.ok().entity(new LLMProviderListDTO().llmProviders(llmProviderListDTO)).build();
     }
@@ -80,14 +85,23 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @param llmProvider The LLMProvider object to convert.
      * @return The corresponding LLMProviderDTO.
      */
-    private LLMProviderDTO convertToDTO(LLMProvider llmProvider, String organization) {
+    private LLMProviderDTO convertToDTO(LLMProvider llmProvider) {
 
         LLMProviderDTO llmProviderDto = new LLMProviderDTO();
         llmProviderDto.setId(llmProvider.getId());
         llmProviderDto.setName(llmProvider.getName());
-        llmProviderDto.setOrganization(organization);
+        llmProviderDto.setOrganization(llmProvider.getOrganization());
         llmProviderDto.setApiVersion(llmProvider.getApiVersion());
         llmProviderDto.setConfigurations(llmProvider.getConfigurations());
         return llmProviderDto;
+    }
+
+    private String getOrganizationXWSO2Tenant(String xWSO2Tenant) {
+
+        return (xWSO2Tenant == null)
+                ? MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                : (!APIConstants.AIAPIConstants.LLM_PROVIDER_TENANT_ALL.equals(xWSO2Tenant))
+                ? xWSO2Tenant
+                : null;
     }
 }

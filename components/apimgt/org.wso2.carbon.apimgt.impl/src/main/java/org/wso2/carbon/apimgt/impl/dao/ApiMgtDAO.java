@@ -14731,7 +14731,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         List<LLMProvider> providerList = new ArrayList<>();
-        String query = buildGetLLMProvidersSql(name, apiVersion, builtInSupport);
+        String query = buildGetLLMProvidersSql(name, organization, apiVersion, builtInSupport);
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             setQueryParameters(preparedStatement, name, organization, apiVersion, builtInSupport);
@@ -14741,6 +14741,7 @@ public class ApiMgtDAO {
                     provider.setId(resultSet.getString("UUID"));
                     provider.setName(resultSet.getString("NAME"));
                     provider.setApiVersion(resultSet.getString("API_VERSION"));
+                    provider.setOrganization(resultSet.getString("ORGANIZATION"));
                     provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
                     provider.setDescription(resultSet.getString("DESCRIPTION"));
                     try (InputStream apiDefStream = resultSet.getBinaryStream("API_DEFINITION")) {
@@ -14770,14 +14771,18 @@ public class ApiMgtDAO {
      * Builds the SQL query with optional filters for organization, name, API version, and built-in support.
      *
      * @param name           the provider name (optional)
+     * @param organization   the organization
      * @param apiVersion     the API version (optional)
      * @param builtInSupport whether the API has built-in support (optional)
      * @return the constructed SQL query string
      */
-    private String buildGetLLMProvidersSql(String name, String apiVersion,
+    private String buildGetLLMProvidersSql(String name, String organization, String apiVersion,
                                            Boolean builtInSupport) {
 
         StringBuilder queryBuilder = new StringBuilder(SQLConstants.GET_LLM_PROVIDERS_SQL);
+        if (organization != null && !organization.isEmpty()) {
+            queryBuilder.append(" AND ORGANIZATION = ?");
+        }
         if (name != null && !name.isEmpty()) {
             queryBuilder.append(" AND NAME = ?");
         }
@@ -14805,7 +14810,9 @@ public class ApiMgtDAO {
             throws SQLException {
 
         int paramIndex = 1;
-        preparedStatement.setString(paramIndex++, organization);
+        if (organization != null && !organization.isEmpty()) {
+            preparedStatement.setString(paramIndex++, organization);
+        }
         if (name != null && !name.isEmpty()) {
             preparedStatement.setString(paramIndex++, name);
         }
@@ -14891,10 +14898,15 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             String sql = SQLConstants.GET_LLM_PROVIDER_SQL;
+            if (organization != null) {
+                sql += " AND ORGANIZATION = ?";
+            }
             connection.setAutoCommit(false);
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, llmProviderId);
-                preparedStatement.setString(2, organization);
+                if (organization != null) {
+                    preparedStatement.setString(2, organization);
+                }
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (!resultSet.next()) {
                     return null;
@@ -14903,6 +14915,7 @@ public class ApiMgtDAO {
                 provider.setId(resultSet.getString("UUID"));
                 provider.setName(resultSet.getString("NAME"));
                 provider.setApiVersion(resultSet.getString("API_VERSION"));
+                provider.setOrganization(resultSet.getString("ORGANIZATION"));
                 provider.setBuiltInSupport(Boolean.parseBoolean(resultSet.getString("BUILT_IN_SUPPORT")));
                 provider.setDescription(resultSet.getString("DESCRIPTION"));
                 try (InputStream apiDefStream = resultSet.getBinaryStream("API_DEFINITION")) {

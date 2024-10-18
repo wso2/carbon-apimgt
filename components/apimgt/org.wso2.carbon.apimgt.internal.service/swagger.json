@@ -913,14 +913,15 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "organization",
-          "in" : "query",
-          "required" : false,
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n            retrieved from.\n",
+          "required" : true,
           "type" : "string"
         } ],
         "responses" : {
           "200" : {
-            "description" : "Event Received success",
+            "description" : "LLM providers received success",
             "schema" : {
               "$ref" : "#/definitions/LLMProviderList"
             }
@@ -943,6 +944,12 @@
         "parameters" : [ {
           "name" : "llmProviderId",
           "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n            retrieved from.\n",
           "required" : true,
           "type" : "string"
         } ],
@@ -2208,7 +2215,7 @@
     },
     "LLMProviderList" : {
       "properties" : {
-        "apis" : {
+        "llmProviders" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/LLMProvider"

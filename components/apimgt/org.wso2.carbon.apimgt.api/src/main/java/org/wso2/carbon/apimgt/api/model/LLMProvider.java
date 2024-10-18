@@ -36,6 +36,7 @@ public class LLMProvider implements Serializable {
     private String apiDefinition = StringUtils.EMPTY;
     private String configurations = null;
     private boolean builtInSupport = false;
+    private String organization = null;
 
     public LLMProvider(String name, String apiVersion) {
 
@@ -103,5 +104,15 @@ public class LLMProvider implements Serializable {
 
     public void setApiDefinition(String apiDefinition) {
         this.apiDefinition = apiDefinition;
+    }
+
+    public String getOrganization() {
+
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+
+        this.organization = organization;
     }
 }
