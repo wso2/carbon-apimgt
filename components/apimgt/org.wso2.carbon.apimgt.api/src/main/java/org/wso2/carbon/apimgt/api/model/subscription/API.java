@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
-import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 
@@ -47,7 +46,6 @@ public class API implements CacheableEntity<String> {
     private String organization;
     private Set<OperationPolicy> apiPolicies = new HashSet<>();
     private boolean isSubscriptionValidationDisabled = false;
-    private AIConfiguration aiConfiguration;
     private int isEgress;
     private String subtype;
 
@@ -225,14 +223,6 @@ public class API implements CacheableEntity<String> {
 
     public void setSubscriptionValidationDisabled(boolean subscriptionValidationDisabled) {
         isSubscriptionValidationDisabled = subscriptionValidationDisabled;
-    }
-
-    public AIConfiguration getAiConfiguration() {
-        return aiConfiguration;
-    }
-
-    public void setAiConfiguration(AIConfiguration aiConfiguration) {
-        this.aiConfiguration = aiConfiguration;
     }
 
     public int isEgress() {

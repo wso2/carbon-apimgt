@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
-import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -119,12 +118,6 @@ public class SubscriptionValidationDataUtil {
             }
             apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
-            AIConfiguration aiConfiguration = model.getAiConfiguration();
-            if (aiConfiguration != null) {
-                AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
-                aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
-                apidto.setAiConfiguration(aiConfigurationDTO);
-            }
             apidto.setIsEgress(model.isEgress() != 0);
             apidto.setSubtype(model.getSubtype());
         }
@@ -187,12 +180,6 @@ public class SubscriptionValidationDataUtil {
             }
             apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
-            AIConfiguration aiConfiguration = model.getAiConfiguration();
-            if (aiConfiguration != null) {
-                AIConfigurationDTO aiConfigurationDTO = new AIConfigurationDTO();
-                aiConfigurationDTO.setLlmProviderId(aiConfiguration.getLlmProviderId());
-                apidto.setAiConfiguration(aiConfigurationDTO);
-            }
             apidto.setIsEgress(model.isEgress() != 0);
             apidto.setSubtype(model.getSubtype());
             apiListdto.setCount(1);
