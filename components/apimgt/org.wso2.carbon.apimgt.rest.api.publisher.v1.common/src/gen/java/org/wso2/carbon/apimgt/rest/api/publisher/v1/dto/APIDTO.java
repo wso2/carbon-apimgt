@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAiConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
@@ -19,6 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
@@ -102,7 +102,6 @@ return null;
         }
     }
     private TypeEnum type = TypeEnum.HTTP;
-    private String subtype = "DEFAULT";
 
     @XmlType(name="AudienceEnum")
     @XmlEnum(String.class)
@@ -312,7 +311,7 @@ return null;
         }
     }
     private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
-    private APIAiConfigurationDTO aiConfiguration = null;
+    private APISubtypeConfigurationDTO subtypeConfiguration = null;
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
@@ -655,24 +654,6 @@ return null;
   }
   public void setType(TypeEnum type) {
     this.type = type;
-  }
-
-  /**
-   * Subtype of the API.
-   **/
-  public APIDTO subtype(String subtype) {
-    this.subtype = subtype;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "AIAPI", value = "Subtype of the API.")
-  @JsonProperty("subtype")
-  public String getSubtype() {
-    return subtype;
-  }
-  public void setSubtype(String subtype) {
-    this.subtype = subtype;
   }
 
   /**
@@ -1228,20 +1209,20 @@ return null;
 
   /**
    **/
-  public APIDTO aiConfiguration(APIAiConfigurationDTO aiConfiguration) {
-    this.aiConfiguration = aiConfiguration;
+  public APIDTO subtypeConfiguration(APISubtypeConfigurationDTO subtypeConfiguration) {
+    this.subtypeConfiguration = subtypeConfiguration;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("aiConfiguration")
-  public APIAiConfigurationDTO getAiConfiguration() {
-    return aiConfiguration;
+  @JsonProperty("subtypeConfiguration")
+  public APISubtypeConfigurationDTO getSubtypeConfiguration() {
+    return subtypeConfiguration;
   }
-  public void setAiConfiguration(APIAiConfigurationDTO aiConfiguration) {
-    this.aiConfiguration = aiConfiguration;
+  public void setSubtypeConfiguration(APISubtypeConfigurationDTO subtypeConfiguration) {
+    this.subtypeConfiguration = subtypeConfiguration;
   }
 
   /**
@@ -1471,7 +1452,6 @@ return null;
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(enableSubscriberVerification, API.enableSubscriberVerification) &&
         Objects.equals(type, API.type) &&
-        Objects.equals(subtype, API.subtype) &&
         Objects.equals(audience, API.audience) &&
         Objects.equals(audiences, API.audiences) &&
         Objects.equals(transport, API.transport) &&
@@ -1503,7 +1483,7 @@ return null;
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(endpointConfig, API.endpointConfig) &&
         Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
-        Objects.equals(aiConfiguration, API.aiConfiguration) &&
+        Objects.equals(subtypeConfiguration, API.subtypeConfiguration) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
@@ -1519,7 +1499,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, subtype, audience, audiences, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, endpointImplementationType, aiConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols, egress);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, audiences, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, endpointImplementationType, subtypeConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols, egress);
   }
 
   @Override
@@ -1546,7 +1526,6 @@ return null;
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    enableSubscriberVerification: ").append(toIndentedString(enableSubscriberVerification)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    subtype: ").append(toIndentedString(subtype)).append("\n");
     sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
     sb.append("    audiences: ").append(toIndentedString(audiences)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
@@ -1578,7 +1557,7 @@ return null;
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");
-    sb.append("    aiConfiguration: ").append(toIndentedString(aiConfiguration)).append("\n");
+    sb.append("    subtypeConfiguration: ").append(toIndentedString(subtypeConfiguration)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");

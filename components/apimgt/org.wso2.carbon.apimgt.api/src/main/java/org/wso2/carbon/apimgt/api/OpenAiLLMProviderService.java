@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,20 +42,20 @@ public class OpenAiLLMProviderService extends BuiltInLLMProviderService {
     }
 
     @Override
-    public LLMProvider registerLLMProvider(String organization, String apiDefinitionFilePath)
+    public LLMProvider getLLMProvider()
             throws APIManagementException {
 
         try {
             LLMProvider llmProvider = new LLMProvider();
             llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_NAME);
             llmProvider.setApiVersion(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_VERSION);
-            llmProvider.setOrganization(organization);
             llmProvider.setDescription(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_DESCRIPTION);
             llmProvider.setBuiltInSupport(true);
 
-            llmProvider.setApiDefinition(readApiDefinition(
-                    apiDefinitionFilePath
-                            + APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_API_DEFINITION_FILE_NAME));
+            llmProvider.setApiDefinition(readApiDefinition("repository" + File.separator + "resources"
+                    + File.separator + "api_definitions" + File.separator
+                    + APIConstants.AIAPIConstants
+                    .LLM_PROVIDER_SERVICE_OPENAI_API_DEFINITION_FILE_NAME));
 
             LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
             llmProviderConfiguration.setAuthHeader(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_KEY);

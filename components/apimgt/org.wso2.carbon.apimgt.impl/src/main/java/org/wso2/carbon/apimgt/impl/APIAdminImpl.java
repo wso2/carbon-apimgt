@@ -602,14 +602,12 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException {
+    public LLMProvider addLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
-        LLMProvider result = apiMgtDAO.addLLMProvider(provider);
-        if (result != null) {
-            new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
-                    result.getOrganization(),
-                    APIConstants.EventType.LLM_PROVIDER_CREATE.name());
-        }
+        provider.setId(UUID.randomUUID().toString());
+        LLMProvider result = apiMgtDAO.addLLMProvider(organization, provider);
+        new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
+                provider.getConfigurations(), organization, APIConstants.EventType.LLM_PROVIDER_CREATE.name());
         return result;
     }
 
@@ -621,25 +619,22 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public LLMProvider deleteLLMProvider(String organization, String llmProviderId, boolean builtIn)
+    public String deleteLLMProvider(String organization, LLMProvider provider, boolean builtIn)
             throws APIManagementException {
 
-        LLMProvider result = apiMgtDAO.deleteLLMProvider(organization, llmProviderId, builtIn);
-        if (result != null) {
-            new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
-                    organization,
-                    APIConstants.EventType.LLM_PROVIDER_DELETE.name());
-        }
-        return result;
+        String deletedLLMProviderId = apiMgtDAO.deleteLLMProvider(organization, provider.getId(), builtIn);
+        new LLMProviderNotificationSender().notify(provider.getId(), provider.getName(), provider.getApiVersion(),
+                provider.getConfigurations(), organization, APIConstants.EventType.LLM_PROVIDER_DELETE.name());
+        return deletedLLMProviderId;
     }
 
     @Override
-    public LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException {
+    public LLMProvider updateLLMProvider(String organization, LLMProvider provider) throws APIManagementException {
 
-        LLMProvider result = apiMgtDAO.updateLLMProvider(provider);
-        if (result != null) {
+        LLMProvider result = apiMgtDAO.updateLLMProvider(organization, provider);
+        if (!result.isBuiltInSupport()) {
             new LLMProviderNotificationSender().notify(result.getId(), result.getName(), result.getApiVersion(),
-                    result.getOrganization(), APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
+                    provider.getConfigurations(), organization, APIConstants.EventType.LLM_PROVIDER_UPDATE.name());
         }
         return result;
     }
