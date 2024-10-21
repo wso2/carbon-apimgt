@@ -515,7 +515,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * @param synCtx Synapse message context that contains message details.
      * @return
      */
-    private void sendNonThrottleEventToThrottlingEngine(MessageContext synCtx) {
+    private void sendThrottleEventDataFromResponseToThrottlingEngine(MessageContext synCtx) {
         String resourceLevelThrottleKey = "";
         String resourceLevelTier = "";
         String applicationLevelThrottleKey;
@@ -690,6 +690,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
 
+        if (!ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
+            return false;
+        }
         if (((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(AI_API_RESPONSE_METADATA) != null) {
             Timer timer3 = getTimer(MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
@@ -710,11 +713,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         responseLatencySpan, tracer);
             }
             long executionStartTime = System.currentTimeMillis();
-            if (!ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
-                return false;
-            }
             try {
-                sendNonThrottleEventToThrottlingEngine(messageContext);
+                sendThrottleEventDataFromResponseToThrottlingEngine(messageContext);
                 return ExtensionListenerUtil.postProcessResponse(messageContext, type);
             } catch (Exception e) {
                 if (TelemetryUtil.telemetryEnabled()) {
@@ -736,11 +736,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 }
             }
 
-        } else {
-            if (ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
-                return ExtensionListenerUtil.postProcessResponse(messageContext, type);
-            }
         }
+        ExtensionListenerUtil.postProcessResponse(messageContext, type);
         return false;
     }
 
@@ -1478,41 +1475,43 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private boolean checkLlmMetadataLimits(MessageContext synCtx, String throttleKey,
                                            Map<String, String> llmMetadata, String promptTokenLimit, String completionTokenLimit,
                                            String totalTokenLimit) throws ThrottleException {
-        if (llmMetadata != null && synCtx.isResponse()) {
-            if (Objects.nonNull(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT))
-                    && throttleMap.containsKey(promptTokenLimit)
-                    && isAccessBlocked(synCtx, throttleKey, promptTokenLimit,
-                            Long.valueOf(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT)))) {
-                log.debug("Hard throttling limit reached due to exceeding prompt token count.");
-                return true;
-            }
-            if (Objects.nonNull(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT))
-                    && throttleMap.containsKey(completionTokenLimit)
-                    && isAccessBlocked(synCtx, throttleKey, completionTokenLimit,
-                            Long.valueOf(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT)))) {
-                log.debug("Hard throttling limit reached due to exceeding completion token count.");
-                return true;
-            }
-            if (Objects.nonNull(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT))
-                    && throttleMap.containsKey(totalTokenLimit)
-                    && isAccessBlocked(synCtx, throttleKey, totalTokenLimit,
-                            Long.valueOf(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT)))) {
-                log.debug("Hard throttling limit reached due to exceeding total token count.");
-                return true;
-            }
-        } else if (!synCtx.isResponse()) {
-            if (throttleMap.containsKey(promptTokenLimit)
-                    && isAccessBlocked(synCtx, throttleKey, promptTokenLimit, 0L)) {
-                log.debug("Hard throttling limit reached due to exceeding prompt token count.");
-                return true;
-            } else if (throttleMap.containsKey(completionTokenLimit)
-                    && isAccessBlocked(synCtx, throttleKey, completionTokenLimit, 0L)) {
-                log.debug("Hard throttling limit reached due to exceeding completion token count.");
-                return true;
-            } else if (throttleMap.containsKey(totalTokenLimit)
-                    && isAccessBlocked(synCtx, throttleKey, totalTokenLimit, 0L)) {
-                log.debug("Hard throttling limit reached due to exceeding total token count.");
-                return true;
+        if (llmMetadata != null) {
+            if (synCtx.isResponse()) {
+                if (Objects.nonNull(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT))
+                        && throttleMap.containsKey(promptTokenLimit)
+                        && isAccessBlocked(synCtx, throttleKey, promptTokenLimit,
+                        Long.valueOf(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT)))) {
+                    log.debug("Hard throttling limit reached due to exceeding prompt token count.");
+                    return true;
+                }
+                if (Objects.nonNull(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT))
+                        && throttleMap.containsKey(completionTokenLimit)
+                        && isAccessBlocked(synCtx, throttleKey, completionTokenLimit,
+                        Long.valueOf(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT)))) {
+                    log.debug("Hard throttling limit reached due to exceeding completion token count.");
+                    return true;
+                }
+                if (Objects.nonNull(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT))
+                        && throttleMap.containsKey(totalTokenLimit)
+                        && isAccessBlocked(synCtx, throttleKey, totalTokenLimit,
+                        Long.valueOf(llmMetadata.get(LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT)))) {
+                    log.debug("Hard throttling limit reached due to exceeding total token count.");
+                    return true;
+                }
+            } else if (!synCtx.isResponse()) {
+                if (throttleMap.containsKey(promptTokenLimit)
+                        && isAccessBlocked(synCtx, throttleKey, promptTokenLimit, 0L)) {
+                    log.debug("Hard throttling limit reached due to exceeding prompt token count.");
+                    return true;
+                } else if (throttleMap.containsKey(completionTokenLimit)
+                        && isAccessBlocked(synCtx, throttleKey, completionTokenLimit, 0L)) {
+                    log.debug("Hard throttling limit reached due to exceeding completion token count.");
+                    return true;
+                } else if (throttleMap.containsKey(totalTokenLimit)
+                        && isAccessBlocked(synCtx, throttleKey, totalTokenLimit, 0L)) {
+                    log.debug("Hard throttling limit reached due to exceeding total token count.");
+                    return true;
+                }
             }
         }
         return false;
