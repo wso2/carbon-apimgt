@@ -70,14 +70,14 @@ public class DataProcessAndPublishingAgent implements Runnable {
     String apiName;
     String appId;
     String ipAddress;
-    Long totalTokens;
-    Long promptTokens;
-    Long completionTokens;
+    Long totalTokens = 0L;
+    Long promptTokens = 0L;
+    Long completionTokens = 0L;
     Map<String, String> headersMap;
     Map<String, Object> customPropertyMap;
     private AuthenticationContext authenticationContext;
 
-    private long messageSizeInBytes;
+    private long messageSizeInBytes = 0L;
 
     public DataProcessAndPublishingAgent() {
 
