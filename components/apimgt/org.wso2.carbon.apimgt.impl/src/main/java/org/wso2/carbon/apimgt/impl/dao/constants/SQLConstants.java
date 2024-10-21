@@ -1120,7 +1120,7 @@ public class SQLConstants {
             "   SUB.TENANT_ID=?" +
             " And "+
             "    ( SUB.CREATED_BY like ?" +
-            " AND APP.NAME like ? )";
+            " OR APP.NAME like ? )";
 
     public static final String GET_APPLICATION_BY_SUBSCRIBERID_AND_NAME_SQL =
             " SELECT " +
@@ -2770,7 +2770,7 @@ public class SQLConstants {
                     "FROM AM_LLM_PROVIDER WHERE 1=1";
 
     public static final String GET_LLM_PROVIDER_SQL =
-            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, CONFIGURATIONS " +
+            "SELECT UUID, NAME, API_VERSION, ORGANIZATION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, CONFIGURATIONS " +
                     "FROM AM_LLM_PROVIDER PROVIDER WHERE UUID = ?";
 
     public static final String GET_LLM_PROVIDER_BY_NAME_AND_VERSION_SQL =
@@ -2780,8 +2780,9 @@ public class SQLConstants {
     public static final String DELETE_LLM_PROVIDER_SQL =
             "DELETE FROM AM_LLM_PROVIDER WHERE ORGANIZATION = ? AND UUID = ? AND BUILT_IN_SUPPORT = ?";
 
-    public static final String CHECK_LLM_PROVIDER_BUILT_IN_SUPPORT_SQL =
-            "SELECT NAME, API_VERSION, BUILT_IN_SUPPORT FROM AM_LLM_PROVIDER WHERE ORGANIZATION = ? AND UUID = ?";
+    public static final String UPDATE_LLM_PROVIDER_SQL =
+            "UPDATE AM_LLM_PROVIDER SET DESCRIPTION = ?, API_DEFINITION = ?, CONFIGURATIONS = ? " +
+                    "WHERE ORGANIZATION = ? AND UUID = ?";
 
     public static final String INSERT_AI_CONFIGURATION =
             "INSERT INTO AM_API_AI_CONFIGURATION (AI_CONFIGURATION_UUID, API_UUID, API_REVISION_UUID, " +
@@ -2796,7 +2797,7 @@ public class SQLConstants {
                     "FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ? AND API_REVISION_UUID = ?";
 
     public static final String DELETE_AI_CONFIGURATION_REVISION =
-            "DELETE FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ? AND API_REVISION_UUID = ?";
+            "DELETE FROM AM_API_AI_CONFIGURATION WHERE API_REVISION_UUID = ?";
 
     public static final String DELETE_AI_CONFIGURATIONS =
             "DELETE FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ?";
@@ -3393,7 +3394,7 @@ public class SQLConstants {
                         + "BLOCK_CONDITION = ? AND DOMAIN = ? ";
         public static final String GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL =
                 "SELECT CONDITION_ID, TYPE, BLOCK_CONDITION, ENABLED, DOMAIN, UUID FROM AM_BLOCK_CONDITIONS WHERE "
-                        + "(TYPE = ? OR ? IS NULL) AND (BLOCK_CONDITION LIKE CONCAT('%', ?, '%') OR ? IS NULL) AND DOMAIN = ?";
+                        + "(TYPE = ? OR ? IS NULL) AND (BLOCK_CONDITION LIKE ? OR ? IS NULL) AND DOMAIN = ?";
         public static final String GET_BLOCK_CONDITIONS_BY_TYPE_AND_EXACT_VALUE_SQL =
                 "SELECT CONDITION_ID, TYPE, BLOCK_CONDITION, ENABLED, DOMAIN, UUID FROM AM_BLOCK_CONDITIONS WHERE "
                         + "(TYPE = ? OR ? IS NULL) AND (BLOCK_CONDITION = ?) AND DOMAIN = ?";

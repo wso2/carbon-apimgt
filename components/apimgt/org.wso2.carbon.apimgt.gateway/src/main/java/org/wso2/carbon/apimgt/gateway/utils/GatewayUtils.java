@@ -1731,4 +1731,18 @@ public class GatewayUtils {
             throw new OAuth2Exception(error, e);
         }
     }
+
+    /**
+     * This method returns True if the given path contains a file based API context
+     *
+     * @param path  Full Request Path
+     * @param tenantDomain  Tenant domain
+     * @return True if the given path contains a file based API context
+     */
+    public static boolean checkForFileBasedApiContexts(String path, String tenantDomain){
+        path = path.replace(APIConstants.TENANT_PREFIX + tenantDomain, "");
+        path = path.split("\\?")[0];
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getGatewayArtifactSynchronizerProperties().getFileBasedApiContexts().contains(path);
+    }
 }

@@ -195,47 +195,47 @@
             {% endfor %}
         </Environments>
         <TransactionCounter>
-            {% if integration.transaction_counter.enable is defined %}
-            <Enabled>{{integration.transaction_counter.enable}}</Enabled>
+            {% if apim.transaction_counter.enable is defined %}
+            <Enabled>{{apim.transaction_counter.enable}}</Enabled>
             {% endif %}
-            {% if integration.transaction_counter.server_id is defined %}
-            <ServerID>{{integration.transaction_counter.server_id}}</ServerID>
+            {% if apim.transaction_counter.server_id is defined %}
+            <ServerID>{{apim.transaction_counter.server_id}}</ServerID>
             {% endif %}
-            {% if integration.transaction_counter.store_impl is defined %}
-            <StoreClass>{{integration.transaction_counter.store_impl}}</StoreClass>
+            {% if apim.transaction_counter.store_impl is defined %}
+            <StoreClass>{{apim.transaction_counter.store_impl}}</StoreClass>
             {% endif %}
-            {% if integration.transaction_counter.record_queue_size is defined %}
-            <QueueSize>{{integration.transaction_counter.record_queue_size}}</QueueSize>
+            {% if apim.transaction_counter.record_queue_size is defined %}
+            <QueueSize>{{apim.transaction_counter.record_queue_size}}</QueueSize>
             {% endif %}
-            {% if integration.transaction_counter.producer_counting_thread_pool_size is defined %}
-            <ProducerThreadPoolSize>{{integration.transaction_counter.producer_counting_thread_pool_size}}</ProducerThreadPoolSize>
+            {% if apim.transaction_counter.producer_counting_thread_pool_size is defined %}
+            <ProducerThreadPoolSize>{{apim.transaction_counter.producer_counting_thread_pool_size}}</ProducerThreadPoolSize>
             {% endif %}
-            {% if integration.transaction_counter.producer_scheduled_interval is defined %}
-            <ProducerScheduledInterval>{{integration.transaction_counter.producer_scheduled_interval}}</ProducerScheduledInterval>
+            {% if apim.transaction_counter.producer_scheduled_interval is defined %}
+            <ProducerScheduledInterval>{{apim.transaction_counter.producer_scheduled_interval}}</ProducerScheduledInterval>
             {% endif %}
-            {% if integration.transaction_counter.max_transaction_count_per_record is defined %}
-            <MaxTransactionCount>{{integration.transaction_counter.max_transaction_count_per_record}}</MaxTransactionCount>
+            {% if apim.transaction_counter.max_transaction_count_per_record is defined %}
+            <MaxTransactionCount>{{apim.transaction_counter.max_transaction_count_per_record}}</MaxTransactionCount>
             {% endif %}
-            {% if integration.transaction_counter.min_transaction_count_per_record is defined %}
-            <MinTransactionCount>{{integration.transaction_counter.min_transaction_count_per_record}}</MinTransactionCount>
+            {% if apim.transaction_counter.min_transaction_count_per_record is defined %}
+            <MinTransactionCount>{{apim.transaction_counter.min_transaction_count_per_record}}</MinTransactionCount>
             {% endif %}
-            {% if integration.transaction_counter.publisher_scheduled_interval is defined %}
-            <PublisherScheduledInterval>{{integration.transaction_counter.publisher_scheduled_interval}}</PublisherScheduledInterval>
+            {% if apim.transaction_counter.publisher_scheduled_interval is defined %}
+            <PublisherScheduledInterval>{{apim.transaction_counter.publisher_scheduled_interval}}</PublisherScheduledInterval>
             {% endif %}
-            {% if integration.transaction_counter.publisher_max_batch_size is defined %}
-            <MaxBatchSize>{{integration.transaction_counter.publisher_max_batch_size}}</MaxBatchSize>
+            {% if apim.transaction_counter.publisher_max_batch_size is defined %}
+            <MaxBatchSize>{{apim.transaction_counter.publisher_max_batch_size}}</MaxBatchSize>
             {% endif %}
-            {% if integration.transaction_counter.publisher_max_retries is defined %}
-            <MaxRetryCount>{{integration.transaction_counter.publisher_max_retries}}</MaxRetryCount>
+            {% if apim.transaction_counter.publisher_max_retries is defined %}
+            <MaxRetryCount>{{apim.transaction_counter.publisher_max_retries}}</MaxRetryCount>
             {% endif %}
-            {% if integration.transaction_counter.service_url is defined %}
-            <ServiceURL>{{integration.transaction_counter.service_url}}</ServiceURL>
+            {% if apim.transaction_counter.service_url is defined %}
+            <ServiceURL>{{apim.transaction_counter.service_url}}</ServiceURL>
             {% endif %}
-            {% if integration.transaction_counter.service_username is defined %}
-            <ServiceUsername>{{integration.transaction_counter.service_username}}</ServiceUsername>
+            {% if apim.transaction_counter.service_username is defined %}
+            <ServiceUsername>{{apim.transaction_counter.service_username}}</ServiceUsername>
             {% endif %}
-            {% if integration.transaction_counter.service_password is defined %}
-            <ServicePassword>{{integration.transaction_counter.service_password}}</ServicePassword>
+            {% if apim.transaction_counter.service_password is defined %}
+            <ServicePassword>{{apim.transaction_counter.service_password}}</ServicePassword>
             {% endif %}
         </TransactionCounter>
     </APIGateway>
@@ -1663,6 +1663,13 @@
          {% endif %}
         </LocalEntries>
         </SkipList>
+        <FileBasedApiContexts>
+            {% if apim.sync_runtime_artifacts.gateway.file_based_api_contexts is defined %}
+                {%- for context in apim.sync_runtime_artifacts.gateway.file_based_api_contexts -%}
+                    <FileBasedApiContext>{{context}}</FileBasedApiContext>
+                {% endfor %}
+            {% endif %}
+        </FileBasedApiContexts>
         <EnableOnDemandLoadingAPIS>{{apim.sync_runtime_artifacts.gateway.enable_on_demand_loading}}</EnableOnDemandLoadingAPIS>
     </SyncRuntimeArtifactsGateway>
     {% endif %}

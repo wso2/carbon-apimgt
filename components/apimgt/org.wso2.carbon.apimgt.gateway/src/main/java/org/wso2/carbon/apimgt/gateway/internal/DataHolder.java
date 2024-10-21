@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
@@ -45,7 +45,7 @@ public class DataHolder {
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
-    private Map<String, LLMProvider> llmProviderMap = new HashMap<>();
+    private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
     private boolean isAllGatewayPoliciesDeployed = false;
 
     private DataHolder() {
@@ -63,7 +63,7 @@ public class DataHolder {
      * @param id the ID of the LLM provider
      * @return the LLMProvider if found, otherwise null
      */
-    public LLMProvider getLLMProviderConfigurations(String id) {
+    public LLMProviderInfo getLLMProviderConfigurations(String id) {
 
         if (llmProviderMap.containsKey(id)) {
             return llmProviderMap.get(id);
@@ -78,7 +78,7 @@ public class DataHolder {
      *
      * @param provider the LLMProvider to add
      */
-    public void addLLMProviderConfigurations(LLMProvider provider) {
+    public void addLLMProviderConfigurations(LLMProviderInfo provider) {
 
         llmProviderMap.put(provider.getId(), provider);
     }
@@ -101,7 +101,7 @@ public class DataHolder {
      *
      * @param provider the LLMProvider to update
      */
-    public void updateLLMProviderConfigurations(LLMProvider provider) {
+    public void updateLLMProviderConfigurations(LLMProviderInfo provider) {
 
         this.removeLLMProviderConfigurations(provider.getId());
         this.addLLMProviderConfigurations(provider);

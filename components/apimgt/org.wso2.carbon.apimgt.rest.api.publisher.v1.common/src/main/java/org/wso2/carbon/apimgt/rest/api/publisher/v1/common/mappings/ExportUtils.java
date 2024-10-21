@@ -193,7 +193,7 @@ public class ExportUtils {
 
         CommonUtil.createDirectory(archivePath);
         if (preserveDocs) {
-            addThumbnailToArchive(archivePath, apiIdentifier, apiProvider);
+            addThumbnailToArchive(archivePath, apiIdentifier, apiProvider, currentApiUuid);
             addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider,
                     APIConstants.API_IDENTIFIER_TYPE);
         } 
@@ -313,7 +313,8 @@ public class ExportUtils {
         CommonUtil.createDirectory(archivePath);
 
         if (preserveDocs) {
-            addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider);
+            addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider,
+                    apiProductDtoToReturn.getRevisionedApiProductId());
             addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider,
                     APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
         }
@@ -345,16 +346,22 @@ public class ExportUtils {
      * @param archivePath File path to export the thumbnail image
      * @param identifier  ID of the requesting API or API Product
      * @param apiProvider API Provider
-     * @throws APIImportExportException If an error occurs while retrieving image from the registry or
-     *                                  storing in the archive directory
+     * @param currentUuid UUID of the API or API Product
+     * @throws APIImportExportException If an error occurs while retrieving image from the registry or storing in the
+     *                                  archive directory
      */
-    public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider)
-            throws APIImportExportException, APIManagementException {
+    public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider,
+            String currentUuid) throws APIImportExportException, APIManagementException {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String localImagePath = archivePath + File.separator + ImportExportConstants.IMAGE_RESOURCE;
         try {
-            ResourceFile thumbnailResource = apiProvider.getIcon(identifier.getUUID(), tenantDomain);
+            ResourceFile thumbnailResource;
+            if (currentUuid == null) {
+                thumbnailResource = apiProvider.getIcon(identifier.getUUID(), tenantDomain);
+            } else {
+                thumbnailResource = apiProvider.getIcon(currentUuid, tenantDomain);
+            }
             if (thumbnailResource != null) {
                 String mediaType = thumbnailResource.getContentType();
                 String extension = ImportExportConstants.fileExtensionMapping.get(mediaType);

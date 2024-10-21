@@ -222,30 +222,18 @@ public class RegistryPersistenceUtil {
                         .getTokenBasedThrottlingConfiguration();
                 artifact.setAttribute(APIConstants.API_TOKEN_BASED_THROTTLING_ENABLED,
                         tokenBasedThrottlingCountHolder.isTokenBasedThrottlingEnabled().toString());
-                if (tokenBasedThrottlingCountHolder.getProductionMaxPromptTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.API_PRODUCTION_MAX_PROMPT_TOKEN_COUNT,
-                            tokenBasedThrottlingCountHolder.getProductionMaxPromptTokenCount());
-                }
-                if (tokenBasedThrottlingCountHolder.getProductionMaxCompletionTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.API_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT,
-                            tokenBasedThrottlingCountHolder.getProductionMaxCompletionTokenCount());
-                }
-                if (tokenBasedThrottlingCountHolder.getProductionMaxTotalTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.API_PRODUCTION_MAX_TOTAL_TOKEN_COUNT,
-                            tokenBasedThrottlingCountHolder.getProductionMaxTotalTokenCount());
-                }
-                if (tokenBasedThrottlingCountHolder.getSandboxMaxPromptTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.API_SANDBOX_MAX_PROMPT_TOKEN_COUNT,
-                            tokenBasedThrottlingCountHolder.getSandboxMaxPromptTokenCount());
-                }
-                if (tokenBasedThrottlingCountHolder.getSandboxMaxCompletionTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.API_SANDBOX_MAX_COMPLETION_TOKEN_COUNT,
-                            tokenBasedThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
-                }
-                if (tokenBasedThrottlingCountHolder.getSandboxMaxTotalTokenCount() != null) {
-                    artifact.setAttribute(APIConstants.API_SANDBOX_MAX_TOTAL_TOKEN_COUNT,
-                            tokenBasedThrottlingCountHolder.getSandboxMaxTotalTokenCount());
-                }
+                artifact.setAttribute(APIConstants.API_PRODUCTION_MAX_PROMPT_TOKEN_COUNT,
+                        tokenBasedThrottlingCountHolder.getProductionMaxPromptTokenCount());
+                artifact.setAttribute(APIConstants.API_PRODUCTION_MAX_COMPLETION_TOKEN_COUNT,
+                        tokenBasedThrottlingCountHolder.getProductionMaxCompletionTokenCount());
+                artifact.setAttribute(APIConstants.API_PRODUCTION_MAX_TOTAL_TOKEN_COUNT,
+                        tokenBasedThrottlingCountHolder.getProductionMaxTotalTokenCount());
+                artifact.setAttribute(APIConstants.API_SANDBOX_MAX_PROMPT_TOKEN_COUNT,
+                        tokenBasedThrottlingCountHolder.getSandboxMaxPromptTokenCount());
+                artifact.setAttribute(APIConstants.API_SANDBOX_MAX_COMPLETION_TOKEN_COUNT,
+                        tokenBasedThrottlingCountHolder.getSandboxMaxCompletionTokenCount());
+                artifact.setAttribute(APIConstants.API_SANDBOX_MAX_TOTAL_TOKEN_COUNT,
+                        tokenBasedThrottlingCountHolder.getSandboxMaxTotalTokenCount());
             }
 
             String policies = policyBuilder.toString();

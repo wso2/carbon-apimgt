@@ -259,6 +259,7 @@ public final class APIConstants {
     // For HTTP requests
     public static final String HEADER_ACCEPT = "Accept";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_CONTENT_LENGTH = "Content-Length";
     public static final String HEADER_API_TOKEN = "X-API-KEY";
     public static final String HEADER_USER_AGENT = "User-Agent";
     public static final String MULTIPART_FORM_BOUNDARY = "X-WSO2-BOUNDARY";
@@ -1553,6 +1554,7 @@ public final class APIConstants {
     public static final String KEYMANAGER_PORT = "keyManagerPort";
     public static final String KEYMANAGER_SERVERURL = API_KEY_VALIDATOR + "ServerURL";
     public static final String CARBON_LOCALIP = "carbon.local.ip";
+    public static final String HTTPS_TRANSPORT_PORT = "https.transport.port";
 
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
@@ -2901,6 +2903,8 @@ public final class APIConstants {
         public static final String API_ID = "apiId";
         public static final String LABEL = "label";
         public static final String LABELS = "labels";
+        public static final String FILE_BASED_API_CONTEXTS = "FileBasedApiContexts";
+        public static final String FILE_BASED_API_CONTEXT = "FileBasedApiContext";
         public static final String EnableOnDemandLoadingAPIS = "EnableOnDemandLoadingAPIS";
 
     }
@@ -3235,5 +3239,11 @@ public final class APIConstants {
     public static class TokenValidationConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
+    }
+
+    public static class TransactionCounter {
+
+        public static final String TRANSACTIONCOUNTER = "TransactionCounter";
+        public static final String COUNTER_ENABLED = "Enabled";
     }
 }

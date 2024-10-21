@@ -39,7 +39,9 @@ import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.common.gateway.constants.HealthCheckConstants;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
@@ -209,8 +211,11 @@ public class InMemoryAPIDeployer {
         if (!redeployChangedAPIs) {
             try {
                 deployJWKSSynapseAPI(tenantDomain); // Deploy JWKS API
+                if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain)) {
+                    deployHealthCheckSynapseAPI(tenantDomain); // Deploy HealthCheck API for the super tenant
+                }
             } catch (APIManagementException e) {
-                log.error("Error while deploying JWKS API for tenant domain :" + tenantDomain, e);
+                log.error("Error while deploying in-memory APIs for tenant domain :" + tenantDomain, e);
             }
         }
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
@@ -548,6 +553,62 @@ public class InMemoryAPIDeployer {
                 MessageContext.destroyCurrentMessageContext();
                 PrivilegedCarbonContext.endTenantFlow();
             }
+        }
+    }
+
+    /**
+     * Deploy Synapse API for the Health Check endpoint
+     *
+     * @param tenantDomain tenant domain
+     */
+    public static void deployHealthCheckSynapseAPI(String tenantDomain) throws APIManagementException {
+        try {
+            // Deploy Health Check API for tenant
+            MessageContext.setCurrentMessageContext(
+                    org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            GatewayAPIDTO healthCheckAPIDto = new GatewayAPIDTO();
+
+            String healthCheckSynapseAPI = "<api xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
+                    HealthCheckConstants.HEALTH_CHECK_API_NAME + "\" context=\""
+                    + HealthCheckConstants.HEALTH_CHECK_API_CONTEXT
+                    + "\" binds-to=\"default,WebhookServer,SecureWebhookServer\">\n"
+                    + "    <resource binds-to=\"default,WebhookServer,SecureWebhookServer\" methods=\"GET\" "
+                    + "url-mapping=\"/*\" faultSequence=\"fault\">\n"
+                    + "        <inSequence>\n"
+                    + "            <property name=\"" + Constants.SKIP_METRICS_PUBLISHING + "\" "
+                    + "value=\"true\" type=\"BOOLEAN\" xmlns:m0=\"http://services.samples/xsd\"/>\n"
+                    + "            <send>\n"
+                    + "                <endpoint name=\"" + HealthCheckConstants.HEALTH_CHECK_API_NAME + "\">\n"
+                    + "                     <address uri=\"https://localhost:"
+                    + System.getProperty(APIConstants.HTTPS_TRANSPORT_PORT)
+                    + "/api/am/gateway/v2/server-startup-healthcheck\" format=\"GET\">\n"
+                    + "                           <timeout>\n"
+                    + "                                <duration>30000</duration>\n"
+                    + "                                <responseAction>fault</responseAction>\n"
+                    + "                           </timeout>\n"
+                    + "                     </address>\n"
+                    + "                </endpoint>\n"
+                    + "            </send>\n"
+                    + "        </inSequence>\n"
+                    + "    </resource>\n"
+                    + "</api>\n";
+
+            healthCheckAPIDto.setName(HealthCheckConstants.HEALTH_CHECK_API_NAME);
+            healthCheckAPIDto.setTenantDomain(tenantDomain);
+            healthCheckAPIDto.setApiDefinition(healthCheckSynapseAPI);
+
+            log.info("Deploying synapse artifacts of " + healthCheckAPIDto.getName());
+            APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
+            apiGatewayAdmin.deployAPI(healthCheckAPIDto);
+            DataHolder.getInstance().markAPIAsDeployed(healthCheckAPIDto);
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving Health Check API Artifact", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 }

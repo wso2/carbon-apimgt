@@ -4823,11 +4823,19 @@ public final class APIUtil {
      */
     public static void loadTenantConfigBlockingMode(String tenantDomain) {
 
+        boolean isTenantFlowStarted = false;
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            isTenantFlowStarted = true;
             ConfigurationContext ctx = ServiceReferenceHolder.getContextService().getServerConfigContext();
             TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, ctx);
         } catch (Exception e) {
             log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -10953,5 +10961,15 @@ public final class APIUtil {
         System.arraycopy(array1, 0, result, 0, array1.length);
         System.arraycopy(array2, 0, result, array1.length, array2.length);
         return result;
+    }
+
+    /**
+     * This method checks whether the transaction counter feature is enabled.
+     *
+     * @return true if the transaction counter is enabled, false otherwise
+     */
+    public static boolean getTransactionCounterEnable() {
+       return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getTransactionCounterProperties();
     }
 }

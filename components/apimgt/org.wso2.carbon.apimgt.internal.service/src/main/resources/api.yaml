@@ -693,13 +693,16 @@ paths:
           in: query
           required: false
           type: string
-        - name: organization
-          in: query
-          required: false
+        - name: xWSO2Tenant
+          in: header
+          description: |
+            This is used to specify the tenant domain, where the resource need to be
+                        retrieved from.
           type: string
+          required: true
       responses:
         200:
-          description: 'Event Received success'
+          description: 'LLM providers received success'
           schema:
             $ref: '#/definitions/LLMProviderList'
         default:
@@ -720,6 +723,13 @@ paths:
           in: path
           required: true
           type: string
+        - name: xWSO2Tenant
+          in: header
+          description: |
+            This is used to specify the tenant domain, where the resource need to be
+                        retrieved from.
+          type: string
+          required: true
       responses:
         200:
           description: 'Event Received success'
@@ -1070,8 +1080,6 @@ definitions:
         description: Whether subscription validation is disabled.
         default: false
         example: false
-      aiConfiguration:
-        $ref: '#/definitions/AIConfiguration'
       isEgress:
         type: boolean
         description: Indicates if the API is an egress API.
@@ -1080,16 +1088,6 @@ definitions:
         type: string
         description: The subtype of the API.
         example: Default
-
-
-  #-----------------------------------------------------
-  # The AIConfiguration resource
-  #-----------------------------------------------------
-  AIConfiguration:
-    properties:
-      llmProviderId:
-        type: string
-        description: UUID of the LLM (Large Language Model) provider.
 
   #-----------------------------------------------------
   # synapse Artifact resource
@@ -1794,7 +1792,7 @@ definitions:
   LLMProviderList:
     title: LLM Provider Config List
     properties:
-      apis:
+      llmProviders:
         type: array
         items:
           $ref: '#/definitions/LLMProvider'

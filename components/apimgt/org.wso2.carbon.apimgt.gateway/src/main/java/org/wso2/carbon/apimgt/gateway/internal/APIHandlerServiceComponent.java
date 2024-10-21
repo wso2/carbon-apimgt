@@ -165,6 +165,8 @@ public class APIHandlerServiceComponent {
         CacheProvider.createGatewayInternalKeyCache();
         CacheProvider.createGatewayInternalKeyDataCache();
         CacheProvider.createInvalidInternalKeyCache();
+
+        setTransportHttpsPort();
     }
 
     @Deactivate
@@ -541,6 +543,13 @@ public class APIHandlerServiceComponent {
             log.debug("Un-setting SynapseConfigurationService");
         }
         ServiceReferenceHolder.getInstance().setSynapseConfigurationService(null);
+    }
+
+    private void setTransportHttpsPort() {
+        ConfigurationContextService configurationContextService =
+                ServiceReferenceHolder.getInstance().getConfigurationContextService();
+        System.setProperty(APIConstants.HTTPS_TRANSPORT_PORT,
+                Integer.toString(CarbonUtils.getTransportPort(configurationContextService, APIConstants.HTTPS_PROTOCOL)));
     }
 }
 

@@ -503,7 +503,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleBadRequest("Username cannot be null", log);
             }
 
-            String userId = applicationThrottleResetDTO.getUserName();
+            String user = applicationThrottleResetDTO.getUserName();
+            String userId = MultitenantUtils.getTenantAwareUsername(user);
             String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getOrganization(messageContext);
 

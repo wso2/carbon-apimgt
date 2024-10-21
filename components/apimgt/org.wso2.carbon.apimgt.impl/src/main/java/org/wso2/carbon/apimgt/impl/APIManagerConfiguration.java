@@ -139,6 +139,7 @@ public class APIManagerConfiguration {
     private TokenValidationDto tokenValidationDto = new TokenValidationDto();
     private boolean enableAiConfiguration;
     private String hashingAlgorithm = SHA_256;
+    private boolean isTransactionCounterEnabled;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -668,10 +669,19 @@ public class APIManagerConfiguration {
                 setTokenValidation(element);
             } else if (APIConstants.HASHING.equals(localName)) {
                 setHashingAlgorithm(element);
+            } else if (APIConstants.TransactionCounter.TRANSACTIONCOUNTER.equals(localName)) {
+                OMElement counterEnabled = element.getFirstChildWithName(new QName(APIConstants.TransactionCounter.COUNTER_ENABLED));
+                if (counterEnabled != null) {
+                    isTransactionCounterEnabled = Boolean.parseBoolean(counterEnabled.getText());
+                }
             }
             readChildElements(element, nameStack);
             nameStack.pop();
         }
+    }
+
+    public boolean getTransactionCounterProperties() {
+        return isTransactionCounterEnabled;
     }
 
     public JSONObject getSubscriberAttributes() {
@@ -2316,6 +2326,19 @@ public class APIManagerConfiguration {
                 OMElement labelElement = (OMElement) labelsIterator.next();
                 if (labelElement != null) {
                     gatewayArtifactSynchronizerProperties.getGatewayLabels().add(labelElement.getText());
+                }
+            }
+        }
+
+        OMElement gatewayFileBasedContextsElement = omElement
+                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.FILE_BASED_API_CONTEXTS));
+        if (gatewayFileBasedContextsElement != null) {
+            Iterator contextsIterator = gatewayFileBasedContextsElement
+                    .getChildrenWithLocalName(APIConstants.GatewayArtifactSynchronizer.FILE_BASED_API_CONTEXT);
+            while (contextsIterator.hasNext()) {
+                OMElement contextElement = (OMElement) contextsIterator.next();
+                if (contextElement != null) {
+                    gatewayArtifactSynchronizerProperties.getFileBasedApiContexts().add(contextElement.getText());
                 }
             }
         }

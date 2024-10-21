@@ -27,9 +27,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
@@ -56,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GatewayPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.LLMProviderEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopesEvent;
@@ -424,95 +427,72 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
             }
         } else if (EventType.LLM_PROVIDER_CREATE.toString().equals(eventType)) {
             try {
-                createLLMProvider(eventJson);
+                LLMProviderEvent providerEvent = new Gson().fromJson(eventJson, LLMProviderEvent.class);
+                addProviderConfigurations(providerEvent, providerEvent.getTenantDomain());
             } catch (Exception e) {
-                log.error("Error while handling LLM_PROVIDER_CREATE event", e);
+                log.error("Error while handling LLM provider add event", e);
             }
         } else if (EventType.LLM_PROVIDER_DELETE.toString().equals(eventType)) {
             try {
-                deleteLLMProvider(eventJson);
+                LLMProviderEvent providerEvent = new Gson().fromJson(eventJson, LLMProviderEvent.class);
+                removeProviderConfigurations(providerEvent.getId());
             } catch (Exception e) {
-                log.error("Error while handling LLM_PROVIDER_DELETE event", e);
+                log.error("Error while handling LLM provider delete event", e);
             }
         } else if (EventType.LLM_PROVIDER_UPDATE.toString().equals(eventType)) {
             try {
-                updateLLMProvider(eventJson);
+                LLMProviderEvent providerEvent = new Gson().fromJson(eventJson, LLMProviderEvent.class);
+                updateProviderConfigurations(providerEvent, providerEvent.getTenantDomain());
             } catch (Exception e) {
-                log.error("Error while handling LLM_PROVIDER_UPDATE event", e);
+                log.error("Error while handling LLM provider update event", e);
             }
         }
     }
 
     /**
-     * Updates the configuration for an existing LLM provider.
-     *
-     * @param eventJson JSON string containing provider details and configuration.
-     */
-    private void updateLLMProvider(String eventJson) {
-        LLMProvider provider = extractLLMProvider(eventJson);
-        updateProviderConfigurations(provider);
-    }
-
-    /**
-     * Creates a new LLM provider with the given configurations.
-     *
-     * @param eventJson JSON string containing provider details and configuration.
-     */
-    private void createLLMProvider(String eventJson) {
-        LLMProvider provider = extractLLMProvider(eventJson);
-        addProviderConfigurations(provider);
-    }
-
-    /**
-     * Deletes an existing LLM provider.
-     *
-     * @param eventJson JSON string containing provider details.
-     */
-    private void deleteLLMProvider(String eventJson) {
-        JSONObject jsonObject = new JSONObject(eventJson);
-        String id = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_ID);
-        removeProviderConfigurations(id);
-    }
-
-    /**
-     * Extracts LLM Provider details from a JSON event string.
-     *
-     * @param eventJson the JSON string containing LLM provider details
-     * @return the LLMProvider object populated with the extracted details
-     */
-    private LLMProvider extractLLMProvider(String eventJson) {
-        JSONObject jsonObject = new JSONObject(eventJson);
-        LLMProvider provider = new LLMProvider();
-        String id = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_ID);
-        String name = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_NAME);
-        String apiVersion = jsonObject.getString(AIAPIConstants.LLM_PROVIDER_API_VERSION);
-        provider.setId(id);
-        provider.setName(name);
-        provider.setApiVersion(apiVersion);
-        return provider;
-    }
-
-    /**
-     * Updates LLM provider configurations in the DataHolder.
-     *
-     * @param provider LLMProvider object containing provider details.
-     */
-    private void updateProviderConfigurations(LLMProvider provider) {
-        String configurations = getProviderConfigurations(provider.getId());
-        provider.setConfigurations(configurations);
-        DataHolder.getInstance().updateLLMProviderConfigurations(provider);
-    }
-
-    /**
      * Adds new LLM provider configurations to the DataHolder.
      *
-     * @param provider LLMProvider object containing provider details.
+     * @param providerEvent LLMProviderEvent containing provider details.
+     * @param tenantDomain  Tenant Domain.
      */
-    private void addProviderConfigurations(LLMProvider provider) {
-        String configurations = getProviderConfigurations(provider.getId());
-        provider.setConfigurations(configurations);
-        DataHolder.getInstance().addLLMProviderConfigurations(provider);
+    private void addProviderConfigurations(LLMProviderEvent providerEvent, String tenantDomain) {
+
+        LLMProviderInfo providerInfo = buildProviderInfo(providerEvent, tenantDomain);
+        DataHolder.getInstance().addLLMProviderConfigurations(providerInfo);
     }
+
+    /**
+     * Updates existing LLM provider configurations in the DataHolder.
+     *
+     * @param providerEvent LLMProviderEvent containing provider details.
+     * @param tenantDomain  Tenant Domain.
+     */
+    private void updateProviderConfigurations(LLMProviderEvent providerEvent, String tenantDomain) {
+
+        LLMProviderInfo providerInfo = buildProviderInfo(providerEvent, tenantDomain);
+        DataHolder.getInstance().updateLLMProviderConfigurations(providerInfo);
+    }
+
+    /**
+     * Helper method to build LLMProviderInfo object from the event.
+     *
+     * @param providerEvent LLMProviderEvent containing provider details.
+     * @param tenantDomain  Tenant Domain.
+     * @return LLMProviderInfo object with populated configurations.
+     */
+    private LLMProviderInfo buildProviderInfo(LLMProviderEvent providerEvent, String tenantDomain) {
+
+        LLMProviderInfo providerInfo = new LLMProviderInfo();
+        providerInfo.setId(providerEvent.getId());
+        providerInfo.setName(providerEvent.getName());
+        providerInfo.setApiVersion(providerEvent.getApiVersion());
+        LLMProviderConfiguration configurations = new Gson().fromJson(providerEvent.getConfiguration(),
+                LLMProviderConfiguration.class);
+        providerInfo.setConfigurations(configurations);
+
+        return providerInfo;
+    }
+
 
     /**
      * Removes LLM provider configurations from the DataHolder.
@@ -520,18 +500,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
      * @param providerId LLMProvider ID.
      */
     private void removeProviderConfigurations(String providerId) {
-        DataHolder.getInstance().removeLLMProviderConfigurations(providerId);
-    }
 
-    /**
-     * Retrieves provider configurations from the LLMProviderManager.
-     *
-     * @param providerId LLMProvider ID.
-     * @return The configuration string for the provider.
-     */
-    private String getProviderConfigurations(String providerId) {
-        return LLMProviderManager.getInstance()
-                .getLLMProviderConfiguration(providerId);
+        DataHolder.getInstance().removeLLMProviderConfigurations(providerId);
     }
 
     private void endTenantFlow() {
