@@ -111,7 +111,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.totalTokens = 0L;
         this.promptTokens = 0L;
         this.completionTokens = 0L;
-        this.messageSizeInBytes = 0;
+        this.messageSizeInBytes = 0L;
         this.customPropertyMap = Collections.emptyMap();
     }
 
@@ -146,9 +146,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.appId = appId;
         this.apiName = GatewayUtils.getAPINameFromContextAndVersion(messageContext);
         this.messageSizeInBytes = 0;
-        this.totalTokens = null;
-        this.promptTokens = null;
-        this.completionTokens = null;
+        this.totalTokens = 0L;
+        this.promptTokens = 0L;
+        this.completionTokens = 0L;
 
         ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
         boolean isVerbInfoContentAware = false;
