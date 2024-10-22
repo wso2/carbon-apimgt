@@ -239,7 +239,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_DEFAULT;
 import static org.wso2.carbon.apimgt.impl.APIConstants.COMMERCIAL_TIER_PLAN;
 
 /**
@@ -5355,7 +5354,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiUuid = apiRevision.getApiUUID();
             revisionUuid = apiRevision.getRevisionUUID();
         }
-        AIConfiguration configurations = apiMgtDAO.getAIConfiguration(apiUuid, revisionUuid, api.getOrganization());
+        AIConfiguration configurations = apiMgtDAO.getAIConfiguration(apiUuid, revisionUuid);
         if (configurations != null) {
             api.setAiConfiguration(configurations);
         }
@@ -6001,8 +6000,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         try {
             apiMgtDAO.addAPIRevision(apiRevision);
-            AIConfiguration aiConfiguration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null,
-                    organization);
+            AIConfiguration aiConfiguration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null);
             if (aiConfiguration != null) {
                 addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), aiConfiguration,
                         organization);
@@ -6056,17 +6054,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addAIConfiguration(String uuid, String revisionUuid, AIConfiguration aiConfiguration,
                                     String organization) throws APIManagementException {
 
-        String aiConfigurationId = UUID.randomUUID().toString();
-        String llmProviderId = aiConfiguration.getLlmProviderId();
+        String llmProviderId = resolveLlmProviderByNameAndApiVersion(aiConfiguration.getLlmProviderName(),
+                aiConfiguration.getLlmProviderApiVersion(), organization);
 
         if (llmProviderId == null) {
-            llmProviderId = resolveLlmProviderId(aiConfiguration, organization);
-        } else {
-            validateLlmProviderById(llmProviderId, organization);
+            llmProviderId = aiConfiguration.getLlmProviderId();
         }
 
         if (llmProviderId != null) {
-            apiMgtDAO.addAIConfiguration(uuid, revisionUuid, llmProviderId, aiConfigurationId);
+            apiMgtDAO.addAIConfiguration(uuid, revisionUuid, llmProviderId, UUID.randomUUID().toString());
         } else {
             throw new APIManagementException("Invalid AI configuration: LLM provider details missing.");
         }
@@ -6075,17 +6071,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Resolves the LLM provider ID based on the provider's name and API version.
      *
-     * @param aiConfiguration AI configuration object containing LLM provider details
-     * @param organization    Organization to which the API belongs
+     * @param llmProviderName       Name of the LLM Provider
+     * @param llmProviderApiVersion API version of the LLM Provider
+     * @param organization          Organization to which the API belongs
      * @return Resolved LLM provider ID or null if provider not found
      * @throws APIManagementException if LLM provider is not found
      */
-    private String resolveLlmProviderId(AIConfiguration aiConfiguration, String organization)
+    private String resolveLlmProviderByNameAndApiVersion(String llmProviderName, String llmProviderApiVersion,
+                                                         String organization)
             throws APIManagementException {
 
-        if (aiConfiguration.getLlmProviderName() != null && aiConfiguration.getLlmProviderApiVersion() != null) {
+        if (llmProviderName != null && llmProviderApiVersion != null) {
             LLMProvider provider = apiMgtDAO.getLLMProvider(organization,
-                    aiConfiguration.getLlmProviderName(), aiConfiguration.getLlmProviderApiVersion());
+                    llmProviderName, llmProviderApiVersion);
             if (provider != null) {
                 return provider.getId();
             }
