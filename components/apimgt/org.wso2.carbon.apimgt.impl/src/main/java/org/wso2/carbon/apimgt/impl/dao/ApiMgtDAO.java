@@ -19928,7 +19928,7 @@ public class ApiMgtDAO {
      * @return The AIConfiguration object if found, or null if no configuration exists.
      * @throws APIManagementException If an error occurs while retrieving the AI configuration.
      */
-    public AIConfiguration getAIConfiguration(String uuid, String revisionUUID, String organization)
+    public AIConfiguration getAIConfiguration(String uuid, String revisionUUID)
             throws APIManagementException {
 
 
@@ -19947,6 +19947,8 @@ public class ApiMgtDAO {
                     if (rs.next()) {
                         aiConfiguration = new AIConfiguration();
                         aiConfiguration.setLlmProviderId(rs.getString("LLM_PROVIDER_UUID"));
+                        aiConfiguration.setLlmProviderName(rs.getString("NAME"));
+                        aiConfiguration.setLlmProviderApiVersion(rs.getString("API_VERSION"));
                     }
                 }
                 connection.commit();
