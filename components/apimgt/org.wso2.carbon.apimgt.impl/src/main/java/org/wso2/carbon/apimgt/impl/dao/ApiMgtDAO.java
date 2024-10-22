@@ -14839,7 +14839,7 @@ public class ApiMgtDAO {
                          connection.prepareStatement(SQLConstants.DELETE_LLM_PROVIDER_SQL)) {
                 prepStmt.setString(1, organization);
                 prepStmt.setString(2, llmProviderId);
-                prepStmt.setBoolean(3, builtIn);
+                prepStmt.setString(3, Boolean.toString(builtIn));
                 prepStmt.executeUpdate();
                 connection.commit();
                 return llmProviderId;
