@@ -58,11 +58,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
@@ -70,8 +72,11 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -82,6 +87,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -627,7 +633,8 @@ public class OAS3Parser extends APIDefinition {
 
         info.setVersion(swaggerData.getVersion());
         openAPI.setInfo(info);
-        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL);
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL,
+                new KeyManagerConfigurationDTO());
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
         if (APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             modifyGraphQLSwagger(openAPI);
@@ -712,7 +719,8 @@ public class OAS3Parser extends APIDefinition {
                 addOrUpdatePathToSwagger(openAPI, resource);
             }
         }
-        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL);
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL,
+                new KeyManagerConfigurationDTO());
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
         
         openAPI.getInfo().setTitle(swaggerData.getTitle());
@@ -900,15 +908,17 @@ public class OAS3Parser extends APIDefinition {
      * @param api            API
      * @param oasDefinition  OAS definition
      * @param hostsWithSchemes host addresses with protocol mapping
+     * @param kmId             UUID of the Key Manager
      * @return OAS definition
      */
     @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes) {
+    public String getOASDefinitionForStore(API api, String oasDefinition,
+            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException {
 
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         updateOperations(openAPI);
         updateEndpoints(api, hostsWithSchemes, openAPI);
-        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(api), hostsWithSchemes);
+        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(api), hostsWithSchemes, kmId);
     }
 
     /**
@@ -917,16 +927,17 @@ public class OAS3Parser extends APIDefinition {
      * @param product        APIProduct
      * @param oasDefinition  OAS definition
      * @param hostsWithSchemes host addresses with protocol mapping
+     * @param kmId             UUID of the Key Manager
      * @return OAS definition
      */
     @Override
     public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
-                                           Map<String, String> hostsWithSchemes) {
+            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException {
 
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         updateOperations(openAPI);
         updateEndpoints(product, hostsWithSchemes, openAPI);
-        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(product), hostsWithSchemes);
+        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(product), hostsWithSchemes, kmId);
     }
 
     /**
@@ -1105,38 +1116,54 @@ public class OAS3Parser extends APIDefinition {
      * @param openAPI     openapi definition
      * @param swaggerData Swagger related API data
      */
-    private void updateSwaggerSecurityDefinition(OpenAPI openAPI, SwaggerData swaggerData, String authUrl) {
+    private void updateSwaggerSecurityDefinition(OpenAPI openAPI, SwaggerData swaggerData, String authUrl,
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
-        if (openAPI.getComponents() == null) {
-            openAPI.setComponents(new Components());
+        if (keyManagerConfigurationDTO == null || StringUtils.isEmpty(keyManagerConfigurationDTO.getUuid())) {
+            if (openAPI.getComponents() == null) {
+                openAPI.setComponents(new Components());
+            }
+            Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
+            if (securitySchemes == null) {
+                securitySchemes = new HashMap<>();
+                openAPI.getComponents().setSecuritySchemes(securitySchemes);
+            }
+            SecurityScheme securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY);
+            if (securityScheme == null) {
+                securityScheme = new SecurityScheme();
+                securityScheme.setType(SecurityScheme.Type.OAUTH2);
+                securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, securityScheme);
+                List<SecurityRequirement> security = new ArrayList<SecurityRequirement>();
+                SecurityRequirement secReq = new SecurityRequirement();
+                secReq.addList(OPENAPI_SECURITY_SCHEMA_KEY, new ArrayList<String>());
+                security.add(secReq);
+                openAPI.setSecurity(security);
+            }
+            if (securityScheme.getFlows() == null) {
+                securityScheme.setFlows(new OAuthFlows());
+            }
+            OAuthFlow oAuthFlow = securityScheme.getFlows().getImplicit();
+            if (oAuthFlow == null) {
+                oAuthFlow = new OAuthFlow();
+                securityScheme.getFlows().setImplicit(oAuthFlow);
+            }
+            if (oAuthFlow.getAuthorizationUrl() == null) {
+                oAuthFlow.setAuthorizationUrl(authUrl);
+            }
+            setScopesToOAuthFlow(oAuthFlow, swaggerData);
+        } else {
+            addSecuritySchemeToOpenAPI(openAPI, keyManagerConfigurationDTO, authUrl, swaggerData);
         }
-        Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
-        if (securitySchemes == null) {
-            securitySchemes = new HashMap<>();
-            openAPI.getComponents().setSecuritySchemes(securitySchemes);
-        }
-        SecurityScheme securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY);
-        if (securityScheme == null) {
-            securityScheme = new SecurityScheme();
-            securityScheme.setType(SecurityScheme.Type.OAUTH2);
-            securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, securityScheme);
-            List<SecurityRequirement> security = new ArrayList<SecurityRequirement>();
-            SecurityRequirement secReq = new SecurityRequirement();
-            secReq.addList(OPENAPI_SECURITY_SCHEMA_KEY, new ArrayList<String>());
-            security.add(secReq);
-            openAPI.setSecurity(security);
-        }
-        if (securityScheme.getFlows() == null) {
-            securityScheme.setFlows(new OAuthFlows());
-        }
-        OAuthFlow oAuthFlow = securityScheme.getFlows().getImplicit();
-        if (oAuthFlow == null) {
-            oAuthFlow = new OAuthFlow();
-            securityScheme.getFlows().setImplicit(oAuthFlow);
-        }
-        if (oAuthFlow.getAuthorizationUrl() == null) {
-            oAuthFlow.setAuthorizationUrl(authUrl);
-        }
+    }
+
+    /**
+     * Add scopes for OAuth flow
+     *
+     * @param oAuthFlow     existing oauthFlow object
+     * @param swaggerData   Swagger related API data
+     */
+    private void setScopesToOAuthFlow(OAuthFlow oAuthFlow, SwaggerData swaggerData){
+
         Scopes oas3Scopes = new Scopes();
         Set<Scope> scopes = swaggerData.getScopes();
         if (scopes != null && !scopes.isEmpty()) {
@@ -1151,6 +1178,136 @@ public class OAS3Parser extends APIDefinition {
             oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
         oAuthFlow.setScopes(oas3Scopes);
+    }
+
+    /**
+     * Set security schema with the information from key manger configurations
+     *
+     * @param openAPI           OpenAPI spec
+     * @param keyManagerConfig  Key manager information
+     * @param authUrl           Default authorization url for the value not existing cases
+     */
+    private void addSecuritySchemeToOpenAPI(OpenAPI openAPI, KeyManagerConfigurationDTO keyManagerConfig,
+            String authUrl, SwaggerData swaggerData) {
+
+        if (openAPI.getComponents() == null) {
+            openAPI.setComponents(new Components());
+        }
+
+        Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
+        if (securitySchemes != null && securitySchemes.containsKey(OPENAPI_SECURITY_SCHEMA_KEY)) {
+            // Remove the existing default security scheme
+            securitySchemes.remove(OPENAPI_SECURITY_SCHEMA_KEY);
+        }
+
+        SecurityScheme securityScheme = new SecurityScheme()
+                .type(SecurityScheme.Type.OAUTH2)
+                .flows(generateOAuthFlows(keyManagerConfig, authUrl, swaggerData));
+
+        // Add the security scheme to components using key manager type as the key
+        openAPI.getComponents().addSecuritySchemes(keyManagerConfig.getType(), securityScheme);
+    }
+
+    /**
+     * Add the key manager provided flows supported by OAS3
+     *
+     * @param keyManagerConfig  Key manager information
+     * @param authUrl           Default authorization url for the value not existing cases
+     * @return OAuthFlows object with generated flows
+     */
+    private OAuthFlows generateOAuthFlows(KeyManagerConfigurationDTO keyManagerConfig, String authUrl,
+            SwaggerData swaggerData) {
+        OAuthFlows oAuthFlows = new OAuthFlows();
+        List<String> grantTypes = (List<String>) keyManagerConfig.getAdditionalProperties().get("grant_types");
+
+        if (Objects.nonNull(grantTypes)) {
+            String tokenEP = null;
+            String authorizeEP = null;
+            if (keyManagerConfig.getAdditionalProperties() != null) {
+                // To keep tokenEP and authorizeEP remains null if the values get null when retrieving
+                tokenEP = Objects.toString(
+                        keyManagerConfig.getAdditionalProperties().get(APIConstants.KeyManager.TOKEN_ENDPOINT), "");
+                authorizeEP = Objects.toString(
+                        keyManagerConfig.getAdditionalProperties().get(APIConstants.KeyManager.AUTHORIZE_ENDPOINT), "");
+            }
+            // This will generate only supported flows by OAS3
+            for (String grantType : grantTypes) {
+                OAuthFlow flow = new OAuthFlow();
+                if (APIConstants.KeyManager.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType) && !StringUtils.isEmpty(
+                        tokenEP)) {
+                    configureAuthorizationCodeFlow(flow, authUrl, authorizeEP, tokenEP);
+                    setScopesToOAuthFlow(flow, swaggerData);
+                    oAuthFlows.authorizationCode(flow);
+                } else if (APIConstants.KeyManager.IMPLICIT_GRANT_TYPE.equals(grantType)) {
+                    configureImplicitFlow(flow, authUrl, authorizeEP);
+                    setScopesToOAuthFlow(flow, swaggerData);
+                    oAuthFlows.implicit(flow);
+                } else if (APIConstants.KeyManager.PASSWORD_GRANT_TYPE.equals(grantType) && !StringUtils.isEmpty(
+                        tokenEP)) {
+                    configurePasswordFlow(flow, tokenEP);
+                    setScopesToOAuthFlow(flow, swaggerData);
+                    oAuthFlows.password(flow);
+                } else if (APIConstants.KeyManager.CLIENT_CREDENTIALS_GRANT_TYPE.equals(grantType)
+                        && !StringUtils.isEmpty(tokenEP)) {
+                    configureClientCredentialsFlow(flow, tokenEP);
+                    setScopesToOAuthFlow(flow, swaggerData);
+                    oAuthFlows.clientCredentials(flow);
+                }
+            }
+        }
+        return oAuthFlows;
+    }
+
+    /**
+     * set authorization code flow information to the flow
+     *
+     * @param flow              flow of adding the information
+     * @param authUrl           Default authorization url for the value not existing cases
+     * @param authorizeEP       authorization endpoint url
+     * @param tokenEP           token endpoint url
+     */
+    private void configureAuthorizationCodeFlow(OAuthFlow flow, String authUrl, String authorizeEP, String tokenEP) {
+        if (!StringUtils.isEmpty(authorizeEP)) {
+            flow.setAuthorizationUrl(authorizeEP);
+        } else {
+            flow.setAuthorizationUrl(authUrl);
+        }
+        flow.setTokenUrl(tokenEP);
+    }
+
+    /**
+     * set implicit flow information to the flow
+     *
+     * @param flow              flow of adding the information
+     * @param authUrl           Default authorization url for the value not existing cases
+     * @param authorizeEP       authorization endpoint url
+     */
+    private void configureImplicitFlow(OAuthFlow flow, String authUrl, String authorizeEP) {
+        if (!StringUtils.isEmpty(authorizeEP)) {
+            flow.setAuthorizationUrl(authorizeEP);
+        } else {
+            flow.setAuthorizationUrl(authUrl);
+        }
+    }
+
+    /**
+     * set password flow information to the flow
+     *
+     * @param flow              flow of adding the information
+     * @param tokenEP           token endpoint url
+     */
+    private void configurePasswordFlow(OAuthFlow flow, String tokenEP) {
+        flow.setTokenUrl(tokenEP);
+    }
+
+    /**
+     * set client credentials flow information to the flow
+     *
+     * @param flow              flow of adding the information
+     * @param tokenEP           token endpoint url
+     */
+    private void configureClientCredentialsFlow(OAuthFlow flow, String tokenEP) {
+        flow.setTokenUrl(tokenEP);
     }
 
     /**
@@ -1320,10 +1477,29 @@ public class OAS3Parser extends APIDefinition {
      * @param openAPI        OpenAPI
      * @param swaggerData    SwaggerData
      * @param hostsWithSchemes GW hosts with protocols
+     * @param kmId             UUID of the Key Manager
      * @return updated OAS definition
+     * @throws APIManagementException if an error occurred
      */
     private String updateSwaggerSecurityDefinitionForStore(OpenAPI openAPI, SwaggerData swaggerData,
-            Map<String,String> hostsWithSchemes) {
+            Map<String,String> hostsWithSchemes, String kmId) throws APIManagementException {
+
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = null;
+        try {
+            if (!StringUtils.isEmpty(kmId)) {
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                APIAdmin apiAdmin = new APIAdminImpl();
+                keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationById(tenantDomain, kmId);
+                if (keyManagerConfigurationDTO == null || (StringUtils.isEmpty(kmId) && !Objects.equals(
+                        keyManagerConfigurationDTO.getType(), APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE))) {
+                    keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationByName(tenantDomain,
+                            APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+                }
+            }
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Failed to retrieve key manager information by name or ID",
+                    ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
+        }
 
         String authUrl;
         // By Default, add the GW host with HTTPS protocol if present.
@@ -1332,7 +1508,7 @@ public class OAS3Parser extends APIDefinition {
         } else {
             authUrl = (hostsWithSchemes.get(APIConstants.HTTP_PROTOCOL)).concat("/authorize");
         }
-        updateSwaggerSecurityDefinitionForStore(openAPI, swaggerData, authUrl);
+        updateSwaggerSecurityDefinitionForStore(openAPI, swaggerData, authUrl, keyManagerConfigurationDTO);
         return prettifyOAS3ToJson(openAPI);
     }
 
@@ -1344,48 +1520,55 @@ public class OAS3Parser extends APIDefinition {
      * @param swaggerData SwaggerData
      * @param authUrl     Authorization URL
      */
-    private void updateSwaggerSecurityDefinitionForStore(OpenAPI openAPI, SwaggerData swaggerData, String authUrl) {
+    private void updateSwaggerSecurityDefinitionForStore(OpenAPI openAPI, SwaggerData swaggerData, String authUrl,
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
-        if (openAPI.getComponents() == null) openAPI.setComponents(new Components());
+        if (openAPI.getComponents() == null)
+            openAPI.setComponents(new Components());
         // Get the security defined for the current API.
-        List<String> secList = swaggerData.getSecurity() != null ? Arrays.asList(swaggerData.getSecurity().split(","))
-                : new ArrayList<>();
+        List<String> secList = swaggerData.getSecurity() != null ?
+                Arrays.asList(swaggerData.getSecurity().split(",")) :
+                new ArrayList<>();
         // Get the security schemes defined in the OAS definition.
         Map<String, SecurityScheme> securitySchemes = openAPI.getComponents().getSecuritySchemes();
-        if (securitySchemes == null) {
-            // If no security schemes defined, create a new map.
-            securitySchemes = new HashMap<>();
-            openAPI.getComponents().setSecuritySchemes(securitySchemes);
-        }
-        List<SecurityRequirement> security = new ArrayList<>(); // Override with new global security requirements.
-        openAPI.setSecurity(security);
-        // If the security in API is empty or default oauth, add oauth2 security to the OAS definition.
-        if (secList.isEmpty() || secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Updating the OAS definition with default oauth2 security of API: " + swaggerData.getTitle()
-                        + " Version: " + swaggerData.getVersion());
+        if (keyManagerConfigurationDTO == null || StringUtils.isEmpty(keyManagerConfigurationDTO.getUuid())) {
+            if (securitySchemes == null) {
+                // If no security schemes defined, create a new map.
+                securitySchemes = new HashMap<>();
+                openAPI.getComponents().setSecuritySchemes(securitySchemes);
             }
-            // Add oauth to global security requirement to the OAS definition.
-            OASParserUtil.addSecurityRequirementToSwagger(openAPI, OPENAPI_SECURITY_SCHEMA_KEY);
-            // If default oauth type security scheme in the OAS definition, add it.
-            SecurityScheme securityScheme = securitySchemes.computeIfAbsent(OPENAPI_SECURITY_SCHEMA_KEY,
-                    key -> {
-                        SecurityScheme newOAuthScheme = new SecurityScheme();
-                        newOAuthScheme.setType(SecurityScheme.Type.OAUTH2);
-                        return newOAuthScheme;
-                    });
-            if (securityScheme.getFlows() == null) { // If no flows defined, create a new one.
-                securityScheme.setFlows(new OAuthFlows());
+            List<SecurityRequirement> security = new ArrayList<>(); // Override with new global security requirements.
+            openAPI.setSecurity(security);
+            // If the security in API is empty or default oauth, add oauth2 security to the OAS definition.
+            if (secList.isEmpty() || secList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Updating the OAS definition with default oauth2 security of API: " + swaggerData.getTitle()
+                                    + " Version: " + swaggerData.getVersion());
+                }
+                // Add oauth to global security requirement to the OAS definition.
+                OASParserUtil.addSecurityRequirementToSwagger(openAPI, OPENAPI_SECURITY_SCHEMA_KEY);
+                // If default oauth type security scheme in the OAS definition, add it.
+                SecurityScheme securityScheme = securitySchemes.computeIfAbsent(OPENAPI_SECURITY_SCHEMA_KEY, key -> {
+                    SecurityScheme newOAuthScheme = new SecurityScheme();
+                    newOAuthScheme.setType(SecurityScheme.Type.OAUTH2);
+                    return newOAuthScheme;
+                });
+                if (securityScheme.getFlows() == null) { // If no flows defined, create a new one.
+                    securityScheme.setFlows(new OAuthFlows());
+                }
+                OAuthFlow oAuthFlow = securityScheme.getFlows().getImplicit();
+                if (oAuthFlow == null) {    // If no implicit flow defined, create a new one.
+                    oAuthFlow = new OAuthFlow();
+                    securityScheme.getFlows().setImplicit(oAuthFlow);
+                }
+                // rewrite the authorization url if the authorization url is not empty.
+                oAuthFlow.setAuthorizationUrl(authUrl);
+                // Set the scopes defined in the API to the OAS definition.
+                OASParserUtil.setScopesFromAPIToSecurityScheme(swaggerData, securityScheme);
             }
-            OAuthFlow oAuthFlow = securityScheme.getFlows().getImplicit();
-            if (oAuthFlow == null) {    // If no implicit flow defined, create a new one.
-                oAuthFlow = new OAuthFlow();
-                securityScheme.getFlows().setImplicit(oAuthFlow);
-            }
-            // rewrite the authorization url if the authorization url is not empty.
-            oAuthFlow.setAuthorizationUrl(authUrl);
-            // Set the scopes defined in the API to the OAS definition.
-            OASParserUtil.setScopesFromAPIToSecurityScheme(swaggerData, securityScheme);
+        } else {
+            addSecuritySchemeToOpenAPI(openAPI, keyManagerConfigurationDTO, authUrl, swaggerData);
         }
         // If the Basic Auth security is in API, add basic security to the OAS definition.
         if (secList.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {

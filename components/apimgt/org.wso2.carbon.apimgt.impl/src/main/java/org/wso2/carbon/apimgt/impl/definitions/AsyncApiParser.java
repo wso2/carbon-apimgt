@@ -1875,12 +1875,14 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes) throws APIManagementException {
+    public String getOASDefinitionForStore(API api, String oasDefinition,
+            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException {
         return null;
     }
 
     @Override
-    public String getOASDefinitionForStore(APIProduct product, String oasDefinition, Map<String, String> hostsWithSchemes) throws APIManagementException {
+    public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
+            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException {
         return null;
     }
 
