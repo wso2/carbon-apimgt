@@ -507,11 +507,11 @@ public class APIKeyValidationService {
      * @throws APIManagementException in case of APIM Component initialization failure
      */
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, int appId,
-                                                        String tenantDomain)
+                                                        String tenantDomain, String keyType)
             throws APIKeyMgtException, APIManagementException {
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
-        return keyValidationHandler.validateSubscription(context, version, appId);
+        return keyValidationHandler.validateSubscription(context, version, appId, keyType);
     }
 
     public Map<String, Scope> retrieveScopes(String tenantDomain) {
