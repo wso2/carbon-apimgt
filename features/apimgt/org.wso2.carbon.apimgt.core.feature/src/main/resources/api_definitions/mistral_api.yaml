@@ -2028,7 +2028,7 @@ components:
         max_tokens:
           anyOf:
             - type: integer
-              minimum: 0
+              minimum: 300
             - type: 'null'
           title: Max Tokens
           description: >-
@@ -2173,7 +2173,7 @@ components:
         max_tokens:
           anyOf:
             - type: integer
-              minimum: 0
+              minimum: 300
             - type: 'null'
           title: Max Tokens
           description: >-
@@ -2421,7 +2421,7 @@ components:
         max_tokens:
           anyOf:
             - type: integer
-              minimum: 0
+              minimum: 300
             - type: 'null'
           title: Max Tokens
           description: >-
