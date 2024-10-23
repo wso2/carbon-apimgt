@@ -2031,6 +2031,7 @@ components:
               minimum: 0
             - type: 'null'
           title: Max Tokens
+          default: 300
           description: >-
             The maximum number of tokens to generate in the completion. The
             token count of your prompt plus `max_tokens` cannot exceed the
@@ -2176,6 +2177,7 @@ components:
               minimum: 0
             - type: 'null'
           title: Max Tokens
+          default: 300
           description: >-
             The maximum number of tokens to generate in the completion. The
             token count of your prompt plus `max_tokens` cannot exceed the
@@ -2424,6 +2426,7 @@ components:
               minimum: 0
             - type: 'null'
           title: Max Tokens
+          default: 300
           description: >-
             The maximum number of tokens to generate in the completion. The
             token count of your prompt plus `max_tokens` cannot exceed the
