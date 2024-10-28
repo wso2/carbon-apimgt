@@ -1280,6 +1280,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 if (clientIp != null) {
                     key = key.replaceAll("\\$clientIp", APIUtil.ipToBigInteger(clientIp).toString());
                 }
+                Object customPropertyObj = messageContext.getProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY);
+                if (customPropertyObj != null) {
+                    Map<String, Object> customProperties = (Map<String, Object>) customPropertyObj;
+                    for (Map.Entry<String, Object> entry : customProperties.entrySet()) {
+                        String customKey = "\\$customProperty\\." + entry.getKey();
+                        String customValue = entry.getValue() != null ? entry.getValue().toString() : "";
+                        key = key.replaceAll(customKey, customValue);
+                    }
+                }
                 if (getThrottleDataHolder().isThrottled(key)) {
                     long timestamp = getThrottleDataHolder().getThrottleNextAccessTimestamp(key);
                     messageContext.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
