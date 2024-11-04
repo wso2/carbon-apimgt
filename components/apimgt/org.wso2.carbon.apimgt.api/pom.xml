@@ -51,6 +51,10 @@
             <groupId>org.wso2.orbit.graphQL</groupId>
             <artifactId>graphQL</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
