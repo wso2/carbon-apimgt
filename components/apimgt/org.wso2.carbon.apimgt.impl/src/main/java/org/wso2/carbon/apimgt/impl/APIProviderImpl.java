@@ -1257,10 +1257,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
                                         endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
                                         endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
+                                        endpointSecurity.setProxyConfigs(oldEndpointSecurity.getProxyConfigs());
                                     }
                                 }
-                                endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new JSONParser()
-                                        .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
+                                endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION,
+                                        new JSONParser().parse(
+                                                new ObjectMapper().writeValueAsString(endpointSecurity)));
                             }
                         }
                         if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
@@ -1303,6 +1305,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
                                         endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
                                         endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
+                                        endpointSecurity.setProxyConfigs(oldEndpointSecurity.getProxyConfigs());
                                     }
                                 }
                                 endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX,
