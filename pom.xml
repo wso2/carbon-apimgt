@@ -28,6 +28,7 @@
         <module>service-stubs/apimgt</module>
         <module>components/apimgt</module>
         <module>features/apimgt</module>
+        <module>components/governance</module>
     </modules>
 
     <build>
@@ -2001,6 +2002,18 @@
                 <artifactId>javassist</artifactId>
                 <version>3.3.GA</version>
                 <scope>test</scope>
+            </dependency>
+
+            <!-- Governance Dependencies -->
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.governance.api</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.governance.impl</artifactId>
+                <version>${carbon.apimgt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

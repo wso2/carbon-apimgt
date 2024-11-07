@@ -1,0 +1,375 @@
+# Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
+#
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License
+################################################################################
+openapi: 3.0.1
+info:
+  version: v0.1
+  title: WSO2 API Manager - Governance
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Manager** - Governance.
+  contact:
+    name: WSO2
+    url: http://wso2.com/products/api-manager/
+    email: architecture@wso2.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://apis.wso2.com/api/am/governance/v0
+tags:
+  - name: Rulesets
+    description: API for managing rulesets.
+  - name: Governance Policies
+    description: API for managing governance policies.
+  - name: Compliance Assessment
+    description: API for accessing compliance details.
+  - name: Compliance Details
+    description: API for managing compliance details.
+  - name: Adherence Details
+    description: API for accessing adherence details.
+  - name: Organization Level Dashboard
+    description: API for organization level dashboard.
+  - name: Project Level Dashboard
+    description: API for project level dashboard.
+  - name: Component Level Dashboard
+    description: API for component level dashboard.
+  - name: Health Check
+    description: API for health check.
+  - name: External
+    description: API resources that are exposed to the external world via gateway.
+  - name: Internal
+    description: API resources that are not exposed to the external world.
+  - name: Deprecated
+    description: API resources that are deprecated.
+paths:
+  /rulesets:
+    get:
+      summary: Retrieves a list of rulesets.
+      description: Returns a list of all rulesets associated with the requested organization.
+      operationId: getRulesets
+      tags:
+        - Rulesets
+        - External
+      responses:
+        "200":
+          description: OK. Successful response with a list of rulesets.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesetList'
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create a new ruleset.
+      description: Creates a new ruleset in the user's organization.
+      operationId: createRuleset
+      tags:
+        - Rulesets
+        - External
+      requestBody:
+        required: true
+        description: JSON object containing the details of the new ruleset.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ruleset'
+      responses:
+        "201":
+          description: OK. Ruleset created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ruleset'
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /healthz/liveness:
+    get:
+      summary: Liveness Check
+      description: Checks if the application is alive and able to respond to requests.
+      operationId: getHealthzLiveness
+      tags:
+        - Health Check
+        - Internal
+      responses:
+        "200":
+          description: Application is alive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthzResponse"
+  /healthz/readiness:
+    get:
+      summary: Readiness Check
+      description: Checks if the application is ready to handle requests.
+      operationId: getHealthzReadiness
+      tags:
+        - Health Check
+        - Internal
+      responses:
+        "200":
+          description: Application is ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthzResponse"
+
+components:
+  schemas:
+    RulesetList:
+      type: object
+      description: A list of rulesets.
+      properties:
+        count:
+          type: integer
+          description: Number of rulesets returned.
+          example: 2
+        list:
+          type: array
+          description: List of rulesets.
+          items:
+            $ref: '#/components/schemas/RulesetInfo'
+    Ruleset:
+      type: object
+      description: Detailed information about a ruleset.
+      properties:
+        id:
+          type: string
+          description: UUID of the ruleset.
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Name of the ruleset.
+          example: "API Security Ruleset"
+        description:
+          type: string
+          description: A brief description of the ruleset.
+          example: "A ruleset designed to enforce security standards for APIs."
+        rulesetContent:
+          type: string
+          description: The content of the ruleset file (YAML or JSON).
+          example: |
+            rules:
+              oas2-always-use-https:
+                given:
+                  - '$.schemes[*]'
+                severity: error
+                then:
+                  function: enumeration
+                  functionOptions:
+                    values:
+                      - https
+                description: >-
+                  Host schemes must use the HTTPS protocol. Applies to: OpenAPI 2.0`
+                message: API host schemes must use the HTTPS protocol.
+                formats:
+                  - oas2
+
+        appliesTo:
+          type: string
+          description: Context or area to which the ruleset applies.
+          enum:
+            - api_metadata
+            - api_definition
+            - documentation
+          example: api_definition
+        documentationLink:
+          type: string
+          description: URL to the documentation related to the ruleset.
+          example: "https://example.com/docs/api-security-ruleset"
+        provider:
+          type: string
+          description: Entity or individual providing the ruleset.
+          example: "TechWave"
+        createdBy:
+          type: string
+          description: Identifier of the user who created the ruleset.
+          readOnly: true
+          example: "admin@gmail.com"
+        createdTime:
+          type: string
+          description: Timestamp when the ruleset was created.
+          readOnly: true
+          example: "2024-08-01T12:00:00Z"
+        updatedBy:
+          type: string
+          description: Identifier of the user who last updated the ruleset.
+          readOnly: true
+          example: "admin@gmail.com"
+        updatedTime:
+          type: string
+          description: Timestamp when the ruleset was last updated.
+          readOnly: true
+          example: "2024-08-10T12:00:00Z"
+      required:
+        - name
+        - rulesetContent
+        - appliesTo
+        - provider
+    RulesetInfo:
+      type: object
+      description: Detailed information about a ruleset.
+      properties:
+        id:
+          type: string
+          description: UUID of the ruleset.
+          readOnly: true
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Name of the ruleset.
+          example: "API Security Ruleset"
+        description:
+          type: string
+          description: A brief description of the ruleset.
+          example: "A ruleset designed to enforce security standards for APIs."
+        appliesTo:
+          type: string
+          description: Context or area to which the ruleset applies.
+          enum:
+            - api_metadata
+            - api_definition
+            - documentation
+        documentationLink:
+          type: string
+          description: URL to the documentation related to the ruleset.
+          example: "https://example.com/docs/api-security-ruleset"
+        provider:
+          type: string
+          description: Entity or individual providing the ruleset.
+          example: "TechWave"
+        createdBy:
+          type: string
+          description: Identifier of the user who created the ruleset.
+          readOnly: true
+          example: "admin@gmail.com"
+        createdTime:
+          type: string
+          description: Timestamp when the ruleset was created.
+          readOnly: true
+          example: "2024-08-01T12:00:00Z"
+        updatedBy:
+          type: string
+          description: Identifier of the user who last updated the ruleset.
+          readOnly: true
+          example: "admin@gmail.com"
+        updatedTime:
+          type: string
+          description: Timestamp when the ruleset was last updated.
+          readOnly: true
+          example: "2024-08-02T12:00:00Z"
+        isDefault:
+          type: boolean
+          description: Whether the ruleset is a default one or not.
+          example: true
+      required:
+        - name
+        - ruleset_file
+        - appliesTo
+        - provider
+    Error:
+      title: Error object returned with 4XX HTTP Status
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+          description: Error message.
+        description:
+          type: string
+          description: |
+            A detail description about the error message.
+        moreInfo:
+          type: string
+          description: |
+            Preferably an url with more details about the error.
+        error:
+          type: array
+          description: |
+            If there are more than one error list them out.
+            For example, list out validation errors by each field.
+          items:
+            $ref: "#/components/schemas/ErrorListItem"
+    ErrorListItem:
+      title: Description of individual errors that may have occurred during a request.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: |
+            Description about individual errors occurred
+        description:
+          type: string
+          description: |
+            A detail description about the error message.
+    HealthzResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: Ok
