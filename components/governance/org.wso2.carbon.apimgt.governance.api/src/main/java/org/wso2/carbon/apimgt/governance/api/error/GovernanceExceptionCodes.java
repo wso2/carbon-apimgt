@@ -62,6 +62,7 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     INVALID_RULESET_CONTENT_WITH_INFO(301013, "Invalid Ruleset content", 400, "Invalid Ruleset content, message: '%s'"),
     ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(301014, "Error while loading default ruleset content", 500, "Error while loading default ruleset provided by WSO2.", true),
     ERROR_WHILE_RETRIEVING_POLICY_IDS_BY_RULESET_ID(301015, "Error while retrieving policy ids for the ruleset.", 500, "Error while retrieving policy ids for ruleset id: %s", true),
+    INVALID_RULE_SEVERITY(301012, "Rule severity is invalid", 400, "Rule severity '%s' is invalid"),
 
     // Policy related codes
     ERROR_WHILE_CREATING_POLICY(401001, "Policy creation failed.", 500, "Error while creating governance policy in the organization %s", true),

@@ -65,7 +65,7 @@ return null;
     private String createdTime = null;
     private String updatedBy = null;
     private String updatedTime = null;
-    private Boolean isDefault = null;
+    private Boolean isDefault = false;
 
   /**
    * UUID of the ruleset.

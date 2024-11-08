@@ -19,7 +19,14 @@
 package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents the Ruleset Mapping Utility
@@ -69,5 +76,45 @@ public class RulesetMappingUtil {
         rulesetDTO.setUpdatedBy(createdRuleset.getUpdatedBy());
         rulesetDTO.setUpdatedTime(createdRuleset.getUpdatedTime());
         return rulesetDTO;
+    }
+
+    /**
+     * Converts a RulesetInfo object to a RulesetInfoDTO object
+     *
+     * @param rulesetInfo RulesetInfo object
+     * @return RulesetInfoDTO object
+     */
+    private static RulesetInfoDTO fromRulesetInfoToRulesetInfoDTO(RulesetInfo rulesetInfo) {
+        RulesetInfoDTO rulesetInfoDTO = new RulesetInfoDTO();
+        rulesetInfoDTO.setId(rulesetInfo.getId());
+        rulesetInfoDTO.setName(rulesetInfo.getName());
+        rulesetInfoDTO.setDescription(rulesetInfo.getDescription());
+        rulesetInfoDTO.setAppliesTo(RulesetInfoDTO.
+                AppliesToEnum.fromValue(rulesetInfo.getAppliesTo()));
+        rulesetInfoDTO.setDocumentationLink(rulesetInfo.getDocumentationLink());
+        rulesetInfoDTO.setProvider(rulesetInfo.getProvider());
+        rulesetInfoDTO.setCreatedBy(rulesetInfo.getCreatedBy());
+        rulesetInfoDTO.setCreatedTime(rulesetInfo.getCreatedTime());
+        rulesetInfoDTO.setUpdatedBy(rulesetInfo.getUpdatedBy());
+        rulesetInfoDTO.setUpdatedTime(rulesetInfo.getUpdatedTime());
+        return rulesetInfoDTO;
+    }
+
+    /**
+     * Converts a RulesetList object to a RulesetListDTO object
+     *
+     * @param rulesetList RulesetList object
+     * @return RulesetListDTO object
+     */
+    public static RulesetListDTO fromRulsetListToDTO(RulesetList rulesetList) {
+        RulesetListDTO rulesetListDTO = new RulesetListDTO();
+        rulesetListDTO.setCount(rulesetList.getCount());
+        List<RulesetInfo> rulesets = rulesetList.getRulesetList();
+        List<RulesetInfoDTO> rulesetInfoDTOs = new ArrayList();
+        for (RulesetInfo ruleset : rulesets) {
+            rulesetInfoDTOs.add(fromRulesetInfoToRulesetInfoDTO(ruleset));
+        }
+        rulesetListDTO.setList(rulesetInfoDTOs);
+        return rulesetListDTO;
     }
 }

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.governance.impl.dao;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 
 /**
  * This interface represents the Governance Ruleset DAO
@@ -35,4 +36,13 @@ public interface RulsetMgtDAO {
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
     Ruleset createRuleset(String organization, Ruleset ruleset) throws GovernanceException;
+
+    /**
+     * Get all the Governance Rulesets of the organization
+     *
+     * @param organization Organization
+     * @return RulesetList object
+     * @throws GovernanceException If an error occurs while getting the rulesets
+     */
+    RulesetList getRulesets(String organization) throws GovernanceException;
 }

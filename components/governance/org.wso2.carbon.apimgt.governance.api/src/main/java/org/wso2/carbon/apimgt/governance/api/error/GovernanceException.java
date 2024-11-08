@@ -81,4 +81,29 @@ public class GovernanceException extends Exception {
         super(message, cause);
         this.errorHandler = code;
     }
+
+    /**
+     * This is a default constructor where you can pass error code to error DTO
+     *
+     * @param code  Exception code that need to pass to the error DTO
+     * @param cause throwable object.
+     * @param args  arguments
+     */
+    public GovernanceException(ErrorHandler code, Throwable cause, Object... args) {
+        super(code.getErrorCode() + ":" + code.getErrorMessage() + "::"
+                + String.format(code.getErrorDescription(), args), cause);
+        this.errorHandler = code;
+    }
+
+    /**
+     * This is a default constructor where you can pass error code to error DTO
+     *
+     * @param code Exception code that need to pass to the error DTO
+     * @param args arguments
+     */
+    public GovernanceException(ErrorHandler code, Object... args) {
+        super(code.getErrorCode() + ":" + code.getErrorMessage() + "::"
+                + String.format(code.getErrorDescription(), args));
+        this.errorHandler = code;
+    }
 }

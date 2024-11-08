@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl;
 import org.wso2.carbon.apimgt.governance.api.manager.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulsetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulsetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
@@ -47,6 +48,20 @@ public class RulesetManagerImpl implements RulesetManager {
     @Override
     public Ruleset createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException {
         ruleset.setId(GovernanceUtil.generateUUID());
+        //TODO: Validate ruleset content with spectral service before creation
         return rulsetMgtDAO.createRuleset(organization, ruleset);
+    }
+
+    /**
+     * Get all the Governance Rulesets
+     *
+     * @param organization Organization
+     * @return RulesetList object
+     * @throws GovernanceException If an error occurs while getting the rulesets
+     */
+    @Override
+    public RulesetList getRulesets(String organization) throws GovernanceException {
+        // TODO: Add logic to support default rulesets, we need to add the default rulesets to this list too
+        return rulsetMgtDAO.getRulesets(organization);
     }
 }

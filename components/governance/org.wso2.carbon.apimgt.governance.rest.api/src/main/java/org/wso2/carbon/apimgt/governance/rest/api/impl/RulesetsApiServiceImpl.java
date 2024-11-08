@@ -22,10 +22,11 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.manager.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.RulesetMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -68,13 +69,20 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         }
     }
 
-    public Response getRulesets(MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+    /**
+     * Get all the Governance Rulesets
+     *
+     * @param messageContext MessageContext
+     * @return Response object
+     * @throws GovernanceException If an error occurs while getting the rulesets
+     */
+    public Response getRulesets(MessageContext messageContext) throws GovernanceException {
+
+        RulesetManager rulesetManager = new RulesetManagerImpl();
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        RulesetList rulesetList = rulesetManager.getRulesets(organization);
+        RulesetListDTO rulesetListDTO = RulesetMappingUtil.fromRulsetListToDTO(rulesetList);
+        return Response.status(Response.Status.OK).entity(rulesetListDTO).build();
     }
 }

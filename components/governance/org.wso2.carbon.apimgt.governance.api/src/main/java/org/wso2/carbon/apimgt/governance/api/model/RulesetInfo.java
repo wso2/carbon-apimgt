@@ -18,5 +18,107 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+/**
+ * This class represents a governance Ruleset
+ */
 public class RulesetInfo {
+    private String id;
+    private String name;
+    private String description;
+    private String appliesTo;
+    private String documentationLink;
+    private String provider;
+    private String createdBy;
+    private String createdTime;
+    private String updatedBy;
+    private String updatedTime;
+    private Boolean isDefault;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getAppliesTo() {
+        return appliesTo;
+    }
+
+    public void setAppliesTo(String appliesTo) {
+        this.appliesTo = appliesTo;
+    }
+
+    public String getDocumentationLink() {
+        return documentationLink;
+    }
+
+    public void setDocumentationLink(String documentationLink) {
+        this.documentationLink = documentationLink;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public String getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(String updatedTime) {
+        this.updatedTime = updatedTime;
+    }
+
+    public Boolean getDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(Boolean aDefault) {
+        isDefault = aDefault;
+    }
 }

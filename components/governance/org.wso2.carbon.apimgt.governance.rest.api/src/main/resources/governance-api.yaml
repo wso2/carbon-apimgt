@@ -94,6 +94,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_rule_read
     post:
       summary: Create a new ruleset.
       description: Creates a new ruleset in the user's organization.
@@ -139,6 +142,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_rule_manage
   /healthz/liveness:
     get:
       summary: Liveness Check
@@ -317,6 +323,7 @@ components:
           example: "2024-08-02T12:00:00Z"
         isDefault:
           type: boolean
+          default: false
           description: Whether the ruleset is a default one or not.
           example: true
       required:
@@ -373,3 +380,19 @@ components:
         status:
           type: string
           example: Ok
+  #####
+  # TODO: Fix scope validation logic. Currently scope validation is broken due to logic in apimgt.rest.api.common.RestAPICommonUtil
+  #####
+  securitySchemes:
+    OAuth2Security:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: https://localhost:9443/oauth2/token
+          scopes:
+            openid: Authorize access to user details
+            apim:gov_rule_read: Read governance rulesets
+            apim:gov_rule_manage: Manage governance rulesets
+            apim:gov_policy_read: Read governance policies
+            apim:gov_policy_manage: Manage governance policies
+            apim:gov_validate: Validate governance rulesets and policies

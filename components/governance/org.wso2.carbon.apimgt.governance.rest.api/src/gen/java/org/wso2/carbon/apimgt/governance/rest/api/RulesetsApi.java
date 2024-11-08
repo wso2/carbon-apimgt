@@ -41,7 +41,11 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Create a new ruleset.", notes = "Creates a new ruleset in the user's organization.", response = RulesetDTO.class, tags={ "Rulesets", "External",  })
+    @ApiOperation(value = "Create a new ruleset.", notes = "Creates a new ruleset in the user's organization.", response = RulesetDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
+        })
+    }, tags={ "Rulesets", "External",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "OK. Ruleset created successfully.", response = RulesetDTO.class),
         @ApiResponse(code = 400, message = "Client error.", response = ErrorDTO.class),
@@ -56,7 +60,11 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves a list of rulesets.", notes = "Returns a list of all rulesets associated with the requested organization.", response = RulesetListDTO.class, tags={ "Rulesets", "External" })
+    @ApiOperation(value = "Retrieves a list of rulesets.", notes = "Returns a list of all rulesets associated with the requested organization.", response = RulesetListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets")
+        })
+    }, tags={ "Rulesets", "External" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with a list of rulesets.", response = RulesetListDTO.class),
         @ApiResponse(code = 400, message = "Client error.", response = ErrorDTO.class),
