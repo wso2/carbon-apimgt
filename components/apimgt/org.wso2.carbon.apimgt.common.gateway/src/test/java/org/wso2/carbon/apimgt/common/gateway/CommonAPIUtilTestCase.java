@@ -96,7 +96,7 @@ public class CommonAPIUtilTestCase {
                 .withSSLContext(sslContext)
                 // proxyProtocol here is https (due to existing limitation)
                 .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol,
-                        new String[]{"localhost"})
+                        new String[]{"localhost"}, new String[]{})
                 .build();
         HttpClient clientForNonProxyHost = null;
         clientForNonProxyHost = CommonAPIUtil.getHttpClient("https", nonProxyHostBasedProxyConfig);
@@ -112,7 +112,8 @@ public class CommonAPIUtilTestCase {
         HttpClientConfigurationDTO configuration = builder
                 .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
                 .withSSLContext(sslContext)
-                .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, proxyPassword, proxyProtocol, nonProxyHosts)
+                .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, proxyPassword, proxyProtocol, nonProxyHosts,
+                        new String[] {})
                 .build();
 
         HttpClient client = null;
@@ -132,7 +133,8 @@ public class CommonAPIUtilTestCase {
         HttpClientConfigurationDTO configWithWrongProxyCredentials = builder
                 .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
                 .withSSLContext(sslContext)
-                .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol, nonProxyHosts)
+                .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol, nonProxyHosts,
+                        new String[] {})
                 .build();
         HttpClient clientWithWrongProxyCreds = null;
         clientWithWrongProxyCreds = CommonAPIUtil.getHttpClient("https", configWithWrongProxyCredentials);

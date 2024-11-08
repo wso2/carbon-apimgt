@@ -1575,6 +1575,7 @@ public final class APIConstants {
     public static final String PROXY_USERNAME = "ProxyConfig.Username";
     public static final String PROXY_PASSWORD = "ProxyConfig.Password";
     public static final String NON_PROXY_HOSTS = "ProxyConfig.NonProxyHosts";
+    public static final String TARGET_PROXY_HOSTS = "ProxyConfig.TargetProxyHosts";
     public static final String PROXY_PROTOCOL = "ProxyConfig.Protocol";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
