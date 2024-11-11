@@ -38,7 +38,7 @@ public class ServiceReferenceHolder {
         return govConfigurationService;
     }
 
-    public void setAPIManagerConfigurationService(GovernanceConfigurationService amConfigurationService) {
+    public void setGovernanceConfigurationService(GovernanceConfigurationService amConfigurationService) {
 
         this.govConfigurationService = amConfigurationService;
     }

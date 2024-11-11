@@ -33,8 +33,6 @@
     <packaging>bundle</packaging>
     <name>WSO2 API Manager Governance API</name>
 
-    <dependencies>
-    </dependencies>
 
     <build>
         <plugins>
