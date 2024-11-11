@@ -253,6 +253,17 @@ paths:
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/requestedTenant-Q'
+        - name: query
+          in: query
+          description: |
+            **Key Manager Specific Swagger Generation**.
+            To retrieve an OpenAPI Specification (OAS) definition for a specific Key Manager, please specify the Key Manager's ID in your request. 
+              
+            For example, by passing the query parameter `kmId=65e30b46-85e4-4788-85b7-b1c3de06b2e0`, you will receive the OAS definition containing all relevant information for the Key Manager associated with that ID.
+              
+            **Important:** If you're using a client that does not automatically handle URL encoding (such as `curl`), please ensure that you encode the URL properly.
+          schema:
+            type: string
       responses:
         200:
           description: |

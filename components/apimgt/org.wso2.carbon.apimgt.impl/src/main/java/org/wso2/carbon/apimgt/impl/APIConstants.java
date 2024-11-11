@@ -2778,6 +2778,12 @@ public final class APIConstants {
         public static final String ROLES = "roles";
         public static final String PERMISSION_TYPE = "permissionType";
         public static final String ALL_KEY_MANAGERS = "ALL";
+        public static final String AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
+        public static final String IMPLICIT_GRANT_TYPE = "implicit";
+        public static final String PASSWORD_GRANT_TYPE = "password";
+        public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
+        public static final String APPLICATION_GRANT_TYPE = "application";
+        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
 
         public static class KeyManagerEvent {
 
