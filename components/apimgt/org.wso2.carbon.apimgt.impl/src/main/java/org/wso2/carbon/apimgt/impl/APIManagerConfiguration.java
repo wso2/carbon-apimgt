@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.analytics.AnalyticsConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
@@ -187,6 +188,12 @@ public class APIManagerConfiguration {
     public Map<String, Map<String, String>> getLoginConfiguration() {
 
         return loginConfiguration;
+    }
+
+    private AnalyticsConfigurationDto analyticsConfigurationDto = new AnalyticsConfigurationDto();
+
+    public AnalyticsConfigurationDto getAnalyticsConfigurationDto() {
+        return analyticsConfigurationDto;
     }
 
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
