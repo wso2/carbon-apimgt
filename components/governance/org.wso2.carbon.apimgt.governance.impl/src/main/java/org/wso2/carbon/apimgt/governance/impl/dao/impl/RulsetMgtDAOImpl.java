@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.sql.Connection;
@@ -79,44 +80,35 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
     @Override
     public Ruleset createRuleset(String organization, Ruleset ruleset) throws GovernanceException {
 
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-
         InputStream rulesetContent = new ByteArrayInputStream(
                 ruleset.getRulesetContent().getBytes(Charset.defaultCharset()));
 
-        // TODO: Check whether the ruleset name is occupied by a default ruleset.
-
         String sqlQuery = SQLConstants.CREATE_RULESET;
-        try {
-            connection = GovernanceDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, ruleset.getId());
-            prepStmt.setString(2, ruleset.getName());
-            prepStmt.setString(3, ruleset.getDescription());
-            prepStmt.setBlob(4, rulesetContent);
-            prepStmt.setString(5, ruleset.getAppliesTo());
-            prepStmt.setString(6, ruleset.getDocumentationLink());
-            prepStmt.setString(7, ruleset.getProvider());
-            prepStmt.setString(8, organization);
-            prepStmt.setString(9, ruleset.getCreatedBy());
-            prepStmt.execute();
-            insertRules(ruleset.getId(), ruleset.getRulesetContent(), connection);
-            connection.commit();
-        } catch (SQLException | GovernanceException e) {
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             try {
-                if (connection != null) {
-                    connection.rollback();
-                }
-            } catch (SQLException ex) {
-                // Rollback failed. Exception will be thrown later for upper exception
-                log.error("Failed to rollback the adding Ruleset: " + ruleset.getName());
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, ruleset.getId());
+                prepStmt.setString(2, ruleset.getName());
+                prepStmt.setString(3, ruleset.getDescription());
+                prepStmt.setBlob(4, rulesetContent);
+                prepStmt.setString(5, ruleset.getAppliesTo());
+                prepStmt.setString(6, ruleset.getDocumentationLink());
+                prepStmt.setString(7, ruleset.getProvider());
+                prepStmt.setString(8, organization);
+                prepStmt.setString(9, ruleset.getCreatedBy());
+                prepStmt.setInt(10, ruleset.isDefault());
+                prepStmt.execute();
+                insertRules(ruleset.getId(), ruleset.getRulesetContent(), connection);
+                connection.commit();
+            } catch (SQLException | GovernanceException e) {
+                connection.rollback();
+                throw e;
             }
-            handleException("Error while adding the Ruleset: " + ruleset.getName() + " to the database", e);
-        } finally {
-            GovernanceDBUtil.closeAllConnections(prepStmt, connection, null);
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_CREATION_FAILED, e,
+                    ruleset.getName(), organization
+            );
         }
         return ruleset;
     }
@@ -132,14 +124,13 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
     private void insertRules(String rulesetId, String rulesetContent, Connection connection)
             throws GovernanceException {
 
-
         // Parse YAML content
         ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
         Map<String, Object> rulesetMap;
         try {
             rulesetMap = yamlReader.readValue(rulesetContent, Map.class);
         } catch (JsonProcessingException e) {
-            throw new GovernanceException("Failed to parse ruleset content", e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONETENT, e);
         }
         // Check if 'rules' is present and not null
         if (rulesetMap.containsKey("rules") && rulesetMap.get("rules") instanceof Map) {
@@ -147,8 +138,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
             Map<String, Map<String, Object>> rules =
                     (Map<String, Map<String, Object>>) rulesetMap.get("rules");
             String sqlQuery = SQLConstants.INSERT_RULES;
-            try {
-                PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
+            try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
                 for (Map.Entry<String, Map<String, Object>> entry : rules.entrySet()) {
                     String ruleCode = entry.getKey();
                     Map<String, Object> ruleDetails = entry.getValue();
@@ -175,8 +165,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
     }
 
     /**
-     * Retrieves rulesets in the organization. This will not retrieve default rulesets which are not added to the
-     * organization.
+     * Retrieves rulesets in the organization.
      *
      * @param organization Organization whose rulesets are to be retrieved
      * @return a list of rulesets associated with the organization
@@ -186,27 +175,26 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
     public RulesetList getRulesets(String organization) throws GovernanceException {
         RulesetList rulesetList = new RulesetList();
         List<RulesetInfo> rulesetInfoList = new ArrayList<>();
-        Connection connection;
-        PreparedStatement prepStmt;
         String sqlQuery = SQLConstants.GET_RULESETS;
-        try {
-            connection = GovernanceDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sqlQuery);
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, organization);
-            ResultSet rs = prepStmt.executeQuery();
-            while (rs.next()) {
-                RulesetInfo rulesetInfo = new RulesetInfo();
-                rulesetInfo.setId(rs.getString("RULESET_ID"));
-                rulesetInfo.setName(rs.getString("NAME"));
-                rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
-                rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
-                rulesetInfo.setProvider(rs.getString("PROVIDER"));
-                rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
-                rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
-                rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
-                rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
-                rulesetInfoList.add(rulesetInfo);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    RulesetInfo rulesetInfo = new RulesetInfo();
+                    rulesetInfo.setId(rs.getString("RULESET_ID"));
+                    rulesetInfo.setName(rs.getString("NAME"));
+                    rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
+                    rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
+                    rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
+                    rulesetInfo.setProvider(rs.getString("PROVIDER"));
+                    rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
+                    rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
+                    rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
+                    rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
+                    rulesetInfo.setIsDefault(rs.getInt("IS_DEFAULT"));
+                    rulesetInfoList.add(rulesetInfo);
+                }
             }
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESETS,
@@ -218,15 +206,211 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
     }
 
     /**
-     * Handle  governance exceptions
+     * Retrieves a ruleset by name.
      *
-     * @param msg error message
-     * @param t   throwable
-     * @throws GovernanceException governance exception
+     * @param organization Organization whose ruleset is to be retrieved
+     * @param name         Name of the ruleset
+     * @return the ruleset with the given name
+     * @throws GovernanceException if there is an error retrieving the ruleset
      */
-    private void handleException(String msg, Throwable t) throws GovernanceException {
-        log.error(msg, t);
-        throw new GovernanceException(msg, t);
+    @Override
+    public RulesetInfo getRulesetByName(String organization, String name) throws GovernanceException {
+        String sqlQuery = SQLConstants.GET_RULESET_BY_NAME;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, name);
+            prepStmt.setString(2, organization);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    RulesetInfo rulesetInfo = new RulesetInfo();
+                    rulesetInfo.setId(rs.getString("RULESET_ID"));
+                    rulesetInfo.setName(rs.getString("NAME"));
+                    rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
+                    rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
+                    rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
+                    rulesetInfo.setProvider(rs.getString("PROVIDER"));
+                    rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
+                    rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
+                    rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
+                    rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
+                    rulesetInfo.setIsDefault(rs.getInt("IS_DEFAULT"));
+                    return rulesetInfo;
+                }
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_NAME,
+                    e, organization);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves a ruleset by ID.
+     *
+     * @param organization Organization whose ruleset is to be retrieved
+     * @param rulesetId    Ruleset ID of the ruleset
+     * @return the ruleset with the given ID
+     * @throws GovernanceException if there is an error retrieving the ruleset
+     */
+    @Override
+    public RulesetInfo getRulesetById(String organization, String rulesetId) throws GovernanceException {
+        String sqlQuery = SQLConstants.GET_RULESETS_BY_ID;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, rulesetId);
+            prepStmt.setString(2, organization);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    RulesetInfo rulesetInfo = new RulesetInfo();
+                    rulesetInfo.setId(rs.getString("RULESET_ID"));
+                    rulesetInfo.setName(rs.getString("NAME"));
+                    rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
+                    rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
+                    rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
+                    rulesetInfo.setProvider(rs.getString("PROVIDER"));
+                    rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
+                    rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
+                    rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
+                    rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
+                    rulesetInfo.setIsDefault(rs.getInt("IS_DEFAULT"));
+                    return rulesetInfo;
+                }
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+                    e, organization);
+        }
+        return null;
+    }
+
+    /**
+     * Get the content of a Governance Ruleset
+     *
+     * @param organization Organization
+     * @param rulesetId    Ruleset ID
+     * @return String Content of the ruleset
+     * @throws GovernanceException If an error occurs while getting the ruleset content
+     */
+    @Override
+    public String getRulesetContent(String organization, String rulesetId) throws GovernanceException {
+        String rulesetContent = null;
+        String sqlQuery = SQLConstants.GET_RULESET_CONTENT;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
+            prepStmt.setString(1, rulesetId);
+            prepStmt.setString(2, organization);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    InputStream inputStream = rs.getBinaryStream("RULESET_CONTENT");
+                    if (inputStream != null) {
+                        rulesetContent = GovernanceDBUtil.getStringFromInputStream(inputStream);
+                    }
+                    return rulesetContent;
+                }
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+                    e, organization);
+        } catch (IOException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_CONTENT_CONVERSION_ERROR, e,
+                    rulesetId, organization);
+        }
+        return null;
+    }
+
+    /**
+     * Delete a Governance Ruleset
+     *
+     * @param organization Organization
+     * @param rulesetId    Ruleset ID
+     * @throws GovernanceException If an error occurs while deleting the ruleset
+     */
+    @Override
+    public void deleteRuleset(String organization, String rulesetId) throws GovernanceException {
+
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULESET)) {
+            try {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, rulesetId);
+                prepStmt.setString(2, organization);
+                prepStmt.executeUpdate();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULESET,
+                    e, rulesetId, organization);
+        }
+    }
+
+    /**
+     * Update a Governance Ruleset
+     *
+     * @param organization Organization
+     * @param rulesetId    Ruleset ID
+     * @param ruleset      Ruleset object
+     * @return Ruleset Updated object
+     * @throws GovernanceException If an error occurs while updating the ruleset
+     */
+    @Override
+    public Ruleset updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
+        InputStream rulesetContent = new ByteArrayInputStream(
+                ruleset.getRulesetContent().getBytes(Charset.defaultCharset()));
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_RULESET)) {
+            try {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, ruleset.getName());
+                prepStmt.setString(2, ruleset.getDescription());
+                prepStmt.setBlob(3, rulesetContent);
+                prepStmt.setString(4, ruleset.getAppliesTo());
+                prepStmt.setString(5, ruleset.getDocumentationLink());
+                prepStmt.setString(6, ruleset.getProvider());
+                prepStmt.setString(7, ruleset.getUpdatedBy());
+                prepStmt.setString(8, rulesetId);
+                prepStmt.setString(9, organization);
+                prepStmt.executeUpdate();
+                // Delete existing rules related to this ruleset.
+                deleteRules(rulesetId, connection);
+                // Insert updated rules.
+                insertRules(rulesetId, ruleset.getRulesetContent(), connection);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.
+                    ERROR_WHILE_UPDATING_RULESET, e, rulesetId, organization);
+        }
+        return ruleset;
+    }
+
+
+    /**
+     * Delete rules related to a ruleset
+     *
+     * @param rulesetId  Ruleset ID
+     * @param connection Database connection
+     * @throws GovernanceException If an error occurs while deleting the rules
+     */
+    private void deleteRules(String rulesetId, Connection connection) throws GovernanceException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULES)) {
+            try {
+                prepStmt.setString(1, rulesetId);
+                int rowsAffected = prepStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    log.error("No rules found to delete for this ruleset with ID: " + rulesetId);
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULES, e, rulesetId);
+        }
     }
 
 

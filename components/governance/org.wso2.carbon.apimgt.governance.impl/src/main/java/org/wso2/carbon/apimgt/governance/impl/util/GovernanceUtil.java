@@ -165,6 +165,7 @@ public class GovernanceUtil {
         ruleset.setProvider(defaultRuleset.getProvider());
         ruleset.setRulesetContent(defaultRuleset.getRulesetContentAsString());
         ruleset.setDocumentationLink(defaultRuleset.getDocumentationLink());
+        ruleset.setIsDefault(1);
         return ruleset;
     }
 

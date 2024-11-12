@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.governance.api.manager;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 
 /**
@@ -45,4 +46,45 @@ public interface RulesetManager {
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
     RulesetList getRulesets(String organization) throws GovernanceException;
+
+
+    /**
+     * Get a Governance Ruleset by ID
+     *
+     * @param organization Organization
+     * @param rulesetId    Ruleset ID
+     * @return RulesetInfo object
+     * @throws GovernanceException If an error occurs while getting the ruleset
+     */
+    RulesetInfo getRulesetById(String organization, String rulesetId) throws GovernanceException;
+
+    /**
+     * Get the content of a Governance Ruleset
+     *
+     * @param organization Organization
+     * @param rulesetId    Ruleset ID
+     * @return String Content of the ruleset
+     * @throws GovernanceException If an error occurs while getting the ruleset content
+     */
+    String getRulesetContent(String organization, String rulesetId) throws GovernanceException;
+
+    /**
+     * Delete a Governance Ruleset
+     *
+     * @param organization Organization
+     * @param rulesetId    Ruleset ID
+     * @throws GovernanceException If an error occurs while deleting the ruleset
+     */
+    void deleteRuleset(String organization, String rulesetId) throws GovernanceException;
+
+    /**
+     * Update a Governance Ruleset
+     *
+     * @param organization Organization
+     * @param rulesetId    Ruleset ID
+     * @param ruleset      Ruleset object
+     * @return Ruleset Updated object
+     * @throws GovernanceException If an error occurs while updating the ruleset
+     */
+    Ruleset updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException;
 }

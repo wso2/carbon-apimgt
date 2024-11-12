@@ -87,12 +87,13 @@ public class GovernanceException extends Exception {
      *
      * @param code  Exception code that need to pass to the error DTO
      * @param cause throwable object.
-     * @param args  arguments
      */
     public GovernanceException(ErrorHandler code, Throwable cause, Object... args) {
         super(code.getErrorCode() + ":" + code.getErrorMessage() + "::"
                 + String.format(code.getErrorDescription(), args), cause);
-        this.errorHandler = code;
+        this.errorHandler = new ErrorItem(code.getErrorMessage(),
+                String.format(code.getErrorDescription(), args),
+                code.getErrorCode(), code.getHttpStatusCode(), code.printStackTrace());
     }
 
     /**
@@ -104,6 +105,8 @@ public class GovernanceException extends Exception {
     public GovernanceException(ErrorHandler code, Object... args) {
         super(code.getErrorCode() + ":" + code.getErrorMessage() + "::"
                 + String.format(code.getErrorDescription(), args));
-        this.errorHandler = code;
+        this.errorHandler = new ErrorItem(code.getErrorMessage(),
+                String.format(code.getErrorDescription(), args),
+                code.getErrorCode(), code.getHttpStatusCode(), code.printStackTrace());
     }
 }

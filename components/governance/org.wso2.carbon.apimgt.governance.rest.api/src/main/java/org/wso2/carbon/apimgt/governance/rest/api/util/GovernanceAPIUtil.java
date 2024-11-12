@@ -20,8 +20,10 @@ package org.wso2.carbon.apimgt.governance.rest.api.util;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.context.CarbonContext;
 
 public class GovernanceAPIUtil {
@@ -44,10 +46,26 @@ public class GovernanceAPIUtil {
 
 
     /**
-     * @return
+     * Get logged in User
+     *
+     * @return String username
      */
     public static String getLoggedInUsername() {
 
         return CarbonContext.getThreadLocalCarbonContext().getUsername();
+    }
+
+    /**
+     * Returns a generic errorDTO from an Error Handler
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(errorHandler.getErrorCode());
+        errorDTO.setMessage(errorHandler.getErrorMessage());
+        errorDTO.setDescription(errorHandler.getErrorDescription());
+        return errorDTO;
     }
 }

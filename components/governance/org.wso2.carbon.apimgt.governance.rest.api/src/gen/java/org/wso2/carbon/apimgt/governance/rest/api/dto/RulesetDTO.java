@@ -31,9 +31,9 @@ public class RulesetDTO   {
     @XmlType(name="AppliesToEnum")
     @XmlEnum(String.class)
     public enum AppliesToEnum {
-        API_METADATA("api_metadata"),
-        API_DEFINITION("api_definition"),
-        DOCUMENTATION("documentation");
+        API_METADATA("API_METADATA"),
+        API_DEFINITION("API_DEFINITION"),
+        DOCUMENTATION("DOCUMENTATION");
         private String value;
 
         AppliesToEnum (String v) {
@@ -62,6 +62,7 @@ return null;
     private AppliesToEnum appliesTo = null;
     private String documentationLink = null;
     private String provider = null;
+    private Boolean isDefault = false;
     private String createdBy = null;
     private String createdTime = null;
     private String updatedBy = null;
@@ -150,7 +151,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "api_definition", required = true, value = "Context or area to which the ruleset applies.")
+  @ApiModelProperty(example = "API_DEFINITION", required = true, value = "Context or area to which the ruleset applies.")
   @JsonProperty("appliesTo")
   @NotNull
   public AppliesToEnum getAppliesTo() {
@@ -195,6 +196,24 @@ return null;
   }
   public void setProvider(String provider) {
     this.provider = provider;
+  }
+
+  /**
+   * Whether the ruleset is a default one or not.
+   **/
+  public RulesetDTO isDefault(Boolean isDefault) {
+    this.isDefault = isDefault;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether the ruleset is a default one or not.")
+  @JsonProperty("isDefault")
+  public Boolean isIsDefault() {
+    return isDefault;
+  }
+  public void setIsDefault(Boolean isDefault) {
+    this.isDefault = isDefault;
   }
 
   /**
@@ -286,6 +305,7 @@ return null;
         Objects.equals(appliesTo, ruleset.appliesTo) &&
         Objects.equals(documentationLink, ruleset.documentationLink) &&
         Objects.equals(provider, ruleset.provider) &&
+        Objects.equals(isDefault, ruleset.isDefault) &&
         Objects.equals(createdBy, ruleset.createdBy) &&
         Objects.equals(createdTime, ruleset.createdTime) &&
         Objects.equals(updatedBy, ruleset.updatedBy) &&
@@ -294,7 +314,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, rulesetContent, appliesTo, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(id, name, description, rulesetContent, appliesTo, documentationLink, provider, isDefault, createdBy, createdTime, updatedBy, updatedTime);
   }
 
   @Override
@@ -309,6 +329,7 @@ return null;
     sb.append("    appliesTo: ").append(toIndentedString(appliesTo)).append("\n");
     sb.append("    documentationLink: ").append(toIndentedString(documentationLink)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    isDefault: ").append(toIndentedString(isDefault)).append("\n");
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedBy: ").append(toIndentedString(updatedBy)).append("\n");

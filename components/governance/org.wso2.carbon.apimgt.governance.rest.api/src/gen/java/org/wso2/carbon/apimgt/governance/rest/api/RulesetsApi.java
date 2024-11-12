@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.governance.rest.api;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.RulesetsApiServiceImpl;
@@ -56,6 +57,63 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         return delegate.createRuleset(rulesetDTO, securityContext);
     }
 
+    @DELETE
+    @Path("/{rulesetId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Deletes a specific ruleset.", notes = "Deletes an existing ruleset identified by the rulesetId.", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
+        })
+    }, tags={ "Rulesets", "External",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 204, message = "OK. Ruleset deleted successfully.", response = Void.class),
+        @ApiResponse(code = 400, message = "Client error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response deleteRuleset(@ApiParam(value = "UUID of the ruleset.",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+        return delegate.deleteRuleset(rulesetId, securityContext);
+    }
+
+    @GET
+    @Path("/{rulesetId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieves details of a specific ruleset.", notes = "Retrieves details of the ruleset identified by the rulesetId.", response = RulesetInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets")
+        })
+    }, tags={ "Rulesets", "External",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Ruleset details retrieved successfully.", response = RulesetInfoDTO.class),
+        @ApiResponse(code = 400, message = "Client error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getRulesetById(@ApiParam(value = "UUID of the ruleset.",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+        return delegate.getRulesetById(rulesetId, securityContext);
+    }
+
+    @GET
+    @Path("/{rulesetId}/content")
+    
+    @Produces({ "application/x-yaml", "application/json" })
+    @ApiOperation(value = "Retrieves the content of a specific ruleset.", notes = "Retrieves the content of the ruleset identified by the rulesetId.", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets")
+        })
+    }, tags={ "Rulesets", "External",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Ruleset content retrieved successfully.", response = String.class),
+        @ApiResponse(code = 400, message = "Client error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getRulesetContent(@ApiParam(value = "UUID of the ruleset.",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+        return delegate.getRulesetContent(rulesetId, securityContext);
+    }
+
     @GET
     
     
@@ -64,7 +122,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance rulesets")
         })
-    }, tags={ "Rulesets", "External" })
+    }, tags={ "Rulesets", "External",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with a list of rulesets.", response = RulesetListDTO.class),
         @ApiResponse(code = 400, message = "Client error.", response = ErrorDTO.class),
@@ -73,5 +131,24 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getRulesets() throws GovernanceException{
         return delegate.getRulesets(securityContext);
+    }
+
+    @PUT
+    @Path("/{rulesetId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Updates a specific ruleset.", notes = "Updates the details of the ruleset identified by the `rulesetId`.", response = RulesetDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance rulesets")
+        })
+    }, tags={ "Rulesets", "External" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Ruleset updated successfully.", response = RulesetDTO.class),
+        @ApiResponse(code = 400, message = "Client error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response updateRulesetById(@ApiParam(value = "UUID of the ruleset.",required=true) @PathParam("rulesetId") String rulesetId, @ApiParam(value = "JSON object containing the updated ruleset details." ,required=true) RulesetDTO rulesetDTO) throws GovernanceException{
+        return delegate.updateRulesetById(rulesetId, rulesetDTO, securityContext);
     }
 }

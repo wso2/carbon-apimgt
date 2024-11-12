@@ -32,7 +32,7 @@ public class RulesetInfo {
     private String createdTime;
     private String updatedBy;
     private String updatedTime;
-    private Boolean isDefault;
+    private int isDefault;
 
     public String getId() {
         return id;
@@ -114,11 +114,11 @@ public class RulesetInfo {
         this.updatedTime = updatedTime;
     }
 
-    public Boolean getDefault() {
+    public int isDefault() {
         return isDefault;
     }
 
-    public void setDefault(Boolean aDefault) {
-        isDefault = aDefault;
+    public void setIsDefault(int isDefault) {
+        this.isDefault = isDefault;
     }
 }

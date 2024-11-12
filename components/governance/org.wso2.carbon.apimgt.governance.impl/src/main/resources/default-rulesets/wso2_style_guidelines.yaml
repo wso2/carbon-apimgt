@@ -1,0 +1,1272 @@
+# Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+
+id: 02a20227-8215-4f56-a093-18256da2fbf5
+name: WSO2 Style Guidelines
+message: Standardizes API definition and formatting for consistency.
+description: >-
+  A set of guidelines focused on enforcing uniformity in API style, including
+  naming conventions, formatting, and documentation to ensure clarity and
+  maintainability across all APIs.
+appliesTo: API_DEFINITION
+documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-rulesets/wso2_style_guidelines_doc/"
+provider: WSO2
+rulesetContent:
+  aliases:
+    API_Document:
+      description: "The complete API specification document. This can be used to target
+        any part of the OpenAPI document using **field**.\n\n*Use this if you don't
+        find specific targets that cater to your usecase.* "
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$"
+        - formats:
+            - oas3
+          given:
+            - "$"
+    Operation_Object:
+      description: The complete operation object. Use it in combo with field object.
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "#Path_Item[get,put,post,delete,options,head,patch,trace]"
+        - formats:
+            - oas3
+          given:
+            - "#Path_Item[get,put,post,delete,options,head,patch,trace]"
+    Operation_Responses:
+      description: Responses for all operations including get, put, post, delete, options,
+        head, patch, trace.
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "#Operation_Object.responses"
+        - formats:
+            - oas3
+          given:
+            - "#Operation_Object.responses"
+    Path_Item:
+      description: ''
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$.paths[*]"
+        - formats:
+            - oas3
+          given:
+            - "$.paths[*]"
+    API_Contact:
+      description: The top level description in an API document
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$.info.contact"
+        - formats:
+            - oas3
+          given:
+            - "$.info.contact"
+    API_License:
+      description: The top level description in an API document
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$.info.license"
+        - formats:
+            - oas3
+          given:
+            - "$.info.license"
+    All_Markdown:
+      description: All markdown descriptions across the document.
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$..[description,title]"
+        - formats:
+            - oas3
+          given:
+            - "$..[description,title]"
+    API_Tags:
+      description: Tags on an API object
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "#Operation_Object.tags"
+        - formats:
+            - oas3
+          given:
+            - "#Operation_Object.tags"
+    Response_All_Object:
+      description: All responses (object) in an API
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$.responses"
+            - "#Operation_Responses"
+            - "$..responses"
+        - formats:
+            - oas3
+          given:
+            - "$.components.responses"
+            - "#Operation_Responses"
+            - "$..responses"
+    API_Server_URL:
+      description: API host urls defined in the API specification
+      targets:
+        - formats:
+            - oas3
+          given:
+            - "$.servers[*].url"
+        - formats:
+            - oas2
+          given:
+            - "$.host"
+    Request_Parameter_All:
+      description: All request parameters
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$..parameters[*]"
+        - formats:
+            - oas3
+          given:
+            - "$..parameters[*]"
+    Path_Object:
+      description: Path object. Usually used to target the Path key e.g. `/users/{userId}`
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$.paths"
+        - formats:
+            - oas3
+          given:
+            - "$.paths"
+    API_Document_RecursiveSearch:
+      description: "The complete API specification document. This can be used to target
+        any part of the OpenAPI document using **field**.\n\n*Use this if you don't
+        find specific targets that cater to your usecase.* "
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$.."
+        - formats:
+            - oas3
+          given:
+            - "$.."
+    All_Example:
+      description: All examples across the API document
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$..examples[*]"
+        - formats:
+            - oas3
+          given:
+            - "$.components.examples[*]"
+            - "$.paths[*][*]..content[*].examples[*]"
+            - "$.paths[*][*]..parameters[*].examples[*]"
+            - "$.components.parameters[*].examples[*]"
+            - "$.paths[*][*]..headers[*].examples[*]"
+            - "$.components.headers[*].examples[*]"
+    API_Tags_Item:
+      description: Tags on an API object
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$.tags[*]"
+        - formats:
+            - oas3
+          given:
+            - "$.tags[*]"
+    API_Server:
+      description: API hosts defined in the API specification
+      targets:
+        - formats:
+            - oas3
+          given:
+            - "$.servers"
+        - formats:
+            - oas2
+          given:
+            - "$.host"
+    All_Array_Item:
+      description: ''
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$..[?(@ && @.type=='array')]"
+        - formats:
+            - oas3
+          given:
+            - "$..[?(@ && @.type=='array')]"
+        - formats:
+            - oas3.0
+          given:
+            - "$..[?(@ && @.type=='array')]"
+            - "$..[?(@ && @.type && @.type.constructor.name === 'Array' && @.type.includes('array'))]"
+
+  rules:
+    contact-url:
+      given:
+        - "#API_Contact"
+      severity: warn
+      then:
+        function: truthy
+        field: url
+      description: |-
+        The `contact` object should have a valid organization URL. 
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "contact": {
+             ... ,
+             "url": "https://acme.com",
+             ... 
+          },
+        ```
+      message: Contact object should have "url".
+    contact-email:
+      given:
+        - "#API_Contact"
+      severity: warn
+      then:
+        function: truthy
+        field: email
+      description: |-
+        The `contact` object should have a valid email. 
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "contact": {
+             ... ,
+             "email": "support.contact@acme.com"
+          },
+        ```
+      message: Contact object should have "email"
+
+    info-contact:
+      given:
+        - "#API_Document"
+      severity: warn
+      then:
+        function: truthy
+        field: info.contact
+      description: |-
+        The `info` object should include a `contact` object.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "info": {
+            ... ,
+            "contact": {
+              "name": "ACME Corporation",
+              "url": "https://acme.com",
+              "email": "support.contact@acme.com"
+            }
+          }
+        }
+        ```
+      message: Info object should have "contact" object.
+
+    info-description:
+      given:
+        - "#API_Document"
+      severity: warn
+      then:
+        function: truthy
+        field: info.description
+      description: |-
+        The `info` object should have a `description` object.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "info": {
+             ... ,
+             "description": "This describes my API."
+          }
+        }
+        ```
+      message: Info object should have "description" object.
+    info-license:
+      given:
+        - "#API_Document"
+      severity: warn
+      then:
+        function: truthy
+        field: info.license
+      description: |-
+        The `info` object should have a `license` object.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "info": {
+            ... ,
+            "license": {
+              "name": "Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)",
+              "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+            }
+          }
+        }
+        ```
+      message: Info object should have "license" object.
+
+    license-url:
+      given:
+        - "#API_License"
+      severity: warn
+      then:
+        function: truthy
+        field: url
+      description: |-
+        The `license` object should include a valid url.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "license": {
+            "name": "Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)",
+            "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+          }
+        }
+        ```
+      message: License object should include "url".
+
+    no-eval-in-markdown:
+      given:
+        - "#All_Markdown"
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: eval\(
+      description: |-
+        Markdown descriptions should not contain [`eval()` functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval),
+        which pose a security risk.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "info": {
+            ... ,
+            "description": "API for users. eval()"
+          }
+        }
+        ```
+      message: Markdown descriptions must not have "eval(".
+
+    no-script-tags-in-markdown:
+      given:
+        - "#All_Markdown"
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: "<script"
+      description: |-
+        Markdown descriptions should not contain `script` tags, which pose a security risk.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "info": {
+            ... ,
+            "description": "API for users. <script>alert(\"You are Hacked\");</script>"
+          }
+        }
+        ```
+      message: Markdown descriptions must not have "<script>" tags.
+    openapi-tags-alphabetical:
+      given:
+        - "#API_Document"
+      severity: warn
+      then:
+        function: alphabetical
+        functionOptions:
+          keyedBy: name
+        field: tags
+      description: |-
+        Global tags specified at the root OpenAPI Document level should be in alphabetical order based on the `name` property.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "tags":[
+            {
+              "name":"Z Global Tag"
+            },
+            {
+              "name":"A Global Tag"
+            }
+          ]
+        }
+        ```
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "tags":[
+            {
+              "name":"A Global Tag"
+            },
+            {
+              "name":"Z Global Tag"
+            }
+          ]
+        }
+        ```
+      message: OpenAPI object should have alphabetical "tags".
+
+    openapi-tags:
+      given:
+        - "#API_Document"
+      severity: warn
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            type: array
+            minItems: 1
+        field: tags
+      description: |-
+        At least one global tag should be specified at the root OpenAPI Document level.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "tags":[
+            {
+              "name":"Global Tag #1"
+            },
+            {
+              "name":"Global Tag #2"
+            }
+          ]
+        }
+        ```
+      message: OpenAPI object should have non-empty "tags" array.
+
+    operation-description:
+      given:
+        - "#Operation_Object"
+      severity: warn
+      then:
+        function: truthy
+        field: description
+      description: |-
+        Each operation should have a description.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "get": {
+            "description": "Get a list of users."
+          }
+        }
+        ```
+      message: Operation "description" should be present and non-empty string.
+
+    operation-operationId:
+      given:
+        - "#Operation_Object"
+      severity: warn
+      then:
+        function: truthy
+        field: operationId
+      description: |-
+        All operations should have an `operationId`.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "get": {
+            "summary": "Get users",
+            "operationId": "get-users"
+          }
+        }
+        ```
+      message: Operation should have "operationId".
+
+    operation-operationId-valid-in-url:
+      given:
+        - "#Operation_Object"
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          match: "^[A-Za-z0-9-._~:/?#\\[\\]@!\\$&'()*+,;=]*$"
+        field: operationId
+      description: |-
+        Operation IDs must not contain characters that are invalid for URLs.
+        
+        **Invalid Example**
+        
+        The `operationId` in this example includes a pipe and space, which are invalid for URLs.
+        
+        ```json
+        {
+          "/users": {
+            "get": {
+              "operationId": "invalid|operationID"
+            }
+          }
+        }
+        ```
+        
+        **Valid Example**
+        
+        This `operationId` is valid for URLs.
+        
+        ```json
+        {
+          "/users": {
+            "get": {
+              "operationId": "this-must-be-unique"
+            }
+          }
+        }
+        ```
+      message: OperationId should not have characters that are invalid when used in URL.
+    operation-singular-tag:
+      given:
+        - "#API_Tags"
+      severity: 'off'
+      then:
+        function: length
+        functionOptions:
+          max: 1
+      description: Operation should not have more than a single tag.
+      message: Operation should not have more than a single tag.
+
+    operation-tags:
+      given:
+        - "#Operation_Object"
+      severity: warn
+      then:
+        function: length
+        functionOptions:
+          max: 999
+          min: 1
+        field: tags
+      description: |-
+        At least one tag should be defined for each operation.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "get": {
+            "tags": ["Users"]
+          }
+        }
+        ```
+      message: Operation should have non-empty "tags" array.
+
+    path-declarations-must-exist:
+      given:
+        - "#Path_Item"
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: "{}"
+        field: "@key"
+      description: |-
+        Path parameter declarations must not be empty.
+        
+        **Invalid Example**
+        
+        `/users/{}`
+        
+        **Valid Example**
+        
+        `/users/{userId}`
+      message: Path parameter declarations must not be empty, e.g., "/given/{}" is invalid.
+
+    paths-no-trailing-slash:
+      given:
+        - "$.paths"
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: "\\/$"
+        field: "@key"
+      description: |-
+        Paths must not end with a trailing slash.
+        
+        `/users` and `/users/` are separate paths. It's considered bad practice for them to differ based only on a trailing slash. It's usually preferred to not have a trailing slash.
+        
+        **Invalid Example**
+        
+        The `users` path ends with a slash.
+        
+        ```json
+        {
+          "/users/": {
+            "post": {}
+          }
+        }
+        ```
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "/user": {
+            "post": {}
+          }
+        }
+        ```
+      message: Paths must not end with a trailing slash.
+
+    contact-name:
+      given:
+        - "#API_Contact"
+      severity: warn
+      then:
+        function: truthy
+        field: name
+      description: |-
+        The `contact` object should have an organization name.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "contact": {
+            "name": "ACME Corporation"
+          }
+        }
+        ```
+      message: Contact object should have "name".
+    path-keys-no-trailing-slash:
+      given:
+        - "#Path_Object"
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: ".+\\/$"
+        field: "@key"
+      description: |-
+        Path keys should not end in forward slashes. This is a best practice for working with web tooling, such as mock servers, code generators, application frameworks, and more.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "/users/": {
+          }
+        }
+        ```
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "/users": {
+          }
+        }
+        ```
+      message: Path should not end with slash.
+    path-not-include-query:
+      given:
+        - "#Path_Object"
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: "\\?"
+        field: "@key"
+      description: |-
+        Paths should not include `query` string items. Instead, add them as parameters with `in: query`.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "/users/{?id}": {
+          }
+        }
+        ```
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "parameters": [
+            {
+              "schema": {
+                "type": "string"
+              },
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "User's ID"
+            }
+          ]
+        }
+        ```
+      message: Path should not include query string.
+    tag-description:
+      given:
+        - "#API_Tags_Item"
+      severity: warn
+      then:
+        function: truthy
+        field: description
+      description: |-
+        Tags defined at the global level should have a description.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "tags": [
+            {
+              "name": "Users",
+              "description": "End-user information"
+            }
+          ]
+        }
+        ```
+      message: Tag object should have "description".
+    api-servers:
+      given:
+        - "#API_Server"
+      severity: warn
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            type: array
+            minItems: 1
+            items:
+              type: object
+          dialect: draft7
+      description: |-
+        A server should be defined at the root document level. This can be localhost, a development server, or a production server.
+        
+        **Valid OpenAPI V3 Example**
+        
+        ```json
+        {
+          "servers": [
+            {
+              "url": "https://staging.myprodserver.com/v1",
+              "description": "Staging server"
+            },
+            {
+              "url": "https://myprodserver.com/v1",
+              "description": "Production server"
+            }
+          ]
+        }
+        ```
+        
+        **Valid OpenAPI V2 Example**
+        
+        ```json
+        {
+          "host": "myprodserver.com",
+          "basePath": "/v2",
+          "schemes": [
+            "https"
+          ]
+        }
+        ```
+      message: Server should be present.
+    server-trailing-slash:
+      given:
+        - "#API_Server_URL"
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: "/$"
+      description: |-
+        Server URLs should not end in forward slashes. This is a best practice for working with web tooling, such as mock servers, code generators, application frameworks, and more.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "servers": [
+            {
+              "url": "https://api.openweathermap.org/data/2.5/"
+            }
+          ]
+        }
+        ```
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "servers": [
+            {
+              "url": "https://api.openweathermap.org/data/2.5"
+            }
+          ]
+        }
+        ```
+      message: Server URL should not have trailing slash.
+    server-lowercase:
+      given:
+        - "$.servers[*].url"
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          match: "^[^A-Z]*$"
+      description: |-
+        Server URLs must be lowercase. This standard helps meet industry best practices.
+        
+        **Invalid Example**
+        
+        The `url` property uses uppercase letters.
+        
+        ```json
+        {
+          "servers": [
+            {
+              "url": "https://ACME.com/api"
+            }
+          ]
+        }
+        ```
+        
+        **Valid Example**
+        
+        The `url` property is fully lowercase.
+        
+        ```json
+        {
+          "servers": [
+            {
+              "url": "https://acme.com/api"
+            }
+          ]
+        }
+        ```
+      message: Server URL must be lowercase.
+      formats:
+        - oas3
+    oas2-api-schemes:
+      given:
+        - "#API_Document"
+      severity: error
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            type: array
+            minItems: 1
+            items:
+              type: string
+          dialect: draft7
+        field: schemes
+      description: |
+        OpenAPI 2 host `schemes` reflect the transfer protocol of the API. 
+        Host schemes must be present and an array with one or more of these values: 
+        `http`, `https`, `ws`, or `wss`.
+        
+        **Valid Example**
+        
+        This example shows that host schemes are `http` and `https`.
+        
+        ```json
+        {
+          "schemes": [
+            "http",
+            "https"
+          ]
+        }
+        ```
+      message: OpenAPI host "schemes" must be present and non-empty array
+      formats:
+        - oas2
+    server-not-example:
+      given:
+        - "#API_Server_URL"
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: example.com
+      description: |
+        Server URLs must not direct to example.com. This helps ensure URLs 
+        are valid before you distribute your API document.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "servers": [
+            {
+              ... ,
+              "url": "https://example.com"
+            }
+          ]
+        }
+        ```
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "servers": [
+            {
+              ... ,
+              "url": "https://api.openweathermap.org/data/2.5"
+            }
+          ]
+        }
+        ```
+      message: Server URL must not point at example.com.
+    parameter-description:
+      given:
+        - "#Request_Parameter_All"
+      severity: warn
+      then:
+        function: truthy
+        field: description
+      description: |
+        All `parameter` objects should have a description.
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "parameters": [
+            {
+              "schema": {
+                "type": "integer"
+              },
+              ... ,
+              ... ,
+              "description": "The number of days to include in the response."
+            }
+          ]
+        }
+        ```
+      message: Parameter objects must have "description".
+    oas2-anyOf:
+      given:
+        - "#API_Document_RecursiveSearch"
+      severity: warn
+      then:
+        function: undefined
+        field: anyOf
+      description: |
+        The `anyOf` keyword is not supported in OAS2. Only `allOf` is supported.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "schema": {
+            "anyOf": [
+              {
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  }
+                }
+              },
+              {}
+            ]
+          }
+        }
+        ```
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              }
+            }
+          }
+        }
+        ```
+      message: anyOf is not available in OpenAPI v2, it was added in OpenAPI v3
+      formats:
+        - oas2
+    oas2-oneOf:
+      given:
+        - "#API_Document_RecursiveSearch"
+      severity: warn
+      then:
+        function: undefined
+        field: oneOf
+      description: |
+        The `oneOf` keyword is not supported in OAS2. Only `allOf` is supported.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "schema": {
+            "oneOf": [
+              {
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  }
+                }
+              },
+              {}
+            ]
+          }
+        }
+        ```
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              }
+            }
+          }
+        }
+        ```
+      message: oneOf is not available in OpenAPI v2, it was added in OpenAPI v3
+      formats:
+        - oas2
+    oas3-examples-value-or-externalValue:
+      given:
+        - "#All_Example"
+      severity: warn
+      then:
+        function: xor
+        functionOptions:
+          properties:
+            - externalValue
+            - value
+      description: |
+        The `examples` object should include a `value` or `externalValue` field, but cannot include both.
+        
+        **Invalid Example**
+        
+        This example includes both a `value` field and an `externalValue` field.
+        
+        ```json
+        {
+          "examples": {
+            "example-1": {
+              "value": {
+                "id": "string",
+                "name": "string"
+              },
+              "externalValue": {
+                "id": "string",
+                "name": "string"
+              }
+            }
+          }
+        }
+        ```
+        
+        **Valid Example**
+        
+        This example includes only a `value` field.
+        
+        ```json
+        {
+          "examples": {
+            "example-1": {
+              "value": {
+                "id": "string",
+                "name": "string"
+              }
+            }
+          }
+        }
+        ```
+      message: Examples must have either "value" or "externalValue" field.
+      formats:
+        - oas3
+    array-items:
+      given:
+        - "#All_Array_Item"
+      severity: error
+      then:
+        function: truthy
+        field: items
+      description: |-
+        Schemas with `type: array`, require a sibling `items` field.
+        
+        **Recommended:** Yes
+        
+        **Good Example**
+        
+        ```yaml
+        TheGoodModel:
+          type: object
+          properties:
+            favoriteColorSets:
+              type: array
+              items:
+                type: array
+                items: {}
+        ```
+        
+        **Bad Example**
+        
+        ```yaml
+        TheBadModel:
+          type: object
+          properties:
+            favoriteColorSets:
+              type: array
+              items:
+                type: array
+        ```
+      message: 'Schemas with "type: array", require a sibling "items" field'
+    path-parameters-on-path-only:
+      given:
+        - "$.paths[*][*].parameters[?(@.in == 'path')]"
+      severity: warn
+      then:
+        function: falsy
+      description: |-
+        Path parameters should be defined on the path level instead of the operation level.
+        
+        **Invalid Example**
+        
+        The `user_id` path parameter on line 8 should not be included with the `patch` operation.
+        
+        ```json
+        {      
+          "patch": {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "integer"
+                },
+                "name": "user_id",
+                "in": "path"
+              }
+            ]
+          }
+        }
+        ```
+        
+        **Valid Example**
+        
+        The `user-id` path parameter is correctly located at the path level.
+        
+        ```json
+        {
+          "paths": {
+            "/users/{userId}": {
+              "parameters": [
+                {
+                  "schema": {
+                    "type": "integer"
+                  },
+                  "name": "user_id",
+                  "in": "path"
+                }
+              ]
+            }
+          }
+        }
+        ```
+      message: Path parameters should be defined on the path level instead of the operation level.
+    paths-no-query-params:
+      given:
+        - "$.paths"
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: "\\?"
+        field: "@key"
+      description: |-
+        Paths should not have query parameters in them. They should be defined separately in the OpenAPI.
+        
+        **Invalid Example**
+        
+        ```json
+        {
+          "/users/{?id}": {
+        ```
+        
+        **Valid Example**
+        
+        ```json
+        {
+          "parameters": [
+            {
+              "schema": {
+                "type": "string"
+              },
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "User's ID"
+            }
+          ]
+        }
+        ```
+      message: Paths should not have query parameters in them. They should be defined separately in the OpenAPI.

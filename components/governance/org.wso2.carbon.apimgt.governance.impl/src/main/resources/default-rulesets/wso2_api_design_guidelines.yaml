@@ -1,0 +1,364 @@
+# Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+
+id: 2f457c02-300c-4a71-9ca1-d658db6f650f
+name: WSO2 API Design Guidelines
+message: Defines best practices for designing efficient, scalable APIs.
+description: >-
+  A guide detailing best practices for creating robust, scalable, and secure
+  APIs, ensuring alignment with industry standards for optimal design.
+appliesTo: API_DEFINITION
+documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-rulesets/wso2_api_design_guidelines_doc/"
+provider: WSO2
+rulesetContent:
+  aliases:
+    Request_Parameter_Path:
+      description: "All request path parameters"
+      targets:
+        - formats:
+            - oas2
+          given:
+            - "$..parameters[?(@ && @.in==\"path\")]"
+        - formats:
+            - oas3
+          given:
+            - "$..parameters[?(@ && @.in==\"path\")]"
+
+    Request_Parameter_Query:
+      description: ""
+      targets:
+        - formats:
+            - oas3
+          given:
+            - "$.paths[*].parameters[?(@.in == 'query')].name"
+            - "$.paths[*][*].parameters[?(@.in == 'query')].name"
+            - "$.components.parameters[?(@.in == 'query')].name"
+  rules:
+    server-has-api:
+      given:
+        - '$.servers[*].url'
+      severity: info
+      then:
+        function: pattern
+        functionOptions:
+          match: ^.*\/api/?.*
+      description: Server must have /api
+      message: Server must have /api in it
+      formats:
+        - oas3
+    path-casing:
+      given:
+        - $.paths
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          match: '^\/([a-z0-9]+(-[a-z0-9]+)*)?(\/[a-z0-9]+(-[a-z0-9]+)*|\/{.+})*$'
+        field: '@key'
+      description: |-
+        Paths must be `kebab-case`, with hyphens separating words.
+
+        **Invalid Example**
+
+        `userInfo` must be separated with a hyphen.
+
+        ```json
+        {
+            "/userInfo": {
+                "post: }
+               ....
+        }
+        ``` 
+
+        **Valid Example**
+
+        ```json
+        {
+            "/user-info": {
+               "post: }
+               ....
+        }
+        ```
+      message: Paths must be kebab-case
+    resource-names-plural:
+      given:
+        - $.paths
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          match: '^((\/v\d+)*((\/[\w+-]*s)(\/\{.*\})*)*)$'
+        field: '@key'
+      description: |-
+        Resource names should generally be plural. 
+
+        **Invalid Example**
+
+        ```json
+        {
+            "paths": {
+              "/user": 
+            }
+          }
+        ```
+
+        **Valid Example**
+
+        ```json
+        {
+            "paths": {
+              "/users": 
+            }
+        }
+        ```
+      message: Resource names should generally be plural
+    paths-no-file-extensions:
+      given:
+        - $.paths
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: \b(JSON|json|XML|xml)\b
+        field: '@key'
+      description: |-
+        Paths must not include `json` or `xml` file extensions.
+
+        **Invalid Example**
+
+        The path contains a `.json` extension. 
+
+        ```json
+        {
+            "/user.json": {
+               "post: }
+               ....
+        }
+        ``` 
+
+        **Valid Example**
+
+        ```json
+        {
+            "/user": {
+               "post: }
+               ....
+        }
+        ```
+      message: Paths must not have file extensions
+    paths-no-http-verbs:
+      given:
+        - $.paths
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: >-
+            \b(GET|PUT|POST|DELETE|LIST|CREATE|REMOVE|get|put|post|delete|list|create|remove|Get|Put|Post|Delete|List|Create|Remove)\b
+        field: '@key'
+      description: >-
+        Verbs such as `get`, `delete`, and `put` must not be included in paths
+        because this information is conveyed by the HTTP method.
+
+
+        **Invalid Example**
+
+
+        The path contains the verb `get`. 
+
+
+        ```json
+
+        {
+            "/getUsers": {
+               "post: }
+               ....
+        }
+
+        ``` 
+
+
+        **Valid Example**
+
+
+        ```json
+
+        {
+            "/user": {
+               "post: }
+               ....
+        }
+
+        ```
+      message: Paths must not have HTTP verbs in them
+    paths-avoid-special-characters:
+      given:
+        - $.paths
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: '^(.*)([\$&+,;=?@%]+)(.*)$'
+          match: ''
+        field: '@key'
+      description: >-
+        Paths should not contain special characters, such as `$` `&` `+` `,` `;`
+        `=` `?` and `@%`.
+
+
+        **Invalid Example**
+
+
+        The path contains an ampersand. 
+
+
+        ```json
+
+        {
+            "/user&info": {
+               "post: }
+               ....
+        }
+
+        ``` 
+
+
+        **Valid Example**
+
+
+        ```json
+
+        {
+            "/user": {
+               "post: }
+               ....
+        }
+
+        ```
+      message: Avoid using special characters in paths
+    path-parameters-snake-case:
+      given:
+        - '#Request_Parameter_Path'
+      severity: error
+      then:
+        function: casing
+        functionOptions:
+          type: snake
+          disallowDigits: true
+        field: name
+      description: >-
+        Path parameters must be `snake_case`, with each word separated by an
+        underscore character and the first letter of each word lowercase. Also,
+        the path parameter must not contain digits.
+
+
+        **Invalid Example**
+
+
+        The `name` property on line 9 (`userId`) must be separated by an
+        underscore character and the `I` must be lowercase.
+
+
+        ```json
+
+        {
+            "paths": {
+              "/users/{userId}": {
+                "parameters": [
+                  {
+                    "schema": {
+                      "type": "integer"
+                    },
+                    "name": "userId",
+                    "in": "path"
+                  }
+                ]
+              }
+            }
+          }
+        ```
+
+
+        **Valid Example**
+
+
+        ```json
+
+        {
+            "paths": {
+              "/users/{userId}": {
+                "parameters": [
+                  {
+                    "schema": {
+                      "type": "integer"
+                    },
+                    "name": "user_id",
+                    "in": "path"
+                  }
+                ]
+              }
+            }
+          }
+        ```
+      message: Path parameters must be snake_case and must not contain digits
+    query-parameters-snake-case:
+      given:
+        - '#Request_Parameter_Query'
+      severity: error
+      then:
+        function: casing
+        functionOptions:
+          type: snake
+          disallowDigits: true
+      description: >-
+        Query parameters must be `snake_case`, with each word separated by an
+        underscore character and the first letter of each word lowercase. Also,
+        the query parameter must not contain digits.
+
+
+        **Invalid Example**
+
+
+        The `name` property on line 8 (`user-Id`) must be separated by an
+        underscore character and the `I` must be lowercase.
+
+
+        ```json
+
+        {
+           "parameters": [
+             {
+               "schema": {
+                 "type": "string"
+               },
+               "in": "query",
+               "name": "user-Id"
+             }
+           ]
+        }
+
+        ```
+
+
+        **Valid Example**
+
+
+        ```json
+
+        {
+            "parameters": [
+              {
+                "schema": {
+                  "type": "string"
+                },
+                "in": "query",
+                "name": "user_id"
+              }
+            ]
+         }
+        ```
+      message: Query parameters should be snake_case and not contain digits

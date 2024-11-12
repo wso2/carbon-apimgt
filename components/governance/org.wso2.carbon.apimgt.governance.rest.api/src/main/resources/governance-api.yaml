@@ -145,6 +145,203 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_manage
+  /rulesets/{rulesetId}:
+    get:
+      summary: Retrieves details of a specific ruleset.
+      description: Retrieves details of the ruleset identified by the rulesetId.
+      operationId: getRulesetById
+      tags:
+        - Rulesets
+        - External
+      parameters:
+        - name: rulesetId
+          in: path
+          required: true
+          description: UUID of the ruleset.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK. Ruleset details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesetInfo'
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_rule_read
+    put:
+      summary: Updates a specific ruleset.
+      description: Updates the details of the ruleset identified by the `rulesetId`.
+      operationId: updateRulesetById
+      tags:
+        - Rulesets
+        - External
+      parameters:
+        - name: rulesetId
+          in: path
+          required: true
+          description: UUID of the ruleset.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: JSON object containing the updated ruleset details.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ruleset'
+      responses:
+        "200":
+          description: OK. Ruleset updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ruleset'
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_rule_manage
+    delete:
+      summary: Deletes a specific ruleset.
+      description: Deletes an existing ruleset identified by the rulesetId.
+      operationId: deleteRuleset
+      tags:
+        - Rulesets
+        - External
+      parameters:
+        - name: rulesetId
+          in: path
+          required: true
+          description: UUID of the ruleset.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK. Ruleset deleted successfully.
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_rule_manage
+  /rulesets/{rulesetId}/content:
+    get:
+      summary: Retrieves the content of a specific ruleset.
+      description: Retrieves the content of the ruleset identified by the rulesetId.
+      operationId: getRulesetContent
+      tags:
+        - Rulesets
+        - External
+      parameters:
+        - name: rulesetId
+          in: path
+          required: true
+          description: UUID of the ruleset.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK. Ruleset content retrieved successfully.
+          content:
+            application/x-yaml:
+              schema:
+                type: string
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_rule_read
   /healthz/liveness:
     get:
       summary: Liveness Check
@@ -232,10 +429,10 @@ components:
           type: string
           description: Context or area to which the ruleset applies.
           enum:
-            - api_metadata
-            - api_definition
-            - documentation
-          example: api_definition
+            - API_METADATA
+            - API_DEFINITION
+            - DOCUMENTATION
+          example: API_DEFINITION
         documentationLink:
           type: string
           description: URL to the documentation related to the ruleset.
@@ -244,6 +441,11 @@ components:
           type: string
           description: Entity or individual providing the ruleset.
           example: "TechWave"
+        isDefault:
+          type: boolean
+          default: false
+          description: Whether the ruleset is a default one or not.
+          example: true
         createdBy:
           type: string
           description: Identifier of the user who created the ruleset.
@@ -290,9 +492,10 @@ components:
           type: string
           description: Context or area to which the ruleset applies.
           enum:
-            - api_metadata
-            - api_definition
-            - documentation
+            - API_METADATA
+            - API_DEFINITION
+            - DOCUMENTATION
+          example: API_DEFINITION
         documentationLink:
           type: string
           description: URL to the documentation related to the ruleset.
@@ -343,33 +546,6 @@ components:
         message:
           type: string
           description: Error message.
-        description:
-          type: string
-          description: |
-            A detail description about the error message.
-        moreInfo:
-          type: string
-          description: |
-            Preferably an url with more details about the error.
-        error:
-          type: array
-          description: |
-            If there are more than one error list them out.
-            For example, list out validation errors by each field.
-          items:
-            $ref: "#/components/schemas/ErrorListItem"
-    ErrorListItem:
-      title: Description of individual errors that may have occurred during a request.
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-          description: |
-            Description about individual errors occurred
         description:
           type: string
           description: |

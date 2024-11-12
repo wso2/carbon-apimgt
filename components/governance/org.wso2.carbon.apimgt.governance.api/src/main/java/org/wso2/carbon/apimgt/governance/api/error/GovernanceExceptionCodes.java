@@ -63,6 +63,12 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(301014, "Error while loading default ruleset content", 500, "Error while loading default ruleset provided by WSO2.", true),
     ERROR_WHILE_RETRIEVING_POLICY_IDS_BY_RULESET_ID(301015, "Error while retrieving policy ids for the ruleset.", 500, "Error while retrieving policy ids for ruleset id: %s", true),
     INVALID_RULE_SEVERITY(301012, "Rule severity is invalid", 400, "Rule severity '%s' is invalid"),
+    ERROR_WHILE_RETRIEVING_RULESET_BY_NAME(301013, "Retrieving ruleset by name failed", 500, "Error while retrieving " +
+            "ruleset for the organization: %s"),
+    ERROR_FAILED_TO_PARSE_RULESET_CONETENT(301014, "Failed to parse ruleset content", 500, "Failed to parse ruleset " +
+            "content for the ruleset."),
+    ERROR_CANNOT_MODIFY_DEFAULT_RULESET(301015, "Can not modify default ruleset", 403, "Can not modify default " +
+            "ruleset %s in the organization: %s"),
 
     // Policy related codes
     ERROR_WHILE_CREATING_POLICY(401001, "Policy creation failed.", 500, "Error while creating governance policy in the organization %s", true),
@@ -160,33 +166,4 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
         return stackTrace;
     }
 
-    /**
-     * Create an ErrorHandler instance with the provided ExceptionCode filled with some dynamic input values
-     *
-     * @param errorHandler ErrorHandler or ExceptionCode object
-     * @param params       dynamic values to be filled
-     * @return ErrorHandler instance with the provided ExceptionCode filled with some dynamic input values
-     */
-    public static ErrorHandler from(ErrorHandler errorHandler, String... params) {
-        String message = errorHandler.getErrorMessage();
-        String description = errorHandler.getErrorDescription();
-
-        if (params != null && params.length > 0) {
-            int placesToFormatInMessage = message.length() - message.replace("%", "").length();
-            int placesToFormatInDescription = description.length() - description.replace("%", "").length();
-
-            String[] part1 = Arrays.copyOfRange(params, 0, placesToFormatInMessage);
-            String[] part2 = Arrays.copyOfRange(params, placesToFormatInMessage,
-                    placesToFormatInMessage + placesToFormatInDescription);
-
-            if (placesToFormatInMessage > 0) {
-                message = String.format(message, part1);
-            }
-            if (placesToFormatInDescription > 0) {
-                description = String.format(description, part2);
-            }
-        }
-        return new ErrorItem(message, description, errorHandler.getErrorCode(), errorHandler.getHttpStatusCode(),
-                errorHandler.printStackTrace());
-    }
 }

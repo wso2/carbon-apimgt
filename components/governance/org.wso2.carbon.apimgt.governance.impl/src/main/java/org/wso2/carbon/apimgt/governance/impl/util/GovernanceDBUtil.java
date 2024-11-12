@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.impl.util;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -28,9 +29,9 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -92,103 +93,17 @@ public class GovernanceDBUtil {
     }
 
     /**
-     * Utility method to close the connection streams.
+     * Function converts IS to String
+     * Used for handling inputstreams
      *
-     * @param preparedStatement PreparedStatement
-     * @param connection        Connection
-     * @param resultSet         ResultSet
+     * @param is - The Input Stream
+     * @return - The inputStream as a string
+     * @throws IOException - If an error occurs while converting the input stream to a string
      */
-    public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
-                                           ResultSet resultSet) {
-        closeConnection(connection);
-        closeResultSet(resultSet);
-        closeStatement(preparedStatement);
-    }
-
-    /**
-     * Close Connection
-     *
-     * @param dbConnection Connection
-     */
-    private static void closeConnection(Connection dbConnection) {
-        if (dbConnection != null) {
-            try {
-                dbConnection.close();
-            } catch (SQLException e) {
-                log.warn("Database error. Could not close database connection. Continuing with " +
-                        "others. - " + e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
-     * Close ResultSet
-     *
-     * @param resultSet ResultSet
-     */
-    private static void closeResultSet(ResultSet resultSet) {
-        if (resultSet != null) {
-            try {
-                resultSet.close();
-            } catch (SQLException e) {
-                log.warn("Database error. Could not close ResultSet  - " + e.getMessage(), e);
-            }
-        }
-
-    }
-
-    /**
-     * Close PreparedStatement
-     *
-     * @param preparedStatement PreparedStatement
-     */
-    public static void closeStatement(PreparedStatement preparedStatement) {
-        if (preparedStatement != null) {
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                log.warn("Database error. Could not close PreparedStatement. Continuing with" +
-                        " others. - " + e.getMessage(), e);
-            }
-        }
-
-    }
-
-    /**
-     * Set autocommit state of the connection
-     *
-     * @param dbConnection Connection
-     * @param autoCommit   autoCommitState
-     */
-    public static void setAutoCommit(Connection dbConnection, boolean autoCommit) {
-        if (dbConnection != null) {
-            try {
-                dbConnection.setAutoCommit(autoCommit);
-            } catch (SQLException e) {
-                log.error("Could not set auto commit back to initial state", e);
-            }
-        }
-    }
-
-    /**
-     * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
-     *
-     * @param connection Connection
-     * @param error      Error message to be logged
-     * @param e          Original SQLException
-     * @throws SQLException
-     */
-    public static void rollbackConnection(Connection connection, String error, SQLException e) throws SQLException {
-        if (connection != null) {
-            try {
-                connection.rollback();
-            } catch (SQLException rollbackException) {
-                // rollback failed
-                log.error(error, rollbackException);
-            }
-            // Rethrow original exception so that it can be handled in the common catch clause of the calling method
-            throw e;
-        }
+    public static String getStringFromInputStream(InputStream is) throws IOException {
+        String str = null;
+        str = IOUtils.toString(is, "UTF-8");
+        return str;
     }
 
 

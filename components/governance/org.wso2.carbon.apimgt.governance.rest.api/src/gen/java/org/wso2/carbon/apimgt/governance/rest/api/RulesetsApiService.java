@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 
 import java.util.List;
@@ -23,5 +24,9 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface RulesetsApiService {
       public Response createRuleset(RulesetDTO rulesetDTO, MessageContext messageContext) throws GovernanceException;
+      public Response deleteRuleset(String rulesetId, MessageContext messageContext) throws GovernanceException;
+      public Response getRulesetById(String rulesetId, MessageContext messageContext) throws GovernanceException;
+      public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException;
       public Response getRulesets(MessageContext messageContext) throws GovernanceException;
+      public Response updateRulesetById(String rulesetId, RulesetDTO rulesetDTO, MessageContext messageContext) throws GovernanceException;
 }

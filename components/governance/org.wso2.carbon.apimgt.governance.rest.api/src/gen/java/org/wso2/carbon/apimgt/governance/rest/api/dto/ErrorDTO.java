@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorListItemDTO;
 import javax.validation.constraints.*;
 
 
@@ -26,8 +23,6 @@ public class ErrorDTO   {
     private Long code = null;
     private String message = null;
     private String description = null;
-    private String moreInfo = null;
-    private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
   /**
    **/
@@ -84,43 +79,6 @@ public class ErrorDTO   {
     this.description = description;
   }
 
-  /**
-   * Preferably an url with more details about the error. 
-   **/
-  public ErrorDTO moreInfo(String moreInfo) {
-    this.moreInfo = moreInfo;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Preferably an url with more details about the error. ")
-  @JsonProperty("moreInfo")
-  public String getMoreInfo() {
-    return moreInfo;
-  }
-  public void setMoreInfo(String moreInfo) {
-    this.moreInfo = moreInfo;
-  }
-
-  /**
-   * If there are more than one error list them out. For example, list out validation errors by each field. 
-   **/
-  public ErrorDTO error(List<ErrorListItemDTO> error) {
-    this.error = error;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "If there are more than one error list them out. For example, list out validation errors by each field. ")
-      @Valid
-  @JsonProperty("error")
-  public List<ErrorListItemDTO> getError() {
-    return error;
-  }
-  public void setError(List<ErrorListItemDTO> error) {
-    this.error = error;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -133,14 +91,12 @@ public class ErrorDTO   {
     ErrorDTO error = (ErrorDTO) o;
     return Objects.equals(code, error.code) &&
         Objects.equals(message, error.message) &&
-        Objects.equals(description, error.description) &&
-        Objects.equals(moreInfo, error.moreInfo) &&
-        Objects.equals(error, error.error);
+        Objects.equals(description, error.description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(code, message, description, moreInfo, error);
+    return Objects.hash(code, message, description);
   }
 
   @Override
@@ -151,8 +107,6 @@ public class ErrorDTO   {
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    moreInfo: ").append(toIndentedString(moreInfo)).append("\n");
-    sb.append("    error: ").append(toIndentedString(error)).append("\n");
     sb.append("}");
     return sb.toString();
   }

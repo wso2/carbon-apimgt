@@ -75,6 +75,7 @@ public class RulesetMappingUtil {
         rulesetDTO.setCreatedTime(createdRuleset.getCreatedTime());
         rulesetDTO.setUpdatedBy(createdRuleset.getUpdatedBy());
         rulesetDTO.setUpdatedTime(createdRuleset.getUpdatedTime());
+        rulesetDTO.setIsDefault(createdRuleset.isDefault() == 1);
         return rulesetDTO;
     }
 
@@ -84,7 +85,7 @@ public class RulesetMappingUtil {
      * @param rulesetInfo RulesetInfo object
      * @return RulesetInfoDTO object
      */
-    private static RulesetInfoDTO fromRulesetInfoToRulesetInfoDTO(RulesetInfo rulesetInfo) {
+    public static RulesetInfoDTO fromRulesetInfoToRulesetInfoDTO(RulesetInfo rulesetInfo) {
         RulesetInfoDTO rulesetInfoDTO = new RulesetInfoDTO();
         rulesetInfoDTO.setId(rulesetInfo.getId());
         rulesetInfoDTO.setName(rulesetInfo.getName());
@@ -97,6 +98,7 @@ public class RulesetMappingUtil {
         rulesetInfoDTO.setCreatedTime(rulesetInfo.getCreatedTime());
         rulesetInfoDTO.setUpdatedBy(rulesetInfo.getUpdatedBy());
         rulesetInfoDTO.setUpdatedTime(rulesetInfo.getUpdatedTime());
+        rulesetInfoDTO.setIsDefault(rulesetInfo.isDefault() == 1);
         return rulesetInfoDTO;
     }
 

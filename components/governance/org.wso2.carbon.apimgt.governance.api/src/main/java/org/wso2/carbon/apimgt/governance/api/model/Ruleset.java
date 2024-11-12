@@ -35,6 +35,8 @@ public class Ruleset {
     private String updatedBy;
     private String updatedTime;
 
+    private int isDefault;
+
     public String getId() {
         return id;
     }
@@ -129,6 +131,14 @@ public class Ruleset {
 
     public void setUpdatedTime(String updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public int isDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(int isDefault) {
+        this.isDefault = isDefault;
     }
 }
 

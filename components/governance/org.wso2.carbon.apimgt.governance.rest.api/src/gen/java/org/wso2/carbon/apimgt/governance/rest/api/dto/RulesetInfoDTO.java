@@ -30,9 +30,9 @@ public class RulesetInfoDTO   {
     @XmlType(name="AppliesToEnum")
     @XmlEnum(String.class)
     public enum AppliesToEnum {
-        API_METADATA("api_metadata"),
-        API_DEFINITION("api_definition"),
-        DOCUMENTATION("documentation");
+        API_METADATA("API_METADATA"),
+        API_DEFINITION("API_DEFINITION"),
+        DOCUMENTATION("DOCUMENTATION");
         private String value;
 
         AppliesToEnum (String v) {
@@ -131,7 +131,7 @@ return null;
   }
 
   
-  @ApiModelProperty(required = true, value = "Context or area to which the ruleset applies.")
+  @ApiModelProperty(example = "API_DEFINITION", required = true, value = "Context or area to which the ruleset applies.")
   @JsonProperty("appliesTo")
   @NotNull
   public AppliesToEnum getAppliesTo() {
