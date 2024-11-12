@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Constructor;
@@ -46,7 +44,7 @@ public abstract class AbstractMonetization implements Monetization{
         }
         String message;
         try {
-            Class<?> callingClass = APIUtil.getClassForName(className);
+            Class<?> callingClass = getClassForName(className);
             Constructor<?> cons = callingClass.getConstructors()[0];
             analyticsClass = (AnalyticsforMonetization) cons.newInstance();;
             return analyticsClass.getUsageData(monetizationUsagePublishInfo);
@@ -67,4 +65,11 @@ public abstract class AbstractMonetization implements Monetization{
             throw new MonetizationException(message, e);
         } //handling of possible exceptions
     }
+
+    public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException,
+            InstantiationException {
+
+        return Class.forName(className);
+    }
+
 }
