@@ -175,7 +175,7 @@
 
         <AuthToken></AuthToken>
 
-        <AnalyticsImpl>{{apim.analytics.}}</AnalyticsImpl>
+        <AnalyticsImpl>{{apim.analytics.analytics_impl}}</AnalyticsImpl>
 
         <!-- Event publisher implementation -->
         <!-- <ReporterClass></ReporterClass> -->
