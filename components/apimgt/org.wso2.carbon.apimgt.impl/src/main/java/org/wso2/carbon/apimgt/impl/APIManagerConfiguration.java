@@ -403,6 +403,9 @@ public class APIManagerConfiguration {
                 OMElement enablePolicy = element.getFirstChildWithName(new QName("PolicyEnabled"));
                 analyticsProps.put("policyEnabled", enablePolicy.getText());
 
+                OMElement analyticsImplementation = element.getFirstChildWithName(new QName("AnalyticsImpl"));
+                analyticsProps.put("analyticsImpl", analyticsImplementation.getText());
+
                 analyticsProperties = analyticsProps;
             } else if ("PersistenceConfigs".equals(localName)) {
                 OMElement properties = element.getFirstChildWithName(new QName("Properties"));
