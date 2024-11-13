@@ -1,7 +1,12 @@
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.impl.monetization;
 
 import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.model.AnalyticsforMonetization;
+import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Constructor;
@@ -12,9 +17,11 @@ import java.util.Map;
  * Abstract class for monetization, implements Monetization interface
  */
 
-public abstract class AbstractMonetization implements Monetization{
+public abstract class AbstractMonetization implements Monetization {
 
     private AnalyticsforMonetization analyticsClass;
+    private APIManagerConfiguration configuration = new APIManagerConfiguration();
+    public static final String ANALYTICS_IMPL = "analyticsImpl";
 
     @Override
     public boolean publishMonetizationUsageRecords(MonetizationUsagePublishInfo monetizationUsagePublishInfo) throws MonetizationException {
@@ -38,13 +45,16 @@ public abstract class AbstractMonetization implements Monetization{
      * @throws AnalyticsException if the action failed
      */
     public Object monetizationAnalyticsDataProvider(MonetizationUsagePublishInfo monetizationUsagePublishInfo) throws MonetizationException{
-        String className = "org.wso2.apim.analytics.impl.ChoreoAnalyticsforMonetizationImpl";
-        if (className == null) {
+        Map<String,String> configs = configuration.getAnalyticsProperties();
+        String className;
+        if (configs.containsKey(ANALYTICS_IMPL) && !configs.get(ANALYTICS_IMPL).isEmpty()) {
+            className = configs.get(ANALYTICS_IMPL);
+        } else {
             className = "org.wso2.apim.analytics.impl.ChoreoAnalyticsforMonetizationImpl";
         }
         String message;
         try {
-            Class<?> callingClass = getClassForName(className);
+            Class<?> callingClass = APIUtil.getClassForName(className);
             Constructor<?> cons = callingClass.getConstructors()[0];
             analyticsClass = (AnalyticsforMonetization) cons.newInstance();;
             return analyticsClass.getUsageData(monetizationUsagePublishInfo);
@@ -65,11 +75,4 @@ public abstract class AbstractMonetization implements Monetization{
             throw new MonetizationException(message, e);
         } //handling of possible exceptions
     }
-
-    public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException,
-            InstantiationException {
-
-        return Class.forName(className);
-    }
-
 }
