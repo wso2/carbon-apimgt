@@ -2012,7 +2012,7 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>9.29.120-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>9.29.120</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
         <carbon.analytics.common.version>5.3.11</carbon.analytics.common.version>
