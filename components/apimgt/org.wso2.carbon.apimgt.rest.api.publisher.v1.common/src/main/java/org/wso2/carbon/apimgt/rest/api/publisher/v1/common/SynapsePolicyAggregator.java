@@ -57,6 +57,9 @@ public class SynapsePolicyAggregator {
     private static final String POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
             + "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
             + "operation_policy_template.j2";
+    private static final String CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION =
+            CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator
+                    + "api_templates" + File.separator + "custom_backend_sequence_template.j2";
     private static final String GATEWAY_POLICY_SEQUENCE_TEMPLATE_LOCATION = CarbonUtils.getCarbonHome() + File.separator
             + "repository" + File.separator + "resources" + File.separator + "templates" + File.separator
             + "gateway_policy_template.j2";
@@ -102,6 +105,38 @@ public class SynapsePolicyAggregator {
         } else {
             return "";
         }
+    }
+
+    public static String generateSequenceBackendForAPIProducts(String seqName, String prodSeq, String pathToArchive,
+            String endpointType) throws APIManagementException, IOException {
+        Map<String, Object> configMap = new HashMap<>();
+        String customBackendTemplate = FileUtil.readFileToString(CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION)
+                .replace("\\", "");
+        // change sequence name from the upper function
+        configMap.put("sequence_name", prodSeq);
+        String sanitizedSequence = renderCustomBackendSequence(seqName, pathToArchive);
+        if (sanitizedSequence == null) {
+            return null;
+        }
+        configMap.put("custom_sequence", sanitizedSequence);
+        configMap.put("endpoint_type", endpointType);
+        return renderPolicyTemplate(customBackendTemplate, configMap);
+    }
+
+    public static String generateBackendSequenceForCustomSequence(String fileName, String pathToArchive,
+            String endpointType, String apiSeqName) throws APIManagementException, IOException {
+        Map<String, Object> configMap = new HashMap<>();
+        String customBackendTemplate = FileUtil.readFileToString(CUSTOM_BACKEND_SEQUENCE_TEMPLATE_LOCATION)
+                .replace("\\", "");
+        // change sequence name from the upper function
+        configMap.put("sequence_name", apiSeqName);
+        String sanitizedSequence = renderCustomBackendSequence(fileName, pathToArchive);
+        if (sanitizedSequence == null) {
+            return null;
+        }
+        configMap.put("custom_sequence", sanitizedSequence);
+        configMap.put("endpoint_type", endpointType);
+        return renderPolicyTemplate(customBackendTemplate, configMap);
     }
 
     /**
@@ -200,6 +235,17 @@ public class SynapsePolicyAggregator {
             }
         }
         return renderedPolicyMappingList;
+    }
+
+    private static String renderCustomBackendSequence(String sequenceName, String pathToArchive)
+            throws APIManagementException {
+        String policyDirectory = pathToArchive + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
+        String sequence = APIUtil.getCustomBackendSequenceFromFile(policyDirectory, sequenceName,
+                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
+        if (sequence == null) {
+            return null;
+        }
+        return renderPolicyTemplate(sequence, new HashMap<>());
     }
 
     /**

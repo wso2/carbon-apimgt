@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -29,6 +32,8 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import io.swagger.v3.parser.ObjectMapperFactory;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -44,7 +49,9 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -80,6 +87,7 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
@@ -93,9 +101,11 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -105,6 +115,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -184,10 +195,56 @@ public class PublisherCommonUtils {
 
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
         apiProvider.updateAPI(apiToUpdate, originalAPI);
-
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
-        // TODO use returend api
+        API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+        if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
+            JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
+            if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && (
+                    APIConstants.API_TYPE_HTTP.equals(apiUpdated.getType()) || APIConstants.API_TYPE_SOAPTOREST.equals(
+                            apiUpdated.getType()))) {
+                apiProvider.deleteSequenceBackendByRevision(apiUpdated.getUuid(), "0");
+            }
+        }
+        return apiUpdated;
     }
+
+    /**
+     * @param api           API of the Custom Backend
+     * @param apiProvider   API Provider
+     * @param endpointType  Endpoint Type of the Custom Backend (SANDBOX, PRODUCTION)
+     * @param customBackend Custom Backend
+     * @param contentDecomp Header Content of the Request
+     * @throws APIManagementException If an error occurs while updating the API and API definition
+     */
+    public static void updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
+            InputStream customBackend, String contentDecomp) throws APIManagementException {
+        String fileName = getFileNameFromContentDisposition(contentDecomp);
+        if (fileName == null) {
+            throw new APIManagementException(
+                    "Error when retrieving Custom Backend file name of API: " + api.getId().getApiName());
+        }
+        String customBackendUUID = UUID.randomUUID().toString();
+        try {
+            String customBackendStr = IOUtils.toString(customBackend);
+            apiProvider.updateCustomBackend(api.getUuid(), endpointType, customBackendStr, fileName, customBackendUUID);
+        } catch (IOException ex) {
+            throw new APIManagementException("Error retrieving sequence backend of API: " + api.getUuid(), ex);
+        }
+    }
+
+    private static String getFileNameFromContentDisposition(String contentDisposition) {
+        // Split the Content-Disposition header to get the file name
+        String[] parts = contentDisposition.split(";");
+        for (String part : parts) {
+            if (part.trim().startsWith("filename")) {
+                // Extract the file name value
+                return part.split("=")[1].trim().replace("\"", "");
+            }
+        }
+        return null;
+    }
+
+
 
     /**
      * Prepare for API object before updating the API.
@@ -211,6 +268,8 @@ public class PublisherCommonUtils {
                     + " as the token information hasn't been correctly set internally",
                     ExceptionCodes.TOKEN_SCOPES_NOT_SET);
         }
+        APIUtil.validateAPIEndpointConfig(apiDtoToUpdate.getEndpointConfig(), apiDtoToUpdate.getType().toString(),
+                apiDtoToUpdate.getName());
         if (apiDtoToUpdate.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && apiDtoToUpdate.getVisibleRoles()
                 .isEmpty()) {
             throw new APIManagementException("Access control roles cannot be empty when visibility is restricted",
@@ -236,6 +295,9 @@ public class PublisherCommonUtils {
         String oldProductionApiSecret = null;
         String oldSandboxApiSecret = null;
 
+        String oldProductionApiKeyValue = null;
+        String oldSandboxApiKeyValue = null;
+
         if (oldEndpointConfig != null) {
             if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
                 JSONObject oldEndpointSecurity = (JSONObject) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
@@ -249,6 +311,13 @@ public class PublisherCommonUtils {
                             != null) {
                         oldProductionApiSecret = oldEndpointSecurityProduction
                                 .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                    } else if (oldEndpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                            && oldEndpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                            && oldEndpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
+                        oldProductionApiKeyValue = oldEndpointSecurityProduction
+                                .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
                     }
                 }
                 if (oldEndpointSecurity != null &&
@@ -261,6 +330,12 @@ public class PublisherCommonUtils {
                             != null) {
                         oldSandboxApiSecret = oldEndpointSecuritySandbox
                                 .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                    } else if (oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                            && oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                            && oldEndpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
+                        oldSandboxApiKeyValue = oldEndpointSecuritySandbox
+                                .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
                     }
                 }
             }
@@ -272,6 +347,28 @@ public class PublisherCommonUtils {
         // OAuth 2.0 backend protection: API Key and API Secret encryption
         encryptEndpointSecurityOAuthCredentials(endpointConfig, cryptoUtil, oldProductionApiSecret, oldSandboxApiSecret,
                 apiDtoToUpdate);
+
+        encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, oldProductionApiKeyValue,
+                oldSandboxApiKeyValue, apiDtoToUpdate);
+        // update endpointConfig with the provided custom sequence
+        if (endpointConfig != null) {
+            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                try {
+                    if (endpointConfig.get("sequence_path") != null) {
+                        String pathToSequence = endpointConfig.get("sequence_path").toString();
+                        String sequence = FileUtils.readFileToString(new File(pathToSequence),
+                                Charset.defaultCharset());
+                        endpointConfig.put("sequence", sequence);
+                        apiDtoToUpdate.setEndpointConfig(endpointConfig);
+                    }
+                } catch (IOException ex) {
+                    throw new APIManagementException(
+                            "Error while reading Custom Sequence of API: " + apiDtoToUpdate.getId(), ex,
+                            ExceptionCodes.ERROR_READING_CUSTOM_SEQUENCE);
+                }
+            }
+        }
 
         // AWS Lambda: secret key encryption while updating the API
         if (apiDtoToUpdate.getEndpointConfig() != null) {
@@ -293,7 +390,6 @@ public class PublisherCommonUtils {
                 }
             }
         }
-
         if (!hasClassLevelScope) {
             // Validate per-field scopes
             apiDtoToUpdate = getFieldOverriddenAPIDTO(apiDtoToUpdate, originalAPI, tokenScopes);
@@ -323,15 +419,52 @@ public class PublisherCommonUtils {
         List<String> apiSecurity = apiDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
+        // Remove the subscriptionless tier if other tiers are available.
+        if (tiersFromDTO != null && tiersFromDTO.size() > 1) {
+            String tierToDrop = null;
+            for (String tier : tiersFromDTO) {
+                if (tier.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+                    tierToDrop = tier;
+                    break;
+                }
+            }
+            if (tierToDrop != null) {
+                tiersFromDTO.remove(tierToDrop);
+                apiDtoToUpdate.setPolicies(tiersFromDTO);
+            }
+        }
         String originalStatus = originalAPI.getStatus();
-        if (apiSecurity != null && (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
-                .contains(APIConstants.API_SECURITY_API_KEY))) {
-            if ((tiersFromDTO == null || tiersFromDTO.isEmpty() && !(APIConstants.CREATED.equals(originalStatus)
-                    || APIConstants.PROTOTYPED.equals(originalStatus)))
-                    && !apiDtoToUpdate.getAdvertiseInfo().isAdvertised()) {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        boolean condition = ((tiersFromDTO == null || tiersFromDTO.isEmpty()
+                && !(APIConstants.CREATED.equals(originalStatus)
+                || APIConstants.PROTOTYPED.equals(originalStatus)))
+                && !apiDtoToUpdate.getAdvertiseInfo().isAdvertised());
+        if (!APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
+            if (apiSecurity != null && (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
+                    .contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
                 throw new APIManagementException(
                         "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
                         ExceptionCodes.TIER_CANNOT_BE_NULL);
+            }
+        } else {
+            if (apiSecurity != null) {
+                if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY) && condition) {
+                    throw new APIManagementException(
+                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
+                            ExceptionCodes.TIER_CANNOT_BE_NULL);
+                } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                    // Internally set the default tier when no tiers are defined in order to support
+                    // subscription validation disabling for OAuth2 secured APIs
+                    if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
+                        if (isAsyncAPI) {
+                            tiersFromDTO.add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS);
+                        } else {
+                            tiersFromDTO.add(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+
+                        }
+                        apiDtoToUpdate.setPolicies(tiersFromDTO);
+                    }
+                }
             }
         }
 
@@ -444,6 +577,93 @@ public class PublisherCommonUtils {
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         return apiToUpdate;
+    }
+
+    /**
+     * This method will encrypt the Api Key
+     *
+     * @param endpointConfig           endpoint configuration of API
+     * @param cryptoUtil               cryptography util
+     * @param oldProductionApiKeyValue existing production API secret
+     * @param oldSandboxApiKeyValue    existing sandbox API secret
+     * @param apidto                   API DTO
+     * @throws CryptoException        if an error occurs while encrypting and base64 encode
+     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
+     */
+    public static void encryptEndpointSecurityApiKeyCredentials(Map endpointConfig,
+                                                                CryptoUtil cryptoUtil,
+                                                                String oldProductionApiKeyValue,
+                                                                String oldSandboxApiKeyValue, APIDTO apidto)
+            throws CryptoException, APIManagementException {
+
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    Map endpointSecurityProduction = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    String productionEndpointType = (String) endpointSecurityProduction
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(productionEndpointType)) {
+                        if (endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null &&
+                                StringUtils.isNotEmpty(endpointSecurityProduction.get(
+                                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString()) &&
+                                !endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
+                                        .equals(oldProductionApiKeyValue)) {
+                            String apiKeyValue = endpointSecurityProduction
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                            String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
+                            endpointSecurityProduction
+                                    .put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, encryptedApiKeyValue);
+                        } else if (StringUtils.isNotBlank(oldProductionApiKeyValue)) {
+                            endpointSecurityProduction
+                                    .put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, oldProductionApiKeyValue);
+                        } else {
+                            String errorMessage = "ApiKey value is not provided for production endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityProduction);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+                    String sandboxEndpointType = (String) endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(sandboxEndpointType)) {
+                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                                && StringUtils.isNotEmpty(
+                                endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE)
+                                        .toString()) &&
+                                !endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).equals(
+                                        oldSandboxApiKeyValue)) {
+                            String apiKeyValue = endpointSecuritySandbox
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                            String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, encryptedApiKeyValue);
+                        } else if (StringUtils.isNotBlank(oldSandboxApiKeyValue)) {
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, oldSandboxApiKeyValue);
+                        } else {
+                            String errorMessage = "ApiKey value is not provided for sandbox endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
     }
 
     /**
@@ -850,13 +1070,13 @@ public class PublisherCommonUtils {
                 for (String aRole : scope.getRoles().split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(username, aRole);
                     if (!isValidRole) {
-                        throw new APIManagementException("Role '" + aRole + "' does not exist.",
-                                ExceptionCodes.ROLE_DOES_NOT_EXIST);
+                        String errorMessage = "Role '" + aRole + "' does not exist.";
+                        throw new APIManagementException(errorMessage,
+                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, aRole));
                     }
                 }
             }
         }
-
         apiProvider.validateSharedScopes(sharedAPIScopes, tenantDomain);
     }
 
@@ -884,6 +1104,7 @@ public class PublisherCommonUtils {
         boolean isAsyncAPI =
                 isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
                         APIDTO.TypeEnum.SSE.equals(apiDto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apiDto.getType());
+        boolean isEgressAPI = apiDto.isEgress();
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -923,6 +1144,9 @@ public class PublisherCommonUtils {
         encryptEndpointSecurityOAuthCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
                 apiDto);
 
+        encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
+                apiDto);
+
         // AWS Lambda: secret key encryption while creating the API
         if (apiDto.getEndpointConfig() != null) {
             if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
@@ -935,12 +1159,6 @@ public class PublisherCommonUtils {
             }
         }
 
-       /* if (isWSAPI) {
-            ArrayList<String> websocketTransports = new ArrayList<>();
-            websocketTransports.add(APIConstants.WS_PROTOCOL);
-            websocketTransports.add(APIConstants.WSS_PROTOCOL);
-            apiDto.setTransport(websocketTransports);
-        }*/
         API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organization);
         validateScopes(apiToAdd);
         //validate API categories
@@ -956,6 +1174,11 @@ public class PublisherCommonUtils {
                 throw new APIManagementException("Invalid API Category name(s) defined",
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
+        }
+
+        // Set API Key security for Egress APIs by default
+        if (isEgressAPI) {
+            apiToAdd.setApiSecurity(APIConstants.API_SECURITY_API_KEY);
         }
 
         if (!isAsyncAPI) {
@@ -1372,7 +1595,101 @@ public class PublisherCommonUtils {
         }
         apiToAdd.setOrganization(organization);
         apiToAdd.setGatewayType(body.getGatewayType());
+        if (body.getSubtypeConfiguration() != null && body.getSubtypeConfiguration().getSubtype() != null
+                && APIConstants.API_SUBTYPE_AI_API.equals(body.getSubtypeConfiguration().getSubtype())
+                && body.getSubtypeConfiguration().getConfiguration() != null) {
+            apiToAdd.setAiConfiguration(new Gson().fromJson(
+                    body.getSubtypeConfiguration().getConfiguration().toString(), AIConfiguration.class));
+            apiToAdd.setSubtype(APIConstants.API_SUBTYPE_AI_API);
+        } else {
+            apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+        }
+        apiToAdd.setEgress(body.isEgress() ? 1 : 0);
         return apiToAdd;
+    }
+
+    /**
+     * Builds the token based throttling configuration from APIMaxTpsTokenBasedThrottlingConfigurationDTO.
+     *
+     * @param throttlingConfigDTO The APIMaxTpsTokenBasedThrottlingConfigurationDTO to extract data from.
+     * @return The TokenBasedThrottlingCountHolder object.
+     */
+    public static TokenBasedThrottlingCountHolder buildThrottlingConfiguration (
+            APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigDTO) {
+
+        TokenBasedThrottlingCountHolder throttlingConfig = new TokenBasedThrottlingCountHolder();
+
+        if (throttlingConfigDTO.getProductionMaxPromptTokenCount() != null) {
+            throttlingConfig.setProductionMaxPromptTokenCount(
+                    throttlingConfigDTO.getProductionMaxPromptTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getProductionMaxCompletionTokenCount() != null) {
+            throttlingConfig.setProductionMaxCompletionTokenCount(
+                    throttlingConfigDTO.getProductionMaxCompletionTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getProductionMaxTotalTokenCount() != null) {
+            throttlingConfig.setProductionMaxTotalTokenCount(
+                    throttlingConfigDTO.getProductionMaxTotalTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getSandboxMaxPromptTokenCount() != null) {
+            throttlingConfig.setSandboxMaxPromptTokenCount(
+                    throttlingConfigDTO.getSandboxMaxPromptTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getSandboxMaxCompletionTokenCount() != null) {
+            throttlingConfig.setSandboxMaxCompletionTokenCount(
+                    throttlingConfigDTO.getSandboxMaxCompletionTokenCount().toString());
+        }
+        if (throttlingConfigDTO.getSandboxMaxTotalTokenCount() != null) {
+            throttlingConfig.setSandboxMaxTotalTokenCount(
+                    throttlingConfigDTO.getSandboxMaxTotalTokenCount().toString());
+        }
+        throttlingConfig.setTokenBasedThrottlingEnabled(throttlingConfigDTO
+                .isIsTokenBasedThrottlingEnabled());
+
+        return throttlingConfig;
+    }
+
+    /**
+     * Builds the throttling configuration DTO from AIConfiguration.
+     *
+     * @return The built APIAiConfigurationThrottlingConfigurationDTO object.
+     */
+    public static APIMaxTpsTokenBasedThrottlingConfigurationDTO buildThrottlingConfigurationDTO(
+            TokenBasedThrottlingCountHolder throttlingConfig) {
+
+        APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigurationsDTO =
+                new APIMaxTpsTokenBasedThrottlingConfigurationDTO();
+        try {
+            if (throttlingConfig.getProductionMaxPromptTokenCount() != null) {
+                throttlingConfigurationsDTO.setProductionMaxPromptTokenCount(
+                        Long.parseLong(throttlingConfig.getProductionMaxPromptTokenCount()));
+            }
+            if (throttlingConfig.getProductionMaxCompletionTokenCount() != null) {
+                throttlingConfigurationsDTO.setProductionMaxCompletionTokenCount(
+                        Long.parseLong(throttlingConfig.getProductionMaxCompletionTokenCount()));
+            }
+            if (throttlingConfig.getProductionMaxTotalTokenCount() != null) {
+                throttlingConfigurationsDTO.setProductionMaxTotalTokenCount(
+                        Long.parseLong(throttlingConfig.getProductionMaxTotalTokenCount()));
+            }
+            if (throttlingConfig.getSandboxMaxPromptTokenCount() != null) {
+                throttlingConfigurationsDTO.setSandboxMaxPromptTokenCount(
+                        Long.parseLong(throttlingConfig.getSandboxMaxPromptTokenCount()));
+            }
+            if (throttlingConfig.getSandboxMaxCompletionTokenCount() != null) {
+                throttlingConfigurationsDTO.setSandboxMaxCompletionTokenCount(
+                        Long.parseLong(throttlingConfig.getSandboxMaxCompletionTokenCount()));
+            }
+            if (throttlingConfig.getSandboxMaxTotalTokenCount() != null) {
+                throttlingConfigurationsDTO.setSandboxMaxTotalTokenCount(
+                        Long.parseLong(throttlingConfig.getSandboxMaxTotalTokenCount()));
+            }
+            throttlingConfigurationsDTO.setIsTokenBasedThrottlingEnabled(
+                    throttlingConfig.isTokenBasedThrottlingEnabled());
+        } catch (NumberFormatException e) {
+            log.error("Cannot convert to Long format when setting AI throttling configurations for API", e);
+        }
+        return throttlingConfigurationsDTO;
     }
 
     public static String updateAPIDefinition(String apiId, APIDefinitionValidationResponse response,
@@ -1519,7 +1836,9 @@ public class PublisherCommonUtils {
                 for (String aRole : roles.split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(), aRole);
                     if (!isValidRole) {
-                        throw new APIManagementException("Role '" + aRole + "' Does not exist.");
+                        String errorMessage = "Role '" + aRole + "' Does not exist.";
+                        throw new APIManagementException(errorMessage,
+                                ExceptionCodes.from(ExceptionCodes.ROLE_OF_SCOPE_DOES_NOT_EXIST, aRole));
                     }
                 }
             }
@@ -1775,20 +2094,23 @@ public class PublisherCommonUtils {
                     ExceptionCodes.DOCUMENT_NAME_ILLEGAL_CHARACTERS);
         }
         if (documentDto.getType() == null) {
-            throw new APIManagementException("Documentation type cannot be empty",
-                    ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            String errorMessage = "Documentation type cannot be empty";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.PARAMETER_NOT_PROVIDED_FOR_DOCUMENTATION, errorMessage));
         }
         if (documentDto.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils
                 .isBlank(documentDto.getOtherTypeName())) {
             //check otherTypeName for not null if doc type is OTHER
-            throw new APIManagementException("otherTypeName cannot be empty if type is OTHER.",
-                    ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            String errorMessage = "otherTypeName cannot be empty if type is OTHER.";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.PARAMETER_NOT_PROVIDED_FOR_DOCUMENTATION, errorMessage));
         }
         String sourceUrl = documentDto.getSourceUrl();
         if (documentDto.getSourceType() == DocumentDTO.SourceTypeEnum.URL && (
                 org.apache.commons.lang3.StringUtils.isBlank(sourceUrl) || !RestApiCommonUtil.isURL(sourceUrl))) {
-            throw new APIManagementException("Invalid document sourceUrl Format",
-                    ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            String errorMessage = "Invalid document sourceUrl Format";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.PARAMETER_NOT_PROVIDED_FOR_DOCUMENTATION, errorMessage));
         }
 
         if (apiProvider.isDocumentationExist(apiId, documentName, organization)) {
@@ -1886,11 +2208,34 @@ public class PublisherCommonUtils {
         List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiProductDtoToUpdate.getPolicies();
-        if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
-                .contains(APIConstants.API_SECURITY_API_KEY)) {
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                throw new APIManagementException("No tier defined for the API Product",
-                        ExceptionCodes.TIER_CANNOT_BE_NULL);
+        // Remove the subscriptionless tier if other tiers are available.
+        if (tiersFromDTO != null && tiersFromDTO.size() > 1
+                && tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+            tiersFromDTO.remove(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+            apiProductDtoToUpdate.setPolicies(tiersFromDTO);
+        }
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (!APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
+            if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
+                    .contains(APIConstants.API_SECURITY_API_KEY)) {
+                if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                    throw new APIManagementException("No tier defined for the API Product",
+                            ExceptionCodes.TIER_CANNOT_BE_NULL);
+                }
+            }
+        } else {
+            if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+                if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                    throw new APIManagementException("No tier defined for the API Product",
+                            ExceptionCodes.TIER_CANNOT_BE_NULL);
+                }
+            } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                // Internally set the default tier when no tiers are defined in order to support
+                // subscription validation disabling for OAuth2 secured APIs
+                if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
+                    tiersFromDTO.add(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+                    apiProductDtoToUpdate.setPolicies(tiersFromDTO);
+                }
             }
         }
 
@@ -1898,17 +2243,19 @@ public class PublisherCommonUtils {
         Set<Tier> definedTiers = apiProvider.getTiers();
         List<String> invalidTiers = PublisherCommonUtils.getInvalidTierNames(definedTiers, tiersFromDTO);
         if (!invalidTiers.isEmpty()) {
-            throw new APIManagementException(
-                    "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid",
-                    ExceptionCodes.TIER_NAME_INVALID);
+            String errorMessage = "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.TIER_NAME_INVALID_WITH_TIER_INFO,
+                            Arrays.toString(invalidTiers.toArray())));
         }
         if (apiProductDtoToUpdate.getAdditionalProperties() != null) {
-            String errorMessage = PublisherCommonUtils
-                    .validateAdditionalProperties(apiProductDtoToUpdate.getAdditionalProperties());
+            String errorMessage = PublisherCommonUtils.validateAdditionalProperties(
+                    apiProductDtoToUpdate.getAdditionalProperties());
             if (!errorMessage.isEmpty()) {
-                throw new APIManagementException(errorMessage, ExceptionCodes
-                        .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, originalAPIProduct.getId().getName(),
-                                originalAPIProduct.getId().getVersion()));
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES_WITH_ERROR,
+                                originalAPIProduct.getId().getName(), originalAPIProduct.getId().getVersion(),
+                                errorMessage));
             }
         }
 
@@ -1970,16 +2317,18 @@ public class PublisherCommonUtils {
         Set<Tier> definedTiers = apiProvider.getTiers();
         List<String> invalidTiers = PublisherCommonUtils.getInvalidTierNames(definedTiers, tiersFromDTO);
         if (!invalidTiers.isEmpty()) {
-            throw new APIManagementException(
-                    "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid",
-                    ExceptionCodes.TIER_NAME_INVALID);
+            String errorMessage = "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid";
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.TIER_NAME_INVALID_WITH_TIER_INFO,
+                            Arrays.toString(invalidTiers.toArray())));
         }
         if (apiProductDTO.getAdditionalProperties() != null) {
             String errorMessage = PublisherCommonUtils
                     .validateAdditionalProperties(apiProductDTO.getAdditionalProperties());
             if (!errorMessage.isEmpty()) {
                 throw new APIManagementException(errorMessage,
-                        ExceptionCodes.from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, apiProductDTO.getName()));
+                        ExceptionCodes.from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES_WITH_ERROR,
+                                apiProductDTO.getName(), apiProductDTO.getVersion(), errorMessage));
             }
         }
         if (apiProductDTO.getVisibility() == null) {
@@ -2199,9 +2548,10 @@ public class PublisherCommonUtils {
 
         String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
         if (!ArrayUtils.contains(nextAllowedStates, action)) {
-            throw new APIManagementException("Action '" + action + "' is not allowed. Allowed actions are "
-                    + Arrays.toString(nextAllowedStates), ExceptionCodes.from(ExceptionCodes
-                    .UNSUPPORTED_LIFECYCLE_ACTION, action));
+            String errorMessage = "Action '" + action + "' is not allowed. Allowed actions are "
+                    + Arrays.toString(nextAllowedStates);
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes
+                    .UNSUPPORTED_AND_ALLOWED_LIFECYCLE_ACTIONS, action, Arrays.toString(nextAllowedStates)));
         }
 
         //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".

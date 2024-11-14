@@ -253,6 +253,17 @@ paths:
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/requestedTenant-Q'
+        - name: query
+          in: query
+          description: |
+            **Key Manager Specific Swagger Generation**.
+            To retrieve an OpenAPI Specification (OAS) definition for a specific Key Manager, please specify the Key Manager's ID in your request. 
+              
+            For example, by passing the query parameter `kmId=65e30b46-85e4-4788-85b7-b1c3de06b2e0`, you will receive the OAS definition containing all relevant information for the Key Manager associated with that ID.
+              
+            **Important:** If you're using a client that does not automatically handle URL encoding (such as `curl`), please ensure that you encode the URL properly.
+          schema:
+            type: string
       responses:
         200:
           description: |
@@ -3979,6 +3990,17 @@ components:
         monetizedInfo:
           type: boolean
           example: true
+        egress:
+          type: boolean
+          description: Whether the API is Egress or not
+          default: false
+          example: true
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
     APIInfoList:
       title: API Info List
       type: object
@@ -4255,6 +4277,17 @@ components:
             - mqtt
           items:
             type: string
+        egress:
+          type: boolean
+          description: Whether the API is egress or not
+          default: false
+          example: true
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
     APIMonetizationInfo:
       title: API monetization object
       required:
@@ -5320,6 +5353,7 @@ components:
             - DOC
             - API
             - APIProduct
+            - DEFINITION
         transportType:
           type: string
           description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
@@ -5420,6 +5454,38 @@ components:
               example: admin
             apiUUID:
               type: string
+    APIDefinitionSearchResult:
+      title: API Definition Search Result
+      allOf:
+        - $ref: '#/components/schemas/SearchResult'
+        - properties:
+            apiName:
+              type: string
+              description: The name of the associated API
+              example: TestAPI
+            apiVersion:
+              type: string
+              description: The version of the associated API
+              example: 1.0.0
+            apiContext:
+              type: string
+              description: The context of the associated API
+              example: /test
+            apiUUID:
+              type: string
+              description: The UUID of the associated API
+            apiProvider:
+              type: string
+              description: The provider name of the associated API
+              example: publisher
+            apiType:
+              type: string
+              description: The type of the associated API
+              example: REST
+            associatedType:
+              type: string
+              description: API or APIProduct
+              example: API
     CommenterInfo:
       type: object
       properties:

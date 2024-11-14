@@ -131,7 +131,12 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
         synchronized (this) {
-            if (expireEventTime == -1) {
+            if (expireEventTime != -1) {
+                if (expireEventTime - timeInMilliSeconds > streamEventChunk.getLast().getTimestamp()) {
+                    // if the event chunk is older than the current window, drop the chunk
+                    return;
+                }
+            } else {
                 long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
                 if (startTime != -1) {
                     expireEventTime = addTimeShift(currentTime);

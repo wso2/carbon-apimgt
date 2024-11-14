@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.common;
 import io.opentelemetry.context.Context;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -43,6 +44,11 @@ public class APIMgtLatencySynapseHandler extends AbstractSynapseHandler {
     public boolean handleRequestInFlow(MessageContext messageContext) {
         TracingTracer tracer = ServiceReferenceHolder.getInstance().getTracer();
         TelemetryTracer telemetryTracer = ServiceReferenceHolder.getInstance().getTelemetryTracer();
+
+        if (GatewayUtils.checkForFileBasedApiContexts(ApiUtils.getFullRequestPath(messageContext),
+                GatewayUtils.getTenantDomain())) {
+            return true;
+        }
 
         if (TelemetryUtil.telemetryEnabled()) {
             org.apache.axis2.context.MessageContext axis2MessageContext =

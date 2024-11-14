@@ -252,7 +252,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    SUB.TENANT_ID = ? "+
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
-                    " AND APP.NAME like ?"+
+                    " OR APP.NAME like ?"+
                     " ) ORDER BY $1 $2 " +
                     " offset ? limit  ? ";
 

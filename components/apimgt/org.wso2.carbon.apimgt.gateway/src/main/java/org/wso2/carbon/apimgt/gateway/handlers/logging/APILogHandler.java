@@ -91,8 +91,12 @@ public class APILogHandler {
             ThreadContext.put("apiContext", selectedApi.getContext());
             ThreadContext.put("apiVersion", selectedApi.getApiVersion());
             if (messageContext.getProperty(API_TO) != null) {
-                String apiTo = "/" + messageContext.getProperty(API_TO);
-                ThreadContext.put("resourceName", apiTo.replaceFirst(selectedApi.getContext(), ""));
+                String apiTo = (String) messageContext.getProperty(API_TO);
+                String resourceName = apiTo.replaceFirst(selectedApi.getContext(), "");
+                if(resourceName.isEmpty()){
+                    resourceName = "/";
+                }
+                ThreadContext.put("resourceName", resourceName);
             }
         }
         ThreadContext.put("tenantDomain", (String) messageContext

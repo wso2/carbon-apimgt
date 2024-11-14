@@ -122,16 +122,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
             int allApplicationsCount = 0;
             if (!migrationMode) { // normal non-migration flow
-                if (!MultitenantUtils.getTenantDomain(user).equals(RestApiCommonUtil.getLoggedInUserTenantDomain())) {
-                    String errorMsg = "User " + user + " is not available for the current tenant domain";
-                    log.error(errorMsg);
-                    return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
-                }
-                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(user);
-
-                // If no user is passed, get the applications for the tenant (not only for the user)
                 APIAdmin apiAdmin = new APIAdminImpl();
-                int tenantId = APIUtil.getTenantId(user);
+                int tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());
                 allMatchedApps = apiAdmin.getApplicationsWithPagination(user, givenUser, tenantId, limit, offset,
                         applicationName, sortBy, sortOrder);
                 allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, givenUser, applicationName);

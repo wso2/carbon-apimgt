@@ -46,7 +46,9 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -109,15 +111,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
-import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
-import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
+import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
@@ -137,6 +131,7 @@ import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.APIDefSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
@@ -394,17 +389,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String generateApiKey(Application application, String userName, long validityPeriod,
                                  String permittedIP, String permittedReferer) throws APIManagementException {
 
-        JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
-                MultitenantUtils.getTenantDomain(userName));
-
+        JwtTokenInfoDTO jwtTokenInfoDTO;
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(application.getId());
-        applicationDTO.setName(application.getName());
-        applicationDTO.setOwner(application.getOwner());
-        applicationDTO.setTier(application.getTier());
         applicationDTO.setUuid(application.getUUID());
-        jwtTokenInfoDTO.setApplication(applicationDTO);
+        if (!APIKeyUtils.isLightweightAPIKeyGenerationEnabled()) {
+            jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
+                    MultitenantUtils.getTenantDomain(userName));
 
+            applicationDTO.setName(application.getName());
+            applicationDTO.setOwner(application.getOwner());
+            applicationDTO.setTier(application.getTier());
+        } else {
+            jwtTokenInfoDTO = new JwtTokenInfoDTO();
+            jwtTokenInfoDTO.setEndUserName(userName);
+            jwtTokenInfoDTO.setContentAware(true);
+        }
+
+        jwtTokenInfoDTO.setApplication(applicationDTO);
         jwtTokenInfoDTO.setSubscriber(userName);
         jwtTokenInfoDTO.setExpirationTime(validityPeriod);
         jwtTokenInfoDTO.setKeyType(application.getKeyType());
@@ -3344,7 +3346,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiChatConfigurationDto();
-        return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+        if (configDto.isKeyProvided()) {
+            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+                    configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+        }
+        return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
                 configDto.getExecuteResource(), requestPayload, apiChatRequestId);
     }
 
@@ -3360,7 +3366,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
-            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+            if (configDto.isKeyProvided()) {
+                return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+                        configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+            }
+            return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
                     configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
         } catch (JsonProcessingException e) {
             String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
@@ -3373,7 +3383,13 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
 
-        return getOpenAPIDefinitionForDeployment(api, environmentName);
+        return getOpenAPIDefinitionForDeployment(api, environmentName, null);
+    }
+
+    @Override
+    public String getOpenAPIDefinitionForEnvironmentByKm(API api, String environmentName, String kmId)
+            throws APIManagementException {
+        return getOpenAPIDefinitionForDeployment(api, environmentName, kmId);
     }
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
@@ -3402,7 +3418,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @return Updated Open API definition
      * @throws APIManagementException
      */
-    private String getOpenAPIDefinitionForDeployment(API api, String environmentName)
+    private String getOpenAPIDefinitionForDeployment(API api, String environmentName, String kmId)
             throws APIManagementException {
 
         String apiTenantDomain;
@@ -3421,7 +3437,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
         api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
         return updatedDefinition;
     }
 
@@ -3859,6 +3875,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         mappedAPI.removeAllTiers();
                         mappedAPI.setAvailableTiers(availableTiers);
                         populateGatewayVendor(mappedAPI);
+                        populateApiInfo(mappedAPI, false);
                         apiList.add(mappedAPI);
                     } catch (APIManagementException e) {
                         log.warn("Retrieving API details from DB failed for API: " + mappedAPI.getUuid() + " " + e);
@@ -3896,14 +3913,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
                     populateAPIProductInformation(uuid, organization, apiProduct);
                     populateDefaultVersion(apiProduct);
-                    populateAPIStatus(apiProduct);
+                    populateApiInfo(apiProduct);
                     apiProduct = addTiersToAPI(apiProduct, organization);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
-                    populateAPIStatus(api);
+                    populateApiInfo(api, true);
                     populateGatewayVendor(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
@@ -3916,16 +3933,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
         }
-    }
-
-    private void populateAPIStatus(API api) throws APIManagementException {
-
-        api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getUuid()));
-    }
-
-    private void populateAPIStatus(APIProduct apiProduct) throws APIManagementException {
-
-        apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getUuid()));
     }
 
     protected void checkVisibilityPermission(String userNameWithTenantDomain, String visibility, String visibilityRoles)
@@ -4091,6 +4098,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
+                    populateAPISubtype(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
@@ -4160,6 +4168,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Map<String, Object> result = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
+        List<APIDefinitionContentSearchResult> defSearchList = new ArrayList<>();
         int totalLength = 0;
 
         String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
@@ -4187,23 +4196,36 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 docItem.getApiVersion()));
                         api.setUuid(docItem.getApiUUID());
                         docMap.put(doc, api);
+                    } else if (item instanceof APIDefSearchContent) {
+                        APIDefSearchContent definitionItem = (APIDefSearchContent) item;
+                        APIDefinitionContentSearchResult apiDefSearchResult = new APIDefinitionContentSearchResult();
+                        apiDefSearchResult.setId(definitionItem.getId());
+                        apiDefSearchResult.setName(definitionItem.getName());
+                        apiDefSearchResult.setApiUuid(definitionItem.getApiUUID());
+                        apiDefSearchResult.setApiName(definitionItem.getApiName());
+                        apiDefSearchResult.setApiContext(definitionItem.getApiContext());
+                        apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
+                        apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
+                        apiDefSearchResult.setApiType(definitionItem.getApiType());
+                        apiDefSearchResult.setAssociatedType(definitionItem.getAssociatedType()); //API or API product
+                        defSearchList.add(apiDefSearchResult);
                     } else if ("API".equals(item.getType())) {
-                        DevPortalSearchContent publiserAPI = (DevPortalSearchContent) item;
-                        API api = new API(new APIIdentifier(publiserAPI.getProvider(), publiserAPI.getName(),
-                                publiserAPI.getVersion()));
-                        api.setUuid(publiserAPI.getId());
-                        api.setContext(publiserAPI.getContext());
-                        api.setContextTemplate(publiserAPI.getContext());
-                        api.setStatus(publiserAPI.getStatus());
-                        api.setBusinessOwner(publiserAPI.getBusinessOwner());
-                        api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
-                        api.setTechnicalOwner(publiserAPI.getTechnicalOwner());
-                        api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
-                        api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
-                        api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
-                        api.setRating(APIUtil.getAverageRating(publiserAPI.getId()));
-                        api.setDescription(publiserAPI.getDescription());
-                        api.setType(publiserAPI.getTransportType());
+                        DevPortalSearchContent publisherAPI = (DevPortalSearchContent) item;
+                        API api = new API(new APIIdentifier(publisherAPI.getProvider(), publisherAPI.getName(),
+                                publisherAPI.getVersion()));
+                        api.setUuid(publisherAPI.getId());
+                        api.setContext(publisherAPI.getContext());
+                        api.setContextTemplate(publisherAPI.getContext());
+                        api.setStatus(publisherAPI.getStatus());
+                        api.setBusinessOwner(publisherAPI.getBusinessOwner());
+                        api.setBusinessOwnerEmail(publisherAPI.getBusinessOwnerEmail());
+                        api.setTechnicalOwner(publisherAPI.getTechnicalOwner());
+                        api.setTechnicalOwnerEmail(publisherAPI.getTechnicalOwnerEmail());
+                        api.setMonetizationEnabled(publisherAPI.getMonetizationStatus());
+                        api.setAdvertiseOnly(publisherAPI.getAdvertiseOnly());
+                        api.setRating(APIUtil.getAverageRating(publisherAPI.getId()));
+                        api.setDescription(publisherAPI.getDescription());
+                        api.setType(publisherAPI.getTransportType());
                         apiSet.add(api);
                     } else if ("APIProduct".equals(item.getType())) {
                         DevPortalSearchContent devAPIProduct = (DevPortalSearchContent) item;
@@ -4226,10 +4248,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 compoundResult.addAll(apiSet);
                 compoundResult.addAll(docMap.entrySet());
                 compoundResult.addAll(apiProductSet);
-                compoundResult.sort(new ContentSearchResultNameComparator());
+                compoundResult.addAll(defSearchList);
+                compoundResult.sort(new SimpleContentSearchResultNameComparator());
                 result.put("length", sResults.getTotalCount());
             } else {
-                result.put("length", compoundResult.size());
+                result.put("length", 0);
             }
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching content ", e);
@@ -4670,5 +4693,43 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
 
         return false;
+    }
+
+    private void populateApiInfo(API api, boolean setStatus) throws APIManagementException {
+
+        String apiId = api.isRevision() ? api.getRevisionedApiId() : api.getUuid();
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+
+        if (apiInfo == null) {
+            return;
+        }
+        api.setEgress(apiInfo.isEgress());
+        api.setSubtype(apiInfo.getApiSubtype());
+        if (setStatus) {
+            api.setStatus(apiInfo.getStatus());
+        }
+    }
+
+    private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
+
+        String apiId = apiProduct.isRevision() ? apiProduct.getRevisionedApiProductId() : apiProduct.getUuid();
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+        if (apiInfo != null) {
+            apiProduct.setEgress(apiInfo.isEgress());
+            apiProduct.setState(apiInfo.getStatus());
+        }
+    }
+
+    /**
+     * This method populates the subType in the API.
+     * @param api API that needs to be populated with the subtype
+     * @throws APIManagementException
+     */
+    private void populateAPISubtype(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getRevisionedApiId()));
+        } else {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getUuid()));
+        }
     }
 }

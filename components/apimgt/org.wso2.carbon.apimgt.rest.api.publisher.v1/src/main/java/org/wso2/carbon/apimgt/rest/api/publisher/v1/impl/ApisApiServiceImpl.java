@@ -31,7 +31,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.http.HttpStatus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -52,13 +51,14 @@ import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.*;
+import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
@@ -79,11 +79,15 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.util.*;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
@@ -165,6 +169,48 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
+    public Response getSequenceBackendData(String apiId, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
+        List<SequenceBackendData> data = apiProvider.getAllSequenceBackendsByAPIUUID(apiId);
+        if (data == null) {
+            throw new APIMgtResourceNotFoundException(
+                    "Couldn't retrieve an existing Sequence Backend for API " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, apiId));
+        }
+        SequenceBackendListDTO respObj = APIMappingUtil.fromSequenceDataToDTO(data);
+        return Response.ok().entity(respObj).build();
+    }
+
+    @Override
+    public Response getSequenceBackendContent(String type, String apiId, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        CommonUtils.validateAPIExistence(apiId);
+
+        SequenceBackendData data = apiProvider.getCustomBackendByAPIUUID(apiId, type);
+        if (data == null) {
+            throw new APIMgtResourceNotFoundException(
+                    "Couldn't retrieve an existing Sequence Backend for API: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.CUSTOM_BACKEND_NOT_FOUND, apiId));
+        }
+        File file = RestApiPublisherUtils.exportCustomBackendData(data.getSequence(), data.getName());
+        return Response.ok(file)
+                .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                .build();
+    }
+
+    @Override
+    public Response sequenceBackendDelete(String type, String apiId, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
+        apiProvider.deleteCustomBackendByID(apiId, type);
+        return Response.ok().build();
+    }
+
+    @Override
     public Response createAPI(APIDTO body, String oasVersion, MessageContext messageContext)
             throws APIManagementException{
         URI createdApiUri;
@@ -197,6 +243,21 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
         return Response.ok().entity(apiToReturn).build();
+    }
+
+    @Override
+    public Response sequenceBackendUpdate(String apiId, InputStream sequenceInputStream,
+            Attachment sequenceDetail, String type, MessageContext messageContext) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        api.setOrganization(organization);
+        MultivaluedMap<String, String> headers = sequenceDetail.getHeaders();
+        String contentDecomp = headers.getFirst("Content-Disposition");
+
+        PublisherCommonUtils.updateCustomBackend(api, apiProvider, type, sequenceInputStream, contentDecomp);
+        return Response.ok().build();
     }
 
     @Override
@@ -1829,7 +1890,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (apiIdentifier == null) {
                 throw new APIManagementException("Error while getting the api identifier for the API:" +
-                        apiId, ExceptionCodes.INVALID_API_ID);
+                        apiId, ExceptionCodes.from(ExceptionCodes.INVALID_API_ID, apiId));
             }
             return PublisherCommonUtils.getLifecycleStateInformation(apiIdentifier, organization);
         } catch (APIManagementException e) {
@@ -2569,7 +2630,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
             //validate API update operation permitted based on the LC state
-            validateAPIOperationsPerLC(apiInfo.getStatus().getStatus());
+            validateAPIOperationsPerLC(apiInfo.getStatus());
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //Handle URL and file based definition imports
@@ -2879,10 +2940,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, String inlineApiDefinition,
                                             MessageContext messageContext) throws APIManagementException {
-
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
-            RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);
+            throw new APIManagementException("'additionalProperties' is required and should not be null",
+                    ExceptionCodes.ADDITIONAL_PROPERTIES_CANNOT_BE_NULL);
         }
 
         // Convert the 'additionalProperties' json into an APIDTO object
@@ -2900,7 +2961,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
         } catch (IOException e) {
-            throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
+            throw new APIManagementException("Error while parsing 'additionalProperties'", e,
+                    ExceptionCodes.ADDITIONAL_PROPERTIES_PARSE_ERROR);
         }
 
         // validate sandbox and production endpoints
@@ -2915,6 +2977,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             // OAuth 2.0 backend protection: API Key and API Secret encryption
             PublisherCommonUtils
                     .encryptEndpointSecurityOAuthCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
+                            StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
+            PublisherCommonUtils
+                    .encryptEndpointSecurityApiKeyCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
                             StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
 
             // Import the API and Definition
@@ -2934,7 +2999,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage =
                     "Error while encrypting the secret key of API : " + apiDTOFromProperties.getProvider() + "-"
                             + apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e,
+                    ExceptionCodes.from(ExceptionCodes.ENDPOINT_SECURITY_CRYPTO_EXCEPTION, errorMessage));
         }
         return null;
     }
@@ -3364,36 +3430,71 @@ public class ApisApiServiceImpl implements ApisApiService {
      * WSDL and sequences are exported. This service generates a zipped archive which contains all the above mentioned
      * resources for a given API.
      *
-     * @param apiId          UUID of an API
-     * @param name           Name of the API that needs to be exported
-     * @param version        Version of the API that needs to be exported
-     * @param providerName   Provider name of the API that needs to be exported
-     * @param format         Format of output documents. Can be YAML or JSON
-     * @param preserveStatus Preserve API status on export
-     * @return
+     * @param apiId              UUID of an API
+     * @param name               Name of the API that needs to be exported
+     * @param version            Version of the API that needs to be exported
+     * @param providerName       Provider name of the API that needs to be exported
+     * @param format             Format of output documents. Can be YAML or JSON
+     * @param preserveStatus     Preserve API status on export
+     * @param gatewayEnvironment Gateway environment of the API to be exported
+     * @return API export response as an archive
      */
     @Override public Response exportAPI(String apiId, String name, String version, String revisionNum,
                                         String providerName, String format, Boolean preserveStatus,
-                                        Boolean exportLatestRevision, MessageContext messageContext)
+                                        Boolean exportLatestRevision, String gatewayEnvironment,
+                                        MessageContext messageContext)
             throws APIManagementException {
 
-        //If not specified status is preserved by default
-        preserveStatus = preserveStatus == null || preserveStatus;
+        if (StringUtils.isEmpty(gatewayEnvironment)) {
+            //If not specified status is preserved by default
+            preserveStatus = preserveStatus == null || preserveStatus;
 
-        // Default export format is YAML
-        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
-                ExportFormat.valueOf(format.toUpperCase()) :
-                ExportFormat.YAML;
-        try {
+            // Default export format is YAML
+            ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
+                    ExportFormat.valueOf(format.toUpperCase()) :
+                    ExportFormat.YAML;
+            try {
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+                File file = importExportAPI
+                        .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
+                                Boolean.TRUE, Boolean.FALSE, exportLatestRevision, StringUtils.EMPTY, organization);
+                return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getName() + "\"").build();
+            } catch (APIImportExportException e) {
+                throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
+            }
+        } else {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-            File file = importExportAPI
-                    .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
-                            Boolean.TRUE, Boolean.FALSE, exportLatestRevision, StringUtils.EMPTY, organization);
-            return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + file.getName() + "\"").build();
-        } catch (APIImportExportException e) {
-            throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
+            if (StringUtils.isEmpty(apiId) && (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version))) {
+                APIIdentifier apiIdentifier = new APIIdentifier(providerName, name, version);
+                apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
+                if (StringUtils.isEmpty(apiId)) {
+                    throw new APIManagementException("API not found for the given name: " + name + ", and version : "
+                            + version, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, name + "-" + version));
+                }
+            }
+            RuntimeArtifactDto runtimeArtifactDto = null;
+            if (StringUtils.isNotEmpty(organization)) {
+                runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, gatewayEnvironment,
+                        APIConstants.API_GATEWAY_TYPE_ENVOY, organization);
+            }
+            if (runtimeArtifactDto != null) {
+                if (runtimeArtifactDto.isFile()) {
+                    File artifact = (File) runtimeArtifactDto.getArtifact();
+                    StreamingOutput streamingOutput = (outputStream) -> {
+                        try {
+                            Files.copy(artifact.toPath(), outputStream);
+                        } finally {
+                            Files.delete(artifact.toPath());
+                        }
+                    };
+                    return Response.ok(streamingOutput).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                            "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
+                            APIConstants.APPLICATION_ZIP).build();
+                }
+            }
+            throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
         }
     }
 
@@ -3576,17 +3677,18 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPISubscriptionPolicies(String apiId, String ifNoneMatch, String xWSO2Tenant,
-                                                     MessageContext messageContext) throws APIManagementException {
+    public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean isAiApi,
+            MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiInfo = getAPIByID(apiId, apiProvider, organization);
-        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true);
+        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl().getThrottlingPolicyList(
+                ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true, isAiApi);
 
-        if (apiInfo != null ) {
+        if (apiInfo != null) {
             List<String> apiPolicies = apiInfo.getPolicies();
-            List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies, availableThrottlingPolicyList);
+            List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
+                    availableThrottlingPolicyList);
             return Response.ok().entity(apiThrottlingPolicies).build();
         }
         return null;
@@ -3726,7 +3828,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response containing newly created APIRevision object
      */
     @Override
-    public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) {
+    public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext)
+            throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -3737,8 +3840,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate whether the API is advertise only
             APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
             if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
-                throw new APIManagementException("Creating API Revisions is not supported for third party APIs: "
-                        + apiId);
+                throw new APIManagementException(
+                        "Creating API Revisions is not supported for third party APIs: " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED, apiId));
             }
 
             //validate API update operation permitted based on the LC state
@@ -3760,7 +3864,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API Revision for API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            if ((e.getErrorHandler()
+                    .getErrorCode() == ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED.getErrorCode())
+                    || (e.getErrorHandler().getErrorCode() == ExceptionCodes.MAXIMUM_REVISIONS_REACHED.getErrorCode()))
+            {
+                throw e;
+            } else {
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving created revision API location for API : "
                     + apiId;
@@ -3839,14 +3950,26 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //validate whether the API is advertise only
         APIDTO apiDto = getAPIByID(apiId, apiProvider, organization);
+
+        // Cannot deploy an API with custom sequence to the APK gateway
+        Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
+        if (endpointConfigMap != null && !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(apiDto.getGatewayType())
+                && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Cannot Deploy an API with a Custom Sequence to APK Gateway: " + apiId).build();
+        }
         // Reject the request if API lifecycle is 'RETIRED'.
         if (apiDto.getLifeCycleStatus().equals(APIConstants.RETIRED)) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Deploying API Revisions is not supported for retired APIs. ApiId: "
-                    + apiId).build();
+            String errorMessage = "Deploying API Revisions is not supported for retired APIs. ApiId: " + apiId;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
         }
-        if (apiDto != null && apiDto.getAdvertiseInfo() != null && Boolean.TRUE.equals(apiDto.getAdvertiseInfo().isAdvertised())) {
-            throw new APIManagementException("Deploying API Revisions is not supported for third party APIs: "
-                    + apiId);
+        if (apiDto != null && apiDto.getAdvertiseInfo() != null && Boolean.TRUE.equals(
+                apiDto.getAdvertiseInfo().isAdvertised())) {
+            String errorMessage = "Deploying API Revisions is not supported for third party APIs: " + apiId;
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
@@ -3904,7 +4027,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (revisionId == null && revisionNum != null) {
             revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
             if (revisionId == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+                throw new APIManagementException(
+                        "No revision found for revision number " + revisionNum + " of API with UUID " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.REVISION_NOT_FOUND_FOR_REVISION_NUMBER, revisionNum));
             }
         }
 

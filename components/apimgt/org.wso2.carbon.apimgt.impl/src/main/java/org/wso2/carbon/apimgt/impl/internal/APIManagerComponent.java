@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
@@ -83,6 +84,7 @@ import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.LLMProviderNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
@@ -216,7 +218,9 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
-            if (configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
+            bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
+            if (configuration.getMarketplaceAssistantConfigurationDto().isKeyProvided() ||
+                    configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
             }
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
@@ -290,16 +294,6 @@ public class APIManagerComponent {
 
                 //Adding default correlation configs at initial server start up
                 APIUtil.addDefaultCorrelationConfigs();
-                // Update all NULL THROTTLING_TIER values to Unlimited
-                boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
-                try {
-                    if (isNullThrottlingTierConversionEnabled) {
-                        ApiMgtDAO.getInstance().convertNullThrottlingTiers();
-                    }
-                } catch (APIManagementException e) {
-                    log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
-                }
-
 //            // Initialise KeyManager.
 //            KeyManagerHolder.initializeKeyManager(configuration);
                 // Initialise sql constants
@@ -414,6 +408,22 @@ public class APIManagerComponent {
 
     protected void unsetRealmService(RealmService realmService) {
         ServiceReferenceHolder.getInstance().setRealmService(null);
+    }
+
+    @Reference(
+            name = "llm.payload.handler.connector.service",
+            service = LLMProviderService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeLLMPayloadHandler")
+    protected void addLLMPayloadHandler(LLMProviderService llmProviderService) {
+
+        ServiceReferenceHolder.getInstance().addLLMProviderService(llmProviderService.getType(), llmProviderService);
+    }
+
+    protected void removeLLMPayloadHandler(LLMProviderService llmProviderService) {
+
+        ServiceReferenceHolder.getInstance().removeLLMProviderService(llmProviderService.getType());
     }
 
     @Reference(
@@ -1022,6 +1032,7 @@ public class APIManagerComponent {
 
         int maxTotal = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_MAX_TOTAL));
         int defaultMaxPerRoute = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE));
+        int connectionTimeout = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_CONNECTION_TIMEOUT));
 
         boolean proxyEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.PROXY_ENABLE));
 
@@ -1071,7 +1082,8 @@ public class APIManagerComponent {
             default:
                 hostnameVerifier = new BrowserHostnameVerifier();
         }
-        configuration.setHttpClientConfiguration(builder.withConnectionParams(maxTotal, defaultMaxPerRoute)
+        configuration.setHttpClientConfiguration(builder
+                .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout)
                 .withSSLContext(sslContext, hostnameVerifier).build());
     }
 
