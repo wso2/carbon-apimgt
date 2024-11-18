@@ -50,7 +50,7 @@ public abstract class AbstractMonetization implements Monetization {
         if (configs.containsKey(ANALYTICS_IMPL) && !configs.get(ANALYTICS_IMPL).isEmpty()) {
             className = configs.get(ANALYTICS_IMPL);
         } else {
-            className = "org.wso2.apim.analytics.impl.ChoreoAnalyticsforMonetizationImpl";
+            className = "org.wso2.am.analytics.retriever.choreo.ChoreoAnalyticsforMonetizationImpl";
         }
         String message;
         try {
