@@ -175,7 +175,7 @@
 
         <AuthToken></AuthToken>
 
-        <AnalyticsImpl>org.wso2.apim.analytics.impl.ChoreoAnalyticsforMonetizationImpl</AnalyticsImpl>
+        <AnalyticsImpl></AnalyticsImpl>
 
         <!-- Event publisher implementation -->
         <!-- <ReporterClass></ReporterClass> -->
