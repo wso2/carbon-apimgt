@@ -372,7 +372,244 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthzResponse"
-
+  /governance-policies:
+    get:
+      summary: Retrieves a list of all governance policies.
+      description: Retrieves a list of governance policies for the user's organization.
+      operationId: getGovernancePolicies
+      tags:
+        - Governance Policies
+        - External
+      responses:
+        "200":
+          description: OK. Successful response with a list of governance policies.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GovernancePolicyList'
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_policy_read
+    post:
+      summary: Creates a new governance policy.
+      description: Creates a new governance policy for the user's organization.
+      operationId: createGovernancePolicy
+      tags:
+        - Governance Policies
+        - External
+      requestBody:
+        required: true
+        description: JSON object containing the details of the new governance policy.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GovernancePolicyInfoWithRulesetIds'
+      responses:
+        "201":
+          description: OK. Governance policy created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GovernancePolicyInfo'
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_policy_manage
+  /governance-policies/{policyId}:
+    get:
+      summary: Get a specific governance policy
+      description: Retrieves details of a specific governance policy identified by the policyId.
+      operationId: getGovernancePolicyById
+      tags:
+        - Governance Policies
+        - External
+      parameters:
+        - name: policyId
+          in: path
+          required: true
+          description: UUID of the governance policy.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK. Governance policy details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GovernancePolicyInfo'
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_policy_read
+    put:
+      summary: Update a specific governance policy
+      description: Updates the details of an existing governance policy identified by the policyId.
+      operationId: updateGovernancePolicyById
+      tags:
+        - Governance Policies
+        - External
+      parameters:
+        - name: policyId
+          in: path
+          required: true
+          description: UUID of the governance policy.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: JSON object containing the updated governance policy details.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GovernancePolicyInfoWithRulesetIds'
+      responses:
+        "200":
+          description: OK. Governance policy updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GovernancePolicyInfo'
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_policy_manage
+    delete:
+      summary: Delete a specific governance policy
+      description: Deletes an existing governance policy identified by the policyId.
+      operationId: deleteGovernancePolicy
+      tags:
+        - Governance Policies
+        - External
+      parameters:
+        - name: policyId
+          in: path
+          required: true
+          description: UUID of the governance policy.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK. Governance policy deleted successfully.
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_policy_manage
 components:
   schemas:
     RulesetList:
@@ -556,6 +793,131 @@ components:
         status:
           type: string
           example: Ok
+    GovernancePolicyInfo:
+      type: object
+      description: Detailed information about a governance policy.
+      properties:
+        id:
+          type: string
+          description: UUID of the governance policy.
+          readOnly: true
+          example: "987e6543-d21b-34d5-b678-912345678900"
+        name:
+          type: string
+          description: Name of the governance policy.
+          example: "API Security Policy"
+        description:
+          type: string
+          description: A brief description of the governance policy.
+          example: "Policy for enforcing security standards across all APIs."
+        rulesets:
+          type: array
+          description: List of rulesets associated with the governance policy.
+          items:
+            $ref: '#/components/schemas/RulesetInfo'
+        labels:
+          type: array
+          description: Labels associated with the governance policy.
+          items:
+            type: string
+          example:
+            - "security"
+        createdBy:
+          type: string
+          description: Identifier of the user who created the governance policy.
+          readOnly: true
+          example: "admin@gmail.com"
+        createdTime:
+          type: string
+          description: Timestamp when the governance policy was created.
+          readOnly: true
+          example: "2024-08-01T12:00:00Z"
+        updatedBy:
+          type: string
+          description: Identifier of the user who last updated the governance policy.
+          readOnly: true
+          example: "admin@gmail.com"
+        updatedTime:
+          type: string
+          description: Timestamp when the governance policy was last updated.
+          readOnly: true
+          example: "2024-08-02T12:00:00Z"
+      required:
+        - name
+        - rulesets
+    GovernancePolicyInfoWithRulesetIds:
+      type: object
+      description: Governance policy information with ruleset IDs.
+      properties:
+        id:
+          type: string
+          description: UUID of the governance policy.
+          readOnly: true
+          example: "987e6543-d21b-34d5-b678-912345678900"
+        name:
+          type: string
+          description: Name of the governance policy.
+          example: "API Security Policy"
+        description:
+          type: string
+          description: A brief description of the governance policy.
+          example: "Policy for enforcing security standards across all APIs."
+        rulesets:
+          type: array
+          description: List of ruleset IDs the governance policy.
+          items:
+            $ref: '#/components/schemas/RulesetId'
+        labels:
+          type: array
+          description: Labels or tags associated with the governance policy.
+          items:
+            type: string
+          example:
+            - "security"
+        createdBy:
+          type: string
+          description: Identifier of the user who created the governance policy.
+          readOnly: true
+          example: "admin@gmail.com"
+        createdTime:
+          type: string
+          description: Timestamp when the governance policy was created.
+          readOnly: true
+          example: "2024-08-01T12:00:00Z"
+        updatedBy:
+          type: string
+          description: Identifier of the user who last updated the governance policy.
+          readOnly: true
+          example: "admin@gmail.com"
+        updatedTime:
+          type: string
+          description: Timestamp when the governance policy was last updated.
+          readOnly: true
+          example: "2024-08-02T12:00:00Z"
+      required:
+        - name
+        - rulesetIds
+    RulesetId:
+      type: object
+      description: Ruleset Id information.
+      properties:
+        id:
+          type: string
+          description: UUID of the ruleset.
+          example: "987e6543-d21b-34d5-b678-912345678900"
+    GovernancePolicyList:
+      type: object
+      description: A list of governance policies.
+      properties:
+        count:
+          type: integer
+          description: Number of governance policies returned.
+          example: 10
+        list:
+          type: array
+          description: List of governance policies.
+          items:
+            $ref: '#/components/schemas/GovernancePolicyInfo'
   #####
   # TODO: Fix scope validation logic. Currently scope validation is broken due to logic in apimgt.rest.api.common.RestAPICommonUtil
   #####

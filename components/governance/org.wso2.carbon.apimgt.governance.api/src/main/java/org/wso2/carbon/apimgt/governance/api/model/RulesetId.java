@@ -16,10 +16,16 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.api;
+package org.wso2.carbon.apimgt.governance.api.model;
 
-public final class GovernanceAPIConstants {
-    public static final String ORGANIZATION = "organization";
-    public static final String RULSET_PATH = "rulesets";
-    public static final String POLICY_PATH = "governance-policies";
+public class RulesetId {
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

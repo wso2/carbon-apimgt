@@ -42,6 +42,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -106,6 +107,12 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
+            if (e instanceof SQLIntegrityConstraintViolationException) {
+                if (getRulesetByName(organization, ruleset.getName()) != null) {
+                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
+                            organization);
+                }
+            }
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_CREATION_FAILED, e,
                     ruleset.getName(), organization
             );

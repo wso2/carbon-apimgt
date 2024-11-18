@@ -79,6 +79,9 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_POLICY(401006, "Deleting policy failed", 500, "Error while deleting policy with ID: %s in the organization: %s"),
     POLICY_ALREADY_EXISTS(401007, "Policy already exists.", 409, "Policy with name: '%s' in the organization: '%s' already exists."),
 
+    ERROR_WHILE_RETRIEVING_POLICY_BY_NAME(401008, "Retrieving policy by name failed", 500, "Error while retrieving " +
+            "policy with name: %s for the organization: %s"),
+
     // Endpoint related codes
     ERROR_WHILE_INSERTING_ENDPOINT_DETAILS(501001, "Error while inserting endpoint details.", 500, "Error while inserting details for endpoint: %s in organization: %s", true),
     ERROR_WHILE_CHECKING_ENDPOINT_AVAILABILITY(501002, "Error while checking endpoint availability.", 500, "Error while checking endpoint availability for endpoint: %s in organization: %s", true),

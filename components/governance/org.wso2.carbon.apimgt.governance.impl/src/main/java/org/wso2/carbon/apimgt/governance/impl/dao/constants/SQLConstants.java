@@ -53,5 +53,50 @@ public class SQLConstants {
     public static final String DELETE_RULESET = "DELETE FROM GOV_RULESET WHERE RULESET_ID = ? AND ORGANIZATION = ?";
     public static final String DELETE_RULES = "DELETE FROM GOV_RULESET_RULE WHERE RULESET_ID = ?";
 
+    public static final String CREATE_POLICY = "INSERT INTO GOV_POLICY (POLICY_ID, NAME, DESCRIPTION," +
+            "ORGANIZATION, CREATED_BY, CREATED_TIME) VALUES (?, ?, ?, ?, ?, ?)";
 
+    public static final String CREATE_POLICY_RULESET_MAPPING = "INSERT INTO GOV_POLICY_RULESET_MAPPING " +
+            "(POLICY_RULESET_MAPPING_ID, POLICY_ID, RULESET_ID) VALUES(?,?,?)";
+    public static final String CREATE_GOVERNANCE_POLICY_LABEL = "INSERT INTO GOV_POLICY_LABEL " +
+            "(POLICY_LABEL_ID, POLICY_ID, LABEL) VALUES(?,?,?)";
+
+    public static final String GET_RULESETS_BY_IDS = "SELECT * FROM GOV_RULESET WHERE RULESET_ID IN (%s) AND " +
+            "ORGANIZATION = ?";
+    public static final String DELETE_GOVERNANCE_POLICY_LABEL = "DELETE FROM GOV_POLICY_LABEL " +
+            "WHERE POLICY_ID = ? AND LABEL = ?";
+
+    public static final String GET_POLICY_BY_NAME =
+            "SELECT policy.POLICY_ID, policy.NAME, policy.DESCRIPTION, " +
+                    "policy.CREATED_BY, policy.CREATED_TIME, policy.UPDATED_BY, " +
+                    "policy.LAST_UPDATED_TIME FROM GOV_POLICY policy WHERE " +
+                    "policy.ORGANIZATION = ? AND policy.NAME = ?";
+
+    public static final String GET_POLICY_BY_ID = "SELECT policy.POLICY_ID, policy.NAME, policy.DESCRIPTION, " +
+            "policy.CREATED_BY, policy.CREATED_TIME, policy.UPDATED_BY, policy.LAST_UPDATED_TIME FROM GOV_POLICY " +
+            "policy WHERE policy.ORGANIZATION = ? AND policy.POLICY_ID = ?";
+
+    public static final String GET_POLICIES = "SELECT policy.POLICY_ID, policy.NAME, policy.DESCRIPTION, " +
+            "policy.CREATED_BY, policy.CREATED_TIME, policy.UPDATED_BY, policy.LAST_UPDATED_TIME " +
+            "FROM GOV_POLICY policy WHERE policy.ORGANIZATION = ?";
+
+
+    public static final String GET_RULESETS_FOR_POLICY = "SELECT RULESET.RULESET_ID, RULESET.NAME, RULESET.DESCRIPTION, " +
+            "RULESET.APPLIES_TO, RULESET.DOCUMENTATION_LINK, RULESET.PROVIDER, RULESET.CREATED_BY, " +
+            "RULESET.CREATED_TIME, RULESET.UPDATED_BY, RULESET.LAST_UPDATED_TIME, RULESET.IS_DEFAULT " +
+            "FROM GOV_POLICY_RULESET_MAPPING MAPPING JOIN GOV_RULESET RULESET " +
+            "ON MAPPING.RULESET_ID = RULESET.RULESET_ID WHERE MAPPING.POLICY_ID = ?";
+
+    public static final String GET_LABELS_FOR_POLICY = "SELECT LABEL FROM GOV_POLICY_LABEL  " +
+            "    WHERE POLICY_ID = ?";
+    public static final String DELETE_GOVERNANCE_POLICY = "DELETE FROM GOV_POLICY WHERE POLICY_ID = ? AND " +
+            "ORGANIZATION = ?";
+    public static final String UPDATE_POLICY = "UPDATE GOV_POLICY SET NAME = ?, DESCRIPTION = ?, " +
+            "UPDATED_BY = ?, LAST_UPDATED_TIME = ? WHERE POLICY_ID = ? AND ORGANIZATION = ?";
+    public static final String GET_RULESET_IDS_BY_POLICY_ID = "SELECT RULESET_ID " +
+            "FROM GOV_POLICY_RULESET_MAPPING WHERE POLICY_ID = ?";
+    public static final String DELETE_POLICY_RULESET_MAPPING = "DELETE FROM GOV_POLICY_RULESET_MAPPING " +
+            "WHERE POLICY_ID = ? AND RULESET_ID = ?";
+    public static final String GET_LABELS_BY_POLICY_ID = "SELECT LABEL FROM GOV_POLICY_LABEL " +
+            "WHERE POLICY_ID = ?";
 }

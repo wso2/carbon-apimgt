@@ -39,7 +39,7 @@ public class RulesetMappingUtil {
      * @param rulesetDTO RulesetDTO object
      * @return Ruleset object
      */
-    public static Ruleset fromDTOtoRuleset(RulesetDTO rulesetDTO) {
+    public static Ruleset fromRulesetDTOtoRuleset(RulesetDTO rulesetDTO) {
         Ruleset ruleset = new Ruleset();
         ruleset.setId(rulesetDTO.getId());
         ruleset.setName(rulesetDTO.getName());
@@ -61,7 +61,7 @@ public class RulesetMappingUtil {
      * @param createdRuleset Ruleset object
      * @return RulesetDTO object
      */
-    public static RulesetDTO fromRulsetToDTO(Ruleset createdRuleset) {
+    public static RulesetDTO fromRulsetToRulesetDTO(Ruleset createdRuleset) {
         RulesetDTO rulesetDTO = new RulesetDTO();
         rulesetDTO.setId(createdRuleset.getId());
         rulesetDTO.setName(createdRuleset.getName());
@@ -108,7 +108,7 @@ public class RulesetMappingUtil {
      * @param rulesetList RulesetList object
      * @return RulesetListDTO object
      */
-    public static RulesetListDTO fromRulsetListToDTO(RulesetList rulesetList) {
+    public static RulesetListDTO fromRulesetListToRuleListDTO(RulesetList rulesetList) {
         RulesetListDTO rulesetListDTO = new RulesetListDTO();
         rulesetListDTO.setCount(rulesetList.getCount());
         List<RulesetInfo> rulesets = rulesetList.getRulesetList();

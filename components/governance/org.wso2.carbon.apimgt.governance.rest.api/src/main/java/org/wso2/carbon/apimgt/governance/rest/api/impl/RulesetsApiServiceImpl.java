@@ -45,6 +45,14 @@ import java.net.URISyntaxException;
  */
 public class RulesetsApiServiceImpl implements RulesetsApiService {
 
+    /**
+     * Create a new Governance Ruleset
+     *
+     * @param rulesetDTO     Ruleset object
+     * @param messageContext MessageContext
+     * @return Response object
+     * @throws GovernanceException If an error occurs while creating the ruleset
+     */
     public Response createRuleset(RulesetDTO rulesetDTO, MessageContext messageContext)
             throws GovernanceException {
 
@@ -54,20 +62,20 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             String username = GovernanceAPIUtil.getLoggedInUsername();
             String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-            Ruleset ruleset = RulesetMappingUtil.fromDTOtoRuleset(rulesetDTO);
+            Ruleset ruleset = RulesetMappingUtil.fromRulesetDTOtoRuleset(rulesetDTO);
             ruleset.setCreatedBy(username);
 
             RulesetManager rulesetManager = new RulesetManagerImpl();
             Ruleset createdRuleset = rulesetManager.createNewRuleset(organization, ruleset);
 
-            createdRulesetDTO = RulesetMappingUtil.fromRulsetToDTO(createdRuleset);
+            createdRulesetDTO = RulesetMappingUtil.fromRulsetToRulesetDTO(createdRuleset);
             createdRulesetURI = new URI(
                     GovernanceAPIConstants.RULSET_PATH + "/" + createdRulesetDTO.getId());
             return Response.created(createdRulesetURI).entity(createdRulesetDTO).build();
 
         } catch (URISyntaxException e) {
-            String error = "Error while creating new governance " +
-                    "ruleset under organization " + "ORGANIZATION";
+            String error = String.format("Error while creating URI for new Ruleset %s",
+                    rulesetDTO.getName());
             throw new GovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
         }
     }
@@ -141,7 +149,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         RulesetList rulesetList = rulesetManager.getRulesets(organization);
-        RulesetListDTO rulesetListDTO = RulesetMappingUtil.fromRulsetListToDTO(rulesetList);
+        RulesetListDTO rulesetListDTO = RulesetMappingUtil.fromRulesetListToRuleListDTO(rulesetList);
         return Response.status(Response.Status.OK).entity(rulesetListDTO).build();
     }
 
@@ -159,7 +167,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         String username = GovernanceAPIUtil.getLoggedInUsername();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        Ruleset ruleset = RulesetMappingUtil.fromDTOtoRuleset(rulesetDTO);
+        Ruleset ruleset = RulesetMappingUtil.fromRulesetDTOtoRuleset(rulesetDTO);
         ruleset.setUpdatedBy(username);
         ruleset.setId(rulesetId);
 
@@ -167,6 +175,6 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         ruleset = rulesetManager.updateRuleset(organization, rulesetId, ruleset);
         // TODO: Handle policy , ruleset compliance assessment as in Choreo
         return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
-                fromRulsetToDTO(ruleset)).build();
+                fromRulsetToRulesetDTO(ruleset)).build();
     }
 }

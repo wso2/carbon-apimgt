@@ -50,10 +50,6 @@ public class RulesetManagerImpl implements RulesetManager {
     @Override
     public Ruleset createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException {
         ruleset.setId(GovernanceUtil.generateUUID());
-        if (rulesetMgtDAO.getRulesetByName(organization, ruleset.getName()) != null) {
-            throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
-                    organization);
-        }
         //TODO: Validate ruleset content with spectral service before creation
         return rulesetMgtDAO.createRuleset(organization, ruleset);
     }
