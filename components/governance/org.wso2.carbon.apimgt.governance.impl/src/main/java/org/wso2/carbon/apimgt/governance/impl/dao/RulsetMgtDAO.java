@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 
+import java.util.List;
+
 /**
  * This interface represents the Governance Ruleset DAO
  */
@@ -97,4 +99,12 @@ public interface RulsetMgtDAO {
      */
     Ruleset updateRuleset(String organization, String rulesetId, Ruleset ruleset)
             throws GovernanceException;
+
+    /**
+     * Get the associated policies for a Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @return List of associated policies
+     */
+    List<String> getAssociatedPoliciesForRuleset(String rulesetId) throws GovernanceException;
 }

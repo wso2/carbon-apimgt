@@ -47,44 +47,66 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     // Ruleset related codes
     RULESET_ALREADY_EXIST(301001, "Ruleset already exists", 409, "Ruleset with name: '%s' in the organization: '%s' already exists."),
-    RULESET_CREATION_FAILED(301002, "Ruleset creation failed", 500, "Ruleset creation failed with name: '%s' in the organization: '%s'."),
-    ERROR_WHILE_RETRIEVING_RULESETS(301003, "Retrieving rulesets failed", 500, "Error while retrieving rulesets for the organization: %s"),
+    RULESET_CREATION_FAILED(301002, "Ruleset creation failed", 500, "Ruleset creation failed with name: '%s' in the " +
+            "organization: '%s'.", true),
+    ERROR_WHILE_RETRIEVING_RULESETS(301003, "Retrieving rulesets failed", 500, "Error while retrieving rulesets for " +
+            "the organization: %s", true),
     ERROR_WHILE_RETRIEVING_RULESET_BY_ID(301004, "Retrieving ruleset by id failed", 500, "Error while retrieving ruleset for the organization: %s"),
-    ERROR_WHILE_UPDATING_RULESET(301005, "Updating ruleset failed", 500, "Error while updating ruleset: %s in the organization: %s"),
-    ERROR_WHILE_DELETING_RULESET(301006, "Deleting ruleset failed", 500, "Error while deleting ruleset with ID: %s in the organization: %s"),
+    ERROR_WHILE_UPDATING_RULESET(301005, "Updating ruleset failed", 500, "Error while updating ruleset: %s in the " +
+            "organization: %s", true),
+    ERROR_WHILE_DELETING_RULESET(301006, "Deleting ruleset failed", 500, "Error while deleting ruleset with ID: %s in" +
+            " the organization: %s", true),
     ERROR_WHILE_DELETING_RULES(301007, "Deleting rules failed", 500, "Error while deleting rules for the ruleset with ID: %s", true),
     RULESET_NOT_FOUND(301007, "Ruleset not found", 404, "Ruleset with ID: %s not found in the organization: %s"),
-    RULESET_CONTENT_CONVERSION_ERROR(301008, "Ruleset content conversion failed", 500, "Error while converting input stream to a string for the ruleset with id: %s in the organization: %s"),
-    ERROR_WHILE_RETRIEVING_RULESET_CONTENT(301009, "Retrieving ruleset content failed", 500, "Error while retrieving the content of the ruleset with id: %s in the organization: %s"),
-    ERROR_WHILE_RETRIEVING_RULESET_CONTENT_ASSOCIATED_WITH_POLICIES(301010, "Retrieving ruleset contents associated with policies failed", 500, "Retrieving ruleset contents associated with policies failed for the organization %s", true),
-    ERROR_WHILE_INSERTING_RULES(301011, "Rule insertion failed", 500, "Rule insertion failed for the ruleset with id: '%s'"),
+    RULESET_CONTENT_CONVERSION_ERROR(301008, "Ruleset content conversion failed", 500, "Error while converting input " +
+            "stream to a string for the ruleset with id: %s in the organization: %s", true),
+    ERROR_WHILE_RETRIEVING_RULESET_CONTENT(301009, "Retrieving ruleset content failed", 500, "Error while retrieving " +
+            "the content of the ruleset with id: %s in the organization: %s", true),
+    ERROR_WHILE_RETRIEVING_RULESET_CONTENT_ASSOCIATED_WITH_POLICIES(301010, "Retrieving ruleset contents associated with policies failed", 500, "Retrieving ruleset " +
+            "contents associated with policies failed for the organization %s", true),
+    ERROR_WHILE_INSERTING_RULES(301011, "Rule insertion failed", 500, "Rule insertion failed for the ruleset with id:" +
+            " '%s'", true),
     INVALID_RULESET_CONTENT(301012, "Ruleset content is invalid", 400, "Ruleset content is invalid with id: '%s'"),
     INVALID_RULESET_CONTENT_WITH_INFO(301013, "Invalid Ruleset content", 400, "Invalid Ruleset content, message: '%s'"),
-    ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(301014, "Error while loading default ruleset content", 500, "Error while loading default ruleset provided by WSO2.", true),
-    ERROR_WHILE_RETRIEVING_POLICY_IDS_BY_RULESET_ID(301015, "Error while retrieving policy ids for the ruleset.", 500, "Error while retrieving policy ids for ruleset id: %s", true),
+    ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(301014, "Error while loading default ruleset content", 500, "Error while loading " +
+            "default ruleset provided by WSO2.", true),
+    ERROR_WHILE_RETRIEVING_POLICY_IDS_BY_RULESET_ID(301015, "Error while retrieving policy ids for the ruleset.", 500, "Error while retrieving " +
+            "policy ids for ruleset id: %s", true),
     INVALID_RULE_SEVERITY(301012, "Rule severity is invalid", 400, "Rule severity '%s' is invalid"),
     ERROR_WHILE_RETRIEVING_RULESET_BY_NAME(301013, "Retrieving ruleset by name failed", 500, "Error while retrieving " +
-            "ruleset for the organization: %s"),
+            "ruleset for the organization: %s", true),
     ERROR_FAILED_TO_PARSE_RULESET_CONETENT(301014, "Failed to parse ruleset content", 500, "Failed to parse ruleset " +
-            "content for the ruleset."),
+            "content for the ruleset.", true),
     ERROR_CANNOT_MODIFY_DEFAULT_RULESET(301015, "Can not modify default ruleset", 403, "Can not modify default " +
             "ruleset %s in the organization: %s"),
+
+    ERROR_RULESET_ASSOCIATED_WITH_POLICIES(301016, "Ruleset is currently in use by some governance policies", 409,
+            "The ruleset with ID: %s cannot be deleted because it is associated with some governance policies in the " +
+                    "organization: %s. Please update the associated governance policies before attempting to delete the ruleset."),
+
+    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES(301017, "Error while retrieving associated policies for the ruleset.", 500,
+            "Error while retrieving associated policies for the ruleset with ID: %s", true),
+
 
     // Policy related codes
     ERROR_WHILE_CREATING_POLICY(401001, "Policy creation failed.", 500, "Error while creating governance policy in the organization %s", true),
     POLICY_NOT_FOUND(401002, "Policy not found", 404, "Policy with ID: %s not found in the organization: %s"),
     ERROR_WHILE_RETRIEVING_POLICIES(401003, "Retrieving policies failed", 500, "Error while retrieving policies for the organization: %s", true),
-    ERROR_WHILE_RETRIEVING_POLICY_BY_ID(401004, "Retrieving policy by id failed", 500, "Error while retrieving policy with id: %s for the organization: %s"),
-    ERROR_WHILE_UPDATING_POLICY(401005, "Updating policy failed", 500, "Error while updating policy with id: %s in the organization: %s"),
-    ERROR_WHILE_DELETING_POLICY(401006, "Deleting policy failed", 500, "Error while deleting policy with ID: %s in the organization: %s"),
+    ERROR_WHILE_RETRIEVING_POLICY_BY_ID(401004, "Retrieving policy by id failed", 500, "Error while retrieving policy" +
+            " with id: %s for the organization: %s", true),
+    ERROR_WHILE_UPDATING_POLICY(401005, "Updating policy failed", 500, ("Error while updating policy with id: %s in " +
+            "the organization: %s"), true),
+    ERROR_WHILE_DELETING_POLICY(401006, "Deleting policy failed", 500, "Error while deleting policy with ID: %s in " +
+            "the organization: %s", true),
     POLICY_ALREADY_EXISTS(401007, "Policy already exists.", 409, "Policy with name: '%s' in the organization: '%s' already exists."),
 
     ERROR_WHILE_RETRIEVING_POLICY_BY_NAME(401008, "Retrieving policy by name failed", 500, "Error while retrieving " +
-            "policy with name: %s for the organization: %s"),
+            "policy with name: %s for the organization: %s", true),
 
     // Endpoint related codes
     ERROR_WHILE_INSERTING_ENDPOINT_DETAILS(501001, "Error while inserting endpoint details.", 500, "Error while inserting details for endpoint: %s in organization: %s", true),
-    ERROR_WHILE_CHECKING_ENDPOINT_AVAILABILITY(501002, "Error while checking endpoint availability.", 500, "Error while checking endpoint availability for endpoint: %s in organization: %s", true),
+    ERROR_WHILE_CHECKING_ENDPOINT_AVAILABILITY(501002, "Error while checking endpoint availability.", 500, "Error while checking endpoint availability for " +
+            "endpoint: %s in organization: %s", true),
     ERROR_WHILE_DELETING_ENDPOINT(501003, "Error while deleting endpoint.", 500, "Error while deleting endpoint with ID: %s in the organization: %s"),
     ENDPOINT_NOT_FOUND(501004, "Endpoint not found", 404, "Endpoint with ID: %s not found in the organization: %s"),
     ENDPOINT_NOT_FOUND_GENERAL(501004, "Endpoint not found", 404, "Endpoint with ID: %s is not found"),
@@ -95,7 +117,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     LINTING_RUN_IN_PROGRESS(601003, "There is currently a linting run in progress.", 503, "There is currently a linting run in progress for endpoint: %s policy: %s ruleset: %s"),
     ERROR_WHILE_UPDATING_LINTING_RUN(601004, "Error while updating linting run.", 500, "Error while updating linting run for endpoint: %s policy: %s ruleset: %s", true),
     ERROR_WHILE_CHECKING_PENDING_LINTING_RUNS(601004, "Error while checking pending linting runs.", 500, "Error while checking pending linting runs for endpoint: %s", true),
-    MAX_RETRIES_EXCEEDED_FOR_LINTING_RUN_CHECK(601005, "Exceeded maximum retry attempts for checking pending linting runs.", 429, "Exceeded maximum retry attempts for checking pending linting runs for endpoint: %s"),
+    MAX_RETRIES_EXCEEDED_FOR_LINTING_RUN_CHECK(601005, "Exceeded maximum retry attempts for checking pending linting runs.", 429, "Exceeded maximum retry attempts for " +
+            "checking pending linting runs for endpoint: %s"),
     ERROR_WHILE_DELETING_LINTING_RESULTS_FOR_ENDPOINT(601006, "Error while deleting linting results.", 500, "Error while deleting linting results for the endpoint: %s", true),
 
     // APIM related codes

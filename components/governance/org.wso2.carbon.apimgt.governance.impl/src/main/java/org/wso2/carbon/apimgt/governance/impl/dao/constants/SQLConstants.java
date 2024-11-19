@@ -99,4 +99,7 @@ public class SQLConstants {
             "WHERE POLICY_ID = ? AND RULESET_ID = ?";
     public static final String GET_LABELS_BY_POLICY_ID = "SELECT LABEL FROM GOV_POLICY_LABEL " +
             "WHERE POLICY_ID = ?";
+
+    public static final String GET_POLICIES_FOR_RULESET = "SELECT POLICY_ID FROM GOV_POLICY_RULESET_MAPPING WHERE " +
+            "RULESET_ID = ?";
 }

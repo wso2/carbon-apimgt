@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.governance.impl.dao.RulsetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulsetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
+import java.util.List;
+
 /**
  * Implementation of the RulesetManager interface.
  */
@@ -119,8 +121,22 @@ public class RulesetManagerImpl implements RulesetManager {
             // Can not modify default rulesets
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_CANNOT_MODIFY_DEFAULT_RULESET,
                     ruleset.getName(), organization);
+        } else if (isRulesetAssociatedWithPolicies(rulesetId)) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
+                    ruleset.getId(), organization);
         }
         rulesetMgtDAO.deleteRuleset(organization, rulesetId);
+    }
+
+    /**
+     * Check if a ruleset is associated with any policies
+     *
+     * @param rulesetId Ruleset ID
+     * @return boolean True if the ruleset is associated with policies
+     */
+    private boolean isRulesetAssociatedWithPolicies(String rulesetId) throws GovernanceException {
+        List<String> policyIds = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
+        return !policyIds.isEmpty();
     }
 
     /**

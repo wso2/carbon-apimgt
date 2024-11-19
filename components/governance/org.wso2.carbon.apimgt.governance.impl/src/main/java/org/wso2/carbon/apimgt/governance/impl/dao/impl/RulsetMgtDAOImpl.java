@@ -395,6 +395,31 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
         return ruleset;
     }
 
+    /**
+     * Get the associated policies for a Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @return List of associated policies
+     */
+    @Override
+    public List<String> getAssociatedPoliciesForRuleset(String rulesetId) throws GovernanceException {
+        List<String> policyIds = new ArrayList<>();
+        String sqlQuery = SQLConstants.GET_POLICIES_FOR_RULESET;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, rulesetId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    policyIds.add(rs.getString("POLICY_ID"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES,
+                    e, rulesetId);
+        }
+        return policyIds;
+    }
+
 
     /**
      * Delete rules related to a ruleset
