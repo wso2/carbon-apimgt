@@ -27,6 +27,8 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLType;
 import graphql.validation.Validator;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.llom.OMElementImpl;
+import org.apache.axiom.om.impl.llom.OMTextImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -51,7 +53,10 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
 
@@ -59,9 +64,11 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     private static final String QUERY_PATH_STRING = "/?query=";
     private static final String QUERY_PAYLOAD_STRING = "query";
+    private static final String QUERY_VARIABLES_STRING = "variables";
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
     private static final String GRAPHQL_API = "GRAPHQL";
     private static final String HTTP_VERB = "HTTP_VERB";
+    private static final String QUERY_NAME = "QUERY_NAME";
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
     private GraphQLSchemaDTO graphQLSchemaDTO;
@@ -104,8 +111,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 } else {
                     RelayUtils.buildMessage(axis2MC);
                     OMElement body = axis2MC.getEnvelope().getBody().getFirstElement();
-                    if (body != null && body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null){
+                    if (body != null && body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null) {
                         payload = body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)).getText();
+                        if (body.getFirstChildWithName(QName.valueOf(QUERY_VARIABLES_STRING)) != null) {
+                            OMElement variables = body.getFirstChildWithName(QName.valueOf(QUERY_VARIABLES_STRING));
+                            Map<String, Object> variablesMap = convertArrayToMap(convertOMElementToArray(variables));
+                            messageContext.setProperty(APIConstants.VARIABLE_MAP, variablesMap);
+                        }
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Invalid query parameter " + queryParams[0]);
@@ -130,12 +142,18 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 for (Definition definition : document.getDefinitions()) {
                     if (definition instanceof OperationDefinition) {
                         OperationDefinition operation = (OperationDefinition) definition;
+                        messageContext.setProperty(APIConstants.GRAPHQL_OPERATION, operation);
                         if (operation.getOperation() != null) {
                             String httpVerb = ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                                     getProperty(HTTP_METHOD).toString();
                             messageContext.setProperty(HTTP_VERB, httpVerb);
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(HTTP_METHOD,
                                     operation.getOperation().toString());
+                            String operationName = operation.getName();
+                            if (operationName == null) {
+                                operationName = "ANONYMOUS QUERY";
+                            }
+                            messageContext.setProperty(QUERY_NAME, operationName);
                             String operationList = GraphQLProcessorUtil.getOperationListAsString(operation,
                                     graphQLSchemaDTO.getTypeDefinitionRegistry());
                             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
@@ -157,6 +175,30 @@ public class GraphQLAPIHandler extends AbstractHandler {
             handleFailure(messageContext, e.getMessage());
         }
         return false;
+    }
+
+    private Map<String, Object> convertArrayToMap(List<OMElement> variablesArray) {
+        Map<String, Object> externalVariables = new HashMap<>();
+        for (OMElement omElement : variablesArray) {
+            String variableKey = omElement.getLocalName();
+            Object variable = null;
+            if (omElement.getFirstOMChild() instanceof OMTextImpl) {
+                variable = ((OMTextImpl) omElement.getFirstOMChild()).getText();
+            } else if (omElement.getFirstOMChild() instanceof OMElementImpl) {
+                variable = convertArrayToMap(convertOMElementToArray(omElement));
+            }
+            externalVariables.put(variableKey, variable);
+        }
+        return externalVariables;
+    }
+
+    private List<OMElement> convertOMElementToArray(OMElement variables) {
+        List<OMElement> variablesArray = new ArrayList<>();
+        Iterator it = variables.getChildElements();
+        while (it.hasNext()) {
+            variablesArray.add((OMElement) it.next());
+        }
+        return variablesArray;
     }
 
     /**
@@ -221,12 +263,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
         messageContext.setProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY, graphQLAccessControlPolicy);
         messageContext.setProperty(APIConstants.API_TYPE, GRAPHQL_API);
         messageContext.setProperty(APIConstants.GRAPHQL_SCHEMA, graphQLSchemaDTO.getGraphQLSchema());
+        messageContext.setProperty(APIConstants.TYPE_DEFINITION, graphQLSchemaDTO.getTypeDefinitionRegistry());
     }
 
     private void setMappingList(String additionalTypeName, String base64DecodedTypeValue,
-            GraphQLFieldDefinition fieldDefinition, HashMap<String, String> operationThrottlingMappingList,
-            HashMap<String, Boolean> operationAuthSchemeMappingList, HashMap<String, String> operationScopeMappingList,
-            ArrayList<String> roleArrayList) {
+                                GraphQLFieldDefinition fieldDefinition, HashMap<String, String> operationThrottlingMappingList,
+                                HashMap<String, Boolean> operationAuthSchemeMappingList, HashMap<String, String> operationScopeMappingList,
+                                ArrayList<String> roleArrayList) {
 
         String base64DecodedURLTypeName = new String(Base64.getUrlDecoder().decode(fieldDefinition.getName()));
         if (additionalTypeName.contains(APIConstants.SCOPE_ROLE_MAPPING)) {

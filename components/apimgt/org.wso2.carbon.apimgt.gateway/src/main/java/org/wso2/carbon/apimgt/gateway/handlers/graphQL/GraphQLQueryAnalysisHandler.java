@@ -33,6 +33,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * This Handler can be used to analyse GraphQL Query. This implementation uses previously set
  * complexity and depth limitation to block the complex queries before it reaches the backend.
@@ -54,7 +57,13 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             queryAnalyzer = new QueryAnalyzer(schema);
         }
         String payload = messageContext.getProperty(APIConstants.GRAPHQL_PAYLOAD).toString();
-        if (!isDepthAndComplexityValid(messageContext, payload)) {
+        Map<String, Object> variableMap;
+        if (messageContext.getPropertyKeySet().contains(APIConstants.VARIABLE_MAP)) {
+            variableMap = (Map<String, Object>) messageContext.getProperty(APIConstants.VARIABLE_MAP);
+        } else {
+            variableMap = new HashMap<>();
+        }
+        if (!isDepthAndComplexityValid(messageContext, payload, variableMap)) {
             log.debug("Query was blocked by the static query analyser");
             return false;
         }
@@ -66,11 +75,12 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      *
      * @param messageContext message context of the request
      * @param payload        payload of the request
+     * @param variableMap
      * @return true, if the query is not blocked or false, if the query is blocked
      */
-    private boolean isDepthAndComplexityValid(MessageContext messageContext, String payload) {
+    private boolean isDepthAndComplexityValid(MessageContext messageContext, String payload, Map<String, Object> variableMap) {
         try {
-            return isDepthValid(messageContext, payload) && isComplexityValid(messageContext, payload);
+            return isDepthValid(messageContext, payload, variableMap) && isComplexityValid(messageContext, payload, variableMap);
         } catch (Exception e) {
             String errorMessage = "Policy definition parsing failed. ";
             log.error(errorMessage, e);
@@ -79,12 +89,12 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
         }
     }
 
-    private boolean isDepthValid(MessageContext messageContext, String payload) {
+    private boolean isDepthValid(MessageContext messageContext, String payload, Map<String, Object> variableMap) {
         int maxQueryDepth = -1;
         if (messageContext.getPropertyKeySet().contains(GraphQLConstants.MAXIMUM_QUERY_DEPTH)) {
             maxQueryDepth = (int) messageContext.getProperty(GraphQLConstants.MAXIMUM_QUERY_DEPTH);
         }
-        QueryAnalyzerResponseDTO responseDTO = queryAnalyzer.analyseQueryDepth(maxQueryDepth, payload);
+        QueryAnalyzerResponseDTO responseDTO = queryAnalyzer.analyseQueryDepth(maxQueryDepth, payload, variableMap);
         if (!responseDTO.isSuccess() && !responseDTO.getErrorList().isEmpty()) {
             handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
                     GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, responseDTO.getErrorList().toString());
@@ -94,7 +104,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
         return true;
     }
 
-    private boolean isComplexityValid(MessageContext messageContext, String payload) {
+    private boolean isComplexityValid(MessageContext messageContext, String payload, Map<String, Object> variableMap) {
         int queryComplexity = -1;
         if (messageContext.getPropertyKeySet().contains(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY)) {
             queryComplexity = (int) messageContext.getProperty(GraphQLConstants.MAXIMUM_QUERY_COMPLEXITY);
@@ -103,7 +113,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                 .getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
         QueryAnalyzerResponseDTO responseDTO = null;
         try {
-            responseDTO = queryAnalyzer.analyseQueryMutationComplexity(payload, queryComplexity, complexityInfoJson);
+            responseDTO = queryAnalyzer.analyseQueryMutationComplexity(payload, queryComplexity, complexityInfoJson, variableMap);
         } catch (ParseException e) {
             String errorMessage = "Policy definition parsing failed. ";
             handleFailure(GraphQLConstants.GRAPHQL_INVALID_QUERY, messageContext, errorMessage, errorMessage);

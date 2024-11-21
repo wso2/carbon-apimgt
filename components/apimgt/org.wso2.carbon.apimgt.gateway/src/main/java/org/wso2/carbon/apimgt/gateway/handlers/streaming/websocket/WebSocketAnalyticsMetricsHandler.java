@@ -36,9 +36,18 @@ public class WebSocketAnalyticsMetricsHandler {
     private static final String HANDSHAKE = "HANDSHAKE";
     private static final String PUBLISH = "PUBLISH";
     private static final String SUBSCRIBE = "SUBSCRIBE";
+    private static final String SUBSCRIPTION_HANDSHAKE = "SUBSCRIPTION_HANDSHAKE";
+    private static final String SUBSCRIPTION_INIT_PUB = "SUBSCRIPTION_INIT_PUB";
+    private static final String SUBSCRIPTION_INIT_SUB = "SUBSCRIPTION_INIT_SUB";
+    private static final String SUBSCRIPTION = "SUBSCRIPTION";
+    private static final String SUBSCRIPTION_EVENT = "SUBSCRIPTION_EVENT";
 
     public void handleHandshake(ChannelHandlerContext ctx) {
-        WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, HANDSHAKE);
+        if (APIConstants.GRAPHQL_API.equals(WebSocketUtils.getPropertyFromChannel(APIConstants.API_TYPE, ctx))) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION_HANDSHAKE);
+        } else {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, HANDSHAKE);
+        }
         String electedResource = (String) WebSocketUtils.getPropertyFromChannel(APIConstants.API_ELECTED_RESOURCE, ctx);
         /*
         Prefix electedResource with APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE_SUBSCRIBE only when collecting data for
@@ -51,12 +60,29 @@ public class WebSocketAnalyticsMetricsHandler {
     }
 
     public void handlePublish(ChannelHandlerContext ctx) {
-        WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, PUBLISH);
-        collectData(ctx);
+        if (APIConstants.GRAPHQL_API.equals(WebSocketUtils.getPropertyFromChannel(APIConstants.API_TYPE, ctx))
+                && WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) == null) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION_INIT_PUB);
+            collectData(ctx);
+        } else if (WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) != null) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION);
+            GraphQLSubscriptionOperationHandler operationInfoAnalyzer = new GraphQLSubscriptionOperationHandler();
+            operationInfoAnalyzer.analyzePayload(ctx);
+        } else {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, PUBLISH);
+            collectData(ctx);
+        }
     }
 
     public void handleSubscribe(ChannelHandlerContext ctx) {
-        WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIBE);
+        if (APIConstants.GRAPHQL_API.equals(WebSocketUtils.getPropertyFromChannel(APIConstants.API_TYPE, ctx))
+                && WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) == null) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION_INIT_SUB);
+        } else if (WebSocketUtils.getPropertyFromChannel(APIConstants.GRAPHQL_PAYLOAD, ctx) != null) {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIPTION_EVENT);
+        } else {
+            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, SUBSCRIBE);
+        }
         collectData(ctx);
     }
 
