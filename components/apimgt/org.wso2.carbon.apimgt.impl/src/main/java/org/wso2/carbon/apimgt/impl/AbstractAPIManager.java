@@ -174,7 +174,7 @@ public abstract class AbstractAPIManager implements APIManager {
         apiMgtDAO.setDefaultVersion(api);
     }
     protected void populateGatewayVendor(API api) throws APIManagementException {
-        if (api.getGatewayVendor() == null) {
+        if (api.getGatewayVendor() == null || "null".equals(api.getGatewayVendor())) {
             String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(api.getUuid());
             if (gatewayVendor == null) {
                 gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;

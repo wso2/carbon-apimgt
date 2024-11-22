@@ -26,12 +26,11 @@ import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.constants.HealthCheckConstants;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
@@ -69,6 +68,10 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
             } catch(APIManagementException e){
                 log.error("Error while deploying JWKS API for tenant domain :" + tenantDomain, e);
             }
+            return true;
+        }
+
+        if (GatewayUtils.checkForFileBasedApiContexts(path, tenantDomain)) {
             return true;
         }
 

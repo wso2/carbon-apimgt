@@ -22,7 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIKeyUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.core.util.KeyStoreManager;
@@ -94,9 +97,18 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
         if (expireIn != -1) {
             jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.EXPIRY_TIME, expireIn);
         }
-        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS, jwtTokenInfoDTO.getSubscribedApiDTOList());
-        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.TIER_INFO, jwtTokenInfoDTO.getSubscriptionPolicyDTOList());
-        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.APPLICATION, jwtTokenInfoDTO.getApplication());
+        if (APIKeyUtils.isLightweightAPIKeyGenerationEnabled()) {
+            JSONObject application = new JSONObject();
+            application.put(APIConstants.JwtTokenConstants.APPLICATION_ID, jwtTokenInfoDTO.getApplication().getId());
+            application.put(APIConstants.JwtTokenConstants.APPLICATION_UUID, jwtTokenInfoDTO.getApplication().getUuid());
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.APPLICATION, application);
+        } else {
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS,
+                    jwtTokenInfoDTO.getSubscribedApiDTOList());
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.TIER_INFO,
+                    jwtTokenInfoDTO.getSubscriptionPolicyDTOList());
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.APPLICATION, jwtTokenInfoDTO.getApplication());
+        }
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.KEY_TYPE, jwtTokenInfoDTO.getKeyType());
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.TOKEN_TYPE,
                 APIConstants.JwtTokenConstants.API_KEY_TOKEN_TYPE);

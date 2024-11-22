@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.29.196-SNAPSHOT</version>
+        <version>9.30.77-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -224,6 +224,8 @@
                             ${project.artifactId}
                         </Bundle-SymbolicName>
                         <Import-Package>
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             javax.validation.*; version="1.1.0.Final",
                             *;resolution:=optional

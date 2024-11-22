@@ -95,7 +95,9 @@ public class APIMappingUtil {
         dto.setIsDefaultVersion(model.isPublishedDefaultVersion());
         dto.setLifeCycleStatus(model.getStatus());
         dto.setType(model.getType());
+        dto.setSubtype(model.getSubtype());
         dto.setAvgRating(String.valueOf(model.getRating()));
+        dto.setEgress(model.isEgress() == 1);
 
         Set<Scope> scopes = model.getScopes();
         Map<String, ScopeInfoDTO> uniqueScope = new HashMap<>();
@@ -293,6 +295,7 @@ public class APIMappingUtil {
         dto.setLifeCycleStatus(model.getState());
         dto.setType(model.getType());
         dto.setAvgRating(String.valueOf(model.getRating()));
+        dto.setEgress(model.isEgress() == 1);
 
         /* todo: created and last updated times
         if (null != model.getLastUpdated()) {
@@ -823,6 +826,7 @@ public class APIMappingUtil {
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(apiProduct.getGatewayVendor());
+        apiInfoDTO.setEgress(apiProduct.isEgress() == 1);
 
         return apiInfoDTO;
     }
@@ -848,6 +852,7 @@ public class APIMappingUtil {
         apiInfoDTO.setProvider(apiId.getProviderName());
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
         apiInfoDTO.setType(api.getType());
+        apiInfoDTO.setSubtype(api.getSubtype());
         apiInfoDTO.setAvgRating(String.valueOf(api.getRating()));
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
@@ -890,6 +895,7 @@ public class APIMappingUtil {
                 subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         apiInfoDTO.setMonetizedInfo(api.isMonetizationEnabled());
+        apiInfoDTO.setEgress(api.isEgress() == 1);
 
         return apiInfoDTO;
     }
@@ -1101,6 +1107,35 @@ public class APIMappingUtil {
             apiInfoDTO.setMonetizationLabel(RestApiConstants.FREEMIUM);
         }
         apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
+    }
+
+    /**
+     * Retrieves the value of the specified query parameter from a query string.
+     *
+     * @param query The query string containing key-value pairs.
+     * @return The value of the "kmId" parameter, or null if not found or if the query is empty or null.
+     */
+    public static String getKmIdValue(String query) {
+
+        if (StringUtils.isBlank(query)) {
+            return null;
+        }
+
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split(":");
+            if (keyValue.length > 0) {
+                String key = keyValue[0].trim();
+                if (key.equals("kmId")) {
+                    if (keyValue.length > 1) {
+                        return keyValue[1].trim();
+                    } else {
+                        return "";
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

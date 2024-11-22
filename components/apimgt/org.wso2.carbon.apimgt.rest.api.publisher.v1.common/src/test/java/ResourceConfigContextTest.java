@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ResourceConfigContext;
 
@@ -46,14 +45,14 @@ public class ResourceConfigContextTest {
         api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
         api.setUriTemplates(setAPIUriTemplates());
-        ConfigContext configcontext = new APIConfigContext(api);
+        ConfigContext configcontext = new APIConfigContextWrapper(api);
         ResourceConfigContext resourceConfigContext = new ResourceConfigContext(configcontext, api);
         resourceConfigContext.validate();
         Assert.assertNotNull(resourceConfigContext.getContext().get("resources"));
         //assign an empty URITemplate set and check the result
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
         api.setUriTemplates(uriTemplates);
-        configcontext = new APIConfigContext(api);
+        configcontext = new APIConfigContextWrapper(api);
         resourceConfigContext = new ResourceConfigContext(configcontext, api);
         String errorClass = "org.wso2.carbon.apimgt.api.APIManagementException";
         String expectedErrorMessage = "At least one resource is required";
@@ -65,7 +64,7 @@ public class ResourceConfigContextTest {
         }
         //set a null value for URITemplate and check the result
         api.setUriTemplates(null);
-        configcontext = new APIConfigContext(api);
+        configcontext = new APIConfigContextWrapper(api);
         resourceConfigContext = new ResourceConfigContext(configcontext, api);
         try {
             resourceConfigContext.validate();
@@ -83,7 +82,7 @@ public class ResourceConfigContextTest {
         APIProduct apiProduct = new APIProduct(apiProductIdentifier);
         apiProduct.setProductResources(getAPIProductResources(apiProductIdentifier));
         apiProduct.setType(APIConstants.API_PRODUCT);
-        ConfigContext configcontext = new APIConfigContext(apiProduct);
+        ConfigContext configcontext = new APIConfigContextWrapper(apiProduct);
         ResourceConfigContext resourceConfigContext = new ResourceConfigContext(configcontext, apiProduct);
         resourceConfigContext.validate();
         VelocityContext context = resourceConfigContext.getContext();

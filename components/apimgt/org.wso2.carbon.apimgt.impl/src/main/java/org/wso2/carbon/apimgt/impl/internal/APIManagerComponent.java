@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
@@ -47,7 +48,6 @@ import org.wso2.carbon.apimgt.common.gateway.http.BrowserHostnameVerifier;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
-import org.wso2.carbon.apimgt.impl.AMIndexerPreprocessor;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -84,6 +84,7 @@ import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.LLMProviderNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
@@ -123,7 +124,6 @@ import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
-import org.wso2.carbon.registry.indexing.indexer.IndexerPreProcessor;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -218,8 +218,9 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
-            bundleContext.registerService(IndexerPreProcessor.class.getName(), new AMIndexerPreprocessor(), null);
-            if (configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
+            bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
+            if (configuration.getMarketplaceAssistantConfigurationDto().isKeyProvided() ||
+                    configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
             }
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
@@ -293,16 +294,6 @@ public class APIManagerComponent {
 
                 //Adding default correlation configs at initial server start up
                 APIUtil.addDefaultCorrelationConfigs();
-                // Update all NULL THROTTLING_TIER values to Unlimited
-                boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
-                try {
-                    if (isNullThrottlingTierConversionEnabled) {
-                        ApiMgtDAO.getInstance().convertNullThrottlingTiers();
-                    }
-                } catch (APIManagementException e) {
-                    log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
-                }
-
 //            // Initialise KeyManager.
 //            KeyManagerHolder.initializeKeyManager(configuration);
                 // Initialise sql constants
@@ -417,6 +408,22 @@ public class APIManagerComponent {
 
     protected void unsetRealmService(RealmService realmService) {
         ServiceReferenceHolder.getInstance().setRealmService(null);
+    }
+
+    @Reference(
+            name = "llm.payload.handler.connector.service",
+            service = LLMProviderService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeLLMPayloadHandler")
+    protected void addLLMPayloadHandler(LLMProviderService llmProviderService) {
+
+        ServiceReferenceHolder.getInstance().addLLMProviderService(llmProviderService.getType(), llmProviderService);
+    }
+
+    protected void removeLLMPayloadHandler(LLMProviderService llmProviderService) {
+
+        ServiceReferenceHolder.getInstance().removeLLMProviderService(llmProviderService.getType());
     }
 
     @Reference(

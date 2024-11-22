@@ -34,6 +34,9 @@ public class APIDTO   {
     private List<OperationPolicyDTO> apiPolicies = new ArrayList<>();
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
     private String securityScheme = null;
+    private Boolean isSubscriptionValidationDisabled = false;
+    private Boolean isEgress = null;
+    private String subtype = null;
 
   /**
    * UUID of API
@@ -284,6 +287,60 @@ public class APIDTO   {
     this.securityScheme = securityScheme;
   }
 
+  /**
+   * Whether subscription validation is disabled.
+   **/
+  public APIDTO isSubscriptionValidationDisabled(Boolean isSubscriptionValidationDisabled) {
+    this.isSubscriptionValidationDisabled = isSubscriptionValidationDisabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether subscription validation is disabled.")
+  @JsonProperty("isSubscriptionValidationDisabled")
+  public Boolean isIsSubscriptionValidationDisabled() {
+    return isSubscriptionValidationDisabled;
+  }
+  public void setIsSubscriptionValidationDisabled(Boolean isSubscriptionValidationDisabled) {
+    this.isSubscriptionValidationDisabled = isSubscriptionValidationDisabled;
+  }
+
+  /**
+   * Indicates if the API is an egress API.
+   **/
+  public APIDTO isEgress(Boolean isEgress) {
+    this.isEgress = isEgress;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Indicates if the API is an egress API.")
+  @JsonProperty("isEgress")
+  public Boolean isIsEgress() {
+    return isEgress;
+  }
+  public void setIsEgress(Boolean isEgress) {
+    this.isEgress = isEgress;
+  }
+
+  /**
+   * The subtype of the API.
+   **/
+  public APIDTO subtype(String subtype) {
+    this.subtype = subtype;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Default", value = "The subtype of the API.")
+  @JsonProperty("subtype")
+  public String getSubtype() {
+    return subtype;
+  }
+  public void setSubtype(String subtype) {
+    this.subtype = subtype;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -307,12 +364,15 @@ public class APIDTO   {
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(apiPolicies, API.apiPolicies) &&
         Objects.equals(urlMappings, API.urlMappings) &&
-        Objects.equals(securityScheme, API.securityScheme);
+        Objects.equals(securityScheme, API.securityScheme) &&
+        Objects.equals(isSubscriptionValidationDisabled, API.isSubscriptionValidationDisabled) &&
+        Objects.equals(isEgress, API.isEgress) &&
+        Objects.equals(subtype, API.subtype);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, isSubscriptionValidationDisabled, isEgress, subtype);
   }
 
   @Override
@@ -334,6 +394,9 @@ public class APIDTO   {
     sb.append("    apiPolicies: ").append(toIndentedString(apiPolicies)).append("\n");
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("    isSubscriptionValidationDisabled: ").append(toIndentedString(isSubscriptionValidationDisabled)).append("\n");
+    sb.append("    isEgress: ").append(toIndentedString(isEgress)).append("\n");
+    sb.append("    subtype: ").append(toIndentedString(subtype)).append("\n");
     sb.append("}");
     return sb.toString();
   }

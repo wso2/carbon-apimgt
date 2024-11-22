@@ -26,6 +26,7 @@ public class QuotaPolicy {
     private RequestCountLimit requestCount;
     private BandwidthLimit bandwidth;
     private EventCountLimit eventCount;
+    private AIAPIQuotaLimit aiApiQuota;
 
     public String getQuotaType() {
         return quotaType;
@@ -59,11 +60,21 @@ public class QuotaPolicy {
         this.eventCount = eventCount;
     }
 
+    public AIAPIQuotaLimit getAiApiQuota() {
+        return aiApiQuota;
+    }
+
+    public void setAiApiQuota(AIAPIQuotaLimit aiApiQuota) {
+        this.aiApiQuota = aiApiQuota;
+    }
+
     public Limit getLimit() {
         if (this.requestCount != null) {
             return this.requestCount;
         } else if (this.eventCount != null) {
             return this.eventCount;
+        } else if (this.aiApiQuota != null) {
+            return this.aiApiQuota;
         }
         return this.bandwidth;
     }
