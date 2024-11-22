@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.persistence;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
+import static org.wso2.carbon.CarbonConstants.REGISTRY_SYSTEM_USERNAME;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -66,6 +67,8 @@ import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.indexing.indexer.IndexerException;
+import org.wso2.carbon.registry.indexing.solr.SolrClient;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -75,7 +78,7 @@ import junit.framework.Assert;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ CarbonContext.class, RegistryPersistenceUtil.class, ServiceReferenceHolder.class,
-        PrivilegedCarbonContext.class, GovernanceUtils.class })
+        PrivilegedCarbonContext.class, GovernanceUtils.class, SolrClient.class })
 public class RegistryPersistenceImplTestCase {
     private final int SUPER_TENANT_ID = -1234;
     private final String SUPER_TENANT_DOMAIN = "carbon.super";
@@ -83,7 +86,7 @@ public class RegistryPersistenceImplTestCase {
     private final String TENANT_DOMAIN = "wso2.com";
 
     @Before
-    public void setupClass() throws UserStoreException {
+    public void setupClass() throws UserStoreException, IndexerException {
         System.setProperty("carbon.home", "");
         ServiceReferenceHolder serviceRefHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
@@ -100,6 +103,10 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(context);
 
         PowerMockito.mockStatic(GovernanceUtils.class);
+
+        SolrClient solrClient = Mockito.mock(SolrClient.class);
+        PowerMockito.mockStatic(SolrClient.class);
+        PowerMockito.when(SolrClient.getInstance()).thenReturn(solrClient);
     }
 
     @Test
@@ -132,6 +139,9 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceRefHolder);
         RealmService realmService = Mockito.mock(RealmService.class);
         PowerMockito.when(serviceRefHolder.getRealmService()).thenReturn(realmService);
+        PowerMockito.when(serviceRefHolder.getRegistryService()).thenReturn(registryService);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getRegistry(REGISTRY_SYSTEM_USERNAME, SUPER_TENANT_ID)).thenReturn(userRegistry);
 
         UserRealm realm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(SUPER_TENANT_ID)).thenReturn(realm);
@@ -193,6 +203,9 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceRefHolder);
         RealmService realmService = Mockito.mock(RealmService.class);
         PowerMockito.when(serviceRefHolder.getRealmService()).thenReturn(realmService);
+        PowerMockito.when(serviceRefHolder.getRegistryService()).thenReturn(registryService);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getRegistry(REGISTRY_SYSTEM_USERNAME, TENANT_ID)).thenReturn(userRegistry);
 
         UserRealm realm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(realm);
@@ -256,6 +269,10 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceRefHolder);
         RealmService realmService = Mockito.mock(RealmService.class);
         PowerMockito.when(serviceRefHolder.getRealmService()).thenReturn(realmService);
+
+        PowerMockito.when(serviceRefHolder.getRegistryService()).thenReturn(registryService);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getRegistry(REGISTRY_SYSTEM_USERNAME, SUPER_TENANT_ID)).thenReturn(userRegistry);
 
         UserRealm realm = Mockito.mock(UserRealm.class);
         PowerMockito.when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(realm);
