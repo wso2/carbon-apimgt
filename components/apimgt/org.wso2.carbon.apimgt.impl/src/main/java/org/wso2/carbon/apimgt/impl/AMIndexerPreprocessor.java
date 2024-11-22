@@ -22,13 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.indexing.indexer.IndexerPreProcessor;
 
-public class AMIndexerPreprocessor implements IndexerPreProcessor {
+public class AMIndexerPreprocessor  {
 
     private static final Log log = LogFactory.getLog(AMIndexerPreprocessor.class);
 
-    @Override
     public void processResource(Resource resource) throws RegistryException {
         if (APIConstants.API_RXT_MEDIA_TYPE.equals(resource.getMediaType())) {
             if (log.isDebugEnabled()) {
