@@ -43,6 +43,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.SynapseConstants;
+import org.wso2.carbon.apimgt.common.gateway.constants.HealthCheckConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
@@ -58,6 +59,7 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponse
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -128,6 +130,29 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 && ((FullHttpRequest) msg).uri().equals(APIConstants.WEB_SOCKET_HEALTH_CHECK_PATH)) {
             ctx.fireChannelRead(msg);
             return;
+        }
+
+        if (msg instanceof FullHttpRequest && ((FullHttpRequest) msg).headers() != null
+                && !((FullHttpRequest) msg).headers().contains(HttpHeaders.UPGRADE)
+                && HealthCheckConstants.HEALTH_CHECK_API_CONTEXT.equals(((FullHttpRequest) msg).uri())) {
+            boolean isAllApisDeployed = GatewayUtils.isAllApisDeployed();
+            if (isAllApisDeployed) {
+                FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.OK);
+                httpResponse.headers().set(APIConstants.HEADER_CONTENT_TYPE, "text/plain; charset=UTF-8");
+                httpResponse.headers().set(APIConstants.HEADER_CONTENT_LENGTH,
+                        httpResponse.content().readableBytes());
+                ctx.writeAndFlush(httpResponse);
+                return;
+            } else {
+                FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                httpResponse.headers().set(APIConstants.HEADER_CONTENT_TYPE, "text/plain; charset=UTF-8");
+                httpResponse.headers().set(APIConstants.HEADER_CONTENT_LENGTH,
+                        httpResponse.content().readableBytes());
+                ctx.writeAndFlush(httpResponse);
+                return;
+            }
         }
 
         InboundMessageContext inboundMessageContext;

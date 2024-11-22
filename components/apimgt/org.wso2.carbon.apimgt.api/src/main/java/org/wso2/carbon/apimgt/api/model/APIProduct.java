@@ -703,4 +703,17 @@ public class APIProduct implements Serializable {
 
         this.workflowStatus = workflowStatus;
     }
+
+    /**
+     * Whether the API Product is Egress (1) or not (0)
+     */
+    private int isEgress;
+
+    public int isEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(int egress) {
+        isEgress = egress;
+    }
 }

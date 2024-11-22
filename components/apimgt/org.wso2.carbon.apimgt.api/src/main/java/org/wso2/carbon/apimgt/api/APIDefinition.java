@@ -164,10 +164,12 @@ public abstract class APIDefinition {
      * @param api            API
      * @param oasDefinition  OAS definition
      * @param hostsWithSchemes host addresses with protocol mapping
+     * @param kmId             UUID of the Key Manager
      * @return updated OAS definition
      * @throws APIManagementException throws if an error occurred
      */
-    public abstract String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes)
+    public abstract String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
+            String kmId)
             throws APIManagementException;
 
     /**
@@ -176,11 +178,12 @@ public abstract class APIDefinition {
      * @param product        APIProduct
      * @param oasDefinition  OAS definition
      * @param hostsWithSchemes host addresses with protocol mapping
+     * @param kmId             UUID of the Key Manager
      * @return updated OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     public abstract String getOASDefinitionForStore(APIProduct product, String oasDefinition,
-                                                    Map<String, String> hostsWithSchemes) throws APIManagementException;
+            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException;
 
     /**
      * Update OAS definition for API Publisher

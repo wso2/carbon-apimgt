@@ -45,6 +45,9 @@ public class API implements CacheableEntity<String> {
     private String revision;
     private String organization;
     private Set<OperationPolicy> apiPolicies = new HashSet<>();
+    private boolean isSubscriptionValidationDisabled = false;
+    private int isEgress;
+    private String subtype;
 
     public String getRevision() {
 
@@ -212,5 +215,29 @@ public class API implements CacheableEntity<String> {
 
     public Set<OperationPolicy> getApiPolicies() {
         return apiPolicies;
+    }
+
+    public boolean isSubscriptionValidationDisabled() {
+        return isSubscriptionValidationDisabled;
+    }
+
+    public void setSubscriptionValidationDisabled(boolean subscriptionValidationDisabled) {
+        isSubscriptionValidationDisabled = subscriptionValidationDisabled;
+    }
+
+    public int isEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(int egress) {
+        isEgress = egress;
+    }
+
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
     }
 }

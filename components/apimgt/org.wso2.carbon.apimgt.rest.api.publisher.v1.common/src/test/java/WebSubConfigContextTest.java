@@ -18,8 +18,13 @@
 
 import org.apache.axis2.Constants;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -27,18 +32,25 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APITemplateBuilderImpl;
 
 import java.io.File;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ServiceReferenceHolder.class})
 public class WebSubConfigContextTest {
 
-    private APIManagerConfiguration config;
+    @Before
+    public void init() {
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+    }
 
     @Test
     public void testWithoutSecretConfigContextForAPI() throws Exception {
@@ -56,9 +68,6 @@ public class WebSubConfigContextTest {
         Environment environment = new Environment();
         environment.setType("production");
 
-        config = Mockito.mock(APIManagerConfiguration.class);
-        APIManagerConfigurationService apiManagerConfigurationService = new APIManagerConfigurationServiceImpl(config);
-        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(apiManagerConfigurationService);
         String templatePath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" +
                 File.separator + "resources" + File.separator;
         System.setProperty("carbon.home", templatePath);
@@ -86,9 +95,6 @@ public class WebSubConfigContextTest {
         Environment environment = new Environment();
         environment.setType("production");
 
-        config = Mockito.mock(APIManagerConfiguration.class);
-        APIManagerConfigurationService apiManagerConfigurationService = new APIManagerConfigurationServiceImpl(config);
-        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(apiManagerConfigurationService);
         String templatePath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" +
                 File.separator + "resources" + File.separator;
         System.setProperty("carbon.home", templatePath);

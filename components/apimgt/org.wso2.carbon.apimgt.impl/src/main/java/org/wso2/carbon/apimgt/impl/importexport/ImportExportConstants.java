@@ -203,7 +203,7 @@ public final class ImportExportConstants {
 
     public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
 
-    public static final String APIM_VERSION = "v4.3.0";
+    public static final String APIM_VERSION = "v4.4.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
@@ -309,6 +309,7 @@ public final class ImportExportConstants {
     public static final String DISPLAY_ON_DEVPORTAL_OPTION = "displayOnDevportal";
 
     public static final String POLICIES_DIRECTORY = "Policies";
+    public static final String CUSTOM_BACKEND_DIRECTORY = "Sequence-Backend";
     public static final String SWAGGER_X_WSO2_APICTL_INIT = "x-wso2-apictl-init";
 
     public static final String EXPORT_POLICY_TYPE_YAML = "YAML";

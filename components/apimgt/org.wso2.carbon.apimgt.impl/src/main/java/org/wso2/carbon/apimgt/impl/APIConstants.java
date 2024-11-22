@@ -136,6 +136,8 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_SUBSCRIPTION_TIER = "DefaultSubscriptionLevelTier";
 
     public static final String API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD = "ExposeEndpointPassword";
+    public static final String API_TENANT_CONF_ALLOW_SUBSCRIPTION_VALIDATION_DISABLING
+            = "AllowSubscriptionValidationDisabling";
 
     public static final String API_CATEGORY_FREE = "Free";
 
@@ -258,6 +260,7 @@ public final class APIConstants {
     // For HTTP requests
     public static final String HEADER_ACCEPT = "Accept";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_CONTENT_LENGTH = "Content-Length";
     public static final String HEADER_API_TOKEN = "X-API-KEY";
     public static final String HEADER_USER_AGENT = "User-Agent";
     public static final String MULTIPART_FORM_BOUNDARY = "X-WSO2-BOUNDARY";
@@ -367,6 +370,12 @@ public final class APIConstants {
     public static final String PROTOTYPE_OVERVIEW_IMPLEMENTATION = "overview_implementation";
     public static final String API_PRODUCTION_THROTTLE_MAXTPS = "overview_productionTps";
     public static final String API_SANDBOX_THROTTLE_MAXTPS = "overview_sandboxTps";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_SECOND = "SECOND";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_SECOND_MS = "1000";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_MINUTE = "MINUTE";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS = "60000";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_HOUR = "HOUR";
+    public static final String API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS = "3600000";
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";
@@ -466,6 +475,7 @@ public final class APIConstants {
     public static final String X5T256_PARAMETER = "x5t#S256";
     public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
+    public static final String ENCODE_X5T_WITHOUT_PADDING = "EncodeX5tWithoutPadding";
     public static final String TOKEN_ISSUERS = "TokenIssuers";
     public static final String GATEWAY_JWT_CONFIGURATION = "Configuration";
     public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "ExcludedClaims";
@@ -506,14 +516,18 @@ public final class APIConstants {
     public static final String ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN = OAUTH_CONFIGS + "EnableCertificateBoundAccessToken";
     public static final String DIGEST = "x5t#S256";
     public static final String CNF = "cnf";
+    public static final String HASHING = "Hashing";
+    public static final String HASGING_ALGORITHM= "HashingAlgorithm";
 
     // Constants related to AI features: API chat and Marketplace Assistant
     public static class AI {
 
         public static final String API_CHAT = "APIChat";
-        public static final String API_CHAT_ENABLED = "Enabled";
+        public static final String ENABLED = "Enabled";
         public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
+        public static final String API_CHAT_KEY = "Key";
         public static final String API_CHAT_ENDPOINT = "Endpoint";
+        public static final String API_CHAT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String RESOURCES = "Resources";
         public static final String API_CHAT_PREPARE_RESOURCE = "PrepareResource";
         public static final String API_CHAT_EXECUTE_RESOURCE = "ExecuteResource";
@@ -524,11 +538,14 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT = "MarketplaceAssistant";
         public static final String MARKETPLACE_ASSISTANT_ENABLED = "Enabled";
         public static final String MARKETPLACE_ASSISTANT_AUTH_TOKEN = "AuthToken";
+        public static final String MARKETPLACE_ASSISTANT_KEY = "Key";
         public static final String MARKETPLACE_ASSISTANT_ENDPOINT = "Endpoint";
+        public static final String MARKETPLACE_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String MARKETPLACE_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String MARKETPLACE_ASSISTANT_PUBLISH_API_RESOURCE = "ApiPublishResource";
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
+        public static final String AI_CONFIGURATION = "AiConfiguration";
 
         private AI() {
 
@@ -750,6 +767,7 @@ public final class APIConstants {
     public static final String API_WEBSUB_GATEWAY_ENDPOINT = "GatewayWebSubEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String API_GATEWAY_TYPE_ENVOY = "Envoy";
     public static final String API_GATEWAY_TYPE_REGULAR = "Regular";
     public static final String API_GATEWAY_TYPE_APK = "APK";
     public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
@@ -814,8 +832,10 @@ public final class APIConstants {
     public static final String AUTHSERVER_URL = "ServerURL";
     public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
-    public static final String API_KEY_SUBSCRIPTION_VALIDATION_ENABLED =
-            API_KEY_VALIDATOR + "EnableAPIKeySubscriptionValidation";
+    public static final String LIGHTWEIGHT_API_KEY_GENERATION_ENABLED =
+            API_KEY_VALIDATOR + "EnableLightWeightAPIKeyGeneration";
+    public static final String ALLOW_SUBSCRIPTION_VALIDATION_DISABLING = API_KEY_VALIDATOR +
+            "AllowSubscriptionValidationDisabling";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
@@ -977,6 +997,10 @@ public final class APIConstants {
     public static final String BASIC_AUTH_APPLICATION_OWNER = " BasicAuthApplicationOwner";
     public static final String MUTUAL_SSL_AUTH_APPLICATION_NAME = "MutualSSLAuthApplication";
     public static final String MUTUAL_SSL_AUTH_APPLICATION_OWNER = "MutualSSLAuthApplicationOwner";
+    public static final String SUBSCRIPTIONLESS_APPLICATION_NAME = "SubscriptionLessApplication";
+    public static final String SUBSCRIPTIONLESS_APPLICATION_OWNER = "SubscriptionLessApplicationOwner";
+    public static final String SUBSCRIPTIONLESS_APPLICATION_DESCRIPTION = "This application is used to internally" +
+            " subscribe to APIs when subscription validation is disabled";
 
     public static final QName POLICY_ELEMENT = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy",
             "Policy");
@@ -1075,6 +1099,7 @@ public final class APIConstants {
     public static final String API_USAGE_DAS_REST_API_PASSWORD = API_ANALYTICS + "StreamProcessorRestApiPassword";
 
     public static final String UNLIMITED_TIER = "Unlimited";
+    public static final String THROTTLING_TIER = "THROTTLING_TIER";
     public static final String UNLIMITED_TIER_DESC = "Allows unlimited requests";
 
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
@@ -1238,6 +1263,7 @@ public final class APIConstants {
         public static final String APPLICATIONS = "/applications";
         public static final String SUBSCRIPTIONS = "/subscriptions";
         public static final String SUBSCRIBERS = "/subscribers";
+        public static final String SUBSCRIBE_INTERNAL = "/subscribe-internal";
         public static final String APPLICATION_KEY_MAPPINGS = "/application-key-mappings";
         public static final String APPLICATION_POLICIES = "/application-policies";
         public static final String API_POLICIES = "/api-policies";
@@ -1339,7 +1365,7 @@ public final class APIConstants {
     public static final String REST_METHOD = "REST_METHOD";
 
     // GraphQL related constants
-    public static final String API_TYPE = "API_TYPE";
+    public static final String API_TYPE = "ApiType";
     public static final String HTTP_VERB = "HTTP_VERB";
     public static final String GRAPHQL_API = "GRAPHQL";
     public static final String GRAPHQL_SUBSCRIPTION_REQUEST = "isGraphqlSubscriptionRequest";
@@ -1396,6 +1422,7 @@ public final class APIConstants {
     public static final String SHA_1 = "SHA-1";
 
     public static final String US_ASCII = "US-ASCII";
+    public static final String HASH = "hash";
 
     public static class DigestAuthConstants {
 
@@ -1457,6 +1484,7 @@ public final class APIConstants {
         public static final String TOKEN_TYPE = "token_type";
         public static final String EXPIRES_IN = "expires_in";
         public static final String EXPIRES_IN_CONFIG = "ExpiresIn";
+        public static final String ENABLE_RETRY_CALL_WITH_NEW_TOKEN = "EnableRetryCallWithNewToken";
 
         // Properties in Endpoint Config
         public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
@@ -1528,6 +1556,7 @@ public final class APIConstants {
     public static final String KEYMANAGER_PORT = "keyManagerPort";
     public static final String KEYMANAGER_SERVERURL = API_KEY_VALIDATOR + "ServerURL";
     public static final String CARBON_LOCALIP = "carbon.local.ip";
+    public static final String HTTPS_TRANSPORT_PORT = "https.transport.port";
 
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
@@ -1733,7 +1762,10 @@ public final class APIConstants {
     public static final String QUERY = "query";
     public static final String HISTORY = "history";
     public static final String VERSION = "version";
+    public static final String VISIBILITYROLES = "visibility_roles";
+    public static final String APIM_VERSION = "apim_version";
     public static final String DESCRIPTION = "description";
+    public static final String USERROLES = "user_roles";
 
     public static final String DEMOTE_TO_CREATED= "Demote to Created";
     public static final String BLOCK = "Block";
@@ -1768,6 +1800,8 @@ public final class APIConstants {
     public static final String ENDPOINT_TYPE_SERVICE = "service";
     public static final String ENDPOINT_TYPE_ADDRESS = "address";
     public static final String ENDPOINT_TYPE_AWSLAMBDA = "awslambda";
+    public static final String ENDPOINT_TYPE_SEQUENCE = "sequence_backend";
+    public static final String SEQUENCE_DATA = "sequence";
     public static final String ENDPOINT_PRODUCTION_FAILOVERS = "production_failovers";
     public static final String ENDPOINT_SANDBOX_FAILOVERS = "sandbox_failovers";
     public static final String ENDPOINT_PRODUCTION_ENDPOINTS = "production_endpoints";
@@ -1778,6 +1812,10 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_BASIC = "basic";
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
     public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
+    public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
+    public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
+    public static final String ENDPOINT_SECURITY_API_KEY_VALUE = "apiKeyValue";
+    public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE = "apiKeyIdentifierType";
     public static final String ENDPOINT_SECURITY_USERNAME = "username";
     public static final String ENDPOINT_SECURITY_CONFIG = "securityConfig";
     public static final String ENDPOINT_SECURITY = "endpoint_security";
@@ -1790,6 +1828,7 @@ public final class APIConstants {
     public static final String ENDPOINT_SPECIFIC_CONFIG = "config";
     public static final String ENDPOINT_CONFIG_ACTION_DURATION = "actionDuration";
     public static final String ENDPOINT_TYPE_GRAPHQL = "graphql";
+    public static final String ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN = "enableRetryCallWithNewOauthToken";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
@@ -1827,6 +1866,9 @@ public final class APIConstants {
     public static final String REGISTRY_RESOURCE_PREFIX = "/registry/resource";
     public static final String REGISTRY_RESOURCE_URL_PREFIX =
             "/registry/resource/_system/governance/apimgt/applicationdata/provider/";
+
+    public static final String APPLICATION_DATA_RESOURCE_URL_PREFIX =
+            "/apimgt/applicationdata/provider/";
 
     public enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
@@ -1916,27 +1958,37 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_BRONZE = "Bronze";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
+    public static final String DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS = "DefaultSubscriptionless";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "AsyncGold";
     public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "AsyncSilver";
     public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "AsyncBronze";
     public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "AsyncUnlimited";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS = "AsyncDefaultSubscriptionless";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "AsyncWHGold";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "AsyncWHSilver";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE = "AsyncWHBronze";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED = "AsyncWHUnlimited";
 
+    public static final String DEFAULT_SUB_POLICY_AI_GOLD = "AIGold";
+    public static final String DEFAULT_SUB_POLICY_AI_SILVER = "AISilver";
+    public static final String DEFAULT_SUB_POLICY_AI_BRONZE = "AIBronze";
+
     public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 5000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 2000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 500 request(s) per minute";
+    public static final String DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS_DESC =
+            "Allows 10000 requests per minute when subscription validation is disabled";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC = "Allows 50000 events per day";
     public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC = "Allows 25000 events per day";
     public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC = "Allows 5000 events per day";
     public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC = "Allows unlimited events";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS_DESC =
+            "Allows 10000 events per day when subscription validation is disabled";
 
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC = "Allows 10000 events per month and " +
             "1000 active subscriptions";
@@ -1946,6 +1998,10 @@ public final class APIConstants {
             "500 active subscriptions";
     public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC = "Allows unlimited events and " +
             "unlimited active subscriptions";
+
+    public static final String DEFAULT_SUB_POLICY_AI_GOLD_DESC = "Allows 50000 total tokens and 500 requests per minute";
+    public static final String DEFAULT_SUB_POLICY_AI_SILVER_DESC = "Allows 10000 total tokens and 100 requests per minute";
+    public static final String DEFAULT_SUB_POLICY_AI_BRONZE_DESC = "Allows 1000 total tokens and 10 requests per minute";
 
     public static final String DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN = "50KPerMin";
     public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
@@ -2020,6 +2076,8 @@ public final class APIConstants {
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
             "SSE", "ASYN" +
             "C"};
+    public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
+    public static final String API_SUBTYPE_AI_API = "AIAPI";
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
@@ -2074,6 +2132,7 @@ public final class APIConstants {
         public static final String TRUE = "true";
         public static final String ADD = "add";
         public static final String ENABLE_POLICY_DEPLOYMENT = "EnablePolicyDeployment";
+        public static final String ENABLE_POLICY_RECREATE = "EnablePolicyRecreationOnStartup";
     }
 
     /**
@@ -2514,7 +2573,7 @@ public final class APIConstants {
 
     public static final int MAX_LENGTH_API_NAME = 60;
     public static final int MAX_LENGTH_VERSION = 30;
-    public static final int MAX_LENGTH_PROVIDER = 50;
+    public static final int MAX_LENGTH_PROVIDER = 200;
     public static final int MAX_LENGTH_CONTEXT = 232; //context becomes context + version + two '/'. Max context is 200
     public static final int MAX_LENGTH_MEDIATION_POLICY_NAME = 255;
 
@@ -2722,6 +2781,13 @@ public final class APIConstants {
         public static final String PERMISSIONS = "permissions";
         public static final String ROLES = "roles";
         public static final String PERMISSION_TYPE = "permissionType";
+        public static final String ALL_KEY_MANAGERS = "ALL";
+        public static final String AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
+        public static final String IMPLICIT_GRANT_TYPE = "implicit";
+        public static final String PASSWORD_GRANT_TYPE = "password";
+        public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
+        public static final String APPLICATION_GRANT_TYPE = "application";
+        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
 
         public static class KeyManagerEvent {
 
@@ -2771,11 +2837,15 @@ public final class APIConstants {
         GA_CONFIG,
         KEY_TEMPLATE,
         CORRELATION_CONFIG,
-        GATEWAY_POLICY
+        GATEWAY_POLICY,
+        LLM_PROVIDER
     }
 
     // Supported Event Types
     public enum EventType {
+        LLM_PROVIDER_CREATE,
+        LLM_PROVIDER_UPDATE,
+        LLM_PROVIDER_DELETE,
         API_CREATE,
         API_UPDATE,
         API_DELETE,
@@ -2843,6 +2913,8 @@ public final class APIConstants {
         public static final String API_ID = "apiId";
         public static final String LABEL = "label";
         public static final String LABELS = "labels";
+        public static final String FILE_BASED_API_CONTEXTS = "FileBasedApiContexts";
+        public static final String FILE_BASED_API_CONTEXT = "FileBasedApiContext";
         public static final String EnableOnDemandLoadingAPIS = "EnableOnDemandLoadingAPIS";
 
     }
@@ -3185,4 +3257,10 @@ public final class APIConstants {
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM = "OrganizationNameLocalClaim";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM = "OrganizationIDLocalClaim";
     public static final String ORG_BASED_ACCESS_CONTROL_SELECTOR_CLAIM = "OrgaizationSelectorLocalClaim";
+
+    public static class TransactionCounter {
+
+        public static final String TRANSACTIONCOUNTER = "TransactionCounter";
+        public static final String COUNTER_ENABLED = "Enabled";
+    }
 }
