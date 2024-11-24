@@ -1828,7 +1828,7 @@ public class APIMgtDAOTest {
         String apiUUID = "7af95c9d-6177-4191-ab3e-d3f6c1cdc4c2";
         String revisionUUID = "821b9664-eeca-4173-9f56-3dc6d46bd6eb";
         String deployment = "default";
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         List<APIRevisionDeployment> apiRevisionDeployments = apiMgtDAO.getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(
                 apiUUID, workflowStatus);
         Assert.assertNotNull(apiRevisionDeployments);
