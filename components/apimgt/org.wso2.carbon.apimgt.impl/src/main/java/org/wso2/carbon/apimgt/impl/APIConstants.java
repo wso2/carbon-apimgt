@@ -1959,6 +1959,7 @@ public final class APIConstants {
     public static final String API_POLICY_API_LEVEL = "apiLevel";
 
     public static final String BILLING_PLAN_FREE = "FREE";
+    public static final String POLICY_RESET = "reset";
 
     public static final String BLOCKING_EVENT_TYPE = "wso2event";
     public static final String BLOCKING_EVENT_FORMAT = "wso2event";
@@ -2780,6 +2781,7 @@ public final class APIConstants {
         POLICY_CREATE,
         POLICY_UPDATE,
         POLICY_DELETE,
+        POLICY_RESET,
         SUBSCRIPTIONS_CREATE,
         SUBSCRIPTIONS_UPDATE,
         SUBSCRIPTIONS_DELETE,
