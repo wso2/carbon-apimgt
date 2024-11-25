@@ -1728,7 +1728,6 @@ public final class APIConstants {
     public static final String API_SPEC_TYPE = "api_type";
     public static final String API_SPEC_NAME = "api_name";
     public static final String TENANT_DOMAIN = "tenant_domain";
-    public static final String QUERY = "query";
     public static final String HISTORY = "history";
     public static final String VERSION = "version";
     public static final String DESCRIPTION = "description";
