@@ -117,7 +117,7 @@ public class OneTimeTokenRevocationMediatorTest {
      * KeyManagerDto is set to null
      */
     @Test
-    public void testMediateWithNullKeyManagerDto() {
+    public void testMediateWithNullKeyManagerDtoList() {
 
         Mockito.when(KeyManagerHolder.getKeyManagerByIssuer(Mockito.anyString(), Mockito.anyString())).
                 thenReturn(null);
