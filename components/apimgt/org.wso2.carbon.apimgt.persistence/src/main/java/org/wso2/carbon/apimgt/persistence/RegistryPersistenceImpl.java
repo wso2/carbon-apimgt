@@ -1168,7 +1168,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return result;
     }
     
-    private List<GovernanceArtifact> searchDevportalAPIs(String query, int tenantId, Registry reg, int start, int offset)
+    protected static List<GovernanceArtifact> searchDevportalAPIs(String query, int tenantId, Registry reg, int start, int offset)
             throws APIManagementException {
         List<GovernanceArtifact> artifacts = new ArrayList<GovernanceArtifact>();
         query = query.replace("PUBLISHED", "published").replace("PROTOTYPED", "prototyped").replace("DEPRECATED",
@@ -3165,7 +3165,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
     }
 
-    protected int getMaxPaginationLimit() {
+    protected static int getMaxPaginationLimit() {
 
         return Integer.MAX_VALUE;
     }
