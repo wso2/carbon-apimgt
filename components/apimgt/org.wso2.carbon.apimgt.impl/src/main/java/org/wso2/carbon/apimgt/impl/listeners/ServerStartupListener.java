@@ -74,7 +74,11 @@ public class ServerStartupListener implements ServerStartupObserver {
         } else {
             log.info("Running on migration enabled mode: Stopped at ServerStartupListener completed");
         }
-        CorrelationConfigManager.getInstance().initializeCorrelationComponentList();
+
+        Thread thread = new Thread(() -> {
+            CorrelationConfigManager.getInstance().initializeCorrelationComponentList();
+        });
+        thread.start();
     }
 
     /**

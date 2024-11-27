@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.InternalServiceCall;
 import org.wso2.carbon.apimgt.gateway.webhooks.WebhooksDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
@@ -66,6 +67,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 /**
@@ -80,6 +83,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private JMSTransportHandler jmsTransportHandlerForTrafficManager;
     private JMSTransportHandler jmsTransportHandlerForEventHub;
     private ThrottleProperties throttleProperties;
+    private ExecutorService service = Executors.newFixedThreadPool(3, new InternalServiceCall());
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
     private boolean isAPIsDeployedInSyncMode = false;
     private boolean isGatewayPoliciesDeployedInSyncMode = false;
@@ -192,11 +196,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 }
             }).start();
             SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            try {
-                retrieveAllAPIMetadata();
-            } catch (DataLoadingException e) {
-                log.error("Error while loading All API Metadata", e);
-            }
+            service.execute(() -> {
+                try {
+                    retrieveAllAPIMetadata();
+                } catch (DataLoadingException e) {
+                    log.error("Error while loading All API Metadata", e);
+                }
+            });
             if (GatewayUtils.isOnDemandLoading()) {
                 try {
                     new EndpointCertificateDeployer().deployAllCertificatesAtStartup();
@@ -222,9 +228,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA,
                     new GatewayJMSMessageListener());
             copyTenantArtifacts();
-            APILoggerManager.getInstance().initializeAPILoggerList();
-            LLMProviderManager.getInstance().initializeLLMProviderConfigurations(
-                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            service.execute(() -> {
+                APILoggerManager.getInstance().initializeAPILoggerList();
+            });
+            service.execute(() -> {
+                LLMProviderManager.getInstance()
+                        .initializeLLMProviderConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            });
         } else {
             log.info("Running on migration enabled mode: Stopped at Gateway Startup listener completed");
         }
