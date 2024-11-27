@@ -124,12 +124,18 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     // APIM related codes
     INVALID_APIM_CREDENTIALS(701001, "Invalid credentials", 500, "Invalid APIM admin credentials", true),
     ERROR_WHILE_GETTING_APIM_PROJECT(701002, "Error while getting APIM project.", 500, "Error while getting APIM project for endpoint: %s in the organization: %s", true),
-    API_DEFINITION_NOT_FOUND(701003, "API definition not found.", 404, "API definition not found for endpoint: %s in the organization: %s"),
+    API_DEFINITION_NOT_FOUND(701003, "API definition not found.", 404, "API definition not found for api: %s in the " +
+            "organization: %s"),
     API_DETAILS_NOT_FOUND(701004, "API details not found.", 404, "API details not found for endpoint: %s in the organization: %s"),
-    ERROR_WHILE_EXTRACTING_SWAGGER_CONTENT(701005, "Error while extracting swagger content.", 500, "Error while extracting swagger content from zip for the endpoint : %s", true),
+    ERROR_WHILE_EXTRACTING_SWAGGER_CONTENT(701005, "Error while extracting swagger content.", 500, "Error while " +
+            "extracting swagger content from zip for the api : %s", true),
     ERROR_WHILE_EXTRACTING_API_DETAILS(701006, "Error while extracting api details.", 500, "Error while extracting api details from zip for the endpoint: %s", true),
     ERROR_WHILE_GETTING_API_LIST(701007, "Error while getting API list.", 500, "Error while getting API list in the " +
-            "organization: %s", true);
+            "organization: %s", true),
+    ENDPOINT_NOT_FOUND_IN_APIM(701008, "Endpoint not found.", 404, "Endpoint can not be found on APIM",
+            true),
+    INTERNAL_SERVER_ERROR_FROM_APIM(701009, "Internal server error occurred.", 500,
+            "An internal server error occurred while fetching from APIM", true);
 
     private final long errorCode;
     private final String errorMessage;

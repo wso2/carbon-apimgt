@@ -23,8 +23,27 @@ import java.io.File;
 public class GovernanceConstants {
 
     public static final String YAML_FILE_TYPE = ".yaml";
+    public static final String YAML = "YAML";
     public static final String MIGRATE = "migrate";
+
+    public static final String DEFINITIONS_FOLDER = "Definitions/";
+    public static final String SWAGGER_FILE_NAME = "swagger.yaml";
+    public static final String API_FILE_NAME = "api.yaml";
 
     public static final String DEFAULT_RULESET_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "governance" + File.separator + "rulesets";
+
+    public static class APIMConfigurations {
+        public static final String APIM_ENDPOINT_URL = "EndpointUrl";
+        public static final String APIM_CLIENT_WORKER_COUNT = "WorkerCount";
+        public static final String APIM_CLIENT_MAX_RETRIES = "MaxRetries";
+        public static final String APIM_CLIENT_RETRY_DELAY = "RetryDelay";
+
+        public static final Integer APIM_DEFAULT_CLIENT_WORKER_COUNT = 5;
+        public static final Integer APIM_DEFAULT_CLIENT_MAX_RETRIES = 2;
+        public static final Integer APIM_DEFAULT_CLIENT_RETRY_DELAY = 500;
+
+
+    }
+
 }

@@ -1,3 +1,22 @@
+
+/*
+ * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
@@ -11,7 +30,6 @@ import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyInfoWithRulesetIdsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
@@ -145,7 +163,7 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
                 fromGovernancePolicyInfoToGovernancePolicyInfoDTO(updatedPolicyInfo);
 
         //TODO: Access Compliance of existing components
-
+        
         return Response.status(Response.Status.OK).entity(updatedPolicyInfoDTO).build();
     }
 }

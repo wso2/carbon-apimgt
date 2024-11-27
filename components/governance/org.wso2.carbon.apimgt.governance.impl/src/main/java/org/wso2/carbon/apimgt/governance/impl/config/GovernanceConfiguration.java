@@ -26,11 +26,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.config.dto.APIMConfigurationDTO;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +56,7 @@ public class GovernanceConfiguration {
     private final Map<String, List<String>> configuration = new ConcurrentHashMap<>();
     private SecretResolver secretResolver;
     private boolean initialized;
+    private APIMConfigurationDTO apimConfigurationDTO;
 
 
     /**
@@ -75,24 +79,31 @@ public class GovernanceConfiguration {
             readChildElements(builder.getDocumentElement(), new Stack<String>());
             initialized = true;
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(e);
             throw new GovernanceException("I/O error while reading the Governance " +
                     "configuration: " + filePath, e);
         } catch (XMLStreamException e) {
-            log.error(e.getMessage());
+            log.error(e);
             throw new GovernanceException("Error while parsing the Governance " +
                     "configuration: " + filePath, e);
         } catch (OMException e) {
-            log.error(e.getMessage());
+            log.error(e);
             throw new GovernanceException("Error while parsing Governance configuration: " + filePath, e);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e);
             throw new GovernanceException("Unexpected error occurred while parsing configuration: " + filePath, e);
         } finally {
             IOUtils.closeQuietly(in);
         }
     }
 
+    /**
+     * Read the child elements of the given OMElement and populate the configuration.
+     *
+     * @param serverConfig OMElement
+     * @param nameStack    Stack<String>
+     * @throws GovernanceException If an error occurs while reading the child elements
+     */
     private void readChildElements(OMElement serverConfig,
                                    Stack<String> nameStack) throws GovernanceException {
 
@@ -106,10 +117,62 @@ public class GovernanceConfiguration {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
                 addToConfiguration(key, GovernanceUtil.replaceSystemProperty(value));
+            } else if ("APIMConfiguration".equals(localName)) {
+                setAPIMConfig(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
         }
+    }
+
+    /**
+     * Set API Manager configurations to connect to APIM from Governance Service
+     *
+     * @param omElement OMElement
+     */
+    private void setAPIMConfig(OMElement omElement) {
+        OMElement apimEpUrlElement = omElement
+                .getFirstChildWithName(new QName(GovernanceConstants.APIMConfigurations
+                        .APIM_ENDPOINT_URL));
+        OMElement apimClientWorkerCountElement = omElement
+                .getFirstChildWithName(new QName(GovernanceConstants.APIMConfigurations
+                        .APIM_CLIENT_WORKER_COUNT));
+        OMElement apimClientMaxRetriesElement = omElement
+                .getFirstChildWithName(new QName(GovernanceConstants.APIMConfigurations
+                        .APIM_CLIENT_MAX_RETRIES));
+        OMElement apimClientRetryDelayElement = omElement
+                .getFirstChildWithName(new QName(GovernanceConstants.APIMConfigurations
+                        .APIM_CLIENT_RETRY_DELAY));
+        apimConfigurationDTO = new APIMConfigurationDTO();
+        if (apimEpUrlElement != null) {
+            apimConfigurationDTO.setEndPointUrl(apimEpUrlElement.getText());
+        } else if (log.isDebugEnabled()) {
+            log.debug("APIM endpoint URL not assigned.");
+        }
+        if (apimClientWorkerCountElement != null) {
+            apimConfigurationDTO.setWorkerCount(Integer.parseInt(apimClientWorkerCountElement.getText()));
+        } else if (log.isDebugEnabled()) {
+            log.debug("APIM Client Worker count not assigned.");
+        }
+        if (apimClientMaxRetriesElement != null) {
+            apimConfigurationDTO.setMaxRetries(Integer.parseInt(apimClientMaxRetriesElement.getText()));
+        } else if (log.isDebugEnabled()) {
+            log.debug("APIM Client max retries not assigned.");
+        }
+        if (apimClientRetryDelayElement != null) {
+            apimConfigurationDTO.setRetryInterval(Integer.parseInt(apimClientRetryDelayElement.getText()));
+        } else if (log.isDebugEnabled()) {
+            log.debug("APIM Client retry delay not assigned.");
+        }
+    }
+
+    /**
+     * Get the APIM configuration.
+     *
+     * @return APIMConfigurationDTO
+     */
+    public APIMConfigurationDTO getAPIMConfiguration() {
+        return apimConfigurationDTO;
     }
 
     private boolean elementHasText(OMElement element) {

@@ -42,8 +42,6 @@ tags:
     description: API for accessing adherence details.
   - name: Organization Level Dashboard
     description: API for organization level dashboard.
-  - name: Project Level Dashboard
-    description: API for project level dashboard.
   - name: Component Level Dashboard
     description: API for component level dashboard.
   - name: Health Check
@@ -610,6 +608,115 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
+  /assess-compliance/api/{apiId}:
+    post:
+      summary: Assesses governance policy compliance for a specific api.
+      description: Initiates a compliance assessment for the specified api within the user's organization.
+      operationId: assessAPICompliance
+      tags:
+        - Compliance Assessment
+        - Internal
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          description: UUID of the api.
+          schema:
+            type: string
+        - name: organization
+          in: query
+          required: true
+          description: Name of the organization.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Labels associated with the api.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessAPIComplianceRequest'
+      responses:
+        "202":
+          description: Accepted. Assessment initiated successfully.
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_compliance_manage
+    delete:
+      summary: Delete a specific api.
+      description: Delete a specified api within the user's organization.
+      operationId: deleteAPI
+      tags:
+        - Compliance Assessment
+        - Internal
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          description: UUID of the api.
+          schema:
+            type: string
+        - name: organization
+          in: query
+          required: true
+          description: Name of the organization.
+          schema:
+            type: string
+      responses:
+        "204":
+          description: OK. API deleted successfully.
+        "400":
+          description: Client error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_compliance_manage
+
 components:
   schemas:
     RulesetList:
@@ -918,6 +1025,17 @@ components:
           description: List of governance policies.
           items:
             $ref: '#/components/schemas/GovernancePolicyInfo'
+    AssessAPIComplianceRequest:
+      type: object
+      description: Request object for assessing compliance of an api.
+      properties:
+        labels:
+          type: array
+          description: Labels associated with the api.
+          items:
+            type: string
+          example:
+            - "security"
   #####
   # TODO: Fix scope validation logic. Currently scope validation is broken due to logic in apimgt.rest.api.common.RestAPICommonUtil
   #####
@@ -933,4 +1051,4 @@ components:
             apim:gov_rule_manage: Manage governance rulesets
             apim:gov_policy_read: Read governance policies
             apim:gov_policy_manage: Manage governance policies
-            apim:gov_validate: Validate governance rulesets and policies
+            apim:gov_compliance_manage: Manage governance compliance tasks

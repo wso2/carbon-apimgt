@@ -33,6 +33,7 @@
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.HealthzApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.RulesetsApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.governance.rest.api.AssessComplianceApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

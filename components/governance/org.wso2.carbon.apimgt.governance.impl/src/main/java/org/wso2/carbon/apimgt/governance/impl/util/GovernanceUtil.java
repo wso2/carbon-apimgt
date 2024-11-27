@@ -20,9 +20,13 @@ package org.wso2.carbon.apimgt.governance.impl.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import feign.Response;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.manager.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -32,20 +36,27 @@ import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * This class contains utility methods for Governance
  */
 public class GovernanceUtil {
     private static final Log log = LogFactory.getLog(GovernanceUtil.class);
+
 
     /**
      * Generates a UUID
@@ -169,5 +180,99 @@ public class GovernanceUtil {
         return ruleset;
     }
 
+    /**
+     * Get response bytes if present
+     *
+     * @param response Response
+     * @return byte[]
+     */
+    public static byte[] getResponseBytesIfPresent(Response response) {
+        byte[] responseBytes = new byte[0];
+        try {
+            if (response.body() != null) {
+                return IOUtils.toByteArray(response.body().asInputStream());
+            }
+        } catch (IOException e) {
+            //Log and continue. Response is read only for logging purposes. We don't need to break the flow.
+            log.error("Error while reading response from dependent component", e);
+        }
+        return responseBytes;
+    }
+
+    /**
+     * Get encoded log
+     *
+     * @param requestBody    Request body
+     * @param requestMethod  Request method
+     * @param requestUrl     Request URL
+     * @param responseStatus Response status
+     * @param responseBody   Response body
+     * @param traceId        Trace ID
+     * @return Encoded log
+     */
+    public static String getEncodedLog(byte[] requestBody, String requestMethod, String requestUrl,
+                                       int responseStatus, byte[] responseBody, String traceId) {
+        String requestStrBase64 = "<empty>";
+        String responseStrBase64 = "<empty>";
+        if (requestBody != null && requestBody.length != 0) {
+            requestStrBase64 = new String(Base64.encodeBase64(requestBody));
+        }
+        if (responseBody != null && responseBody.length != 0) {
+            responseStrBase64 = new String(Base64.encodeBase64(responseBody));
+        }
+        return "{" +
+                "\"status\": \"" + responseStatus + "\", " +
+                "\"responseBody\": \"" + responseStrBase64 + "\", " +
+                "\"requestUrl\": \"" + requestMethod + " " + requestUrl + "\", " +
+                "\"requestBody\": \"" + requestStrBase64 + "\", " +
+                "\"traceId\": \"" + traceId + "\"" +
+                "}";
+    }
+
+    /**
+     * Get Swagger file from zip
+     *
+     * @param zipContent Zip content
+     * @param apiId      api ID
+     * @return Swagger file content
+     * @throws GovernanceException if an error occurs while extracting swagger content
+     */
+    public static String getSwaggerFileFromZip(byte[] zipContent, String apiId) throws GovernanceException {
+        String swaggerContent = null;
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(zipContent))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER
+                        + GovernanceConstants.SWAGGER_FILE_NAME)) {
+                    // Read all bytes from the ZipInputStream
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = zipInputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                    // Convert the byte array to string
+                    swaggerContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                    return swaggerContent;
+                }
+            }
+        } catch (IOException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.
+                    ERROR_WHILE_EXTRACTING_SWAGGER_CONTENT, apiId);
+        }
+        return null;
+    }
+
+    /**
+     * Get byte array from input stream
+     *
+     * @param is InputStream
+     * @return byte[]
+     * @throws IOException if an error occurs while converting input stream to byte array
+     */
+    public static byte[] toByteArray(InputStream is) throws IOException {
+
+        return IOUtils.toByteArray(is);
+    }
 }
 

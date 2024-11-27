@@ -102,4 +102,18 @@ public class SQLConstants {
 
     public static final String GET_POLICIES_FOR_RULESET = "SELECT POLICY_ID FROM GOV_POLICY_RULESET_MAPPING WHERE " +
             "RULESET_ID = ?";
+
+    public static final String GET_RULESETS_BY_POLICY_ID = "SELECT ruleset.RULESET_ID, ruleset.RULESET_CONTENT, " +
+            "policyRulesetMapping.POLICY_ID " +
+            "FROM GOV_RULESET ruleset JOIN GOV_POLICY_RULESET_MAPPING policyRulesetMapping " +
+            "ON ruleset.RULESET_ID = policyRulesetMapping.RULESET_ID " +
+            "WHERE policyRulesetMapping.POLICY_ID = ?";
+
+    public static final String GET_RULESETS_BY_POLICY = "SELECT DISTINCT ruleset.RULESET_ID, " +
+            "ruleset.RULESET_CONTENT, policy.POLICY_ID " +
+            "FROM GOV_POLICY policy LEFT JOIN GOV_POLICY_RULESET_MAPPING policyRulesetMapping " +
+            "ON policy.POLICY_ID = policyRulesetMapping.POLICY_ID " +
+            "LEFT JOIN GOV_RULESET ruleset ON policyRulesetMapping.RULESET_ID = ruleset.RULESET_ID " +
+            "WHERE ruleset.RULESET_CONTENT IS NOT NULL AND policy.ORGANIZATION = ?";
+
 }

@@ -39,7 +39,6 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +48,6 @@ import java.util.stream.Collectors;
  */
 public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
 
-    private static final Log log = LogFactory.getLog(GovernancePolicyMgtDAOImpl.class);
     private static GovernancePolicyMgtDAO INSTANCE = null;
 
     private GovernancePolicyMgtDAOImpl() {
