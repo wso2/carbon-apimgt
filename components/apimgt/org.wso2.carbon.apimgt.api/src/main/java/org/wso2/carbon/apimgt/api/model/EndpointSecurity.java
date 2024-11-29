@@ -56,6 +56,8 @@ public class EndpointSecurity {
 
     private int socketTimeoutDuration = -1;
 
+    private ProxyConfigs proxyConfigs;
+
     public EndpointSecurity(EndpointSecurity endpointSecurity) {
 
         this.uniqueIdentifier = endpointSecurity.uniqueIdentifier;
@@ -72,10 +74,18 @@ public class EndpointSecurity {
         this.connectionTimeoutDuration = endpointSecurity.connectionTimeoutDuration;
         this.connectionRequestTimeoutDuration = endpointSecurity.connectionRequestTimeoutDuration;
         this.socketTimeoutDuration = endpointSecurity.socketTimeoutDuration;
+        this.proxyConfigs = endpointSecurity.proxyConfigs;
     }
 
     public EndpointSecurity() {
 
+    }
+    public ProxyConfigs getProxyConfigs() {
+        return proxyConfigs;
+    }
+
+    public void setProxyConfigs(ProxyConfigs proxyConfigs) {
+        this.proxyConfigs = proxyConfigs;
     }
 
     public String getUniqueIdentifier() {
@@ -239,6 +249,63 @@ public class EndpointSecurity {
 
     public void setSocketTimeoutDuration(int socketTimeoutDuration) {
         this.socketTimeoutDuration = socketTimeoutDuration;
+    }
+
+    public static class ProxyConfigs {
+        private boolean proxyEnabled;
+        private String proxyHost;
+        private String proxyPort;
+        private String proxyProtocol;
+        private String proxyUsername;
+        private String proxyPassword;
+
+        public boolean isProxyEnabled() {
+            return proxyEnabled;
+        }
+
+        public void setProxyEnabled(boolean proxyEnabled) {
+            this.proxyEnabled = proxyEnabled;
+        }
+
+        public String getProxyHost() {
+            return proxyHost;
+        }
+
+        public void setProxyHost(String proxyHost) {
+            this.proxyHost = proxyHost;
+        }
+
+        public String getProxyPort() {
+            return proxyPort;
+        }
+
+        public void setProxyPort(String proxyPort) {
+            this.proxyPort = proxyPort;
+        }
+
+        public String getProxyProtocol() {
+            return proxyProtocol;
+        }
+
+        public void setProxyProtocol(String proxyProtocol) {
+            this.proxyProtocol = proxyProtocol;
+        }
+
+        public String getProxyUsername() {
+            return proxyUsername;
+        }
+
+        public void setProxyUsername(String proxyUsername) {
+            this.proxyUsername = proxyUsername;
+        }
+
+        public String getProxyPassword() {
+            return proxyPassword;
+        }
+
+        public void setProxyPassword(String proxyPassword) {
+            this.proxyPassword = proxyPassword;
+        }
     }
 
     @Override
