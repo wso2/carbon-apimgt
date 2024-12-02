@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.constants.HealthCheckConstants;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -62,7 +63,10 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
             }
         }
 
-        if (isJWKSEndpoint) {
+        boolean isJWKSApiEnabled =  ServiceReferenceHolder
+                .getInstance().getAPIManagerConfiguration().getJwtConfigurationDto().isJWKSApiEnabled();
+
+        if (isJWKSEndpoint && isJWKSApiEnabled) {
             try {
                 InMemoryAPIDeployer.deployJWKSSynapseAPI(tenantDomain);
             } catch(APIManagementException e){
