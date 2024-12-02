@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SearchApiService;
@@ -55,9 +56,12 @@ public class SearchApiServiceImpl implements SearchApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "*" : query;
-        String organization = RestApiUtil.getOrganization(messageContext);
 
         try {
+            String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            orgInfo.setSuperOrganization(superOrganization);
+
             if (!query.contains(":")) {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
@@ -66,11 +70,11 @@ public class SearchApiServiceImpl implements SearchApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             Map<String, Object> result = null;
             // Extracting search queries for the recommendation system
-            apiConsumer.publishSearchQuery(query, username, organization);
+            apiConsumer.publishSearchQuery(query, username, superOrganization);
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = apiConsumer.searchPaginatedContent(query, organization, offset, limit);
+                result = apiConsumer.searchPaginatedContent(query, orgInfo, offset, limit);
             } else {
-                result = apiConsumer.searchPaginatedAPIs(query, organization, offset, limit, null, null);
+                result = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset, limit, null, null);
             }
 
             ArrayList<Object> apis;

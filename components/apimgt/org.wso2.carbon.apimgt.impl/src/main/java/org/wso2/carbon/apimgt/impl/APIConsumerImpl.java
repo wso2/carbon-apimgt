@@ -4192,6 +4192,31 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public Map<String, Object> searchPaginatedContent(String searchQuery, String organization, int start, int end)
             throws APIManagementException {
 
+        String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+        Organization org = new Organization(organization);
+        Map<String, Object> properties = APIUtil.getUserProperties(userame);
+        String[] roles = APIUtil.getFilteredUserRoles(userame);
+        ;
+        UserContext ctx = new UserContext(userame, org, properties, roles);
+        return  searchPaginatedContent(org, searchQuery, start, end, ctx);
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedContent(String searchQuery, OrganizationInfo organizationInfo,
+                                                      int start, int end) throws APIManagementException {
+
+        String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+        Organization org = new Organization(organizationInfo.getSuperOrganization());
+        Map<String, Object> properties = APIUtil.getUserProperties(userName);
+        String[] roles = APIUtil.getFilteredUserRoles(userName);
+
+        UserContext ctx = new UserContext(userName, new Organization(organizationInfo.getOrganizationSelector()),
+                properties, roles);
+        return  searchPaginatedContent(org, searchQuery, start, end, ctx);
+    }
+
+    private Map<String, Object> searchPaginatedContent(Organization org, String searchQuery, int start, int end,
+                                                       UserContext ctx) throws APIManagementException {
         ArrayList<Object> compoundResult = new ArrayList<Object>();
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
         Map<String, Object> result = new HashMap<String, Object>();
@@ -4199,13 +4224,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
         List<APIDefinitionContentSearchResult> defSearchList = new ArrayList<>();
         int totalLength = 0;
-
-        String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-        Organization org = new Organization(organization);
-        Map<String, Object> properties = APIUtil.getUserProperties(userame);
-        String[] roles = APIUtil.getFilteredUserRoles(userame);
-        ;
-        UserContext ctx = new UserContext(userame, org, properties, roles);
 
         try {
             DevPortalContentSearchResult sResults = apiPersistenceInstance.searchContentForDevPortal(org, searchQuery,
