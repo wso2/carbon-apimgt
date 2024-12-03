@@ -34,9 +34,18 @@ public class SubscriptionPolicy extends Policy {
     private String tierQuotaType;
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
+    private String usageMetric;
 
     public SubscriptionPolicy(String name) {
         super(name);
+    }
+
+    public String getUsageMetric() {
+        return usageMetric;
+    }
+
+    public void setUsageMetric(String usageMetric) {
+        this.usageMetric = usageMetric;
     }
 
     public int getRateLimitCount() {
@@ -121,12 +130,20 @@ public class SubscriptionPolicy extends Policy {
 
     @Override
     public String toString() {
-        return "SubscriptionPolicy [rateLimitCount=" + rateLimitCount + ", rateLimitTimeUnit=" + rateLimitTimeUnit
-                + ", customAttributes=" + Arrays.toString(customAttributes) + ", stopOnQuotaReach=" + stopOnQuotaReach
-                + ", billingPlan=" + billingPlan + ", monetizationPlan=" + monetizationPlan
-                + ", monetizationPlanProperties=" + monetizationPlanProperties + ", tierQuotaType=" + tierQuotaType
-                + ", maxDepth=" + graphQLMaxDepth + ", maxComplexity=" + graphQLMaxComplexity
-                + ", subscriberCount= " + subscriberCount + "]";
+        return "SubscriptionPolicy{" +
+                "rateLimitCount=" + rateLimitCount +
+                ", rateLimitTimeUnit='" + rateLimitTimeUnit + '\'' +
+                ", subscriberCount=" + subscriberCount +
+                ", customAttributes=" + Arrays.toString(customAttributes) +
+                ", stopOnQuotaReach=" + stopOnQuotaReach +
+                ", billingPlan='" + billingPlan + '\'' +
+                ", monetizationPlan='" + monetizationPlan + '\'' +
+                ", monetizationPlanProperties=" + monetizationPlanProperties +
+                ", tierQuotaType='" + tierQuotaType + '\'' +
+                ", graphQLMaxDepth=" + graphQLMaxDepth +
+                ", graphQLMaxComplexity=" + graphQLMaxComplexity +
+                ", usageMetric='" + usageMetric + '\'' +
+                '}';
     }
 
     public int getSubscriberCount() {
