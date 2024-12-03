@@ -141,6 +141,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, api.getBusinessOwnerEmail());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBILITY, api.getVisibility());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES, api.getVisibleRoles());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS, api.getVisibleOrganizations());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS, api.getVisibleTenants());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED,
                                             Boolean.toString(api.isEndpointSecured()));
@@ -997,9 +998,9 @@ public class RegistryPersistenceUtil {
      * @param artifactPath API resource path
      * @throws APIManagementException Throwing exception
      */
-    public static void setResourcePermissions(String username, String visibility, String[] roles, String artifactPath)
-                                    throws APIManagementException {
-        setResourcePermissions(username, visibility, roles, artifactPath, null);
+    public static void setResourcePermissions(String username, String visibility, String[] roles, String artifactPath,
+                                              String visibleOrganizations) throws APIManagementException {
+        setResourcePermissions(username, visibility, roles, artifactPath, null, visibleOrganizations);
     }
 
     /**
@@ -1012,7 +1013,7 @@ public class RegistryPersistenceUtil {
      * @throws APIManagementException Throwing exception
      */
     public static void setResourcePermissions(String username, String visibility, String[] roles, String artifactPath,
-                                    Registry registry) throws APIManagementException {
+                                    Registry registry, String visibleOrganizations) throws APIManagementException {
 
         try {
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
@@ -1042,6 +1043,9 @@ public class RegistryPersistenceUtil {
                     // store_view_role property.
                 } else {
                     registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, publisherAccessRoles.toString());
+                }
+                if (!StringUtils.isEmpty(visibleOrganizations) && visibleOrganizations.contains(" ")) {
+                    visibleOrganizations = visibleOrganizations.replace(" ", "+");
                 }
             }
             String tenantDomain = MultitenantUtils.getTenantDomain(PersistenceUtil.replaceEmailDomainBack(username));
@@ -1138,6 +1142,7 @@ public class RegistryPersistenceUtil {
             }
             if (registryResource != null) {
                 registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, publisherAccessRoles.toString());
+                registryResource.setProperty(APIConstants.VISIBLE_ORGANIZATIONS, visibleOrganizations);
                 registry.put(artifactPath, registryResource);
             }
 
