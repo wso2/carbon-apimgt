@@ -36,7 +36,8 @@
     <JWTConfiguration>
         <!-- Enable/Disable JWT generation. Default is false. -->
         <EnableJWTGeneration>{{apim.jwt.enable}}</EnableJWTGeneration>
-
+        <!-- Enable/Disable JWKS in memory API deployment. Default is true. -->
+        <EnableJWKSApi>{{apim.jwt.enable_jwks_api}}</EnableJWKSApi>
         <!-- Name of the security context header to be added to the validated requests. -->
         <JWTHeader>{{apim.jwt.header}}</JWTHeader>
 
