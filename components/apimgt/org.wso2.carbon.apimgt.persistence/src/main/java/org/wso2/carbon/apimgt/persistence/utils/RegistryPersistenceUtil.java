@@ -1946,6 +1946,9 @@ public class RegistryPersistenceUtil {
                 case "tags":
                     outputMap.put("tags", value);
                     break;
+                case "apiCategories_categoryName":
+                    outputMap.put("apiCategories_categoryName", value.toLowerCase());
+                    break;
                 default:
                     // Add any other cases if needed
                     outputMap.put("overview_" + key, value);
