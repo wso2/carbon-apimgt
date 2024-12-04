@@ -567,10 +567,14 @@ public class RegistrySearchUtil {
                 }
             }
 
-            String apiOverviewStateCriteria = APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY;
-            apiOverviewStateCriteria = apiOverviewStateCriteria + getORBasedSearchCriteria(statusList);
+            if (!modifiedQuery.startsWith(APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY) && !modifiedQuery
+                    .contains(APIConstants.SEARCH_AND_TAG + APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY)) {
 
-            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + apiOverviewStateCriteria;
+                String apiOverviewStateCriteria = APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY;
+                apiOverviewStateCriteria = apiOverviewStateCriteria + getORBasedSearchCriteria(statusList);
+
+                modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + apiOverviewStateCriteria;
+            }
         }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery, true), ctx);
         return modifiedQuery;
