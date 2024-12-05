@@ -65,6 +65,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String visibleRoles;
     private String gatewayVendor;
     private String asyncTransportProtocols;
+    private String publisherAccessControl;
+    private String publisherAccessControlRoles;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -390,7 +392,23 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     public void setVisibility(String visibility) {
         this.visibility = visibility;
     }
-    
+
+    public String getPublisherAccessControl() {
+        return publisherAccessControl;
+    }
+
+    public void setPublisherAccessControl(String publisherAccessControl) {
+        this.publisherAccessControl = publisherAccessControl;
+    }
+
+    public String getPublisherAccessControlRoles() {
+        return publisherAccessControlRoles;
+    }
+
+    public void setPublisherAccessControlRoles(String publisherAccessControlRoles) {
+        this.publisherAccessControlRoles = publisherAccessControlRoles;
+    }
+
 
     /*
     private String accessControl; //publisher accessControl : 'restricted', 'all' // this won't be required
