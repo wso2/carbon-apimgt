@@ -22,6 +22,7 @@
   "apim.gateway_type": "Regular",
   "apim.enable_secure_vault": "false",
   "apim.jwt.enable": false,
+  "apim.jwt.enable_jwks_api": true,
   "apim.jwt.header": "X-JWT-Assertion",
   "apim.jwt.claim_dialect": "http://wso2.org/claims",
   "apim.jwt.convert_dialect": false,
