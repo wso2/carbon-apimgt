@@ -55,6 +55,9 @@ public class Environment implements Serializable {
     private String gatewayType;
     private Map<String, String> additionalProperties = new HashMap<>();
 
+    private String[] visibilityRoles;
+    private String visibility;
+
     public boolean isDefault() {
         return isDefault;
     }
@@ -157,6 +160,37 @@ public class Environment implements Serializable {
         if (StringUtils.isEmpty(this.displayName)) {
             this.displayName = name;
         }
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+
+    public String[] getVisibilityRoles() {
+        if (visibilityRoles != null) {
+            return visibilityRoles;
+        } else if (visibility != null) {
+            return visibility.split(",");
+        }
+        return null;
+    }
+
+    public void setVisibility(String[] visibilityRoles) {
+        if (visibilityRoles != null && !"".equals(visibilityRoles[0].trim())) {
+            StringBuilder builder = new StringBuilder();
+            for (String role : visibilityRoles) {
+                builder.append(role).append(',');
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            this.visibility = builder.toString();
+        } else {
+            this.visibility = "all";
+        }
+        this.visibilityRoles = visibilityRoles;
     }
 
     public String getDisplayName() {

@@ -5600,13 +5600,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
-                /// populate relavant external info
-                // environment
-                String environmentString = null;
+                // populate relevant external info environment
+                List<Environment> environments = null;
                 if (api.getEnvironments() != null) {
-                    environmentString = String.join(",", api.getEnvironments());
+                    environments = APIUtil.getEnvironmentsOfAPI(api);
                 }
-                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments, organization, userNameWithoutChange));
                 //CORS . if null is returned, set default config from the configuration
                 if (api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());

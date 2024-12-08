@@ -1207,11 +1207,11 @@ public abstract class AbstractAPIManager implements APIManager {
         Organization org = new Organization(organization);
         api.setOrganization(organization);
         // environment
-        String environmentString = null;
+        List<Environment> environments = null;
         if (api.getEnvironments() != null) {
-            environmentString = String.join(",", api.getEnvironments());
+            environments = APIUtil.getEnvironmentsOfAPI(api);
         }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments, organization, username));
         // workflow status
         APIIdentifier apiId = api.getId();
         WorkflowDTO workflow;
@@ -1382,11 +1382,11 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         api.setOrganization(organization);
         // environment
-        String environmentString = null;
+        List<Environment> environments = null;
         if (api.getEnvironments() != null) {
-            environmentString = String.join(",", api.getEnvironments());
+            environments = APIUtil.getEnvironmentsOfAPI(api);
         }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments, organization, username));
         // workflow status
         APIIdentifier apiId = api.getId();
         String currentApiUuid = uuid;

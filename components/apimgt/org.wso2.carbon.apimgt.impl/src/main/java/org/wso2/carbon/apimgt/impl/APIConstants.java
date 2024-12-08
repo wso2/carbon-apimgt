@@ -758,6 +758,7 @@ public final class APIConstants {
     public static final String API_GATEWAY = "APIGateway.";
     public static final String API_GATEWAY_NAME = "Name";
     public static final String API_GATEWAY_DISPLAY_NAME = "DisplayName";
+    public static final String API_GATEWAY_VISIBILITY = "Visibility";
     public static final String API_GATEWAY_SERVER_URL = "ServerURL";
     public static final String API_GATEWAY_USERNAME = "Username";
     public static final String API_GATEWAY_PASSWORD = "Password";

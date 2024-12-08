@@ -5031,25 +5031,110 @@ public final class APIUtil {
         return environmentStringSet;
     }
 
+    public static Set<String> extractVisibleEnvironmentsForUser(List<Environment> environments, String organization, String userName) throws APIManagementException {
+
+        Set<String> environmentStringSet = new HashSet<String>();
+        String[] userRoles = APIUtil.getListOfRoles(userName);
+        if (environments != null) {
+            for (Environment environment : environments) {
+                String[] permittedRoles = environment.getVisibilityRoles();
+                if (permittedRoles[0].equals("all")) {
+                    environmentStringSet.add(environment.toString());
+                } else {
+                    for (String role : userRoles) {
+                        for (String permission : permittedRoles) {
+                            if (role.equals(permission)) {
+                                environmentStringSet.add(environment.toString());
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            Map<String, Environment> environmentsMap = getEnvironments(organization);
+            for (Environment environment : environmentsMap.values()) {
+                String[] permittedRoles = environment.getVisibilityRoles();
+                if (permittedRoles[0].equals("all")) {
+                    environmentStringSet.add(environment.toString());
+                } else {
+                    for (String role : userRoles) {
+                        for (String permission : permittedRoles) {
+                            if (role.equals(permission)) {
+                                environmentStringSet.add(environment.toString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return environmentStringSet;
+    }
+
+    public static Map<String, Environment> extractVisibleEnvironmentsForUser(String organization, String userName) throws APIManagementException {
+
+        Map<String, Environment> returnEnvironments = new LinkedHashMap<>();
+        String[] userRoles = APIUtil.getListOfRoles(userName);
+        Map<String, Environment> environmentsMap = getEnvironments(organization);
+        for (Environment environment : environmentsMap.values()) {
+            String[] permittedRoles = environment.getVisibilityRoles();
+            if (permittedRoles[0].equals("all")) {
+                returnEnvironments.put(environment.getName(), environment);
+            } else {
+                for (String role : userRoles) {
+                    for (String permission : permittedRoles) {
+                        if (role.equals(permission)) {
+                            returnEnvironments.put(environment.getName(), environment);
+                        }
+                    }
+                }
+            }
+        }
+        return returnEnvironments;
+    }
+
     public static Set<String> extractEnvironmentsForAPI(String environments, String organization) throws APIManagementException {
 
         Set<String> environmentStringSet = null;
         if (environments == null) {
             environmentStringSet = new HashSet<>(getEnvironments(organization).keySet());
         } else {
-            //handle not to publish to any of the gateways
+            // Handle not to publish to any of the gateways
             if (APIConstants.API_GATEWAY_NONE.equals(environments)) {
                 environmentStringSet = new HashSet<String>();
             }
-            //handle to set published gateways nto api object
+            // Handle to set published gateways into api object
             else if (!"".equals(environments)) {
                 String[] publishEnvironmentArray = environments.split(",");
                 environmentStringSet = new HashSet<String>(Arrays.asList(publishEnvironmentArray));
                 environmentStringSet.remove(APIConstants.API_GATEWAY_NONE);
             }
-            //handle to publish to any of the gateways when api creating stage
+            // Handle to publish to any of the gateways when api creating stage
             else if ("".equals(environments)) {
                 environmentStringSet = new HashSet<>(getEnvironments(organization).keySet());
+            }
+        }
+
+        return environmentStringSet;
+    }
+
+    public static Set<String> extractEnvironmentsForAPI(List<Environment> environments, String organization, String userName) throws APIManagementException {
+
+        Set<String> environmentStringSet = null;
+        if (environments == null) {
+            environmentStringSet = extractVisibleEnvironmentsForUser(environments, organization, userName);
+        } else {
+            // Handle not to publish to any of the gateways
+            if (environments.contains(APIConstants.API_GATEWAY_NONE)) {
+                environmentStringSet = new HashSet<String>();
+            }
+            // Handle to set published gateways into api object
+            else if (!environments.isEmpty()) {
+                environmentStringSet = extractVisibleEnvironmentsForUser(environments, organization, userName);
+                environmentStringSet.remove(APIConstants.API_GATEWAY_NONE);
+            }
+            // Handle to publish to any of the gateways when api creating stage
+            else if ("".equals(environments)) {
+                environmentStringSet = extractVisibleEnvironmentsForUser(environments, organization, userName);
             }
         }
 

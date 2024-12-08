@@ -244,6 +244,12 @@ public class APIMappingUtil {
             dto.setEnvironmentList(environmentListToReturn);
         }
 
+        if (model.getEnvironments() != null) {
+            List<String> environmentListToReturn = new ArrayList<>();
+            environmentListToReturn.addAll(model.getEnvironments());
+            dto.setEnvironmentList(environmentListToReturn);
+        }
+
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
         dto.setApiKeyHeader(model.getApiKeyHeader());
         if (model.getApiSecurity() != null) {
@@ -506,7 +512,7 @@ public class APIMappingUtil {
     public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String organization)
             throws APIManagementException {
 
-        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
+        Map<String, Environment> environments = APIUtil.extractVisibleEnvironmentsForUser(organization, RestApiCommonUtil.getLoggedInUsername());
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
 
