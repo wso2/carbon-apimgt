@@ -54,7 +54,6 @@ import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.common.TermData;
@@ -1970,7 +1969,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRoles,
                     wsdlResourcePath, registry, getVisibleOrganizations(apiArtifact
-                            .getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS)));
+                            .getAttribute(APIConstants.ARTIFACT_VISIBLE_ORGANIZATIONS)));
 
             if (isZip) {
                 //Delete any WSDL file if exists
@@ -2123,7 +2122,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     new APIIdentifier(apiProviderName, apiName, apiVersion), ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr,
                     resourcePath, registry, getVisibleOrganizations(apiArtifact
-                            .getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS)));
+                            .getAttribute(APIConstants.ARTIFACT_VISIBLE_ORGANIZATIONS)));
 
         } catch (RegistryException | APIPersistenceException | APIManagementException e) {
             throw new OASPersistenceException("Error while adding OSA Definition for " + apiId, e);
@@ -2222,7 +2221,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath
                     , registry, getVisibleOrganizations(apiArtifact
-                            .getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS)));
+                            .getAttribute(APIConstants.ARTIFACT_VISIBLE_ORGANIZATIONS)));
 
         } catch (RegistryException | APIPersistenceException | APIManagementException e) {
             throw new AsyncSpecPersistenceException("Error while adding AsyncApi Definition for " + apiId, e);
@@ -2396,7 +2395,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
             }
             String visibleOrganizations = getVisibleOrganizations(apiArtifact
-                    .getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS));
+                    .getAttribute(APIConstants.ARTIFACT_VISIBLE_ORGANIZATIONS));
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, docArtifact
                     .getPath(), registry, visibleOrganizations);
             String docFilePath = docArtifact.getAttribute(APIConstants.DOC_FILE_PATH);
@@ -2468,7 +2467,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     new APIIdentifier(apiProviderName, apiName, apiVersion), ((UserRegistry) registry).getTenantId());
 
             String visibleOrganizations = getVisibleOrganizations(apiArtifact
-                    .getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS));
+                    .getAttribute(APIConstants.ARTIFACT_VISIBLE_ORGANIZATIONS));
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles,
                     artifact.getPath(), registry, visibleOrganizations);
 
@@ -2634,7 +2633,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             String visibleOrganizations = getVisibleOrganizations(apiArtifact
-                    .getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS));
+                    .getAttribute(APIConstants.ARTIFACT_VISIBLE_ORGANIZATIONS));
 
 
             GenericArtifactManager docArtifactManager = RegistryPersistenceDocUtil
@@ -2993,7 +2992,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String savedFilePath = addResourceFile(filePath, resourceFile, registry, tenantDomain);
 
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, null, null, filePath,
-                    getVisibleOrganizations(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS)));
+                    getVisibleOrganizations(apiArtifact.getAttribute(APIConstants.ARTIFACT_VISIBLE_ORGANIZATIONS)));
 
             apiArtifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, savedFilePath);
             apiArtifactManager.updateGenericArtifact(apiArtifact);
@@ -3365,7 +3364,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         if (visibleRolesList != null) {
             api.visibleRoles = visibleRolesList.split(",");
         }
-        api.visibleOrganizations = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS);
+        api.visibleOrganizations = apiArtifact.getAttribute(APIConstants.ARTIFACT_VISIBLE_ORGANIZATIONS);
         api.visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
 
         return api;

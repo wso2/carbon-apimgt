@@ -141,7 +141,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, api.getBusinessOwnerEmail());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBILITY, api.getVisibility());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES, api.getVisibleRoles());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ORGANIZATIONS, api.getVisibleOrganizations());
+            artifact.setAttribute(APIConstants.ARTIFACT_VISIBLE_ORGANIZATIONS, api.getVisibleOrganizations());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS, api.getVisibleTenants());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED,
                                             Boolean.toString(api.isEndpointSecured()));
