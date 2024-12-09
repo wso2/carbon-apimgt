@@ -51,6 +51,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_BUSS_OWNER_EMAIL = "overview_businessOwnerEmail";
     public static final String API_OVERVIEW_VISIBILITY = "overview_visibility";
     public static final String API_OVERVIEW_VISIBLE_ROLES = "overview_visibleRoles";
+    public static final String ARTIFACT_VISIBLE_ORGANIZATIONS = "visibleOrganizations";
     public static final String API_OVERVIEW_VISIBLE_TENANTS = "overview_visibleTenants";
     public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
     public static final String API_OVERVIEW_AUDIENCE = "overview_audience";
