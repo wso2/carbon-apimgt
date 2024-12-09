@@ -409,7 +409,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.publisherAccessControlRoles = publisherAccessControlRoles;
     }
 
-
     /*
     private String accessControl; //publisher accessControl : 'restricted', 'all' // this won't be required
 
