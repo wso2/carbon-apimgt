@@ -139,6 +139,16 @@ public class WebsocketUtilTestCase {
     }
 
     @Test
+    public void testGetThrottleStatus() {
+        ThrottleDataHolder throttleDataHolder = Mockito.mock(ThrottleDataHolder.class);
+        Mockito.when(serviceReferenceHolder.getThrottleDataHolder()).thenReturn(throttleDataHolder);
+        Mockito.when(throttleDataHolder.isAPIThrottled(apiKey)).thenReturn(true);
+        Mockito.when(throttleDataHolder.isAPIThrottled(resourceKey)).thenReturn(true);
+        Mockito.when(throttleDataHolder.isAPIThrottled(subscriptionKey)).thenReturn(true);
+        Assert.assertTrue(WebsocketUtil.getThrottleStatus(resourceKey, subscriptionKey, apiKey).isThrottled());
+    }
+
+    @Test
     public void testGetAccessTokenCacheKey() {
         Assert.assertEquals("235erwytgtkyb:/ishara:/resource",
                             WebsocketUtil.getAccessTokenCacheKey(cachedToken, apiContext, resource));

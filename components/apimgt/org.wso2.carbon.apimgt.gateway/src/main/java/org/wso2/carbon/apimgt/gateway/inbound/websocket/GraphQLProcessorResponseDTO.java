@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
+import org.wso2.carbon.apimgt.gateway.dto.InboundProcessorResponseError;
 
 /**
  * Extended DTO class to hold response information during execution of GraphQL subscription Inbound processors.
@@ -11,6 +12,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiC
 public class GraphQLProcessorResponseDTO extends InboundProcessorResponseDTO {
 
     String id; // operation ID
+    InboundProcessorResponseError inboundProcessorResponseError;
 
     public String getId() {
         return id;
@@ -33,5 +35,13 @@ public class GraphQLProcessorResponseDTO extends InboundProcessorResponseDTO {
         errorPayloads.put(payload);
         jsonObject.put(GraphQLConstants.SubscriptionConstants.PAYLOAD_FIELD_NAME_PAYLOAD, errorPayloads);
         return jsonObject.toString();
+    }
+
+    public InboundProcessorResponseError getInboundProcessorResponseError() {
+        return inboundProcessorResponseError;
+    }
+
+    public void setInboundProcessorResponseError(InboundProcessorResponseError inboundProcessorResponseError) {
+        this.inboundProcessorResponseError = inboundProcessorResponseError;
     }
 }

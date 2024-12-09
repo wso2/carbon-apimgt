@@ -15,8 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.apimgt.gateway.inbound.websocket;
 
+import org.wso2.carbon.apimgt.gateway.dto.InboundProcessorResponseError;
 /**
  * DTO class to hold response information during execution of Inbound processors.
  */
@@ -26,6 +28,7 @@ public class InboundProcessorResponseDTO {
     int errorCode;
     String errorMessage;
     boolean closeConnection = false; // whether to close the connection if during frame validation
+    InboundProcessorResponseError inboundProcessorResponseError;
 
     public boolean isError() {
         return isError;
@@ -61,5 +64,13 @@ public class InboundProcessorResponseDTO {
 
     public String getErrorResponseString() {
         return "Error code: " + errorCode + " reason: " + errorMessage;
+    }
+
+    public InboundProcessorResponseError getInboundProcessorResponseError() {
+        return inboundProcessorResponseError;
+    }
+
+    public void setInboundProcessorResponseError(InboundProcessorResponseError inboundProcessorResponseError) {
+        this.inboundProcessorResponseError = inboundProcessorResponseError;
     }
 }
