@@ -1177,13 +1177,16 @@ public class ApisApiServiceImpl implements ApisApiService {
             String status = api.getStatus();
             String visibleOrgs = api.getApi().getVisibleOrganizations();
             String userOrg = userOrgInfo.getOrganizationSelector();
-            
-            if (!api.isAPIProduct() && !RestApiUtil.isOrganizationVisibilityAllowed(visibleOrgs, userOrg)) {
+
+            String userName = RestApiCommonUtil.getLoggedInUsername();
+            String[] roles = APIUtil.getListOfRoles(APIUtil.getUserNameWithTenantSuffix(userName));
+
+            if (!api.isAPIProduct() && !(Arrays.asList(roles).contains("admin")) &&
+                    !RestApiUtil.isOrganizationVisibilityAllowed(visibleOrgs, userOrg)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
             // Extracting clicked API name by the user, for the recommendation system
-            String userName = RestApiCommonUtil.getLoggedInUsername();
             apiConsumer.publishClickedAPI(api, userName, organization);
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
