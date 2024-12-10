@@ -26,8 +26,10 @@ import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RealmUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -46,6 +48,8 @@ import org.wso2.uri.template.URITemplateException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +91,14 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         if (policy != null) {
             inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.BASIC_AUTHENTICATION);
             //Extract user credentials from the auth header and validate.
+            String path = (String) inMessage.get(Message.PATH_INFO);
+            String httpMethod = (String) inMessage.get(Message.HTTP_REQUEST_METHOD);
+            if (isBasicAuthBlockedURI(path, httpMethod)) {
+                log.error("Requested URI:" + path + " with HTTP method: " + httpMethod +
+                        " is not allowed with Basic Authentication");
+                throw new AuthenticationException("Unauthenticated request");
+            }
+
             String username = StringUtils.trim(policy.getUserName());
             String password = StringUtils.trim(policy.getPassword());
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
@@ -306,4 +318,40 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         return false;
     }
 
+    /**
+     * This method will check if the requested URI is allowed to access with Basic Authentication
+     *
+     * @param path       Requested URI path
+     * @param httpMethod HTTP Method
+     * @return true if the requested URI is not allowed with Basic Authentication
+     */
+    private boolean isBasicAuthBlockedURI(String path, String httpMethod) {
+        Dictionary<org.wso2.uri.template.URITemplate,List<String>> blockedResourcePathsMap;
+        if (path.contains(APIConstants.RestApiConstants.REST_API_OLD_VERSION)) {
+            path = path.replace("/" + APIConstants.RestApiConstants.REST_API_OLD_VERSION, "");
+        }
+
+        //Check if the accessing URI is Basic Auth allowed and then authorization is failed if not.
+        try {
+            blockedResourcePathsMap = RestApiUtil.getBasicAuthBlockedURIsToMethodsMap();
+            Enumeration<org.wso2.uri.template.URITemplate> uriTemplateSet = blockedResourcePathsMap.keys();
+
+            while (uriTemplateSet.hasMoreElements()) {
+                org.wso2.uri.template.URITemplate uriTemplate = uriTemplateSet.nextElement();
+                if (uriTemplate.matches(path, new HashMap<String, String>())) {
+                    List<String> blockedVerbs = blockedResourcePathsMap.get(uriTemplate);
+                    if (blockedVerbs.contains(httpMethod)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Unable to retrieve/process " +
+                            "Basic Auth blocked URIs for REST API", e, log);
+        }
+        return false;
+    }
 }
