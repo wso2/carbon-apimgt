@@ -110,9 +110,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset,
             //        limit, null, null);
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset,
-                    limit, null, null);
-            
+            Map allMatchedApisMap;
+            if (APIUtil.isOrganizationAccessControlEnabled()) {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset,
+                        limit, null, null);
+            } else {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset,
+                        limit, null, null);
+            }
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
@@ -1179,10 +1184,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String userOrg = userOrgInfo.getOrganizationSelector();
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
-            String[] roles = APIUtil.getListOfRoles(APIUtil.getUserNameWithTenantSuffix(userName));
 
-            if (!api.isAPIProduct() && !(Arrays.asList(roles).contains("admin")) &&
-                    !RestApiUtil.isOrganizationVisibilityAllowed(visibleOrgs, userOrg)) {
+            if (!api.isAPIProduct() && !RestApiUtil.isOrganizationVisibilityAllowed(userName,visibleOrgs, userOrg)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 

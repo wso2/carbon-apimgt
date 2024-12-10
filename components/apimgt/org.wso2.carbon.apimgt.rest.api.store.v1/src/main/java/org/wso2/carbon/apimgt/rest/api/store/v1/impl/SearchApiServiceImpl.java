@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SearchApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
@@ -71,10 +72,20 @@ public class SearchApiServiceImpl implements SearchApiService {
             Map<String, Object> result = null;
             // Extracting search queries for the recommendation system
             apiConsumer.publishSearchQuery(query, username, superOrganization);
+            boolean isOrganizationSupportEnabled = APIUtil.isOrganizationAccessControlEnabled();
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = apiConsumer.searchPaginatedContent(query, orgInfo, offset, limit);
+                if (isOrganizationSupportEnabled) {
+                    result = apiConsumer.searchPaginatedContent(query, orgInfo, offset, limit);
+                } else {
+                    result = apiConsumer.searchPaginatedContent(query, superOrganization, offset, limit);
+                }
             } else {
-                result = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset, limit, null, null);
+                if (isOrganizationSupportEnabled) {
+                    result = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset, limit, null, null);
+                } else {
+                    result = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset, limit, null,
+                            null);
+                }
             }
 
             ArrayList<Object> apis;
