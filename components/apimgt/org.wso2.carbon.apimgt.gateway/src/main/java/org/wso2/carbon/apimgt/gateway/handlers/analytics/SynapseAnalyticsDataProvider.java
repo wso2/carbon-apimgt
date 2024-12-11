@@ -522,7 +522,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
         int errorCode = getErrorCode();
         return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
+                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END
+                && errorCode != Constants.RESOURCE_NOT_FOUND_APIM_ERROR_CODE;
     }
 
     private boolean isThrottledFaultRequest() {
