@@ -189,6 +189,7 @@ public class Environment implements Serializable {
             this.visibility = builder.toString();
         } else {
             this.visibility = "all";
+            this.visibilityRoles[0] = "all";
         }
         this.visibilityRoles = visibilityRoles;
     }

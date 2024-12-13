@@ -5054,7 +5054,7 @@ public final class APIUtil {
             Map<String, Environment> environmentsMap = getEnvironments(organization);
             for (Environment environment : environmentsMap.values()) {
                 String[] permittedRoles = environment.getVisibilityRoles();
-                if (permittedRoles[0].equals("all")) {
+                if (permittedRoles != null && permittedRoles[0].equals("all")) {
                     environmentStringSet.add(environment.toString());
                 } else {
                     for (String role : userRoles) {
