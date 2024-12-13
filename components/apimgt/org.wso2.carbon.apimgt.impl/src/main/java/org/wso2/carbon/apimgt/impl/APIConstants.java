@@ -865,6 +865,10 @@ public final class APIConstants {
     public static final String API_RESTAPI_ALLOWED_URI = API_RESTAPI + "AllowedURIs.AllowedURI.";
     public static final String API_RESTAPI_ALLOWED_URI_URI = API_RESTAPI_ALLOWED_URI + "URI";
     public static final String API_RESTAPI_ALLOWED_URI_HTTPMethods = API_RESTAPI_ALLOWED_URI + "HTTPMethods";
+    public static final String API_RESTAPI_BASIC_AUTH_BLOCKED_URI = API_RESTAPI + "BasicAuthBlockedURIs.BasicAuthBlockedURI.";
+    public static final String API_RESTAPI_BASIC_AUTH_BLOCKED_URI_URI = API_RESTAPI_BASIC_AUTH_BLOCKED_URI + "URI";
+    public static final String API_RESTAPI_BASIC_AUTH_BLOCKED_URI_HTTPMethods =
+            API_RESTAPI_BASIC_AUTH_BLOCKED_URI + "HTTPMethods";
     public static final String API_RESTAPI_ETAG_SKIP_LIST = API_RESTAPI + "ETagSkipList.";
     public static final String API_RESTAPI_ETAG_SKIP_URI = API_RESTAPI_ETAG_SKIP_LIST + "ETagSkipURI.";
     public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
