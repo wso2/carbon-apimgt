@@ -110,9 +110,14 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset,
             //        limit, null, null);
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset,
-                    limit, null, null);
-            
+            Map allMatchedApisMap;
+            if (APIUtil.isOrganizationAccessControlEnabled()) {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset,
+                        limit, null, null);
+            } else {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset,
+                        limit, null, null);
+            }
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
@@ -1177,13 +1182,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             String status = api.getStatus();
             String visibleOrgs = api.getApi().getVisibleOrganizations();
             String userOrg = userOrgInfo.getOrganizationSelector();
-            
-            if (!api.isAPIProduct() && !RestApiUtil.isOrganizationVisibilityAllowed(visibleOrgs, userOrg)) {
+
+            String userName = RestApiCommonUtil.getLoggedInUsername();
+
+            if (!api.isAPIProduct() && !RestApiUtil.isOrganizationVisibilityAllowed(userName,visibleOrgs, userOrg)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
             // Extracting clicked API name by the user, for the recommendation system
-            String userName = RestApiCommonUtil.getLoggedInUsername();
             apiConsumer.publishClickedAPI(api, userName, organization);
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)

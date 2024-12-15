@@ -1294,20 +1294,28 @@ public class RestApiUtil {
         return  organization;
     }
     
-    public static boolean isOrganizationVisibilityAllowed(String visibleOrgs, String userOrg) {
+    public static boolean isOrganizationVisibilityAllowed(String userName, String visibleOrgs, String userOrg)
+            throws APIManagementException {
         boolean allowed = false;
 
-        if (StringUtils.isEmpty(visibleOrgs) || APIConstants.DEFAULT_VISIBLE_ORG.equals(visibleOrgs)) {
-            allowed = true;
-        } else {
-            List<String> visibleOrgList = Arrays.asList(visibleOrgs.split(","));
-            
-            if(visibleOrgList.contains(userOrg)) {
+        if (APIUtil.isOrganizationAccessControlEnabled()) {
+            String[] roles = APIUtil.getListOfRoles(APIUtil.getUserNameWithTenantSuffix(userName));
+            if (Arrays.asList(roles).contains("admin")) {
+                return true;
+            }
+            if (StringUtils.isEmpty(visibleOrgs) || APIConstants.DEFAULT_VISIBLE_ORG.equals(visibleOrgs)) {
                 allowed = true;
             } else {
-                allowed = false;
+                List<String> visibleOrgList = Arrays.asList(visibleOrgs.split(","));
+
+                if (visibleOrgList.contains(userOrg)) {
+                    allowed = true;
+                } else {
+                    allowed = false;
+                }
             }
+            return allowed;
         }
-        return allowed;
+        return true;
     }
 }

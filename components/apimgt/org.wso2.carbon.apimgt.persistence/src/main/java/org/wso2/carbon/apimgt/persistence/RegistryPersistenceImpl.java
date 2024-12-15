@@ -197,6 +197,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 resource.setContent(api.getSwaggerDefinition());
                 resource.setMediaType("application/json");
+                resource.setProperty(APIConstants.VISIBLE_ORGANIZATIONS, visibleOrgs);
                 registry.put(resourcePath, resource);
                 //Need to set anonymous if the visibility is public
                 RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
@@ -217,6 +218,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 resource.setContent(api.getAsyncApiDefinition());
                 resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);          //add a constant for app.json
+                resource.setProperty(APIConstants.VISIBLE_ORGANIZATIONS, visibleOrgs);
                 registry.put(resourcePath, resource);
                 RegistryPersistenceUtil.clearResourcePermissions(resourcePath, api.getId(),
                         ((UserRegistry) registry).getTenantId());
@@ -231,6 +233,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                     visibleRoles, docLocation);
+            updateRegistryResourcesForArtifacts(registry, artifact.getId(), docLocation);
 
             registry.commitTransaction();
             api.setUuid(artifact.getId());
@@ -606,6 +609,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         ((UserRegistry) registry).getTenantId());
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, resourcePath, registry);
+                updateRegistryResourcesForArtifacts(registry, api.getUuid(), resourcePath);
             }
 
             // Update api def file permissions, required for API definition content search functionality
@@ -619,6 +623,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             ((UserRegistry) registry).getTenantId());
                     RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                             visibleRoles, resourcePath, registry);
+                    updateRegistryResourcesForArtifacts(registry, api.getUuid(), resourcePath);
                 }
             } else if (api.isAsync()) {
                 String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
@@ -629,6 +634,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             ((UserRegistry) registry).getTenantId());
                     RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                             visibleRoles, resourcePath, registry);
+                    updateRegistryResourcesForArtifacts(registry, api.getUuid(), resourcePath);
                 }
             } else if (APIConstants.API_TYPE_SOAP.equals(api.getType())) {
                 String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
@@ -640,6 +646,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             ((UserRegistry) registry).getTenantId());
                     RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                             visibleRoles, resourcePath, registry);
+                    updateRegistryResourcesForArtifacts(registry, api.getUuid(), resourcePath);
                 }
             }
 
@@ -675,6 +682,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                         + doc.getName();
                                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(),
                                         api.getVisibility(), visibleRoles, documentationPath, registry);
+                                updateRegistryResourcesForArtifacts(registry, api.getUuid(), documentationPath);
                                 if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())
                                         || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
 
@@ -683,12 +691,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                             + RegistryConstants.PATH_SEPARATOR + doc.getName();
                                     RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(),
                                             api.getVisibility(), visibleRoles, contentPath, registry);
+                                    updateRegistryResourcesForArtifacts(registry, api.getUuid(), contentPath);
                                 } else if (Documentation.DocumentSourceType.FILE.equals(doc.getSourceType())
                                         && doc.getFilePath() != null) {
                                     String filePath = RegistryPersistenceDocUtil.getDocumentationFilePath(api.getId(),
                                             doc.getFilePath().split("files" + RegistryConstants.PATH_SEPARATOR)[1]);
                                     RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(),
                                             api.getVisibility(), visibleRoles, filePath, registry);
+                                    updateRegistryResourcesForArtifacts(registry, api.getUuid(), filePath);
                                 }
                             }
                         }
@@ -1961,6 +1971,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
             }
+            updateRegistryResourcesForArtifacts(registry, apiId, wsdlResourcePath);
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRoles,
                     wsdlResourcePath, registry);
 
@@ -2113,6 +2124,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             // Need to set anonymous if the visibility is public
             RegistryPersistenceUtil.clearResourcePermissions(resourcePath,
                     new APIIdentifier(apiProviderName, apiName, apiVersion), ((UserRegistry) registry).getTenantId());
+            updateRegistryResourcesForArtifacts(registry, apiId, resourcePath);
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr,
                     resourcePath, registry);
 
@@ -2213,7 +2225,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath
                     , registry);
-
+            updateRegistryResourcesForArtifacts(registry, apiId, resourcePath);
         } catch (RegistryException | APIPersistenceException | APIManagementException e) {
             throw new AsyncSpecPersistenceException("Error while adding AsyncApi Definition for " + apiId, e);
         } finally {
@@ -2304,6 +2316,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(api.apiProvider, api.visibility, api.visibleRoles,
                     saveResourcePath, registry);
+            updateRegistryResourcesForArtifacts(registry, apiId, saveResourcePath);
 
         } catch (RegistryException | APIManagementException | APIPersistenceException e) {
             throw new GraphQLPersistenceException("Error while adding Graphql Definition for api " + apiId, e);
@@ -2369,9 +2382,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifactManager docArtifactManager = new GenericArtifactManager(registry,
                     APIConstants.DOCUMENTATION_KEY);
             GenericArtifact docArtifact = docArtifactManager.newGovernanceArtifact(new QName(documentation.getName()));
-            docArtifactManager.addGenericArtifact(RegistryPersistenceDocUtil.createDocArtifactContent(docArtifact,
-                    apiName, apiVersion, apiProviderName, documentation));
-
+            GenericArtifact genericDocArtifact = RegistryPersistenceDocUtil.createDocArtifactContent(docArtifact,
+                    apiName, apiVersion, apiProviderName, documentation);
+            docArtifactManager.addGenericArtifact(genericDocArtifact);
+            String docArtifactPath = GovernanceUtils.getArtifactPath(registry, genericDocArtifact.getId());
             String apiPath = RegistryPersistenceUtil.getAPIPath(apiName, apiVersion, apiProviderName);
             String docVisibility = documentation.getVisibility().name();
             String[] authorizedRoles = RegistryPersistenceUtil.getAuthorizedRoles(apiPath, tenantDomain);
@@ -2385,6 +2399,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     visibility = APIConstants.DOC_OWNER_VISIBILITY;
                 }
             }
+            updateRegistryResourcesForArtifacts(registry, apiId, docArtifactPath);
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, docArtifact
                     .getPath(), registry);
             String docFilePath = docArtifact.getAttribute(APIConstants.DOC_FILE_PATH);
@@ -2398,6 +2413,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     String filePath = docFilePath.substring(startIndex, docFilePath.length());
                     RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, filePath,
                             registry);
+                    updateRegistryResourcesForArtifacts(registry, apiId, filePath);
                 }
             }
             documentation.setId(docArtifact.getId());
@@ -2457,6 +2473,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles,
                     artifact.getPath(), registry);
+            updateRegistryResourcesForArtifacts(registry, apiId, artifact.getPath());
 
             String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
             if (docFilePath != null && !"".equals(docFilePath)) {
@@ -2469,6 +2486,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, filePath,
                         registry);
+                updateRegistryResourcesForArtifacts(registry, apiId, filePath);
             }
             return documentation;
         } catch (RegistryException | APIManagementException | APIPersistenceException e) {
@@ -2638,6 +2656,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.setResourcePermissions(
                         RegistryPersistenceUtil.replaceEmailDomain(apiProviderName), visibility, visibleRoles, filePath,
                         registry);
+                updateRegistryResourcesForArtifacts(registry, apiId, filePath);
                 //documentation.setFilePath(addResourceFile(apiId, filePath, icon));
                 String savedFilePath = addResourceFile(filePath, resource, registry, tenantDomain);
                 //doc.setFilePath(savedFilePath);
@@ -2677,6 +2696,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles,
                         contentPath, registry);
+                updateRegistryResourcesForArtifacts(registry, apiId, contentPath);
                 GenericArtifact updateDocArtifact = RegistryPersistenceDocUtil.createDocArtifactContent(docArtifact,
                         apiProviderName, apiName, apiVersion, doc);
                 Boolean toggle = Boolean.parseBoolean(updateDocArtifact.getAttribute("toggle"));
@@ -3165,6 +3185,31 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
     }
 
+    private void updateRegistryResourcesForArtifacts(Registry registry, String apiId, String artifactResourcePath)
+            throws RegistryException {
+
+        //get path to API in registry
+        String artifactPath = GovernanceUtils.getArtifactPath(registry, apiId);
+
+        //get API
+        Resource apiResource = registry.get(artifactPath);
+
+        //get orgs of the API
+        String visibleOrgs = apiResource.getProperty(APIConstants.VISIBLE_ORGANIZATIONS);
+
+        //add the org value for api-artifact in the registry
+        if (registry.resourceExists(artifactResourcePath)) {
+            Resource artifactResource = registry.get(artifactResourcePath);
+            if (artifactResource != null) {
+                if (!StringUtils.isEmpty(visibleOrgs) && visibleOrgs.contains(" ")) {
+                    visibleOrgs = visibleOrgs.replace(" ", "+");
+                }
+                artifactResource.setProperty(APIConstants.VISIBLE_ORGANIZATIONS, visibleOrgs);
+                registry.put(artifactResourcePath, artifactResource);
+            }
+        }
+    }
+
     protected static int getMaxPaginationLimit() {
 
         return Integer.MAX_VALUE;
@@ -3411,7 +3456,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
             String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
             // if (StringUtils.isEmpty(apiProduct.getVisibleOrganizations())) {
-                //visibleOrgs = apiProduct.getVisibleOrganizations(); TODO fix for products
+                //visibleOrgs = apiProduct.getVisibleOrganizations();
+            // TODO fix for products and do needful for unified search
             // }
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
                     apiProduct.getAdditionalProperties(), visibleOrgs);
@@ -3641,7 +3687,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
             // if (APIConstants.API_RESTRICTED_BY_ORG.equals(apiProduct.getVisibility())){
-                //visibleOrgs = apiProduct.getVisibleOrganizations(); TODO fix for products
+                //visibleOrgs = apiProduct.getVisibleOrganizations();
+            // TODO fix for products and do needful for unified search
             // }
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
                     apiProduct.getAdditionalProperties(), visibleOrgs);
