@@ -2475,7 +2475,6 @@ public final class APIUtil {
      * Retrieves the role list of a user
      *
      * @param username A username
-     * @param username A username
      * @throws APIManagementException If an error occurs
      */
     public static String[] getListOfRoles(String username) throws APIManagementException {
@@ -5205,6 +5204,24 @@ public final class APIUtil {
 
         for (Environment environment : gatewayEnvironments.values()) {
             for (String apiEnvironment : apiEnvironments) {
+                if (environment.getName().equals(apiEnvironment)) {
+                    returnEnvironments.add(environment);
+                    break;
+                }
+            }
+        }
+        return returnEnvironments;
+    }
+
+    public static List<Environment> getEnvironmentsOfAPIProduct(APIProduct apiProduct) throws APIManagementException {
+
+        String organization = apiProduct.getOrganization();
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
+        Set<String> apiProductEnvironments = apiProduct.getEnvironments();
+        List<Environment> returnEnvironments = new ArrayList<Environment>();
+
+        for (Environment environment : gatewayEnvironments.values()) {
+            for (String apiEnvironment : apiProductEnvironments) {
                 if (environment.getName().equals(apiEnvironment)) {
                     returnEnvironments.add(environment);
                     break;

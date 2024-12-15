@@ -1568,11 +1568,11 @@ public abstract class AbstractAPIManager implements APIManager {
             apiProduct.setUuid(uuid);
         }
         // environment
-        String environmentString = null;
+        List<Environment> environments = null;
         if (apiProduct.getEnvironments() != null) {
-            environmentString = String.join(",", apiProduct.getEnvironments());
+            environments = APIUtil.getEnvironmentsOfAPIProduct(apiProduct);
         }
-        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments, organization, username));
 
         // workflow status
         APIProductIdentifier productIdentifier = apiProduct.getId();
