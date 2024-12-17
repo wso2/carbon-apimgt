@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class DefaultMonetizationImpl implements Monetization {
+public class DefaultMonetizationImpl extends AbstractMonetization {
 
     @Override
     public boolean createBillingPlan(SubscriptionPolicy subPolicy) throws MonetizationException {
@@ -108,7 +108,8 @@ public class DefaultMonetizationImpl implements Monetization {
         return true;
     }
 
-    public MonetizationSubscription getMonetizedSubscriptionClass(){
+    @Override
+    public MonetizationSubscription getMonetizationSubscriptionClass() {
         return new DefaultMonetizationSubscriptionImpl();
     }
 
