@@ -2129,7 +2129,7 @@
         <databridge.agent.range>[5.1,6)</databridge.agent.range>
 
         <!-- Transaction Counter -->
-        <integration.transaction.counter.version>1.1.0</integration.transaction.counter.version>
+        <integration.transaction.counter.version>1.2.0</integration.transaction.counter.version>
 
         <javax.xml.soap.imp.pkg.version>0.0.0</javax.xml.soap.imp.pkg.version>
         <javax.xml.stream.imp.pkg.version>[1.0.1, 1.1.0)</javax.xml.stream.imp.pkg.version>
