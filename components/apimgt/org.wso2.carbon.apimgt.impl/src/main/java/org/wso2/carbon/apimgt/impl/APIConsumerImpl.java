@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.monetization.AbstractMonetization;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationSubscription;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
@@ -148,8 +149,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private static final Log log = LogFactory.getLog(APIConsumerImpl.class);
     private RecommendationEnvironment recommendationEnvironment;
-    //private Monetization monetizationImpl = getMonetizationImplClass();
-    private MonetizationSubscription subscriptionImple = monetizationImpl.
+    private AbstractMonetization monetizationImpl = (AbstractMonetization) getMonetizationImplClass();
+    private MonetizationSubscription subscriptionImpl = monetizationImpl.getMonetizationSubscriptionClass();
 
     private static final Log audit = CarbonConstants.AUDIT_LOG;
     public static final char COLON_CHAR = ':';
@@ -890,14 +891,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     isMonetizationEnabled = api.getMonetizationStatus();
                     //check whether monetization is enabled for API and tier plan is commercial
                     if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = addSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
+                        subscriptionImpl.monetizeSubscription(workflowDTO, api);
                     }
                     workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
                 } else {
                     isMonetizationEnabled = product.getMonetizationStatus();
                     //check whether monetization is enabled for API and tier plan is commercial
                     if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = addSubscriptionWFExecutor.monetizeSubscription(workflowDTO, product);
+                        subscriptionImpl.monetizeSubscription(workflowDTO, product);
                     }
                     workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
                 }
@@ -1078,14 +1079,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     isMonetizationEnabled = api.getMonetizationStatus();
                     //check whether monetization is enabled for API and tier plan is commercial
                     if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
+                        subscriptionImpl.monetizeSubscription(workflowDTO, api);
                     }
                     workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
                 } else {
                     isMonetizationEnabled = product.getMonetizationStatus();
                     //check whether monetization is enabled for API and tier plan is commercial
                     if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, product);
+                        subscriptionImpl.monetizeSubscription(workflowDTO, product);
                     }
                     workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
                 }
@@ -1343,14 +1344,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (api != null) {
                 //check whether monetization is enabled for API and tier plan is commercial
                 if (api.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, api);
+                    subscriptionImpl.deleteMonetizedSubscription(workflowDTO, api);
                 } else {
                     removeSubscriptionWFExecutor.execute(workflowDTO);
                 }
             } else if (product != null) {
                 //check whether monetization is enabled for API product and tier plan is commercial
                 if (product.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, product);
+                    subscriptionImpl.deleteMonetizedSubscription(workflowDTO, product);
                 } else {
                     removeSubscriptionWFExecutor.execute(workflowDTO);
                 }
