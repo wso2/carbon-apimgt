@@ -63,36 +63,6 @@ public abstract class WorkflowExecutor implements Serializable {
     }
 
     /**
-     * Implements monetization logic in workflow.
-     *
-     * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
-     * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
-     */
-    public WorkflowResponse monetizeSubscription(WorkflowDTO workflowDTO, API api) throws WorkflowException {
-        return new GeneralWorkflowResponse();
-    }
-
-    public WorkflowResponse monetizeSubscription(WorkflowDTO workflowDTO, APIProduct apiProduct)
-            throws WorkflowException {
-        return new GeneralWorkflowResponse();
-    }
-
-    /**
-     * Implements monetization deletion logic in workflow.
-     *
-     * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
-     * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
-     */
-    public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, API api) throws WorkflowException {
-        return new GeneralWorkflowResponse();
-    }
-
-    public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, APIProduct apiProduct)
-            throws WorkflowException {
-        return new GeneralWorkflowResponse();
-    }
-
-    /**
      * Implements the workflow completion logic.
      *
      * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
