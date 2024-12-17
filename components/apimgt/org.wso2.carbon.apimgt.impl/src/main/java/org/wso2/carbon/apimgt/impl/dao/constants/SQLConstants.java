@@ -4284,6 +4284,22 @@ public class SQLConstants {
                         " WHERE " +
                         " OP.POLICY_UUID = ? AND OP.ORGANIZATION = ? AND AOP.REVISION_UUID = ?";
 
+        public static final String GET_API_SPECIFIC_OPERATION_POLICY_LIST_FROM_API_UUID =
+                "SELECT " +
+                        " POLICY_UUID " +
+                        " FROM " +
+                        " AM_API_OPERATION_POLICY " +
+                        " WHERE " +
+                        " CLONED_POLICY_UUID IS NOT NULL AND API_UUID = ?";
+
+        public static final String GET_REVISION_SPECIFIC_OPERATION_POLICY_LIST_FROM_REVISION_UUID =
+                "SELECT " +
+                        " POLICY_UUID " +
+                        " FROM " +
+                        " AM_API_OPERATION_POLICY " +
+                        " WHERE " +
+                        " CLONED_POLICY_UUID IS NOT NULL AND REVISION_UUID = ?";
+
         public static final String GET_COMMON_OPERATION_POLICY_WITH_OUT_DEFINITION_FROM_POLICY_ID =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.POLICY_VERSION, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +

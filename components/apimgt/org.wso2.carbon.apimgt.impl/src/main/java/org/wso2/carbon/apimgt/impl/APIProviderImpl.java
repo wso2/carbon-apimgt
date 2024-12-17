@@ -5300,34 +5300,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public String getPolicyType(OperationPolicy policy, String apiUUId, String tenantDomain)
-            throws APIManagementException {
-        String policyType = null;
-        if (policy.getPolicyId() == null) {
-            policyType = ImportExportConstants.POLICY_TYPE_API;
-        } else {
-            OperationPolicyData basicPolicyData =
-                    getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
-                            apiUUId, tenantDomain, false);
-            if (basicPolicyData.getClonedCommonPolicyId() == null) {
-                policyType = ImportExportConstants.POLICY_TYPE_API;
-            } else {
-                policyType = ImportExportConstants.POLICY_TYPE_COMMON;
-            }
-        }
-        return policyType;
-    }
+    public API addPolicyTypeFieldToApi(API api) throws APIManagementException {
 
-    public API addPolicyTypeFieldToApi(API api, String tenantDomain)
-            throws APIManagementException {
-
+        List<String> apiOperationPolicyIds = getClonedAPISpecificOperationPolicyIdsList(api.getUuid());
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         for (URITemplate uriTemplate : uriTemplates) {
             List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
             if (!operationPolicies.isEmpty()) {
                 for (OperationPolicy operationPolicy : operationPolicies) {
-                    String policyType = getPolicyType(operationPolicy, api.getUuid(),
-                            tenantDomain);
+                    String policyType = ImportExportConstants.POLICY_TYPE_API;
+                    if (apiOperationPolicyIds.contains(operationPolicy.getPolicyId())) {
+                        policyType = ImportExportConstants.POLICY_TYPE_COMMON;
+                    }
                     operationPolicy.setPolicyType(policyType);
                 }
             }
@@ -5337,8 +5321,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiPolicies = api.getApiPolicies();
         if (apiPolicies != null && !apiPolicies.isEmpty()) {
             for (OperationPolicy policy : apiPolicies) {
-                String policyType = getPolicyType(policy, api.getUuid(),
-                        tenantDomain);
+                String policyType = ImportExportConstants.POLICY_TYPE_API;
+                if (apiOperationPolicyIds.contains(policy.getPolicyId())) {
+                    policyType = ImportExportConstants.POLICY_TYPE_COMMON;
+                }
                 policy.setPolicyType(policyType);
             }
         }
@@ -5389,7 +5375,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateApiInfo(api);
                 populateSubtypeConfiguration(api);
                 populateDefaultVersion(api);
-                api = addPolicyTypeFieldToApi(api, organization);
+                api = addPolicyTypeFieldToApi(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -7298,6 +7284,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return apiMgtDAO
                 .getAPISpecificOperationPolicyByPolicyID(policyId, apiUUID, organization, isWithPolicyDefinition);
+    }
+
+    public List<String> getClonedAPISpecificOperationPolicyIdsList(String apiUUID)
+            throws APIManagementException {
+
+        return apiMgtDAO
+                .getClonedAPISpecificOperationPolicyIdsList(apiUUID);
     }
 
     @Override
