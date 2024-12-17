@@ -108,4 +108,8 @@ public class DefaultMonetizationImpl implements Monetization {
         return true;
     }
 
+    public MonetizationSubscription getMonetizedSubscriptionClass(){
+        return new DefaultMonetizationSubscriptionImpl();
+    }
+
 }
