@@ -33,7 +33,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     private static final Log log = LogFactory.getLog(EnvironmentsApiServiceImpl.class);
 
     /**
-     * Delete gateway envirionment
+     * Delete gateway environment
      *
      * @param environmentId environment ID
      * @param messageContext message context

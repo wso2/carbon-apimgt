@@ -759,6 +759,15 @@ public class APIManagerConfiguration {
             gatewayType = APIConstants.API_GATEWAY_TYPE_REGULAR;
         }
         environment.setGatewayType(gatewayType);
+        OMElement visibility = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_VISIBILITY));
+        String[] visibilityRoles;
+        if (visibility == null) {
+            visibilityRoles = new String[]{"all"};
+        } else {
+            String visibilityString = visibility.getText();
+            visibilityRoles = visibilityString.split(",");
+        }
+        environment.setVisibility(visibilityRoles);
         if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
         environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_SERVER_URL)).getText()));
