@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.common.gateway.graphql.QueryAnalyzer;
 import org.wso2.carbon.apimgt.common.gateway.graphql.QueryValidator;
 import org.wso2.carbon.apimgt.gateway.dto.GraphQLOperationDTO;
 import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLProcessorUtil;
+import org.wso2.carbon.apimgt.gateway.dto.WebSocketThrottleResponseDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants;
@@ -298,6 +299,10 @@ public class GraphQLRequestProcessor extends RequestProcessor {
                 responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX);
                 responseDTO.setErrorMessage(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE
                         + " : " + queryAnalyzerResponseDTO.getErrorList().toString());
+                WebSocketThrottleResponseDTO throttleResponseDTO = new WebSocketThrottleResponseDTO(true, "Throttled "
+                        + "due to subscription-level query complexity constraint.", inboundMessageContext.getApiContext()
+                        , inboundMessageContext.getInfoDTO().getSubscriber());
+                responseDTO.setInboundProcessorResponseError(throttleResponseDTO);
                 return responseDTO;
             }
         } catch (ParseException e) {
@@ -337,8 +342,12 @@ public class GraphQLRequestProcessor extends RequestProcessor {
             log.error("Query depth validation failed for: " + payload + " errors: " + errorList.toString());
             responseDTO.setError(true);
             responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP);
-            responseDTO.setErrorMessage(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE
-                    + " : " + queryAnalyzerResponseDTO.getErrorList().toString());
+            responseDTO.setErrorMessage(WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE + " : "
+                                                + queryAnalyzerResponseDTO.getErrorList().toString());
+            WebSocketThrottleResponseDTO throttleResponseDTO = new WebSocketThrottleResponseDTO(true, "Throttled due "
+                    + "to subscription-level query depth constraint.", inboundMessageContext.getApiContext()
+                    , inboundMessageContext.getInfoDTO().getSubscriber());
+            responseDTO.setInboundProcessorResponseError(throttleResponseDTO);
             return responseDTO;
         }
         return responseDTO;
