@@ -192,7 +192,7 @@ public class SynapsePolicyAggregator {
             if (flow.equals(policy.getDirection())) {
                 Map<String, Object> policyParameters = policy.getParameters();
                 String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
-                        policy.getPolicyVersion());
+                        policy.getPolicyVersion(), policy.getPolicyType());
                 OperationPolicySpecification policySpecification = ImportUtils
                         .getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
                 if (policySpecification.getSupportedGateways()
