@@ -4310,6 +4310,8 @@ public class SQLConstants {
                         " OP.POLICY_UUID = ? AND OP.ORGANIZATION = ?";
 
 
+        // CLONED_POLICY_UUID IS NULL was added to the query to allow creating an API level policy while having a common policy with same name and version
+        // and is attached to the API already
         public static final String GET_API_SPECIFIC_OPERATION_POLICY_FROM_POLICY_NAME =
                 "SELECT " +
                         " OP.POLICY_UUID, OP.POLICY_NAME, OP.POLICY_VERSION, OP.DISPLAY_NAME, OP.POLICY_DESCRIPTION, OP.APPLICABLE_FLOWS, OP.GATEWAY_TYPES, OP.API_TYPES, " +
@@ -4318,7 +4320,7 @@ public class SQLConstants {
                         " FROM " +
                         " AM_OPERATION_POLICY OP INNER JOIN AM_API_OPERATION_POLICY AOP ON OP.POLICY_UUID = AOP.POLICY_UUID " +
                         " WHERE " +
-                        " OP.POLICY_NAME = ? AND OP.POLICY_VERSION = ? AND OP.ORGANIZATION = ? AND AOP.API_UUID = ? ";
+                        " OP.POLICY_NAME = ? AND OP.POLICY_VERSION = ? AND OP.ORGANIZATION = ? AND AOP.API_UUID = ? AND AOP.CLONED_POLICY_UUID IS NULL ";
 
         public static final String GET_COMMON_OPERATION_POLICY_FROM_POLICY_NAME =
                 "SELECT " +
