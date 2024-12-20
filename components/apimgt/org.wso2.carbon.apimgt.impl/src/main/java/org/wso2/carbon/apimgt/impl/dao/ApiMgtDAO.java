@@ -125,7 +125,6 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
-import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -20914,11 +20913,11 @@ public class ApiMgtDAO {
      * @return operation policy
      * @throws APIManagementException
      */
-    public Map<String, String> getClonedAPISpecificOperationPolicyIdsList(String apiUUID)
+    public Map<String, String> getClonedIdsMappedApiSpecificOperationPolicies(String apiUUID)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            return getClonedAPISpecificOperationPolicyIdsList(connection, apiUUID);
+            return getClonedIdsMappedApiSpecificOperationPolicies(connection, apiUUID);
         } catch (SQLException e) {
             handleException("Failed to get the API specific operation policy IDs from API "
                     + apiUUID, e);
@@ -20926,23 +20925,22 @@ public class ApiMgtDAO {
         return null;
     }
 
-    private Map<String, String> getClonedAPISpecificOperationPolicyIdsList(Connection connection, String apiUUID)
+    private Map<String, String> getClonedIdsMappedApiSpecificOperationPolicies(Connection connection, String apiUUID)
             throws SQLException, APIManagementException {
 
         String dbQuery;
         boolean isAPIRevision = checkAPIUUIDIsARevisionUUID(apiUUID) != null;
         if (isAPIRevision) {
             dbQuery = SQLConstants.OperationPolicyConstants.
-                    GET_REVISION_SPECIFIC_OPERATION_POLICY_LIST_FROM_REVISION_UUID;
+                    GET_REVISION_SPECIFIC_OPERATION_POLICY_IDS_FROM_REVISION_UUID;
         } else {
-            dbQuery = SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_LIST_FROM_API_UUID;
+            dbQuery = SQLConstants.OperationPolicyConstants.GET_API_SPECIFIC_OPERATION_POLICY_IDS_FROM_API_UUID;
         }
-        Map<String, String> policyMap = null;
+        Map<String, String> policyMap = new HashMap<>();
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    policyMap = new HashMap<>();
+                while (rs.next()) {
                     policyMap.put(rs.getString("POLICY_UUID"), rs.getString("CLONED_POLICY_UUID"));
                 }
             }

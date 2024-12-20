@@ -7339,7 +7339,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         return apiMgtDAO
-                .getClonedAPISpecificOperationPolicyIdsList(apiUUID);
+                .getClonedIdsMappedApiSpecificOperationPolicies(apiUUID);
     }
 
     @Override
