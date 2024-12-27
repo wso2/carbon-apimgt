@@ -51,6 +51,7 @@ public class RegistrySearchUtil {
     public static final String SEARCH_AND_TAG = "&";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
     public static final String NAME_TYPE_PREFIX = "name";
+    public static final String AND_WITH_SPACES = " AND ";
     public static final String API_STATUS = "STATUS";
     public static final String API_PROVIDER = "Provider";
     public static final String DOCUMENT_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer";
@@ -61,7 +62,9 @@ public class RegistrySearchUtil {
     public static final String SOAP_DEFINITION_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer" +
             ".SOAPAPIDefinitionIndexer";
     public static final String STORE_VIEW_ROLES = "store_view_roles";
+    public static final String STORE_VIEW_ROLES_FIELD = "store_view_roles_ss:";
     public static final String VISIBLE_ORGANIZATIONS = "visible_organizations";
+    public static final String VISIBLE_ORGANIZATIONS_FIELD = "visible_organizations_ss:";
     public static final String PUBLISHER_ROLES = "publisher_roles";
     public static final String DOCUMENT_MEDIA_TYPE_KEY = "application/vnd.wso2-document\\+xml";
     public static final String API_DEF_MEDIA_TYPE_KEY = "application/json";
@@ -252,7 +255,7 @@ public class RegistrySearchUtil {
                         devportalFilterQueryField = STORE_VIEW_ROLES;
                         devportalFilterQuery = keyVal[1];
                     } else {
-                        devportalFilterQuery += (" AND store_view_roles_ss:" + keyVal[1]);
+                        devportalFilterQuery += (AND_WITH_SPACES + STORE_VIEW_ROLES_FIELD + keyVal[1]);
                     }
                 }
             } else if (VISIBLE_ORGANIZATIONS.equals(keyVal[0])) {
@@ -261,7 +264,7 @@ public class RegistrySearchUtil {
                         devportalFilterQueryField = VISIBLE_ORGANIZATIONS;
                         devportalFilterQuery = keyVal[1];
                     } else {
-                        devportalFilterQuery += (" AND visible_organizations_ss:" + keyVal[1]);
+                        devportalFilterQuery += (AND_WITH_SPACES + VISIBLE_ORGANIZATIONS_FIELD + keyVal[1]);
                     }
                 }
             } else if (PUBLISHER_ROLES.equals(keyVal[0])) {
