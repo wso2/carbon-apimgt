@@ -100,6 +100,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
     INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
     USER_ROLES_CANNOT_BE_NULL(900610, "Access control roles cannot be empty", 400, "Access control roles cannot be empty when visibility is restricted"),
+    ORGS_CANNOT_BE_NULL(900610, "Access control organizatoins cannot be empty", 400, "Access control organizations cannot be empty when visibility is restricted"),
     API_REVISION_NOT_FOUND(900347, "API Revision Not Found", 404, "Requested API Revision with id %s not found"),
     EXISTING_API_REVISION_DEPLOYMENT_FOUND(900348, "Can not delete API Revision ", 400, "Couldn't delete API revision since API revision is currently deployed to a gateway. " +
             "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: %s "),

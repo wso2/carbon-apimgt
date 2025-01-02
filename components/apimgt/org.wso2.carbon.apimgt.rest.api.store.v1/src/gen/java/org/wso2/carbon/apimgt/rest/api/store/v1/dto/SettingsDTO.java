@@ -35,6 +35,7 @@ public class SettingsDTO   {
     private Boolean isAnonymousModeEnabled = true;
     private Boolean isPasswordChangeEnabled = true;
     private Boolean isJWTEnabledForLoginTokens = false;
+    private Boolean orgAccessControlEnabled = null;
     private String userStorePasswordPattern = null;
     private String passwordPolicyPattern = null;
     private Integer passwordPolicyMinLength = null;
@@ -249,6 +250,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * Is Organization-based access control configuration enabled 
+   **/
+  public SettingsDTO orgAccessControlEnabled(Boolean orgAccessControlEnabled) {
+    this.orgAccessControlEnabled = orgAccessControlEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Is Organization-based access control configuration enabled ")
+  @JsonProperty("orgAccessControlEnabled")
+  public Boolean isOrgAccessControlEnabled() {
+    return orgAccessControlEnabled;
+  }
+  public void setOrgAccessControlEnabled(Boolean orgAccessControlEnabled) {
+    this.orgAccessControlEnabled = orgAccessControlEnabled;
+  }
+
+  /**
    * The &#39;PasswordJavaRegEx&#39; cofigured in the UserStoreManager
    **/
   public SettingsDTO userStorePasswordPattern(String userStorePasswordPattern) {
@@ -396,6 +415,7 @@ public class SettingsDTO   {
         Objects.equals(isAnonymousModeEnabled, settings.isAnonymousModeEnabled) &&
         Objects.equals(isPasswordChangeEnabled, settings.isPasswordChangeEnabled) &&
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
+        Objects.equals(orgAccessControlEnabled, settings.orgAccessControlEnabled) &&
         Objects.equals(userStorePasswordPattern, settings.userStorePasswordPattern) &&
         Objects.equals(passwordPolicyPattern, settings.passwordPolicyPattern) &&
         Objects.equals(passwordPolicyMinLength, settings.passwordPolicyMinLength) &&
@@ -407,7 +427,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled);
   }
 
   @Override
@@ -427,6 +447,7 @@ public class SettingsDTO   {
     sb.append("    isAnonymousModeEnabled: ").append(toIndentedString(isAnonymousModeEnabled)).append("\n");
     sb.append("    isPasswordChangeEnabled: ").append(toIndentedString(isPasswordChangeEnabled)).append("\n");
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
+    sb.append("    orgAccessControlEnabled: ").append(toIndentedString(orgAccessControlEnabled)).append("\n");
     sb.append("    userStorePasswordPattern: ").append(toIndentedString(userStorePasswordPattern)).append("\n");
     sb.append("    passwordPolicyPattern: ").append(toIndentedString(passwordPolicyPattern)).append("\n");
     sb.append("    passwordPolicyMinLength: ").append(toIndentedString(passwordPolicyMinLength)).append("\n");
