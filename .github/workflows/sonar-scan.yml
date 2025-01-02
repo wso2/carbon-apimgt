@@ -22,14 +22,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: '0'
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
-          java-version: 11.0.16+8
+          java-version: 17
           distribution: 'temurin'
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '14.x'
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -38,14 +35,14 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Cache SonarCloud packages
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Build carbon-apimgt with Tests, skipping AspectJ
-        run: mvn clean install sonar:sonar --file pom.xml -Dskip.aspectj=true  -Dmaven.test.skip=true
+        run: mvn sonar:sonar --file pom.xml -Dskip.aspectj=true  -Dmaven.test.skip=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
