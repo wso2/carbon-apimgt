@@ -3257,4 +3257,7 @@ public final class APIConstants {
         public static final String TRANSACTIONCOUNTER = "TransactionCounter";
         public static final String COUNTER_ENABLED = "Enabled";
     }
+
+    //Property for enabling application update capabilities for users in the same organization.
+    public static final String ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED = "orgWideAppUpdateEnabled";
 }

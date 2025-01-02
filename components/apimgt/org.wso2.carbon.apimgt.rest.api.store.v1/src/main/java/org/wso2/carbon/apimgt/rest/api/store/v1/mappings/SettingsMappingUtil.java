@@ -64,6 +64,7 @@ public class SettingsMappingUtil {
         settingsDTO.setRecommendationEnabled(recommendationEnabled);
         settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
         settingsDTO.setMonetizationEnabled(moneatizationEnabled);
+        settingsDTO.setOrgWideAppUpdateEnabled(APIUtil.isOrgWideAppUpdateEnabled());
         SettingsIdentityProviderDTO identityProviderDTO = new SettingsIdentityProviderDTO();
         identityProviderDTO.setExternal(APIUtil.getIdentityProviderConfig() != null);
         settingsDTO.setIdentityProvider(identityProviderDTO);
