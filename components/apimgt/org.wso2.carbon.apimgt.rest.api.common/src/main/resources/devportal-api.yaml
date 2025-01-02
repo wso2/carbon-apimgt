@@ -5625,6 +5625,9 @@ components:
           type: boolean
           description: Specifies whether Marketplace Assistant feature is enabled.
           default: true
+        orgWideAppUpdateEnabled:
+          type: boolean
+          default: false
     ApplicationAttribute:
       title: Application attributes
       type: object
