@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -259,10 +260,12 @@ public class KeyManagerHolder {
         return keyManager;
     }
 
-    public static KeyManagerDto getKeyManagerByIssuer(String tenantDomain, String issuer) {
+    public static List<KeyManagerDto> getKeyManagerByIssuer(String tenantDomain, String issuer) {
 
         if (globalJWTValidatorMap.containsKey(issuer)) {
-            return globalJWTValidatorMap.get(issuer);
+            List list = new ArrayList<KeyManagerDto>();
+            list.add(globalJWTValidatorMap.get(issuer));
+            return list;
         }
         OrganizationKeyManagerDto organizationKeyManagerDto = getTenantKeyManagerDto(tenantDomain);
         if (organizationKeyManagerDto != null) {

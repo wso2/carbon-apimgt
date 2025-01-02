@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -94,7 +95,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         query = query == null ? "" : query;
         APIListDTO apiListDTO = new APIListDTO();
         try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            orgInfo.setSuperOrganization(superOrganization);
+            
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
@@ -104,14 +108,21 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
-                    limit, null, null);
-            
+            //Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset,
+            //        limit, null, null);
+            Map allMatchedApisMap;
+            if (APIUtil.isOrganizationAccessControlEnabled()) {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset,
+                        limit, null, null);
+            } else {
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset,
+                        limit, null, null);
+            }
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, organization);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, superOrganization);
             //Add pagination section in the response
             Object totalLength = allMatchedApisMap.get("length");
             Integer totalAvailableAPis = 0;
@@ -141,8 +152,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        return Response.ok().entity(getAPIByAPIId(apiId, organization)).build();
+        String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+        OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        userOrgInfo.setSuperOrganization(superOrganization);
+        return Response.ok().entity(getAPIByAPIId(apiId, superOrganization, userOrgInfo)).build();
     }
 
 
@@ -795,8 +808,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String message = "Error generating the SDK. API id or language should not be empty";
             RestApiUtil.handleBadRequest(message, log);
         }
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        APIDTO api = getAPIByAPIId(apiId, organization);
+        String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+        OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        userOrgInfo.setSuperOrganization(superOrganization);
+        APIDTO api = getAPIByAPIId(apiId, superOrganization, userOrgInfo);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
         String swaggerDefinition = api.getApiDefinition();
@@ -1136,10 +1151,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
                                                      MessageContext messageContext) throws APIManagementException {
-        String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        APIDTO apiInfo = getAPIByAPIId(apiId, organization);
+        String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+        OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        userOrgInfo.setSuperOrganization(superOrganization);
+        APIDTO apiInfo = getAPIByAPIId(apiId, superOrganization, userOrgInfo);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), organization);
+                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), superOrganization);
 
         if (apiInfo != null ) {
             List<APITiersDTO> apiTiers = apiInfo.getTiers();
@@ -1158,18 +1175,32 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO getAPIByAPIId(String apiId, String organization) {
+    private APIDTO getAPIByAPIId(String apiId, String organization, OrganizationInfo userOrgInfo) {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String status = api.getStatus();
+            String visibleOrgs = api.getApi().getVisibleOrganizations();
+            String userOrg = userOrgInfo.getOrganizationSelector();
+
+            String userName = RestApiCommonUtil.getLoggedInUsername();
+
+            if (!api.isAPIProduct() && !RestApiUtil.isOrganizationVisibilityAllowed(userName,visibleOrgs, userOrg)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
+            }
 
             // Extracting clicked API name by the user, for the recommendation system
-            String userName = RestApiCommonUtil.getLoggedInUsername();
             apiConsumer.publishClickedAPI(api, userName, organization);
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
+                if (!api.isAPIProduct()) {
+                    // Add only organization specific tiers
+                    Set<Tier> tiers = APIUtil.getAllowedTiersForTheOrganization(api.getApi().getAvailableTiers(),
+                            userOrgInfo.getOrganizationSelector(), userOrgInfo.getSuperOrganization());
+                    api.getApi().removeAllTiers();
+                    api.getApi().setAvailableTiers(tiers);
+                }
 
                 APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, organization);
                 long subscriptionCountOfAPI = apiConsumer.getSubscriptionCountOfAPI(apiId, organization);

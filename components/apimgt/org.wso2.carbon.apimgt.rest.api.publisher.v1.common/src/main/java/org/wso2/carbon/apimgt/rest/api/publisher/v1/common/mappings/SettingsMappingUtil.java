@@ -87,6 +87,7 @@ public class SettingsMappingUtil {
             settingsDTO.setExternalStoresEnabled(
                     APIUtil.isExternalStoresEnabled(RestApiCommonUtil.getLoggedInUserTenantDomain()));
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
+            settingsDTO.setOrgAccessControlEnabled(APIUtil.isOrganizationAccessControlEnabled());
             settingsDTO.setPortalConfigurationOnlyModeEnabled(APIUtil.isPortalConfigurationOnlyModeEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
             settingsDTO.setAllowSubscriptionValidationDisabling(

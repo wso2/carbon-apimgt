@@ -20,10 +20,12 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
@@ -198,5 +200,22 @@ public class APIUtils {
         }
 
         return apiEndpointsList;
+    }
+    
+    public static List<KeyManagerConfigurationDTO> filterAllowedKeyManagersForOrganizations(
+            List<KeyManagerConfigurationDTO> keymanagerConfigs, OrganizationInfo orgInfo) {
+
+        List<KeyManagerConfigurationDTO> allowedList = new ArrayList<KeyManagerConfigurationDTO>();
+        String organization = orgInfo.getOrganizationSelector();
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keymanagerConfigs) {
+            List<String> allowedOrgs = keyManagerConfigurationDTO.getAllowedOrganizations();
+            // Add to allowedList if no organizations are restricted or if the organization is allowed
+            if (allowedOrgs == null || allowedOrgs.isEmpty() || allowedOrgs.contains(organization)) {
+                allowedList.add(keyManagerConfigurationDTO);
+            }
+            
+        }
+
+        return allowedList;
     }
 }

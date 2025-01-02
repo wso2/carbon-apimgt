@@ -51,6 +51,7 @@ public class RegistrySearchUtil {
     public static final String SEARCH_AND_TAG = "&";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
     public static final String NAME_TYPE_PREFIX = "name";
+    public static final String AND_WITH_SPACES = " AND ";
     public static final String API_STATUS = "STATUS";
     public static final String API_PROVIDER = "Provider";
     public static final String DOCUMENT_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer";
@@ -61,6 +62,9 @@ public class RegistrySearchUtil {
     public static final String SOAP_DEFINITION_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer" +
             ".SOAPAPIDefinitionIndexer";
     public static final String STORE_VIEW_ROLES = "store_view_roles";
+    public static final String STORE_VIEW_ROLES_FIELD = "store_view_roles_ss:";
+    public static final String VISIBLE_ORGANIZATIONS = "visible_organizations";
+    public static final String VISIBLE_ORGANIZATIONS_FIELD = "visible_organizations_ss:";
     public static final String PUBLISHER_ROLES = "publisher_roles";
     public static final String DOCUMENT_MEDIA_TYPE_KEY = "application/vnd.wso2-document\\+xml";
     public static final String API_DEF_MEDIA_TYPE_KEY = "application/json";
@@ -241,12 +245,28 @@ public class RegistrySearchUtil {
         String apiState = "";
         String publisherRoles = "";
         Map<String, String> attributes = new HashMap<String, String>();
+        String devportalFilterQuery = "";
+        String devportalFilterQueryField = "";
         for (String searchCriterea : searchQueries) {
             String[] keyVal = searchCriterea.split("=");
             if (STORE_VIEW_ROLES.equals(keyVal[0])) {
-                attributes.put("propertyName", keyVal[0]);
-                attributes.put("rightPropertyValue", keyVal[1]);
-                attributes.put("rightOp", "eq");
+                if (!StringUtils.isEmpty(keyVal[1])) {
+                    if (StringUtils.isEmpty(devportalFilterQuery)) {
+                        devportalFilterQueryField = STORE_VIEW_ROLES;
+                        devportalFilterQuery = keyVal[1];
+                    } else {
+                        devportalFilterQuery += (AND_WITH_SPACES + STORE_VIEW_ROLES_FIELD + keyVal[1]);
+                    }
+                }
+            } else if (VISIBLE_ORGANIZATIONS.equals(keyVal[0])) {
+                if (!StringUtils.isEmpty(keyVal[1])) {
+                    if (StringUtils.isEmpty(devportalFilterQuery)) {
+                        devportalFilterQueryField = VISIBLE_ORGANIZATIONS;
+                        devportalFilterQuery = keyVal[1];
+                    } else {
+                        devportalFilterQuery += (AND_WITH_SPACES + VISIBLE_ORGANIZATIONS_FIELD + keyVal[1]);
+                    }
+                }
             } else if (PUBLISHER_ROLES.equals(keyVal[0])) {
                 publisherRoles = keyVal[1];
             } else {
@@ -257,6 +277,11 @@ public class RegistrySearchUtil {
                 keyVal[1] = keyVal[1].replaceAll(" ", "&&");
                 attributes.put(keyVal[0], keyVal[1]);
             }
+        }
+        if (!StringUtils.isEmpty(devportalFilterQueryField)) {
+            attributes.put("propertyName", devportalFilterQueryField);
+            attributes.put("rightPropertyValue", devportalFilterQuery);
+            attributes.put("rightOp", "eq");
         }
 
         //check whether the new document indexer is engaged
@@ -431,6 +456,28 @@ public class RegistrySearchUtil {
         return criteria;
     }
 
+    private static String getOrganizationVisibilityWrappedQuery(String query, UserContext context) {
+        if (PersistenceUtil.isAdminUser(context)) {
+            log.debug("Admin user. no modifications to the query");
+            return query;
+        }
+
+        String orgName = context.getOrganization().getName();
+        if (orgName != null && orgName.contains(" ")) {
+            orgName = orgName.replace(" ", "+");
+        }
+
+        String criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgName + ")";
+        if (query != null && !query.trim().isEmpty()) {
+            criteria = criteria + "&" + query;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Organization visibility wrapped query : " + criteria);
+        }
+        return criteria;
+    }
+
+
     private static String getUserRolesQuery(String[] userRoles, String skippedRoles) {
 
         StringBuilder rolesQuery = new StringBuilder();
@@ -523,10 +570,14 @@ public class RegistrySearchUtil {
                 }
             }
 
-            String apiOverviewStateCriteria = APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY;
-            apiOverviewStateCriteria = apiOverviewStateCriteria + getORBasedSearchCriteria(statusList);
+            if (!modifiedQuery.startsWith(APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY) && !modifiedQuery
+                    .contains(APIConstants.SEARCH_AND_TAG + APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY)) {
 
-            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + apiOverviewStateCriteria;
+                String apiOverviewStateCriteria = APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY;
+                apiOverviewStateCriteria = apiOverviewStateCriteria + getORBasedSearchCriteria(statusList);
+
+                modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + apiOverviewStateCriteria;
+            }
         }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery, true), ctx);
         return modifiedQuery;
@@ -597,6 +648,7 @@ public class RegistrySearchUtil {
             modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString,
                     APIConstants.LCSTATE_SEARCH_TYPE_KEY);
         }
+        modifiedQuery = RegistrySearchUtil.getOrganizationVisibilityWrappedQuery(modifiedQuery, ctx);
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
         modifiedQuery = RegistrySearchUtil.getDevPortalVisibilityWrappedQuery(modifiedQuery, isCrossTenant);
         Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);

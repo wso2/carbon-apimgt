@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
@@ -1298,6 +1299,20 @@ public class RestApiUtil {
         }
         return organization;
     }
+    
+    /**
+     * Method to extract the User organization
+     * @param ctx MessageContext
+     * @return organization
+     */
+
+    public static OrganizationInfo getOrganizationInfo(MessageContext ctx) throws APIManagementException {
+        OrganizationInfo organizationInfo = new OrganizationInfo();
+        if (ctx.get(RestApiConstants.ORGANIZATION_INFO) != null) {
+            organizationInfo = (OrganizationInfo) ctx.get(RestApiConstants.ORGANIZATION_INFO);
+        }
+        return organizationInfo;
+    }
 
 
     /**
@@ -1339,5 +1354,30 @@ public class RestApiUtil {
         properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
         String organization = resolver.resolve(properties);
         return  organization;
+    }
+    
+    public static boolean isOrganizationVisibilityAllowed(String userName, String visibleOrgs, String userOrg)
+            throws APIManagementException {
+        boolean allowed = false;
+
+        if (APIUtil.isOrganizationAccessControlEnabled()) {
+            String[] roles = APIUtil.getListOfRoles(APIUtil.getUserNameWithTenantSuffix(userName));
+            if (Arrays.asList(roles).contains("admin")) {
+                return true;
+            }
+            if (StringUtils.isEmpty(visibleOrgs) || APIConstants.DEFAULT_VISIBLE_ORG.equals(visibleOrgs)) {
+                allowed = true;
+            } else {
+                List<String> visibleOrgList = Arrays.asList(visibleOrgs.split(","));
+
+                if (visibleOrgList.contains(userOrg)) {
+                    allowed = true;
+                } else {
+                    allowed = false;
+                }
+            }
+            return allowed;
+        }
+        return true;
     }
 }
