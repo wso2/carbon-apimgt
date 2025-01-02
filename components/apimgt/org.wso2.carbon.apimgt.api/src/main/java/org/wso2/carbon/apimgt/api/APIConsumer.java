@@ -904,4 +904,15 @@ public interface APIConsumer extends APIManager {
      */
     Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start, int end,
             String sortBy, String sortOrder) throws APIManagementException;
+
+    /**
+     * @param searchQuery search query
+     * @param organizationInfo Information about the organization
+     * @param start
+     * @param end
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedContent(String searchQuery, OrganizationInfo organizationInfo, int start, int end)
+            throws APIManagementException;
 }
