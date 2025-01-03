@@ -3437,6 +3437,7 @@ public class APIMappingUtil {
                         + model.getSuccessDeployedTime(), e);
             }
         }
+        apiRevisionDeploymentDTO.setVisibility(model.getVisibility());
         return apiRevisionDeploymentDTO;
     }
 
