@@ -7045,7 +7045,7 @@ public final class APIUtil {
     public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy) {
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("typ", entityType);
+        jsonObject.put("type", entityType);
         jsonObject.put("action", action);
         jsonObject.put("performedBy", performedBy);
         if (entityInfo != null && !StringUtils.isBlank(entityInfo)) {
