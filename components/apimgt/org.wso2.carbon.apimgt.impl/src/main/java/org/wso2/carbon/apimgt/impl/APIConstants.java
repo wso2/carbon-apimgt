@@ -464,6 +464,7 @@ public final class APIConstants {
     public static final String BINDING_FEDERATED_USER_CLAIMS = "EnableBindingFederatedUserClaims";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
+    public static final String Enable_JWKS_API = "EnableJWKSApi";
     public static final String CLAIMS_RETRIEVER_CLASS = "ClaimsRetrieverImplClass";
     public static final String USE_KID = "UseKidProperty";
     public static final String CONSUMER_DIALECT_URI = "ConsumerDialectURI";
@@ -864,6 +865,10 @@ public final class APIConstants {
     public static final String API_RESTAPI_ALLOWED_URI = API_RESTAPI + "AllowedURIs.AllowedURI.";
     public static final String API_RESTAPI_ALLOWED_URI_URI = API_RESTAPI_ALLOWED_URI + "URI";
     public static final String API_RESTAPI_ALLOWED_URI_HTTPMethods = API_RESTAPI_ALLOWED_URI + "HTTPMethods";
+    public static final String API_RESTAPI_BASIC_AUTH_BLOCKED_URI = API_RESTAPI + "BasicAuthBlockedURIs.BasicAuthBlockedURI.";
+    public static final String API_RESTAPI_BASIC_AUTH_BLOCKED_URI_URI = API_RESTAPI_BASIC_AUTH_BLOCKED_URI + "URI";
+    public static final String API_RESTAPI_BASIC_AUTH_BLOCKED_URI_HTTPMethods =
+            API_RESTAPI_BASIC_AUTH_BLOCKED_URI + "HTTPMethods";
     public static final String API_RESTAPI_ETAG_SKIP_LIST = API_RESTAPI + "ETagSkipList.";
     public static final String API_RESTAPI_ETAG_SKIP_URI = API_RESTAPI_ETAG_SKIP_LIST + "ETagSkipURI.";
     public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
@@ -2569,7 +2574,7 @@ public final class APIConstants {
 
     public static final int MAX_LENGTH_API_NAME = 60;
     public static final int MAX_LENGTH_VERSION = 30;
-    public static final int MAX_LENGTH_PROVIDER = 50;
+    public static final int MAX_LENGTH_PROVIDER = 200;
     public static final int MAX_LENGTH_CONTEXT = 232; //context becomes context + version + two '/'. Max context is 200
     public static final int MAX_LENGTH_MEDIATION_POLICY_NAME = 255;
 

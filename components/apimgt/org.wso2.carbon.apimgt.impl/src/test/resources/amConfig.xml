@@ -11,6 +11,7 @@
     </Database>
     <JWTConfiguration>
         <EnableJWTGeneration>false</EnableJWTGeneration>
+        <EnableJWKSApi>true</EnableJWKSApi>
 	    <SignatureAlgorithm>NONE</SignatureAlgorithm>
     </JWTConfiguration>
     <APIUsageTracking>

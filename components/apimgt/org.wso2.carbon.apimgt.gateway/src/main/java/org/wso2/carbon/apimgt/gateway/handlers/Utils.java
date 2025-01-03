@@ -79,7 +79,21 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 
@@ -822,17 +836,19 @@ public class Utils {
      */
     public static Set<Resource> getAcceptableResources(Resource[] allAPIResources,
                                                        String httpMethod, String corsRequestMethod) {
-        Set<Resource> acceptableResources = new LinkedHashSet<>();
+        List<Resource> acceptableResourcesList = new LinkedList<>();
         for (Resource resource : allAPIResources) {
             //If the requesting method is OPTIONS or if the Resource contains the requesting method
-            String [] resourceMethods = resource.getMethods();
-            if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resourceMethods != null
-                    && Arrays.asList(resourceMethods).contains(corsRequestMethod))
-                    || (resourceMethods != null && Arrays.asList(resourceMethods).contains(httpMethod))) {
-                acceptableResources.add(resource);
+            if (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod) &&
+                    RESTConstants.METHOD_OPTIONS.equals(httpMethod)) {
+                acceptableResourcesList.add(0, resource);
+            } else if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
+                    Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
+                    (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+                acceptableResourcesList.add(resource);
             }
         }
-        return acceptableResources;
+        return new LinkedHashSet<>(acceptableResourcesList);
     }
 
     /**
