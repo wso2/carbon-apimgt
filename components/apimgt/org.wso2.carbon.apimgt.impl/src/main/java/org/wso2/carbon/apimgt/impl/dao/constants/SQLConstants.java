@@ -3939,8 +3939,8 @@ public class SQLConstants {
         public static final String GET_REVISIONS_BY_API_UUID = "SELECT ID, REVISION_UUID, DESCRIPTION, CREATED_TIME, " +
                 "CREATED_BY FROM AM_REVISION WHERE API_UUID = ? ORDER BY ID";
         public static final String ADD_API_REVISION_DEPLOYMENT_MAPPING =
-                " INSERT INTO AM_DEPLOYMENT_REVISION_MAPPING (NAME, VHOST, REVISION_UUID, DISPLAY_ON_DEVPORTAL, DEPLOYED_TIME)" +
-                        " VALUES (?,?,?,?,?)";
+                " INSERT INTO AM_DEPLOYMENT_REVISION_MAPPING (NAME, VHOST, REVISION_UUID, DISPLAY_ON_DEVPORTAL, DEPLOYED_TIME, GW_VISIBILITY)" +
+                        " VALUES (?,?,?,?,?,?)";
         public static final String ADD_DEPLOYED_API_REVISION =
                 "INSERT INTO AM_DEPLOYED_REVISION (NAME, VHOST, REVISION_UUID, DEPLOYED_TIME)" +
                         " VALUES (?,?,?,?)";

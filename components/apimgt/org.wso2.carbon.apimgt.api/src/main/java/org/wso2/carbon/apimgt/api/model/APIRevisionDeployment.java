@@ -33,6 +33,8 @@ public class APIRevisionDeployment implements Serializable {
     private String deployedTime;
     private String successDeployedTime;
 
+    private String visibility;
+
     public int getId() {
         return id;
     }
@@ -95,5 +97,13 @@ public class APIRevisionDeployment implements Serializable {
 
     public void setStatus(WorkflowStatus status) {
         this.status = status;
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
     }
 }

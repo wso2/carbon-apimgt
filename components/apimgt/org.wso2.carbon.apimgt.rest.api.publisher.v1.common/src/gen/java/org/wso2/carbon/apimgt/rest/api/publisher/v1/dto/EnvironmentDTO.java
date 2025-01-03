@@ -32,6 +32,7 @@ public class EnvironmentDTO   {
     private String gatewayType = "Regular";
     private String serverUrl = null;
     private String provider = null;
+    private String visibility = null;
     private Boolean showInApiConsole = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
     private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
@@ -162,6 +163,23 @@ public class EnvironmentDTO   {
 
   /**
    **/
+  public EnvironmentDTO visibility(String visibility) {
+    this.visibility = visibility;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Role1, Role2", value = "")
+  @JsonProperty("visibility")
+  public String getVisibility() {
+    return visibility;
+  }
+  public void setVisibility(String visibility) {
+    this.visibility = visibility;
+  }
+
+  /**
+   **/
   public EnvironmentDTO showInApiConsole(Boolean showInApiConsole) {
     this.showInApiConsole = showInApiConsole;
     return this;
@@ -249,6 +267,7 @@ public class EnvironmentDTO   {
         Objects.equals(gatewayType, environment.gatewayType) &&
         Objects.equals(serverUrl, environment.serverUrl) &&
         Objects.equals(provider, environment.provider) &&
+        Objects.equals(visibility, environment.visibility) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
         Objects.equals(vhosts, environment.vhosts) &&
         Objects.equals(endpointURIs, environment.endpointURIs) &&
@@ -257,7 +276,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, type, gatewayType, serverUrl, provider, showInApiConsole, vhosts, endpointURIs, additionalProperties);
+    return Objects.hash(id, name, displayName, type, gatewayType, serverUrl, provider, visibility, showInApiConsole, vhosts, endpointURIs, additionalProperties);
   }
 
   @Override
@@ -272,6 +291,7 @@ public class EnvironmentDTO   {
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    serverUrl: ").append(toIndentedString(serverUrl)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    showInApiConsole: ").append(toIndentedString(showInApiConsole)).append("\n");
     sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
     sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");

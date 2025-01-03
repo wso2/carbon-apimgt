@@ -18043,6 +18043,7 @@ public class ApiMgtDAO {
                     statement.setString(3, apiRevisionId);
                     statement.setBoolean(4, apiRevisionDeployment.isDisplayOnDevportal());
                     statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+                    statement.setString(6, apiRevisionDeployment.getVisibility());
                     statement.addBatch();
                 }
                 statement.executeBatch();

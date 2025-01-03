@@ -59,6 +59,7 @@ public class EnvironmentMappingUtil {
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());
         environmentDTO.setProvider(environment.getProvider());
+        environmentDTO.setVisibility(environment.getVisibility());
         environmentDTO.setVhosts(environment.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
         environmentDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
