@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.29.120</version>
+        <version>9.30.76-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -291,9 +291,6 @@
                                 </bundleDef>
                                 <bundleDef>
                                     com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${fasterxml.jackson.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    software.amazon.ion:ion-java:${software.amazon.ion.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>

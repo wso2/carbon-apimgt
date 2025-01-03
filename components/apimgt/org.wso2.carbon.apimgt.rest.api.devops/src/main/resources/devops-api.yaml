@@ -26,12 +26,12 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 paths:
-  "/tenant-logs/{tenantId}/apis/":
+  "/tenant-logs/{tenant}/apis/":
     get:
       summary: |
         GET log level of APIs
       parameters:
-        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/tenant'
         - $ref: '#/components/parameters/logLevel'
       responses:
         "200":
@@ -56,11 +56,11 @@ paths:
                 $ref: "#/components/schemas/Error"
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/1/apis?log-level=FULL"'
+          source: 'curl -k -H "Authorization: Basic YWRtaW46YWRtaW4="
+          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/carbon.super/apis?log-level=FULL"'
 
 
-  "/tenant-logs/{tenantId}/apis/{apiId}":
+  "/tenant-logs/{tenant}/apis/{apiId}":
     get:
       summary: |
         GET log enabled API data
@@ -86,12 +86,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       parameters:
-        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/tenant'
         - $ref: '#/components/parameters/apiId'
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/1/apis/12d6e73c-778d-45ac-b57d-117c6c5092a4"'
+          source: 'curl -k -H "Authorization: Basic YWRtaW46YWRtaW4="
+          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/carbon.super/apis/12d6e73c-778d-45ac-b57d-117c6c5092a4"'
     put:
       summary: |
         Set logging levels of the API with its api ID
@@ -100,7 +100,7 @@ paths:
         template(context/version) with the log level (OFF|BASIC|STANDARD|FULL).
         You should either provide the api ID and the api log level.
       parameters:
-        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/tenant'
         - $ref: '#/components/parameters/apiId'
       requestBody:
         content:
@@ -132,8 +132,8 @@ paths:
                 $ref: "#/components/schemas/Error"
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/1/apis/12d6e73c-778d-45ac-b57d-117c6c5092a4"'
+          source: 'curl -k -X PUT -H "Authorization: Basic YWRtaW46YWRtaW4="
+          "https://127.0.0.1:9443/api/am/devops/v0/tenant-logs/carbon.super/apis/12d6e73c-778d-45ac-b57d-117c6c5092a4"'
 
   "/config/correlation/":
     get:
@@ -163,7 +163,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          source: 'curl -k -H "Authorization: Basic YWRtaW46YWRtaW4="
           "https://127.0.0.1:9443/api/am/devops/v0/config/correlation"'
 
     put:
@@ -204,7 +204,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d data.json
+          source: 'curl -k -X PUT -H "Authorization: Basic YWRtaW46YWRtaW4=" -d data.json
           "https://127.0.0.1:9443/api/am/devops/v0/config/correlation"'
 
 servers:
@@ -333,11 +333,11 @@ components:
             A detail description about the error message.
 
   parameters:
-    tenantId:
-      name: tenantId
+    tenant:
+      name: tenant
       in: path
       description: |
-        Tenant ID
+        Tenant (organization) name
       required: true
       schema:
         type: string

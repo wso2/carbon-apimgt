@@ -253,6 +253,17 @@ paths:
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/requestedTenant-Q'
+        - name: query
+          in: query
+          description: |
+            **Key Manager Specific Swagger Generation**.
+            To retrieve an OpenAPI Specification (OAS) definition for a specific Key Manager, please specify the Key Manager's ID in your request. 
+              
+            For example, by passing the query parameter `kmId=65e30b46-85e4-4788-85b7-b1c3de06b2e0`, you will receive the OAS definition containing all relevant information for the Key Manager associated with that ID.
+              
+            **Important:** If you're using a client that does not automatically handle URL encoding (such as `curl`), please ensure that you encode the URL properly.
+          schema:
+            type: string
       responses:
         200:
           description: |
@@ -3144,6 +3155,55 @@ paths:
           source: curl -k "https://localhost:9443/api/am/devportal/v3/throttling-policies/application/10PerMin"
 
   ######################################################
+  # The "Throttling Policy Reset" resource APIs
+  ######################################################
+  /applications/{applicationId}/reset-throttle-policy:
+    post:
+      tags:
+        - Applications
+      summary: Reset Application-Level Throttle Policy
+      description: |
+        This operation can be used to reset the application-level throttle policy for a specific user.
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+      requestBody:
+        description: |
+          Payload for which the application-level throttle policy needs to be reset
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationThrottleReset'
+        required: true
+      responses:
+        200:
+          description: OK. Application-level throttle policy reset successfully
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+          - apim:app_manage
+          - apim:subscribe
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k \
+            -H "Authorization: Bearer 80249337-fe7c-3c66-bde6-ed431c144372" \
+            -H "Content-Type: application/json" -X POST \
+            -d @payload.json \
+            "https://localhost:9443/api/am/devportal/v3/application/37dd21cc-631e-4c73-bf73-c59cc7087a63/reset-throttle-policy"'
+
+  ######################################################
   # The "Tag Collection" resource API
   ######################################################
   /tags:
@@ -3772,6 +3832,14 @@ paths:
 
 components:
   schemas:
+    ApplicationThrottleReset:
+      title: Reset application level throttling
+      type: object
+      properties:
+        userName:
+          type: string
+          description: The username for which the throttle policy needs to be reset
+          example: admin
     APIList:
       title: API List
       type: object
@@ -3922,6 +3990,17 @@ components:
         monetizedInfo:
           type: boolean
           example: true
+        egress:
+          type: boolean
+          description: Whether the API is Egress or not
+          default: false
+          example: true
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
     APIInfoList:
       title: API Info List
       type: object
@@ -4198,6 +4277,17 @@ components:
             - mqtt
           items:
             type: string
+        egress:
+          type: boolean
+          description: Whether the API is egress or not
+          default: false
+          example: true
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
     APIMonetizationInfo:
       title: API monetization object
       required:
@@ -5262,6 +5352,8 @@ components:
           enum:
             - DOC
             - API
+            - APIProduct
+            - DEFINITION
         transportType:
           type: string
           description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
@@ -5362,6 +5454,38 @@ components:
               example: admin
             apiUUID:
               type: string
+    APIDefinitionSearchResult:
+      title: API Definition Search Result
+      allOf:
+        - $ref: '#/components/schemas/SearchResult'
+        - properties:
+            apiName:
+              type: string
+              description: The name of the associated API
+              example: TestAPI
+            apiVersion:
+              type: string
+              description: The version of the associated API
+              example: 1.0.0
+            apiContext:
+              type: string
+              description: The context of the associated API
+              example: /test
+            apiUUID:
+              type: string
+              description: The UUID of the associated API
+            apiProvider:
+              type: string
+              description: The provider name of the associated API
+              example: publisher
+            apiType:
+              type: string
+              description: The type of the associated API
+              example: REST
+            associatedType:
+              type: string
+              description: API or APIProduct
+              example: API
     CommenterInfo:
       type: object
       properties:

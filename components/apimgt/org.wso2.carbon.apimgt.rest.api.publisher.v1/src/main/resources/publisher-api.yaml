@@ -487,6 +487,196 @@ paths:
           -H "Content-Type: application/json" -d @data.json
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/topics"'
 
+  /apis/{apiId}/sequence-backend/{type}/content:
+    get:
+      tags:
+        - APIs
+      summary: Get Sequence of Custom Backend
+      description: This operation can be used to get Sequence of the Custom Backend
+      operationId: getSequenceBackendContent
+      parameters:
+        - name: type
+          in: path
+          description: |
+            Type of the Endpoint.
+            SANDBOX or PRODUCTION
+          required: true
+          schema:
+            maxLength: 15
+            type: string
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API Custom Backend is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/xml:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:api_import_export
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f/content"'
+
+  /apis/{apiId}/sequence-backend/{type}:
+    delete:
+      tags:
+        - APIs
+      summary: Delete Sequence Backend of the API
+      description: This operation can be used to remove the Sequence Backend of the API
+      operationId: sequenceBackendDelete
+      parameters:
+        - name: type
+          in: path
+          description: |
+            Type of the Endpoint.
+            SANDBOX or PRODUCTION
+          required: true
+          schema:
+            maxLength: 15
+            type: string
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: { }
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_delete
+            - apim:api_manage
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f"'
+
+  /apis/{apiId}/sequence-backend:
+    get:
+      tags:
+        - APIs
+      summary: Get Sequence Backends of the API
+      description: This operation can be used to get Sequence Backend data of the API
+      operationId: getSequenceBackendData
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API Sequence Backend is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SequenceBackendList'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:api_import_export
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend/7a2298c4-c915-483f-8fac-38c73301631f"'
+    put:
+      tags:
+        - APIs
+      summary: Upload Sequence Sequence as the Endpoint of the API
+      description: This operation can be used to change the endpoint of the API to Sequence Backend
+      operationId: sequenceBackendUpdate
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                sequence:
+                  type: string
+                  description: The sequence that needs to be uploaded.
+                  format: binary
+                type:
+                  type: string
+                  description: Type of the Endpoint
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated API object
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/custom-backend"'
+
+
   /apis/{apiId}/reimport-service:
     put:
       tags:
@@ -1105,6 +1295,7 @@ paths:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/isAiApi'
       responses:
         200:
           description: |
@@ -4013,6 +4204,12 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: gatewayEnvironment
+          in: query
+          description: |
+            Gateway environment of the exported APIs
+          schema:
+            type: string
       responses:
         200:
           description: |
@@ -4386,6 +4583,44 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809"'
       operationId: unBlockSubscription
 
+  /subscriptions/change-business-plan:
+    post:
+      tags:
+        - Subscriptions
+      summary: Change subscription business plan
+      description: |
+        This operation can be used to change the business plan of a subscription specifying the subscription Id and the business plan.
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId-Q'
+        - name: businessPlan
+          in: query
+          description: |
+            The business plan to be assigned to the subscription.
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Subscription business plan was changed successfully.
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+      security:
+        - OAuth2Security:
+            - apim:subscription_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST
+          "https://127.0.0.1:9443/api/am/publisher/v4/subscriptions/change-business-plan?subscriptionId=92c50632-012f-4739-b37d-baa23008c813&businessPlan=Silver"'
+      operationId: changeSubscriptionBusinessPlan
 
   ######################################################
   # The "Thorttling Tier Collection" resource APIs
@@ -4404,6 +4639,7 @@ paths:
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/policyLevel'
         - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/isAiApi'
       responses:
         200:
           description: |
@@ -4554,11 +4790,15 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/throttling-policies/api/Platinum"'
 
+  ######################################################
+  # The "Client Certificates" resource APIs (Deprecated)
+  ######################################################
   /apis/{apiId}/client-certificates:
     get:
       tags:
         - Client Certificates
       summary: Retrieve/ Search Uploaded Client Certificates
+      deprecated: true
       description: |
         This operation can be used to retrieve and search the uploaded client certificates.
       parameters:
@@ -4604,6 +4844,7 @@ paths:
       tags:
         - Client Certificates
       summary: Upload a New Certificate
+      deprecated: true
       description: |
         This operation can be used to upload a new certificate for an endpoint.
       parameters:
@@ -4669,6 +4910,7 @@ paths:
 
   /apis/{apiId}/client-certificates/{alias}:
     get:
+      deprecated: true
       tags:
         - Client Certificates
       summary: Get the Certificate Information
@@ -4714,6 +4956,7 @@ paths:
       operationId: getAPIClientCertificateByAlias
 
     put:
+      deprecated: true
       tags:
         - Client Certificates
       summary: Update a Certificate
@@ -4781,6 +5024,7 @@ paths:
       operationId: updateAPIClientCertificateByAlias
 
     delete:
+      deprecated: true
       tags:
         - Client Certificates
       summary: Delete a Certificate
@@ -4826,6 +5070,7 @@ paths:
 
   /apis/{apiId}/client-certificates/{alias}/content:
     get:
+      deprecated: true
       tags:
         - Client Certificates
       summary: Download a Certificate
@@ -4866,6 +5111,342 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon/content" > test.crt'
       operationId: getAPIClientCertificateContentByAlias
+
+  ######################################################
+  # The "Client Certificates" resource APIs (New)
+  ######################################################
+  /apis/{apiId}/client-certs/{keyType}:
+    parameters:
+      - in: path
+        name: keyType
+        schema:
+          type: string
+        required: true
+        description: Key type for the certificate
+    get:
+      tags:
+        - Client Certificates
+      summary: Retrieve/ Search Uploaded Client Certificates of a given key type
+      description: |
+        This operation can be used to retrieve and search the uploaded client certificates of a given key type.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: alias
+          in: query
+          description: Alias for the client certificate
+          schema:
+            type: string
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK. Successful response with the list of matching certificate information in the body.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientCertificates'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:client_certificates_view
+            - apim:client_certificates_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certs/PRODUCTION?alias=wso2carbon"'
+      operationId: getAPIClientCertificatesByKeyType
+    post:
+      tags:
+        - Client Certificates
+      summary: Upload a New Certificate of the given key type
+      description: |
+        This operation can be used to upload a new certificate for an endpoint of the given type.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - alias
+                - certificate
+                - tier
+              properties:
+                certificate:
+                  type: string
+                  description: The certificate that needs to be uploaded.
+                  format: binary
+                alias:
+                  maxLength: 30
+                  minLength: 1
+                  type: string
+                  description: Alias for the certificate
+                tier:
+                  type: string
+                  description: API tier to which the certificate should be applied.
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            The Certificate added successfully.
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientCertMetadata'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:client_certificates_add
+            - apim:client_certificates_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=wso2carbon -F tier=Gold
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certs/PRODUCTION"'
+      operationId: addAPIClientCertificateOfGivenKeyType
+
+  /apis/{apiId}/client-certs/{keyType}/{alias}:
+    parameters:
+      - in: path
+        name: keyType
+        schema:
+          type: string
+        required: true
+        description: Key type for the certificate
+    get:
+      tags:
+        - Client Certificates
+      summary: Get the Certificate Information of a Given Key Type
+      description: |
+        This operation can be used to get the information about a certificate of a given key type.
+      parameters:
+        - name: alias
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:client_certificates_view
+            - apim:client_certificates_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certs/PRODUCTION/wso2carbon"'
+      operationId: getAPIClientCertificateByKeyTypeAndAlias
+
+    put:
+      tags:
+        - Client Certificates
+      summary: Update a Certificate of a Given Key Type
+      description: |
+        This operation can be used to update an uploaded certificate of a given key type.
+      parameters:
+        - name: alias
+          in: path
+          description: Alias for the certificate
+          required: true
+          schema:
+            maxLength: 30
+            minLength: 1
+            type: string
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                certificate:
+                  type: string
+                  description: The certificate that needs to be uploaded.
+                  format: binary
+                tier:
+                  type: string
+                  description: The tier of the certificate
+      responses:
+        200:
+          description: |
+            OK.
+            The Certificate updated successfully.
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientCertMetadata'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:client_certificates_update
+            - apim:client_certificates_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=wso2carbon
+          -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certs/PRODUCTION/wso2carbon"'
+      operationId: updateAPIClientCertificateByKeyTypeAndAlias
+
+    delete:
+      tags:
+        - Client Certificates
+      summary: Delete a Certificate of a Given Key Type
+      description: |
+        This operation can be used to delete an uploaded certificate of a given key type.
+      parameters:
+        - name: alias
+          in: path
+          description: |
+            The alias of the certificate that should be deleted.
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            The Certificate deleted successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:client_certificates_update
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
+      operationId: deleteAPIClientCertificateByKeyTypeAndAlias
+
+  /apis/{apiId}/client-certs/{keyType}/{alias}/content:
+    get:
+      tags:
+        - Client Certificates
+      summary: Download a Certificate of Given Key Type
+      description: |
+        This operation can be used to download a certificate which matches the given alias and key type.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - name: alias
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: keyType
+          in: path
+          description: |
+            The key type of the certificate that should be deleted.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:client_certificates_view
+            - apim:client_certificates_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certs/PRODUCTION/wso2carbon/content" > test.crt'
+      operationId: getAPIClientCertificateContentByKeyTypeAndAlias
 
   ######################################################
   # The "Certificate Management" resource APIs
@@ -7784,7 +8365,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
+            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F synapsePolicyDefinitionFile=@setHeader.j2
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies"'
 
 
@@ -7908,6 +8489,141 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
+  ######################################################
+  # LLM Providers resource APIs
+  ######################################################
+  /llm-providers:
+    get:
+      tags:
+        - LLMProviders
+      summary: Get all LLM providers
+      description: |
+        Get all LLM providers
+      responses:
+        200:
+          description: |
+            OK.
+            List of LLM providers.
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderSummaryResponseList'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers"'
+      operationId: getLLMProviders
+
+  /llm-providers/{llmProviderId}/api-definition:
+    get:
+      tags:
+        - LLMProvider
+      summary: Get LLM Provider's API Definition
+      description: |
+        Get LLM Provider's API Definition
+      parameters:
+        - name: llmProviderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            API Definition
+          content:
+            application/json:
+              schema:
+                type: string
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/api-definition"'
+      operationId: getLLMProviderApiDefinition
+
+  /llm-providers/{llmProviderId}/endpoint-configuration:
+    get:
+      tags:
+        - LLMProvider
+      summary: Get LLM provider's security configurations
+      description: |
+        Get LLM provider's endpoint security configurations
+      parameters:
+        - name: llmProviderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            API Definition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderEndpointConfiguration'
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/endpoint-configuration"'
+      operationId: getLLMProviderEndpointConfiguration
+
+  ######################################################
+  # The "Individual LLM Provider" resource APIs
+  ######################################################
+  /llm-providers/{llmProviderId}:
+    get:
+      tags:
+        - LLMProvider
+      summary: Get LLM Provider
+      description: |
+        Get a LLM Provider
+      parameters:
+        - name: llmProviderId
+          in: path
+          description: |
+            LLM Provider ID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            LLM Provider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderResponse'
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
+      operationId: getLLMProvider
+
   /operation-policies:
     get:
       tags:
@@ -8028,7 +8744,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F policyDefinitionFile=@setHeader.j2
+            -H "Content-Type: multipart/form-data" -F policySpecFile=@setHeader.yaml -F synapsePolicyDefinitionFile=@setHeader.j2
             "https://127.0.0.1:9443/api/am/publisher/v4/operation-policies"'
 
   /operation-policies/export:
@@ -8681,8 +9397,180 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPIProductLifecycleStatePendingTasks
 
+  ######################################################
+  # The "Workflow Collection" resource APIs
+  ######################################################
+  /workflows:
+    get:
+      tags:
+        - Workflow (Collection)
+      summary: |
+        Retrieve All Pending Workflow Processes
+      description: |
+        This operation can be used to retrieve list of workflow pending processes.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/Accept'
+        - name: workflowType
+          in: query
+          description: |
+            We need to show the values of each workflow process separately .for that we use workflow type.
+            Workflow type can be AM_SUBSCRIPTION_CREATION, AM_SUBSCRIPTION_UPDATE.
+          schema:
+            type: string
+            enum:
+              - AM_SUBSCRIPTION_CREATION
+              - AM_SUBSCRIPTION_UPDATE
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow pendding process list returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:subscription_approval_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/workflows"'
+  /workflows/{externalWorkflowRef}:
+    get:
+      tags:
+        - Workflows (Individual)
+      summary: |
+        Get Pending Workflow Details by External Workflow Reference
+      description: |
+        Using this operation, you can retrieve complete details of a pending workflow request that either belongs to application creation, application subscription, application registration, api state change, user self sign up.. You need to provide the External_Workflow_Reference of the workflow Request to retrive it.
+      parameters:
+        - name: externalWorkflowRef
+          in: path
+          description: |
+            from the externel workflow reference we decide what is the the pending request that the are requesting.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Requested Workflow Pending is returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowInfo'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:subscription_approval_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/workflows/c43a325c-260b-4302-81cb-768eafaa3aed"'
+
+  /workflows/update-workflow-status:
+    post:
+      tags:
+        - Workflows (Individual)
+      summary: Update Workflow Status
+      description: |
+        This operation can be used to approve or reject a workflow task.
+      parameters:
+        - $ref: '#/components/parameters/workflowReferenceId-Q'
+      requestBody:
+        description: |
+          Workflow event that need to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workflow'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:subscription_approval_view
+            - apim:subscription_approval_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
 components:
   schemas:
+    SequenceBackendList:
+      title: Sequence Backend List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Sequence Backends returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/SequenceBackend'
+    SequenceBackend:
+      title: Sequence Backend
+      type: object
+      properties:
+        sequenceId:
+          type: string
+          readOnly: true
+          example: 943d3002-000c-42d3-a1b9-d6559f8a4d49
+        sequenceName:
+          type: string
+          readOnly: true
+          example: 943d3002-000c-42d3-a1b9-d6559f8a4d49-SANDBOX
+        sequenceType:
+          type: string
+          readOnly: true
+          example: SANDBOX
+        sequence:
+          type: string
+          format: binary
+          readOnly: true
     Comment:
       title: Comment
       required:
@@ -8836,6 +9724,12 @@ components:
         type:
           type: string
           example: HTTP
+        subtype:
+          type: string
+          description: Subtype of the API.
+          default: DEFAULT
+          example: AIAPI
+          readOnly: true
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -8843,6 +9737,12 @@ components:
           enum:
             - PUBLIC
             - SINGLE
+        audiences:
+          type: array
+          description: The audiences of the API for jwt validation. Accepted values are any String values
+          items:
+            type: string
+            example: [ "aud1","aud2","aud3" ]
         lifeCycleStatus:
           type: string
           example: CREATED
@@ -8892,6 +9792,11 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the API is EGRESS or not
+          default: false
+          example: true
     APIMetadata:
       title: API Info object with basic minimal API details.
       type: object
@@ -8955,6 +9860,108 @@ components:
             $ref: '#/components/schemas/Topic'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    Workflow:
+      title: workflow
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+          description: |
+            This attribute declares whether this workflow task is approved or rejected.
+          example: APPROVED
+          enum:
+            - APPROVED
+            - REJECTED
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+          description: |
+            Custom attributes to complete the workflow task
+          example: {}
+        description:
+          type: string
+          example: Approve workflow request.
+    WorkflowList:
+      title: WorkflowList
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of workflow processes returned.
+          example: 1
+        next:
+          type: string
+          description: |
+            Link to the next subset of resources qualified.
+            Empty if no more resources are to be returned.
+          example: /workflows?limit=1&offset=2&user=
+        previous:
+          type: string
+          description: |
+            Link to the previous subset of resources qualified.
+            Empty if current subset is the first subset returned.
+          example: /workflows?limit=1&offset=0&user=
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowInfo'
+    WorkflowInfo:
+      title: Workflow info object with basic workflow details
+      type: object
+      properties:
+        workflowType:
+          type: string
+          description: |
+            Type of the Workflow Request. It shows which type of request is it.
+          example: APPLICATION_CREATION
+          enum:
+            - APPLICATION_CREATION
+            - SUBSCRIPTION_CREATION
+            - USER_SIGNUP
+            - APPLICATION_REGISTRATION_PRODUCTION
+            - APPLICATION_REGISTRATION_SANDBOX
+            - APPLICATION_DELETION
+            - API_STATE
+            - API_PRODUCT_STATE
+            - SUBSCRIPTION_DELETION
+            - SUBSCRIPTION_UPDATE
+            - REVISION_DEPLOYMENT
+        workflowStatus:
+          type: string
+          description: |
+            Show the Status of the the workflow request whether it is approved or created.
+          example: APPROVED
+          enum:
+            - APPROVED
+            - CREATED
+        createdTime:
+          type: string
+          description: |
+            Time of the the workflow request created.
+          example: 2020-02-10 10:10:19.704
+        updatedTime:
+          type: string
+          description: |
+            Time of the the workflow request updated.
+          example: 2020-02-10 10:10:19.704
+        referenceId:
+          type: string
+          description: |
+            Workflow external reference is used to identify the workflow requests uniquely.
+          example: 5871244b-d6f3-466e-8995-8accd1e64303
+        properties:
+          type: object
+          properties: { }
+        description:
+          type: string
+          description: |
+            description is a message with basic details about the workflow request.
+          example: Approve application [APP1] creation request from application creator
+            - admin with throttling tier - 10MinPer
     API:
       title: API object
       required:
@@ -9060,6 +10067,12 @@ components:
           enum:
             - PUBLIC
             - SINGLE
+        audiences:
+          type: array
+          description: The audiences of the API for jwt validation. Accepted values are any String values
+          items:
+            type: string
+            example: [ "aud1","aud2","aud3" ]
         transport:
           type: array
           description: |
@@ -9370,6 +10383,19 @@ components:
             - INLINE
             - ENDPOINT
             - MOCKED_OAS
+        subtypeConfiguration:
+          type: object
+          description: Configuration settings for the API subtype.
+          properties:
+            subtype:
+              type: string
+              description: The designated name of the API subtype.
+              default: DEFAULT
+              example: AIAPI
+              readOnly: true
+            configuration:
+              type: object
+              description: Specific configuration properties related to the API subtype.
         scopes:
           type: array
           items:
@@ -9452,6 +10478,11 @@ components:
             - https
           items:
             type: string
+        egress:
+          type: boolean
+          description: Whether the API is EGRESS or not
+          default: false
+          example: true
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -9558,6 +10589,7 @@ components:
         displayOnDevportal:
           type: boolean
           example: true
+          default: true
         deployedTime:
           readOnly: true
           type: string
@@ -9652,6 +10684,12 @@ components:
         gatewayVendor:
           type: string
           example: wso2
+        audiences:
+          type: array
+          description: The audiences of the API product for jwt validation. Accepted values are any String values
+          items:
+            type: string
+            example: [ "aud1","aud2","aud3" ]
         monetizedInfo:
           type: boolean
           example: true
@@ -9667,6 +10705,11 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     APIProduct:
       title: API Product object
       required:
@@ -9925,6 +10968,17 @@ components:
         workflowStatus:
           type: string
           example: APPROVED
+        audiences:
+          type: array
+          description: The audiences of the API for jwt validation. Accepted values are any String values
+          items:
+            type: string
+            example: [ "aud1","aud2","aud3" ]
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     ProductAPI:
       title: ProductAPI
       required:
@@ -10285,6 +11339,24 @@ components:
             Unit of data allowed to be transfered. Allowed values are "KB", "MB" and "GB"
           type: string
           example: KB
+        totalTokenCount:
+          type: integer
+          description: |
+            Maximum number of total tokens which can be used within a provided unit time
+          format: int64
+          example: 1000
+        promptTokenCount:
+          type: integer
+          description: |
+            Maximum number of prompt tokens which can be used within a provided unit time
+          format: int64
+          example: 500
+        completionTokenCount:
+          type: integer
+          description: |
+            Maximum number of completion tokens which can be used within a provided unit time
+          format: int64
+          example: 600
         unitTime:
           type: integer
           format: int64
@@ -10307,6 +11379,7 @@ components:
           enum:
             - REQUESTCOUNT
             - BANDWIDTHVOLUME
+            - AIAPIQUOTA
           example: REQUESTCOUNT
         tierPlan:
           type: string
@@ -10790,6 +11863,85 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+    LLMProviderResponse:
+      title: LLMProviderResponse
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: OpenAI
+        apiVersion:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: 1.0.0
+        builtInSupport:
+          type: boolean
+          description: Is built-in support
+        description:
+          maxLength: 1023
+          type: string
+          example: OpenAI LLM
+        configurations:
+          type: string
+          description: LLM Provider configurations
+        apiDefinition:
+          type: string
+          description: OpenAPI specification
+    LLMProviderSummaryResponse:
+      title: LLMProviderSummaryResponse
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: open-ai
+        apiVersion:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: 1.0.0
+        builtInSupport:
+          type: boolean
+          description: Is built-in support
+        description:
+          maxLength: 1023
+          type: string
+          example: OpenAI LLM Provider
+    LLMProviderSummaryResponseList:
+      title: LLMProviderSummaryResponseList
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of LLM Providers returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/LLMProviderSummaryResponse'
+    LLMProviderEndpointConfiguration:
+      title: LLMProviderEndpointConfiguration
+      type: object
+      properties:
+        authHeader:
+          type: string
+          example: Authorization
+        authQueryParameter:
+          type: string
+          example: ApiKey
     AdditionalProperty:
       title: Additional Gateway Properties
       type: object
@@ -10854,10 +12006,59 @@ components:
           type: integer
           format: int64
           example: 1000
+        productionTimeUnit:
+          type: string
+          description: "Time unit for the production."
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
         sandbox:
           type: integer
           format: int64
           example: 1000
+        sandboxTimeUnit:
+          type: string
+          description: "Time unit for the sandbox."
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
+        tokenBasedThrottlingConfiguration:
+          type: object
+          required:
+            - isTokenBasedThrottlingEnabled
+          properties:
+            productionMaxPromptTokenCount:
+              type: integer
+              description: "Maximum prompt token count for production"
+              format: int64
+            productionMaxCompletionTokenCount:
+              type: integer
+              description: "Maximum completion token count for production"
+              format: int64
+            productionMaxTotalTokenCount:
+              type: integer
+              description: "Maximum total token count for production"
+              format: int64
+            sandboxMaxPromptTokenCount:
+              type: integer
+              description: "Maximum prompt token count for sandbox"
+              format: int64
+            sandboxMaxCompletionTokenCount:
+              type: integer
+              description: "Maximum completion token count for sandbox"
+              format: int64
+            sandboxMaxTotalTokenCount:
+              type: integer
+              description: "Maximum total token count for sandbox"
+              format: int64
+            isTokenBasedThrottlingEnabled:
+              type: boolean
+              default: false
+              description: "Whether token-based throttling is enabled"
     APIBusinessInformation:
       type: object
       properties:
@@ -11097,6 +12298,9 @@ components:
           description: |
             If the provider value is not given user invoking the api will be used as the provider.
           example: admin
+        revisionID:
+          type: string
+          example: Revision 1
         usedResourceList:
           type: array
           description: |
@@ -11615,6 +12819,7 @@ components:
             - DOC
             - API
             - APIProduct
+            - DEFINITION
         transportType:
           type: string
           description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
@@ -11724,6 +12929,10 @@ components:
             TechnicalOwnerEmail:
               type: string
               example: technicalowner@abc.com
+            egress:
+              type: boolean
+              description: Whether the API is Egress or not
+              example: false
     APIMonetizationInfo:
       title: API monetization object
       required:
@@ -11795,6 +13004,38 @@ components:
               type: string
             associatedType:
               type: string
+    APIDefinitionSearchResult:
+      title: API Definition Search Result
+      allOf:
+        - $ref: '#/components/schemas/SearchResult'
+        - properties:
+            apiName:
+              type: string
+              description: The name of the associated API
+              example: TestAPI
+            apiVersion:
+              type: string
+              description: The version of the associated API
+              example: 1.0.0
+            apiContext:
+              type: string
+              description: The context of the associated API
+              example: /test
+            apiUUID:
+              type: string
+              description: The UUID of the associated API
+            apiProvider:
+              type: string
+              description: The provider name of the associated API
+              example: publisher
+            apiType:
+              type: string
+              description: The type of the associated API
+              example: REST
+            associatedType:
+              type: string
+              description: API or APIProduct
+              example: API
     MockResponsePayloadList:
       title: Mock Response Payload list
       type: object
@@ -11932,6 +13173,12 @@ components:
             Is Portal Configuration Only Mode enabled
           example: false
           default: false
+        retryCallWithNewOAuthTokenEnabled:
+          type: boolean
+          description: |
+            Is Retry Call With New OAuth Token Enabled
+          example: true
+          default: true
         crossTenantSubscriptionEnabled:
           type: boolean
           description: |
@@ -11951,6 +13198,11 @@ components:
         IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
+        allowSubscriptionValidationDisabling:
+          type: boolean
+          description: |
+            Allow subscription validation disabling for OAuth tokens
+          default: true
         customProperties:
           type: array
           items:
@@ -12845,6 +14097,14 @@ components:
         Revision ID of an API
       schema:
         type: string
+    workflowReferenceId-Q:
+      name: workflowReferenceId
+      in: query
+      description: |
+        Workflow reference id
+      required: true
+      schema:
+        type: string
     revisionNum-Q:
       name: revisionNumber
       in: query
@@ -12921,6 +14181,14 @@ components:
       schema:
         type: string
         default: application/json
+    isAiApi:
+      name: isAiApi
+      in: query
+      description: |
+        Indicates the quota policy type to be AI API quota or not.
+      schema:
+        type: boolean
+        default: false
     offset:
       name: offset
       in: query
@@ -13127,3 +14395,6 @@ components:
             apim:tier_manage: View, update and delete throttling policies
             apim:api_list_view: View, Retrieve API list
             apim:api_definition_view: View, Retrieve API definition
+            apim:subscription_approval_view: Approve subscription creation requests
+            apim:subscription_approval_manage: Approve subscription update requests
+            apim:llm_provider_read: Read LLM Providers

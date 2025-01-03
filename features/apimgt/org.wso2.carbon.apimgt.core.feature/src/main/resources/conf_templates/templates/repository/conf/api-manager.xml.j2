@@ -88,6 +88,7 @@
         {% endif %}
         <GatewayJWTGeneration>
             <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
+            <EncodeX5tWithoutPadding>{{apim.jwt.encode_x5t_without_padding}}</EncodeX5tWithoutPadding>
             <Configuration>
             <ExcludedClaims>
                 {%- for claim in apim.jwt.gateway_generator.excluded_claims -%}
@@ -96,6 +97,9 @@
             </ExcludedClaims>
             <EnableUserClaimRetrievalFromKeyManager>{{apim.jwt.gateway_generator.enable_claim_retrieval}}</EnableUserClaimRetrievalFromKeyManager>
             </Configuration>
+            {% if apim.jwt.enable_base64_padding is defined %}
+            <EnableBase64Padding>{{apim.jwt.enable_base64_padding}}</EnableBase64Padding>
+            {% endif %}
         </GatewayJWTGeneration>
     </JWTConfiguration>
 
@@ -331,7 +335,7 @@
 
         <PolicyEnabled>{{apim.analytics.enablePolicy}}</PolicyEnabled>
 
-        <AnalyticsImpl>{{apim.analytics.}}</AnalyticsImpl>
+        <AnalyticsImpl>{{apim.analytics.analytics_impl}}</AnalyticsImpl>
 
         <Type>{{apim.analytics.type}}</Type>
 

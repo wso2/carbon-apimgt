@@ -22,6 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -90,7 +91,24 @@ public final class BlockConditionDBUtil {
                                     IPLevelDTO ipLevelDTO = new IPLevelDTO();
                                     ipLevelDTO.setTenantDomain(tenantDomain);
                                     ipLevelDTO.setId(conditionId);
-                                    JsonElement ipLevelJson = new JsonParser().parse(value);
+                                    JsonElement ipLevelJson = null;
+                                    try {
+                                        ipLevelJson = new JsonParser().parse(value);
+                                    } catch (JsonSyntaxException e) {
+                                        // Handle migrated Fixed IP blocking conditions
+                                        String[] conditionsArray = value.split(":");
+                                        if (conditionsArray.length == 2) {
+                                            String fixedIp = conditionsArray[1];
+                                            ipLevelDTO.setFixedIp(fixedIp);
+                                            ipLevelDTO.setInvert(Boolean.FALSE);
+                                            ipLevelDTO.setType(APIConstants.BLOCKING_CONDITIONS_IP);
+                                        } else {
+                                            // This is a true parsing exception. Hence, it will be thrown
+                                            // without handling
+                                            log.error("Error parsing IP blocking condition", e);
+                                            throw new JsonSyntaxException(e);
+                                        }
+                                    }
                                     if (ipLevelJson instanceof JsonPrimitive) {
                                         JsonPrimitive fixedIp = (JsonPrimitive) ipLevelJson;
                                         ipLevelDTO.setFixedIp(fixedIp.getAsString());

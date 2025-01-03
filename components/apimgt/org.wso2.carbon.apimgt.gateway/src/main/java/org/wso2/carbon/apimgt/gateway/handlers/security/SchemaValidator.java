@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 import com.atlassian.oai.validator.OpenApiInteractionValidator;
 import com.atlassian.oai.validator.report.LevelResolver;
 import com.atlassian.oai.validator.report.ValidationReport;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +39,7 @@ public class SchemaValidator extends AbstractHandler {
     private static final String INTERNAL_ERROR_CODE = "500";
     private static final Log logger = LogFactory.getLog(SchemaValidator.class);
     private static final String HTTP_SC_CODE = "400";
+    public static final String REG_TIME_MODULE = "register.timeModule";
 
     /**
      * Method to generate OpenApiInteractionValidator when the openAPI is provided.
@@ -60,6 +63,10 @@ public class SchemaValidator extends AbstractHandler {
     @Override
     public boolean handleRequest(MessageContext messageContext) {
 
+        boolean timeModuleRegisterEnabled = Boolean.parseBoolean(System.getProperty(REG_TIME_MODULE, "false"));
+        if (timeModuleRegisterEnabled) {
+            Json.mapper().registerModule(new JavaTimeModule());
+        }
         logger.debug("Validating the API request Body content..");
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
         if (openAPI != null) {

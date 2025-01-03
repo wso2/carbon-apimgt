@@ -74,7 +74,7 @@ public class SseApiHandler extends APIAuthenticationHandler {
 
         org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_SSE);
-        synCtx.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING,
+        synCtx.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.IS_ASYNC_API,
                            true);
         synCtx.setProperty(ASYNC_MESSAGE_TYPE, ASYNC_MESSAGE_TYPE_SUBSCRIBE);
         GatewayUtils.setRequestDestination(synCtx);

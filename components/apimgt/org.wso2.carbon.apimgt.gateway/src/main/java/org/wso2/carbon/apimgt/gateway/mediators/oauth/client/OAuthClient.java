@@ -144,13 +144,15 @@ public class OAuthClient {
             throw new APIManagementException("Error while accessing the Token URL. "
                     + "Found http status " + response.getStatusLine());
         }
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response
-                .getEntity().getContent(), StandardCharsets.UTF_8));
-        String inputLine;
+
         StringBuilder stringBuilder = new StringBuilder();
 
-        while ((inputLine = reader.readLine()) != null) {
-            stringBuilder.append(inputLine);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(response
+                .getEntity().getContent(), StandardCharsets.UTF_8))) {
+            String inputLine;
+            while ((inputLine = reader.readLine()) != null) {
+                stringBuilder.append(inputLine);
+            }
         }
 
         JSONParser parser = new JSONParser();

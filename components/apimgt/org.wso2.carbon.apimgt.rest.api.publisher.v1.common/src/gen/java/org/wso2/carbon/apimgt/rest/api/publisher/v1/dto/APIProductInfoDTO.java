@@ -32,11 +32,13 @@ public class APIProductInfoDTO   {
     private String state = null;
     private List<String> securityScheme = new ArrayList<String>();
     private String gatewayVendor = null;
+    private List<String> audiences = new ArrayList<String>();
     private Boolean monetizedInfo = null;
     private String businessOwner = null;
     private String businessOwnerEmail = null;
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
+    private Boolean egress = false;
 
   /**
    * UUID of the api product 
@@ -215,6 +217,24 @@ public class APIProductInfoDTO   {
   }
 
   /**
+   * The audiences of the API product for jwt validation. Accepted values are any String values
+   **/
+  public APIProductInfoDTO audiences(List<String> audiences) {
+    this.audiences = audiences;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The audiences of the API product for jwt validation. Accepted values are any String values")
+  @JsonProperty("audiences")
+  public List<String> getAudiences() {
+    return audiences;
+  }
+  public void setAudiences(List<String> audiences) {
+    this.audiences = audiences;
+  }
+
+  /**
    **/
   public APIProductInfoDTO monetizedInfo(Boolean monetizedInfo) {
     this.monetizedInfo = monetizedInfo;
@@ -299,6 +319,24 @@ public class APIProductInfoDTO   {
     this.technicalOwnerEmail = technicalOwnerEmail;
   }
 
+  /**
+   * Whether the APIProduct is EGRESS or not
+   **/
+  public APIProductInfoDTO egress(Boolean egress) {
+    this.egress = egress;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether the APIProduct is EGRESS or not")
+  @JsonProperty("egress")
+  public Boolean isEgress() {
+    return egress;
+  }
+  public void setEgress(Boolean egress) {
+    this.egress = egress;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -319,16 +357,18 @@ public class APIProductInfoDTO   {
         Objects.equals(state, apIProductInfo.state) &&
         Objects.equals(securityScheme, apIProductInfo.securityScheme) &&
         Objects.equals(gatewayVendor, apIProductInfo.gatewayVendor) &&
+        Objects.equals(audiences, apIProductInfo.audiences) &&
         Objects.equals(monetizedInfo, apIProductInfo.monetizedInfo) &&
         Objects.equals(businessOwner, apIProductInfo.businessOwner) &&
         Objects.equals(businessOwnerEmail, apIProductInfo.businessOwnerEmail) &&
         Objects.equals(technicalOwner, apIProductInfo.technicalOwner) &&
-        Objects.equals(technicalOwnerEmail, apIProductInfo.technicalOwnerEmail);
+        Objects.equals(technicalOwnerEmail, apIProductInfo.technicalOwnerEmail) &&
+        Objects.equals(egress, apIProductInfo.egress);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, version, hasThumbnail, state, securityScheme, gatewayVendor, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    return Objects.hash(id, name, context, description, provider, version, hasThumbnail, state, securityScheme, gatewayVendor, audiences, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
   }
 
   @Override
@@ -346,11 +386,13 @@ public class APIProductInfoDTO   {
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    audiences: ").append(toIndentedString(audiences)).append("\n");
     sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");
     sb.append("    businessOwner: ").append(toIndentedString(businessOwner)).append("\n");
     sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
     sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
     sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
+    sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -39,6 +39,7 @@ import org.wso2.carbon.registry.indexing.indexer.Indexer;
 import static org.wso2.carbon.apimgt.persistence.APIConstants.API_GLOBAL_VISIBILITY;
 import static org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_KEY_MANAGERS;
 import static org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_VISIBILITY;
+import static org.wso2.carbon.apimgt.persistence.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
 
 public class RegistrySearchUtil {
 
@@ -53,15 +54,27 @@ public class RegistrySearchUtil {
     public static final String API_STATUS = "STATUS";
     public static final String API_PROVIDER = "Provider";
     public static final String DOCUMENT_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer";
+    public static final String REST_ASYNC_API_DEFINITION_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer" +
+            ".RESTAsyncAPIDefinitionIndexer";
+    public static final String GRAPHQL_DEFINITION_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer" +
+            ".GraphQLAPIDefinitionIndexer";
+    public static final String SOAP_DEFINITION_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer" +
+            ".SOAPAPIDefinitionIndexer";
     public static final String STORE_VIEW_ROLES = "store_view_roles";
     public static final String PUBLISHER_ROLES = "publisher_roles";
     public static final String DOCUMENT_MEDIA_TYPE_KEY = "application/vnd.wso2-document\\+xml";
-    public static final String DOCUMENT_INDEXER_INDICATOR = "document_indexed";
-    public static final String DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD = "mediaType";
+    public static final String API_DEF_MEDIA_TYPE_KEY = "application/json";
+    public static final String GRAPHQL_DEF_MEDIA_TYPE_KEY = "text/plain(.)+charset=ISO-8859-1";
+    public static final String SOAP_DEF_MEDIA_TYPE_KEY = "application/wsdl\\+xml|application/octet-stream";
+    public static final String SEARCH_MEDIA_TYPE_FIELD = "mediaType";
     public static final String DOCUMENTATION_INLINE_CONTENT_TYPE = "text/plain";
     public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
     public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
+    public static final String GRAPHQL_DEFINITION_MEDIA_TYPE = "text/plain; charset=ISO-8859-1";
+    public static final String SOAP_DEFINITION_WSDL_XML_MEDIA_TYPE = "application/wsdl+xml";
+    public static final String SOAP_DEFINITION_WSDL_FILE_MEDIA_TYPE = "application/octet-stream";
+
     public static final String API_OVERVIEW_STATUS = "overview_status";
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
     public static final String API_RELATED_CUSTOM_PROPERTIES_DISPLAY_DEV = "__display";
@@ -99,31 +112,65 @@ public class RegistrySearchUtil {
      * @throws APIManagementException If there is an error in the search query
      */
     private static String constructQueryWithProvidedCriterias(String inputSearchQuery) throws APIPersistenceException {
-
         String newSearchQuery = "";
-        // sub context and doc content doesn't support AND search
-        if (inputSearchQuery != null && inputSearchQuery.contains(" ")
-                && !inputSearchQuery.contains(TAG_COLON_SEARCH_TYPE_PREFIX)
-                && (!inputSearchQuery.contains(CONTENT_SEARCH_TYPE_PREFIX) || inputSearchQuery.split(":").length > 2)) {
-            if (inputSearchQuery.split(" ").length > 1) {
-                String[] searchCriterias = inputSearchQuery.split(" ");
-                for (int i = 0; i < searchCriterias.length; i++) {
-                    if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
-                        if (DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
-                            throw new APIPersistenceException("Invalid query. AND based search is not supported for "
-                                    + "doc prefix");
-                        }
-                    }
-                    if (i == 0) {
-                        newSearchQuery = getSingleSearchCriteria(searchCriterias[i]);
-                    } else {
-                        newSearchQuery = newSearchQuery + SEARCH_AND_TAG + getSingleSearchCriteria(searchCriterias[i]);
-                    }
+
+        // for empty search query this method should return name=* as the new search query
+        // or if it is a content search query, we should not split in spaces, but return as content=*search query*
+        // for example.
+        if (StringUtils.isEmpty(inputSearchQuery) || (inputSearchQuery.contains(
+                CONTENT_SEARCH_TYPE_PREFIX) && inputSearchQuery.split(":").length == 2)) {
+            newSearchQuery = getSingleSearchCriteria(inputSearchQuery);
+        } else {
+            String[] criterea = inputSearchQuery.split(" ");
+            Map<String, List<String>> critereaMap = new HashMap<>();
+            List<String> untaggedContent = new ArrayList();
+            for (int i = 0; i < criterea.length; i++) {
+                if (criterea[i].contains(":") && criterea[i].split(":").length > 1) {
+                    String searchPrefix = criterea[i].split(":")[0];
+                    String searchValue = criterea[i].split(":")[1];
+
+                    List<String> values = critereaMap.containsKey(searchPrefix) ?
+                            critereaMap.get(searchPrefix) :
+                            new ArrayList<>();
+                    values.add(searchValue);
+                    critereaMap.put(searchPrefix, values);
+                } else {
+                    untaggedContent.add(criterea[i]);
                 }
             }
-        } else {
-            newSearchQuery = getSingleSearchCriteria(inputSearchQuery);
+
+            // doc content doesn't support AND search
+            if (critereaMap.size() > 1 && critereaMap.containsKey(DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+                throw new APIPersistenceException(
+                        "Invalid query. AND based search is not supported for " + "doc prefix");
+            }
+
+            // When multiple values are present for the same search key those are considered as an OR based search.
+            // ex: tags:sales tags:dev -> tags=(sales OR dev)
+            // When multiple search keys are present those are considered as an AND based search.
+            // ex: name:pizzashack version:1.0 -> name=pizzashack AND version=1.0
+            for (Map.Entry<String, List<String>> entry : critereaMap.entrySet()) {
+                String nextCriterea = "";
+                if (entry.getValue().size() > 1) {
+                    nextCriterea = entry.getKey() + "=" + getORBasedSearchCriteria(
+                            entry.getValue().toArray(new String[0]));
+                } else {
+                    nextCriterea = getSingleSearchCriteria(entry.getKey() + ":" + entry.getValue().get(0));
+                }
+
+                newSearchQuery = StringUtils.isNotEmpty(newSearchQuery) ?
+                        (newSearchQuery + SEARCH_AND_TAG + nextCriterea) :
+                        nextCriterea;
+            }
+            if (!untaggedContent.isEmpty()) {
+                for (String searchCriteria : untaggedContent) {
+                    newSearchQuery = StringUtils.isNotEmpty(newSearchQuery) ?
+                            (newSearchQuery + SEARCH_AND_TAG + getSingleSearchCriteria(searchCriteria)) :
+                            getSingleSearchCriteria(searchCriteria);
+                }
+            }
         }
+
         return newSearchQuery;
     }
 
@@ -216,33 +263,61 @@ public class RegistrySearchUtil {
         RegistryConfigLoader registryConfig = RegistryConfigLoader.getInstance();
         Map<String, Indexer> indexerMap = registryConfig.getIndexerMap();
         Indexer documentIndexer = indexerMap.get(DOCUMENT_MEDIA_TYPE_KEY);
-        String complexAttribute;
-        if (documentIndexer != null && DOCUMENT_INDEXER.equals(documentIndexer.getClass().getName())) {
-            //field check on document_indexed was added to prevent unindexed(by new DocumentIndexer) from coming up as search results
-            //on indexed documents this property is always set to true
-            complexAttribute = ClientUtils.escapeQueryChars(API_RXT_MEDIA_TYPE) + " OR mediaType_s:("  + ClientUtils
-                    .escapeQueryChars(DOCUMENT_RXT_MEDIA_TYPE) + " AND document_indexed_s:true)";
+        Indexer jsonIndexer = indexerMap.get(API_DEF_MEDIA_TYPE_KEY);
+        Indexer graphqlIndexer = indexerMap.get(GRAPHQL_DEF_MEDIA_TYPE_KEY);
+        Indexer soapIndexer = indexerMap.get(SOAP_DEF_MEDIA_TYPE_KEY);
+        String complexAttribute = ClientUtils.escapeQueryChars(API_RXT_MEDIA_TYPE);
+        if (!StringUtils.isEmpty(publisherRoles)) {
+            complexAttribute =
+                    "(" + ClientUtils.escapeQueryChars(API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
+                            + publisherRoles + ")";
+        }
 
-            //construct query such that publisher roles is checked in properties for api artifacts and in fields for document artifacts
-            //this was designed this way so that content search can be fully functional if registry is re-indexed after engaging DocumentIndexer
+        if (documentIndexer != null && DOCUMENT_INDEXER.equals(documentIndexer.getClass().getName())) {
             if (!StringUtils.isEmpty(publisherRoles)) {
-                complexAttribute =
-                        "(" + ClientUtils.escapeQueryChars(API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
-                                + publisherRoles + ") OR mediaType_s:("  + ClientUtils
-                                .escapeQueryChars(DOCUMENT_RXT_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
-            }
-        } else {
-            //document indexer required for document content search is not engaged, therefore carry out the search only for api artifact contents
-            complexAttribute = ClientUtils.escapeQueryChars(API_RXT_MEDIA_TYPE);
-            if (!StringUtils.isEmpty(publisherRoles)) {
-                complexAttribute =
-                        "(" + ClientUtils.escapeQueryChars(API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
-                                + publisherRoles + ")";
+                complexAttribute += " OR mediaType_s:(" + ClientUtils
+                        .escapeQueryChars(DOCUMENT_RXT_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
+            } else {
+                complexAttribute += " OR mediaType_s:(" + ClientUtils
+                        .escapeQueryChars(DOCUMENT_RXT_MEDIA_TYPE) + " AND document_indexed_s:true)";
             }
         }
 
+        if (jsonIndexer != null && REST_ASYNC_API_DEFINITION_INDEXER.equals(jsonIndexer.getClass().getName())) {
+            if (!StringUtils.isEmpty(publisherRoles)) {
+                complexAttribute += " OR mediaType_s:(" + ClientUtils
+                        .escapeQueryChars(APPLICATION_JSON_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
+            } else {
+                complexAttribute += " OR mediaType_s:(" + ClientUtils
+                        .escapeQueryChars(APPLICATION_JSON_MEDIA_TYPE) + " AND document_indexed_s:true)";
+            }
+        }
 
-        attributes.put(DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, complexAttribute);
+        if (graphqlIndexer != null && GRAPHQL_DEFINITION_INDEXER.equals(graphqlIndexer.getClass().getName())) {
+            if (!StringUtils.isEmpty(publisherRoles)) {
+                complexAttribute += " OR mediaType_s:(" + ClientUtils
+                        .escapeQueryChars(GRAPHQL_DEFINITION_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
+            } else {
+                complexAttribute += " OR mediaType_s:(" + ClientUtils
+                        .escapeQueryChars(GRAPHQL_DEFINITION_MEDIA_TYPE) + " AND document_indexed_s:true)";
+            }
+        }
+
+        if (soapIndexer != null && SOAP_DEFINITION_INDEXER.equals(soapIndexer.getClass().getName())) {
+            if (!StringUtils.isEmpty(publisherRoles)) {
+                complexAttribute += " OR mediaType_s:((" + ClientUtils
+                        .escapeQueryChars(SOAP_DEFINITION_WSDL_XML_MEDIA_TYPE) +
+                        " OR " + ClientUtils.escapeQueryChars(SOAP_DEFINITION_WSDL_FILE_MEDIA_TYPE)
+                        + " ) AND publisher_roles_s:" + publisherRoles + ")";
+            } else {
+                complexAttribute += " OR mediaType_s:((" + ClientUtils
+                        .escapeQueryChars(SOAP_DEFINITION_WSDL_XML_MEDIA_TYPE) +
+                        " OR " + ClientUtils.escapeQueryChars(SOAP_DEFINITION_WSDL_FILE_MEDIA_TYPE)
+                        + " ) AND document_indexed_s:true)";
+            }
+        }
+
+        attributes.put(SEARCH_MEDIA_TYPE_FIELD, complexAttribute);
         attributes.put(API_OVERVIEW_STATUS, apiState);
         return attributes;
     }

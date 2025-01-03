@@ -23,10 +23,17 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 public class APISecurityException extends Exception {
     
     private int errorCode;
+    private String description;
 
     public APISecurityException(int errorCode, String message) {
         super(message);
         this.errorCode = errorCode;
+    }
+
+    public APISecurityException(int errorCode, String message, String description) {
+        super(message);
+        this.errorCode = errorCode;
+        this.description = description;
     }
 
     public APISecurityException(int errorCode, String message, Throwable cause) {
@@ -36,5 +43,9 @@ public class APISecurityException extends Exception {
 
     public int getErrorCode() {
         return errorCode;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

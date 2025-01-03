@@ -59,6 +59,8 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -121,6 +123,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -232,6 +235,7 @@ public class ImportUtils {
             }
 
             String apiType = importedApiDTO.getType().toString();
+            boolean asyncAPI = PublisherCommonUtils.isStreamingAPI(importedApiDTO);
 
             // Validate swagger content except for streaming APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
@@ -259,6 +263,10 @@ public class ImportUtils {
 
             // validate the API context
             APIUtil.validateAPIContext(importedApiDTO.getContext(), importedApiDTO.getName());
+
+            // Get the endpoint config object updated
+            APIUtil.validateAPIEndpointConfig(importedApiDTO.getEndpointConfig(), importedApiDTO.getType().toString(),
+                    importedApiDTO.getName());
 
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE, organization);
@@ -330,7 +338,7 @@ public class ImportUtils {
                 }
                 importedApi = PublisherCommonUtils.updateApiAndDefinition(targetApi, importedApiDTO,
                         RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes,
-                        validationResponse);
+                        validationResponse, false);
             } else {
                 if (targetApi == null && Boolean.TRUE.equals(overwrite)) {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
@@ -339,6 +347,21 @@ public class ImportUtils {
                 // Initialize to CREATED when import
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
+                if (APIStatus.PUBLISHED.toString().equalsIgnoreCase(targetStatus)
+                        && importedApiDTO.getPolicies() != null
+                        && importedApiDTO.getPolicies().isEmpty()
+                        && importedApiDTO.getSecurityScheme() != null
+                        && importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && APIUtil.isSubscriptionValidationDisablingAllowed(organization)
+                        && !PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
+                   if (asyncAPI) {
+                        importedApiDTO.setPolicies(Arrays
+                                .asList(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS));
+                   } else {
+                       importedApiDTO.setPolicies(Arrays
+                                   .asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+                   }
+                }
                 if (!PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
                     importedApi = PublisherCommonUtils
                             .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
@@ -348,7 +371,7 @@ public class ImportUtils {
                             && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                         // Add the validated swagger separately since the UI does the same procedure
                         PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false,
-                                organization);
+                                organization, false);
                         importedApi = apiProvider.getAPIbyUUID(importedApi.getUuid(), currentTenantDomain);
                     }
                 } else {
@@ -363,12 +386,17 @@ public class ImportUtils {
                 }
             }
 
-            if (!extractedPoliciesMap.isEmpty() || !extractedAPIPolicies.isEmpty()) {
-                populateAPIWithPolicies(importedApi, apiProvider, extractedFolderPath, extractedPoliciesMap,
-                        extractedAPIPolicies, currentTenantDomain);
-                API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
-                apiProvider.updateAPI(importedApi, oldAPI);
+            populateAPIWithPolicies(importedApi, apiProvider, extractedFolderPath, extractedPoliciesMap,
+                    extractedAPIPolicies, currentTenantDomain);
+            // Update Custom Backend Data if endpoint type is selected to "custom_backend"
+            Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
+            if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+                    endpointConf.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                updateAPIWithCustomBackend(importedApi, extractedFolderPath, apiProvider);
             }
+
+            API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
+            apiProvider.updateAPI(importedApi, oldAPI);
 
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -400,7 +428,11 @@ public class ImportUtils {
             }
             if (StringUtils
                     .equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
-                addSOAPToREST(importedApi, validationResponse.getContent(), apiProvider);
+                List<SOAPToRestSequence> sequences = getSOAPToRESTSequences(extractedFolderPath);
+                if (sequences != null && !sequences.isEmpty()) {
+                    String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                    apiProvider.updateSoapToRestSequences(tenantDomain, importedApi.getUuid(), sequences);
+                }
             }
 
             if (!isAdvertiseOnlyAPI(importedApiDTO)) {
@@ -409,8 +441,10 @@ public class ImportUtils {
                 if (log.isDebugEnabled()) {
                     log.debug("Mutual SSL enabled. Importing client certificates.");
                 }
-                addClientCertificates(extractedFolderPath, apiProvider, new ApiTypeWrapper(importedApi), organization,
-                        overwrite, tenantId);
+                addClientCertificates(extractedFolderPath, apiProvider, new ApiTypeWrapper(importedApi),
+                        APIConstants.API_KEY_TYPE_PRODUCTION, organization, overwrite, tenantId);
+                addClientCertificates(extractedFolderPath, apiProvider, new ApiTypeWrapper(importedApi),
+                        APIConstants.API_KEY_TYPE_SANDBOX, organization, overwrite, tenantId);
             }
 
             // Change API lifecycle if state transition is required
@@ -650,6 +684,51 @@ public class ImportUtils {
     }
 
     /**
+     * Method is used to Update the Custom Backend of the API
+     *
+     * @param api                 API Object
+     * @param extractedFolderPath Extracted folder path
+     * @param apiProvider         API Provider
+     * @throws APIManagementException Throws an error occurs while reading the sequence as an Input Stream
+     */
+    public static void updateAPIWithCustomBackend(API api, String extractedFolderPath, APIProvider apiProvider)
+            throws APIManagementException {
+        String customBackendDir = extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
+        if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
+            JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+
+            if (endpointConfig != null) {
+                if (endpointConfig.get("sandbox") != null) {
+                    String seqFile = endpointConfig.get("sandbox").getAsString();
+                    String seqId = UUID.randomUUID().toString();
+                    String seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    if (!StringUtils.isEmpty(seqFile) && !seqFile.contains(
+                            APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                        seqFile = seqFile + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+                    }
+                    if (seq != null) {
+                        apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX, seq, seqFile,
+                                seqId);
+                    }
+                }
+                if (endpointConfig.get("production") != null) {
+                    String seqFile = endpointConfig.get("production").getAsString();
+                    String seqId = UUID.randomUUID().toString();
+                    String seq = APIUtil.getCustomBackendSequence(customBackendDir, seqFile, ".xml");
+                    if (!StringUtils.isEmpty(seqFile) && !seqFile.contains(
+                            APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                        seqFile = seqFile + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+                    }
+                    if (seq != null) {
+                        apiProvider.updateCustomBackend(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION, seq,
+                                seqFile, seqId);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * This method is used to populate uri template of the API with API Level Policies and Operation Level Policies.
      *
      * @param api                       The API object
@@ -667,20 +746,22 @@ public class ImportUtils {
 
         String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
         Map<String, String> importedPolicies = new HashMap<>();
-        if (!operationLevelPoliciesMap.isEmpty()) {
-            Set<URITemplate> uriTemplates = api.getUriTemplates();
-            for (URITemplate uriTemplate : uriTemplates) {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                if (operationLevelPoliciesMap.containsKey(key)) {
-                    List<OperationPolicy> operationPolicies = operationLevelPoliciesMap.get(key);
-                    if (operationPolicies != null && !operationPolicies.isEmpty()) {
-                        uriTemplate.setOperationPolicies(findOrImportPolicy(operationPolicies, importedPolicies,
-                                policyDirectory, tenantDomain, api, provider));
-                    }
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+            if (operationLevelPoliciesMap.containsKey(key)) {
+                List<OperationPolicy> operationPolicies = operationLevelPoliciesMap.get(key);
+                if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                    uriTemplate.setOperationPolicies(findOrImportPolicy(operationPolicies, importedPolicies,
+                            policyDirectory, tenantDomain, api, provider));
                 }
+            } else {
+                // If the imported API does not contain operation policies attached to this uriTemplate, we have to
+                // remove any existing policies
+                uriTemplate.setOperationPolicies(null);
             }
-            api.setUriTemplates(uriTemplates);
         }
+        api.setUriTemplates(uriTemplates);
 
         if (!apiLevelPoliciesList.isEmpty()) {
             api.setApiPolicies(findOrImportPolicy(apiLevelPoliciesList, importedPolicies, policyDirectory,
@@ -742,7 +823,7 @@ public class ImportUtils {
                             operationPolicyData.setCcPolicyDefinition(ccDefinition);
                         }
                         operationPolicyData.setMd5Hash(
-                                APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+                                APIUtil.getHashOfOperationPolicy(operationPolicyData));
                         policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
                         importedPolicies.put(policyFileName, policyID);
                         policyImported = true;
@@ -893,8 +974,10 @@ public class ImportUtils {
                         } else {
                             // set the default vhost of the given environment
                             if (gatewayEnvironment.getVhosts().isEmpty()) {
-                                throw new APIManagementException("No VHosts defined for the environment: "
-                                        + deploymentName);
+                                throw new APIManagementException(
+                                        "No VHosts defined for the environment: " + deploymentName,
+                                        ExceptionCodes.from(ExceptionCodes.NO_VHOSTS_DEFINED_FOR_ENVIRONMENT,
+                                                deploymentName));
                             }
                             deploymentVhost = gatewayEnvironment.getVhosts().get(0).getHost();
                         }
@@ -1148,7 +1231,7 @@ public class ImportUtils {
             policySpecification = getOperationPolicySpecificationFromFile(pathToArchive, fileName);
             if (policySpecification == null) {
                 throw new APIManagementException("Policy Specification Cannot be null",
-                        ExceptionCodes.INVALID_OPERATION_POLICY_PARAMETERS);
+                        ExceptionCodes.MISSING_OPERATION_POLICY_PARAMETERS);
             }
             OperationPolicyData operationPolicyData = new OperationPolicyData();
             operationPolicyData.setOrganization(organization);
@@ -1179,7 +1262,7 @@ public class ImportUtils {
                     operationPolicyData.setSynapsePolicyDefinition(synapseGatewayDefinition);
                 }
 
-                operationPolicyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(operationPolicyData));
+                operationPolicyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(operationPolicyData));
                 policyID = apiProvider.addCommonOperationPolicy(operationPolicyData, organization);
                 if (log.isDebugEnabled()) {
                     log.debug("A common operation policy has been added with name " + policySpecification.getName());
@@ -1488,9 +1571,11 @@ public class ImportUtils {
             APIDefinitionValidationResponse validationResponse =
                     AsyncApiParserUtil.validateAsyncAPISpecification(asyncApiDefinition, true);
             if (!validationResponse.isValid()) {
-                throw new APIManagementException(
-                        "Error occurred while importing the API. Invalid AsyncAPI definition found. "
-                                + validationResponse.getErrorItems());
+                String errorMessage = "Error occurred while importing the API. Invalid AsyncAPI definition found. "
+                        + validationResponse.getErrorItems();
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.IMPORT_ERROR_INVALID_ASYNC_API_SCHEMA,
+                                StringUtils.join(validationResponse.getErrorItems(), ", ")));
             }
             return validationResponse;
         } catch (IOException e) {
@@ -1535,9 +1620,11 @@ public class ImportUtils {
             GraphQLValidationResponseDTO graphQLValidationResponseDTO = PublisherCommonUtils
                     .validateGraphQLSchema(file.getName(), schemaDefinition);
             if (!graphQLValidationResponseDTO.isIsValid()) {
-                throw new APIManagementException(
-                        "Error occurred while importing the API. Invalid GraphQL schema definition found. "
-                                + graphQLValidationResponseDTO.getErrorMessage());
+                String errorMessage = "Error occurred while importing the API. Invalid GraphQL schema definition "
+                        + "found. " + graphQLValidationResponseDTO.getErrorMessage();
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.IMPORT_ERROR_INVALID_GRAPHQL_SCHEMA,
+                                graphQLValidationResponseDTO.getErrorMessage()));
             }
             return graphQLValidationResponseDTO;
         } catch (IOException e) {
@@ -2243,24 +2330,24 @@ public class ImportUtils {
      *
      * @param pathToArchive Location of the extracted folder of the API
      * @param apiProvider   API Provider
+     * @param keyType       Key type of the certificate
      * @param organization  Identifier of the organization
      * @throws APIImportExportException
      */
     private static void addClientCertificates(String pathToArchive, APIProvider apiProvider,
-                                              ApiTypeWrapper apiTypeWrapper, String organization, boolean isOverwrite
-            , int tenantId)
-            throws APIManagementException {
+                                              ApiTypeWrapper apiTypeWrapper, String keyType, String organization,
+                                              boolean isOverwrite, int tenantId) throws APIManagementException {
 
         try {
             Identifier apiIdentifier = apiTypeWrapper.getId();
-            List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive);
+            List<ClientCertificateDTO> certificateMetadataDTOS = retrieveClientCertificates(pathToArchive, keyType);
             for (ClientCertificateDTO certDTO : certificateMetadataDTOS) {
                 if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == (apiProvider.addClientCertificate(
                         APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()), apiTypeWrapper,
-                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), organization))
-                        && isOverwrite) {
+                        certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName(), keyType,
+                        organization)) && isOverwrite) {
                     apiProvider.updateClientCertificate(certDTO.getCertificate(), certDTO.getAlias(), apiTypeWrapper,
-                            certDTO.getTierName(), tenantId, organization);
+                            certDTO.getTierName(), keyType, tenantId, organization);
                 }
             }
         } catch (APIManagementException e) {
@@ -2268,12 +2355,16 @@ public class ImportUtils {
         }
     }
 
-    public static List<ClientCertificateDTO> retrieveClientCertificates(String pathToArchive)
+    public static List<ClientCertificateDTO> retrieveClientCertificates(String pathToArchive, String keyType)
             throws APIManagementException {
 
         String jsonContent = null;
-        String pathToClientCertificatesDirectory =
-                pathToArchive + File.separator + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY;
+        /*
+         since the certificate file is named by the alias, this also need to store in two separate directories
+         considering the key type, to support same alias for production and sandbox
+         */
+        String pathToClientCertificatesDirectory = pathToArchive + File.separator +
+                ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY + File.separator + keyType;
         String pathToYamlFile = pathToClientCertificatesDirectory + ImportExportConstants.CLIENT_CERTIFICATE_FILE
                 + ImportExportConstants.YAML_EXTENSION;
         String pathToJsonFile = pathToClientCertificatesDirectory + ImportExportConstants.CLIENT_CERTIFICATE_FILE
@@ -2321,7 +2412,58 @@ public class ImportUtils {
         PublisherCommonUtils
                 .updateAPIBySettingGenerateSequencesFromSwagger(swaggerContent, importedApi, apiProvider, tenantDomain);
     }
+    
+    /**
+     * This method retrieve soap to rest sequences from the exported zip file.
+     * 
+     * @param extractedFolderPath folder path.
+     * @return List<SOAPToRestSequence> list of soap to rest sequences
+     * @throws APIManagementException
+     */
+    private static List<SOAPToRestSequence> getSOAPToRESTSequences(String extractedFolderPath)
+            throws APIManagementException {
 
+        List<SOAPToRestSequence> list = new ArrayList<SOAPToRestSequence>();
+        try {
+            String folderName = extractedFolderPath + File.separator + SOAPTOREST;
+            String[] directions = { IN, OUT };
+            if (APIUtil.checkFileExistence(folderName)) {
+                for (int i = 0; i < directions.length; i++) {
+                    String sequenceFolderName = folderName + File.separator + directions[i];
+                    if (APIUtil.checkFileExistence(sequenceFolderName)) {
+                        File sequenceFolder = new File(sequenceFolderName);
+                        File[] listOfFiles = sequenceFolder.listFiles();
+                        if (listOfFiles != null) {
+                            for (File file : listOfFiles) {
+                                if (file.isFile() && file.getName().endsWith(".xml")) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Found sequence " + file.getName() + " in " + sequenceFolder);
+                                    }
+                                    String operation = file.getName().replace(".xml", "");
+                                    // Find the last underscore in the string
+                                    int lastUnderscoreIndex = operation.lastIndexOf('_');
+                                    // Split the string from the last underscore
+                                    //String path = "/" + operation.substring(0, lastUnderscoreIndex);
+                                    String path = operation.substring(0, lastUnderscoreIndex);
+                                    String method = operation.substring(lastUnderscoreIndex + 1);
+                                    String content = FileUtils.readFileToString(file);
+                                    Direction direction = IN.equals(directions[i]) ? Direction.IN : Direction.OUT;
+                                    SOAPToRestSequence seq = new SOAPToRestSequence(method, path, content, direction);
+                                    list.add(seq);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading sequences from path: " + extractedFolderPath, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
+        }
+        return list;
+    }
+    
     public static List<SoapToRestMediationDto> retrieveSoapToRestFlowMediations(String pathToArchive, String type)
             throws APIManagementException {
 
@@ -2532,6 +2674,16 @@ public class ImportUtils {
                     log.info("Cannot find : " + importedApiProductDTO.getName() + ". Creating it.");
                 }
                 currentStatus = APIStatus.CREATED.toString();
+                if (APIStatus.PUBLISHED.toString().equalsIgnoreCase(targetStatus)
+                        && importedApiProductDTO.getPolicies() != null
+                        && importedApiProductDTO.getPolicies().isEmpty()
+                        && importedApiProductDTO.getSecurityScheme() != null
+                        && importedApiProductDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && APIUtil.isSubscriptionValidationDisablingAllowed(organization)) {
+                    importedApiProductDTO.setPolicies(Arrays
+                                .asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+
+                }
                 importedApiProduct = PublisherCommonUtils
                         .addAPIProductWithGeneratedSwaggerDefinition(importedApiProductDTO,
                                 importedApiProductDTO.getProvider(), organization);
@@ -2554,8 +2706,10 @@ public class ImportUtils {
                 log.debug("Mutual SSL enabled. Importing client certificates.");
             }
             int tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());
-            addClientCertificates(extractedFolderPath, apiProvider, apiTypeWrapperWithUpdatedApiProduct, organization,
-                    overwriteAPIProduct, tenantId);
+            addClientCertificates(extractedFolderPath, apiProvider, apiTypeWrapperWithUpdatedApiProduct,
+                    APIConstants.API_KEY_TYPE_PRODUCTION, organization, overwriteAPIProduct, tenantId);
+            addClientCertificates(extractedFolderPath, apiProvider, apiTypeWrapperWithUpdatedApiProduct,
+                    APIConstants.API_KEY_TYPE_SANDBOX, organization, overwriteAPIProduct, tenantId);
 
             // Change API Product lifecycle if state transition is required
             if (!lifecycleActions.isEmpty()) {
@@ -2605,7 +2759,7 @@ public class ImportUtils {
                                     importedApiProduct.getId().getVersion());
                         }
                     } else {
-                        throw new APIManagementException(e);
+                        throw e;
                     }
                 }
 
@@ -2697,8 +2851,14 @@ public class ImportUtils {
                         // Product does not have corresponding API resources neither inside the importing directory nor
                         // inside the APIM
                         if (!invalidApiOperations.isEmpty()) {
-                            throw new APIMgtResourceNotFoundException(
-                                    "Cannot find API resources for some API Product resources.");
+                            List<String> invalidOperationList = new ArrayList();
+                            for (APIOperationsDTO dto : invalidApiOperations) {
+                                invalidOperationList.add(dto.getVerb() + ":" + dto.getTarget());
+                            }
+                            String errorMessage = "Cannot find API resources for some API Product resources.";
+                            throw new APIMgtResourceNotFoundException(errorMessage,
+                                        ExceptionCodes.from(ExceptionCodes.INVALID_API_RESOURCES_FOR_API_PRODUCT,
+                                                StringUtils.join(invalidOperationList, ", ")));
                         }
                     }
                 }

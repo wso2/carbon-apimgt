@@ -228,6 +228,21 @@ public class OAS3ParserTest extends OASTestBase {
     }
 
     @Test
+    public void testOpenAPIValidatorWithMultiplePathsHavingSameNameWithAndWithoutTrailingSlash() throws Exception {
+        String faultySwagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
+                        + File.separator + "oas3_paths_with_trailing_slash.json"),
+                "UTF-8");
+
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+        Assert.assertFalse(response.isValid());
+        Assert.assertEquals(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode(),
+                response.getErrorItems().get(0).getErrorCode());
+        Assert.assertEquals("Multiple GET operations with the same resource path /test found in " +
+                "the openapi definition", response.getErrorItems().get(0).getErrorDescription());
+    }
+
+    @Test
     public void testRootLevelApplicationSecurity() throws Exception {
         String apiSecurity = "oauth_basic_auth_api_key_mandatory,oauth2,api_key";
         String oasDefinition = IOUtils.toString(
@@ -349,7 +364,7 @@ public class OAS3ParserTest extends OASTestBase {
         api.setTransports("https");
         api.setContext("/");
         api.setScopes(new HashSet<>());
-        String response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        String response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         String oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_mig_without_sec_extensions_response.json"),
@@ -362,7 +377,7 @@ public class OAS3ParserTest extends OASTestBase {
                         + "publisher" + File.separator + "oas3_mig_with_sec_extensions.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setScopes(getAPITestScopes());
-        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_mig_with_sec_extensions_response.json"),
@@ -377,7 +392,7 @@ public class OAS3ParserTest extends OASTestBase {
                 String.valueOf(StandardCharsets.UTF_8));
         api.setScopes(getAPITestScopes());
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth,oauth2");
-        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_with_default_allsecurity_response.json"),
@@ -389,7 +404,7 @@ public class OAS3ParserTest extends OASTestBase {
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "publisher" + File.separator + "oas3_with_apikey_basic_oauth_security_u2.json"),
                 String.valueOf(StandardCharsets.UTF_8));
-        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_with_apikey_basic_oauth_security_u2_response.json"),
@@ -402,7 +417,7 @@ public class OAS3ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas3_with_basic_apisec.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth");
-        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_with_basic_apisec_response.json"),
@@ -414,7 +429,7 @@ public class OAS3ParserTest extends OASTestBase {
                         + "devportal" + File.separator + "oas3_with_basic.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,basic_auth");
-        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3" + File.separator
                         + "devportal" + File.separator + "oas3_with_basic_response.json"),
@@ -426,7 +441,7 @@ public class OAS3ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas3_with_apikey.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key");
-        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas3Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
                         + File.separator + "devportal" + File.separator + "oas3_with_apikey_response.json"),

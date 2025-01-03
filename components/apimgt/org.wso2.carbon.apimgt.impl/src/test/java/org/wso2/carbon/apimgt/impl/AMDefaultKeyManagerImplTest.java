@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -212,6 +214,93 @@ public class AMDefaultKeyManagerImplTest {
         accessTokenInfo = keyManager.getTokenMetaData(accessToken);
         Assert.assertFalse(accessTokenInfo.isApplicationToken());
     }
+
+    @Test
+    public void testGetTokenTypeToSendInRequestUpdateJWTToJWT() throws Exception {
+        OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
+        oauthApplication.setClientId("test");
+        oauthApplication.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+
+        ClientInfo clientInfo = new ClientInfo();
+        clientInfo.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+
+        Mockito.when(dcrClient.getApplication(java.util.Base64.getUrlEncoder().encodeToString(
+                oauthApplication.getClientId().getBytes(StandardCharsets.UTF_8)))).thenReturn(clientInfo);
+
+        String tokenType = Whitebox.invokeMethod(keyManager, "getTokenTypeToSendInRequest", oauthApplication, true);
+        Assert.assertEquals(APIConstants.TOKEN_TYPE_JWT, tokenType);
+    }
+
+    @Test
+    public void testGetTokenTypeToSendInRequestUpdateJWTToOAuth() throws Exception {
+        OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
+        oauthApplication.setClientId("test");
+        oauthApplication.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+
+        ClientInfo clientInfo = new ClientInfo();
+        clientInfo.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+
+        Mockito.when(dcrClient.getApplication(java.util.Base64.getUrlEncoder().encodeToString(
+                oauthApplication.getClientId().getBytes(StandardCharsets.UTF_8)))).thenReturn(clientInfo);
+
+        String tokenType = Whitebox.invokeMethod(keyManager, "getTokenTypeToSendInRequest",
+                oauthApplication, true);
+        Assert.assertEquals(APIConstants.TOKEN_TYPE_JWT, tokenType);
+    }
+
+    @Test
+    public void testGetTokenTypeToSendInRequestUpdateOAuthToOAuth() throws Exception {
+        OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
+        oauthApplication.setClientId("test");
+        oauthApplication.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+
+        ClientInfo clientInfo = new ClientInfo();
+        clientInfo.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+
+        Mockito.when(dcrClient.getApplication(java.util.Base64.getUrlEncoder().encodeToString(
+                oauthApplication.getClientId().getBytes(StandardCharsets.UTF_8)))).thenReturn(clientInfo);
+
+        String tokenType = Whitebox.invokeMethod(keyManager, "getTokenTypeToSendInRequest", oauthApplication, true);
+        Assert.assertEquals(APIConstants.TOKEN_TYPE_OAUTH, tokenType);
+    }
+
+    @Test
+    public void testGetTokenTypeToSendInRequestUpdateCustomType() throws Exception {
+        OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
+        oauthApplication.setClientId("test");
+        oauthApplication.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+
+        String customTokenType = "customTokenType";
+        ClientInfo clientInfo = new ClientInfo();
+        clientInfo.setTokenType(customTokenType);
+
+        Mockito.when(dcrClient.getApplication(java.util.Base64.getUrlEncoder().encodeToString(
+                oauthApplication.getClientId().getBytes(StandardCharsets.UTF_8)))).thenReturn(clientInfo);
+
+        String tokenType = Whitebox.invokeMethod(keyManager, "getTokenTypeToSendInRequest", oauthApplication, true);
+        Assert.assertEquals(customTokenType, tokenType);
+    }
+
+    @Test
+    public void testGetTokenTypeToSendInRequestCreateJWT() throws Exception {
+        OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
+        oauthApplication.setClientId("test");
+        oauthApplication.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+
+        String tokenType = Whitebox.invokeMethod(keyManager, "getTokenTypeToSendInRequest", oauthApplication, false);
+        Assert.assertEquals(APIConstants.TOKEN_TYPE_JWT, tokenType);
+    }
+
+    @Test
+    public void testGetTokenTypeToSendInRequestCreateDefault() throws Exception {
+        OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
+        oauthApplication.setClientId("test");
+        oauthApplication.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
+
+        String tokenType = Whitebox.invokeMethod(keyManager, "getTokenTypeToSendInRequest", oauthApplication, false);
+        Assert.assertEquals(APIConstants.DEFAULT_TOKEN_TYPE, tokenType);
+    }
+
 //
 //    @Test
 //    public void testUpdateApplication() throws APIManagementException {

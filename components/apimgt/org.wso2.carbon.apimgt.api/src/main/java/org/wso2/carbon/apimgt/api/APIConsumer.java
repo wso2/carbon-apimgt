@@ -574,6 +574,18 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
+     * Returns the swagger definition of the API for the given gateway environment and key manager as a string
+     *
+     * @param api
+     * @param environmentName API Gateway environment name
+     * @param kmId            Key Manager UUID
+     * @return swagger string
+     * @throws APIManagementException if error occurred while obtaining the swagger definition
+     */
+    String getOpenAPIDefinitionForEnvironmentByKm(API api, String environmentName, String kmId)
+            throws APIManagementException;
+
+    /**
      * Revokes the oldAccessToken generating a new one.
      *
      * @param oldAccessToken  Token to be revoked
@@ -808,6 +820,16 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to retrieve policy.
      */
     Tier getThrottlePolicyByName(String name, int policyType, String organization) throws APIManagementException;
+
+    /**
+     * Send Application Policy Reset Event to Eventhub
+     *
+     * @param applicationId Application Identifier used by traffic manager
+     * @param userId Username for which the policy should be reset
+     * @param organization Tenant which application owner belongs to
+     */
+    void resetApplicationThrottlePolicy(String applicationId, String userId, String organization)
+            throws APIManagementException;
 
     /**
      * Returns the API Chat execute call response as a string

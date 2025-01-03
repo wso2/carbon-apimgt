@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+
 /**
  * The default API notification service implementation in which API creation, update, delete and LifeCycle change
  * events are published to gateway.
@@ -67,54 +68,53 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         APIEvent apiEvent;
         apiEvent = (APIEvent) event;
 
-        if (!APIConstants.API_GLOBAL_VISIBILITY.equals(apiEvent.getApiVisibility())) {
-            return;
-        }
-
-        if (APIConstants.EventType.API_LIFECYCLE_CHANGE.name().equals(event.getType())) {
-            String lifecycleEvent = apiEvent.getLifecycleEvent();
+        if (APIConstants.EventType.API_UPDATE.name().equals(event.getType())) {
             String currentStatus = apiEvent.getCurrentStatus().toUpperCase();
-            switch (lifecycleEvent) {
-                case APIConstants.DEMOTE_TO_CREATED:
-                case APIConstants.BLOCK:
-                    deleteRequest(apiEvent);
+            switch (currentStatus) {
+                case APIConstants.PROTOTYPED:
+                case APIConstants.PUBLISHED:
+                    postRequest(apiEvent);
                     break;
-                case APIConstants.DEPRECATE:
-                    if (APIConstants.PUBLISHED.equals(currentStatus)){
+                default:
+                    break;
+            }
+        } else {
+
+            if (APIConstants.EventType.API_LIFECYCLE_CHANGE.name().equals(event.getType())) {
+                String lifecycleEvent = apiEvent.getLifecycleEvent();
+                String currentStatus = apiEvent.getCurrentStatus().toUpperCase();
+                switch (lifecycleEvent) {
+                    case APIConstants.DEMOTE_TO_CREATED:
+                    case APIConstants.BLOCK:
                         deleteRequest(apiEvent);
                         break;
-                    }
-                case APIConstants.PUBLISH:
-                case APIConstants.DEPLOY_AS_A_PROTOTYPE:
-                    if (APIConstants.CREATED.equals(currentStatus)) {
+                    case APIConstants.DEPRECATE:
+                        if (APIConstants.PUBLISHED.equals(currentStatus)){
+                            deleteRequest(apiEvent);
+                            break;
+                        }
+                    case APIConstants.PUBLISH:
+                    case APIConstants.DEPLOY_AS_A_PROTOTYPE:
+                        if (APIConstants.CREATED.equals(currentStatus)) {
+                            postRequest(apiEvent);
+                        }
+                        break;
+                    case APIConstants.REPUBLISH:
                         postRequest(apiEvent);
-                    }
-                    break;
-                case APIConstants.REPUBLISH:
-                    postRequest(apiEvent);
-                    break;
-                default:
-                    break;
-            }
-        } else if (APIConstants.EventType.API_DELETE.name().equals(event.getType())) {
-            String currentStatus = apiEvent.getApiStatus().toUpperCase();
-            switch (currentStatus) {
-                case APIConstants.PROTOTYPED:
-                case APIConstants.PUBLISHED:
-                    deleteRequest(apiEvent);
-                    break;
-                default:
-                    break;
-            }
-        } else if (APIConstants.EventType.API_UPDATE.name().equals(event.getType())) {
-            String currentStatus = apiEvent.getApiStatus().toUpperCase();
-            switch (currentStatus) {
-                case APIConstants.PROTOTYPED:
-                case APIConstants.PUBLISHED:
-                    postRequest(apiEvent);
-                    break;
-                default:
-                    break;
+                        break;
+                    default:
+                        break;
+                }
+            } else if (APIConstants.EventType.API_DELETE.name().equals(event.getType())) {
+                String currentStatus = apiEvent.getApiStatus().toUpperCase();
+                switch (currentStatus) {
+                    case APIConstants.PROTOTYPED:
+                    case APIConstants.PUBLISHED:
+                        deleteRequest(apiEvent);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
@@ -191,9 +191,23 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
                 payload.put(APIConstants.TENANT_DOMAIN, apiEvent.getTenantDomain());
                 payload.put(APIConstants.VERSION, apiEvent.getApiVersion());
 
-                APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                        marketplaceAssistantConfigurationDto.getAccessToken(),
-                        marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+                String visibleRoles = apiEvent.getApiVisibleRoles();
+                if (visibleRoles == null) {
+                    visibleRoles = "";  // Assign an empty string if null
+                }
+                payload.put(APIConstants.VISIBILITYROLES, visibleRoles.toLowerCase());
+                payload.put(APIConstants.APIM_VERSION, APIUtil.getAPIMVersion());
+
+                if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
+                    APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                            marketplaceAssistantConfigurationDto.getTokenEndpoint(),
+                            marketplaceAssistantConfigurationDto.getKey(),
+                            marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+                } else if (marketplaceAssistantConfigurationDto.isAuthTokenProvided()) {
+                    APIUtil.invokeAIService(marketplaceAssistantConfigurationDto.getEndpoint(), null,
+                            marketplaceAssistantConfigurationDto.getAccessToken(),
+                            marketplaceAssistantConfigurationDto.getApiPublishResource(), payload.toString(), null);
+                }
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Uploading the API with UUID: " +
                         apiId + " to the vector database" + e.getMessage();
@@ -211,9 +225,17 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         @Override
         public void run() {
             try {
-                APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
-                        marketplaceAssistantConfigurationDto.getAccessToken(),
-                        marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
+                if (marketplaceAssistantConfigurationDto.isKeyProvided()) {
+                    APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                            marketplaceAssistantConfigurationDto.getTokenEndpoint(),
+                            marketplaceAssistantConfigurationDto.getKey(),
+                            marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
+                } else if (marketplaceAssistantConfigurationDto.isAuthTokenProvided()) {
+                    APIUtil.marketplaceAssistantDeleteService(marketplaceAssistantConfigurationDto.getEndpoint(),
+                            null,
+                            marketplaceAssistantConfigurationDto.getAccessToken(),
+                            marketplaceAssistantConfigurationDto.getApiDeleteResource(), uuid);
+                }
             } catch (APIManagementException e) {
                 String errorMessage = "Error encountered while Deleting the API with UUID: " +
                         uuid + " from the vector database" + e.getMessage();

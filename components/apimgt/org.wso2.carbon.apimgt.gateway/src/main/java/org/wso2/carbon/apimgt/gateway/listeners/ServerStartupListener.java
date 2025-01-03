@@ -44,14 +44,11 @@ public class ServerStartupListener implements ServerStartupObserver {
         // This prevents errors in an All in one setup caused by the ThrottleDataPublisher trying to connect to the
         // event receiver, before the event receiver has been started on completion of server startup.
         ServiceReferenceHolder.getInstance().setThrottleDataPublisher(new ThrottleDataPublisher());
-        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
-        APIThrottleDataServiceImpl throttleDataServiceImpl =
-                new APIThrottleDataServiceImpl(throttleDataHolder);
+        APIThrottleDataServiceImpl throttleDataServiceImpl = new APIThrottleDataServiceImpl();
         CacheInvalidationService cacheInvalidationService = new CacheInvalidationServiceImpl();
         // Register APIThrottleDataService so that ThrottleData maps are available to other components.
         ServiceReferenceHolder.getInstance().setCacheInvalidationService(cacheInvalidationService);
         ServiceReferenceHolder.getInstance().setAPIThrottleDataService(throttleDataServiceImpl);
-        ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
         ServiceReferenceHolder.getInstance().setRevokedTokenService(new RevokedTokenDataImpl());
         SubscriptionsDataService subscriptionsDataService = new SubscriptionsDataServiceImpl();
         ServiceReferenceHolder.getInstance().setSubscriptionsDataService(subscriptionsDataService);

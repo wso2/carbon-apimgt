@@ -74,7 +74,8 @@ public class OASParserUtilTest {
             definition = OASParserUtil.getOASParser(oasInvalid);
             Assert.fail("Exception expected");
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Invalid OAS definition provided."));
+            Assert.assertTrue(e.getMessage().contains(
+                    "Could not determine the OAS version as the version element of the definition is not found."));
         }
     }
 

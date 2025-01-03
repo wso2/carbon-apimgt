@@ -65,8 +65,8 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
         workflowDTO.setProperties("apiVersion", subsWorkflowDTO.getApiVersion());
         workflowDTO.setProperties("subscriber", subsWorkflowDTO.getSubscriber());
         workflowDTO.setProperties("applicationName", subsWorkflowDTO.getApplicationName());
+        workflowDTO.setProperties("tier", subsWorkflowDTO.getTierName());
         super.execute(workflowDTO);
-
         return new GeneralWorkflowResponse();
     }
 

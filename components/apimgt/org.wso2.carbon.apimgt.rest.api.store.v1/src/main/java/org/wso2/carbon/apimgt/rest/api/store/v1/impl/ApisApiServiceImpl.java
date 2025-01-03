@@ -278,7 +278,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             MessageContext messageContext) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
-        if (configDto.isAuthTokenProvided()) {
+        if (configDto.isAuthTokenProvided() || configDto.isKeyProvided()) {
             // Check the action
             if (apiChatAction.equals(APIConstants.AI.API_CHAT_ACTION_PREPARE)) {
                 // Determine whether the request body is valid. Request body should have a request UUID.
@@ -303,13 +303,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
                         return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
                     } else {
-                        String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
-                                "service. Cause: " + e.getCause().getMessage();
+                        String errorMessage = "Error encountered while executing the prepare statement of API Chat.";
                         RestApiUtil.handleInternalServerError(errorMessage, e, log);
                     }
                 } catch (IOException e) {
-                    String errorMessage = "Error encountered while executing the prepare statement of API Chat " +
-                            "service. Cause: " + e.getCause().getMessage();
+                    String errorMessage = "Error encountered while executing the prepare statement of API Chat.";
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
 
@@ -330,7 +328,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     boolean isTestInitializationRequest = !StringUtils.isEmpty(
                             apiChatRequestDTO.getCommand()) && apiChatRequestDTO.getApiSpec() != null;
                     boolean isTestExecutionRequest = apiChatRequestDTO.getResponse() != null;
-                    String requestPayload = ""; // Request payload for Choreo deployed API Chat Agent
+                    String requestPayload; // Request payload for Choreo deployed API Chat Agent
 
                     if (isTestInitializationRequest) {
                         ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
@@ -379,12 +377,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                         return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
                     } else {
                         String errorMessage = "Error encountered while executing the API Chat service to " +
-                                "accommodate the specified testing requirement. Cause: " + e.getCause().getMessage();
+                                "accommodate the specified testing requirement.";
                         RestApiUtil.handleInternalServerError(errorMessage, e, log);
                     }
                 } catch (IOException e) {
                     String errorMessage = "Error encountered while executing the API Chat service to accommodate the " +
-                            "specified testing requirement. Cause: " + e.getCause().getMessage();
+                            "specified testing requirement.";
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
             } else {
@@ -832,7 +830,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String environmentName,
-            String ifNoneMatch, String xWSO2Tenant, String xWSO2TenantQ, MessageContext messageContext) {
+            String ifNoneMatch, String xWSO2Tenant, String xWSO2TenantQ, String query, MessageContext messageContext) {
         try {
             String organization;
             if (StringUtils.isNotEmpty(xWSO2TenantQ) && StringUtils.isEmpty(xWSO2Tenant)) {
@@ -882,7 +880,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiSwagger = null;
             if (StringUtils.isNotEmpty(environmentName)) {
                 try {
-                    apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api, environmentName);
+                    if (StringUtils.isNotEmpty(query)){
+                        String kmId = APIMappingUtil.getKmIdValue(query);
+                        if (StringUtils.isNotBlank(kmId)) {
+                            apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironmentByKm(api, environmentName, kmId);
+                        }
+                    } else {
+                        apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api, environmentName);
+                    }
                 } catch (APIManagementException e) {
                     // handle gateway not found exception otherwise pass it
                     if (RestApiUtil.isDueToResourceNotFound(e)) {

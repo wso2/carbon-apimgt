@@ -18,3 +18,5 @@ emitOnStateChange=org.wso2.carbon.apimgt.throttling.siddhi.extension.EmitOnState
 timeBatch=org.wso2.carbon.apimgt.throttling.siddhi.extension.ThrottleStreamProcessor
 bigIntcmp=org.wso2.carbon.apimgt.throttling.siddhi.extension.BigIntCompareFunctionExecutor
 timeLength=org.wso2.carbon.apimgt.throttling.siddhi.extension.AsyncAPIThrottleStreamProcessor
+count=org.wso2.carbon.apimgt.throttling.siddhi.extension.CountAttributeAggregatorWithReset
+sum=org.wso2.carbon.apimgt.throttling.siddhi.extension.SumAttributeAggregatorWithReset

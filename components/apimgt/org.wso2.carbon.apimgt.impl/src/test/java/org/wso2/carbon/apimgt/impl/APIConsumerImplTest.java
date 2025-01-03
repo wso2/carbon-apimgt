@@ -374,6 +374,7 @@ public class APIConsumerImplTest {
         PowerMockito.when(APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, "testorg")).thenReturn(tierMap);
         PowerMockito.when(APIUtil.findTier(tierMap.values(), "tier1")).thenReturn(new Tier("tier1"));
         Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
+        Mockito.when(apiMgtDAO.getApplicationById(Mockito.anyInt())).thenReturn(application);
         assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
     }
     @Test
@@ -414,6 +415,7 @@ public class APIConsumerImplTest {
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1", "testorg")).thenReturn(false);
         Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
+        Mockito.when(apiMgtDAO.getApplicationById(Mockito.anyInt())).thenReturn(application);
         assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
     }
 
@@ -635,6 +637,23 @@ public class APIConsumerImplTest {
             Assert.fail("API management exception not thrown for error scenario");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Cannot update the application while it is INACTIVE"));
+        }
+    }
+
+    @Test
+    public void testResetApplicationThrottlePolicy() throws APIManagementException {
+        Application application = new Application("app", new Subscriber("sub1"));
+        application.setGroupId("testGroupId");
+        application.setId(5);
+        application.setTier("testTier");
+
+        Mockito.when(apiMgtDAO.getApplicationByUUID(Mockito.anyString())).thenReturn(application);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        try {
+            apiConsumer.resetApplicationThrottlePolicy("1", "testUser", "testOrg");
+            Assert.fail("API management exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Application is not accessible to user"));
         }
     }
 

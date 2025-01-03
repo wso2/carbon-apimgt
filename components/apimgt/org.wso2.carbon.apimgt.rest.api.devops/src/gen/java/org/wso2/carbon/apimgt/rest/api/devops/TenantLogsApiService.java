@@ -22,7 +22,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface TenantLogsApiService {
-      public Response tenantLogsTenantIdApisApiIdGet(String tenantId, String apiId, MessageContext messageContext) throws APIManagementException;
-      public Response tenantLogsTenantIdApisApiIdPut(String tenantId, String apiId, LoggingApiInputDTO loggingApiInputDTO, MessageContext messageContext) throws APIManagementException;
-      public Response tenantLogsTenantIdApisGet(String tenantId, String logLevel, MessageContext messageContext) throws APIManagementException;
+      public Response tenantLogsTenantApisApiIdGet(String tenant, String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response tenantLogsTenantApisApiIdPut(String tenant, String apiId, LoggingApiInputDTO loggingApiInputDTO, MessageContext messageContext) throws APIManagementException;
+      public Response tenantLogsTenantApisGet(String tenant, String logLevel, MessageContext messageContext) throws APIManagementException;
 }

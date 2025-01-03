@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -71,7 +72,7 @@ public class ServiceReferenceHolder {
 
     private ConfigurationContextService cfgCtxService;
     private APIManagerConfigurationService amConfigService;
-    public ThrottleDataHolder throttleDataHolder;
+    private final ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
     private ThrottleProperties throttleProperties;
     private ConfigurationContext axis2ConfigurationContext;
     private TracingService tracingService;
@@ -84,6 +85,7 @@ public class ServiceReferenceHolder {
     private MediationSecurityAdminService mediationSecurityAdminService;
     private ThrottleDataPublisher throttleDataPublisher;
     private Map<String,AbstractAPIMgtGatewayJWTGenerator> apiMgtGatewayJWTGenerators  = new HashMap<>();
+    private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
     private TracingTracer tracer;
     private TelemetryTracer telemetryTracer;
     private CacheInvalidationService cacheInvalidationService;
@@ -100,9 +102,7 @@ public class ServiceReferenceHolder {
 
     private Set<String> activeTenants = new ConcurrentSkipListSet<>();
     private JedisPool redisPool;
-    public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
-        this.throttleDataHolder = throttleDataHolder;
-    }
+
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
     }
@@ -462,4 +462,18 @@ public class ServiceReferenceHolder {
         this.gatewayCount = gatewayCount;
     }
 
+    public void addLLMProviderService(String type, LLMProviderService llmProviderService) {
+
+        llmProviderServiceMap.put(type, llmProviderService);
+    }
+
+    public void removeLLMProviderService(String type) {
+
+        llmProviderServiceMap.remove(type);
+    }
+
+    public LLMProviderService getLLMProviderService(String type) {
+
+        return llmProviderServiceMap.get(type);
+    }
 }

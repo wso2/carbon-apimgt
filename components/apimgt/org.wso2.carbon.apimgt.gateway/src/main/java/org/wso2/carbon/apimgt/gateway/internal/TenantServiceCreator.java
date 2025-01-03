@@ -295,7 +295,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             } catch (FileAlreadyExistsException e) {
                 // This exception is thrown when the file already exists. As this is a harmless, this case is ignored
             } catch (IOException e) {
-                log.error("Error while copying API manager specific synapse sequences" + e);
+                log.warn("Error while copying API manager specific synapse sequences" + e);
             }
         }
 

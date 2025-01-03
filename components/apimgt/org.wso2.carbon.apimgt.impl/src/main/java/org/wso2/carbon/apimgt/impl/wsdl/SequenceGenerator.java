@@ -39,6 +39,7 @@ import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.xerces.impl.Constants;
 import org.json.JSONException;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -198,7 +199,7 @@ public class SequenceGenerator {
                     sequenceMap.put("sequence", payloadSequence.get(operationId));
                     RESTToSOAPMsgTemplate template = new RESTToSOAPMsgTemplate();
                     String inSequence = template.getMappingInSequence(sequenceMap, operationId, soapAction,
-                            namespace, soapNamespace, arraySequenceElements);
+                            namespace, soapNamespace, soapVersion, arraySequenceElements);
                     String outSequence = template.getMappingOutSequence();
                     if (isResourceFromWSDL) {
                         SOAPToRestSequence inSeq = new SOAPToRestSequence(httpMethod.toString().toLowerCase(), pathName,
@@ -371,6 +372,10 @@ public class SequenceGenerator {
         try {
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             Transformer transformer = transformerFactory.newTransformer();
+            docFactory.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE,
+                    false);
+            docFactory.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE,
+                    false);
             docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
             Element rootElement = null;
@@ -581,6 +586,10 @@ public class SequenceGenerator {
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             Transformer transformer = transformerFactory.newTransformer();
             docBuilder = docFactory.newDocumentBuilder();
+            docFactory.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE,
+                    false);
+            docFactory.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE,
+                    false);
             Document doc = docBuilder.newDocument();
             Element argElement = doc.createElement(SOAPToRESTConstants.SequenceGen.ARG_ELEMENT);
             Element propertyElement = doc.createElement(SOAPToRESTConstants.SequenceGen.PROPERTY_ELEMENT);

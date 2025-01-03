@@ -21,6 +21,10 @@ package org.wso2.carbon.apimgt.gateway.handlers.common;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.util.Base64;
+import com.nimbusds.jose.util.Base64URL;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
@@ -29,10 +33,10 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
+import org.wso2.carbon.apimgt.gateway.dto.CertificateInfo;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -44,6 +48,7 @@ import org.wso2.carbon.core.util.KeyStoreManager;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
@@ -63,7 +68,7 @@ public class JwksHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(JwksHandler.class);
     private static final String KEY_USE = "sig";
     private static final String KEYS = "keys";
-    private final Map<String, Set<Certificate>> certificateMap = new HashMap<>();
+    private final Map<String, Set<CertificateInfo>> certificateMap = new HashMap<>();
     ExtendedJWTConfigurationDto jwtConfigurationDto;
 
     public boolean handleRequest(MessageContext messageContext) {
@@ -77,7 +82,7 @@ public class JwksHandler extends AbstractHandler {
             axis2MsgContext.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             axis2MsgContext.setProperty(Constants.Configuration.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             axis2MsgContext.removeProperty(APIConstants.NO_ENTITY_BODY);
-        } catch (ParseException | AxisFault | APIManagementException e) {
+        } catch (ParseException | AxisFault | APIManagementException | CertificateEncodingException e) {
             log.error("Error while generating payload " + axis2MsgContext.getLogIDString(), e);
         }
         return true;
@@ -92,7 +97,7 @@ public class JwksHandler extends AbstractHandler {
      *
      * @return JWKS response
      */
-    public String getJwksEndpointResponse() throws ParseException, APIManagementException {
+    public String getJwksEndpointResponse() throws ParseException, APIManagementException, CertificateEncodingException {
         this.jwtConfigurationDto = org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfiguration().getJwtConfigurationDto();
         boolean isTenantBasedSigningEnabled = jwtConfigurationDto.isTenantBasedSigningEnabled();
@@ -103,7 +108,7 @@ public class JwksHandler extends AbstractHandler {
             certMapKey = APIConstants.SUPER_TENANT_DOMAIN;
         }
 
-        Set<Certificate> certificateSet = null;
+        Set<CertificateInfo> certificateSet = null;
         if (certificateMap.containsKey(certMapKey)) {
             certificateSet = certificateMap.get(certMapKey);
         } else {
@@ -126,7 +131,8 @@ public class JwksHandler extends AbstractHandler {
      * @param certificates Set of certificates
      * @return JWKS response as a JSON string
      */
-    private String buildResponse(Set<Certificate> certificates) throws ParseException, APIManagementException {
+    private String buildResponse(Set<CertificateInfo> certificates) throws ParseException, APIManagementException,
+            CertificateEncodingException {
 
         JSONArray jwksArray = new JSONArray();
         JSONObject jwksJson = new JSONObject();
@@ -134,16 +140,21 @@ public class JwksHandler extends AbstractHandler {
                 ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getSignatureAlgorithm());
         List<JWSAlgorithm> diffAlgorithms = findDifferentAlgorithms(accessTokenSignAlgorithm);
 
-        for (Certificate certificate : certificates) {
+        for (CertificateInfo certificateInfo : certificates) {
             for (JWSAlgorithm algorithm : diffAlgorithms) {
-                RSAPublicKey publicKey = (RSAPublicKey) certificate.getPublicKey();
+                String alias = certificateInfo.getCertificateAlias();
+                X509Certificate x509Certificate = (X509Certificate) certificateInfo.getCertificate();
+                RSAPublicKey publicKey = (RSAPublicKey) x509Certificate.getPublicKey();
                 RSAKey.Builder jwk = new RSAKey.Builder(publicKey);
 
-                X509Certificate x509Certificate = (X509Certificate) certificate;
+                Certificate[] certChain = certificateInfo.getCertificateChain();
+                List<Base64> encodedCertList = generateEncodedCertList(certChain, alias);
                 jwk.keyID(JWTUtil.getKID(x509Certificate));
                 jwk.algorithm(algorithm);
                 jwk.keyUse(KeyUse.parse(KEY_USE));
-                jwksArray.put(jwk.build().toJSONObject());
+                jwk.x509CertChain(encodedCertList);
+                jwk.x509CertSHA256Thumbprint(new Base64URL(GatewayUtils.getThumbPrint(x509Certificate, alias)));
+                jwksArray.add(jwk.build().toJSONObject());
             }
         }
 
@@ -192,8 +203,8 @@ public class JwksHandler extends AbstractHandler {
      * @param tenantDomain tenant domain which is used to get the relevant key store and extract certificates
      * @return set of certificates
      */
-    private Set<Certificate> getCertificates(String tenantDomain) {
-        Set<Certificate> certificates = new HashSet<>();
+    private Set<CertificateInfo> getCertificates(String tenantDomain) {
+        Set<CertificateInfo> certificates = new HashSet<>();
         KeyStore keyStore;
         try {
             if (!APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
@@ -232,13 +243,14 @@ public class JwksHandler extends AbstractHandler {
      * @param keyStore Key store
      * @return Set of certificates from the key store
      */
-    private Set<Certificate> getCertificatesFromKeyStore(KeyStore keyStore) throws KeyStoreException {
-        Set<Certificate> certs = new HashSet<>();
+    private Set<CertificateInfo> getCertificatesFromKeyStore(KeyStore keyStore) throws KeyStoreException {
+        Set<CertificateInfo> certs = new HashSet<>();
         Enumeration<String> enumeration = keyStore.aliases();
         while (enumeration.hasMoreElements()) {
             String alias = enumeration.nextElement();
             if (keyStore.isKeyEntry(alias)) {
-                Certificate publicCert = keyStore.getCertificate(alias);
+                CertificateInfo publicCert = new CertificateInfo(keyStore.getCertificate(alias), alias);
+                publicCert.setCertificateChain(keyStore.getCertificateChain(alias));
                 certs.add(publicCert);
             }
         }
@@ -276,5 +288,27 @@ public class JwksHandler extends AbstractHandler {
         } else {
             return JWSAlgorithm.PS256;
         }
+    }
+
+    /**
+     * This method generates the base64 encoded certificate list from a Certificate array
+     *
+     * @return base64 encoded certificate list
+     */
+    private List<Base64> generateEncodedCertList(Certificate[] certificates, String alias)
+            throws CertificateEncodingException {
+
+        List<Base64> certList = new ArrayList<>();
+        for (Certificate certificate : certificates) {
+            try {
+                certList.add(Base64.encode(certificate.getEncoded()));
+            } catch (CertificateEncodingException exception) {
+                String errorMessage = "Unable to encode the public certificate with alias: " + alias +
+                        " in the tenant domain: " + PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        getTenantDomain();
+                throw new CertificateEncodingException(errorMessage, exception);
+            }
+        }
+        return certList;
     }
 }
