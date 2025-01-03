@@ -26,7 +26,9 @@ import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLOperationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -35,6 +37,7 @@ import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConst
 
 import java.util.Map;
 
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.TRANSPORT_HEADERS;
 /**
  * Global synapse handler to publish analytics data to analytics cloud.
  */
@@ -92,19 +95,27 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
             return true;
         }
+        messageContext.setProperty(TRANSPORT_HEADERS, ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                getProperty(TRANSPORT_HEADERS));
+
         AnalyticsDataProvider provider;
         Object isAsyncAPI = messageContext.getProperty(Constants.IS_ASYNC_API);
-        if (isAsyncAPI != null && (Boolean) isAsyncAPI) {
-            provider = new AsyncAnalyticsDataProvider(messageContext);
+        if (messageContext.getProperty(APIConstants.API_TYPE) == "GRAPHQL"){
+            GraphQLOperationHandler operationInfoAnalyzer = new GraphQLOperationHandler();
+            operationInfoAnalyzer.handleGraphQLOperation(messageContext);
         } else {
-            provider = new SynapseAnalyticsDataProvider(messageContext,
-                    ServiceReferenceHolder.getInstance().getAnalyticsCustomDataProvider());
-        }
-        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-        try {
-            dataCollector.collectData();
-        } catch (Exception e) {
-            log.error("Error Occurred when collecting data", e);
+            if (isAsyncAPI != null && (Boolean) isAsyncAPI) {
+                provider = new AsyncAnalyticsDataProvider(messageContext);
+            } else {
+                provider = new SynapseAnalyticsDataProvider(messageContext,
+                        ServiceReferenceHolder.getInstance().getAnalyticsCustomDataProvider());
+            }
+            GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+            try {
+                dataCollector.collectData();
+            } catch (Exception e) {
+                log.error("Error Occurred when collecting data", e);
+            }
         }
         return true;
     }
