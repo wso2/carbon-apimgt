@@ -19,6 +19,7 @@
     <HttpClient>
          <MaxTotal>{{apim.http_client.max_total}}</MaxTotal>
          <DefaultMaxPerRoute>{{apim.http_client.default_max_per_route}}</DefaultMaxPerRoute>
+         <ConnectionTimeout>{{apim.http_client.connection_timeout}}</ConnectionTimeout>
      </HttpClient>
 
 
@@ -195,47 +196,47 @@
             {% endfor %}
         </Environments>
         <TransactionCounter>
-            {% if integration.transaction_counter.enable is defined %}
-            <Enabled>{{integration.transaction_counter.enable}}</Enabled>
+            {% if apim.transaction_counter.enable is defined %}
+            <Enabled>{{apim.transaction_counter.enable}}</Enabled>
             {% endif %}
-            {% if integration.transaction_counter.server_id is defined %}
-            <ServerID>{{integration.transaction_counter.server_id}}</ServerID>
+            {% if apim.transaction_counter.server_id is defined %}
+            <ServerID>{{apim.transaction_counter.server_id}}</ServerID>
             {% endif %}
-            {% if integration.transaction_counter.store_impl is defined %}
-            <StoreClass>{{integration.transaction_counter.store_impl}}</StoreClass>
+            {% if apim.transaction_counter.store_impl is defined %}
+            <StoreClass>{{apim.transaction_counter.store_impl}}</StoreClass>
             {% endif %}
-            {% if integration.transaction_counter.record_queue_size is defined %}
-            <QueueSize>{{integration.transaction_counter.record_queue_size}}</QueueSize>
+            {% if apim.transaction_counter.record_queue_size is defined %}
+            <QueueSize>{{apim.transaction_counter.record_queue_size}}</QueueSize>
             {% endif %}
-            {% if integration.transaction_counter.producer_counting_thread_pool_size is defined %}
-            <ProducerThreadPoolSize>{{integration.transaction_counter.producer_counting_thread_pool_size}}</ProducerThreadPoolSize>
+            {% if apim.transaction_counter.producer_counting_thread_pool_size is defined %}
+            <ProducerThreadPoolSize>{{apim.transaction_counter.producer_counting_thread_pool_size}}</ProducerThreadPoolSize>
             {% endif %}
-            {% if integration.transaction_counter.producer_scheduled_interval is defined %}
-            <ProducerScheduledInterval>{{integration.transaction_counter.producer_scheduled_interval}}</ProducerScheduledInterval>
+            {% if apim.transaction_counter.producer_scheduled_interval is defined %}
+            <ProducerScheduledInterval>{{apim.transaction_counter.producer_scheduled_interval}}</ProducerScheduledInterval>
             {% endif %}
-            {% if integration.transaction_counter.max_transaction_count_per_record is defined %}
-            <MaxTransactionCount>{{integration.transaction_counter.max_transaction_count_per_record}}</MaxTransactionCount>
+            {% if apim.transaction_counter.max_transaction_count_per_record is defined %}
+            <MaxTransactionCount>{{apim.transaction_counter.max_transaction_count_per_record}}</MaxTransactionCount>
             {% endif %}
-            {% if integration.transaction_counter.min_transaction_count_per_record is defined %}
-            <MinTransactionCount>{{integration.transaction_counter.min_transaction_count_per_record}}</MinTransactionCount>
+            {% if apim.transaction_counter.min_transaction_count_per_record is defined %}
+            <MinTransactionCount>{{apim.transaction_counter.min_transaction_count_per_record}}</MinTransactionCount>
             {% endif %}
-            {% if integration.transaction_counter.publisher_scheduled_interval is defined %}
-            <PublisherScheduledInterval>{{integration.transaction_counter.publisher_scheduled_interval}}</PublisherScheduledInterval>
+            {% if apim.transaction_counter.publisher_scheduled_interval is defined %}
+            <PublisherScheduledInterval>{{apim.transaction_counter.publisher_scheduled_interval}}</PublisherScheduledInterval>
             {% endif %}
-            {% if integration.transaction_counter.publisher_max_batch_size is defined %}
-            <MaxBatchSize>{{integration.transaction_counter.publisher_max_batch_size}}</MaxBatchSize>
+            {% if apim.transaction_counter.publisher_max_batch_size is defined %}
+            <MaxBatchSize>{{apim.transaction_counter.publisher_max_batch_size}}</MaxBatchSize>
             {% endif %}
-            {% if integration.transaction_counter.publisher_max_retries is defined %}
-            <MaxRetryCount>{{integration.transaction_counter.publisher_max_retries}}</MaxRetryCount>
+            {% if apim.transaction_counter.publisher_max_retries is defined %}
+            <MaxRetryCount>{{apim.transaction_counter.publisher_max_retries}}</MaxRetryCount>
             {% endif %}
-            {% if integration.transaction_counter.service_url is defined %}
-            <ServiceURL>{{integration.transaction_counter.service_url}}</ServiceURL>
+            {% if apim.transaction_counter.service_url is defined %}
+            <ServiceURL>{{apim.transaction_counter.service_url}}</ServiceURL>
             {% endif %}
-            {% if integration.transaction_counter.service_username is defined %}
-            <ServiceUsername>{{integration.transaction_counter.service_username}}</ServiceUsername>
+            {% if apim.transaction_counter.service_username is defined %}
+            <ServiceUsername>{{apim.transaction_counter.service_username}}</ServiceUsername>
             {% endif %}
-            {% if integration.transaction_counter.service_password is defined %}
-            <ServicePassword>{{integration.transaction_counter.service_password}}</ServicePassword>
+            {% if apim.transaction_counter.service_password is defined %}
+            <ServicePassword>{{apim.transaction_counter.service_password}}</ServicePassword>
             {% endif %}
         </TransactionCounter>
     </APIGateway>
@@ -378,7 +379,11 @@
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
+        <Key>{{apim.ai.key}}</Key>
+
         <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
 
         <Resources>
             <PrepareResource>{{apim.ai.api_chat_prepare_resource}}</PrepareResource>
@@ -386,6 +391,11 @@
         </Resources>
 
     </APIChat>
+
+
+    <AiConfiguration>
+        <Enabled>{{apim.ai.llm_provider_events_enabled}}</Enabled>
+    </AiConfiguration>
 
     <!--
         Configurations relevant to enable rate limit feature.
@@ -405,7 +415,11 @@
 
         <AuthToken>{{apim.ai.token}}</AuthToken>
 
+        <Key>{{apim.ai.key}}</Key>
+
         <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
 
         <Resources>
             <ChatResource>{{apim.ai.marketplace_assistant_chat_resource}}</ChatResource>
@@ -437,9 +451,10 @@
       {% if apim.key_manager.enable_provisioned_app_validation is defined %}
       <EnableProvisionedAppValidation>{{apim.key_manager.enable_provisioned_app_validation}}</EnableProvisionedAppValidation>
       {% endif %}
-      {% if apim.key_manager.enable_apikey_subscription_validation is defined %}
-      <EnableAPIKeySubscriptionValidation>{{apim.key_manager.enable_apikey_subscription_validation}}</EnableAPIKeySubscriptionValidation>
+      {% if apim.key_manager.enable_lightweight_apikey_generation is defined %}
+      <EnableLightWeightAPIKeyGeneration>{{apim.key_manager.enable_lightweight_apikey_generation}}</EnableLightWeightAPIKeyGeneration>
       {% endif %}
+      <AllowSubscriptionValidationDisabling>{{apim.key_manager.allow_subscription_validation_disabling}}</AllowSubscriptionValidationDisabling>
     </APIKeyValidator>
 
 
@@ -515,6 +530,11 @@
         </PersistentNotifier>
         {% endif %}
     </TokenRevocationNotifiers>
+
+    <TokenValidation>
+        <!-- Enforce validating JWT type header -->
+        <EnforceTypeHeaderValidation>{{apim.token.validation.enforce_type_header_validation}}</EnforceTypeHeaderValidation>
+    </TokenValidation>
 
     <!-- Settings related to managing API access tiers. -->
     <TierManagement>
@@ -1115,6 +1135,7 @@
                 <Silver>2000</Silver>
                 <Bronze>1000</Bronze>
                 <Unauthenticated>60</Unauthenticated>
+                <DefaultSubscriptionless>100000</DefaultSubscriptionless>
             </SubscriptionTierLimits>
             <ApplicationTierLimits>
                 <50PerMin>50</50PerMin>
@@ -1133,6 +1154,7 @@
         <EnableQueryParamConditions>{{apim.throttling.enable_query_param_based_throttling}}</EnableQueryParamConditions>
         <SkipRedeployingPolicies>RequestPreProcessorExecutionPlan{% for policy in apim.throttling.skip_redeploying_policies %}{{ "," if loop.first }}{{policy}}{{ "," if not loop.last }}{% endfor %}</SkipRedeployingPolicies>
         <EnablePolicyDeployment>{{apim.throttling.enable_policy_deployment}}</EnablePolicyDeployment>
+        <EnablePolicyRecreationOnStartup>{{apim.throttling.enable_policy_recreation_on_startup}}</EnablePolicyRecreationOnStartup>
     </ThrottlingConfigurations>
 
     <WorkflowConfigurations>
@@ -1360,6 +1382,8 @@
         </ApplicationAttributes>
     </ApplicationConfiguration>
     {% endif %}
+
+    <EnableEmptyValuesInApplicationAttributes>{{apim.devportal.enable_empty_values_in_application_attributes}}</EnableEmptyValuesInApplicationAttributes>
 
     {% if apim.ai_security is defined %}
     <AISecurityHandler>
@@ -1653,6 +1677,13 @@
          {% endif %}
         </LocalEntries>
         </SkipList>
+        <FileBasedApiContexts>
+            {% if apim.sync_runtime_artifacts.gateway.file_based_api_contexts is defined %}
+                {%- for context in apim.sync_runtime_artifacts.gateway.file_based_api_contexts -%}
+                    <FileBasedApiContext>{{context}}</FileBasedApiContext>
+                {% endfor %}
+            {% endif %}
+        </FileBasedApiContexts>
         <EnableOnDemandLoadingAPIS>{{apim.sync_runtime_artifacts.gateway.enable_on_demand_loading}}</EnableOnDemandLoadingAPIS>
     </SyncRuntimeArtifactsGateway>
     {% endif %}
@@ -1696,6 +1727,8 @@
         <OAuth>
         <!-- If the access token expires, the server should reply with the duration of time the access token is granted for. -->
                  <ExpiresIn>{{apim.mediator_config.oauth.expires_in}}</ExpiresIn>
+                 <!-- Enable/Disable retry API calls with new access token when the access token is invalid. Default is true. -->
+                 <EnableRetryCallWithNewToken>{{apim.mediator_config.oauth.enable_retry_call_with_new_token}}</EnableRetryCallWithNewToken>
              </OAuth>
           </MediatorConfigs>
       {% endif %}
@@ -1720,4 +1753,8 @@
             </CustomProperties>
         </PropertyConfigurations>
       {% endif %}
+
+      <Hashing>
+        <HashingAlgorithm>{{apim.hashing.hashing_algorithm}}</HashingAlgorithm>
+      </Hashing>
 </APIManager>
