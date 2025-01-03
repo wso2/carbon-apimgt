@@ -5055,7 +5055,7 @@ public final class APIUtil {
                 String[] permittedRoles = environment.getVisibilityRoles();
                 if (permittedRoles != null && permittedRoles[0].equals("all")) {
                     environmentStringSet.add(environment.toString());
-                } else {
+                } else if (permittedRoles != null) {
                     for (String role : userRoles) {
                         for (String permission : permittedRoles) {
                             if (role.equals(permission)) {
@@ -5063,6 +5063,8 @@ public final class APIUtil {
                             }
                         }
                     }
+                } else {
+                    environmentStringSet.add(environment.toString());
                 }
             }
         }
@@ -5076,9 +5078,9 @@ public final class APIUtil {
         Map<String, Environment> environmentsMap = getEnvironments(organization);
         for (Environment environment : environmentsMap.values()) {
             String[] permittedRoles = environment.getVisibilityRoles();
-            if (permittedRoles[0].equals("all")) {
+            if (permittedRoles != null && permittedRoles[0].equals("all")) {
                 returnEnvironments.put(environment.getName(), environment);
-            } else {
+            } else if (permittedRoles != null) {
                 for (String role : userRoles) {
                     for (String permission : permittedRoles) {
                         if (role.equals(permission)) {
@@ -5086,6 +5088,8 @@ public final class APIUtil {
                         }
                     }
                 }
+            } else {
+                returnEnvironments.put(environment.getName(), environment);
             }
         }
         return returnEnvironments;
