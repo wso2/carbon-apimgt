@@ -202,6 +202,8 @@ return null;
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<String> categories = new ArrayList<String>();
     private String workflowStatus = null;
+    private List<String> audiences = new ArrayList<String>();
+    private Boolean egress = false;
 
   /**
    * UUID of the api product 
@@ -962,6 +964,42 @@ return null;
     this.workflowStatus = workflowStatus;
   }
 
+  /**
+   * The audiences of the API for jwt validation. Accepted values are any String values
+   **/
+  public APIProductDTO audiences(List<String> audiences) {
+    this.audiences = audiences;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The audiences of the API for jwt validation. Accepted values are any String values")
+  @JsonProperty("audiences")
+  public List<String> getAudiences() {
+    return audiences;
+  }
+  public void setAudiences(List<String> audiences) {
+    this.audiences = audiences;
+  }
+
+  /**
+   * Whether the APIProduct is EGRESS or not
+   **/
+  public APIProductDTO egress(Boolean egress) {
+    this.egress = egress;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether the APIProduct is EGRESS or not")
+  @JsonProperty("egress")
+  public Boolean isEgress() {
+    return egress;
+  }
+  public void setEgress(Boolean egress) {
+    this.egress = egress;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1014,12 +1052,14 @@ return null;
         Objects.equals(apis, apIProduct.apis) &&
         Objects.equals(scopes, apIProduct.scopes) &&
         Objects.equals(categories, apIProduct.categories) &&
-        Objects.equals(workflowStatus, apIProduct.workflowStatus);
+        Objects.equals(workflowStatus, apIProduct.workflowStatus) &&
+        Objects.equals(audiences, apIProduct.audiences) &&
+        Objects.equals(egress, apIProduct.egress);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, version, description, provider, hasThumbnail, state, enableSchemaValidation, isDefaultVersion, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus);
+    return Objects.hash(id, name, context, version, description, provider, hasThumbnail, state, enableSchemaValidation, isDefaultVersion, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus, audiences, egress);
   }
 
   @Override
@@ -1070,6 +1110,8 @@ return null;
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
+    sb.append("    audiences: ").append(toIndentedString(audiences)).append("\n");
+    sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");
     return sb.toString();
   }

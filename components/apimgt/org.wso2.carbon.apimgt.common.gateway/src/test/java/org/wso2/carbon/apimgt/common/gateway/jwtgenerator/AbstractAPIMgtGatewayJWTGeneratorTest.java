@@ -19,15 +19,25 @@
 package org.wso2.carbon.apimgt.common.gateway.jwtgenerator;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 
 public class AbstractAPIMgtGatewayJWTGeneratorTest {
+    protected JWTConfigurationDto jwtConfigurationDto;
+
+    @Before
+    public void setup() {
+        jwtConfigurationDto = new JWTConfigurationDto();
+        jwtConfigurationDto.setEnableBase64Padding(false);
+    }
 
     @Test
     public void testEncode() {
         // Test whether the encode method is base64 encoding.
         AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = new APIMgtGatewayJWTGeneratorImpl();
+        apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
         String stringToBeEncoded = "<<???>>";
         String expectedEncodedString = "PDw/Pz8+Pg";
         try {

@@ -44,8 +44,10 @@ public class JWTConfigurationDto {
     private Certificate publicCert;
     private PrivateKey privateKey;
     private long ttl;
+    private boolean enableBase64Padding = false;
 
     private boolean useKid;
+    private boolean isEncodeX5tWithoutPadding;
 
     public boolean useKid() {
         return useKid;
@@ -199,5 +201,21 @@ public class JWTConfigurationDto {
 
     public void setUseSHA256Hash(boolean useSHA256Hash) {
         this.useSHA256Hash = useSHA256Hash;
+    }
+
+    public void setEnableBase64Padding(boolean enableBase64Padding) {
+        this.enableBase64Padding = enableBase64Padding;
+    }
+
+    public boolean isEnableBase64Padding() {
+        return enableBase64Padding;
+    }
+
+    public boolean isEncodeX5tWithoutPadding() {
+        return isEncodeX5tWithoutPadding;
+    }
+
+    public void setEncodeX5tWithoutPadding(boolean encodeX5tWithoutPadding) {
+        isEncodeX5tWithoutPadding = encodeX5tWithoutPadding;
     }
 }

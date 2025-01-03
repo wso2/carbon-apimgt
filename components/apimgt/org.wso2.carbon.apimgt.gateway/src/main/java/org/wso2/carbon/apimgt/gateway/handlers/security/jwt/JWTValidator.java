@@ -68,6 +68,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
@@ -82,6 +83,7 @@ public class JWTValidator {
     private APIKeyValidator apiKeyValidator;
     private boolean jwtGenerationEnabled;
     private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator;
+    private Set<String> audiences;
     ExtendedJWTConfigurationDto jwtConfigurationDto;
     JWTValidationService jwtValidationService;
     private static volatile long ttl = -1L;
@@ -130,6 +132,12 @@ public class JWTValidator {
         this.apiMgtGatewayJWTGenerator = apiMgtGatewayJWTGenerator;
         this.jwtConfigurationDto = jwtConfigurationDto;
         this.jwtValidationService = jwtValidationService;
+    }
+
+    public JWTValidator(APIKeyValidator apiKeyValidator, String tenantDomain, Set<String> audiences)
+            throws APIManagementException {
+        this(apiKeyValidator, tenantDomain);
+        this.setAudiences(audiences);
     }
 
     /**
@@ -274,6 +282,7 @@ public class JWTValidator {
                 }
                 // Validate scopes
                 validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo);
+                validateAudiences(signedJWTInfo);
                 synCtx.setProperty(APIMgtGatewayConstants.SCOPES, jwtValidationInfo.getScopes().toString());
                 synCtx.setProperty(APIMgtGatewayConstants.JWT_CLAIMS, jwtValidationInfo.getClaims());
                 if (apiKeyValidationInfoDTO.isAuthorized()) {
@@ -345,6 +354,39 @@ public class JWTValidator {
             }
             return ttl;
         }
+    }
+
+    public Set<String> getAudiences() {
+
+        return audiences;
+    }
+
+    public void setAudiences(Set<String> audiences) {
+
+        this.audiences = audiences;
+    }
+
+    private boolean validateAudiences(SignedJWTInfo signedJWTInfo) throws APISecurityException {
+        if (this.getAudiences() == null || this.getAudiences().isEmpty() ||
+                this.getAudiences().contains(APIConstants.ALL_AUDIENCES)) {
+            return true;
+        }
+        List<String> jwtAudienceClaim = signedJWTInfo.getJwtClaimsSet().getAudience();
+        if (jwtAudienceClaim == null) {
+            log.debug("User is NOT authorized to access the Resource. Audience validation failed.");
+            throw new APISecurityException(APISecurityConstants.API_OAUTH_INVALID_AUDIENCES,
+                    APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_MESSAGE,
+                                           APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_DESCRIPTION);
+        }
+        for (String aud : this.getAudiences()) {
+            if (jwtAudienceClaim.contains(aud)) {
+                return true;
+            }
+        }
+        log.debug("User is NOT authorized to access the Resource. Audience validation failed.");
+        throw new APISecurityException(APISecurityConstants.API_OAUTH_INVALID_AUDIENCES,
+                APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_MESSAGE,
+                                       APISecurityConstants.API_OAUTH_INVALID_AUDIENCES_DESCRIPTION);
     }
 
     private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)

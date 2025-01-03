@@ -286,6 +286,11 @@
         </PersistentNotifier>
     </TokenRevocationNotifiers>
 
+    <TokenValidation>
+        <!-- Enforce validating JWT type header -->
+        <EnforceTypeHeaderValidation>false</EnforceTypeHeaderValidation>
+    </TokenValidation>
+
     <!-- Settings related to managing API access tiers. -->
     <TierManagement>
         <!-- Enable the providers to expose their APIs over the special 'Unlimited' tier which

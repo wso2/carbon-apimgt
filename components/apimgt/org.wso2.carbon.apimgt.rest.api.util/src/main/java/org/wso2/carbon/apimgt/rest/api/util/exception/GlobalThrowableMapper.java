@@ -173,11 +173,16 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
                     log.error("A defined exception has been captured and mapped to an HTTP response " +
                             "by the global exception mapper ", e);
                 } else {
-                    // Not to log the stack trace due to error code was mark as not print stacktrace.
-                    log.error(e.getMessage());
+                    // if the request is a bad request, not to log error message or anything
+                    if (selectedErrorHandler.getHttpStatusCode() != 400) {
+                        // Not to log the stack trace due to error code was mark as not print stacktrace.
+                        log.error(e.getMessage());
+                    }
                     if (log.isDebugEnabled()) {
-                        log.debug("A defined exception has been captured and mapped to an HTTP response " +
-                                "by the global exception mapper ", e);
+                        log.debug(
+                                "A defined exception has been captured and mapped to an HTTP response by the " +
+                                        "global exception mapper ",
+                                e);
                     }
                 }
 

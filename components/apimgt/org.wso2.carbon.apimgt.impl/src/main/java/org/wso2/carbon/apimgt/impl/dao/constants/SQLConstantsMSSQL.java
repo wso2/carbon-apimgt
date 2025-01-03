@@ -55,7 +55,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
             " And " +
-            "    NAME like ?" +
+            "    LOWER (NAME) like LOWER (?)" +
             " ) a " +
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -92,7 +92,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " AND " +
             "   APP.ORGANIZATION = ? " +
             " And "+
-            "    NAME like ?"+
+            "    LOWER (NAME) like LOWER (?)"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)"+
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -132,7 +132,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
                     " And "+
-                    "    NAME like ? ) a " +
+                    "    LOWER (NAME) like LOWER (?) ) a " +
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
                     " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
@@ -174,7 +174,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
                     " And " +
-                    "    NAME like ?"+
+                    "    LOWER (NAME) like LOWER (?)"+
                     " ) a " +
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
                     " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -209,7 +209,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " AND " +
             "   APP.ORGANIZATION = ? " +
             " And "+
-            "    NAME like ?"+
+            "    LOWER (NAME) like LOWER (?)"+
             " )a " +
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -244,7 +244,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " AND " +
             "    APP.ORGANIZATION = ? " +
             " And "+
-            "    NAME like ?"+
+            "    LOWER (NAME) like LOWER (?)"+
             " ) a " +
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = (x.USER_ID + ':') + x.NAME)" +
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -273,7 +273,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "    SUB.TENANT_ID = ?"+
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
-                    " AND APP.NAME like ?"+
+                    " OR APP.NAME like ?"+
                     " )) a " +
                     " )" +
                     " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import java.util.Set;
+
 /**
  * A subset of org.wso2.carbon.apimgt.persistence.models.PublisherAPIProduct. Minimal API information required only for
  * listing API Products in publisher which are stored in the
@@ -38,6 +40,14 @@ public class PublisherAPIProductInfo {
     private String technicalOwner;
     private String technicalOwnerEmail;
     private Boolean isMonetizationEnabled;
+    private Set<String> audiences;
+
+    public Set<String> getAudiences() {
+        return audiences;
+    }
+    public void setAudiences(Set<String> audiences) {
+        this.audiences = audiences;
+    }
     public String getThumbnail() {
         return thumbnail;
     }

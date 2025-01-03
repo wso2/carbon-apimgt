@@ -35,6 +35,7 @@ import java.util.Set;
  * An Utility class to generate dummy policies.
  */
 public class TestUtil {
+    public static final String HEADER_CONDITION_HEADER_NAME = "HEADER1";
 
     /**
      * Generate a dummy API Policy object
@@ -74,6 +75,14 @@ public class TestUtil {
         condition1.setValue("127.0.0.1");
         condition1.setInverted(false);
         conditions.add(condition1);
+
+        Condition condition2 = new Condition();
+        condition2.setConditionType("Header");
+        //set the header name in mixed case to test that execution plans are deployed with lower-case header names
+        condition2.setName(HEADER_CONDITION_HEADER_NAME);
+        condition2.setValue("test1");
+        condition2.setInverted(false);
+        conditions.add(condition2);
 
         conditionGroup1.setCondition(conditions);
 

@@ -203,7 +203,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         try {
             extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
         } catch (APIImportExportException e) {
-            throw new APIManagementException(e);
+            throw new APIManagementException("Error extracting and processing the directory", e,
+                    ExceptionCodes.ERROR_PROCESSING_DIRECTORY_TO_IMPORT);
         }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision,
                 overwrite, preservePortalConfigurations, false, tokenScopes, null, organization);
@@ -220,7 +221,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         try {
             extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
         } catch (APIImportExportException e) {
-            throw new APIManagementException(e);
+            throw new APIManagementException("Error extracting and processing the directory", e,
+                    ExceptionCodes.ERROR_PROCESSING_DIRECTORY_TO_IMPORT);
         }
         return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, rotateRevision, overwriteAPIProduct,
                 overwriteAPIs, importAPIs, tokenScopes, organization);

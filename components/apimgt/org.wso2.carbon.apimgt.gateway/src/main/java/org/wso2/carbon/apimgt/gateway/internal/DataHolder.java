@@ -18,20 +18,23 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.gateway.webhooks.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
-import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DataHolder {
     private static final Log log  = LogFactory.getLog(DataHolder.class);
@@ -41,16 +44,67 @@ public class DataHolder {
     private Map<String, GraphQLSchemaDTO> apiToGraphQLSchemaDTOMap = new HashMap<>();
     private Map<String, List<String>> apiToKeyManagersMap = new HashMap<>();
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
-    private boolean isAllApisDeployed = false;
+    private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
+    private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
     private boolean isAllGatewayPoliciesDeployed = false;
 
     private DataHolder() {
-
+        initializeTenantDeploymentStatusMap();
     }
 
     public Map<String, List<String>> getApiToCertificatesMap() {
 
         return apiToCertificatesMap;
+    }
+
+    /**
+     * Retrieves LLM Provider configurations by ID.
+     *
+     * @param id the ID of the LLM provider
+     * @return the LLMProvider if found, otherwise null
+     */
+    public LLMProviderInfo getLLMProviderConfigurations(String id) {
+
+        if (llmProviderMap.containsKey(id)) {
+            return llmProviderMap.get(id);
+        } else {
+            log.warn("LLM Provider key " + id + " not found");
+            return null;
+        }
+    }
+
+    /**
+     * Adds a new LLM Provider configuration.
+     *
+     * @param provider the LLMProvider to add
+     */
+    public void addLLMProviderConfigurations(LLMProviderInfo provider) {
+
+        llmProviderMap.put(provider.getId(), provider);
+    }
+
+    /**
+     * Removes an LLM Provider configuration by ID.
+     *
+     * @param id the ID of the LLM provider to remove
+     */
+    public void removeLLMProviderConfigurations(String id) {
+
+        if (StringUtils.isEmpty(id)) {
+            return;
+        }
+        llmProviderMap.remove(id);
+    }
+
+    /**
+     * Updates an existing LLM Provider configuration.
+     *
+     * @param provider the LLMProvider to update
+     */
+    public void updateLLMProviderConfigurations(LLMProviderInfo provider) {
+
+        this.removeLLMProviderConfigurations(provider.getId());
+        this.addLLMProviderConfigurations(provider);
     }
 
     public void setApiToCertificatesMap(Map<String, List<String>> apiToCertificatesMap) {
@@ -104,13 +158,15 @@ public class DataHolder {
     }
 
     public boolean isAllApisDeployed() {
-
-        return isAllApisDeployed;
+        return tenantDeployStatus.values().stream().allMatch(Boolean::booleanValue);
     }
 
-    public void setAllApisDeployed(boolean allApisDeployed) {
+    public Map<String, Boolean> getTenantDeployStatus() {
+        return tenantDeployStatus;
+    }
 
-        isAllApisDeployed = allApisDeployed;
+    public void setTenantDeployStatus(String tenant) {
+        tenantDeployStatus.put(tenant, true);
     }
 
     public void addKeyManagerToAPIMapping(String uuid, List<String> keyManagers) {
@@ -139,8 +195,11 @@ public class DataHolder {
             log.debug("Adding meta data of API : " + api.getApiName());
         }
         String context = api.getContext();
+        String defaultContext = context;
         int index = context.lastIndexOf("/" + api.getApiVersion());
-        String defaultContext = context.substring(0, index);
+        if (index != -1) {
+            defaultContext = context.substring(0, index);
+        }
         Map<String, API> apiMap;
         if (tenantAPIMap.containsKey(api.getOrganization())) {
             apiMap = tenantAPIMap.get(api.getOrganization());
@@ -225,6 +284,15 @@ public class DataHolder {
         if (tenantAPIMap.containsKey(tenantDomain)) {
             Map<String, API> apiMap = tenantAPIMap.get(tenantDomain);
             apiMap.values().forEach(api -> api.setDeployed(false));
+        }
+    }
+
+    private void initializeTenantDeploymentStatusMap() {
+        try {
+            Set<String> tenants = GatewayUtils.getTenantsToBeDeployed();
+            tenantDeployStatus = tenants.stream().collect(Collectors.toMap(str -> str, str -> false));
+        } catch (APIManagementException e) {
+            log.error("Error while initializing tenant deployment status map", e);
         }
     }
 }

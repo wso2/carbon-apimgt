@@ -21,10 +21,14 @@ package org.wso2.carbon.apimgt.internal.service.utils;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -41,33 +45,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
-import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.BandwidthLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.BurstLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.EventCountLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -81,6 +59,7 @@ public class SubscriptionValidationDataUtil {
     private static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
         APIDTO apidto = null;
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (model != null) {
             apidto = new APIDTO();
             apidto.setUuid(model.getApiUUID());
@@ -88,6 +67,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setVersion(model.getVersion());
             apidto.setName(model.getName());
             apidto.setContext(model.getContext());
+            apidto.setContextTemplate(model.getContextTemplate());
             apidto.setPolicy(model.getPolicy());
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
@@ -98,9 +78,11 @@ public class SubscriptionValidationDataUtil {
             // The security schema is necessary only for the websocket APIs. To prevent unnecessary registry calls,
             // it has been excluded from other APIs, thus reducing operational costs.
             if(model.getApiType() != null && model.getApiType().equals("WS")) {
-                apidto.setSecurityScheme(RestApiCommonUtil.getLoggedInUserProvider().
+                apidto.setSecurityScheme(apiProvider.
                         getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
             }
+            apidto.setIsSubscriptionValidationDisabled(apiProvider
+                    .isSubscriptionValidationDisabled(model.getApiUUID()));
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -137,6 +119,8 @@ public class SubscriptionValidationDataUtil {
             }
             apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
+            apidto.setIsEgress(model.isEgress() != 0);
+            apidto.setSubtype(model.getSubtype());
         }
         return apidto;
     }
@@ -144,12 +128,14 @@ public class SubscriptionValidationDataUtil {
     public static APIListDTO fromAPIToAPIListDTO(API model) throws APIManagementException {
 
         APIListDTO apiListdto = new APIListDTO();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (model != null) {
             APIDTO apidto = new APIDTO();
             apidto.setUuid(model.getApiUUID());
             apidto.setApiId(model.getApiId());
             apidto.setVersion(model.getVersion());
             apidto.setContext(model.getContext());
+            apidto.setContextTemplate(model.getContextTemplate());
             apidto.setPolicy(model.getPolicy());
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
@@ -157,8 +143,9 @@ public class SubscriptionValidationDataUtil {
             apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
             apidto.setOrganization(model.getOrganization());
-            apidto.setSecurityScheme(RestApiCommonUtil.getLoggedInUserProvider().
-                    getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
+            apidto.setSecurityScheme(apiProvider.getSecuritySchemeOfAPI(model.getApiUUID(), model.getOrganization()));
+            apidto.setIsSubscriptionValidationDisabled(apiProvider
+                    .isSubscriptionValidationDisabled(model.getApiUUID()));
             Map<String, URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
             for (URLMapping urlMapping : urlMappings.values()) {
@@ -195,6 +182,8 @@ public class SubscriptionValidationDataUtil {
             }
             apidto.setApiPolicies(apiPolicies);
             apidto.setUrlMappings(urlMappingsDTO);
+            apidto.setIsEgress(model.isEgress() != 0);
+            apidto.setSubtype(model.getSubtype());
             apiListdto.setCount(1);
             apiListdto.getList().add(apidto);
         } else {
@@ -330,6 +319,9 @@ public class SubscriptionValidationDataUtil {
         } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())) {
             EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
             defaultLimit.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
+        } else if (PolicyConstants.AI_API_QUOTA_TYPE.equals(quotaPolicy.getType())) {
+            AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) quotaPolicy.getLimit();
+            defaultLimit.setAiApiQuota(fromAIAPIQuotaLimitToDTO(AIAPIQuotaLimit));
         }
         return defaultLimit;
     }
@@ -404,6 +396,24 @@ public class SubscriptionValidationDataUtil {
         dto.setTimeUnit(eventCountLimit.getTimeUnit());
         dto.setUnitTime(eventCountLimit.getUnitTime());
         dto.setEventCount(eventCountLimit.getEventCount());
+        return dto;
+    }
+
+    /**
+     * Converts a AI API Quota Limit model object into a AI API Quota Limit DTO object.
+     *
+     * @param AIAPIQuotaLimit AI APIQuota Limit model object
+     * @return AI API Quota Limit DTO object derived from model
+     */
+    private static AIAPIQuotaLimitDTO fromAIAPIQuotaLimitToDTO(AIAPIQuotaLimit AIAPIQuotaLimit) {
+
+        AIAPIQuotaLimitDTO dto = new AIAPIQuotaLimitDTO();
+        dto.setTimeUnit(AIAPIQuotaLimit.getTimeUnit());
+        dto.setUnitTime(AIAPIQuotaLimit.getUnitTime());
+        dto.setRequestCount(AIAPIQuotaLimit.getRequestCount());
+        dto.setTotalTokenCount(AIAPIQuotaLimit.getTotalTokenCount());
+        dto.setPromptTokenCount(AIAPIQuotaLimit.getPromptTokenCount());
+        dto.setCompletionTokenCount(AIAPIQuotaLimit.getCompletionTokenCount());
         return dto;
     }
 
@@ -571,5 +581,10 @@ public class SubscriptionValidationDataUtil {
             globalPolicyListDTO.setCount(0);
         }
         return globalPolicyListDTO;
+    }
+
+    public static ApiTypeWrapper getAPIOrAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        return apiConsumer.getAPIorAPIProductByUUID(uuid, tenantDomain);
     }
 }

@@ -113,6 +113,7 @@ public class PersistenceHelper {
         artifact.setAttribute("overview_status", "PUBLISHED");
         artifact.setId("88e758b7-6924-4e9f-8882-431070b6492b");
         artifact.setAttribute("overview_audience", "PUBLIC");
+        artifact.setAttribute("overview_audiences", null);
         
         return artifact;
     }
@@ -247,6 +248,7 @@ public class PersistenceHelper {
         artifact.setAttribute("overview_enableStore","true");
         artifact.setAttribute("overview_enableSchemaValidation","false");
         artifact.setId("88e758b7-6924-4e9f-8882-431070b6492b");
+        artifact.setAttribute("overview_audiences", null);
         return artifact;
     }
     

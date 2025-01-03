@@ -68,7 +68,7 @@ public class KeyTemplateRetrieverTest {
         eventHubConfigurationDto.setPassword("admin".toCharArray());
         eventHubConfigurationDto.setEnabled(true);
         eventHubConfigurationDto.setServiceUrl("http://localhost:18084/internal/data/v1");
-        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+        ThrottleDataHolder throttleDataHolder = ThrottleDataHolder.getInstance();
         KeyTemplateRetriever keyTemplateRetriever = new KeyTemplateRetrieverWrapper(eventHubConfigurationDto,
                 throttleDataHolder);
         keyTemplateRetriever.run();

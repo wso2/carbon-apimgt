@@ -65,7 +65,14 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private String gatewayVendor;
 
     private String versionTimestamp;
+    private Set<String> audiences;
 
+    public Set<String> getAudiences() {
+        return audiences;
+    }
+    public void setAudiences(Set<String> audiences) {
+        this.audiences = audiences;
+    }
     public String getDescription() {
         return description;
     }

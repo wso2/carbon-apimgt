@@ -144,13 +144,15 @@ public class OAuthClient {
             throw new APIManagementException("Error while accessing the Token URL. "
                     + "Found http status " + response.getStatusLine());
         }
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response
-                .getEntity().getContent(), StandardCharsets.UTF_8));
-        String inputLine;
+
         StringBuilder stringBuilder = new StringBuilder();
 
-        while ((inputLine = reader.readLine()) != null) {
-            stringBuilder.append(inputLine);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(response
+                .getEntity().getContent(), StandardCharsets.UTF_8))) {
+            String inputLine;
+            while ((inputLine = reader.readLine()) != null) {
+                stringBuilder.append(inputLine);
+            }
         }
 
         JSONParser parser = new JSONParser();
@@ -161,8 +163,13 @@ public class OAuthClient {
             if (jsonResponse.containsKey("refresh_token")) {
                 tokenResponse.setRefreshToken((String) jsonResponse.get("refresh_token"));
             }
-            if (jsonResponse.containsKey("scope")) {
-                Set<String> scopeSet = Stream.of(jsonResponse.get("scope").toString().trim()
+            Object scopes = jsonResponse.get("scope");
+            /* The scopes object will be null in the following scenarios
+                1. The scope key is not present in the jsonResponse object
+                2. The value of the scope key is null (Example: "scope": null)
+            */
+            if (scopes != null) {
+                Set<String> scopeSet = Stream.of(scopes.toString().trim()
                         .split("\\s*,\\s*")).collect(Collectors.toSet());
                 tokenResponse.setScope(scopeSet);
             }

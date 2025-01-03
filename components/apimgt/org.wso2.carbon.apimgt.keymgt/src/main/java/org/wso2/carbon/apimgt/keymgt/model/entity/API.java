@@ -35,6 +35,7 @@ public class API implements CacheableEntity<String> {
     private String name = null;
     private String version = null;
     private String context = null;
+    private String contextTemplate = null;
     private String policy = null;
     private String apiType = null;
     private String status;
@@ -44,6 +45,9 @@ public class API implements CacheableEntity<String> {
     private String securityScheme;
     private String revisionId;
     private List<OperationPolicy> apiPolicies = new ArrayList<>();
+    private boolean isSubscriptionValidationDisabled = false;
+    private Boolean isEgress = null;
+    private String subtype = null;
 
     public API() {
     }
@@ -128,6 +132,16 @@ public class API implements CacheableEntity<String> {
         this.context = context;
     }
 
+    public String getContextTemplate() {
+
+        return contextTemplate;
+    }
+
+    public void setContextTemplate(String contextTemplate) {
+
+        this.contextTemplate = contextTemplate;
+    }
+
     public String getApiTier() {
 
         return policy;
@@ -203,10 +217,12 @@ public class API implements CacheableEntity<String> {
                 ", name='" + name + '\'' +
                 ", version='" + version + '\'' +
                 ", context='" + context + '\'' +
+                ", contextTemplate='" + contextTemplate + '\'' +
                 ", policy='" + policy + '\'' +
                 ", apiType='" + apiType + '\'' +
                 ", status='" + status + '\'' +
                 ", securityScheme='" + securityScheme + '\'' +
+                ", isSubscriptionValidationDisabled='" + isSubscriptionValidationDisabled + '\'' +
                 ", isDefaultVersion=" + isDefaultVersion +
                 ", urlMappings=" + urlMappings +
                 ", apiPolicies=" + apiPolicies +
@@ -323,5 +339,29 @@ public class API implements CacheableEntity<String> {
 
     public List<OperationPolicy> getApiPolicies() {
         return apiPolicies;
+    }
+
+    public boolean isSubscriptionValidationDisabled() {
+        return isSubscriptionValidationDisabled;
+    }
+
+    public void setSubscriptionValidationDisabled(boolean subscriptionValidationDisabled) {
+        isSubscriptionValidationDisabled = subscriptionValidationDisabled;
+    }
+
+    public Boolean getEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(Boolean egress) {
+        isEgress = egress;
+    }
+
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
     }
 }

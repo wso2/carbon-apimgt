@@ -170,6 +170,22 @@ public class OAS2ParserTest extends OASTestBase {
     }
 
     @Test
+    public void testOpenAPIValidatorWithMultiplePathsHavingSameNameWithAndWithoutTrailingSlash() throws Exception {
+        String faultySwagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
+                        + File.separator + "oas2_paths_with_trailing_slash.json"),
+                "UTF-8");
+
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+        Assert.assertFalse(response.isValid());
+        Assert.assertEquals(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode(),
+                response.getErrorItems().get(0).getErrorCode());
+        Assert.assertEquals("Multiple GET operations with the same resource path /test found in " +
+                "the swagger definition", response.getErrorItems().get(0).getErrorDescription());
+    }
+
+
+    @Test
     public void testRootLevelApplicationSecurity() throws Exception {
         String apiSecurity = "oauth2,oauth_basic_auth_api_key_mandatory,api_key";
         String oasDefinition = IOUtils.toString(
@@ -266,7 +282,7 @@ public class OAS2ParserTest extends OASTestBase {
         api.setTransports("https");
         api.setContext("/oldapi");
         api.setScopes(new HashSet<>());
-        String response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        String response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         String oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
                         + File.separator + "devportal" + File.separator
@@ -279,7 +295,7 @@ public class OAS2ParserTest extends OASTestBase {
                         + File.separator + "publisher" + File.separator + "oas2_mig_with_sec_extensions.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setScopes(getAPITestScopes());
-        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
                         + File.separator + "devportal" + File.separator + "oas2_mig_with_sec_extensions_response.json"),
@@ -298,7 +314,7 @@ public class OAS2ParserTest extends OASTestBase {
         api.setContext("/v2");
         api.setScopes(getAPITestScopes());
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth,oauth2");
-        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
                         + File.separator + "devportal" + File.separator
@@ -310,7 +326,7 @@ public class OAS2ParserTest extends OASTestBase {
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2" + File.separator
                         + "devportal" + File.separator + "oas2_with_apikey_basic_oauth_security_u2.json"),
                 String.valueOf(StandardCharsets.UTF_8));
-        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2" + File.separator
                         + "devportal" + File.separator + "oas2_with_apikey_basic_oauth_security_u2_response.json"),
@@ -323,7 +339,7 @@ public class OAS2ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas2_with_basic_apisec.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth");
-        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
                         + File.separator + "devportal" + File.separator + "oas2_with_basic_apisec_response.json"),
@@ -335,7 +351,7 @@ public class OAS2ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas2_with_basic.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,basic_auth");
-        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
                         + File.separator + "devportal" + File.separator + "oas2_with_basic_response.json"),
@@ -347,7 +363,7 @@ public class OAS2ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas2_with_apikey.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key");
-        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes);
+        response = oas2Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
                         + File.separator + "devportal" + File.separator + "oas2_with_apikey_response.json"),

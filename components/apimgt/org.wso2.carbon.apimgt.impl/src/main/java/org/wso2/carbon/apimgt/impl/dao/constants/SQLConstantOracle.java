@@ -54,7 +54,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
                     " And " +
-                    "    NAME like ?" +
+                    "    LOWER (NAME) like LOWER (?)" +
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
@@ -91,7 +91,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
                     " And "+
-                    "    NAME like ?"+
+                    "    LOWER (NAME) like LOWER (?)"+
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
@@ -130,7 +130,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
                     " And " +
-                    "    NAME like ?" +
+                    "    LOWER (NAME) like LOWER (?)" +
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
@@ -171,7 +171,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
                     " And " +
-                    "    NAME like ?"+
+                    "    LOWER (NAME) like LOWER (?)"+
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
@@ -206,7 +206,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
                     " And "+
-                    "    NAME like ?"+
+                    "    LOWER (NAME) like LOWER (?)"+
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
@@ -241,7 +241,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
                     " And "+
-                    "    NAME like ?"+
+                    "    LOWER (NAME) like LOWER (?)"+
                     " ) a WHERE r BETWEEN ?+1 AND ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
@@ -270,7 +270,7 @@ public class SQLConstantOracle extends SQLConstants{
                     "    SUB.TENANT_ID = ? "+
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
-                    " AND APP.NAME like ?"+
+                    " OR APP.NAME like ?"+
                     " )) a WHERE r BETWEEN ?+1 AND ?"+
                     " ) "+
                     " ORDER BY $1 $2 ";

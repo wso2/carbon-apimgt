@@ -46,7 +46,9 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -109,14 +111,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
-import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
-import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
+import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
@@ -136,6 +131,7 @@ import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.APIDefSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
@@ -393,17 +389,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String generateApiKey(Application application, String userName, long validityPeriod,
                                  String permittedIP, String permittedReferer) throws APIManagementException {
 
-        JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
-                MultitenantUtils.getTenantDomain(userName));
-
+        JwtTokenInfoDTO jwtTokenInfoDTO;
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(application.getId());
-        applicationDTO.setName(application.getName());
-        applicationDTO.setOwner(application.getOwner());
-        applicationDTO.setTier(application.getTier());
         applicationDTO.setUuid(application.getUUID());
-        jwtTokenInfoDTO.setApplication(applicationDTO);
+        if (!APIKeyUtils.isLightweightAPIKeyGenerationEnabled()) {
+            jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
+                    MultitenantUtils.getTenantDomain(userName));
 
+            applicationDTO.setName(application.getName());
+            applicationDTO.setOwner(application.getOwner());
+            applicationDTO.setTier(application.getTier());
+        } else {
+            jwtTokenInfoDTO = new JwtTokenInfoDTO();
+            jwtTokenInfoDTO.setEndUserName(userName);
+            jwtTokenInfoDTO.setContentAware(true);
+        }
+
+        jwtTokenInfoDTO.setApplication(applicationDTO);
         jwtTokenInfoDTO.setSubscriber(userName);
         jwtTokenInfoDTO.setExpirationTime(validityPeriod);
         jwtTokenInfoDTO.setKeyType(application.getKeyType());
@@ -866,7 +869,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         WorkflowResponse workflowResponse = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
-        checkSubscriptionAllowed(apiTypeWrapper);
+        checkSubscriptionAllowed(apiTypeWrapper, apiTypeWrapper.getTier());
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
@@ -1057,7 +1060,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiContext = api.getContext();
             apiOrgId = api.getOrganization();
         }
-        checkSubscriptionAllowed(apiTypeWrapper);
+        checkSubscriptionAllowed(apiTypeWrapper, requestedThrottlingPolicy);
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state) || APIConstants.PROTOTYPED.equals(state)) {
@@ -1893,6 +1896,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         validateApplicationPolicy(application, existingApp.getOrganization());
         apiMgtDAO.updateApplication(application);
+        Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
         }
@@ -1918,9 +1922,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                existingApp.getOrganization(), application.getId(), application.getUUID(), application.getName(),
-                application.getTokenType(), application.getTier(), application.getGroupId(),
-                application.getApplicationAttributes(), existingApp.getSubscriber().getName());
+                existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
+                updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
+                updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
+                existingApp.getSubscriber().getName());
         APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
@@ -2377,7 +2382,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             } else {
                 throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
             }
-            
+
             if (appRegistrationWorkflow == null ) {
                 appRegistrationWorkflow = new ApplicationRegistrationSimpleWorkflowExecutor();
             }
@@ -3001,6 +3006,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
 
         isAppUpdated = apiMgtDAO.updateApplicationOwner(userId, application);
+
+        if (isAppUpdated) {
+            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
+                    tenantDomain, application.getId(), application.getUUID(), application.getName(),
+                    application.getTokenType(), application.getTier(), application.getGroupId(),
+                    application.getApplicationAttributes(), userId);
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        }
         return isAppUpdated;
     }
 
@@ -3331,7 +3346,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiChatConfigurationDto();
-        return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+        if (configDto.isKeyProvided()) {
+            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+                    configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+        }
+        return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
                 configDto.getExecuteResource(), requestPayload, apiChatRequestId);
     }
 
@@ -3347,7 +3366,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
-            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getAccessToken(),
+            if (configDto.isKeyProvided()) {
+                return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+                        configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+            }
+            return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
                     configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
         } catch (JsonProcessingException e) {
             String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
@@ -3360,7 +3383,13 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
 
-        return getOpenAPIDefinitionForDeployment(api, environmentName);
+        return getOpenAPIDefinitionForDeployment(api, environmentName, null);
+    }
+
+    @Override
+    public String getOpenAPIDefinitionForEnvironmentByKm(API api, String environmentName, String kmId)
+            throws APIManagementException {
+        return getOpenAPIDefinitionForDeployment(api, environmentName, kmId);
     }
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
@@ -3389,7 +3418,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @return Updated Open API definition
      * @throws APIManagementException
      */
-    private String getOpenAPIDefinitionForDeployment(API api, String environmentName)
+    private String getOpenAPIDefinitionForDeployment(API api, String environmentName, String kmId)
             throws APIManagementException {
 
         String apiTenantDomain;
@@ -3408,7 +3437,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
         api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
         return updatedDefinition;
     }
 
@@ -3846,6 +3875,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         mappedAPI.removeAllTiers();
                         mappedAPI.setAvailableTiers(availableTiers);
                         populateGatewayVendor(mappedAPI);
+                        populateApiInfo(mappedAPI, false);
                         apiList.add(mappedAPI);
                     } catch (APIManagementException e) {
                         log.warn("Retrieving API details from DB failed for API: " + mappedAPI.getUuid() + " " + e);
@@ -3876,21 +3906,22 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
-                        devPortalApi.getVisibleRoles());
+                        devPortalApi.getVisibleRoles(), devPortalApi.getPublisherAccessControl(),
+                        devPortalApi.getPublisherAccessControlRoles());
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
                     populateAPIProductInformation(uuid, organization, apiProduct);
                     populateDefaultVersion(apiProduct);
-                    populateAPIStatus(apiProduct);
+                    populateApiInfo(apiProduct);
                     apiProduct = addTiersToAPI(apiProduct, organization);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
-                    populateAPIStatus(api);
+                    populateApiInfo(api, true);
                     populateGatewayVendor(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
@@ -3905,17 +3936,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
     }
 
-    private void populateAPIStatus(API api) throws APIManagementException {
-
-        api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getUuid()));
-    }
-
-    private void populateAPIStatus(APIProduct apiProduct) throws APIManagementException {
-
-        apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getUuid()));
-    }
-
-    protected void checkVisibilityPermission(String userNameWithTenantDomain, String visibility, String visibilityRoles)
+    protected void checkVisibilityPermission(String userNameWithTenantDomain, String visibility, String visibilityRoles,
+                                             String publisherAccessControl, String publisherAccessControlRoles)
             throws APIManagementException {
 
         if (visibility == null || visibility.trim().isEmpty()
@@ -3925,10 +3947,38 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
             return;
         }
-        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)
-                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_CREATE)
-                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_PUBLISH)) {
+        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
             return;
+        }
+        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_CREATE)
+                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_PUBLISH)) {
+            if (publisherAccessControl == null || publisherAccessControl.trim().isEmpty()
+                    || publisherAccessControl.equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
+                // If the API has not been restricted with publisher access control, the API will be visible to all
+                // creators and publishers irrespective of devportal visibility restrictions.
+                return;
+            } else {
+                // If the API has been restricted with publisher access control, the API will be visible to creators
+                // and publishers having the roles which has been specified under publisher access control irrespective
+                // of devportal visibility restrictions.
+                if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
+                    String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
+                    if (log.isDebugEnabled()) {
+                        log.debug("API has restricted access to creators and publishers with the roles : "
+                                + Arrays.toString(accessControlRoleList));
+                    }
+                    String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
+                    if (log.isDebugEnabled()) {
+                        log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
+                    }
+                    for (String role : accessControlRoleList) {
+                        if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)
+                                && APIUtil.compareRoleList(userRoleList, role)) {
+                            return;
+                        }
+                    }
+                }
+            }
         }
 
         if (visibilityRoles != null && !visibilityRoles.trim().isEmpty()) {
@@ -4012,7 +4062,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
-                        devPortalApi.getVisibleRoles());
+                        devPortalApi.getVisibleRoles(), devPortalApi.getPublisherAccessControl(),
+                        devPortalApi.getPublisherAccessControlRoles());
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
 
                 /// populate relavant external info
@@ -4078,6 +4129,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateDevPortalAPIInformation(uuid, organization, api);
                     populateDefaultVersion(api);
+                    populateAPISubtype(api);
                     api = addTiersToAPI(api, organization);
                     return new ApiTypeWrapper(api);
                 }
@@ -4146,6 +4198,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
         Map<String, Object> result = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
+        List<APIDefinitionContentSearchResult> defSearchList = new ArrayList<>();
         int totalLength = 0;
 
         String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
@@ -4173,32 +4227,63 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 docItem.getApiVersion()));
                         api.setUuid(docItem.getApiUUID());
                         docMap.put(doc, api);
-                    } else {
-                        DevPortalSearchContent publiserAPI = (DevPortalSearchContent) item;
-                        API api = new API(new APIIdentifier(publiserAPI.getProvider(), publiserAPI.getName(),
-                                publiserAPI.getVersion()));
-                        api.setUuid(publiserAPI.getId());
-                        api.setContext(publiserAPI.getContext());
-                        api.setContextTemplate(publiserAPI.getContext());
-                        api.setStatus(publiserAPI.getStatus());
-                        api.setBusinessOwner(publiserAPI.getBusinessOwner());
-                        api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
-                        api.setTechnicalOwner(publiserAPI.getTechnicalOwner());
-                        api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
-                        api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
-                        api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
-                        api.setRating(APIUtil.getAverageRating(publiserAPI.getId()));
-                        api.setDescription(publiserAPI.getDescription());
-                        api.setType(publiserAPI.getTransportType());
+                    } else if (item instanceof APIDefSearchContent) {
+                        APIDefSearchContent definitionItem = (APIDefSearchContent) item;
+                        APIDefinitionContentSearchResult apiDefSearchResult = new APIDefinitionContentSearchResult();
+                        apiDefSearchResult.setId(definitionItem.getId());
+                        apiDefSearchResult.setName(definitionItem.getName());
+                        apiDefSearchResult.setApiUuid(definitionItem.getApiUUID());
+                        apiDefSearchResult.setApiName(definitionItem.getApiName());
+                        apiDefSearchResult.setApiContext(definitionItem.getApiContext());
+                        apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
+                        apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
+                        apiDefSearchResult.setApiType(definitionItem.getApiType());
+                        apiDefSearchResult.setAssociatedType(definitionItem.getAssociatedType()); //API or API product
+                        defSearchList.add(apiDefSearchResult);
+                    } else if ("API".equals(item.getType())) {
+                        DevPortalSearchContent publisherAPI = (DevPortalSearchContent) item;
+                        API api = new API(new APIIdentifier(publisherAPI.getProvider(), publisherAPI.getName(),
+                                publisherAPI.getVersion()));
+                        api.setUuid(publisherAPI.getId());
+                        api.setContext(publisherAPI.getContext());
+                        api.setContextTemplate(publisherAPI.getContext());
+                        api.setStatus(publisherAPI.getStatus());
+                        api.setBusinessOwner(publisherAPI.getBusinessOwner());
+                        api.setBusinessOwnerEmail(publisherAPI.getBusinessOwnerEmail());
+                        api.setTechnicalOwner(publisherAPI.getTechnicalOwner());
+                        api.setTechnicalOwnerEmail(publisherAPI.getTechnicalOwnerEmail());
+                        api.setMonetizationEnabled(publisherAPI.getMonetizationStatus());
+                        api.setAdvertiseOnly(publisherAPI.getAdvertiseOnly());
+                        api.setRating(APIUtil.getAverageRating(publisherAPI.getId()));
+                        api.setDescription(publisherAPI.getDescription());
+                        api.setType(publisherAPI.getTransportType());
                         apiSet.add(api);
+                    } else if ("APIProduct".equals(item.getType())) {
+                        DevPortalSearchContent devAPIProduct = (DevPortalSearchContent) item;
+                        APIProduct apiProduct = new APIProduct(
+                                new APIProductIdentifier(devAPIProduct.getProvider(), devAPIProduct.getName(),
+                                        devAPIProduct.getVersion()));
+                        apiProduct.setUuid(devAPIProduct.getId());
+                        apiProduct.setContextTemplate(devAPIProduct.getContext());
+                        apiProduct.setState(devAPIProduct.getStatus());
+                        apiProduct.setType(devAPIProduct.getTransportType());
+                        apiProduct.setBusinessOwner(devAPIProduct.getBusinessOwner());
+                        apiProduct.setBusinessOwnerEmail(devAPIProduct.getBusinessOwnerEmail());
+                        apiProduct.setTechnicalOwner(devAPIProduct.getTechnicalOwner());
+                        apiProduct.setTechnicalOwnerEmail(devAPIProduct.getTechnicalOwnerEmail());
+                        apiProduct.setDescription(devAPIProduct.getDescription());
+                        apiProduct.setRating("0");// need to retrieve from db
+                        apiProductSet.add(apiProduct);
                     }
                 }
                 compoundResult.addAll(apiSet);
                 compoundResult.addAll(docMap.entrySet());
-                compoundResult.sort(new ContentSearchResultNameComparator());
+                compoundResult.addAll(apiProductSet);
+                compoundResult.addAll(defSearchList);
+                compoundResult.sort(new SimpleContentSearchResultNameComparator());
                 result.put("length", sResults.getTotalCount());
             } else {
-                result.put("length", compoundResult.size());
+                result.put("length", 0);
             }
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching content ", e);
@@ -4212,7 +4297,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         try {
             DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(organization), apiId);
             if (api != null) {
-                checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles());
+                checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles(),
+                        api.getPublisherAccessControl(), api.getPublisherAccessControlRoles());
             }
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while accessing dev portal API", e);
@@ -4463,7 +4549,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      *                                subscription, this will throw an instance of APIMgtAuthorizationFailedException
       *                                with the reason as the message
      */
-    private void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper)
+    private void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper, String requestedThrottlingPolicy)
             throws APIManagementException {
 
         Set<Tier> tiers;
@@ -4521,17 +4607,17 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         List<String> allowedTierList = new ArrayList<>();
         while (iterator.hasNext()) {
             Tier t = iterator.next();
-            if (t.getName() != null && (t.getName()).equals(apiTypeWrapper.getTier())) {
+            if (t.getName() != null && (t.getName()).equals(requestedThrottlingPolicy)) {
                 isTierAllowed = true;
             }
             allowedTierList.add(t.getName());
         }
         if (!isTierAllowed) {
             String msg =
- "Tier " + apiTypeWrapper.getTier() + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
+ "Tier " + requestedThrottlingPolicy + " is not allowed for API/API Product " + apiTypeWrapper + ". Only "
                     + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
             throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_TIER_NOT_ALLOWED,
-                    apiTypeWrapper.getTier(), username));
+                    requestedThrottlingPolicy, username));
         }
     }
 
@@ -4639,5 +4725,43 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
 
         return false;
+    }
+
+    private void populateApiInfo(API api, boolean setStatus) throws APIManagementException {
+
+        String apiId = api.isRevision() ? api.getRevisionedApiId() : api.getUuid();
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+
+        if (apiInfo == null) {
+            return;
+        }
+        api.setEgress(apiInfo.isEgress());
+        api.setSubtype(apiInfo.getApiSubtype());
+        if (setStatus) {
+            api.setStatus(apiInfo.getStatus());
+        }
+    }
+
+    private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
+
+        String apiId = apiProduct.isRevision() ? apiProduct.getRevisionedApiProductId() : apiProduct.getUuid();
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+        if (apiInfo != null) {
+            apiProduct.setEgress(apiInfo.isEgress());
+            apiProduct.setState(apiInfo.getStatus());
+        }
+    }
+
+    /**
+     * This method populates the subType in the API.
+     * @param api API that needs to be populated with the subtype
+     * @throws APIManagementException
+     */
+    private void populateAPISubtype(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getRevisionedApiId()));
+        } else {
+            api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getUuid()));
+        }
     }
 }

@@ -53,7 +53,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ImportUtils {
     private static final Log log = LogFactory.getLog(ImportUtils.class);
@@ -152,28 +154,90 @@ public class ImportUtils {
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-                                                          Application application, Boolean update, APIConsumer apiConsumer, String organization)
+                                                          Application application, Boolean update,
+                                                          APIConsumer apiConsumer, String organization)
             throws APIManagementException,
             UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
-        // removing existing subscribed apis
+
+        // Create a map of the imported subscriptions. The key is a combination of apiName and version
+        Map<String, ExportedSubscribedAPI> importedSubscriptionMap = subscribedAPIs.stream()
+                .collect(Collectors.toMap(
+                        api -> api.getApiId().getApiName() + "_" + api.getApiId().getVersion(),
+                        api -> api));
+
+        // If update flag is set, remove the existing subscriptions that are not in the imported list
         if (update) {
             Subscriber subscriber = apiConsumer.getSubscriber(userId);
-            Set<SubscribedAPI> currentSubscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber, application.getName(),
-                    application.getGroupId());
-            for (SubscribedAPI subscribedAPI : currentSubscribedAPIs) {
-                apiConsumer.removeSubscription(subscribedAPI.getAPIIdentifier(), userId, application.getId(),
-                        application.getGroupId(), application.getOrganization());
+            Set<SubscribedAPI> currentSubscribedAPIs = apiConsumer.getSubscribedAPIs(subscriber,
+                    application.getName(), application.getGroupId());
+
+            for (SubscribedAPI existingSubscribedAPI : currentSubscribedAPIs) {
+                String existingSubscriptionKey = existingSubscribedAPI.getIdentifier().getName() + "_" +
+                        existingSubscribedAPI.getIdentifier().getVersion();
+                APIIdentifier existingApi = existingSubscribedAPI.getAPIIdentifier();
+                if (importedSubscriptionMap.containsKey(existingSubscriptionKey)) {
+
+                    // Update the tier if the existing tier is different from the imported tier
+                    if (!existingSubscribedAPI.getTier().getName().equals(
+                            importedSubscriptionMap.get(existingSubscriptionKey).getThrottlingPolicy())) {
+
+
+                        String tenantDomain = MultitenantUtils
+                                .getTenantDomain(APIUtil.replaceEmailDomainBack(existingApi.getProviderName()));
+                        if (!StringUtils.isEmpty(tenantDomain) && APIUtil.isTenantAvailable(tenantDomain)) {
+                            String uuidFromIdentifier = ApiMgtDAO.getInstance().getUUIDFromIdentifier(existingApi,
+                                    tenantDomain);
+                            if (StringUtils.isNotEmpty(uuidFromIdentifier)) {
+                                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(
+                                        uuidFromIdentifier, tenantDomain);
+                                // Tier of the imported subscription
+                                String targetTier = importedSubscriptionMap.get(existingSubscriptionKey).
+                                        getThrottlingPolicy();
+                                // Checking whether the target tier is available
+                                if (isTierAvailable(targetTier, apiTypeWrapper) && apiTypeWrapper.getStatus() != null
+                                        && APIConstants.PUBLISHED.equals(apiTypeWrapper.getStatus())) {
+
+                                    apiConsumer.updateSubscription(apiTypeWrapper, userId, application,
+                                            existingSubscribedAPI.getUUID(), existingSubscribedAPI.getTier().getName(),
+                                            targetTier);
+                                } else {
+                                    log.error("Failed to import Subscription as API/API Product "
+                                            + existingApi.getName() + "-" + existingApi.getVersion() +
+                                            " as one or more tiers may be unavailable or the API/API Product may " +
+                                            "not have been published ");
+                                }
+                            } else {
+                                log.error("Failed to import Subscription as API " + existingApi.getName() + "-" +
+                                        existingApi.getVersion() + " is not available");
+                            }
+                        } else {
+                            log.error("Failed to import Subscription as Tenant domain: " + tenantDomain +
+                                    " is not available");
+                        }
+                    }
+
+                    // Remove the existing subscription from the imported list
+                    importedSubscriptionMap.remove(existingSubscriptionKey);
+                } else {
+                    // Remove the subscription if it is not in the imported list
+                    apiConsumer.removeSubscription(existingApi, userId, application.getId(), application.getGroupId(),
+                            organization);
+
+                }
             }
         }
-        for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
+
+        for (String importedSubscriptionKey : importedSubscriptionMap.keySet()) {
+            ExportedSubscribedAPI subscribedAPI = importedSubscriptionMap.get(importedSubscriptionKey);
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
             String tenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
             if (!StringUtils.isEmpty(tenantDomain) && APIUtil.isTenantAvailable(tenantDomain)) {
                 String uuidFromIdentifier = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier, tenantDomain);
                 if (StringUtils.isNotEmpty(uuidFromIdentifier)) {
-                    ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(uuidFromIdentifier, tenantDomain);
+                    ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(uuidFromIdentifier,
+                            tenantDomain);
                     // Tier of the imported subscription
                     String targetTier = subscribedAPI.getThrottlingPolicy();
                     // Checking whether the target tier is available
@@ -191,7 +255,8 @@ public class ImportUtils {
                         }
                     } else {
                         log.error("Failed to import Subscription as API/API Product "
-                                + apiIdentifier.getName() + "-" + apiIdentifier.getVersion() + " as one or more tiers may "
+                                + apiIdentifier.getName() + "-" + apiIdentifier.getVersion() + " as one or more " +
+                                "tiers may "
                                 + "be unavailable or the API/API Product may not have been published ");
                         skippedAPIList.add(subscribedAPI.getApiId());
                     }
@@ -293,10 +358,14 @@ public class ImportUtils {
             JsonObject jsonObject = gson.fromJson(additionalProperties, JsonObject.class);
             Set<String> keysSet = jsonObject.keySet();
             for (String key : keysSet) {
-                if (jsonObject.getAsJsonPrimitive(key).isNumber()) {
-                    jsonObject.addProperty(key, String.valueOf(jsonObject.getAsJsonPrimitive(key).getAsLong()));
+                if (jsonObject.get(key).isJsonPrimitive()) {
+                    if (jsonObject.getAsJsonPrimitive(key).isNumber()) {
+                        jsonObject.addProperty(key, String.valueOf(jsonObject.getAsJsonPrimitive(key).getAsLong()));
+                    } else {
+                        jsonObject.addProperty(key, jsonObject.getAsJsonPrimitive(key).getAsString());
+                    }
                 } else {
-                    jsonObject.addProperty(key, jsonObject.getAsJsonPrimitive(key).getAsString());
+                    jsonObject.addProperty(key, jsonObject.get(key).toString());
                 }
             }
             jsonParamObj.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonObject.toString());

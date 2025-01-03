@@ -150,7 +150,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         try {
             Certificate publicCert = jwtConfigurationDto.getPublicCert();
             return JWTUtil.generateHeader(publicCert, signatureAlgorithm, jwtConfigurationDto.useKid(),
-                    useSHA256Hash);
+                    useSHA256Hash, jwtConfigurationDto.isEncodeX5tWithoutPadding());
         } catch (Exception e) {
             String error = "Error in obtaining keystore";
             throw new JWTGeneratorException(error, e);
@@ -174,7 +174,8 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         ObjectMapper mapper = new ObjectMapper();
         for (Map.Entry<String, Object> claimEntry : claims.entrySet()) {
             Object claimVal = claimEntry.getValue();
-            if (claimVal instanceof String && claimEntry.toString().contains("{")) {
+            if (claimVal instanceof String && claimVal.toString().startsWith("{") &&
+                    claimVal.toString().endsWith("}")) {
                 try {
                     Map<String, String> map = mapper.readValue(claimVal.toString(), Map.class);
                     jwtClaimSetBuilder.claim(claimEntry.getKey(), map);
@@ -213,7 +214,11 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     }
 
     public String encode(byte[] stringToBeEncoded) throws JWTGeneratorException {
-        return java.util.Base64.getEncoder().withoutPadding().encodeToString(stringToBeEncoded);
+        if (jwtConfigurationDto.isEnableBase64Padding()) {
+            return java.util.Base64.getEncoder().encodeToString(stringToBeEncoded);
+        } else {
+            return java.util.Base64.getEncoder().withoutPadding().encodeToString(stringToBeEncoded);
+        }
     }
 
     public String getDialectURI() {

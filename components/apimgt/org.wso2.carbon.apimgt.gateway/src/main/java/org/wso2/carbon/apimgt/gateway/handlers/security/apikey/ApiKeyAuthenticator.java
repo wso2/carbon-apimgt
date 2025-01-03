@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -163,12 +164,12 @@ public class ApiKeyAuthenticator implements Authenticator {
                         tenantDomain, payload);
                 ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, GatewayUtils.getIp(axis2MessageContext),
                         apiContext, apiVersion, referer);
-                net.minidev.json.JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload,
+                APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload,
                         splitToken[0]);
-                String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(api, jwtConfigurationDto, apiKey,
-                        signedJWT, payload, tokenIdentifier, isGatewayTokenCacheEnabled);
+                String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO, jwtConfigurationDto, apiKey,
+                        signedJWT, payload, tokenIdentifier, apiContext, apiVersion, isGatewayTokenCacheEnabled);
                 AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(tokenIdentifier,
-                        payload, api, apiLevelPolicy, endUserToken, synCtx);
+                        payload, apiKeyValidationInfoDTO, endUserToken);
                 APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
                         jwtGenerationEnabled ? getContextHeader() : null);
                 synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());

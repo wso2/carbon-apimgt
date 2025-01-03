@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
+import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 
 import java.util.ArrayList;
@@ -63,7 +65,9 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;
     private String implementation;
     private String productionMaxTps;
+    private String productionTimeUnit;
     private String sandboxMaxTps;
+    private String sandboxTimeUnit;
     private String authorizationHeader;
     private String apiKeyHeader;
     private String apiSecurity; // ?check whether same to private List<String> securityScheme = new ArrayList<>();
@@ -95,11 +99,32 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     private String versionTimestamp;
     private String audience;
+    private Set<String> audiences;
     private String apiExternalProductionEndpoint;
     private String apiExternalSandboxEndpoint;
     private String redirectURL;
     private String apiOwner;
     private String vendor;
+    private AIConfiguration aiConfiguration;
+    private BackendThrottlingConfiguration backendThrottlingConfiguration;
+
+    public AIConfiguration getAiConfiguration() {
+
+        return aiConfiguration;
+    }
+
+    public void setAiConfiguration(AIConfiguration aiConfiguration) {
+
+        this.aiConfiguration = aiConfiguration;
+    }
+
+    public BackendThrottlingConfiguration getBackendThrottlingConfiguration() {
+        return backendThrottlingConfiguration;
+    }
+
+    public void setBackendThrottlingConfiguration(BackendThrottlingConfiguration backendThrottlingConfiguration) {
+        this.backendThrottlingConfiguration = backendThrottlingConfiguration;
+    }
 
     public String getAudience() {
         return audience;
@@ -107,6 +132,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setAudience(String audience) {
         this.audience = audience;
+    }
+
+    public Set<String> getAudiences() {
+        return audiences;
+    }
+
+    public void setAudiences(Set<String> audiences) {
+        this.audiences = audiences;
     }
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
@@ -339,6 +372,23 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setSandboxMaxTps(String sandboxMaxTps) {
         this.sandboxMaxTps = sandboxMaxTps;
+    }
+
+
+    public String getProductionTimeUnit() {
+        return productionTimeUnit;
+    }
+
+    public void setProductionTimeUnit(String productionTimeUnit) {
+        this.productionTimeUnit = productionTimeUnit;
+    }
+
+    public String getSandboxTimeUnit() {
+        return sandboxTimeUnit;
+    }
+
+    public void setSandboxTimeUnit(String sandboxTimeUnit) {
+        this.sandboxTimeUnit = sandboxTimeUnit;
     }
 
     public String getAuthorizationHeader() {

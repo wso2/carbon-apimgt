@@ -17,18 +17,24 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionListDTO;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class is responsible for mapping Block Condition model and its sub components into REST API DTOs and vice-versa
@@ -44,7 +50,7 @@ public class BlockingConditionMappingUtil {
      * @return REST API List DTO object derived from Block Condition list
      */
     public static BlockingConditionListDTO fromBlockConditionListToListDTO(
-            List<BlockConditionsDTO> blockConditionList) throws ParseException {
+            List<BlockConditionsDTO> blockConditionList) throws APIManagementException {
         BlockingConditionListDTO listDTO = new BlockingConditionListDTO();
         List<BlockingConditionDTO> blockingConditionDTOList = new ArrayList<>();
         if (blockConditionList != null) {
@@ -70,7 +76,7 @@ public class BlockingConditionMappingUtil {
      * @return Block condition DTO object derived from block condition model object
      */
     public static BlockingConditionDTO fromBlockingConditionToDTO(
-            BlockConditionsDTO blockCondition) throws ParseException {
+            BlockConditionsDTO blockCondition) throws APIManagementException {
 
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(blockCondition.getUUID());
@@ -97,16 +103,41 @@ public class BlockingConditionMappingUtil {
                     } else {
                         // This is a true parsing exception. Hence, it will be thrown without handling.
                         log.error("Error parsing IP blocking condition value", e);
-                        throw new ParseException(ParseException.ERROR_UNEXPECTED_EXCEPTION, e);
+                        throw new APIManagementException(ExceptionCodes.INVALID_BLOCK_CONDITION_VALUES);
                     }
                 } else {
                     // This is a true parsing exception. Hence, it will be thrown without handling.
                     log.error("Error parsing IP blocking condition value. The value is null.", e);
-                    throw new ParseException(ParseException.ERROR_UNEXPECTED_EXCEPTION, e);
+                    throw new APIManagementException(ExceptionCodes.INVALID_BLOCK_CONDITION_VALUES);
                 }
             }
         }
         dto.setConditionStatus(blockCondition.isEnabled());
         return dto;
+    }
+
+    /**
+     * Get query parameter values for conditionType and conditionValue from the query string.
+     *
+     * @param query Request query
+     * @return map of conditionType and conditionValue values
+     */
+    public static Map<String, String> getQueryParams(String query) {
+        if (query == null || StringUtils.isBlank(query)) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> parameters = new HashMap<>();
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split(":");
+            if (keyValue.length == 2) {
+                String key = keyValue[0];
+                String value = keyValue[1];
+                if (key.equals(APIConstants.BLOCK_CONDITION_TYPE) || key.equals(APIConstants.BLOCK_CONDITION_VALUE)) {
+                    parameters.put(key, value);
+                }
+            }
+        }
+        return parameters;
     }
 }

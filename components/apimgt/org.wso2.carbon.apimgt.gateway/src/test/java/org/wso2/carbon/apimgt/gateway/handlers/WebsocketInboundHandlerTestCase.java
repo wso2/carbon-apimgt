@@ -96,6 +96,7 @@ public class WebsocketInboundHandlerTestCase {
         Attribute attribute = Mockito.mock(Attribute.class);
         ChannelId channelId = Mockito.mock(ChannelId.class);
         Mockito.when(channel.attr(AttributeKey.valueOf("API_PROPERTIES"))).thenReturn(attribute);
+        Mockito.when(channel.attr(AttributeKey.valueOf("API_CONTEXT_URI"))).thenReturn(attribute);
         Mockito.when(channelHandlerContext.channel()).thenReturn(channel);
         Mockito.when(channel.id()).thenReturn(channelId);
         Mockito.when(channelId.asLongText()).thenReturn(channelIdString);
@@ -240,11 +241,20 @@ public class WebsocketInboundHandlerTestCase {
     public void exceptionCaughtTest() throws Exception {
         Throwable cause = new CorruptedWebSocketFrameException(WebSocketCloseStatus.MESSAGE_TOO_BIG,
                 "Max frame length of 65536 has been exceeded.");
-        Attribute<Object> attributes = Mockito.mock(Attribute.class);
+        Attribute<Object> apiPropertiesAttributes = Mockito.mock(Attribute.class);
+        Attribute<Object> contextUriAttributes = Mockito.mock(Attribute.class);
+
         Mockito.when(channelHandlerContext.channel().attr(AttributeKey.valueOf("API_PROPERTIES")))
-                .thenReturn(attributes);
+                .thenReturn(apiPropertiesAttributes);
+        Mockito.when(channelHandlerContext.channel().attr(AttributeKey.valueOf("API_CONTEXT_URI")))
+                .thenReturn(contextUriAttributes);
+
         HashMap apiProperties = new HashMap();
-        Mockito.when((HashMap)attributes.get()).thenReturn(apiProperties);
+        HashMap apiContextUriAttributes = new HashMap();
+
+        Mockito.when((HashMap)apiPropertiesAttributes.get()).thenReturn(apiProperties);
+        Mockito.when((HashMap)contextUriAttributes.get()).thenReturn(apiContextUriAttributes);
+
         websocketInboundHandler.exceptionCaught(channelHandlerContext, cause);
         Assert.assertEquals(apiProperties.get("api.ut.WS_SC"), 1009);
     }

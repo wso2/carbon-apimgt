@@ -58,10 +58,16 @@ public class RESTToSOAPMsgTemplate {
      * @return in sequence string
      */
     public String getMappingInSequence(Map<String, String> mapping, String method, String soapAction, String namespace,
-            String soapNamespace, JSONArray array) {
+            String soapNamespace, String soapVersion, JSONArray array) {
+
+        String mediaType;
+        if(soapVersion.equals(SOAPToRESTConstants.SOAP_VERSION_11))
+            mediaType = SOAPToRESTConstants.TEXT_XML;
+        else
+            mediaType = SOAPToRESTConstants.APPLICATION_SOAP_XML;
 
         ConfigContext configcontext = new SOAPToRESTConfigContext(mapping, method, soapAction, namespace, soapNamespace,
-                array);
+                mediaType, array);
         StringWriter writer = new StringWriter();
         try {
             VelocityContext context = configcontext.getContext();

@@ -51,10 +51,12 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.BotDetectionDataApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.RolesApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.LlmProvidersApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigSchemaApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.GlobalKeyManagersApi,
-            org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApi
+            org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.TransactionCountApi
         </param-value>
     </init-param>
     <init-param>
@@ -73,7 +75,7 @@
     <init-param>
         <param-name>jaxrs.inInterceptors</param-name>
         <param-value>
-            org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v4 latestVersion=v4.1),
+            org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v4 latestVersion=v4.2),
             org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor,

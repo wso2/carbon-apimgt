@@ -35,6 +35,7 @@ public class APIInfoDTO   {
     private String version = null;
     private String provider = null;
     private String type = null;
+    private String subtype = "DEFAULT";
 
     @XmlType(name="AudienceEnum")
     @XmlEnum(String.class)
@@ -67,6 +68,7 @@ return null;
         }
     }
     private AudienceEnum audience = null;
+    private List<String> audiences = new ArrayList<String>();
     private String lifeCycleStatus = null;
     private String workflowStatus = null;
     private Boolean hasThumbnail = null;
@@ -82,6 +84,7 @@ return null;
     private String businessOwnerEmail = null;
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
+    private Boolean egress = false;
 
   /**
    **/
@@ -241,6 +244,24 @@ return null;
   }
 
   /**
+   * Subtype of the API.
+   **/
+  public APIInfoDTO subtype(String subtype) {
+    this.subtype = subtype;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "AIAPI", value = "Subtype of the API.")
+  @JsonProperty("subtype")
+  public String getSubtype() {
+    return subtype;
+  }
+  public void setSubtype(String subtype) {
+    this.subtype = subtype;
+  }
+
+  /**
    * The audience of the API. Accepted values are PUBLIC, SINGLE
    **/
   public APIInfoDTO audience(AudienceEnum audience) {
@@ -256,6 +277,24 @@ return null;
   }
   public void setAudience(AudienceEnum audience) {
     this.audience = audience;
+  }
+
+  /**
+   * The audiences of the API for jwt validation. Accepted values are any String values
+   **/
+  public APIInfoDTO audiences(List<String> audiences) {
+    this.audiences = audiences;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The audiences of the API for jwt validation. Accepted values are any String values")
+  @JsonProperty("audiences")
+  public List<String> getAudiences() {
+    return audiences;
+  }
+  public void setAudiences(List<String> audiences) {
+    this.audiences = audiences;
   }
 
   /**
@@ -514,6 +553,24 @@ return null;
     this.technicalOwnerEmail = technicalOwnerEmail;
   }
 
+  /**
+   * Whether the API is EGRESS or not
+   **/
+  public APIInfoDTO egress(Boolean egress) {
+    this.egress = egress;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether the API is EGRESS or not")
+  @JsonProperty("egress")
+  public Boolean isEgress() {
+    return egress;
+  }
+  public void setEgress(Boolean egress) {
+    this.egress = egress;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -533,7 +590,9 @@ return null;
         Objects.equals(version, apIInfo.version) &&
         Objects.equals(provider, apIInfo.provider) &&
         Objects.equals(type, apIInfo.type) &&
+        Objects.equals(subtype, apIInfo.subtype) &&
         Objects.equals(audience, apIInfo.audience) &&
+        Objects.equals(audiences, apIInfo.audiences) &&
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(workflowStatus, apIInfo.workflowStatus) &&
         Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
@@ -548,12 +607,13 @@ return null;
         Objects.equals(businessOwner, apIInfo.businessOwner) &&
         Objects.equals(businessOwnerEmail, apIInfo.businessOwnerEmail) &&
         Objects.equals(technicalOwner, apIInfo.technicalOwner) &&
-        Objects.equals(technicalOwnerEmail, apIInfo.technicalOwnerEmail);
+        Objects.equals(technicalOwnerEmail, apIInfo.technicalOwnerEmail) &&
+        Objects.equals(egress, apIInfo.egress);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, audience, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, updatedBy, gatewayVendor, gatewayType, advertiseOnly, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    return Objects.hash(id, name, description, context, additionalProperties, additionalPropertiesMap, version, provider, type, subtype, audience, audiences, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime, updatedBy, gatewayVendor, gatewayType, advertiseOnly, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
   }
 
   @Override
@@ -570,7 +630,9 @@ return null;
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    subtype: ").append(toIndentedString(subtype)).append("\n");
     sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
+    sb.append("    audiences: ").append(toIndentedString(audiences)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
@@ -586,6 +648,7 @@ return null;
     sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
     sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
     sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
+    sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");
     return sb.toString();
   }
