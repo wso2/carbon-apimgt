@@ -1345,16 +1345,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 //check whether monetization is enabled for API and tier plan is commercial
                 if (api.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
                     subscriptionImpl.deleteMonetizedSubscription(workflowDTO, api);
-                } else {
-                    removeSubscriptionWFExecutor.execute(workflowDTO);
                 }
+                removeSubscriptionWFExecutor.execute(workflowDTO);
             } else if (product != null) {
                 //check whether monetization is enabled for API product and tier plan is commercial
                 if (product.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
                     subscriptionImpl.deleteMonetizedSubscription(workflowDTO, product);
-                } else {
-                    removeSubscriptionWFExecutor.execute(workflowDTO);
                 }
+                removeSubscriptionWFExecutor.execute(workflowDTO);
             }
             JSONObject subsLogObject = new JSONObject();
             subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
