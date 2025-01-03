@@ -83,6 +83,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     private MessageContext messageContext;
     private AnalyticsCustomDataProvider analyticsCustomDataProvider;
     private Boolean buildResponseMessage = null;
+    private static final String GRAPHQL = "GRAPHQL";
+    private static final String QUERY_NAME = "QUERY_NAME";
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
 
@@ -420,6 +422,13 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
         customProperties.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
+        if (messageContext.getProperty(APIConstants.API_TYPE) == GRAPHQL) {
+            customProperties.put(Constants.QUERY_NAME, messageContext.getProperty(QUERY_NAME));
+            customProperties.put(Constants.OPERATION_INFO, getOperationInfo());
+            customProperties.put(Constants.ACCESSED_FIELDS, getAccessedFields());
+            customProperties.put(Constants.MUTATED_FIELDS, getMutatedFields());
+        }
+
         org.wso2.carbon.apimgt.keymgt.model.entity.API api =
                 (org.wso2.carbon.apimgt.keymgt.model.entity.API) messageContext.getProperty(API_OBJECT);
         customProperties.put(Constants.IS_EGRESS, api.getEgress());
@@ -439,6 +448,21 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             );
         }
         return customProperties;
+    }
+
+    private Map<String, Object> getOperationInfo() {
+        Object fieldUsage = messageContext.getProperty(APIConstants.OPERATION_INFO);
+        return (Map<String, Object>) fieldUsage;
+    }
+
+    private Object getAccessedFields() {
+        Object accessedFields = messageContext.getProperty(APIConstants.ACCESSED_FIELDS);
+        return accessedFields;
+    }
+
+    private Object getMutatedFields() {
+        Object mutatedFields = messageContext.getProperty(APIConstants.MUTATED_FIELDS);
+        return mutatedFields;
     }
 
     public static int getHourByUTC(long timestampMillis) {
@@ -522,7 +546,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
         int errorCode = getErrorCode();
         return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
+                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END
+                && errorCode != Constants.RESOURCE_NOT_FOUND_APIM_ERROR_CODE;
     }
 
     private boolean isThrottledFaultRequest() {
@@ -606,8 +631,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                 buildResponseMessage = false;
             }
         }
-        Map headers = (Map) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                .getProperty(TRANSPORT_HEADERS);
+        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
         if (headers != null  && headers.get(HttpHeaders.CONTENT_LENGTH) != null) {
             responseSize = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH).toString());
         }
@@ -636,7 +660,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     public String getResponseContentType() {
-        Map headers = (Map) ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(TRANSPORT_HEADERS);
+        Map headers = (Map) messageContext.getProperty(TRANSPORT_HEADERS);
         if (headers != null && headers.get(HttpHeaders.CONTENT_TYPE) != null) {
             return headers.get(HttpHeaders.CONTENT_TYPE).toString();
         }

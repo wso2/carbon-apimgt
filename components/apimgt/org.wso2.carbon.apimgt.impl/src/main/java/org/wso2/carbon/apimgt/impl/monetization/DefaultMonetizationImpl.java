@@ -113,4 +113,9 @@ public class DefaultMonetizationImpl extends AbstractMonetization {
         return new DefaultMonetizationSubscriptionImpl();
     }
 
+    @Override
+    public boolean publishUsageData(Object usageData, MonetizationUsagePublishInfo monetizationUsagePublishInfo) throws MonetizationException {
+        return true;
+    }
+
 }

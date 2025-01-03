@@ -37,6 +37,7 @@ public class API implements CacheableEntity<String> {
     private String name = null;
     private String version = null;
     private String context = null;
+    private String contextTemplate = null;
     private String policy = null;
     private String apiType = null;
     private Boolean isDefaultVersion = false;
@@ -103,6 +104,16 @@ public class API implements CacheableEntity<String> {
     public void setContext(String context) {
 
         this.context = context;
+    }
+
+    public String getContextTemplate() {
+
+        return contextTemplate;
+    }
+
+    public void setContextTemplate(String contextTemplate) {
+
+        this.contextTemplate = contextTemplate;
     }
 
     public String getProvider() {

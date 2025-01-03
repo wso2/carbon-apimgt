@@ -42,6 +42,7 @@ import org.apache.synapse.commons.throttle.core.ThrottleConstants;
 import org.apache.synapse.commons.throttle.core.ThrottleContext;
 import org.apache.synapse.commons.throttle.core.ThrottleException;
 import org.apache.synapse.commons.throttle.core.ThrottleFactory;
+import org.apache.synapse.commons.throttle.core.CallerContext;
 import org.apache.synapse.commons.throttle.core.factory.ThrottleContextFactory;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -1237,6 +1238,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 }
 
                 if (info != null && !info.isAccessAllowed()) {
+                    CallerContext callerContext = subscriptionLevelSpikeArrestThrottleContext.getCallerContext(throttleKey);
+                    long timestamp = callerContext.getNextAccessTime();
+                    synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.SUBSCRIPTON_BURST_LIMIT_EXCEEDED);
                     log.debug("Subscription level burst control limit exceeded for key " + throttleKey);
                     return true;
@@ -1279,6 +1283,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 key = key.replaceAll("\\$appId", appId);
                 if (clientIp != null) {
                     key = key.replaceAll("\\$clientIp", APIUtil.ipToBigInteger(clientIp).toString());
+                }
+                Object customPropertyObj = messageContext.getProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY);
+                if (customPropertyObj != null) {
+                    Map<String, Object> customProperties = (Map<String, Object>) customPropertyObj;
+                    for (Map.Entry<String, Object> entry : customProperties.entrySet()) {
+                        String customKey = "\\$customProperty\\." + entry.getKey();
+                        String customValue = entry.getValue() != null ? entry.getValue().toString() : "";
+                        key = key.replaceAll(customKey, customValue);
+                    }
                 }
                 if (getThrottleDataHolder().isThrottled(key)) {
                     long timestamp = getThrottleDataHolder().getThrottleNextAccessTimestamp(key);

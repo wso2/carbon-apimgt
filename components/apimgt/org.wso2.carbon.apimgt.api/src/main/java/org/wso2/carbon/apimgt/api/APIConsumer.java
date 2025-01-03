@@ -574,6 +574,18 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
+     * Returns the swagger definition of the API for the given gateway environment and key manager as a string
+     *
+     * @param api
+     * @param environmentName API Gateway environment name
+     * @param kmId            Key Manager UUID
+     * @return swagger string
+     * @throws APIManagementException if error occurred while obtaining the swagger definition
+     */
+    String getOpenAPIDefinitionForEnvironmentByKm(API api, String environmentName, String kmId)
+            throws APIManagementException;
+
+    /**
      * Revokes the oldAccessToken generating a new one.
      *
      * @param oldAccessToken  Token to be revoked

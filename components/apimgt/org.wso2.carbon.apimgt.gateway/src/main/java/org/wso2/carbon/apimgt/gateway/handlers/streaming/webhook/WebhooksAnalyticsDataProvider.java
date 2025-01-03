@@ -25,6 +25,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.nio.charset.Charset;
+
 public class WebhooksAnalyticsDataProvider extends AsyncAnalyticsDataProvider {
 
     private MessageContext messageContext;
@@ -64,4 +66,9 @@ public class WebhooksAnalyticsDataProvider extends AsyncAnalyticsDataProvider {
         return target;
     }
 
+    @Override
+    public int getResponseSize() {
+        String payload = (String) messageContext.getProperty(APIConstants.Webhooks.PAYLOAD_PROPERTY);
+        return payload.getBytes(Charset.defaultCharset()).length;
+    }
 }
