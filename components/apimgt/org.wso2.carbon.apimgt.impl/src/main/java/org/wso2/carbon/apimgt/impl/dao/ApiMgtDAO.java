@@ -181,6 +181,7 @@ public class ApiMgtDAO {
     private final Object scopeMutex = new Object();
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
+    private boolean isOrganizationAccessControlEnabled = false;
     private String KeyManagerAccessPublic = "PUBLIC";
     private static final String[] keyTypes =
             new String[]{APIConstants.API_KEY_TYPE_PRODUCTION, APIConstants.API_KEY_TYPE_SANDBOX};
@@ -195,8 +196,8 @@ public class ApiMgtDAO {
         if (caseSensitiveComparison != null) {
             forceCaseInsensitiveComparisons = Boolean.parseBoolean(caseSensitiveComparison);
         }
-
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
+        isOrganizationAccessControlEnabled = APIUtil.isOrganizationAccessControlEnabled();
     }
 
     /**
@@ -4122,50 +4123,35 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start,
-            int offset, String search, String sortColumn, String sortOrder, String organization,
-            String sharedOrganization)
+                                                       int offset, String search, String sortColumn, String sortOrder, String organization,
+                                                       String sharedOrganization)
             throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         Application[] applications = null;
-        String sqlQuery = null;
-        boolean isOrgSharingEnabled = true; //TODO need to come from config or from user info
+        String sqlQuery;
+
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+            String orgSharingSuffix = isOrganizationAccessControlEnabled ? "ORG_SHARING_" : "";
             if (multiGroupAppSharingEnabled) {
-                if (forceCaseInsensitiveComparisons) {
-                    sqlQuery = SQLConstantManagerFactory.
-                            getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID");
-                } else {
-                    sqlQuery = SQLConstantManagerFactory.
-                            getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID");
-                }
+                sqlQuery = getSqlQuery(
+                        forceCaseInsensitiveComparisons,
+                        orgSharingSuffix + "WITH_MULTIGROUPID"
+                );
             } else {
-                if (forceCaseInsensitiveComparisons) {
-                    sqlQuery = SQLConstantManagerFactory.
-                            getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID");
-                } else {
-                    sqlQuery = SQLConstantManagerFactory.
-                            getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE_WITHGROUPID");
-                }
+                sqlQuery = getSqlQuery(
+                        forceCaseInsensitiveComparisons,
+                        orgSharingSuffix + "WITHGROUPID"
+                );
             }
         } else {
-            if (forceCaseInsensitiveComparisons) {
-                if (isOrgSharingEnabled) {
-                    sqlQuery = SQLConstantManagerFactory
-                            .getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_ORGSHARING");
-                } else {
-                    sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE");
-                }
-            } else {
-                if (isOrgSharingEnabled) {
-                    sqlQuery = SQLConstantManagerFactory
-                            .getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_ORGSHARING");
-                } else {
-                    sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_CASESENSITVE");
-                }
-            }
+            String orgSharingSuffix = isOrganizationAccessControlEnabled ? "ORG_SHARING" : "";
+            sqlQuery = getSqlQuery(
+                    forceCaseInsensitiveComparisons,
+                    orgSharingSuffix
+            );
         }
 
         try {
@@ -4197,43 +4183,44 @@ public class ApiMgtDAO {
                     prepStmt.setString(++noOfParams, tenantDomain);
                     prepStmt.setString(++noOfParams, subscriber.getName());
                     prepStmt.setString(++noOfParams, tenantDomain + '/' + groupingId);
+                    if (isOrganizationAccessControlEnabled) {
+                        prepStmt.setString(++noOfParams, sharedOrganization);
+                    }
                     prepStmt.setString(++noOfParams, organization);
                     prepStmt.setString(++noOfParams, "%" + search + "%");
                     prepStmt.setInt(++noOfParams, start);
                     prepStmt.setInt(++noOfParams, offset);
                 } else {
+                    int noOfParams = 0;
                     prepStmt = connection.prepareStatement(sqlQuery);
-                    prepStmt.setString(1, groupingId);
-                    prepStmt.setString(2, subscriber.getName());
-                    prepStmt.setString(3, organization);
-                    prepStmt.setString(4, "%" + search + "%");
-                    prepStmt.setInt(5, start);
-                    prepStmt.setInt(6, offset);
+                    prepStmt.setString(++noOfParams, groupingId);
+                    prepStmt.setString(++noOfParams, subscriber.getName());
+                    if (isOrganizationAccessControlEnabled) {
+                        prepStmt.setString(++noOfParams, sharedOrganization);
+                    }
+                    prepStmt.setString(++noOfParams, organization);
+                    prepStmt.setString(++noOfParams, "%" + search + "%");
+                    prepStmt.setInt(++noOfParams, start);
+                    prepStmt.setInt(++noOfParams, offset);
                 }
             } else {
-                if (isOrgSharingEnabled) {
-                    prepStmt = connection.prepareStatement(sqlQuery);
-                    prepStmt.setString(1, subscriber.getName());
-                    prepStmt.setString(2, sharedOrganization);
-                    prepStmt.setString(3, organization);
-                    prepStmt.setString(4, "%" + search + "%");
-                    prepStmt.setInt(5, start);
-                    prepStmt.setInt(6, offset);
-                } else {
-                    prepStmt = connection.prepareStatement(sqlQuery);
-                    prepStmt.setString(1, subscriber.getName());
-                    prepStmt.setString(2, organization);
-                    prepStmt.setString(3, "%" + search + "%");
-                    prepStmt.setInt(4, start);
-                    prepStmt.setInt(5, offset);
+                int noOfParams = 0;
+                prepStmt = connection.prepareStatement(sqlQuery);
+                prepStmt.setString(++noOfParams, subscriber.getName());
+                if (isOrganizationAccessControlEnabled) {
+                    prepStmt.setString(++noOfParams, sharedOrganization);
                 }
+                prepStmt.setString(++noOfParams, organization);
+                prepStmt.setString(++noOfParams, "%" + search + "%");
+                prepStmt.setInt(++noOfParams, start);
+                prepStmt.setInt(++noOfParams, offset);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Query: " + sqlQuery);
-                log.debug("Param: " + "Sub:" + subscriber.getName() + " GroupId: " + groupingId + " Search:%" + search
-                        + "% " + "Start:" + start + " Offset:" + offset + " SortColumn:" + sortColumn + " SortOrder:"
-                        + sortOrder);
-            }
+
+            log.info("Query: " + sqlQuery);
+            log.info("Param: " + "Sub:" + subscriber.getName() + " GroupId: " + groupingId + " Search:%" + search
+                    + "% " + "Start:" + start + " Offset:" + offset + " SortColumn:" + sortColumn + " SortOrder:"
+                    + sortOrder);
+
             rs = prepStmt.executeQuery();
             ArrayList<Application> applicationsList = new ArrayList<Application>();
             Application application;
@@ -4253,11 +4240,11 @@ public class ApiMgtDAO {
                 application.setCreatedTime(String.valueOf(rs.getTimestamp("APP_CREATED_TIME").getTime()));
 
                 if (multiGroupAppSharingEnabled) {
-                    setGroupIdInApplication(connection,application);
+                    setGroupIdInApplication(connection, application);
                 }
 
                 //setting subscription count
-                int subscriptionCount = getSubscriptionCountByApplicationId(connection,application, organization);
+                int subscriptionCount = getSubscriptionCountByApplicationId(connection, application, organization);
                 application.setSubscriptionCount(subscriptionCount);
 
                 // Get custom attributes of application
@@ -4275,6 +4262,14 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return applications;
+    }
+
+    private String getSqlQuery(boolean isCaseInsensitive, String suffix) throws APIManagementException {
+        String caseType = isCaseInsensitive ? "NONE_CASESENSITVE" : "CASESENSITVE";
+
+        return SQLConstantManagerFactory.getSQlString(
+                String.format("GET_APPLICATIONS_PREFIX_%s_%s", caseType, suffix)
+        );
     }
 
     /**
