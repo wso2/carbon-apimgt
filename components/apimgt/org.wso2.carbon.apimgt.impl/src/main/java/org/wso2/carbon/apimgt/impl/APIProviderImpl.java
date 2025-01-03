@@ -5300,6 +5300,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     *
+     * @param policy
+     * @param apiOperationPolicyIdToClonedPolicyIdMap
+     * @return
+     * @throws APIManagementException
+     */
     public String getPolicyType(OperationPolicy policy, Map<String, String> apiOperationPolicyIdToClonedPolicyIdMap)
             throws APIManagementException {
         String policyType = null;
@@ -5332,7 +5339,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return getPolicyType(policy, apiOperationPolicyIdToClonedPolicyIdMap);
     }
 
-    public API addPolicyTypeFieldToApi(API api) throws APIManagementException {
+    public void populatePolicyTypeInAPI(API api) throws APIManagementException {
 
         Map<String, String> apiOperationPolicyIdToClonedPolicyIdMap = getClonedAPISpecificOperationPolicyIdsList(api.getUuid());
         Set<URITemplate> uriTemplates = api.getUriTemplates();
@@ -5355,11 +5362,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         api.setApiPolicies(apiPolicies);
-
-        return api;
     }
 
-    public APIProduct addPolicyTypeFieldToApiProduct(APIProduct product) throws APIManagementException {
+    public void populatePolicyTypeInApiProduct(APIProduct product) throws APIManagementException {
 
         Map<String, String> apiProductOperationPolicyIdToClonedPolicyIdMap =
                 getClonedAPISpecificOperationPolicyIdsList(product.getUuid());
@@ -5378,7 +5383,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             resource.setUriTemplate(uriTemplate);
         }
         product.setProductResources(productResources);
-        return product;
     }
 
     @Override
@@ -5423,7 +5427,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateApiInfo(api);
                 populateSubtypeConfiguration(api);
                 populateDefaultVersion(api);
-                api = addPolicyTypeFieldToApi(api);
+                populatePolicyTypeInAPI(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -5603,7 +5607,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (migrationEnabled == null) {
                     populateDefaultVersion(product);
                 }
-                product = addPolicyTypeFieldToApiProduct(product);
+                populatePolicyTypeInApiProduct(product);
                 return product;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
@@ -7137,7 +7141,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * If there aren't any existing policies, a new API specific policy will be created.
      *
      * @param importedPolicyData Imported policy
-     * @param organization       Organization name
+     * @param organization Organization name
      * @return corrosponding policy ID for imported data
      * @throws APIManagementException if failed to delete APIRevision
      */
@@ -7199,23 +7203,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return policyId;
     }
+
     @Override
     public String importOperationPolicyOfGivenType(OperationPolicyData importedPolicyData, String policyType,
-                                                   String organization)
-            throws APIManagementException {
+                                                   String organization) throws APIManagementException {
 
         OperationPolicySpecification importedSpec = importedPolicyData.getSpecification();
         OperationPolicyData existingOperationPolicy;
 
         String policyId = null;
         if (policyType == null) {
-            /*To handle scenarios where api is exported from a previous U2 version. API and Common policies with same name
-             and same version is not supported there
+            /*To handle scenarios where api is exported from a previous U2 version. API and Common policies with
+                same name and same version is not supported there
              */
             policyId = importOperationPolicy(importedPolicyData, organization);
         } else if (policyType.equalsIgnoreCase(ImportExportConstants.POLICY_TYPE_COMMON)) {
             existingOperationPolicy = getCommonOperationPolicyByPolicyName(importedSpec.getName(),
-                    importedSpec.getVersion(),organization, false);
+                    importedSpec.getVersion(), organization, false);
 
             if (existingOperationPolicy != null) {
                 if (existingOperationPolicy.getMd5Hash().equals(importedPolicyData.getMd5Hash())) {
@@ -7244,8 +7248,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policyId = addAPISpecificOperationPolicy(importedPolicyData.getApiUUID(), importedPolicyData,
                         organization);
                 if (log.isDebugEnabled()) {
-                    log.debug(
-                            "There aren't any existing common policy for the imported policy. " +
+                    log.debug("There is no common policy currently available for the imported policy. " +
                                     "A new policy created with ID " + policyId);
                 }
             }
