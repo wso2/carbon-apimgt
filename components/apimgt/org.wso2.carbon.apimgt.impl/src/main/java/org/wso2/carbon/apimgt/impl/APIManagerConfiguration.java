@@ -1790,6 +1790,10 @@ public class APIManagerConfiguration {
                 }
             }
         }
+
+        OMElement jwksApiEnableElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.Enable_JWKS_API));
+        jwtConfigurationDto.setJWKSApiEnabled(Boolean.parseBoolean(jwksApiEnableElement.getText()));
     }
 
     public ThrottleProperties getThrottleProperties() {

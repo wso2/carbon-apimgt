@@ -2371,11 +2371,14 @@ paths:
       description: |
         This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
 
-        1. Retrieving applications which are subscibed to a specific API.
+        1. Retrieving applications which are subscribed to a specific API.
         `GET https://localhost:9443/api/am/devportal/v2/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
 
         2. Retrieving APIs which are subscribed by a specific application.
         `GET https://localhost:9443/api/am/devportal/v2/subscriptions?applicationId=c43a325c-260b-4302-81cb-768eafaa3aed`
+        
+        If application sharing is enabled, the **groupId** can be used to include subscriptions associated with the
+        specified **groupId** in the results, provided the application is shared within the group.
 
         **IMPORTANT:**
         * It is mandatory to provide either **apiId** or **applicationId**.

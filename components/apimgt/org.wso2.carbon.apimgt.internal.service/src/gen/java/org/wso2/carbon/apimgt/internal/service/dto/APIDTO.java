@@ -26,6 +26,7 @@ public class APIDTO   {
     private String name = null;
     private String version = null;
     private String context = null;
+    private String contextTemplate = null;
     private String policy = null;
     private String apiType = null;
     private String status = null;
@@ -143,6 +144,24 @@ public class APIDTO   {
   }
   public void setContext(String context) {
     this.context = context;
+  }
+
+  /**
+   * Context template of the API.
+   **/
+  public APIDTO contextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Context template of the API.")
+  @JsonProperty("contextTemplate")
+  public String getContextTemplate() {
+    return contextTemplate;
+  }
+  public void setContextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
   }
 
   /**
@@ -357,6 +376,7 @@ public class APIDTO   {
         Objects.equals(name, API.name) &&
         Objects.equals(version, API.version) &&
         Objects.equals(context, API.context) &&
+        Objects.equals(contextTemplate, API.contextTemplate) &&
         Objects.equals(policy, API.policy) &&
         Objects.equals(apiType, API.apiType) &&
         Objects.equals(status, API.status) &&
@@ -372,7 +392,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, isSubscriptionValidationDisabled, isEgress, subtype);
+    return Objects.hash(uuid, apiId, provider, name, version, context, contextTemplate, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, isSubscriptionValidationDisabled, isEgress, subtype);
   }
 
   @Override
@@ -386,6 +406,7 @@ public class APIDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    contextTemplate: ").append(toIndentedString(contextTemplate)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
