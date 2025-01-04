@@ -17,9 +17,9 @@ import javax.validation.Valid;
 @Scope(name = "{{.}}", description="", value ="")
 {{/vendorExtensions.x-scopes}}
 public class {{classname}} {{#parent}}extends {{{parent}}}{{/parent}} {{#serializableModel}}implements Serializable{{/serializableModel}} {
-  {{#vars}}{{#isEnum}}
+  {{#vars}}{{#isEnum}}{{^isContainer}}
 
-{{>enumClass}}{{/isEnum}}{{#items.isEnum}}{{#items}}
+      {{>enumClass}}{{/isContainer}} {{/isEnum}}{{#items.isEnum}}{{#items}}
 
 {{>enumClass}}{{/items}}{{/items.isEnum}}
 {{#vendorExtensions.x-otherScopes}}

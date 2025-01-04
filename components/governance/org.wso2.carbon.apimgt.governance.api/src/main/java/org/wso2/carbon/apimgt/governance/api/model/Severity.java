@@ -21,18 +21,21 @@ package org.wso2.carbon.apimgt.governance.api.model;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 
+/**
+ * This class represents a governance rule Severity
+ */
 public enum Severity {
-    ERROR(0),
-    WARN(1),
-    INFO(2);
+    ERROR("ERROR"),
+    WARN("WARN"),
+    INFO("INFO");
 
-    private final int value;
+    private final String value;
 
-    Severity(int value) {
+    Severity(String value) {
         this.value = value;
     }
 
-    public static Severity fromValue(int value) throws GovernanceException {
+    public static Severity fromValue(String value) throws GovernanceException {
         for (Severity severity : Severity.values()) {
             if (severity.getValue() == value) {
                 return severity;
@@ -44,7 +47,7 @@ public enum Severity {
     public static Severity fromString(String severityString) {
         if ("error".equals(severityString)) {
             return Severity.ERROR;
-        } else if ("warnings".equals(severityString)) {
+        } else if ("warn".equals(severityString)) {
             return Severity.WARN;
         } else if ("info".equals(severityString)) {
             return Severity.INFO;
@@ -52,7 +55,7 @@ public enum Severity {
         return Severity.WARN;
     }
 
-    public int getValue() {
+    public String getValue() {
         return value;
     }
 }

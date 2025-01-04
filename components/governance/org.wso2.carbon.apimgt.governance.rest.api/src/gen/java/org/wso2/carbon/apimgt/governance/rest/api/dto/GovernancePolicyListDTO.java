@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyInfoDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -27,7 +27,7 @@ import javax.validation.Valid;
 public class GovernancePolicyListDTO   {
   
     private Integer count = null;
-    private List<GovernancePolicyInfoDTO> list = new ArrayList<GovernancePolicyInfoDTO>();
+    private List<GovernancePolicyDTO> list = new ArrayList<GovernancePolicyDTO>();
 
   /**
    * Number of governance policies returned.
@@ -50,7 +50,7 @@ public class GovernancePolicyListDTO   {
   /**
    * List of governance policies.
    **/
-  public GovernancePolicyListDTO list(List<GovernancePolicyInfoDTO> list) {
+  public GovernancePolicyListDTO list(List<GovernancePolicyDTO> list) {
     this.list = list;
     return this;
   }
@@ -59,10 +59,10 @@ public class GovernancePolicyListDTO   {
   @ApiModelProperty(value = "List of governance policies.")
       @Valid
   @JsonProperty("list")
-  public List<GovernancePolicyInfoDTO> getList() {
+  public List<GovernancePolicyDTO> getList() {
     return list;
   }
-  public void setList(List<GovernancePolicyInfoDTO> list) {
+  public void setList(List<GovernancePolicyDTO> list) {
     this.list = list;
   }
 

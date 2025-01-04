@@ -7,12 +7,12 @@
 
 id: 02a20227-8215-4f56-a093-18256da2fbf5
 name: WSO2 Style Guidelines
-message: Standardizes API definition and formatting for consistency.
 description: >-
   A set of guidelines focused on enforcing uniformity in API style, including
   naming conventions, formatting, and documentation to ensure clarity and
   maintainability across all APIs.
 appliesTo: API_DEFINITION
+artifactType: REST_API
 documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-rulesets/wso2_style_guidelines_doc/"
 provider: WSO2
 rulesetContent:

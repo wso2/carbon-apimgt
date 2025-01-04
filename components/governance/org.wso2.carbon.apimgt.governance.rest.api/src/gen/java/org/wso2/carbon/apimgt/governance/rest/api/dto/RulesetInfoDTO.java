@@ -27,12 +27,12 @@ public class RulesetInfoDTO   {
     private String name = null;
     private String description = null;
 
-    @XmlType(name="AppliesToEnum")
+          @XmlType(name="AppliesToEnum")
     @XmlEnum(String.class)
     public enum AppliesToEnum {
         API_METADATA("API_METADATA"),
         API_DEFINITION("API_DEFINITION"),
-        DOCUMENTATION("DOCUMENTATION");
+        API_DOCUMENTATION("API_DOCUMENTATION");
         private String value;
 
         AppliesToEnum (String v) {
@@ -57,15 +57,49 @@ public class RulesetInfoDTO   {
             }
 return null;
         }
-    }
+    } 
     private AppliesToEnum appliesTo = null;
+
+          @XmlType(name="ArtifactTypeEnum")
+    @XmlEnum(String.class)
+    public enum ArtifactTypeEnum {
+        REST_API("REST_API"),
+        SOAP_API("SOAP_API"),
+        GRAPHQL_API("GRAPHQL_API"),
+        ASYNC_API("ASYNC_API"),
+        ALL_API("ALL_API");
+        private String value;
+
+        ArtifactTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ArtifactTypeEnum fromValue(String v) {
+            for (ArtifactTypeEnum b : ArtifactTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    } 
+    private ArtifactTypeEnum artifactType = null;
     private String documentationLink = null;
     private String provider = null;
     private String createdBy = null;
     private String createdTime = null;
     private String updatedBy = null;
     private String updatedTime = null;
-    private Boolean isDefault = false;
 
   /**
    * UUID of the ruleset.
@@ -139,6 +173,25 @@ return null;
   }
   public void setAppliesTo(AppliesToEnum appliesTo) {
     this.appliesTo = appliesTo;
+  }
+
+  /**
+   * The type of artifact that the ruleset validates.
+   **/
+  public RulesetInfoDTO artifactType(ArtifactTypeEnum artifactType) {
+    this.artifactType = artifactType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "REST_API", required = true, value = "The type of artifact that the ruleset validates.")
+  @JsonProperty("artifactType")
+  @NotNull
+  public ArtifactTypeEnum getArtifactType() {
+    return artifactType;
+  }
+  public void setArtifactType(ArtifactTypeEnum artifactType) {
+    this.artifactType = artifactType;
   }
 
   /**
@@ -250,24 +303,6 @@ return null;
     this.updatedTime = updatedTime;
   }
 
-  /**
-   * Whether the ruleset is a default one or not.
-   **/
-  public RulesetInfoDTO isDefault(Boolean isDefault) {
-    this.isDefault = isDefault;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "Whether the ruleset is a default one or not.")
-  @JsonProperty("isDefault")
-  public Boolean isIsDefault() {
-    return isDefault;
-  }
-  public void setIsDefault(Boolean isDefault) {
-    this.isDefault = isDefault;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -282,18 +317,18 @@ return null;
         Objects.equals(name, rulesetInfo.name) &&
         Objects.equals(description, rulesetInfo.description) &&
         Objects.equals(appliesTo, rulesetInfo.appliesTo) &&
+        Objects.equals(artifactType, rulesetInfo.artifactType) &&
         Objects.equals(documentationLink, rulesetInfo.documentationLink) &&
         Objects.equals(provider, rulesetInfo.provider) &&
         Objects.equals(createdBy, rulesetInfo.createdBy) &&
         Objects.equals(createdTime, rulesetInfo.createdTime) &&
         Objects.equals(updatedBy, rulesetInfo.updatedBy) &&
-        Objects.equals(updatedTime, rulesetInfo.updatedTime) &&
-        Objects.equals(isDefault, rulesetInfo.isDefault);
+        Objects.equals(updatedTime, rulesetInfo.updatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, appliesTo, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime, isDefault);
+    return Objects.hash(id, name, description, appliesTo, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
   }
 
   @Override
@@ -305,13 +340,13 @@ return null;
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    appliesTo: ").append(toIndentedString(appliesTo)).append("\n");
+    sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    documentationLink: ").append(toIndentedString(documentationLink)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedBy: ").append(toIndentedString(updatedBy)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
-    sb.append("    isDefault: ").append(toIndentedString(isDefault)).append("\n");
     sb.append("}");
     return sb.toString();
   }

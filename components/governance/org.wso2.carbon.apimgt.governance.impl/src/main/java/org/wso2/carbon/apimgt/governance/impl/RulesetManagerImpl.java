@@ -50,7 +50,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
     @Override
-    public Ruleset createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException {
+    public RulesetInfo createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException {
         ruleset.setId(GovernanceUtil.generateUUID());
         //TODO: Validate ruleset content with spectral service before creation
         return rulesetMgtDAO.createRuleset(organization, ruleset);
@@ -78,11 +78,7 @@ public class RulesetManagerImpl implements RulesetManager {
      */
     @Override
     public RulesetInfo getRulesetById(String organization, String rulesetId) throws GovernanceException {
-        RulesetInfo result = rulesetMgtDAO.getRulesetById(organization, rulesetId);
-        if (result == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId, organization);
-        }
-        return result;
+        return rulesetMgtDAO.getRulesetById(organization, rulesetId);
     }
 
     /**
@@ -113,15 +109,8 @@ public class RulesetManagerImpl implements RulesetManager {
      */
     @Override
     public void deleteRuleset(String organization, String rulesetId) throws GovernanceException {
-        // Check if default ruleset is attempted to be deleted
         RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(organization, rulesetId);
-        if (ruleset == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId, organization);
-        } else if (ruleset.isDefault() == 1) {
-            // Can not modify default rulesets
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_CANNOT_MODIFY_DEFAULT_RULESET,
-                    ruleset.getName(), organization);
-        } else if (isRulesetAssociatedWithPolicies(rulesetId)) {
+        if (isRulesetAssociatedWithPolicies(rulesetId)) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
                     ruleset.getId(), organization);
         }
@@ -149,16 +138,20 @@ public class RulesetManagerImpl implements RulesetManager {
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
     @Override
-    public Ruleset updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
-        RulesetInfo oldRuleset = rulesetMgtDAO.getRulesetById(organization, rulesetId);
-        if (oldRuleset == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId, organization);
-        } else if (oldRuleset.isDefault() == 1) {
-            // Can not modify default rulesets
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_CANNOT_MODIFY_DEFAULT_RULESET,
-                    ruleset.getName(), organization);
-        }
+    public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
         //TODO: Validate ruleset content with spectral service before update
         return rulesetMgtDAO.updateRuleset(organization, rulesetId, ruleset);
+    }
+
+    /**
+     * Get the policies using the Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @return List of policies using the ruleset
+     * @throws GovernanceException If an error occurs while getting the ruleset usage
+     */
+    @Override
+    public List<String> getRulesetUsage(String rulesetId) throws GovernanceException {
+        return rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
     }
 }

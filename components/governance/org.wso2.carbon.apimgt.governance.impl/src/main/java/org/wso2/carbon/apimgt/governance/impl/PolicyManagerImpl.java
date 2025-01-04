@@ -21,8 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.manager.PolicyManager;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfo;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfoWithRulesetIds;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
@@ -42,16 +41,16 @@ public class PolicyManagerImpl implements PolicyManager {
     /**
      * Create a new Governance Policy
      *
-     * @param organization                       Organization
-     * @param governancePolicyInfoWithRulesetIds Governance Policy Info with Ruleset Ids
-     * @return GovernancePolicyInfo Created object
+     * @param organization     Organization
+     * @param governancePolicy Governance Policy
+     * @return GovernancePolicy Created object
      * @throws GovernanceException If an error occurs while creating the policy
      */
     @Override
-    public GovernancePolicyInfo createGovernancePolicy(String organization, GovernancePolicyInfoWithRulesetIds
-            governancePolicyInfoWithRulesetIds) throws GovernanceException {
-        governancePolicyInfoWithRulesetIds.setId(GovernanceUtil.generateUUID());
-        return policyMgtDAO.createGovernancePolicy(organization, governancePolicyInfoWithRulesetIds);
+    public GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
+            governancePolicy) throws GovernanceException {
+        governancePolicy.setId(GovernanceUtil.generateUUID());
+        return policyMgtDAO.createGovernancePolicy(organization, governancePolicy);
     }
 
     /**
@@ -59,12 +58,12 @@ public class PolicyManagerImpl implements PolicyManager {
      *
      * @param organization Organization
      * @param policyID     Policy ID
-     * @return GovernancePolicyInfo
+     * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     @Override
-    public GovernancePolicyInfo getGovernancePolicyByID(String organization, String policyID) throws GovernanceException {
-        GovernancePolicyInfo policyInfo = policyMgtDAO.getGovernancePolicyByID(organization, policyID);
+    public GovernancePolicy getGovernancePolicyByID(String organization, String policyID) throws GovernanceException {
+        GovernancePolicy policyInfo = policyMgtDAO.getGovernancePolicyByID(organization, policyID);
         if (policyInfo == null) {
             throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyID, organization);
         }
@@ -100,14 +99,14 @@ public class PolicyManagerImpl implements PolicyManager {
      *
      * @param policyId                           Policy ID
      * @param organization                       Organization
-     * @param governancePolicyInfoWithRulesetIds Governance Policy Info with Ruleset Ids
-     * @return GovernancePolicyInfo Updated object
+     * @param governancePolicy Governance Policy
+     * @return GovernancePolicy Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
     @Override
-    public GovernancePolicyInfo updateGovernancePolicy(String policyId, String organization,
-                                                       GovernancePolicyInfoWithRulesetIds governancePolicyInfoWithRulesetIds)
+    public GovernancePolicy updateGovernancePolicy(String policyId, String organization,
+                                                   GovernancePolicy governancePolicy)
             throws GovernanceException {
-        return policyMgtDAO.updateGovernancePolicy(policyId, organization, governancePolicyInfoWithRulesetIds);
+        return policyMgtDAO.updateGovernancePolicy(policyId, organization, governancePolicy);
     }
 }

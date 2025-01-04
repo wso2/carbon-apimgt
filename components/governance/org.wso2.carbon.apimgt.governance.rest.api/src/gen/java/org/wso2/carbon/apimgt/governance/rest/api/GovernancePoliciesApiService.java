@@ -10,8 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyInfoDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyInfoWithRulesetIdsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
 
 import java.util.List;
@@ -23,9 +22,9 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface GovernancePoliciesApiService {
-      public Response createGovernancePolicy(GovernancePolicyInfoWithRulesetIdsDTO governancePolicyInfoWithRulesetIdsDTO, MessageContext messageContext) throws GovernanceException;
+      public Response createGovernancePolicy(GovernancePolicyDTO governancePolicyDTO, MessageContext messageContext) throws GovernanceException;
       public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException;
       public Response getGovernancePolicies(MessageContext messageContext) throws GovernanceException;
       public Response getGovernancePolicyById(String policyId, MessageContext messageContext) throws GovernanceException;
-      public Response updateGovernancePolicyById(String policyId, GovernancePolicyInfoWithRulesetIdsDTO governancePolicyInfoWithRulesetIdsDTO, MessageContext messageContext) throws GovernanceException;
+      public Response updateGovernancePolicyById(String policyId, GovernancePolicyDTO governancePolicyDTO, MessageContext messageContext) throws GovernanceException;
 }

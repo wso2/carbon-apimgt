@@ -75,11 +75,11 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
      *
      * @param organization Organization
      * @param ruleset      Ruleset object
-     * @return
+     * @return RulesetInfo Created object
      * @throws GovernanceException
      */
     @Override
-    public Ruleset createRuleset(String organization, Ruleset ruleset) throws GovernanceException {
+    public RulesetInfo createRuleset(String organization, Ruleset ruleset) throws GovernanceException {
 
         InputStream rulesetContent = new ByteArrayInputStream(
                 ruleset.getRulesetContent().getBytes(Charset.defaultCharset()));
@@ -94,11 +94,11 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(3, ruleset.getDescription());
                 prepStmt.setBlob(4, rulesetContent);
                 prepStmt.setString(5, ruleset.getAppliesTo());
-                prepStmt.setString(6, ruleset.getDocumentationLink());
-                prepStmt.setString(7, ruleset.getProvider());
-                prepStmt.setString(8, organization);
-                prepStmt.setString(9, ruleset.getCreatedBy());
-                prepStmt.setInt(10, ruleset.isDefault());
+                prepStmt.setString(6, ruleset.getArtifactType());
+                prepStmt.setString(7, ruleset.getDocumentationLink());
+                prepStmt.setString(8, ruleset.getProvider());
+                prepStmt.setString(9, organization);
+                prepStmt.setString(10, ruleset.getCreatedBy());
                 prepStmt.execute();
                 insertRules(ruleset.getId(), ruleset.getRulesetContent(), connection);
                 connection.commit();
@@ -117,7 +117,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     ruleset.getName(), organization
             );
         }
-        return ruleset;
+        return getRulesetById(organization, ruleset.getId()); // to return all info of the created ruleset
     }
 
     /**
@@ -147,19 +147,19 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
             String sqlQuery = SQLConstants.INSERT_RULES;
             try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
                 for (Map.Entry<String, Map<String, Object>> entry : rules.entrySet()) {
-                    String ruleCode = entry.getKey();
+                    String code = entry.getKey();
                     Map<String, Object> ruleDetails = entry.getValue();
-                    String message = (String) ruleDetails.get("message");
                     String description = (String) ruleDetails.get("description");
+                    String message = (String) ruleDetails.get("message");
                     String severityString = (String) ruleDetails.get("severity");
-                    int severity = Severity.fromString(severityString).getValue();
+                    String severity = Severity.fromString(severityString).getValue();
 
                     prepStmt.setString(1, GovernanceUtil.generateUUID());
                     prepStmt.setString(2, rulesetId);
-                    prepStmt.setString(3, ruleCode);
+                    prepStmt.setString(3, code);
                     prepStmt.setString(4, message);
                     prepStmt.setString(5, description);
-                    prepStmt.setInt(6, severity);
+                    prepStmt.setString(6, severity);
                     prepStmt.addBatch();
                 }
                 prepStmt.executeBatch();
@@ -193,13 +193,13 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
                     rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
+                    rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
                     rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
                     rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
                     rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
                     rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
-                    rulesetInfo.setIsDefault(rs.getInt("IS_DEFAULT"));
                     rulesetInfoList.add(rulesetInfo);
                 }
             }
@@ -234,13 +234,13 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
                     rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
+                    rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
                     rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
                     rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
                     rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
                     rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
-                    rulesetInfo.setIsDefault(rs.getInt("IS_DEFAULT"));
                     return rulesetInfo;
                 }
             }
@@ -273,21 +273,22 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
                     rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
+                    rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
                     rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
                     rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
                     rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
                     rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
-                    rulesetInfo.setIsDefault(rs.getInt("IS_DEFAULT"));
                     return rulesetInfo;
+                } else {
+                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId, organization);
                 }
             }
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
                     e, organization);
         }
-        return null;
     }
 
     /**
@@ -313,6 +314,8 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                         rulesetContent = GovernanceDBUtil.getStringFromInputStream(inputStream);
                     }
                     return rulesetContent;
+                } else {
+                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId, organization);
                 }
             }
         } catch (SQLException e) {
@@ -322,7 +325,6 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_CONTENT_CONVERSION_ERROR, e,
                     rulesetId, organization);
         }
-        return null;
     }
 
     /**
@@ -341,7 +343,11 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 connection.setAutoCommit(false);
                 prepStmt.setString(1, rulesetId);
                 prepStmt.setString(2, organization);
-                prepStmt.executeUpdate();
+                int rowsAffected = prepStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
+                            rulesetId, organization);
+                }
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;
@@ -358,11 +364,11 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
      * @param organization Organization
      * @param rulesetId    Ruleset ID
      * @param ruleset      Ruleset object
-     * @return Ruleset Updated object
+     * @return RulesetInfo Created object
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
     @Override
-    public Ruleset updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
+    public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
         InputStream rulesetContent = new ByteArrayInputStream(
                 ruleset.getRulesetContent().getBytes(Charset.defaultCharset()));
         try (Connection connection = GovernanceDBUtil.getConnection();
@@ -373,12 +379,17 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(2, ruleset.getDescription());
                 prepStmt.setBlob(3, rulesetContent);
                 prepStmt.setString(4, ruleset.getAppliesTo());
-                prepStmt.setString(5, ruleset.getDocumentationLink());
-                prepStmt.setString(6, ruleset.getProvider());
-                prepStmt.setString(7, ruleset.getUpdatedBy());
-                prepStmt.setString(8, rulesetId);
-                prepStmt.setString(9, organization);
-                prepStmt.executeUpdate();
+                prepStmt.setString(5, ruleset.getArtifactType());
+                prepStmt.setString(6, ruleset.getDocumentationLink());
+                prepStmt.setString(7, ruleset.getProvider());
+                prepStmt.setString(8, ruleset.getUpdatedBy());
+                prepStmt.setString(9, rulesetId);
+                prepStmt.setString(10, organization);
+                int rowsAffected = prepStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
+                            rulesetId, organization);
+                }
                 // Delete existing rules related to this ruleset.
                 deleteRules(rulesetId, connection);
                 // Insert updated rules.
@@ -392,7 +403,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes.
                     ERROR_WHILE_UPDATING_RULESET, e, rulesetId, organization);
         }
-        return ruleset;
+        return getRulesetById(organization, rulesetId); // to return all info of the updated ruleset
     }
 
     /**
@@ -444,7 +455,5 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULES, e, rulesetId);
         }
     }
-
-
 }
 

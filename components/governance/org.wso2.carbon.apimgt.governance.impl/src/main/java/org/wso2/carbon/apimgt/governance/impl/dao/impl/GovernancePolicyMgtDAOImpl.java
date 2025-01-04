@@ -18,14 +18,11 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfo;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfoWithRulesetIds;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetId;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
@@ -39,9 +36,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of the GovernancePolicyMgtDAO interface.
@@ -68,38 +63,42 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     /**
      * Create a new Governance Policy
      *
-     * @param organization                       Organization
-     * @param governancePolicyInfoWithRulesetIds Governance Policy Info with Ruleset Ids
-     * @return GovernancePolicyInfo Created object
+     * @param organization     Organization
+     * @param governancePolicy Governance Policy Info with Ruleset Ids
+     * @return GovernancePolicy Created object
      */
     @Override
-    public GovernancePolicyInfo createGovernancePolicy(String organization, GovernancePolicyInfoWithRulesetIds
-            governancePolicyInfoWithRulesetIds) throws GovernanceException {
+    public GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
+            governancePolicy) throws GovernanceException {
         List<RulesetInfo> rulesetInfoList = new ArrayList<>();
-        List<RulesetId> rulesetIds;
+        List<String> rulesetIds;
         Timestamp timestamp;
         List<String> labels;
+        List<String> states;
+        List<GovernanceAction> actions;
         try (Connection connection = GovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.CREATE_POLICY)) {
-                    prepStmt.setString(1, governancePolicyInfoWithRulesetIds.getId());
-                    prepStmt.setString(2, governancePolicyInfoWithRulesetIds.getName());
-                    prepStmt.setString(3, governancePolicyInfoWithRulesetIds.getDescription());
+                    prepStmt.setString(1, governancePolicy.getId());
+                    prepStmt.setString(2, governancePolicy.getName());
+                    prepStmt.setString(3, governancePolicy.getDescription());
                     prepStmt.setString(4, organization);
-                    prepStmt.setString(5, governancePolicyInfoWithRulesetIds.getCreatedBy());
+                    prepStmt.setString(5, governancePolicy.getCreatedBy());
+
                     timestamp = new Timestamp(System.currentTimeMillis());
+                    governancePolicy.setCreatedTime(timestamp.toString());
                     prepStmt.setTimestamp(6, timestamp);
                     prepStmt.execute();
                 }
                 // Insert into GOV_POLICY_RULESET_MAPPING table
                 try (PreparedStatement prepStmt =
                              connection.prepareStatement(SQLConstants.CREATE_POLICY_RULESET_MAPPING)) {
-                    rulesetIds = governancePolicyInfoWithRulesetIds.getRulesets();
-                    for (RulesetId rulesetId : rulesetIds) {
+                    rulesetIds = governancePolicy.getRulesetIds();
+                    for (String rulesetId : rulesetIds) {
                         prepStmt.setString(1, GovernanceUtil.generateUUID());
-                        prepStmt.setString(2, governancePolicyInfoWithRulesetIds.getId());
-                        prepStmt.setString(3, rulesetId.getId());
+                        prepStmt.setString(2, governancePolicy.getId());
+                        prepStmt.setString(3, rulesetId);
                         prepStmt.addBatch();
                     }
                     prepStmt.executeBatch();
@@ -107,61 +106,55 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
 
                 // Insert into GOV_POLICY_LABEL table
                 try (PreparedStatement prepStmt =
-                             connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_LABEL)) {
-                    labels = governancePolicyInfoWithRulesetIds.getLabels();
+                             connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_LABEL_MAPPING)) {
+                    labels = governancePolicy.getLabels();
                     for (String label : labels) {
                         prepStmt.setString(1, GovernanceUtil.generateUUID());
-                        prepStmt.setString(2, governancePolicyInfoWithRulesetIds.getId());
+                        prepStmt.setString(2, governancePolicy.getId());
                         prepStmt.setString(3, label);
                         prepStmt.addBatch();
                     }
                     prepStmt.executeBatch();
                 }
-                connection.commit();
-                // Retrieve RulesetInfo
-                String placeholders = String.join(",", Collections.nCopies(rulesetIds.size(), "?"));
-                String query = String.format(SQLConstants.GET_RULESETS_BY_IDS, placeholders);
-                try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
-                    int index = 1;
-                    for (RulesetId rulesetId : rulesetIds) {
-                        prepStmt.setString(index++, rulesetId.getId());
+
+                // Insert into GOV_POLICY_STATE table
+                try (PreparedStatement prepStmt =
+                             connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_STATE_MAPPING)) {
+                    states = governancePolicy.getLinkedStates();
+                    for (String state : states) {
+                        prepStmt.setString(1, GovernanceUtil.generateUUID());
+                        prepStmt.setString(2, governancePolicy.getId());
+                        prepStmt.setString(3, state);
+                        prepStmt.addBatch();
                     }
-                    prepStmt.setString(index, organization);
-                    ResultSet resultSet = prepStmt.executeQuery();
-                    while (resultSet.next()) {
-                        RulesetInfo rulesetInfo = new RulesetInfo();
-                        rulesetInfo.setId(resultSet.getString("RULESET_ID"));
-                        rulesetInfo.setName(resultSet.getString("NAME"));
-                        rulesetInfo.setDescription(resultSet.getString("DESCRIPTION"));
-                        rulesetInfo.setAppliesTo(resultSet.getString("APPLIES_TO"));
-                        rulesetInfo.setDocumentationLink(resultSet.getString("DOCUMENTATION_LINK"));
-                        rulesetInfo.setProvider(resultSet.getString("PROVIDER"));
-                        rulesetInfo.setCreatedBy(resultSet.getString("CREATED_BY"));
-                        rulesetInfo.setCreatedTime(resultSet.getString("CREATED_TIME"));
-                        rulesetInfo.setUpdatedBy(resultSet.getString("UPDATED_BY"));
-                        rulesetInfo.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
-                        rulesetInfo.setIsDefault(resultSet.getInt("IS_DEFAULT"));
-                        rulesetInfoList.add(rulesetInfo);
-                    }
+                    prepStmt.executeBatch();
                 }
-                GovernancePolicyInfo governancePolicyInfo = new GovernancePolicyInfo();
-                governancePolicyInfo.setId(governancePolicyInfoWithRulesetIds.getId());
-                governancePolicyInfo.setName(governancePolicyInfoWithRulesetIds.getName());
-                governancePolicyInfo.setDescription(governancePolicyInfoWithRulesetIds.getDescription());
-                governancePolicyInfo.setRulesets(rulesetInfoList);
-                governancePolicyInfo.setLabels(labels);
-                governancePolicyInfo.setCreatedBy(governancePolicyInfoWithRulesetIds.getCreatedBy());
-                governancePolicyInfo.setCreatedTime(timestamp.toString());
-                return governancePolicyInfo;
+
+                // Insert into GOV_POLICY_ACTION table
+                try (PreparedStatement prepStmt =
+                             connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_ACTION_MAPPING)) {
+                    actions = governancePolicy.getActions();
+                    for (GovernanceAction action : actions) {
+                        prepStmt.setString(1, GovernanceUtil.generateUUID());
+                        prepStmt.setString(2, governancePolicy.getId());
+                        prepStmt.setString(3, action.getState());
+                        prepStmt.setString(4, action.getRuleSeverity());
+                        prepStmt.setString(5, action.getType());
+                        prepStmt.addBatch();
+                    }
+                    prepStmt.executeBatch();
+                }
+                connection.commit();
+                return getGovernancePolicyByID(organization, governancePolicy.getId()); // to return saved policy
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;
             }
         } catch (SQLException e) {
             if (e instanceof SQLIntegrityConstraintViolationException) {
-                if (getGovernancePolicyByName(organization, governancePolicyInfoWithRulesetIds.getName()) != null) {
+                if (getGovernancePolicyByName(organization, governancePolicy.getName()) != null) {
                     throw new GovernanceException(GovernanceExceptionCodes.POLICY_ALREADY_EXISTS, e,
-                            governancePolicyInfoWithRulesetIds.getName(), organization);
+                            governancePolicy.getName(), organization);
                 }
             }
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_CREATING_POLICY, e, organization);
@@ -174,29 +167,29 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param organization Organization
      * @param policyName   Policy Name
-     * @return GovernancePolicyInfo
+     * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     @Override
-    public GovernancePolicyInfo getGovernancePolicyByName(String organization, String policyName) throws GovernanceException {
-        GovernancePolicyInfo policyInfo = null;
+    public GovernancePolicy getGovernancePolicyByName(String organization, String policyName) throws GovernanceException {
+        GovernancePolicy policy = null;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_BY_NAME)) {
             prepStmt.setString(1, organization);
             prepStmt.setString(2, policyName);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 if (resultSet.next()) {
-                    policyInfo = new GovernancePolicyInfo();
-                    policyInfo.setId(resultSet.getString("POLICY_ID"));
-                    policyInfo.setName(resultSet.getString("NAME"));
-                    policyInfo.setDescription(resultSet.getString("DESCRIPTION"));
-                    policyInfo.setCreatedBy(resultSet.getString("CREATED_BY"));
-                    policyInfo.setCreatedTime(resultSet.getString("CREATED_TIME"));
-                    policyInfo.setUpdatedBy(resultSet.getString("UPDATED_BY"));
-                    policyInfo.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
+                    policy = new GovernancePolicy();
+                    policy.setId(resultSet.getString("POLICY_ID"));
+                    policy.setName(resultSet.getString("NAME"));
+                    policy.setDescription(resultSet.getString("DESCRIPTION"));
+                    policy.setCreatedBy(resultSet.getString("CREATED_BY"));
+                    policy.setCreatedTime(resultSet.getString("CREATED_TIME"));
+                    policy.setUpdatedBy(resultSet.getString("UPDATED_BY"));
+                    policy.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
                 }
             }
-            return policyInfo;
+            return policy;
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_NAME, e, policyName,
                     organization);
@@ -208,31 +201,33 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param organization Organization
      * @param policyID     Policy ID
-     * @return GovernancePolicyInfo
+     * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     @Override
-    public GovernancePolicyInfo getGovernancePolicyByID(String organization, String policyID) throws GovernanceException {
-        GovernancePolicyInfo policyInfo = null;
+    public GovernancePolicy getGovernancePolicyByID(String organization, String policyID) throws GovernanceException {
+        GovernancePolicy policy = null;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_BY_ID)) {
             prepStmt.setString(1, organization);
             prepStmt.setString(2, policyID);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 if (resultSet.next()) {
-                    policyInfo = new GovernancePolicyInfo();
-                    policyInfo.setId(resultSet.getString("POLICY_ID"));
-                    policyInfo.setName(resultSet.getString("NAME"));
-                    policyInfo.setDescription(resultSet.getString("DESCRIPTION"));
-                    policyInfo.setCreatedBy(resultSet.getString("CREATED_BY"));
-                    policyInfo.setCreatedTime(resultSet.getString("CREATED_TIME"));
-                    policyInfo.setUpdatedBy(resultSet.getString("UPDATED_BY"));
-                    policyInfo.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
-                    policyInfo.setRulesets(getRulesetsByPolicyId(policyInfo.getId(), connection));
-                    policyInfo.setLabels(getLabelsByPolicyId(policyInfo.getId(), connection));
+                    policy = new GovernancePolicy();
+                    policy.setId(resultSet.getString("POLICY_ID"));
+                    policy.setName(resultSet.getString("NAME"));
+                    policy.setDescription(resultSet.getString("DESCRIPTION"));
+                    policy.setCreatedBy(resultSet.getString("CREATED_BY"));
+                    policy.setCreatedTime(resultSet.getString("CREATED_TIME"));
+                    policy.setUpdatedBy(resultSet.getString("UPDATED_BY"));
+                    policy.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
+                    policy.setRulesetIds(getRulesetsByPolicyId(policy.getId(), connection));
+                    policy.setLabels(getLabelsByPolicyId(policy.getId(), connection));
+                    policy.setLinkedStates(getStatesByPolicyId(policy.getId(), connection));
+                    policy.setActions(getActionsByPolicyId(policy.getId(), connection));
                 }
             }
-            return policyInfo;
+            return policy;
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_ID, e, policyID,
                     organization);
@@ -248,29 +243,30 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      */
     @Override
     public GovernancePolicyList getGovernancePolicies(String organization) throws GovernanceException {
-        GovernancePolicyList policyList = new GovernancePolicyList();
-        List<GovernancePolicyInfo> policyInfoList = new ArrayList<>();
+        GovernancePolicyList policyListObj = new GovernancePolicyList();
+        List<GovernancePolicy> policyList = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES)) {
             prepStmt.setString(1, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    GovernancePolicyInfo policyInfo = new GovernancePolicyInfo();
-                    policyInfo.setId(resultSet.getString("POLICY_ID"));
-                    policyInfo.setName(resultSet.getString("NAME"));
-                    policyInfo.setDescription(resultSet.getString("DESCRIPTION"));
-                    policyInfo.setCreatedBy(resultSet.getString("CREATED_BY"));
-                    policyInfo.setCreatedTime(resultSet.getString("CREATED_TIME"));
-                    policyInfo.setUpdatedBy(resultSet.getString("UPDATED_BY"));
-                    policyInfo.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
-                    policyInfo.setRulesets(getRulesetsByPolicyId(policyInfo.getId(), connection));
-                    policyInfo.setLabels(getLabelsByPolicyId(policyInfo.getId(), connection));
-                    policyInfoList.add(policyInfo);
+                    GovernancePolicy policy = new GovernancePolicy();
+                    policy.setId(resultSet.getString("POLICY_ID"));
+                    policy.setName(resultSet.getString("NAME"));
+                    policy.setDescription(resultSet.getString("DESCRIPTION"));
+                    policy.setCreatedBy(resultSet.getString("CREATED_BY"));
+                    policy.setCreatedTime(resultSet.getString("CREATED_TIME"));
+                    policy.setUpdatedBy(resultSet.getString("UPDATED_BY"));
+                    policy.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
+                    policy.setRulesetIds(getRulesetsByPolicyId(policy.getId(), connection));
+                    policy.setLabels(getLabelsByPolicyId(policy.getId(), connection));
+                    policy.setActions(getActionsByPolicyId(policy.getId(), connection));
+                    policyList.add(policy);
                 }
             }
-            policyList.setCount(policyInfoList.size());
-            policyList.setGovernancePolicyList(policyInfoList);
-            return policyList;
+            policyListObj.setCount(policyList.size());
+            policyListObj.setGovernancePolicyList(policyList);
+            return policyListObj;
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES,
                     e, organization);
@@ -313,23 +309,29 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     /**
      * Update a Governance Policy
      *
-     * @param policyId                           Policy ID
-     * @param organization                       Organization
-     * @param governancePolicyInfoWithRulesetIds Governance Policy Info with Ruleset Ids
-     * @return GovernancePolicyInfo Updated object
+     * @param policyId         Policy ID
+     * @param organization     Organization
+     * @param governancePolicy Governance Policy Info with Ruleset Ids
+     * @return GovernancePolicy Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
     @Override
-    public GovernancePolicyInfo updateGovernancePolicy(String policyId, String organization, GovernancePolicyInfoWithRulesetIds governancePolicyInfoWithRulesetIds) throws GovernanceException {
+    public GovernancePolicy updateGovernancePolicy(String policyId, String organization,
+                                                   GovernancePolicy governancePolicy) throws GovernanceException {
+        Timestamp timestamp;
         try (Connection connection = GovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 // Update policy details
                 try (PreparedStatement updateStatement = connection.prepareStatement(SQLConstants.UPDATE_POLICY)) {
-                    updateStatement.setString(1, governancePolicyInfoWithRulesetIds.getName());
-                    updateStatement.setString(2, governancePolicyInfoWithRulesetIds.getDescription());
-                    updateStatement.setString(3, governancePolicyInfoWithRulesetIds.getUpdatedBy());
-                    updateStatement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                    updateStatement.setString(1, governancePolicy.getName());
+                    updateStatement.setString(2, governancePolicy.getDescription());
+                    updateStatement.setString(3, governancePolicy.getUpdatedBy());
+
+                    timestamp = new Timestamp(System.currentTimeMillis());
+                    governancePolicy.setUpdatedTime(timestamp.toString());
+                    updateStatement.setTimestamp(4, timestamp);
+
                     updateStatement.setString(5, policyId);
                     updateStatement.setString(6, organization);
                     updateStatement.executeUpdate();
@@ -346,9 +348,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     }
                 }
                 // Determine rulesets to add and remove
-                List<String> rulesetsToBeUpdatedList = governancePolicyInfoWithRulesetIds.getRulesets().stream()
-                        .map(RulesetId::getId)
-                        .collect(Collectors.toList());
+                List<String> rulesetsToBeUpdatedList = governancePolicy.getRulesetIds();
                 List<String> rulesetsToAdd = new ArrayList<>(rulesetsToBeUpdatedList);
                 List<String> rulesetsToRemove = new ArrayList<>(existingRulesets);
                 rulesetsToAdd.removeAll(existingRulesets);
@@ -378,89 +378,14 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                         deleteStatement.executeBatch();
                     }
                 }
-                // Retrieve existing labels
-                List<String> existingLabels = new ArrayList<>();
-                try (PreparedStatement getLabelsStatement =
-                             connection.prepareStatement(SQLConstants.GET_LABELS_BY_POLICY_ID)) {
-                    getLabelsStatement.setString(1, policyId);
-                    try (ResultSet resultSet = getLabelsStatement.executeQuery()) {
-                        while (resultSet.next()) {
-                            existingLabels.add(resultSet.getString("LABEL"));
-                        }
-                    }
-                }
-                // Determine labels to add and remove
-                List<String> labelsToBeUpdated = governancePolicyInfoWithRulesetIds.getLabels();
-                List<String> labelsToAdd = new ArrayList<>(labelsToBeUpdated);
-                List<String> labelsToRemove = new ArrayList<>(existingLabels);
-                labelsToAdd.removeAll(existingLabels);
-                labelsToRemove.removeAll(labelsToBeUpdated);
-                // Add new labels
-                if (!labelsToAdd.isEmpty()) {
-                    try (PreparedStatement insertStatement =
-                                 connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_LABEL)) {
-                        for (String label : labelsToAdd) {
-                            insertStatement.setString(1, GovernanceUtil.generateUUID());
-                            insertStatement.setString(2, policyId);
-                            insertStatement.setString(3, label);
-                            insertStatement.addBatch();
-                        }
-                        insertStatement.executeBatch();
-                    }
-                }
-                // Remove old labels
-                if (!labelsToRemove.isEmpty()) {
-                    try (PreparedStatement deleteStatement =
-                                 connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_LABEL)) {
-                        for (String label : labelsToRemove) {
-                            deleteStatement.setString(1, policyId);
-                            deleteStatement.setString(2, label);
-                            deleteStatement.addBatch();
-                        }
-                        deleteStatement.executeBatch();
-                    }
-                }
-                // Retrieve updated ruleset info
-                List<RulesetInfo> rulesetInfoList = new ArrayList<>();
-                String placeholders = String.join(",", Collections.nCopies(rulesetsToBeUpdatedList.size(), "?"));
-                String query = String.format(SQLConstants.GET_RULESETS_BY_IDS, placeholders);
-                try (PreparedStatement getRulesetsInfoStatement = connection.prepareStatement(query)) {
-                    int index = 1;
-                    for (String rulesetId : rulesetsToBeUpdatedList) {
-                        getRulesetsInfoStatement.setString(index++, rulesetId);
-                    }
-                    getRulesetsInfoStatement.setString(index, organization);
-                    try (ResultSet resultSet = getRulesetsInfoStatement.executeQuery()) {
-                        while (resultSet.next()) {
-                            RulesetInfo rulesetInfo = new RulesetInfo();
-                            rulesetInfo.setId(resultSet.getString("RULESET_ID"));
-                            rulesetInfo.setName(resultSet.getString("NAME"));
-                            rulesetInfo.setDescription(resultSet.getString("DESCRIPTION"));
-                            rulesetInfo.setAppliesTo(resultSet.getString("APPLIES_TO"));
-                            rulesetInfo.setDocumentationLink(resultSet.getString("DOCUMENTATION_LINK"));
-                            rulesetInfo.setProvider(resultSet.getString("PROVIDER"));
-                            rulesetInfo.setCreatedBy(resultSet.getString("CREATED_BY"));
-                            rulesetInfo.setCreatedTime(resultSet.getString("CREATED_TIME"));
-                            rulesetInfo.setUpdatedBy(resultSet.getString("UPDATED_BY"));
-                            rulesetInfo.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
-                            rulesetInfo.setIsDefault(resultSet.getInt("IS_DEFAULT"));
-                            rulesetInfoList.add(rulesetInfo);
-                        }
-                    }
-                }
-                // Create and return GovernancePolicyInfo object
-                GovernancePolicyInfo governancePolicyInfo = new GovernancePolicyInfo();
-                governancePolicyInfo.setId(policyId);
-                governancePolicyInfo.setName(governancePolicyInfoWithRulesetIds.getName());
-                governancePolicyInfo.setDescription(governancePolicyInfoWithRulesetIds.getDescription());
-                governancePolicyInfo.setRulesets(rulesetInfoList);
-                governancePolicyInfo.setLabels(labelsToBeUpdated);
-                governancePolicyInfo.setCreatedBy(governancePolicyInfoWithRulesetIds.getCreatedBy());
-                governancePolicyInfo.setCreatedTime(governancePolicyInfoWithRulesetIds.getCreatedTime());
-                governancePolicyInfo.setUpdatedBy(governancePolicyInfoWithRulesetIds.getUpdatedBy());
-                governancePolicyInfo.setUpdatedTime(new Timestamp(System.currentTimeMillis()).toString());
+
+                updateLabelsForPolicy(policyId, governancePolicy, connection);
+                updateApplicableStatesForPolicy(policyId, governancePolicy, connection);
+                updateActionsForPolicy(policyId, governancePolicy, connection);
+
+                // return updated GovernancePolicy object
                 connection.commit();
-                return governancePolicyInfo;
+                return getGovernancePolicyByID(organization, policyId);
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;
@@ -472,37 +397,195 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     }
 
     /**
+     * Update applicable states for a Policy
+     *
+     * @param policyId         Policy ID
+     * @param governancePolicy Governance Policy Info with Ruleset Ids
+     * @param connection       DB Connection
+     * @throws SQLException If an error occurs while updating the states (Captured at higher level)
+     */
+    private void updateApplicableStatesForPolicy(String policyId, GovernancePolicy governancePolicy,
+                                                 Connection connection) throws SQLException {
+        // Retrieve applicable States
+        List<String> existingStates = new ArrayList<>();
+        try (PreparedStatement getStatesStatement =
+                     connection.prepareStatement(SQLConstants.GET_STATES_BY_POLICY_ID)) {
+            getStatesStatement.setString(1, policyId);
+            try (ResultSet resultSet = getStatesStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    existingStates.add(resultSet.getString("STATE"));
+                }
+            }
+        }
+        // Determine states to add and remove
+        List<String> statesToBeUpdated = governancePolicy.getLinkedStates();
+        List<String> statesToAdd = new ArrayList<>(statesToBeUpdated);
+        List<String> statesToRemove = new ArrayList<>(existingStates);
+        statesToAdd.removeAll(existingStates);
+        statesToRemove.removeAll(statesToBeUpdated);
+        // Add new states
+        if (!statesToAdd.isEmpty()) {
+            try (PreparedStatement insertStatement =
+                         connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_STATE_MAPPING)) {
+                for (String state : statesToAdd) {
+                    insertStatement.setString(1, GovernanceUtil.generateUUID());
+                    insertStatement.setString(2, policyId);
+                    insertStatement.setString(3, state);
+                    insertStatement.addBatch();
+                }
+                insertStatement.executeBatch();
+            }
+        }
+        // Remove old states
+        if (!statesToRemove.isEmpty()) {
+            try (PreparedStatement deleteStatement =
+                         connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_STATE_MAPPING)) {
+                for (String state : statesToRemove) {
+                    deleteStatement.setString(1, policyId);
+                    deleteStatement.setString(2, state);
+                    deleteStatement.addBatch();
+                }
+                deleteStatement.executeBatch();
+            }
+        }
+    }
+
+    /**
+     * Update labels for a Policy
+     *
+     * @param policyId         Policy ID
+     * @param governancePolicy Governance Policy Info with Ruleset Ids
+     * @param connection       DB Connection
+     * @throws SQLException If an error occurs while updating the labels (Captured at higher level)
+     */
+    private void updateLabelsForPolicy(String policyId, GovernancePolicy governancePolicy,
+                                       Connection connection) throws SQLException {
+        // Retrieve existing labels
+        List<String> existingLabels = new ArrayList<>();
+        try (PreparedStatement getLabelsStatement =
+                     connection.prepareStatement(SQLConstants.GET_LABELS_BY_POLICY_ID)) {
+            getLabelsStatement.setString(1, policyId);
+            try (ResultSet resultSet = getLabelsStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    existingLabels.add(resultSet.getString("LABEL"));
+                }
+            }
+        }
+        // Determine labels to add and remove
+        List<String> labelsToBeUpdated = governancePolicy.getLabels();
+        List<String> labelsToAdd = new ArrayList<>(labelsToBeUpdated);
+        List<String> labelsToRemove = new ArrayList<>(existingLabels);
+        labelsToAdd.removeAll(existingLabels);
+        labelsToRemove.removeAll(labelsToBeUpdated);
+        // Add new labels
+        if (!labelsToAdd.isEmpty()) {
+            try (PreparedStatement insertStatement =
+                         connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_LABEL_MAPPING)) {
+                for (String label : labelsToAdd) {
+                    insertStatement.setString(1, GovernanceUtil.generateUUID());
+                    insertStatement.setString(2, policyId);
+                    insertStatement.setString(3, label);
+                    insertStatement.addBatch();
+                }
+                insertStatement.executeBatch();
+            }
+        }
+        // Remove old labels
+        if (!labelsToRemove.isEmpty()) {
+            try (PreparedStatement deleteStatement =
+                         connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_LABEL_MAPPING)) {
+                for (String label : labelsToRemove) {
+                    deleteStatement.setString(1, policyId);
+                    deleteStatement.setString(2, label);
+                    deleteStatement.addBatch();
+                }
+                deleteStatement.executeBatch();
+            }
+        }
+    }
+
+    /**
+     * Update actions for a Policy
+     *
+     * @param policyId         Policy ID
+     * @param governancePolicy Governance Policy Info with Ruleset Ids
+     * @param connection       DB Connection
+     * @throws SQLException If an error occurs while updating the actions (Captured at higher level)
+     */
+    private void updateActionsForPolicy(String policyId, GovernancePolicy governancePolicy,
+                                        Connection connection) throws SQLException {
+        // Retrieve existing actions
+        List<GovernanceAction> existingActions = new ArrayList<>();
+        try (PreparedStatement getActionsStatement =
+                     connection.prepareStatement(SQLConstants.GET_ACTIONS_BY_POLICY_ID)) {
+            getActionsStatement.setString(1, policyId);
+            try (ResultSet resultSet = getActionsStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    GovernanceAction action = new GovernanceAction();
+                    action.setState(resultSet.getString("STATE"));
+                    action.setRuleSeverity(resultSet.getString("SEVERITY"));
+                    action.setType(resultSet.getString("TYPE"));
+                    existingActions.add(action);
+                }
+            }
+        }
+        // Determine actions to add and remove
+        List<GovernanceAction> actionsToBeUpdated = governancePolicy.getActions();
+        List<GovernanceAction> actionsToAdd = new ArrayList<>(actionsToBeUpdated);
+        List<GovernanceAction> actionsToRemove = new ArrayList<>(existingActions);
+        actionsToAdd.removeAll(existingActions);
+        actionsToRemove.removeAll(actionsToBeUpdated);
+        // Add new actions
+        if (!actionsToAdd.isEmpty()) {
+            try (PreparedStatement insertStatement =
+                         connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_ACTION_MAPPING)) {
+                for (GovernanceAction action : actionsToAdd) {
+                    insertStatement.setString(1, GovernanceUtil.generateUUID());
+                    insertStatement.setString(2, policyId);
+                    insertStatement.setString(3, action.getState());
+                    insertStatement.setString(4, action.getRuleSeverity());
+                    insertStatement.setString(5, action.getType());
+                    insertStatement.addBatch();
+                }
+                insertStatement.executeBatch();
+            }
+        }
+        // Remove old actions
+        if (!actionsToRemove.isEmpty()) {
+            try (PreparedStatement deleteStatement =
+                         connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_ACTION_MAPPING)) {
+                for (GovernanceAction action : actionsToRemove) {
+                    deleteStatement.setString(1, policyId);
+                    deleteStatement.setString(2, action.getState());
+                    deleteStatement.setString(3, action.getRuleSeverity());
+                    deleteStatement.setString(4, action.getType());
+                    deleteStatement.addBatch();
+                }
+                deleteStatement.executeBatch();
+            }
+        }
+    }
+
+    /**
      * Get all the Rulesets attached to a Policy
      *
      * @param policyId   Policy ID
      * @param connection DB Connection
-     * @return List of RulesetInfo
-     * @throws SQLException If an error occurs while retrieving the policies (Captured at higher level)
+     * @return List of Rulesets
+     * @throws SQLException If an error occurs while retrieving the rulesets (Captured at higher level)
      */
-    private List<RulesetInfo> getRulesetsByPolicyId(String policyId, Connection connection) throws SQLException {
-        List<RulesetInfo> rulesetInfoList = new ArrayList<>();
-        String sqlQuery = SQLConstants.GET_RULESETS_FOR_POLICY;
+    private List<String> getRulesetsByPolicyId(String policyId, Connection connection) throws SQLException {
+        List<String> rulesetIds = new ArrayList<>();
+        String sqlQuery = SQLConstants.GET_RULESET_IDS_BY_POLICY_ID;
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, policyId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
-                    RulesetInfo rulesetInfo = new RulesetInfo();
-                    rulesetInfo.setId(rs.getString("RULESET_ID"));
-                    rulesetInfo.setName(rs.getString("NAME"));
-                    rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
-                    rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
-                    rulesetInfo.setProvider(rs.getString("PROVIDER"));
-                    rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
-                    rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
-                    rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
-                    rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
-                    rulesetInfo.setIsDefault(rs.getInt("IS_DEFAULT"));
-                    rulesetInfoList.add(rulesetInfo);
+                    rulesetIds.add(rs.getString("RULESET_ID"));
                 }
             }
         }
-        return rulesetInfoList;
+        return rulesetIds;
     }
 
     /**
@@ -526,6 +609,56 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         }
         return labels;
     }
+
+    /**
+     * Get all the States attached to a Policy
+     *
+     * @param policyId   Policy ID
+     * @param connection DB Connection
+     * @return List of States
+     * @throws SQLException If an error occurs while retrieving the states (Captured at higher level)
+     */
+    private List<String> getStatesByPolicyId(String policyId, Connection connection) throws SQLException {
+        List<String> states = new ArrayList<>();
+        try (PreparedStatement prepStmt =
+                     connection.prepareStatement(SQLConstants.GET_STATES_BY_POLICY_ID)) {
+            prepStmt.setString(1, policyId);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    states.add(resultSet.getString("STATE"));
+                }
+            }
+        }
+        return states;
+    }
+
+
+    /**
+     * Get all the Actions attached to a Policy
+     *
+     * @param policyId   Policy ID
+     * @param connection DB Connection
+     * @return List of Actions
+     * @throws SQLException If an error occurs while retrieving the actions (Captured at higher level)
+     */
+    private List<GovernanceAction> getActionsByPolicyId(String policyId, Connection connection) throws SQLException {
+        List<GovernanceAction> actions = new ArrayList<>();
+        try (PreparedStatement prepStmt =
+                     connection.prepareStatement(SQLConstants.GET_ACTIONS_BY_POLICY_ID)) {
+            prepStmt.setString(1, policyId);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    GovernanceAction action = new GovernanceAction();
+                    action.setState(resultSet.getString("STATE"));
+                    action.setRuleSeverity(resultSet.getString("SEVERITY"));
+                    action.setType(resultSet.getString("TYPE"));
+                    actions.add(action);
+                }
+            }
+        }
+        return actions;
+    }
+
 
 }
 

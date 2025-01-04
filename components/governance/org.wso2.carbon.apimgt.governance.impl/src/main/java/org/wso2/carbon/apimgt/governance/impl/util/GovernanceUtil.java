@@ -170,13 +170,12 @@ public class GovernanceUtil {
         Ruleset ruleset = new Ruleset();
         ruleset.setId(defaultRuleset.getId());
         ruleset.setName(defaultRuleset.getName());
-        ruleset.setMessage(defaultRuleset.getMessage());
         ruleset.setDescription(defaultRuleset.getDescription());
         ruleset.setAppliesTo(defaultRuleset.getAppliesTo());
+        ruleset.setArtifactType(defaultRuleset.getArtifactType());
         ruleset.setProvider(defaultRuleset.getProvider());
         ruleset.setRulesetContent(defaultRuleset.getRulesetContentAsString());
         ruleset.setDocumentationLink(defaultRuleset.getDocumentationLink());
-        ruleset.setIsDefault(1);
         return ruleset;
     }
 

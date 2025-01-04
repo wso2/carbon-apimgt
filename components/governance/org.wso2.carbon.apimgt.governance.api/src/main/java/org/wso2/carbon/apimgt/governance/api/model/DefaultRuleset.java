@@ -23,12 +23,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 
+/**
+ * This class represents the default ruleset model.
+ */
 public class DefaultRuleset {
     private String id;
     private String name;
-    private String message;
     private String description;
     private String appliesTo;
+    private String artifactType;
     private String documentationLink;
     private String provider;
     private Object rulesetContent;
@@ -47,14 +50,6 @@ public class DefaultRuleset {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public String getDescription() {
@@ -95,6 +90,14 @@ public class DefaultRuleset {
 
     public void setRulesetContent(Object rulesetContent) {
         this.rulesetContent = rulesetContent;
+    }
+
+    public String getArtifactType() {
+        return artifactType;
+    }
+
+    public void setArtifactType(String artifactType) {
+        this.artifactType = artifactType;
     }
 
     public String getRulesetContentAsString() throws GovernanceException {

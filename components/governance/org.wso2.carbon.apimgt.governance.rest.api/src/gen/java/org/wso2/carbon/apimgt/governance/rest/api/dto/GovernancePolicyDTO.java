@@ -6,11 +6,11 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetIdDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ActionDTO;
 import javax.validation.constraints.*;
 
 /**
- * Governance policy information with ruleset IDs.
+ * Detailed information about a governance policy.
  **/
 
 import io.swagger.annotations.*;
@@ -22,14 +22,49 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Governance policy information with ruleset IDs.")
+@ApiModel(description = "Detailed information about a governance policy.")
 
-public class GovernancePolicyInfoWithRulesetIdsDTO   {
+public class GovernancePolicyDTO   {
   
     private String id = null;
     private String name = null;
-    private String description = null;
-    private List<RulesetIdDTO> rulesets = new ArrayList<RulesetIdDTO>();
+    private String description = null; 
+
+    @XmlType(name="LinkedStatesEnum")
+    @XmlEnum(String.class)
+    public enum LinkedStatesEnum {
+        API_CREATE("API_CREATE"),
+        API_UPDATE("API_UPDATE"),
+        API_DEPLOY("API_DEPLOY"),
+        API_PUBLISH("API_PUBLISH");
+        private String value;
+
+        LinkedStatesEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static LinkedStatesEnum fromValue(String v) {
+            for (LinkedStatesEnum b : LinkedStatesEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private List<LinkedStatesEnum> linkedStates = new ArrayList<LinkedStatesEnum>();
+    private List<ActionDTO> actions = new ArrayList<ActionDTO>();
+    private List<String> rulesets = new ArrayList<String>();
     private List<String> labels = new ArrayList<String>();
     private String createdBy = null;
     private String createdTime = null;
@@ -39,7 +74,7 @@ public class GovernancePolicyInfoWithRulesetIdsDTO   {
   /**
    * UUID of the governance policy.
    **/
-  public GovernancePolicyInfoWithRulesetIdsDTO id(String id) {
+  public GovernancePolicyDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -57,7 +92,7 @@ public class GovernancePolicyInfoWithRulesetIdsDTO   {
   /**
    * Name of the governance policy.
    **/
-  public GovernancePolicyInfoWithRulesetIdsDTO name(String name) {
+  public GovernancePolicyDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -76,7 +111,7 @@ public class GovernancePolicyInfoWithRulesetIdsDTO   {
   /**
    * A brief description of the governance policy.
    **/
-  public GovernancePolicyInfoWithRulesetIdsDTO description(String description) {
+  public GovernancePolicyDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -92,35 +127,75 @@ public class GovernancePolicyInfoWithRulesetIdsDTO   {
   }
 
   /**
-   * List of ruleset IDs the governance policy.
+   * List of states at which the governance policy should be enforced.
    **/
-  public GovernancePolicyInfoWithRulesetIdsDTO rulesets(List<RulesetIdDTO> rulesets) {
+  public GovernancePolicyDTO linkedStates(List<LinkedStatesEnum> linkedStates) {
+    this.linkedStates = linkedStates;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "List of states at which the governance policy should be enforced.")
+  @JsonProperty("linkedStates")
+  @NotNull
+  public List<LinkedStatesEnum> getLinkedStates() {
+    return linkedStates;
+  }
+  public void setLinkedStates(List<LinkedStatesEnum> linkedStates) {
+    this.linkedStates = linkedStates;
+  }
+
+  /**
+   * List of actions taken when the governance policy is violated.
+   **/
+  public GovernancePolicyDTO actions(List<ActionDTO> actions) {
+    this.actions = actions;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "List of actions taken when the governance policy is violated.")
+      @Valid
+  @JsonProperty("actions")
+  @NotNull
+  public List<ActionDTO> getActions() {
+    return actions;
+  }
+  public void setActions(List<ActionDTO> actions) {
+    this.actions = actions;
+  }
+
+  /**
+   * List of rulesets associated with the governance policy.
+   **/
+  public GovernancePolicyDTO rulesets(List<String> rulesets) {
     this.rulesets = rulesets;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of ruleset IDs the governance policy.")
-      @Valid
+  @ApiModelProperty(required = true, value = "List of rulesets associated with the governance policy.")
   @JsonProperty("rulesets")
-  public List<RulesetIdDTO> getRulesets() {
+  @NotNull
+  public List<String> getRulesets() {
     return rulesets;
   }
-  public void setRulesets(List<RulesetIdDTO> rulesets) {
+  public void setRulesets(List<String> rulesets) {
     this.rulesets = rulesets;
   }
 
   /**
-   * Labels or tags associated with the governance policy.
+   * Labels associated with the governance policy.
    **/
-  public GovernancePolicyInfoWithRulesetIdsDTO labels(List<String> labels) {
+  public GovernancePolicyDTO labels(List<String> labels) {
     this.labels = labels;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[\"security\"]", value = "Labels or tags associated with the governance policy.")
+  @ApiModelProperty(example = "[\"healthcare\"]", required = true, value = "Labels associated with the governance policy.")
   @JsonProperty("labels")
+  @NotNull
   public List<String> getLabels() {
     return labels;
   }
@@ -131,13 +206,13 @@ public class GovernancePolicyInfoWithRulesetIdsDTO   {
   /**
    * Identifier of the user who created the governance policy.
    **/
-  public GovernancePolicyInfoWithRulesetIdsDTO createdBy(String createdBy) {
+  public GovernancePolicyDTO createdBy(String createdBy) {
     this.createdBy = createdBy;
     return this;
   }
 
   
-  @ApiModelProperty(example = "admin@gmail.com", value = "Identifier of the user who created the governance policy.")
+  @ApiModelProperty(example = "admin@wso2.com", value = "Identifier of the user who created the governance policy.")
   @JsonProperty("createdBy")
   public String getCreatedBy() {
     return createdBy;
@@ -149,7 +224,7 @@ public class GovernancePolicyInfoWithRulesetIdsDTO   {
   /**
    * Timestamp when the governance policy was created.
    **/
-  public GovernancePolicyInfoWithRulesetIdsDTO createdTime(String createdTime) {
+  public GovernancePolicyDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -167,13 +242,13 @@ public class GovernancePolicyInfoWithRulesetIdsDTO   {
   /**
    * Identifier of the user who last updated the governance policy.
    **/
-  public GovernancePolicyInfoWithRulesetIdsDTO updatedBy(String updatedBy) {
+  public GovernancePolicyDTO updatedBy(String updatedBy) {
     this.updatedBy = updatedBy;
     return this;
   }
 
   
-  @ApiModelProperty(example = "admin@gmail.com", value = "Identifier of the user who last updated the governance policy.")
+  @ApiModelProperty(example = "admin@wso2.com", value = "Identifier of the user who last updated the governance policy.")
   @JsonProperty("updatedBy")
   public String getUpdatedBy() {
     return updatedBy;
@@ -185,7 +260,7 @@ public class GovernancePolicyInfoWithRulesetIdsDTO   {
   /**
    * Timestamp when the governance policy was last updated.
    **/
-  public GovernancePolicyInfoWithRulesetIdsDTO updatedTime(String updatedTime) {
+  public GovernancePolicyDTO updatedTime(String updatedTime) {
     this.updatedTime = updatedTime;
     return this;
   }
@@ -209,31 +284,35 @@ public class GovernancePolicyInfoWithRulesetIdsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GovernancePolicyInfoWithRulesetIdsDTO governancePolicyInfoWithRulesetIds = (GovernancePolicyInfoWithRulesetIdsDTO) o;
-    return Objects.equals(id, governancePolicyInfoWithRulesetIds.id) &&
-        Objects.equals(name, governancePolicyInfoWithRulesetIds.name) &&
-        Objects.equals(description, governancePolicyInfoWithRulesetIds.description) &&
-        Objects.equals(rulesets, governancePolicyInfoWithRulesetIds.rulesets) &&
-        Objects.equals(labels, governancePolicyInfoWithRulesetIds.labels) &&
-        Objects.equals(createdBy, governancePolicyInfoWithRulesetIds.createdBy) &&
-        Objects.equals(createdTime, governancePolicyInfoWithRulesetIds.createdTime) &&
-        Objects.equals(updatedBy, governancePolicyInfoWithRulesetIds.updatedBy) &&
-        Objects.equals(updatedTime, governancePolicyInfoWithRulesetIds.updatedTime);
+    GovernancePolicyDTO governancePolicy = (GovernancePolicyDTO) o;
+    return Objects.equals(id, governancePolicy.id) &&
+        Objects.equals(name, governancePolicy.name) &&
+        Objects.equals(description, governancePolicy.description) &&
+        Objects.equals(linkedStates, governancePolicy.linkedStates) &&
+        Objects.equals(actions, governancePolicy.actions) &&
+        Objects.equals(rulesets, governancePolicy.rulesets) &&
+        Objects.equals(labels, governancePolicy.labels) &&
+        Objects.equals(createdBy, governancePolicy.createdBy) &&
+        Objects.equals(createdTime, governancePolicy.createdTime) &&
+        Objects.equals(updatedBy, governancePolicy.updatedBy) &&
+        Objects.equals(updatedTime, governancePolicy.updatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, rulesets, labels, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(id, name, description, linkedStates, actions, rulesets, labels, createdBy, createdTime, updatedBy, updatedTime);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GovernancePolicyInfoWithRulesetIdsDTO {\n");
+    sb.append("class GovernancePolicyDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    linkedStates: ").append(toIndentedString(linkedStates)).append("\n");
+    sb.append("    actions: ").append(toIndentedString(actions)).append("\n");
     sb.append("    rulesets: ").append(toIndentedString(rulesets)).append("\n");
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");

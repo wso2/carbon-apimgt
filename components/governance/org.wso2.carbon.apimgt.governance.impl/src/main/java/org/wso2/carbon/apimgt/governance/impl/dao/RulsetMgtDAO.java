@@ -35,10 +35,10 @@ public interface RulsetMgtDAO {
      *
      * @param organization Organization
      * @param ruleset      Ruleset object
-     * @return Ruleset Created object
+     * @return RulesetInfo Created object
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
-    Ruleset createRuleset(String organization, Ruleset ruleset) throws GovernanceException;
+    RulesetInfo createRuleset(String organization, Ruleset ruleset) throws GovernanceException;
 
     /**
      * Get all the Governance Rulesets of the organization
@@ -94,10 +94,10 @@ public interface RulsetMgtDAO {
      * @param organization Organization
      * @param rulesetId    Ruleset ID
      * @param ruleset      Ruleset object
-     * @return Ruleset Updated object
+     * @return RulesetInfo Updated object
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
-    Ruleset updateRuleset(String organization, String rulesetId, Ruleset ruleset)
+    RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset)
             throws GovernanceException;
 
     /**

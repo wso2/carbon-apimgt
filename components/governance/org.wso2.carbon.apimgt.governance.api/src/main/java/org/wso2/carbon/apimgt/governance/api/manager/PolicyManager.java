@@ -19,8 +19,7 @@
 package org.wso2.carbon.apimgt.governance.api.manager;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfo;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfoWithRulesetIds;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 
 /**
@@ -30,13 +29,13 @@ public interface PolicyManager {
     /**
      * Create a new Governance Policy
      *
-     * @param organization                       Organization
-     * @param governancePolicyInfoWithRulesetIds Governance Policy Info with Ruleset Ids
+     * @param organization     Organization
+     * @param governancePolicy Governance Policy
      * @return GovernancePolicyInfo Created object
      * @throws GovernanceException If an error occurs while creating the policy
      */
-    GovernancePolicyInfo createGovernancePolicy(String organization, GovernancePolicyInfoWithRulesetIds
-            governancePolicyInfoWithRulesetIds) throws GovernanceException;
+    GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
+            governancePolicy) throws GovernanceException;
 
     /**
      * Get Governance Policy by Name
@@ -46,7 +45,7 @@ public interface PolicyManager {
      * @return GovernancePolicyInfo
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
-    GovernancePolicyInfo getGovernancePolicyByID(String organization, String policyID) throws GovernanceException;
+    GovernancePolicy getGovernancePolicyByID(String organization, String policyID) throws GovernanceException;
 
     /**
      * Get Governance Policies
@@ -71,13 +70,13 @@ public interface PolicyManager {
      *
      * @param policyId                           Policy ID
      * @param organization                       Organization
-     * @param governancePolicyInfoWithRulesetIds Governance Policy Info with Ruleset Ids
+     * @param governancePolicy Governance Policy Info
      * @return GovernancePolicyInfo Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
-    GovernancePolicyInfo updateGovernancePolicy(String policyId, String organization,
-                                                GovernancePolicyInfoWithRulesetIds
-                                                        governancePolicyInfoWithRulesetIds)
+    GovernancePolicy updateGovernancePolicy(String policyId, String organization,
+                                            GovernancePolicy
+                                                    governancePolicy)
             throws GovernanceException;
 
 }

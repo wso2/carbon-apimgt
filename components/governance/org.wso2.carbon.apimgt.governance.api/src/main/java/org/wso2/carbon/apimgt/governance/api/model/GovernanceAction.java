@@ -18,14 +18,35 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-public class RulesetId {
-    private String id;
+/**
+ * This class represents a governance action
+ */
+public class GovernanceAction {
+    private String state;
+    private String ruleSeverity;
+    private String type;
 
-    public String getId() {
-        return id;
+    public String getState() {
+        return state;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getRuleSeverity() {
+        return ruleSeverity;
+    }
+
+    public void setRuleSeverity(String ruleSeverity) {
+        this.ruleSeverity = ruleSeverity;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

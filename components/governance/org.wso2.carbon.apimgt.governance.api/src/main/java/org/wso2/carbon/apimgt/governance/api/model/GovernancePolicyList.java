@@ -21,9 +21,12 @@ package org.wso2.carbon.apimgt.governance.api.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a list of governance Policies
+ */
 public class GovernancePolicyList {
     private Integer count;
-    private List<GovernancePolicyInfo> governancePolicyList = new ArrayList<>();
+    private List<GovernancePolicy> governancePolicyList = new ArrayList<>();
 
     public Integer getCount() {
         return count;
@@ -33,11 +36,11 @@ public class GovernancePolicyList {
         this.count = count;
     }
 
-    public List<GovernancePolicyInfo> getGovernancePolicyList() {
+    public List<GovernancePolicy> getGovernancePolicyList() {
         return governancePolicyList;
     }
 
-    public void setGovernancePolicyList(List<GovernancePolicyInfo> governancePolicyList) {
+    public void setGovernancePolicyList(List<GovernancePolicy> governancePolicyList) {
         this.governancePolicyList = governancePolicyList;
     }
 }

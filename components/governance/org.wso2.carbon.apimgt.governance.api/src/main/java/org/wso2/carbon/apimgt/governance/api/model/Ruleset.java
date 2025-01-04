@@ -24,18 +24,16 @@ package org.wso2.carbon.apimgt.governance.api.model;
 public class Ruleset {
     private String id;
     private String name;
-    private String message;
     private String description;
     private String rulesetContent;
     private String appliesTo;
+    private String artifactType;
     private String documentationLink;
     private String provider;
     private String createdBy;
     private String createdTime;
     private String updatedBy;
     private String updatedTime;
-
-    private int isDefault;
 
     public String getId() {
         return id;
@@ -51,14 +49,6 @@ public class Ruleset {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public String getDescription() {
@@ -83,6 +73,14 @@ public class Ruleset {
 
     public void setAppliesTo(String appliesTo) {
         this.appliesTo = appliesTo;
+    }
+
+    public String getArtifactType() {
+        return artifactType;
+    }
+
+    public void setArtifactType(String artifactType) {
+        this.artifactType = artifactType;
     }
 
     public String getDocumentationLink() {
@@ -131,14 +129,6 @@ public class Ruleset {
 
     public void setUpdatedTime(String updatedTime) {
         this.updatedTime = updatedTime;
-    }
-
-    public int isDefault() {
-        return isDefault;
-    }
-
-    public void setIsDefault(int isDefault) {
-        this.isDefault = isDefault;
     }
 }
 

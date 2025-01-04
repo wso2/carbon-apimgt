@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class represents the Ruleset Mapping Utility
@@ -46,6 +47,7 @@ public class RulesetMappingUtil {
         ruleset.setDescription(rulesetDTO.getDescription());
         ruleset.setRulesetContent(rulesetDTO.getRulesetContent());
         ruleset.setAppliesTo(String.valueOf(rulesetDTO.getAppliesTo()));
+        ruleset.setArtifactType(String.valueOf(rulesetDTO.getArtifactType()));
         ruleset.setDocumentationLink(rulesetDTO.getDocumentationLink());
         ruleset.setProvider(rulesetDTO.getProvider());
         ruleset.setCreatedBy(rulesetDTO.getCreatedBy());
@@ -69,13 +71,14 @@ public class RulesetMappingUtil {
         rulesetDTO.setRulesetContent(createdRuleset.getRulesetContent());
         rulesetDTO.setAppliesTo(RulesetDTO.AppliesToEnum.
                 fromValue(createdRuleset.getAppliesTo()));
+        rulesetDTO.setArtifactType(RulesetDTO.ArtifactTypeEnum
+                .fromValue(createdRuleset.getArtifactType()));
         rulesetDTO.setDocumentationLink(createdRuleset.getDocumentationLink());
         rulesetDTO.setProvider(createdRuleset.getProvider());
         rulesetDTO.setCreatedBy(createdRuleset.getCreatedBy());
         rulesetDTO.setCreatedTime(createdRuleset.getCreatedTime());
         rulesetDTO.setUpdatedBy(createdRuleset.getUpdatedBy());
         rulesetDTO.setUpdatedTime(createdRuleset.getUpdatedTime());
-        rulesetDTO.setIsDefault(createdRuleset.isDefault() == 1);
         return rulesetDTO;
     }
 
@@ -92,13 +95,14 @@ public class RulesetMappingUtil {
         rulesetInfoDTO.setDescription(rulesetInfo.getDescription());
         rulesetInfoDTO.setAppliesTo(RulesetInfoDTO.
                 AppliesToEnum.fromValue(rulesetInfo.getAppliesTo()));
+        rulesetInfoDTO.setArtifactType(RulesetInfoDTO.
+                ArtifactTypeEnum.fromValue(rulesetInfo.getArtifactType()));
         rulesetInfoDTO.setDocumentationLink(rulesetInfo.getDocumentationLink());
         rulesetInfoDTO.setProvider(rulesetInfo.getProvider());
         rulesetInfoDTO.setCreatedBy(rulesetInfo.getCreatedBy());
         rulesetInfoDTO.setCreatedTime(rulesetInfo.getCreatedTime());
         rulesetInfoDTO.setUpdatedBy(rulesetInfo.getUpdatedBy());
         rulesetInfoDTO.setUpdatedTime(rulesetInfo.getUpdatedTime());
-        rulesetInfoDTO.setIsDefault(rulesetInfo.isDefault() == 1);
         return rulesetInfoDTO;
     }
 

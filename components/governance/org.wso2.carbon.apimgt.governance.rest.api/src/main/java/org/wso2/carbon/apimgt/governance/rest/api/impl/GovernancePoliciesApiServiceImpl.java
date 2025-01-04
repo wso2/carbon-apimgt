@@ -23,15 +23,13 @@ import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.manager.PolicyManager;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfo;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfoWithRulesetIds;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyInfoDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyInfoWithRulesetIdsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.PolicyMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
@@ -49,41 +47,41 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
     /**
      * Create a new Governance Policy
      *
-     * @param governancePolicyInfoWithRulesetIdsDTO Governance Policy Info with Ruleset Ids
-     * @param messageContext                        Message Context
+     * @param governancePolicyDTO Governance Policy  with Ruleset Ids
+     * @param messageContext      Message Context
      * @return Response
      * @throws GovernanceException If an error occurs while creating the policy
      */
-    public Response createGovernancePolicy(GovernancePolicyInfoWithRulesetIdsDTO governancePolicyInfoWithRulesetIdsDTO,
+    public Response createGovernancePolicy(GovernancePolicyDTO governancePolicyDTO,
                                            MessageContext messageContext) throws GovernanceException {
 
-        GovernancePolicyInfoDTO createdPolicyInfoDTO;
+        GovernancePolicyDTO createdPolicyDTO;
         URI createdPolicyURI;
 
         try {
             PolicyManager policyManager = new PolicyManagerImpl();
-            GovernancePolicyInfoWithRulesetIds governancePolicyInfoWithRulesetIds =
-                    PolicyMappingUtil.fromDTOtoGovernancePolicyInfoWithRulesetIds(governancePolicyInfoWithRulesetIdsDTO);
+            GovernancePolicy governancePolicy =
+                    PolicyMappingUtil.fromDTOtoGovernancePolicy(governancePolicyDTO);
 
             String username = GovernanceAPIUtil.getLoggedInUsername();
             String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-            governancePolicyInfoWithRulesetIds.setCreatedBy(username);
-            GovernancePolicyInfo governancePolicyInfo = policyManager.createGovernancePolicy(organization,
-                    governancePolicyInfoWithRulesetIds);
+            governancePolicy.setCreatedBy(username);
+            governancePolicy = policyManager.createGovernancePolicy(organization,
+                    governancePolicy);
 
             // TODO: Assess compliance for APIs
-            createdPolicyInfoDTO = PolicyMappingUtil.
-                    fromGovernancePolicyInfoToGovernancePolicyInfoDTO(governancePolicyInfo);
+            createdPolicyDTO = PolicyMappingUtil.
+                    fromGovernancePolicyToGovernancePolicyDTO(governancePolicy);
             createdPolicyURI = new URI(
-                    GovernanceAPIConstants.POLICY_PATH + "/" + createdPolicyInfoDTO.getId());
+                    GovernanceAPIConstants.POLICY_PATH + "/" + createdPolicyDTO.getId());
 
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Governance Policy %s",
-                    governancePolicyInfoWithRulesetIdsDTO.getName());
+                    governancePolicyDTO.getName());
             throw new GovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
         }
-        return Response.created(createdPolicyURI).entity(createdPolicyInfoDTO).build();
+        return Response.created(createdPolicyURI).entity(createdPolicyDTO).build();
     }
 
     /**
@@ -98,9 +96,9 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
         PolicyManager policyManager = new PolicyManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        GovernancePolicyInfo policyInfo = policyManager.getGovernancePolicyByID(organization, policyId);
-        GovernancePolicyInfoDTO policyInfoDTO = PolicyMappingUtil.fromGovernancePolicyInfoToGovernancePolicyInfoDTO(policyInfo);
-        return Response.status(Response.Status.OK).entity(policyInfoDTO).build();
+        GovernancePolicy policy = policyManager.getGovernancePolicyByID(organization, policyId);
+        GovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
+        return Response.status(Response.Status.OK).entity(policyDTO).build();
     }
 
     /**
@@ -139,31 +137,31 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
     /**
      * Update a Governance Policy
      *
-     * @param policyId                              Policy ID
-     * @param governancePolicyInfoWithRulesetIdsDTO Governance Policy Info with Ruleset Ids
-     * @param messageContext                        Message Context
+     * @param policyId            Policy ID
+     * @param governancePolicyDTO Governance Policy  with Ruleset Ids
+     * @param messageContext      Message Context
      * @return Response
      * @throws GovernanceException If an error occurs while updating the policy
      */
-    public Response updateGovernancePolicyById(String policyId, GovernancePolicyInfoWithRulesetIdsDTO
-            governancePolicyInfoWithRulesetIdsDTO, MessageContext messageContext) throws GovernanceException {
+    public Response updateGovernancePolicyById(String policyId, GovernancePolicyDTO
+            governancePolicyDTO, MessageContext messageContext) throws GovernanceException {
         PolicyManager policyManager = new PolicyManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
         String username = GovernanceAPIUtil.getLoggedInUsername();
 
-        GovernancePolicyInfoWithRulesetIds governancePolicyInfoWithRulesetIds =
+        GovernancePolicy governancePolicy =
                 PolicyMappingUtil.
-                        fromDTOtoGovernancePolicyInfoWithRulesetIds(governancePolicyInfoWithRulesetIdsDTO);
+                        fromDTOtoGovernancePolicy(governancePolicyDTO);
 
-        governancePolicyInfoWithRulesetIds.setUpdatedBy(username);
-        GovernancePolicyInfo updatedPolicyInfo = policyManager.updateGovernancePolicy
-                (policyId, organization, governancePolicyInfoWithRulesetIds);
+        governancePolicy.setUpdatedBy(username);
+        GovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
+                (policyId, organization, governancePolicy);
 
-        GovernancePolicyInfoDTO updatedPolicyInfoDTO = PolicyMappingUtil.
-                fromGovernancePolicyInfoToGovernancePolicyInfoDTO(updatedPolicyInfo);
+        GovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
+                fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
 
         //TODO: Access Compliance of existing components
-        
-        return Response.status(Response.Status.OK).entity(updatedPolicyInfoDTO).build();
+
+        return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
     }
 }

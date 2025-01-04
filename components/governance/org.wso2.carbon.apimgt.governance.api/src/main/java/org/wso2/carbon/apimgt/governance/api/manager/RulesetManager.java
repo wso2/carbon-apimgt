@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 
+import java.util.List;
+
 /**
  * This interface represents the Governance Ruleset Manager
  */
@@ -33,10 +35,10 @@ public interface RulesetManager {
      *
      * @param organization Organization
      * @param ruleset      Ruleset object
-     * @return Ruleset Created object
+     * @return RulesetInfo Created object
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
-    Ruleset createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException;
+    RulesetInfo createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException;
 
     /**
      * Get all the Governance Rulesets
@@ -83,8 +85,17 @@ public interface RulesetManager {
      * @param organization Organization
      * @param rulesetId    Ruleset ID
      * @param ruleset      Ruleset object
-     * @return Ruleset Updated object
+     * @return RulesetInfo Updated object
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
-    Ruleset updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException;
+    RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException;
+
+    /**
+     * Get the policies using the Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @return List of policies using the ruleset
+     * @throws GovernanceException If an error occurs while getting the ruleset usage
+     */
+    List<String> getRulesetUsage(String rulesetId) throws GovernanceException;
 }

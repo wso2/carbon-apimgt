@@ -19,8 +19,7 @@
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfo;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyInfoWithRulesetIds;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 
 /**
@@ -31,33 +30,33 @@ public interface GovernancePolicyMgtDAO {
     /**
      * Create a new Governance Policy
      *
-     * @param organization                       Organization
-     * @param governancePolicyInfoWithRulesetIds Governance Policy Info with Ruleset Ids
-     * @return GovernancePolicyInfo Created object
+     * @param organization     Organization
+     * @param governancePolicy Governance Policy
+     * @return GovernancePolicy Created object
      */
-    GovernancePolicyInfo createGovernancePolicy(String organization,
-                                                GovernancePolicyInfoWithRulesetIds
-                                                        governancePolicyInfoWithRulesetIds) throws GovernanceException;
+    GovernancePolicy createGovernancePolicy(String organization,
+                                            GovernancePolicy
+                                                    governancePolicy) throws GovernanceException;
 
     /**
      * Get Governance Policy by Name
      *
      * @param organization Organization
      * @param policyName   Policy Name
-     * @return GovernancePolicyInfo
+     * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
-    GovernancePolicyInfo getGovernancePolicyByName(String organization, String policyName) throws GovernanceException;
+    GovernancePolicy getGovernancePolicyByName(String organization, String policyName) throws GovernanceException;
 
     /**
      * Get Governance Policy by ID
      *
      * @param organization Organization
      * @param policyID     Policy ID
-     * @return GovernancePolicyInfo
+     * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
-    GovernancePolicyInfo getGovernancePolicyByID(String organization, String policyID) throws GovernanceException;
+    GovernancePolicy getGovernancePolicyByID(String organization, String policyID) throws GovernanceException;
 
     /**
      * Get all the Governance Policies
@@ -80,15 +79,15 @@ public interface GovernancePolicyMgtDAO {
     /**
      * Update a Governance Policy
      *
-     * @param policyId                           Policy ID
-     * @param organization                       Organization
-     * @param governancePolicyInfoWithRulesetIds Governance Policy Info with Ruleset Ids
-     * @return GovernancePolicyInfo Updated object
+     * @param policyId         Policy ID
+     * @param organization     Organization
+     * @param governancePolicy Governance Policy
+     * @return GovernancePolicy Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
-    GovernancePolicyInfo updateGovernancePolicy(String policyId, String organization,
-                                                GovernancePolicyInfoWithRulesetIds
-                                                        governancePolicyInfoWithRulesetIds)
+    GovernancePolicy updateGovernancePolicy(String policyId, String organization,
+                                            GovernancePolicy
+                                                    governancePolicy)
             throws GovernanceException;
 }
 

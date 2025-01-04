@@ -18,15 +18,19 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class GovernancePolicyInfoWithRulesetIds {
+/**
+ * This class represents a governance Policy
+ */
+public class GovernancePolicy {
     private String id;
     private String name;
     private String description;
-    private List<RulesetId> rulesets = new ArrayList<>();
-    private List<String> labels = new ArrayList<>();
+    private List<String> rulesetIds;
+    private List<String> labels;
+    private List<String> linkedStates;
+    private List<GovernanceAction> actions;
     private String createdBy;
     private String createdTime;
     private String updatedBy;
@@ -56,21 +60,36 @@ public class GovernancePolicyInfoWithRulesetIds {
         this.description = description;
     }
 
-    public List<RulesetId> getRulesets() {
-        return rulesets;
+    public List<String> getRulesetIds() {
+        return rulesetIds;
     }
 
-    public void addRuleset(RulesetId ruleset) {
-        this.rulesets.add(ruleset);
+    public void setRulesetIds(List<String> rulesetIds) {
+        this.rulesetIds = rulesetIds;
     }
-
 
     public List<String> getLabels() {
         return labels;
     }
 
-    public void addLabel(String label) {
-        this.labels.add(label);
+    public void setLabels(List<String> labels) {
+        this.labels = labels;
+    }
+
+    public List<String> getLinkedStates() {
+        return linkedStates;
+    }
+
+    public void setLinkedStates(List<String> linkedStates) {
+        this.linkedStates = linkedStates;
+    }
+
+    public List<GovernanceAction> getActions() {
+        return actions;
+    }
+
+    public void setActions(List<GovernanceAction> actions) {
+        this.actions = actions;
     }
 
     public String getCreatedBy() {

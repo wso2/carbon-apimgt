@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 
 /**
@@ -56,7 +57,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     public Response createRuleset(RulesetDTO rulesetDTO, MessageContext messageContext)
             throws GovernanceException {
 
-        RulesetDTO createdRulesetDTO;
+        RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
         try {
             String username = GovernanceAPIUtil.getLoggedInUsername();
@@ -66,9 +67,9 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             ruleset.setCreatedBy(username);
 
             RulesetManager rulesetManager = new RulesetManagerImpl();
-            Ruleset createdRuleset = rulesetManager.createNewRuleset(organization, ruleset);
+            RulesetInfo createdRuleset = rulesetManager.createNewRuleset(organization, ruleset);
 
-            createdRulesetDTO = RulesetMappingUtil.fromRulsetToRulesetDTO(createdRuleset);
+            createdRulesetDTO = RulesetMappingUtil.fromRulesetInfoToRulesetInfoDTO(createdRuleset);
             createdRulesetURI = new URI(
                     GovernanceAPIConstants.RULSET_PATH + "/" + createdRulesetDTO.getId());
             return Response.created(createdRulesetURI).entity(createdRulesetDTO).build();
@@ -94,7 +95,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         rulesetManager.deleteRuleset(organization, rulesetId);
-        return Response.status(Response.Status.OK).build();
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     /**
@@ -137,6 +138,21 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     }
 
     /**
+     * Get the list of policies using the Ruleset
+     *
+     * @param rulesetId      Ruleset ID
+     * @param messageContext MessageContext
+     * @return Response object
+     * @throws GovernanceException If an error occurs while getting the ruleset usage
+     */
+    @Override
+    public Response getRulesetUsage(String rulesetId, MessageContext messageContext) throws GovernanceException {
+        RulesetManager rulesetManager = new RulesetManagerImpl();
+        List<String> policies = rulesetManager.getRulesetUsage(rulesetId);
+        return Response.status(Response.Status.OK).entity(policies).build();
+    }
+
+    /**
      * Get all the Governance Rulesets
      *
      * @param messageContext MessageContext
@@ -172,9 +188,9 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         ruleset.setId(rulesetId);
 
         RulesetManager rulesetManager = new RulesetManagerImpl();
-        ruleset = rulesetManager.updateRuleset(organization, rulesetId, ruleset);
-        // TODO: Handle policy , ruleset compliance assessment as in Choreo
+        RulesetInfo updatedRuleset = rulesetManager.updateRuleset(organization, rulesetId, ruleset);
+        // TODO: Retrigger Policy Validation
         return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
-                fromRulsetToRulesetDTO(ruleset)).build();
+                fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
     }
 }
