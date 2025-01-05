@@ -28,6 +28,6 @@ public interface RulesetsApiService {
       public Response getRulesetById(String rulesetId, MessageContext messageContext) throws GovernanceException;
       public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException;
       public Response getRulesetUsage(String rulesetId, MessageContext messageContext) throws GovernanceException;
-      public Response getRulesets(MessageContext messageContext) throws GovernanceException;
+      public Response getRulesets(Integer limit, Integer offset, MessageContext messageContext) throws GovernanceException;
       public Response updateRulesetById(String rulesetId, RulesetDTO rulesetDTO, MessageContext messageContext) throws GovernanceException;
 }

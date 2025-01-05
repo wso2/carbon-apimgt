@@ -52,7 +52,7 @@ PolicyGovernanceResultsApiService delegate = new PolicyGovernanceResultsApiServi
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernanceResultsByPolicyId(@ApiParam(value = "The unique identifier of the governance policy.",required=true) @PathParam("policyId") String policyId) throws GovernanceException{
+    public Response getGovernanceResultsByPolicyId(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws GovernanceException{
         return delegate.getGovernanceResultsByPolicyId(policyId, securityContext);
     }
 
@@ -71,7 +71,7 @@ PolicyGovernanceResultsApiService delegate = new PolicyGovernanceResultsApiServi
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernanceResultsForAllPolicies() throws GovernanceException{
-        return delegate.getGovernanceResultsForAllPolicies(securityContext);
+    public Response getGovernanceResultsForAllPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
+        return delegate.getGovernanceResultsForAllPolicies(limit, offset, securityContext);
     }
 }

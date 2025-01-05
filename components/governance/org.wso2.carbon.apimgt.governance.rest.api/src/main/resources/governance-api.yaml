@@ -31,15 +31,17 @@ servers:
   - url: https://apis.wso2.com/api/am/governance/v0
 tags:
   - name: Rulesets
-    description: API for managing rulesets.
+    description: for managing rulesets.
   - name: Governance Policies
-    description: API for managing governance policies.
+    description: for managing governance policies.
+  - name: Governance Validation
+    description: for validating governance compliance.
   - name: Governance Results
-    description: API for accessing governance results.
+    description: for accessing governance results.
   - name: Health Check
-    description: API for health check.
+    description: for health check.
   - name: Deprecated
-    description: API resources that are deprecated.
+    description: resources that are deprecated.
 paths:
   /rulesets:
     get:
@@ -48,6 +50,9 @@ paths:
       operationId: getRulesets
       tags:
         - Rulesets
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       responses:
         "200":
           description: OK. Successful response with a list of rulesets.
@@ -137,12 +142,7 @@ paths:
       tags:
         - Rulesets
       parameters:
-        - name: rulesetId
-          in: path
-          required: true
-          description: UUID of the ruleset.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/rulesetId'
       responses:
         "200":
           description: OK. Ruleset details retrieved successfully.
@@ -184,12 +184,7 @@ paths:
       tags:
         - Rulesets
       parameters:
-        - name: rulesetId
-          in: path
-          required: true
-          description: UUID of the ruleset.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/rulesetId'
       requestBody:
         required: true
         description: JSON object containing the updated ruleset details.
@@ -238,12 +233,7 @@ paths:
       tags:
         - Rulesets
       parameters:
-        - name: rulesetId
-          in: path
-          required: true
-          description: UUID of the ruleset.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/rulesetId'
       responses:
         '204':
           description: OK. Ruleset deleted successfully.
@@ -282,12 +272,7 @@ paths:
       tags:
         - Rulesets
       parameters:
-        - name: rulesetId
-          in: path
-          required: true
-          description: UUID of the ruleset.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/rulesetId'
       responses:
         "200":
           description: OK. Ruleset content retrieved successfully.
@@ -330,12 +315,7 @@ paths:
       tags:
         - Rulesets
       parameters:
-        - name: rulesetId
-          in: path
-          required: true
-          description: UUID of the ruleset.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/rulesetId'
       responses:
         "200":
           description: OK. Ruleset usage retrieved successfully.
@@ -411,6 +391,9 @@ paths:
       operationId: getGovernancePolicies
       tags:
         - Governance Policies
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       responses:
         "200":
           description: OK. Successful response with a list of governance policies.
@@ -500,12 +483,7 @@ paths:
       tags:
         - Governance Policies
       parameters:
-        - name: policyId
-          in: path
-          required: true
-          description: UUID of the governance policy.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/policyId'
       responses:
         "200":
           description: OK. Governance policy details retrieved successfully.
@@ -547,12 +525,7 @@ paths:
       tags:
         - Governance Policies
       parameters:
-        - name: policyId
-          in: path
-          required: true
-          description: UUID of the governance policy.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/policyId'
       requestBody:
         required: true
         description: JSON object containing the updated governance policy details.
@@ -601,12 +574,7 @@ paths:
       tags:
         - Governance Policies
       parameters:
-        - name: policyId
-          in: path
-          required: true
-          description: UUID of the governance policy.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/policyId'
       responses:
         '204':
           description: OK. Governance policy deleted successfully.
@@ -637,11 +605,64 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
+  /validate:
+    post:
+      summary: Validate governance compliance
+      description: Validates the compliance of an artifact with the governance policies.
+      operationId: validateGovernanceCompliance
+      tags:
+        - Governance Validation
+      requestBody:
+        required: true
+        description: JSON object containing the details of the artifact to be checked.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GovernanceValidationRequest'
+      responses:
+        "200":
+          description: OK. Governance check successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtifactGovernanceResult'
+        "204":
+          description: No Content. No governance check triggered in the background.
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_validation
   /artifact-governance-results:
     get:
       summary: Retrieves governance results of all artifacts
       description: Retrieves governance results of all artifacts in the organization.
       operationId: getGovernanceResultsForAllArtifacts
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       tags:
         - Governance Results
       responses:
@@ -686,12 +707,7 @@ paths:
       tags:
         - Governance Results
       parameters:
-        - name: artifactId
-          in: path
-          required: true
-          description: The unique identifier of the artifact/api.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/artifactId'
       responses:
         "200":
           description: Successful response with governance results for the specified artifact.
@@ -731,6 +747,9 @@ paths:
       summary: Retrieve governance results for all policies
       description: Retrieve governance results of all governance policies within the organization.
       operationId: getGovernanceResultsForAllPolicies
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       tags:
         - Governance Results
       responses:
@@ -775,12 +794,7 @@ paths:
       tags:
         - Governance Results
       parameters:
-        - name: policyId
-          in: path
-          required: true
-          description: The unique identifier of the governance policy.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/policyId'
       responses:
         "200":
           description: Successful response with governance results for the specified policy.
@@ -818,6 +832,29 @@ paths:
 
 components:
   schemas:
+    Pagination:
+      title: Pagination
+      type: object
+      properties:
+        offset:
+          type: integer
+          example: 0
+        limit:
+          type: integer
+          example: 1
+        total:
+          type: integer
+          example: 10
+        next:
+          type: string
+          description: |
+            Link to the next subset of resources qualified.
+            Empty if no more resources are to be returned.
+        previous:
+          type: string
+          description: |
+            Link to the previous subset of resources qualified.
+            Empty if current subset is the first subset returned.
     Error:
       title: Error object returned with 4XX HTTP Status
       required:
@@ -853,6 +890,8 @@ components:
           description: List of rulesets.
           items:
             $ref: '#/components/schemas/RulesetInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     Ruleset:
       type: object
       description: Detailed information about a ruleset.
@@ -1137,28 +1176,54 @@ components:
           description: List of governance policies.
           items:
             $ref: '#/components/schemas/GovernancePolicy'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    ArtifactGovernanceResultList:
+      type: object
+      description: A list of artifact governance results.
+      properties:
+        count:
+          type: integer
+          description: Number of artifact governance results returned.
+          example: 10
+        list:
+          type: array
+          description: List of artifact governance results.
+          items:
+            $ref: '#/components/schemas/ArtifactGovernanceResultInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     ArtifactGovernanceResults:
       type: object
       description: Governance results of all artifacts of an organization.
       properties:
-        artifactGovernanceSummary:
+        summary:
           $ref: '#/components/schemas/GovernanceSummaryForArtifacts'
-        artifactGovernanceResults:
+        results:
+          $ref: '#/components/schemas/ArtifactGovernanceResultList'
+    PolicyGovernanceResultList:
+      type: object
+      description: A list of policy governance results.
+      properties:
+        count:
+          type: integer
+          description: Number of policy governance results returned.
+          example: 10
+        list:
           type: array
-          description: Governance results for a list of artifacts.
+          description: List of policy governance results.
           items:
-            $ref: '#/components/schemas/ArtifactGovernanceResultInfo'
+            $ref: '#/components/schemas/PolicyGovernanceResultInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     PolicyGovernanceResults:
       type: object
       description: Governance results of all policies of an organization.
       properties:
-        policyGovernanceSummary:
+        summary:
           $ref: '#/components/schemas/GovernanceSummaryForPolicies'
-        policyGovernanceResults:
-          type: array
-          description: Governance results for a list of policies.
-          items:
-            $ref: '#/components/schemas/PolicyGovernanceResultInfo'
+        results:
+          $ref: '#/components/schemas/PolicyGovernanceResultList'
     GovernanceSummaryForPolicies:
       type: object
       description: Summary of governance policy compliance.
@@ -1372,6 +1437,23 @@ components:
           type: string
           description: Message to be displayed when the rule is violated.
           example: "API name can not be too long or short"
+    GovernanceValidationRequest:
+      type: object
+      description: Request object for governance compliance validation.
+      properties:
+        artifactId:
+          type: string
+          description: UUID of the artifact.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        artifactType:
+          type: string
+          description: Type of the artifact.
+          enum:
+            - REST_API
+            - SOAP_API
+            - GRAPHQL_API
+            - ASYNC_API
+          example: REST_API
   #####
   # TODO: Fix scope validation logic. Currently scope validation is broken due to logic in apimgt.rest.api.common.RestAPICommonUtil
   #####
@@ -1387,4 +1469,46 @@ components:
             apim:gov_rule_manage: Manage governance rulesets
             apim:gov_policy_read: Read governance policies
             apim:gov_policy_manage: Manage governance policies
+            apim:gov_validation: Validate governance policies
             apim:gov_result_read: Read governance results
+  parameters:
+    artifactId:
+      name: artifactId
+      in: path
+      description: |
+        **UUID** of the Artifact.
+      required: true
+      schema:
+        type: string
+    rulesetId:
+      name: rulesetId
+      in: path
+      description: |
+        **UUID** of the Ruleset.
+      required: true
+      schema:
+        type: string
+    policyId:
+      name: policyId
+      in: path
+      description: |
+        **UUID** of the Policy.
+      required: true
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: |
+        Maximum size of resource array to return.
+      schema:
+        type: integer
+        default: 25
+    offset:
+      name: offset
+      in: query
+      description: |
+        Starting point within the complete list of items qualified.
+      schema:
+        type: integer
+        default: 0

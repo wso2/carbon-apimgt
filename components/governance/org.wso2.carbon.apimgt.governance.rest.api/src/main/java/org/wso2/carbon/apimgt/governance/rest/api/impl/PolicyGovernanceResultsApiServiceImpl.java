@@ -30,7 +30,7 @@ public class PolicyGovernanceResultsApiServiceImpl implements PolicyGovernanceRe
         return Response.status(status).entity(errorObject).build();
     }
 
-    public Response getGovernanceResultsForAllPolicies(MessageContext messageContext) {
+    public Response getGovernanceResultsForAllPolicies(Integer limit, Integer offset, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactGovernanceResultInfoDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactGovernanceResultListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernanceSummaryForArtifactsDTO;
 import javax.validation.constraints.*;
 
@@ -27,44 +25,43 @@ import javax.validation.Valid;
 
 public class ArtifactGovernanceResultsDTO   {
   
-    private GovernanceSummaryForArtifactsDTO artifactGovernanceSummary = null;
-    private List<ArtifactGovernanceResultInfoDTO> artifactGovernanceResults = new ArrayList<ArtifactGovernanceResultInfoDTO>();
+    private GovernanceSummaryForArtifactsDTO summary = null;
+    private ArtifactGovernanceResultListDTO results = null;
 
   /**
    **/
-  public ArtifactGovernanceResultsDTO artifactGovernanceSummary(GovernanceSummaryForArtifactsDTO artifactGovernanceSummary) {
-    this.artifactGovernanceSummary = artifactGovernanceSummary;
+  public ArtifactGovernanceResultsDTO summary(GovernanceSummaryForArtifactsDTO summary) {
+    this.summary = summary;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("artifactGovernanceSummary")
-  public GovernanceSummaryForArtifactsDTO getArtifactGovernanceSummary() {
-    return artifactGovernanceSummary;
+  @JsonProperty("summary")
+  public GovernanceSummaryForArtifactsDTO getSummary() {
+    return summary;
   }
-  public void setArtifactGovernanceSummary(GovernanceSummaryForArtifactsDTO artifactGovernanceSummary) {
-    this.artifactGovernanceSummary = artifactGovernanceSummary;
+  public void setSummary(GovernanceSummaryForArtifactsDTO summary) {
+    this.summary = summary;
   }
 
   /**
-   * Governance results for a list of artifacts.
    **/
-  public ArtifactGovernanceResultsDTO artifactGovernanceResults(List<ArtifactGovernanceResultInfoDTO> artifactGovernanceResults) {
-    this.artifactGovernanceResults = artifactGovernanceResults;
+  public ArtifactGovernanceResultsDTO results(ArtifactGovernanceResultListDTO results) {
+    this.results = results;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Governance results for a list of artifacts.")
+  @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("artifactGovernanceResults")
-  public List<ArtifactGovernanceResultInfoDTO> getArtifactGovernanceResults() {
-    return artifactGovernanceResults;
+  @JsonProperty("results")
+  public ArtifactGovernanceResultListDTO getResults() {
+    return results;
   }
-  public void setArtifactGovernanceResults(List<ArtifactGovernanceResultInfoDTO> artifactGovernanceResults) {
-    this.artifactGovernanceResults = artifactGovernanceResults;
+  public void setResults(ArtifactGovernanceResultListDTO results) {
+    this.results = results;
   }
 
 
@@ -77,13 +74,13 @@ public class ArtifactGovernanceResultsDTO   {
       return false;
     }
     ArtifactGovernanceResultsDTO artifactGovernanceResults = (ArtifactGovernanceResultsDTO) o;
-    return Objects.equals(artifactGovernanceSummary, artifactGovernanceResults.artifactGovernanceSummary) &&
-        Objects.equals(artifactGovernanceResults, artifactGovernanceResults.artifactGovernanceResults);
+    return Objects.equals(summary, artifactGovernanceResults.summary) &&
+        Objects.equals(results, artifactGovernanceResults.results);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifactGovernanceSummary, artifactGovernanceResults);
+    return Objects.hash(summary, results);
   }
 
   @Override
@@ -91,8 +88,8 @@ public class ArtifactGovernanceResultsDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ArtifactGovernanceResultsDTO {\n");
     
-    sb.append("    artifactGovernanceSummary: ").append(toIndentedString(artifactGovernanceSummary)).append("\n");
-    sb.append("    artifactGovernanceResults: ").append(toIndentedString(artifactGovernanceResults)).append("\n");
+    sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
+    sb.append("    results: ").append(toIndentedString(results)).append("\n");
     sb.append("}");
     return sb.toString();
   }

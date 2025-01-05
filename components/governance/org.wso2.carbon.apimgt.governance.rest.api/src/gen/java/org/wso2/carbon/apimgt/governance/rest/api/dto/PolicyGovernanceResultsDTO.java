@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernanceSummaryForPoliciesDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultInfoDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultListDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -27,44 +25,43 @@ import javax.validation.Valid;
 
 public class PolicyGovernanceResultsDTO   {
   
-    private GovernanceSummaryForPoliciesDTO policyGovernanceSummary = null;
-    private List<PolicyGovernanceResultInfoDTO> policyGovernanceResults = new ArrayList<PolicyGovernanceResultInfoDTO>();
+    private GovernanceSummaryForPoliciesDTO summary = null;
+    private PolicyGovernanceResultListDTO results = null;
 
   /**
    **/
-  public PolicyGovernanceResultsDTO policyGovernanceSummary(GovernanceSummaryForPoliciesDTO policyGovernanceSummary) {
-    this.policyGovernanceSummary = policyGovernanceSummary;
+  public PolicyGovernanceResultsDTO summary(GovernanceSummaryForPoliciesDTO summary) {
+    this.summary = summary;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("policyGovernanceSummary")
-  public GovernanceSummaryForPoliciesDTO getPolicyGovernanceSummary() {
-    return policyGovernanceSummary;
+  @JsonProperty("summary")
+  public GovernanceSummaryForPoliciesDTO getSummary() {
+    return summary;
   }
-  public void setPolicyGovernanceSummary(GovernanceSummaryForPoliciesDTO policyGovernanceSummary) {
-    this.policyGovernanceSummary = policyGovernanceSummary;
+  public void setSummary(GovernanceSummaryForPoliciesDTO summary) {
+    this.summary = summary;
   }
 
   /**
-   * Governance results for a list of policies.
    **/
-  public PolicyGovernanceResultsDTO policyGovernanceResults(List<PolicyGovernanceResultInfoDTO> policyGovernanceResults) {
-    this.policyGovernanceResults = policyGovernanceResults;
+  public PolicyGovernanceResultsDTO results(PolicyGovernanceResultListDTO results) {
+    this.results = results;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Governance results for a list of policies.")
+  @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("policyGovernanceResults")
-  public List<PolicyGovernanceResultInfoDTO> getPolicyGovernanceResults() {
-    return policyGovernanceResults;
+  @JsonProperty("results")
+  public PolicyGovernanceResultListDTO getResults() {
+    return results;
   }
-  public void setPolicyGovernanceResults(List<PolicyGovernanceResultInfoDTO> policyGovernanceResults) {
-    this.policyGovernanceResults = policyGovernanceResults;
+  public void setResults(PolicyGovernanceResultListDTO results) {
+    this.results = results;
   }
 
 
@@ -77,13 +74,13 @@ public class PolicyGovernanceResultsDTO   {
       return false;
     }
     PolicyGovernanceResultsDTO policyGovernanceResults = (PolicyGovernanceResultsDTO) o;
-    return Objects.equals(policyGovernanceSummary, policyGovernanceResults.policyGovernanceSummary) &&
-        Objects.equals(policyGovernanceResults, policyGovernanceResults.policyGovernanceResults);
+    return Objects.equals(summary, policyGovernanceResults.summary) &&
+        Objects.equals(results, policyGovernanceResults.results);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyGovernanceSummary, policyGovernanceResults);
+    return Objects.hash(summary, results);
   }
 
   @Override
@@ -91,8 +88,8 @@ public class PolicyGovernanceResultsDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class PolicyGovernanceResultsDTO {\n");
     
-    sb.append("    policyGovernanceSummary: ").append(toIndentedString(policyGovernanceSummary)).append("\n");
-    sb.append("    policyGovernanceResults: ").append(toIndentedString(policyGovernanceResults)).append("\n");
+    sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
+    sb.append("    results: ").append(toIndentedString(results)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -72,7 +72,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response deleteRuleset(@ApiParam(value = "UUID of the ruleset.",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+    public Response deleteRuleset(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
         return delegate.deleteRuleset(rulesetId, securityContext);
     }
 
@@ -91,7 +91,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesetById(@ApiParam(value = "UUID of the ruleset.",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+    public Response getRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
         return delegate.getRulesetById(rulesetId, securityContext);
     }
 
@@ -110,7 +110,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesetContent(@ApiParam(value = "UUID of the ruleset.",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+    public Response getRulesetContent(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
         return delegate.getRulesetContent(rulesetId, securityContext);
     }
 
@@ -129,7 +129,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesetUsage(@ApiParam(value = "UUID of the ruleset.",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+    public Response getRulesetUsage(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
         return delegate.getRulesetUsage(rulesetId, securityContext);
     }
 
@@ -148,8 +148,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesets() throws GovernanceException{
-        return delegate.getRulesets(securityContext);
+    public Response getRulesets( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
+        return delegate.getRulesets(limit, offset, securityContext);
     }
 
     @PUT
@@ -167,7 +167,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response updateRulesetById(@ApiParam(value = "UUID of the ruleset.",required=true) @PathParam("rulesetId") String rulesetId, @ApiParam(value = "JSON object containing the updated ruleset details." ,required=true) RulesetDTO rulesetDTO) throws GovernanceException{
+    public Response updateRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId, @ApiParam(value = "JSON object containing the updated ruleset details." ,required=true) RulesetDTO rulesetDTO) throws GovernanceException{
         return delegate.updateRulesetById(rulesetId, rulesetDTO, securityContext);
     }
 }

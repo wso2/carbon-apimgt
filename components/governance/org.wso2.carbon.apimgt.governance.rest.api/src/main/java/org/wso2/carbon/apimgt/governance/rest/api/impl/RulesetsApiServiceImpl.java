@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
@@ -34,11 +35,15 @@ import org.wso2.carbon.apimgt.governance.rest.api.mappings.RulesetMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -71,7 +76,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
             createdRulesetDTO = RulesetMappingUtil.fromRulesetInfoToRulesetInfoDTO(createdRuleset);
             createdRulesetURI = new URI(
-                    GovernanceAPIConstants.RULSET_PATH + "/" + createdRulesetDTO.getId());
+                    GovernanceAPIConstants.RULESET_PATH + "/" + createdRulesetDTO.getId());
             return Response.created(createdRulesetURI).entity(createdRulesetDTO).build();
 
         } catch (URISyntaxException e) {
@@ -159,14 +164,75 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @return Response object
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    public Response getRulesets(MessageContext messageContext) throws GovernanceException {
+    public Response getRulesets(Integer limit, Integer offset, MessageContext messageContext) throws GovernanceException {
+
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         RulesetManager rulesetManager = new RulesetManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         RulesetList rulesetList = rulesetManager.getRulesets(organization);
-        RulesetListDTO rulesetListDTO = RulesetMappingUtil.fromRulesetListToRuleListDTO(rulesetList);
-        return Response.status(Response.Status.OK).entity(rulesetListDTO).build();
+        RulesetListDTO paginatedRuleList = getPaginatedRulesets(rulesetList, limit, offset);
+
+        return Response.status(Response.Status.OK).entity(paginatedRuleList).build();
+    }
+
+    /**
+     * Get the paginated list of Governance Rulesets
+     *
+     * @param rulesetList RulesetList object
+     * @param limit       Limit
+     * @param offset      Offset
+     * @return RulesetListDTO object
+     */
+    private RulesetListDTO getPaginatedRulesets(RulesetList rulesetList, int limit, int offset) {
+        int rulesetCount = rulesetList.getCount();
+        List<RulesetInfoDTO> paginatedRulesets = new ArrayList<>();
+        RulesetListDTO paginatedRulesetListDTO = new RulesetListDTO();
+        paginatedRulesetListDTO.setCount(Math.min(rulesetCount, limit));
+
+        // If the provided offset value exceeds the offset, reset the offset to default.
+        if (offset > rulesetCount) {
+            offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        }
+
+        // Select only the set of rulesets which matches the given limit and offset values.
+        int start = offset;
+        int end = Math.min(rulesetCount, start + limit);
+        for (int i = start; i < end; i++) {
+            RulesetInfo rulesetInfo = rulesetList.getRulesetList().get(i);
+            RulesetInfoDTO rulesetInfoDTO = RulesetMappingUtil.fromRulesetInfoToRulesetInfoDTO(rulesetInfo);
+            paginatedRulesets.add(rulesetInfoDTO);
+        }
+        paginatedRulesetListDTO.setList(paginatedRulesets);
+
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setTotal(rulesetCount);
+        paginatedRulesetListDTO.setPagination(paginationDTO);
+
+        // Set previous and next URLs for pagination
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, rulesetCount);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.RULESETS_GET_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+        }
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.RULESETS_GET_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+        }
+
+        paginationDTO.setPrevious(paginatedPrevious);
+        paginationDTO.setNext(paginatedNext);
+
+        return paginatedRulesetListDTO;
     }
 
     /**

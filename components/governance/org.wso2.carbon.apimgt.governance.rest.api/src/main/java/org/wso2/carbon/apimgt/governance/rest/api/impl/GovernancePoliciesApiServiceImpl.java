@@ -31,11 +31,17 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.PolicyMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
@@ -102,22 +108,85 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
     }
 
     /**
-     * Get Governance Policies
+     * Get all Governance Policies
      *
+     * @param limit          Limit for Pagination
+     * @param offset         Offset for Pagination
      * @param messageContext Message Context
      * @return Response
      * @throws GovernanceException If an error occurs while retrieving the policies
      */
-    public Response getGovernancePolicies(MessageContext messageContext) throws GovernanceException {
+    public Response getGovernancePolicies(Integer limit, Integer offset, MessageContext messageContext)
+            throws GovernanceException {
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
         PolicyManager policyManager = new PolicyManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
         GovernancePolicyList policyList = policyManager.getGovernancePolicies(organization);
 
-        GovernancePolicyListDTO policyListDTO = PolicyMappingUtil.
-                fromGovernancePolicyListToGovernancePolicyListDTO(policyList);
+        GovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset);
 
         return Response.status(Response.Status.OK).entity(policyListDTO).build();
     }
+
+    /**
+     * Get a paginated list of Governance Policies
+     *
+     * @param policyList List of Governance Policies
+     * @param limit      Limit for Pagination
+     * @param offset     Offset for Pagination
+     * @return Paginated Governance Policy List
+     */
+    private GovernancePolicyListDTO getPaginatedPolicyList(GovernancePolicyList policyList, int limit, int offset) {
+        int policyCount = policyList.getCount();
+        List<GovernancePolicyDTO> policies = new ArrayList<>();
+        GovernancePolicyListDTO paginatedPolicyListDTO = new GovernancePolicyListDTO();
+        paginatedPolicyListDTO.setCount(Math.min(policyCount, limit));
+
+        // If the provided offset value exceeds the offset, reset the offset to default.
+        if (offset > policyCount) {
+            offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        }
+
+        // Select only the set of policies which matches the given limit and offset values.
+        int start = offset;
+        int end = Math.min(policyCount, start + limit);
+        for (int i = start; i < end; i++) {
+            GovernancePolicy policy = policyList.getGovernancePolicyList().get(i);
+            GovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
+            policies.add(policyDTO);
+        }
+        paginatedPolicyListDTO.setList(policies);
+
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setTotal(policyCount);
+        paginatedPolicyListDTO.setPagination(paginationDTO);
+
+        // Set previous and next URLs for pagination
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, policyCount);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICIES_GET_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+        }
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICIES_GET_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+        }
+
+        paginationDTO.setPrevious(paginatedPrevious);
+        paginationDTO.setNext(paginatedNext);
+
+        return paginatedPolicyListDTO;
+    }
+
 
     /**
      * Delete a Governance Policy

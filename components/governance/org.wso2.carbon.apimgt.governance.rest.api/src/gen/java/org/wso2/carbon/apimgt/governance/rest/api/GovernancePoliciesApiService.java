@@ -24,7 +24,7 @@ import javax.ws.rs.core.SecurityContext;
 public interface GovernancePoliciesApiService {
       public Response createGovernancePolicy(GovernancePolicyDTO governancePolicyDTO, MessageContext messageContext) throws GovernanceException;
       public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException;
-      public Response getGovernancePolicies(MessageContext messageContext) throws GovernanceException;
+      public Response getGovernancePolicies(Integer limit, Integer offset, MessageContext messageContext) throws GovernanceException;
       public Response getGovernancePolicyById(String policyId, MessageContext messageContext) throws GovernanceException;
       public Response updateGovernancePolicyById(String policyId, GovernancePolicyDTO governancePolicyDTO, MessageContext messageContext) throws GovernanceException;
 }

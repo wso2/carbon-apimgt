@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.context.CarbonContext;
 
 public class GovernanceAPIUtil {
@@ -67,5 +68,20 @@ public class GovernanceAPIUtil {
         errorDTO.setMessage(errorHandler.getErrorMessage());
         errorDTO.setDescription(errorHandler.getErrorDescription());
         return errorDTO;
+    }
+
+    /**
+     * Method to get the paginated URL
+     *
+     * @param paginatedURL paginated URL
+     * @param offset       offset
+     * @param limit        limit
+     * @return paginated URL
+     */
+    public static String getPaginatedURL(String paginatedURL, Integer offset,
+                                         Integer limit) {
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
     }
 }

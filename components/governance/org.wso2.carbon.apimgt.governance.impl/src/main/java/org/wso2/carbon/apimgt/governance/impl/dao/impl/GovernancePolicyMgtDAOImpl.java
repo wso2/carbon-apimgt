@@ -261,6 +261,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     policy.setRulesetIds(getRulesetsByPolicyId(policy.getId(), connection));
                     policy.setLabels(getLabelsByPolicyId(policy.getId(), connection));
                     policy.setActions(getActionsByPolicyId(policy.getId(), connection));
+                    policy.setLinkedStates(getStatesByPolicyId(policy.getId(), connection));
                     policyList.add(policy);
                 }
             }

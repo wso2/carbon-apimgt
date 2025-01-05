@@ -71,7 +71,7 @@ GovernancePoliciesApiService delegate = new GovernancePoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response deleteGovernancePolicy(@ApiParam(value = "UUID of the governance policy.",required=true) @PathParam("policyId") String policyId) throws GovernanceException{
+    public Response deleteGovernancePolicy(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws GovernanceException{
         return delegate.deleteGovernancePolicy(policyId, securityContext);
     }
 
@@ -90,8 +90,8 @@ GovernancePoliciesApiService delegate = new GovernancePoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernancePolicies() throws GovernanceException{
-        return delegate.getGovernancePolicies(securityContext);
+    public Response getGovernancePolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
+        return delegate.getGovernancePolicies(limit, offset, securityContext);
     }
 
     @GET
@@ -109,7 +109,7 @@ GovernancePoliciesApiService delegate = new GovernancePoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernancePolicyById(@ApiParam(value = "UUID of the governance policy.",required=true) @PathParam("policyId") String policyId) throws GovernanceException{
+    public Response getGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws GovernanceException{
         return delegate.getGovernancePolicyById(policyId, securityContext);
     }
 
@@ -128,7 +128,7 @@ GovernancePoliciesApiService delegate = new GovernancePoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response updateGovernancePolicyById(@ApiParam(value = "UUID of the governance policy.",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "JSON object containing the updated governance policy details." ,required=true) GovernancePolicyDTO governancePolicyDTO) throws GovernanceException{
+    public Response updateGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "JSON object containing the updated governance policy details." ,required=true) GovernancePolicyDTO governancePolicyDTO) throws GovernanceException{
         return delegate.updateGovernancePolicyById(policyId, governancePolicyDTO, securityContext);
     }
 }

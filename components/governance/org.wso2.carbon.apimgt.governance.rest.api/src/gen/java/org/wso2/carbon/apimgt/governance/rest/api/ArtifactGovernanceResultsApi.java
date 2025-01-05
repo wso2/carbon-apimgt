@@ -52,7 +52,7 @@ ArtifactGovernanceResultsApiService delegate = new ArtifactGovernanceResultsApiS
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernanceResultsByArtifactId(@ApiParam(value = "The unique identifier of the artifact/api.",required=true) @PathParam("artifactId") String artifactId) throws GovernanceException{
+    public Response getGovernanceResultsByArtifactId(@ApiParam(value = "**UUID** of the Artifact. ",required=true) @PathParam("artifactId") String artifactId) throws GovernanceException{
         return delegate.getGovernanceResultsByArtifactId(artifactId, securityContext);
     }
 
@@ -71,7 +71,7 @@ ArtifactGovernanceResultsApiService delegate = new ArtifactGovernanceResultsApiS
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernanceResultsForAllArtifacts() throws GovernanceException{
-        return delegate.getGovernanceResultsForAllArtifacts(securityContext);
+    public Response getGovernanceResultsForAllArtifacts( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
+        return delegate.getGovernanceResultsForAllArtifacts(limit, offset, securityContext);
     }
 }
