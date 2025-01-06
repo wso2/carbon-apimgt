@@ -5033,14 +5033,21 @@ public final class APIUtil {
     public static Set<String> extractVisibleEnvironmentsForUser(List<Environment> environments, String organization, String userName) throws APIManagementException {
 
         Set<String> environmentStringSet = new HashSet<String>();
-        String[] userRoles = APIUtil.getListOfRoles(userName);
+        List<String> userRolesList;
+        if (userName == null) {
+            userRolesList = new ArrayList<String>() {{
+                add(APIConstants.NULL_USER_ROLE_LIST);
+            }};
+        } else {
+            userRolesList = new ArrayList<String>(Arrays.asList(APIUtil.getListOfRoles(userName)));
+        }
         if (environments != null) {
             for (Environment environment : environments) {
                 String[] permittedRoles = environment.getVisibilityRoles();
                 if (permittedRoles[0].equals("all")) {
                     environmentStringSet.add(environment.toString());
                 } else {
-                    for (String role : userRoles) {
+                    for (String role : userRolesList) {
                         for (String permission : permittedRoles) {
                             if (role.equals(permission)) {
                                 environmentStringSet.add(environment.toString());
@@ -5056,7 +5063,7 @@ public final class APIUtil {
                 if (permittedRoles != null && permittedRoles[0].equals("all")) {
                     environmentStringSet.add(environment.toString());
                 } else if (permittedRoles != null) {
-                    for (String role : userRoles) {
+                    for (String role : userRolesList) {
                         for (String permission : permittedRoles) {
                             if (role.equals(permission)) {
                                 environmentStringSet.add(environment.toString());
@@ -5074,14 +5081,21 @@ public final class APIUtil {
     public static Map<String, Environment> extractVisibleEnvironmentsForUser(String organization, String userName) throws APIManagementException {
 
         Map<String, Environment> returnEnvironments = new LinkedHashMap<>();
-        String[] userRoles = APIUtil.getListOfRoles(userName);
+        List<String> userRolesList;
+        if (userName == null) {
+            userRolesList = new ArrayList<String>() {{
+                add(APIConstants.NULL_USER_ROLE_LIST);
+            }};
+        } else {
+            userRolesList = new ArrayList<String>(Arrays.asList(APIUtil.getListOfRoles(userName)));
+        }
         Map<String, Environment> environmentsMap = getEnvironments(organization);
         for (Environment environment : environmentsMap.values()) {
             String[] permittedRoles = environment.getVisibilityRoles();
             if (permittedRoles != null && permittedRoles[0].equals("all")) {
                 returnEnvironments.put(environment.getName(), environment);
             } else if (permittedRoles != null) {
-                for (String role : userRoles) {
+                for (String role : userRolesList) {
                     for (String permission : permittedRoles) {
                         if (role.equals(permission)) {
                             returnEnvironments.put(environment.getName(), environment);

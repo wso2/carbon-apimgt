@@ -63,6 +63,7 @@ public class EnvironmentMappingUtil {
         envDTO.setDescription(env.getDescription());
         envDTO.setProvider(env.getProvider());
         envDTO.setGatewayType(env.getGatewayType());
+        envDTO.setVisibility(env.getVisibility());
         envDTO.setIsReadOnly(env.isReadOnly());
         envDTO.setVhosts(env.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
@@ -134,6 +135,7 @@ public class EnvironmentMappingUtil {
         env.setDescription(envDTO.getDescription());
         env.setProvider(envDTO.getProvider());
         env.setGatewayType(envDTO.getGatewayType());
+        env.setVisibility(envDTO.getVisibility());
         env.setReadOnly(false);
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));

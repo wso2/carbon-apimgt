@@ -30,6 +30,7 @@ public class EnvironmentDTO   {
     private String displayName = null;
     private String provider = null;
     private String type = "hybrid";
+    private String visibility = "all";
     private String gatewayType = "Regular";
     private String description = null;
     private Boolean isReadOnly = null;
@@ -121,6 +122,23 @@ public class EnvironmentDTO   {
   }
   public void setType(String type) {
     this.type = type;
+  }
+
+  /**
+   **/
+  public EnvironmentDTO visibility(String visibility) {
+    this.visibility = visibility;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "role1, role2", value = "")
+  @JsonProperty("visibility")
+  public String getVisibility() {
+    return visibility;
+  }
+  public void setVisibility(String visibility) {
+    this.visibility = visibility;
   }
 
   /**
@@ -244,6 +262,7 @@ public class EnvironmentDTO   {
         Objects.equals(displayName, environment.displayName) &&
         Objects.equals(provider, environment.provider) &&
         Objects.equals(type, environment.type) &&
+        Objects.equals(visibility, environment.visibility) &&
         Objects.equals(gatewayType, environment.gatewayType) &&
         Objects.equals(description, environment.description) &&
         Objects.equals(isReadOnly, environment.isReadOnly) &&
@@ -254,7 +273,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, vhosts, endpointURIs, additionalProperties);
+    return Objects.hash(id, name, displayName, provider, type, visibility, gatewayType, description, isReadOnly, vhosts, endpointURIs, additionalProperties);
   }
 
   @Override
@@ -267,6 +286,7 @@ public class EnvironmentDTO   {
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    isReadOnly: ").append(toIndentedString(isReadOnly)).append("\n");
