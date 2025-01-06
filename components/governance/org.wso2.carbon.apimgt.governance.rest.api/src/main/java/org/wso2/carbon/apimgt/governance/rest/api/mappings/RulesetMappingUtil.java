@@ -46,7 +46,7 @@ public class RulesetMappingUtil {
         ruleset.setName(rulesetDTO.getName());
         ruleset.setDescription(rulesetDTO.getDescription());
         ruleset.setRulesetContent(rulesetDTO.getRulesetContent());
-        ruleset.setAppliesTo(String.valueOf(rulesetDTO.getAppliesTo()));
+        ruleset.setRuleType(String.valueOf(rulesetDTO.getRuleType()));
         ruleset.setArtifactType(String.valueOf(rulesetDTO.getArtifactType()));
         ruleset.setDocumentationLink(rulesetDTO.getDocumentationLink());
         ruleset.setProvider(rulesetDTO.getProvider());
@@ -69,8 +69,8 @@ public class RulesetMappingUtil {
         rulesetDTO.setName(createdRuleset.getName());
         rulesetDTO.setDescription(createdRuleset.getDescription());
         rulesetDTO.setRulesetContent(createdRuleset.getRulesetContent());
-        rulesetDTO.setAppliesTo(RulesetDTO.AppliesToEnum.
-                fromValue(createdRuleset.getAppliesTo()));
+        rulesetDTO.setRuleType(RulesetDTO.RuleTypeEnum.
+                fromValue(createdRuleset.getRuleType()));
         rulesetDTO.setArtifactType(RulesetDTO.ArtifactTypeEnum
                 .fromValue(createdRuleset.getArtifactType()));
         rulesetDTO.setDocumentationLink(createdRuleset.getDocumentationLink());
@@ -93,8 +93,8 @@ public class RulesetMappingUtil {
         rulesetInfoDTO.setId(rulesetInfo.getId());
         rulesetInfoDTO.setName(rulesetInfo.getName());
         rulesetInfoDTO.setDescription(rulesetInfo.getDescription());
-        rulesetInfoDTO.setAppliesTo(RulesetInfoDTO.
-                AppliesToEnum.fromValue(rulesetInfo.getAppliesTo()));
+        rulesetInfoDTO.setRuleType(RulesetInfoDTO.
+                RuleTypeEnum.fromValue(rulesetInfo.getRuleType()));
         rulesetInfoDTO.setArtifactType(RulesetInfoDTO.
                 ArtifactTypeEnum.fromValue(rulesetInfo.getArtifactType()));
         rulesetInfoDTO.setDocumentationLink(rulesetInfo.getDocumentationLink());

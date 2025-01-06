@@ -26,7 +26,7 @@ public class Ruleset {
     private String name;
     private String description;
     private String rulesetContent;
-    private String appliesTo;
+    private String ruleType;
     private String artifactType;
     private String documentationLink;
     private String provider;
@@ -67,12 +67,12 @@ public class Ruleset {
         this.rulesetContent = rulesetContent;
     }
 
-    public String getAppliesTo() {
-        return appliesTo;
+    public String getRuleType() {
+        return ruleType;
     }
 
-    public void setAppliesTo(String appliesTo) {
-        this.appliesTo = appliesTo;
+    public void setRuleType(String ruleType) {
+        this.ruleType = ruleType;
     }
 
     public String getArtifactType() {

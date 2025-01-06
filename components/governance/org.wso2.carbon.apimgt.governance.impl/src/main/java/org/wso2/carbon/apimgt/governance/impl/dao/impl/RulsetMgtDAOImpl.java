@@ -93,7 +93,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(2, ruleset.getName());
                 prepStmt.setString(3, ruleset.getDescription());
                 prepStmt.setBlob(4, rulesetContent);
-                prepStmt.setString(5, ruleset.getAppliesTo());
+                prepStmt.setString(5, ruleset.getRuleType());
                 prepStmt.setString(6, ruleset.getArtifactType());
                 prepStmt.setString(7, ruleset.getDocumentationLink());
                 prepStmt.setString(8, ruleset.getProvider());
@@ -192,7 +192,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     rulesetInfo.setId(rs.getString("RULESET_ID"));
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
+                    rulesetInfo.setRuleType(rs.getString("RULE_TYPE"));
                     rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
@@ -233,7 +233,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     rulesetInfo.setId(rs.getString("RULESET_ID"));
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
+                    rulesetInfo.setRuleType(rs.getString("RULE_TYPE"));
                     rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
@@ -272,7 +272,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     rulesetInfo.setId(rs.getString("RULESET_ID"));
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setAppliesTo(rs.getString("APPLIES_TO"));
+                    rulesetInfo.setRuleType(rs.getString("RULE_TYPE"));
                     rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
@@ -378,7 +378,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(1, ruleset.getName());
                 prepStmt.setString(2, ruleset.getDescription());
                 prepStmt.setBlob(3, rulesetContent);
-                prepStmt.setString(4, ruleset.getAppliesTo());
+                prepStmt.setString(4, ruleset.getRuleType());
                 prepStmt.setString(5, ruleset.getArtifactType());
                 prepStmt.setString(6, ruleset.getDocumentationLink());
                 prepStmt.setString(7, ruleset.getProvider());

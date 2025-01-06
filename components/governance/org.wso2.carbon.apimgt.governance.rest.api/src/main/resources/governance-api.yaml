@@ -928,7 +928,7 @@ components:
                 message: API host schemes must use the HTTPS protocol.
                 formats:
                   - oas2
-        appliesTo:
+        ruleType:
           type: string
           description: Context or area to which the ruleset applies.
           enum:
@@ -977,7 +977,7 @@ components:
       required:
         - name
         - rulesetContent
-        - appliesTo
+        - ruleType
         - artifactType
         - provider
     RulesetInfo:
@@ -997,7 +997,7 @@ components:
           type: string
           description: A brief description of the ruleset.
           example: "A ruleset designed to enforce security standards for APIs."
-        appliesTo:
+        ruleType:
           type: string
           description: Context or area to which the ruleset applies.
           enum:
@@ -1049,7 +1049,7 @@ components:
           example: "2024-08-02T12:00:00Z"
       required:
         - name
-        - appliesTo
+        - ruleType
         - artifactType
         - provider
     GovernancePolicy:
@@ -1069,7 +1069,7 @@ components:
           type: string
           description: A brief description of the governance policy.
           example: "Policy for enforcing security standards across all APIs."
-        linkedStates:
+        applicableStates:
           type: array
           description: List of states at which the governance policy should be enforced.
           items:
@@ -1128,7 +1128,7 @@ components:
         - name
         - rulesets
         - labels
-        - linkedStates
+        - applicableStates
         - actions
     Action:
       type: object

@@ -25,7 +25,7 @@ public class RulesetInfo {
     private String id;
     private String name;
     private String description;
-    private String appliesTo;
+    private String ruleType;
     private String artifactType;
     private String documentationLink;
     private String provider;
@@ -58,12 +58,12 @@ public class RulesetInfo {
         this.description = description;
     }
 
-    public String getAppliesTo() {
-        return appliesTo;
+    public String getRuleType() {
+        return ruleType;
     }
 
-    public void setAppliesTo(String appliesTo) {
-        this.appliesTo = appliesTo;
+    public void setRuleType(String ruleType) {
+        this.ruleType = ruleType;
     }
 
     public String getArtifactType() {

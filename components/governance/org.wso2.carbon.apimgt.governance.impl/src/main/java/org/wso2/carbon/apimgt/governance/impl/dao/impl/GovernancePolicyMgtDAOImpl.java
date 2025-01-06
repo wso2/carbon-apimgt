@@ -117,10 +117,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     prepStmt.executeBatch();
                 }
 
-                // Insert into GOV_POLICY_STATE table
+                // Insert into GOV_POLICY_APPLICABLE_STATE table
                 try (PreparedStatement prepStmt =
                              connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_STATE_MAPPING)) {
-                    states = governancePolicy.getLinkedStates();
+                    states = governancePolicy.getApplicableStates();
                     for (String state : states) {
                         prepStmt.setString(1, GovernanceUtil.generateUUID());
                         prepStmt.setString(2, governancePolicy.getId());
@@ -223,7 +223,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     policy.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
                     policy.setRulesetIds(getRulesetsByPolicyId(policy.getId(), connection));
                     policy.setLabels(getLabelsByPolicyId(policy.getId(), connection));
-                    policy.setLinkedStates(getStatesByPolicyId(policy.getId(), connection));
+                    policy.setApplicableStates(getStatesByPolicyId(policy.getId(), connection));
                     policy.setActions(getActionsByPolicyId(policy.getId(), connection));
                 }
             }
@@ -261,7 +261,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     policy.setRulesetIds(getRulesetsByPolicyId(policy.getId(), connection));
                     policy.setLabels(getLabelsByPolicyId(policy.getId(), connection));
                     policy.setActions(getActionsByPolicyId(policy.getId(), connection));
-                    policy.setLinkedStates(getStatesByPolicyId(policy.getId(), connection));
+                    policy.setApplicableStates(getStatesByPolicyId(policy.getId(), connection));
                     policyList.add(policy);
                 }
             }
@@ -419,7 +419,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
         }
         // Determine states to add and remove
-        List<String> statesToBeUpdated = governancePolicy.getLinkedStates();
+        List<String> statesToBeUpdated = governancePolicy.getApplicableStates();
         List<String> statesToAdd = new ArrayList<>(statesToBeUpdated);
         List<String> statesToRemove = new ArrayList<>(existingStates);
         statesToAdd.removeAll(existingStates);

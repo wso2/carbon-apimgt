@@ -28,15 +28,15 @@ public class RulesetDTO   {
     private String description = null;
     private String rulesetContent = null;
 
-          @XmlType(name="AppliesToEnum")
+          @XmlType(name="RuleTypeEnum")
     @XmlEnum(String.class)
-    public enum AppliesToEnum {
+    public enum RuleTypeEnum {
         API_METADATA("API_METADATA"),
         API_DEFINITION("API_DEFINITION"),
         DOCUMENTATION("DOCUMENTATION");
         private String value;
 
-        AppliesToEnum (String v) {
+        RuleTypeEnum (String v) {
             value = v;
         }
 
@@ -50,8 +50,8 @@ public class RulesetDTO   {
         }
 
         @JsonCreator
-        public static AppliesToEnum fromValue(String v) {
-            for (AppliesToEnum b : AppliesToEnum.values()) {
+        public static RuleTypeEnum fromValue(String v) {
+            for (RuleTypeEnum b : RuleTypeEnum.values()) {
                 if (String.valueOf(b.value).equals(v)) {
                     return b;
                 }
@@ -59,7 +59,7 @@ public class RulesetDTO   {
 return null;
         }
     } 
-    private AppliesToEnum appliesTo = null;
+    private RuleTypeEnum ruleType = null;
 
           @XmlType(name="ArtifactTypeEnum")
     @XmlEnum(String.class)
@@ -179,20 +179,20 @@ return null;
   /**
    * Context or area to which the ruleset applies.
    **/
-  public RulesetDTO appliesTo(AppliesToEnum appliesTo) {
-    this.appliesTo = appliesTo;
+  public RulesetDTO ruleType(RuleTypeEnum ruleType) {
+    this.ruleType = ruleType;
     return this;
   }
 
   
   @ApiModelProperty(example = "API_DEFINITION", required = true, value = "Context or area to which the ruleset applies.")
-  @JsonProperty("appliesTo")
+  @JsonProperty("ruleType")
   @NotNull
-  public AppliesToEnum getAppliesTo() {
-    return appliesTo;
+  public RuleTypeEnum getRuleType() {
+    return ruleType;
   }
-  public void setAppliesTo(AppliesToEnum appliesTo) {
-    this.appliesTo = appliesTo;
+  public void setRuleType(RuleTypeEnum ruleType) {
+    this.ruleType = ruleType;
   }
 
   /**
@@ -337,7 +337,7 @@ return null;
         Objects.equals(name, ruleset.name) &&
         Objects.equals(description, ruleset.description) &&
         Objects.equals(rulesetContent, ruleset.rulesetContent) &&
-        Objects.equals(appliesTo, ruleset.appliesTo) &&
+        Objects.equals(ruleType, ruleset.ruleType) &&
         Objects.equals(artifactType, ruleset.artifactType) &&
         Objects.equals(documentationLink, ruleset.documentationLink) &&
         Objects.equals(provider, ruleset.provider) &&
@@ -349,7 +349,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, rulesetContent, appliesTo, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(id, name, description, rulesetContent, ruleType, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
   }
 
   @Override
@@ -361,7 +361,7 @@ return null;
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    rulesetContent: ").append(toIndentedString(rulesetContent)).append("\n");
-    sb.append("    appliesTo: ").append(toIndentedString(appliesTo)).append("\n");
+    sb.append("    ruleType: ").append(toIndentedString(ruleType)).append("\n");
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    documentationLink: ").append(toIndentedString(documentationLink)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");

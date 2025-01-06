@@ -54,7 +54,7 @@ public class PolicyMappingUtil {
         govPolicy.setRulesetIds(dto.getRulesets());
         govPolicy.setLabels(dto.getLabels());
         govPolicy.setActions(fromActionDTOListtoActionList(dto.getActions()));
-        govPolicy.setLinkedStates(dto.getLinkedStates().stream()
+        govPolicy.setApplicableStates(dto.getApplicableStates().stream()
                 .map(Enum::name)
                 .collect(Collectors.toList()));
         return govPolicy;
@@ -80,8 +80,8 @@ public class PolicyMappingUtil {
         governancePolicyDTO.setRulesets(governancePolicy.getRulesetIds());
         governancePolicyDTO.setActions(
                 fromActionListtoActionDTOList(governancePolicy.getActions()));
-        governancePolicyDTO.setLinkedStates(governancePolicy.getLinkedStates().stream()
-                .map(GovernancePolicyDTO.LinkedStatesEnum::valueOf)
+        governancePolicyDTO.setApplicableStates(governancePolicy.getApplicableStates().stream()
+                .map(GovernancePolicyDTO.ApplicableStatesEnum::valueOf)
                 .collect(Collectors.toList()));
         return governancePolicyDTO;
     }

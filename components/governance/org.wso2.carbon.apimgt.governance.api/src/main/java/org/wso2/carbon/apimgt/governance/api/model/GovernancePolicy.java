@@ -29,7 +29,7 @@ public class GovernancePolicy {
     private String description;
     private List<String> rulesetIds;
     private List<String> labels;
-    private List<String> linkedStates;
+    private List<String> applicableStates;
     private List<GovernanceAction> actions;
     private String createdBy;
     private String createdTime;
@@ -76,12 +76,12 @@ public class GovernancePolicy {
         this.labels = labels;
     }
 
-    public List<String> getLinkedStates() {
-        return linkedStates;
+    public List<String> getApplicableStates() {
+        return applicableStates;
     }
 
-    public void setLinkedStates(List<String> linkedStates) {
-        this.linkedStates = linkedStates;
+    public void setApplicableStates(List<String> applicableStates) {
+        this.applicableStates = applicableStates;
     }
 
     public List<GovernanceAction> getActions() {

@@ -171,7 +171,7 @@ public class GovernanceUtil {
         ruleset.setId(defaultRuleset.getId());
         ruleset.setName(defaultRuleset.getName());
         ruleset.setDescription(defaultRuleset.getDescription());
-        ruleset.setAppliesTo(defaultRuleset.getAppliesTo());
+        ruleset.setRuleType(defaultRuleset.getAppliesTo());
         ruleset.setArtifactType(defaultRuleset.getArtifactType());
         ruleset.setProvider(defaultRuleset.getProvider());
         ruleset.setRulesetContent(defaultRuleset.getRulesetContentAsString());

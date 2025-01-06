@@ -30,16 +30,16 @@ public class GovernancePolicyDTO   {
     private String name = null;
     private String description = null; 
 
-    @XmlType(name="LinkedStatesEnum")
+    @XmlType(name="ApplicableStatesEnum")
     @XmlEnum(String.class)
-    public enum LinkedStatesEnum {
+    public enum ApplicableStatesEnum {
         API_CREATE("API_CREATE"),
         API_UPDATE("API_UPDATE"),
         API_DEPLOY("API_DEPLOY"),
         API_PUBLISH("API_PUBLISH");
         private String value;
 
-        LinkedStatesEnum (String v) {
+        ApplicableStatesEnum (String v) {
             value = v;
         }
 
@@ -53,8 +53,8 @@ public class GovernancePolicyDTO   {
         }
 
         @JsonCreator
-        public static LinkedStatesEnum fromValue(String v) {
-            for (LinkedStatesEnum b : LinkedStatesEnum.values()) {
+        public static ApplicableStatesEnum fromValue(String v) {
+            for (ApplicableStatesEnum b : ApplicableStatesEnum.values()) {
                 if (String.valueOf(b.value).equals(v)) {
                     return b;
                 }
@@ -62,7 +62,7 @@ public class GovernancePolicyDTO   {
 return null;
         }
     }
-    private List<LinkedStatesEnum> linkedStates = new ArrayList<LinkedStatesEnum>();
+    private List<ApplicableStatesEnum> applicableStates = new ArrayList<ApplicableStatesEnum>();
     private List<ActionDTO> actions = new ArrayList<ActionDTO>();
     private List<String> rulesets = new ArrayList<String>();
     private List<String> labels = new ArrayList<String>();
@@ -129,20 +129,20 @@ return null;
   /**
    * List of states at which the governance policy should be enforced.
    **/
-  public GovernancePolicyDTO linkedStates(List<LinkedStatesEnum> linkedStates) {
-    this.linkedStates = linkedStates;
+  public GovernancePolicyDTO applicableStates(List<ApplicableStatesEnum> applicableStates) {
+    this.applicableStates = applicableStates;
     return this;
   }
 
   
   @ApiModelProperty(required = true, value = "List of states at which the governance policy should be enforced.")
-  @JsonProperty("linkedStates")
+  @JsonProperty("applicableStates")
   @NotNull
-  public List<LinkedStatesEnum> getLinkedStates() {
-    return linkedStates;
+  public List<ApplicableStatesEnum> getApplicableStates() {
+    return applicableStates;
   }
-  public void setLinkedStates(List<LinkedStatesEnum> linkedStates) {
-    this.linkedStates = linkedStates;
+  public void setApplicableStates(List<ApplicableStatesEnum> applicableStates) {
+    this.applicableStates = applicableStates;
   }
 
   /**
@@ -288,7 +288,7 @@ return null;
     return Objects.equals(id, governancePolicy.id) &&
         Objects.equals(name, governancePolicy.name) &&
         Objects.equals(description, governancePolicy.description) &&
-        Objects.equals(linkedStates, governancePolicy.linkedStates) &&
+        Objects.equals(applicableStates, governancePolicy.applicableStates) &&
         Objects.equals(actions, governancePolicy.actions) &&
         Objects.equals(rulesets, governancePolicy.rulesets) &&
         Objects.equals(labels, governancePolicy.labels) &&
@@ -300,7 +300,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, linkedStates, actions, rulesets, labels, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(id, name, description, applicableStates, actions, rulesets, labels, createdBy, createdTime, updatedBy, updatedTime);
   }
 
   @Override
@@ -311,7 +311,7 @@ return null;
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    linkedStates: ").append(toIndentedString(linkedStates)).append("\n");
+    sb.append("    applicableStates: ").append(toIndentedString(applicableStates)).append("\n");
     sb.append("    actions: ").append(toIndentedString(actions)).append("\n");
     sb.append("    rulesets: ").append(toIndentedString(rulesets)).append("\n");
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
