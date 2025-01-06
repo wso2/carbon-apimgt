@@ -3838,8 +3838,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
-                                                   String sortBy, String sortOrder) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
+            throws APIManagementException {
 
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {

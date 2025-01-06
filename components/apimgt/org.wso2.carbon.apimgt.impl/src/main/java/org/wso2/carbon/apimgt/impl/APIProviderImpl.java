@@ -5407,7 +5407,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         try {
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
-                    offset, limit, userCtx, "createdTime", "desc");
+                    offset, limit, userCtx);
             if (log.isDebugEnabled()) {
                 log.debug("Running Solr query : " + query);
             }
@@ -5514,8 +5514,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
-            String sortBy, String sortOrder) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
+            throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
@@ -5527,7 +5527,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
-                    start, end, userCtx, sortBy, sortOrder);
+                    start, end, userCtx);
             if (log.isDebugEnabled()) {
                 log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
             }

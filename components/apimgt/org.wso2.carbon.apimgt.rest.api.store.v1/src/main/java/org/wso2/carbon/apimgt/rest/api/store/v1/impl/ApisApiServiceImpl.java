@@ -104,9 +104,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset,
-                    limit, null, null);
-            
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, organization, offset, limit);
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
