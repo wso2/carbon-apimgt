@@ -29,10 +29,10 @@ public class SQLConstants {
                     "DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, CREATED_BY) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    public static final String INSERT_RULES =
+    public static final String ADD_RULES =
             "INSERT INTO GOV_RULESET_RULE (RULESET_RULE_ID, RULESET_ID, " +
-                    "RULE_CODE, RULE_MESSAGE, RULE_DESCRIPTION, SEVERITY) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+                    "RULE_CODE, RULE_MESSAGE, RULE_DESCRIPTION, SEVERITY, RULE_CONTENT) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     public static final String GET_RULESETS =
             "SELECT RULESET_ID, NAME, DESCRIPTION, RULESET_CONTENT, RULE_TYPE, ARTIFACT_TYPE, " +

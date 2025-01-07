@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.impl.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import feign.Response;
@@ -46,6 +47,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -272,6 +274,25 @@ public class GovernanceUtil {
     public static byte[] toByteArray(InputStream is) throws IOException {
 
         return IOUtils.toByteArray(is);
+    }
+
+    /**
+     * Get ruleset content map
+     *
+     * @param rulesetContent Ruleset content string
+     * @return Map
+     * @throws GovernanceException if an error occurs while parsing ruleset content
+     */
+    public static Map<String, Object> getRulesetConetentMap(String rulesetContent) throws GovernanceException {
+        // Parse YAML content
+        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+        Map<String, Object> rulesetMap;
+        try {
+            rulesetMap = yamlReader.readValue(rulesetContent, Map.class);
+        } catch (JsonProcessingException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONETENT, e);
+        }
+        return rulesetMap;
     }
 }
 

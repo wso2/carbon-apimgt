@@ -18,17 +18,16 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
-import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.impl.client.validationengine.SpectralValidationEngine;
+import org.wso2.carbon.apimgt.governance.impl.client.validationengine.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulsetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
@@ -45,7 +44,6 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Implementation of the RulsetMgtDAO interface.
@@ -81,7 +79,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
     @Override
     public RulesetInfo createRuleset(String organization, Ruleset ruleset) throws GovernanceException {
 
-        InputStream rulesetContent = new ByteArrayInputStream(
+        InputStream rulesetContentStream = new ByteArrayInputStream(
                 ruleset.getRulesetContent().getBytes(Charset.defaultCharset()));
 
         String sqlQuery = SQLConstants.CREATE_RULESET;
@@ -92,7 +90,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(1, ruleset.getId());
                 prepStmt.setString(2, ruleset.getName());
                 prepStmt.setString(3, ruleset.getDescription());
-                prepStmt.setBlob(4, rulesetContent);
+                prepStmt.setBlob(4, rulesetContentStream);
                 prepStmt.setString(5, ruleset.getRuleType());
                 prepStmt.setString(6, ruleset.getArtifactType());
                 prepStmt.setString(7, ruleset.getDocumentationLink());
@@ -100,7 +98,15 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(9, organization);
                 prepStmt.setString(10, ruleset.getCreatedBy());
                 prepStmt.execute();
-                insertRules(ruleset.getId(), ruleset.getRulesetContent(), connection);
+
+                ValidationEngine validationEngine = new SpectralValidationEngine();
+                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset.getRulesetContent());
+                if (rules.size() > 0) {
+                    addRules(ruleset.getId(), rules, connection);
+                } else {
+                    throw new GovernanceException(
+                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getId());
+                }
                 connection.commit();
             } catch (SQLException | GovernanceException e) {
                 connection.rollback();
@@ -121,54 +127,33 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
     }
 
     /**
-     * Insert rules into the database
+     * Add rules to a ruleset
      *
-     * @param rulesetId      Ruleset ID
-     * @param rulesetContent Ruleset content
-     * @param connection     Database connection
-     * @throws GovernanceException Governance exception
+     * @param rulesetId  Ruleset ID
+     * @param rules      List of rules
+     * @param connection Database connection
+     * @throws GovernanceException If an error occurs while adding the rules
      */
-    private void insertRules(String rulesetId, String rulesetContent, Connection connection)
+    private void addRules(String rulesetId, List<Rule> rules, Connection connection)
             throws GovernanceException {
-
-        // Parse YAML content
-        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-        Map<String, Object> rulesetMap;
-        try {
-            rulesetMap = yamlReader.readValue(rulesetContent, Map.class);
-        } catch (JsonProcessingException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONETENT, e);
-        }
-        // Check if 'rules' is present and not null
-        if (rulesetMap.containsKey("rules") && rulesetMap.get("rules") instanceof Map) {
-            // Extract rules
-            Map<String, Map<String, Object>> rules =
-                    (Map<String, Map<String, Object>>) rulesetMap.get("rules");
-            String sqlQuery = SQLConstants.INSERT_RULES;
-            try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
-                for (Map.Entry<String, Map<String, Object>> entry : rules.entrySet()) {
-                    String code = entry.getKey();
-                    Map<String, Object> ruleDetails = entry.getValue();
-                    String description = (String) ruleDetails.get("description");
-                    String message = (String) ruleDetails.get("message");
-                    String severityString = (String) ruleDetails.get("severity");
-                    String severity = Severity.fromString(severityString).getValue();
-
-                    prepStmt.setString(1, GovernanceUtil.generateUUID());
-                    prepStmt.setString(2, rulesetId);
-                    prepStmt.setString(3, code);
-                    prepStmt.setString(4, message);
-                    prepStmt.setString(5, description);
-                    prepStmt.setString(6, severity);
-                    prepStmt.addBatch();
-                }
-                prepStmt.executeBatch();
-            } catch (SQLException e) {
-                throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_INSERTING_RULES, e, rulesetId);
+        String sqlQuery = SQLConstants.ADD_RULES;
+        try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
+            for (Rule rule : rules) {
+                prepStmt.setString(1, rule.getId());
+                prepStmt.setString(2, rulesetId);
+                prepStmt.setString(3, rule.getCode());
+                prepStmt.setString(4, rule.getMessageOnFailure());
+                prepStmt.setString(5, rule.getDescription());
+                prepStmt.setString(6, rule.getSeverity());
+                prepStmt.setBlob(7, new ByteArrayInputStream(rule.getContent()
+                        .getBytes(Charset.defaultCharset())));
+                prepStmt.addBatch();
             }
-        } else {
-            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT, rulesetId);
+            prepStmt.executeBatch();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_INSERTING_RULES, e, rulesetId);
         }
+
     }
 
     /**
@@ -393,7 +378,14 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 // Delete existing rules related to this ruleset.
                 deleteRules(rulesetId, connection);
                 // Insert updated rules.
-                insertRules(rulesetId, ruleset.getRulesetContent(), connection);
+                ValidationEngine validationEngine = new SpectralValidationEngine();
+                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset.getRulesetContent());
+                if (rules.size() > 0) {
+                    addRules(ruleset.getId(), rules, connection);
+                } else {
+                    throw new GovernanceException(
+                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getId());
+                }
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();

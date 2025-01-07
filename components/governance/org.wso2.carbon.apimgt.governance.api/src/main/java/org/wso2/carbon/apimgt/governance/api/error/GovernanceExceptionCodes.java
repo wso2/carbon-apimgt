@@ -86,7 +86,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES(301017, "Error while retrieving associated policies for the ruleset.", 500,
             "Error while retrieving associated policies for the ruleset with ID: %s", true),
-
+    ERROR_WHILE_EXTRACTING_RULE_CONTENT(301018, "Error while extracting rule content", 500, "Error while extracting " +
+            "rule content from the ruleset", true),
 
     // Policy related codes
     ERROR_WHILE_CREATING_POLICY(401001, "Policy creation failed.", 500, "Error while creating governance policy in the organization %s", true),
