@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.manager.RulesetManager;
@@ -28,7 +29,6 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.RulesetMappingUtil;
@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -54,21 +55,36 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     /**
      * Create a new Governance Ruleset
      *
-     * @param rulesetDTO     Ruleset object
-     * @param messageContext MessageContext
+     * @param name                      Name
+     * @param rulesetContentInputStream Ruleset content input stream
+     * @param rulesetContentDetail      Ruleset content detail
+     * @param ruleType                  Rule type
+     * @param artifactType              Artifact type
+     * @param provider                  Provider
+     * @param description               Description
+     * @param documentationLink         Documentation link
+     * @param messageContext            MessageContext
      * @return Response object
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
-    public Response createRuleset(RulesetDTO rulesetDTO, MessageContext messageContext)
-            throws GovernanceException {
-
+    @Override
+    public Response createRuleset(String name, InputStream rulesetContentInputStream, Attachment rulesetContentDetail,
+                                  String ruleType, String artifactType, String provider, String description,
+                                  String documentationLink, MessageContext messageContext) throws GovernanceException {
         RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
+        Ruleset ruleset = new Ruleset();
         try {
+            ruleset.setName(name);
+            ruleset.setRuleType(ruleType);
+            ruleset.setArtifactType(artifactType);
+            ruleset.setProvider(provider);
+            ruleset.setDescription(description);
+            ruleset.setDocumentationLink(documentationLink);
+            ruleset.setRulesetContent(rulesetContentInputStream);
+
             String username = GovernanceAPIUtil.getLoggedInUsername();
             String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-
-            Ruleset ruleset = RulesetMappingUtil.fromRulesetDTOtoRuleset(rulesetDTO);
             ruleset.setCreatedBy(username);
 
             RulesetManager rulesetManager = new RulesetManagerImpl();
@@ -81,7 +97,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Ruleset %s",
-                    rulesetDTO.getName());
+                    name);
             throw new GovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
         }
     }
@@ -238,20 +254,37 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     /**
      * Update a Governance Ruleset
      *
-     * @param rulesetId      Ruleset ID
-     * @param rulesetDTO     Ruleset object
-     * @param messageContext MessageContext
+     * @param rulesetId                 Ruleset ID
+     * @param name                      Name
+     * @param rulesetContentInputStream Ruleset content input stream
+     * @param rulesetContentDetail      Ruleset content detail
+     * @param ruleType                  Rule type
+     * @param artifactType              Artifact type
+     * @param provider                  Provider
+     * @param description               Description
+     * @param documentationLink         Documentation link
+     * @param messageContext            MessageContext
      * @return Response object
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
     @Override
-    public Response updateRulesetById(String rulesetId, RulesetDTO rulesetDTO, MessageContext messageContext) throws GovernanceException {
+    public Response updateRulesetById(String rulesetId, String name, InputStream rulesetContentInputStream,
+                                      Attachment rulesetContentDetail, String ruleType, String artifactType,
+                                      String provider, String description, String documentationLink,
+                                      MessageContext messageContext) throws GovernanceException {
+        Ruleset ruleset = new Ruleset();
+        ruleset.setName(name);
+        ruleset.setRuleType(ruleType);
+        ruleset.setArtifactType(artifactType);
+        ruleset.setProvider(provider);
+        ruleset.setId(rulesetId);
+        ruleset.setDescription(description);
+        ruleset.setDocumentationLink(documentationLink);
+        ruleset.setRulesetContent(rulesetContentInputStream);
+
         String username = GovernanceAPIUtil.getLoggedInUsername();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-
-        Ruleset ruleset = RulesetMappingUtil.fromRulesetDTOtoRuleset(rulesetDTO);
         ruleset.setUpdatedBy(username);
-        ruleset.setId(rulesetId);
 
         RulesetManager rulesetManager = new RulesetManagerImpl();
         RulesetInfo updatedRuleset = rulesetManager.updateRuleset(organization, rulesetId, ruleset);

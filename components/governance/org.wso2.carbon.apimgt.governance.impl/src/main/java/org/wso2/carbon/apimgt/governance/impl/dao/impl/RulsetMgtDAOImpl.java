@@ -79,8 +79,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
     @Override
     public RulesetInfo createRuleset(String organization, Ruleset ruleset) throws GovernanceException {
 
-        InputStream rulesetContentStream = new ByteArrayInputStream(
-                ruleset.getRulesetContent().getBytes(Charset.defaultCharset()));
+        InputStream rulesetContentStream = ruleset.getRulesetContent();
 
         String sqlQuery = SQLConstants.CREATE_RULESET;
         try (Connection connection = GovernanceDBUtil.getConnection();
@@ -354,8 +353,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
      */
     @Override
     public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
-        InputStream rulesetContent = new ByteArrayInputStream(
-                ruleset.getRulesetContent().getBytes(Charset.defaultCharset()));
+        InputStream rulesetContent = ruleset.getRulesetContent();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_RULESET)) {
             try {

@@ -176,7 +176,7 @@ public class GovernanceUtil {
         ruleset.setRuleType(defaultRuleset.getAppliesTo());
         ruleset.setArtifactType(defaultRuleset.getArtifactType());
         ruleset.setProvider(defaultRuleset.getProvider());
-        ruleset.setRulesetContent(defaultRuleset.getRulesetContentAsString());
+        ruleset.setRulesetContent(defaultRuleset.getRulesetContentAsInputStream());
         ruleset.setDocumentationLink(defaultRuleset.getDocumentationLink());
         return ruleset;
     }
@@ -277,22 +277,41 @@ public class GovernanceUtil {
     }
 
     /**
-     * Get ruleset content map
+     * Get map from YAML string content
      *
-     * @param rulesetContent Ruleset content string
+     * @param content String content
      * @return Map
-     * @throws GovernanceException if an error occurs while parsing ruleset content
+     * @throws GovernanceException if an error occurs while parsing YAML content
      */
-    public static Map<String, Object> getRulesetConetentMap(String rulesetContent) throws GovernanceException {
+    public static Map<String, Object> getMapFromYAMLStringContent(String content) throws GovernanceException {
         // Parse YAML content
         ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
         Map<String, Object> rulesetMap;
         try {
-            rulesetMap = yamlReader.readValue(rulesetContent, Map.class);
+            rulesetMap = yamlReader.readValue(content, Map.class);
         } catch (JsonProcessingException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONETENT, e);
         }
         return rulesetMap;
     }
+
+
+    /**
+     * Get string content from input stream
+     *
+     * @param inputStream InputStream
+     * @return String
+     * @throws GovernanceException if an error occurs while reading content from input stream
+     */
+    public static String getStringContentFromInputStream(InputStream inputStream) throws GovernanceException {
+        try {
+            return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new GovernanceException("Error while reading content from input stream", e);
+        }
+    }
+
 }
+
+
 

@@ -10,7 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetDTO;
+import java.io.File;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 
@@ -23,11 +23,11 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface RulesetsApiService {
-      public Response createRuleset(RulesetDTO rulesetDTO, MessageContext messageContext) throws GovernanceException;
+      public Response createRuleset(String name, InputStream rulesetContentInputStream, Attachment rulesetContentDetail, String ruleType, String artifactType, String provider, String description, String documentationLink, MessageContext messageContext) throws GovernanceException;
       public Response deleteRuleset(String rulesetId, MessageContext messageContext) throws GovernanceException;
       public Response getRulesetById(String rulesetId, MessageContext messageContext) throws GovernanceException;
       public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException;
       public Response getRulesetUsage(String rulesetId, MessageContext messageContext) throws GovernanceException;
       public Response getRulesets(Integer limit, Integer offset, MessageContext messageContext) throws GovernanceException;
-      public Response updateRulesetById(String rulesetId, RulesetDTO rulesetDTO, MessageContext messageContext) throws GovernanceException;
+      public Response updateRulesetById(String rulesetId, String name, InputStream rulesetContentInputStream, Attachment rulesetContentDetail, String ruleType, String artifactType, String provider, String description, String documentationLink, MessageContext messageContext) throws GovernanceException;
 }

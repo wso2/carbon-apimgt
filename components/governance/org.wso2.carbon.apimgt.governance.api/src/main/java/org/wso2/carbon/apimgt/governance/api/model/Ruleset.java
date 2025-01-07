@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.io.InputStream;
+
 /**
  * This class represents a governance Ruleset
  */
@@ -25,7 +27,7 @@ public class Ruleset {
     private String id;
     private String name;
     private String description;
-    private String rulesetContent;
+    private InputStream rulesetContent;
     private String ruleType;
     private String artifactType;
     private String documentationLink;
@@ -59,11 +61,11 @@ public class Ruleset {
         this.description = description;
     }
 
-    public String getRulesetContent() {
+    public InputStream getRulesetContent() {
         return rulesetContent;
     }
 
-    public void setRulesetContent(String rulesetContent) {
+    public void setRulesetContent(InputStream rulesetContent) {
         this.rulesetContent = rulesetContent;
     }
 

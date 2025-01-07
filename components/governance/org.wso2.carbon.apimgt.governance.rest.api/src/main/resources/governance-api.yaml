@@ -97,9 +97,9 @@ paths:
         required: true
         description: JSON object containing the details of the new ruleset.
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Ruleset'
+              $ref: '#/components/schemas/RulesetInput'
       responses:
         "201":
           description: OK. Ruleset created successfully.
@@ -189,9 +189,9 @@ paths:
         required: true
         description: JSON object containing the updated ruleset details.
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Ruleset'
+              $ref: '#/components/schemas/RulesetInput'
       responses:
         "200":
           description: OK. Ruleset updated successfully.
@@ -892,15 +892,10 @@ components:
             $ref: '#/components/schemas/RulesetInfo'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    Ruleset:
+    RulesetInput:
       type: object
       description: Detailed information about a ruleset.
       properties:
-        id:
-          type: string
-          description: UUID of the ruleset.
-          readOnly: true
-          example: "123e4567-e89b-12d3-a456-426614174000"
         name:
           type: string
           description: Name of the ruleset.
@@ -912,6 +907,7 @@ components:
         rulesetContent:
           type: string
           description: The content of the ruleset file (YAML or JSON).
+          format: binary
           example: |
             rules:
               oas2-always-use-https:
@@ -934,8 +930,12 @@ components:
           enum:
             - API_METADATA
             - API_DEFINITION
-            - DOCUMENTATION
+            - API_DOCUMENTATION
           example: API_DEFINITION
+          x-enum-varnames:
+            - API_METADATA
+            - API_DEFINITION
+            - API_DOCUMENTATION
         artifactType:
           type: string
           description: The type of artifact that the ruleset validates.
@@ -954,26 +954,6 @@ components:
           type: string
           description: Entity or individual providing the ruleset.
           example: "TechWave"
-        createdBy:
-          type: string
-          description: Identifier of the user who created the ruleset.
-          readOnly: true
-          example: "admin@gmail.com"
-        createdTime:
-          type: string
-          description: Timestamp when the ruleset was created.
-          readOnly: true
-          example: "2024-08-01T12:00:00Z"
-        updatedBy:
-          type: string
-          description: Identifier of the user who last updated the ruleset.
-          readOnly: true
-          example: "admin@gmail.com"
-        updatedTime:
-          type: string
-          description: Timestamp when the ruleset was last updated.
-          readOnly: true
-          example: "2024-08-10T12:00:00Z"
       required:
         - name
         - rulesetContent

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl.client.validationengine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -36,5 +37,5 @@ public interface ValidationEngine {
      * @return List of rules
      * @throws GovernanceException If an error occurs while extracting rules
      */
-    List<Rule> extractRulesFromRuleset(String rulesetContent) throws GovernanceException;
+    List<Rule> extractRulesFromRuleset(InputStream rulesetContent) throws GovernanceException;
 }

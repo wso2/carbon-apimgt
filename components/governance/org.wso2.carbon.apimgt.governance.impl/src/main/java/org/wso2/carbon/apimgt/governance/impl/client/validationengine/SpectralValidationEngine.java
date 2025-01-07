@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +45,9 @@ public class SpectralValidationEngine implements ValidationEngine {
      * @throws GovernanceException If an error occurs while extracting rules
      */
     @Override
-    public List<Rule> extractRulesFromRuleset(String rulesetContent) throws GovernanceException {
-        Map<String, Object> contentMap = GovernanceUtil.getRulesetConetentMap(rulesetContent);
+    public List<Rule> extractRulesFromRuleset(InputStream rulesetContent) throws GovernanceException {
+        String ruleContentString = GovernanceUtil.getStringContentFromInputStream(rulesetContent);
+        Map<String, Object> contentMap = GovernanceUtil.getMapFromYAMLStringContent(ruleContentString);
         List<Rule> rulesList = new ArrayList<>();
 
         // Check if 'rules' is present and not null

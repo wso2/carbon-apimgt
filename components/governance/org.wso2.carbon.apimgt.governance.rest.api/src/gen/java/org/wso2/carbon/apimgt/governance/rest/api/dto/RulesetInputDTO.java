@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.io.File;
 import javax.validation.constraints.*;
 
 /**
@@ -21,19 +22,18 @@ import javax.validation.Valid;
 
 @ApiModel(description = "Detailed information about a ruleset.")
 
-public class RulesetDTO   {
+public class RulesetInputDTO   {
   
-    private String id = null;
     private String name = null;
     private String description = null;
-    private String rulesetContent = null;
+    private File rulesetContent = null;
 
           @XmlType(name="RuleTypeEnum")
     @XmlEnum(String.class)
     public enum RuleTypeEnum {
         API_METADATA("API_METADATA"),
         API_DEFINITION("API_DEFINITION"),
-        DOCUMENTATION("DOCUMENTATION");
+        API_DOCUMENTATION("API_DOCUMENTATION");
         private String value;
 
         RuleTypeEnum (String v) {
@@ -97,33 +97,11 @@ return null;
     private ArtifactTypeEnum artifactType = null;
     private String documentationLink = null;
     private String provider = null;
-    private String createdBy = null;
-    private String createdTime = null;
-    private String updatedBy = null;
-    private String updatedTime = null;
-
-  /**
-   * UUID of the ruleset.
-   **/
-  public RulesetDTO id(String id) {
-    this.id = id;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "123e4567-e89b-12d3-a456-426614174000", value = "UUID of the ruleset.")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
-  }
 
   /**
    * Name of the ruleset.
    **/
-  public RulesetDTO name(String name) {
+  public RulesetInputDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -142,7 +120,7 @@ return null;
   /**
    * A brief description of the ruleset.
    **/
-  public RulesetDTO description(String description) {
+  public RulesetInputDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -160,26 +138,26 @@ return null;
   /**
    * The content of the ruleset file (YAML or JSON).
    **/
-  public RulesetDTO rulesetContent(String rulesetContent) {
+  public RulesetInputDTO rulesetContent(File rulesetContent) {
     this.rulesetContent = rulesetContent;
     return this;
   }
 
   
-  @ApiModelProperty(example = "rules:   oas2-always-use-https:     given:       - '$.schemes[*]'     severity: error     then:       function: enumeration       functionOptions:         values:           - https     description: >-       Host schemes must use the HTTPS protocol. Applies to: OpenAPI 2.0`     message: API host schemes must use the HTTPS protocol.     formats:       - oas2 ", required = true, value = "The content of the ruleset file (YAML or JSON).")
+  @ApiModelProperty(required = true, value = "The content of the ruleset file (YAML or JSON).")
   @JsonProperty("rulesetContent")
   @NotNull
-  public String getRulesetContent() {
+  public File getRulesetContent() {
     return rulesetContent;
   }
-  public void setRulesetContent(String rulesetContent) {
+  public void setRulesetContent(File rulesetContent) {
     this.rulesetContent = rulesetContent;
   }
 
   /**
    * Context or area to which the ruleset applies.
    **/
-  public RulesetDTO ruleType(RuleTypeEnum ruleType) {
+  public RulesetInputDTO ruleType(RuleTypeEnum ruleType) {
     this.ruleType = ruleType;
     return this;
   }
@@ -198,7 +176,7 @@ return null;
   /**
    * The type of artifact that the ruleset validates.
    **/
-  public RulesetDTO artifactType(ArtifactTypeEnum artifactType) {
+  public RulesetInputDTO artifactType(ArtifactTypeEnum artifactType) {
     this.artifactType = artifactType;
     return this;
   }
@@ -217,7 +195,7 @@ return null;
   /**
    * URL to the documentation related to the ruleset.
    **/
-  public RulesetDTO documentationLink(String documentationLink) {
+  public RulesetInputDTO documentationLink(String documentationLink) {
     this.documentationLink = documentationLink;
     return this;
   }
@@ -235,7 +213,7 @@ return null;
   /**
    * Entity or individual providing the ruleset.
    **/
-  public RulesetDTO provider(String provider) {
+  public RulesetInputDTO provider(String provider) {
     this.provider = provider;
     return this;
   }
@@ -251,78 +229,6 @@ return null;
     this.provider = provider;
   }
 
-  /**
-   * Identifier of the user who created the ruleset.
-   **/
-  public RulesetDTO createdBy(String createdBy) {
-    this.createdBy = createdBy;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "admin@gmail.com", value = "Identifier of the user who created the ruleset.")
-  @JsonProperty("createdBy")
-  public String getCreatedBy() {
-    return createdBy;
-  }
-  public void setCreatedBy(String createdBy) {
-    this.createdBy = createdBy;
-  }
-
-  /**
-   * Timestamp when the ruleset was created.
-   **/
-  public RulesetDTO createdTime(String createdTime) {
-    this.createdTime = createdTime;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "2024-08-01T12:00:00Z", value = "Timestamp when the ruleset was created.")
-  @JsonProperty("createdTime")
-  public String getCreatedTime() {
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime) {
-    this.createdTime = createdTime;
-  }
-
-  /**
-   * Identifier of the user who last updated the ruleset.
-   **/
-  public RulesetDTO updatedBy(String updatedBy) {
-    this.updatedBy = updatedBy;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "admin@gmail.com", value = "Identifier of the user who last updated the ruleset.")
-  @JsonProperty("updatedBy")
-  public String getUpdatedBy() {
-    return updatedBy;
-  }
-  public void setUpdatedBy(String updatedBy) {
-    this.updatedBy = updatedBy;
-  }
-
-  /**
-   * Timestamp when the ruleset was last updated.
-   **/
-  public RulesetDTO updatedTime(String updatedTime) {
-    this.updatedTime = updatedTime;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "2024-08-10T12:00:00Z", value = "Timestamp when the ruleset was last updated.")
-  @JsonProperty("updatedTime")
-  public String getUpdatedTime() {
-    return updatedTime;
-  }
-  public void setUpdatedTime(String updatedTime) {
-    this.updatedTime = updatedTime;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -332,32 +238,26 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RulesetDTO ruleset = (RulesetDTO) o;
-    return Objects.equals(id, ruleset.id) &&
-        Objects.equals(name, ruleset.name) &&
-        Objects.equals(description, ruleset.description) &&
-        Objects.equals(rulesetContent, ruleset.rulesetContent) &&
-        Objects.equals(ruleType, ruleset.ruleType) &&
-        Objects.equals(artifactType, ruleset.artifactType) &&
-        Objects.equals(documentationLink, ruleset.documentationLink) &&
-        Objects.equals(provider, ruleset.provider) &&
-        Objects.equals(createdBy, ruleset.createdBy) &&
-        Objects.equals(createdTime, ruleset.createdTime) &&
-        Objects.equals(updatedBy, ruleset.updatedBy) &&
-        Objects.equals(updatedTime, ruleset.updatedTime);
+    RulesetInputDTO rulesetInput = (RulesetInputDTO) o;
+    return Objects.equals(name, rulesetInput.name) &&
+        Objects.equals(description, rulesetInput.description) &&
+        Objects.equals(rulesetContent, rulesetInput.rulesetContent) &&
+        Objects.equals(ruleType, rulesetInput.ruleType) &&
+        Objects.equals(artifactType, rulesetInput.artifactType) &&
+        Objects.equals(documentationLink, rulesetInput.documentationLink) &&
+        Objects.equals(provider, rulesetInput.provider);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, rulesetContent, ruleType, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(name, description, rulesetContent, ruleType, artifactType, documentationLink, provider);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RulesetDTO {\n");
+    sb.append("class RulesetInputDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    rulesetContent: ").append(toIndentedString(rulesetContent)).append("\n");
@@ -365,10 +265,6 @@ return null;
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    documentationLink: ").append(toIndentedString(documentationLink)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
-    sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
-    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
-    sb.append("    updatedBy: ").append(toIndentedString(updatedBy)).append("\n");
-    sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.governance.rest.api;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetDTO;
+import java.io.File;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
@@ -40,7 +40,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
 
     @POST
     
-    @Consumes({ "application/json" })
+    @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a new ruleset.", notes = "Creates a new ruleset in the user's organization.", response = RulesetInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -53,8 +53,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response createRuleset(@ApiParam(value = "JSON object containing the details of the new ruleset." ,required=true) RulesetDTO rulesetDTO) throws GovernanceException{
-        return delegate.createRuleset(rulesetDTO, securityContext);
+    public Response createRuleset(@Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "provider")  String provider, @Multipart(value = "description", required = false)  String description, @Multipart(value = "documentationLink", required = false)  String documentationLink) throws GovernanceException{
+        return delegate.createRuleset(name, rulesetContentInputStream, rulesetContentDetail, ruleType, artifactType, provider, description, documentationLink, securityContext);
     }
 
     @DELETE
@@ -154,7 +154,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
 
     @PUT
     @Path("/{rulesetId}")
-    @Consumes({ "application/json" })
+    @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Updates a specific ruleset.", notes = "Updates the details of the ruleset identified by the `rulesetId`.", response = RulesetInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -167,7 +167,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response updateRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId, @ApiParam(value = "JSON object containing the updated ruleset details." ,required=true) RulesetDTO rulesetDTO) throws GovernanceException{
-        return delegate.updateRulesetById(rulesetId, rulesetDTO, securityContext);
+    public Response updateRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId, @Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "provider")  String provider, @Multipart(value = "description", required = false)  String description, @Multipart(value = "documentationLink", required = false)  String documentationLink) throws GovernanceException{
+        return delegate.updateRulesetById(rulesetId, name, rulesetContentInputStream, rulesetContentDetail, ruleType, artifactType, provider, description, documentationLink, securityContext);
     }
 }

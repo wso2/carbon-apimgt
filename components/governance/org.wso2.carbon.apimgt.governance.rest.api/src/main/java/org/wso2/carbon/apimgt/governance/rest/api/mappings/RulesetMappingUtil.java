@@ -18,69 +18,18 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 
-import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This class represents the Ruleset Mapping Utility
  */
 public class RulesetMappingUtil {
-
-    /**
-     * Converts a RulesetDTO object to a Ruleset object
-     *
-     * @param rulesetDTO RulesetDTO object
-     * @return Ruleset object
-     */
-    public static Ruleset fromRulesetDTOtoRuleset(RulesetDTO rulesetDTO) {
-        Ruleset ruleset = new Ruleset();
-        ruleset.setId(rulesetDTO.getId());
-        ruleset.setName(rulesetDTO.getName());
-        ruleset.setDescription(rulesetDTO.getDescription());
-        ruleset.setRulesetContent(rulesetDTO.getRulesetContent());
-        ruleset.setRuleType(String.valueOf(rulesetDTO.getRuleType()));
-        ruleset.setArtifactType(String.valueOf(rulesetDTO.getArtifactType()));
-        ruleset.setDocumentationLink(rulesetDTO.getDocumentationLink());
-        ruleset.setProvider(rulesetDTO.getProvider());
-        ruleset.setCreatedBy(rulesetDTO.getCreatedBy());
-        ruleset.setCreatedTime(rulesetDTO.getCreatedTime());
-        ruleset.setUpdatedBy(rulesetDTO.getUpdatedBy());
-        ruleset.setUpdatedTime(rulesetDTO.getUpdatedTime());
-        return ruleset;
-    }
-
-    /**
-     * Converts a Ruleset object to a RulesetDTO object
-     *
-     * @param createdRuleset Ruleset object
-     * @return RulesetDTO object
-     */
-    public static RulesetDTO fromRulsetToRulesetDTO(Ruleset createdRuleset) {
-        RulesetDTO rulesetDTO = new RulesetDTO();
-        rulesetDTO.setId(createdRuleset.getId());
-        rulesetDTO.setName(createdRuleset.getName());
-        rulesetDTO.setDescription(createdRuleset.getDescription());
-        rulesetDTO.setRulesetContent(createdRuleset.getRulesetContent());
-        rulesetDTO.setRuleType(RulesetDTO.RuleTypeEnum.
-                fromValue(createdRuleset.getRuleType()));
-        rulesetDTO.setArtifactType(RulesetDTO.ArtifactTypeEnum
-                .fromValue(createdRuleset.getArtifactType()));
-        rulesetDTO.setDocumentationLink(createdRuleset.getDocumentationLink());
-        rulesetDTO.setProvider(createdRuleset.getProvider());
-        rulesetDTO.setCreatedBy(createdRuleset.getCreatedBy());
-        rulesetDTO.setCreatedTime(createdRuleset.getCreatedTime());
-        rulesetDTO.setUpdatedBy(createdRuleset.getUpdatedBy());
-        rulesetDTO.setUpdatedTime(createdRuleset.getUpdatedTime());
-        return rulesetDTO;
-    }
 
     /**
      * Converts a RulesetInfo object to a RulesetInfoDTO object
