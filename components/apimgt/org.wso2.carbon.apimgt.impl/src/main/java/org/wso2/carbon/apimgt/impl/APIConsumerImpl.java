@@ -215,6 +215,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private final Object tagCacheMutex = new Object();
     protected String userNameWithoutChange;
 
+    boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
+
     public APIConsumerImpl() throws APIManagementException {
 
         super();
@@ -1790,7 +1792,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             isUserAppOwner = application.getSubscriber().getName().equals(existingApp.getSubscriber().getName());
         }
 
-        if (!isUserAppOwner) {
+        if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
             throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
                     "attempted to update application owned by: " + existingApp.getSubscriber().getName());
         }
@@ -1982,7 +1984,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             isUserAppOwner = application.getSubscriber().getName().equals(username);
         }
 
-        if (!isUserAppOwner) {
+        if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
             throw new APIManagementException("user: " + username + ", " + "attempted to remove application owned by: "
                     + application.getSubscriber().getName());
         }
@@ -2356,7 +2358,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 isUserAppOwner = application.getSubscriber().getName().equals(userId);
             }
 
-            if (!isUserAppOwner) {
+            if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
                 throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
                         "attempted to generate tokens for application owned by: " + userId);
             }
@@ -2856,7 +2858,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 isUserAppOwner = subscriberName.equals(userId);
             }
 
-            if (!isUserAppOwner) {
+            if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
                 throw new APIManagementException("user: " + userId + ", attempted to update OAuth application " +
                         "owned by: " + subscriberName);
             }
