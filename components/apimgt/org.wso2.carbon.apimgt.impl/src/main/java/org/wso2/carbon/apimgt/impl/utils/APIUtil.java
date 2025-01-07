@@ -198,6 +198,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -2493,6 +2494,10 @@ public final class APIUtil {
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+            // If tenant Id is not set in the tokenReqContext, deriving it from username.
+            if (tenantId == 0 || tenantId == -1) {
+                tenantId = IdentityTenantUtil.getTenantIdOfUser(username);
+            }
             UserStoreManager manager = ServiceReferenceHolder.getInstance().getRealmService()
                     .getTenantUserRealm(tenantId).getUserStoreManager();
             roles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
