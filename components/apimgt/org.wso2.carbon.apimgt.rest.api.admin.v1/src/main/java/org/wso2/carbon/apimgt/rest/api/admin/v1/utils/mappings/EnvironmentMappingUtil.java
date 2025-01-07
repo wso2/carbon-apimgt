@@ -17,11 +17,13 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 
 import java.util.ArrayList;
@@ -63,12 +65,19 @@ public class EnvironmentMappingUtil {
         envDTO.setDescription(env.getDescription());
         envDTO.setProvider(env.getProvider());
         envDTO.setGatewayType(env.getGatewayType());
-        envDTO.setVisibility(env.getVisibility());
         envDTO.setIsReadOnly(env.isReadOnly());
         envDTO.setVhosts(env.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
         envDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (env.getAdditionalProperties()));
+        GatewayVisibilityPermissionConfigurationDTO permissions = env.getPermissions();
+        if (permissions != null) {
+            EnvironmentPermissionsDTO environmentPermissionsDTO = new EnvironmentPermissionsDTO();
+            environmentPermissionsDTO.setPermissionType(EnvironmentPermissionsDTO.PermissionTypeEnum
+                    .fromValue(permissions.getPermissionType()));
+            environmentPermissionsDTO.setRoles(permissions.getRoles());
+            envDTO.setPermissions(environmentPermissionsDTO);
+        }
         return envDTO;
     }
 
@@ -135,12 +144,20 @@ public class EnvironmentMappingUtil {
         env.setDescription(envDTO.getDescription());
         env.setProvider(envDTO.getProvider());
         env.setGatewayType(envDTO.getGatewayType());
-        env.setVisibility(envDTO.getVisibility());
         env.setReadOnly(false);
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));
         env.setAdditionalProperties(fromAdditionalPropertiesDTOToAdditionalProperties
                 (envDTO.getAdditionalProperties()));
+        EnvironmentPermissionsDTO permissions = envDTO.getPermissions();
+        if (permissions != null && permissions.getPermissionType() != null) {
+            GatewayVisibilityPermissionConfigurationDTO permissionsConfiguration = new GatewayVisibilityPermissionConfigurationDTO();
+            permissionsConfiguration.setPermissionType(permissions.getPermissionType().toString());
+            permissionsConfiguration.setRoles(permissions.getRoles());
+            env.setPermissions(permissionsConfiguration);
+        } else {
+            env.setPermissions(new GatewayVisibilityPermissionConfigurationDTO());
+        }
         return env;
     }
 

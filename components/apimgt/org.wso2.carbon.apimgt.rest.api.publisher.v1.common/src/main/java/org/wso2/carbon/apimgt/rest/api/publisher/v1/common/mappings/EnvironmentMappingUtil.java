@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.AsyncProtocolEndpoint;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -28,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
 
@@ -59,7 +61,14 @@ public class EnvironmentMappingUtil {
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());
         environmentDTO.setProvider(environment.getProvider());
-        environmentDTO.setVisibility(environment.getVisibility());
+        GatewayVisibilityPermissionConfigurationDTO permissions = environment.getPermissions();
+        if (permissions != null) {
+            EnvironmentPermissionsDTO environmentPermissionsDTO = new EnvironmentPermissionsDTO();
+            environmentPermissionsDTO.setPermissionType(EnvironmentPermissionsDTO.PermissionTypeEnum
+                    .fromValue(permissions.getPermissionType()));
+            environmentPermissionsDTO.setRoles(permissions.getRoles());
+            environmentDTO.setPermissions(environmentPermissionsDTO);
+        }
         environmentDTO.setVhosts(environment.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
         environmentDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO

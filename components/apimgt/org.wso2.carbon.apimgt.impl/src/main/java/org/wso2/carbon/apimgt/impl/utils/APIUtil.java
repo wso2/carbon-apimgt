@@ -74,6 +74,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
@@ -88,6 +89,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -5035,83 +5037,79 @@ public final class APIUtil {
         return environmentStringSet;
     }
 
-    public static Set<String> extractVisibleEnvironmentsForUser(List<Environment> environments, String organization, String userName) throws APIManagementException {
+    public static Set<String> extractVisibleEnvironmentsForUser(List<Environment> environments, String organization, String username) throws APIManagementException {
 
-        Set<String> environmentStringSet = new HashSet<String>();
-        List<String> userRolesList;
-        if (userName == null) {
-            userRolesList = new ArrayList<String>() {{
-                add(APIConstants.NULL_USER_ROLE_LIST);
-            }};
-        } else {
-            userRolesList = new ArrayList<String>(Arrays.asList(APIUtil.getListOfRoles(userName)));
-        }
+        Map<String, Environment> permittedEnvironments;
         if (environments != null) {
-            for (Environment environment : environments) {
-                String[] permittedRoles = environment.getVisibilityRoles();
-                if (permittedRoles[0].equals("all")) {
-                    environmentStringSet.add(environment.toString());
-                } else {
-                    for (String role : userRolesList) {
-                        for (String permission : permittedRoles) {
-                            if (role.equals(permission)) {
-                                environmentStringSet.add(environment.toString());
-                            }
-                        }
-                    }
-                }
-            }
+            permittedEnvironments = extractVisibleEnvironmentsForUser(environments, username);
         } else {
             Map<String, Environment> environmentsMap = getEnvironments(organization);
-            for (Environment environment : environmentsMap.values()) {
-                String[] permittedRoles = environment.getVisibilityRoles();
-                if (permittedRoles != null && permittedRoles[0].equals("all")) {
-                    environmentStringSet.add(environment.toString());
-                } else if (permittedRoles != null) {
-                    for (String role : userRolesList) {
-                        for (String permission : permittedRoles) {
-                            if (role.equals(permission)) {
-                                environmentStringSet.add(environment.toString());
-                            }
-                        }
-                    }
-                } else {
-                    environmentStringSet.add(environment.toString());
-                }
-            }
+            List<Environment> environmentsList = new ArrayList<Environment>(environmentsMap.values());
+            permittedEnvironments = extractVisibleEnvironmentsForUser(environmentsList, username);
         }
-        return environmentStringSet;
+        return permittedEnvironments.keySet();
     }
 
-    public static Map<String, Environment> extractVisibleEnvironmentsForUser(String organization, String userName) throws APIManagementException {
+    public static Map<String, Environment> extractVisibleEnvironmentsForUser(List<Environment> environments, String username) throws APIManagementException {
 
-        Map<String, Environment> returnEnvironments = new LinkedHashMap<>();
-        List<String> userRolesList;
-        if (userName == null) {
-            userRolesList = new ArrayList<String>() {{
-                add(APIConstants.NULL_USER_ROLE_LIST);
-            }};
-        } else {
-            userRolesList = new ArrayList<String>(Arrays.asList(APIUtil.getListOfRoles(userName)));
-        }
-        Map<String, Environment> environmentsMap = getEnvironments(organization);
-        for (Environment environment : environmentsMap.values()) {
-            String[] permittedRoles = environment.getVisibilityRoles();
-            if (permittedRoles != null && permittedRoles[0].equals("all")) {
-                returnEnvironments.put(environment.getName(), environment);
-            } else if (permittedRoles != null) {
-                for (String role : userRolesList) {
-                    for (String permission : permittedRoles) {
-                        if (role.equals(permission)) {
-                            returnEnvironments.put(environment.getName(), environment);
-                        }
-                    }
+        Map<String, Environment> permittedGatewayEnvironments = new LinkedHashMap<>();
+        if (environments.size() > 0) {
+            for (Environment environment : environments) {
+                if (isGatewayAllowedForUser(environment, username)) {
+                    permittedGatewayEnvironments.put(environment.getName(), environment);
                 }
-            } else {
-                returnEnvironments.put(environment.getName(), environment);
             }
         }
-        return returnEnvironments;
+        return permittedGatewayEnvironments;
+    }
+
+    /**
+     * This method is used to check if gateway environment is allowed for user
+     *
+     * @param environment gateway environment
+     * @param username  username of the logged-in user
+     * @return boolean returns if the gateway environment is allowed for the logged-in user
+     * @throws APIManagementException if error occurred
+     */
+    public static boolean isGatewayAllowedForUser(Environment environment, String username) throws APIManagementException {
+
+        GatewayVisibilityPermissionConfigurationDTO permissions;
+        if (environment.getPermissions() == null) {
+            APIAdmin apiAdmin = new APIAdminImpl();
+            permissions = apiAdmin.getGatewayVisibilityPermissions(environment.getUuid());
+        } else {
+            permissions = environment.getPermissions();
+        }
+        String permissionType = permissions.getPermissionType();
+        if (permissions != null && !permissionType.equals(APIConstants.PERMISSION_NOT_RESTRICTED)) {
+            String[] permissionRoles = permissions.getRoles()
+                    .stream()
+                    .toArray(String[]::new);
+            String[] userRoles = APIUtil.getListOfRoles(username);
+            boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
+            if ((APIConstants.PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
+                    || (APIConstants.PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean hasIntersection(String[] arr1, String[] arr2) {
+
+        Set<String> set = new HashSet<>();
+
+        for (String element : arr1) {
+            set.add(element);
+        }
+
+        for (String element : arr2) {
+            if (set.contains(element)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static Set<String> extractEnvironmentsForAPI(String environments, String organization) throws APIManagementException {
@@ -5143,7 +5141,7 @@ public final class APIUtil {
 
         Set<String> environmentStringSet = null;
         if (environments == null) {
-            environmentStringSet = extractVisibleEnvironmentsForUser(environments, organization, userName);
+            environmentStringSet = extractVisibleEnvironmentsForUser(null, organization, userName);
         } else {
             // Handle not to publish to any of the gateways
             if (environments.contains(APIConstants.API_GATEWAY_NONE)) {

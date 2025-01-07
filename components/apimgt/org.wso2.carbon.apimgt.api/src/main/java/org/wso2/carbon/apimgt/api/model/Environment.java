@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIConstants;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -57,6 +58,8 @@ public class Environment implements Serializable {
 
     private String[] visibilityRoles;
     private String visibility;
+
+    private GatewayVisibilityPermissionConfigurationDTO permissions = new GatewayVisibilityPermissionConfigurationDTO();
 
     public boolean isDefault() {
         return isDefault;
@@ -188,10 +191,21 @@ public class Environment implements Serializable {
             builder.deleteCharAt(builder.length() - 1);
             this.visibility = builder.toString();
         } else {
-            this.visibility = "all";
-            this.visibilityRoles[0] = "all";
+            this.visibility = "PUBLIC";
+            this.visibilityRoles[0] = "internal/everyone";
         }
         this.visibilityRoles = visibilityRoles;
+    }
+
+    public GatewayVisibilityPermissionConfigurationDTO getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(GatewayVisibilityPermissionConfigurationDTO permissions) {
+        if (permissions == null) {
+            permissions = new GatewayVisibilityPermissionConfigurationDTO();
+        }
+        this.permissions = permissions;
     }
 
     public String getDisplayName() {

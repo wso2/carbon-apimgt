@@ -5,6 +5,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -23,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -69,13 +72,20 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         body.setId(environmentId);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
-        apiAdmin.updateEnvironment(organization, env);
+        GatewayVisibilityPermissionConfigurationDTO gatewayVisibilityPermissionConfigurationDTO =
+                env.getPermissions();
         URI location = null;
         try {
-            location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + environmentId);
+        this.validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
+        apiAdmin.updateEnvironment(organization, env);
+        location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + environmentId);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while updating Environment : " + environmentId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (IllegalArgumentException e) {
+            String error = "Error while storing gateway visibility permissions with name "
+                    + body.getName() + " in tenant " + organization;
+            throw new APIManagementException(error, e, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
         String info = "{'id':'" + environmentId + "'}";
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, info,
@@ -106,10 +116,9 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      * @throws APIManagementException if failed to create
      */
     public Response environmentsPost(EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String gatewayType = body.getGatewayType();
             if (!(APIConstants.API_GATEWAY_TYPE_REGULAR.equals(gatewayType) || APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType))) {
                 throw new APIManagementException("Invalid gateway type: " + gatewayType);
@@ -119,6 +128,9 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             }
             Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
             EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(apiAdmin.addEnvironment(organization, env));
+            GatewayVisibilityPermissionConfigurationDTO gatewayVisibilityPermissionConfigurationDTO =
+                    env.getPermissions();
+            this.validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + envDTO.getId());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, new Gson().toJson(envDTO),
                     APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
@@ -126,8 +138,30 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while adding gateway environment : " + body.getName() + "-" + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (IllegalArgumentException e) {
+            String error = "Error while storing gateway visibility permission roles with name "
+                    + body.getName() + " in tenant " + organization;
+            throw new APIManagementException(error, e, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
         return null;
+    }
+
+    public void validatePermissions(GatewayVisibilityPermissionConfigurationDTO permissionDTO)
+            throws IllegalArgumentException, APIManagementException {
+
+        if (permissionDTO != null && permissionDTO.getRoles() != null) {
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String[] allowedPermissionTypes = {"PUBLIC", "ALLOW", "DENY"};
+            String permissionType = permissionDTO.getPermissionType();
+            if (!Arrays.stream(allowedPermissionTypes).anyMatch(permissionType::equals)) {
+                throw new APIManagementException("Invalid permission type");
+            }
+            for (String role : permissionDTO.getRoles()) {
+                if (!APIUtil.isRoleNameExist(username, role)) {
+                    throw new IllegalArgumentException("Invalid user roles found in visibleRoles list");
+                }
+            }
+        }
     }
 
     /**

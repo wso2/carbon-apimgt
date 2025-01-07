@@ -4674,10 +4674,6 @@ components:
           type: string
           default: hybrid
           example: hybrid
-        visibility:
-          type: string
-          default: all
-          example: role1, role2
         gatewayType:
           type: string
           example: Regular
@@ -4703,6 +4699,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdditionalProperty'
+        permissions:
+          type: object
+          properties:
+            permissionType:
+              type: string
+              example: ALLOW
+              default: PUBLIC
+              enum:
+                - PUBLIC
+                - ALLOW
+                - DENY
+            roles:
+              type: array
+              items:
+                type: string
+                example: Internal/everyone
     EnvironmentList:
       title: Environment List
       type: object

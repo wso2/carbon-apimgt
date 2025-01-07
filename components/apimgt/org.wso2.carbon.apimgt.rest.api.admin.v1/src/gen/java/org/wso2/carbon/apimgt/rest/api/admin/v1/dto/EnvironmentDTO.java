@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayEnvironmentProtocolURIDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
@@ -30,13 +31,13 @@ public class EnvironmentDTO   {
     private String displayName = null;
     private String provider = null;
     private String type = "hybrid";
-    private String visibility = "all";
     private String gatewayType = "Regular";
     private String description = null;
     private Boolean isReadOnly = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
     private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
     private List<AdditionalPropertyDTO> additionalProperties = new ArrayList<AdditionalPropertyDTO>();
+    private EnvironmentPermissionsDTO permissions = null;
 
   /**
    **/
@@ -122,23 +123,6 @@ public class EnvironmentDTO   {
   }
   public void setType(String type) {
     this.type = type;
-  }
-
-  /**
-   **/
-  public EnvironmentDTO visibility(String visibility) {
-    this.visibility = visibility;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "role1, role2", value = "")
-  @JsonProperty("visibility")
-  public String getVisibility() {
-    return visibility;
-  }
-  public void setVisibility(String visibility) {
-    this.visibility = visibility;
   }
 
   /**
@@ -247,6 +231,24 @@ public class EnvironmentDTO   {
     this.additionalProperties = additionalProperties;
   }
 
+  /**
+   **/
+  public EnvironmentDTO permissions(EnvironmentPermissionsDTO permissions) {
+    this.permissions = permissions;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("permissions")
+  public EnvironmentPermissionsDTO getPermissions() {
+    return permissions;
+  }
+  public void setPermissions(EnvironmentPermissionsDTO permissions) {
+    this.permissions = permissions;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -262,18 +264,18 @@ public class EnvironmentDTO   {
         Objects.equals(displayName, environment.displayName) &&
         Objects.equals(provider, environment.provider) &&
         Objects.equals(type, environment.type) &&
-        Objects.equals(visibility, environment.visibility) &&
         Objects.equals(gatewayType, environment.gatewayType) &&
         Objects.equals(description, environment.description) &&
         Objects.equals(isReadOnly, environment.isReadOnly) &&
         Objects.equals(vhosts, environment.vhosts) &&
         Objects.equals(endpointURIs, environment.endpointURIs) &&
-        Objects.equals(additionalProperties, environment.additionalProperties);
+        Objects.equals(additionalProperties, environment.additionalProperties) &&
+        Objects.equals(permissions, environment.permissions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, type, visibility, gatewayType, description, isReadOnly, vhosts, endpointURIs, additionalProperties);
+    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, vhosts, endpointURIs, additionalProperties, permissions);
   }
 
   @Override
@@ -286,13 +288,13 @@ public class EnvironmentDTO   {
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    isReadOnly: ").append(toIndentedString(isReadOnly)).append("\n");
     sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
     sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("}");
     return sb.toString();
   }

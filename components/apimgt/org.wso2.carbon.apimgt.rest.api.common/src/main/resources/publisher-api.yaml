@@ -10589,6 +10589,14 @@ components:
         visibility:
           type: string
           example: Role1, Role2
+        permissionType:
+          type: string
+          example: PUBLIC
+          default: PUBLIC
+          enum:
+            - PUBLIC
+            - ALLOW
+            - DENY
         displayOnDevportal:
           type: boolean
           example: true
@@ -11838,9 +11846,6 @@ components:
         provider:
           type: string
           example: wso2
-        visibility:
-          type: string
-          example: Role1, Role2
         showInApiConsole:
           type: boolean
           example: true
@@ -11856,6 +11861,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdditionalProperty'
+        permissions:
+          type: object
+          properties:
+            permissionType:
+              type: string
+              example: ALLOW
+              default: PUBLIC
+              enum:
+                - PUBLIC
+                - ALLOW
+                - DENY
+            roles:
+              type: array
+              items:
+                type: string
+                example: Internal/everyone
     EnvironmentList:
       title: Environment List
       type: object

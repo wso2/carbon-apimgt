@@ -3195,6 +3195,10 @@ public final class APIConstants {
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
 
+    public static final String PERMISSION_ALLOW = "ALLOW";
+    public static final String PERMISSION_DENY = "DENY";
+    public static final String PERMISSION_NOT_RESTRICTED = "PUBLIC";
+
     // Protocol variables
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
     public static final String HTTPS_TRANSPORT_PROTOCOL_NAME = "https";

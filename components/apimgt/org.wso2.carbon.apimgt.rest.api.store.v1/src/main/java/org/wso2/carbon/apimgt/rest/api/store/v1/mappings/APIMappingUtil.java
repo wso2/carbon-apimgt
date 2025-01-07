@@ -512,7 +512,9 @@ public class APIMappingUtil {
     public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String organization)
             throws APIManagementException {
 
-        Map<String, Environment> environments = APIUtil.extractVisibleEnvironmentsForUser(organization, RestApiCommonUtil.getLoggedInUsername());
+        Map<String, Environment> environmentsMap = APIUtil.getEnvironments(organization);
+        List<Environment> environmentsList = new ArrayList<Environment>(environmentsMap.values());
+        Map<String, Environment> permittedEnvironments = APIUtil.extractVisibleEnvironmentsForUser(environmentsList, RestApiCommonUtil.getLoggedInUsername());
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
 
@@ -528,7 +530,7 @@ public class APIMappingUtil {
         for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
             if (revisionDeployment.isDisplayOnDevportal()) {
                 // Deployed environment
-                Environment environment = environments.get(revisionDeployment.getDeployment());
+                Environment environment = permittedEnvironments.get(revisionDeployment.getDeployment());
                 if (environment != null) {
                     APIEndpointURLsDTO apiEndpointURLsDTO = fromAPIRevisionToEndpoints(apidto, environment,
                             revisionDeployment.getVhost(), customGatewayUrl, organization);

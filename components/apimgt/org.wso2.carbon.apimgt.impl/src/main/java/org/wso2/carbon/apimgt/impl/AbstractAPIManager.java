@@ -1195,6 +1195,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected void populateAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException, AsyncSpecPersistenceException {
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         //UUID
         if (api.getUuid() == null) {
             api.setUuid(uuid);
@@ -1376,6 +1377,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void populateDevPortalAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException {
         Organization org = new Organization(organization);
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         //UUID
         if (api.getUuid() == null) {
             api.setUuid(uuid);
@@ -1520,6 +1522,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void populateAPIProductInformation(String uuid, String organization, APIProduct apiProduct)
             throws APIManagementException, OASPersistenceException, ParseException {
         Organization org = new Organization(organization);
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         apiProduct.setOrganization(organization);
         ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
         apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
