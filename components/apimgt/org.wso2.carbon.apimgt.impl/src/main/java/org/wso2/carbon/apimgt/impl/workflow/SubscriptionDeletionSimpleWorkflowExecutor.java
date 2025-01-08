@@ -54,25 +54,6 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
         return new GeneralWorkflowResponse();
     }
 
-    /**
-     * This method is responsible for deleting the monetized subscription and returns the execute method.
-     *
-     * @param workflowDTO The WorkflowDTO which contains workflow contextual information related to the workflow
-     * @return workflow response to the caller by returning the execute() method
-     * @throws WorkflowException
-     */
-    @Override
-    public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, API api) throws WorkflowException {
-        // implementation is not provided in this version
-        return execute(workflowDTO);
-    }
-
-    @Override
-    public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, APIProduct apiProduct) throws WorkflowException {
-        // implementation is not provided in this version
-        return execute(workflowDTO);
-    }
-
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
