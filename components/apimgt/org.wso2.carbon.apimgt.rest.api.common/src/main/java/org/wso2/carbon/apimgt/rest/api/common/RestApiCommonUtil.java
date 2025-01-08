@@ -574,6 +574,24 @@ public class RestApiCommonUtil {
     }
 
     /**
+     * Returns the paginated url for subscriptions
+     *
+     * @param offset  starting index
+     * @param limit   max number of objects returned
+     * @param groupId groupId of the Application
+     * @return constructed paginated url
+     */
+    public static String getSubscriptionPaginatedURL(Integer offset, Integer limit, String groupId) {
+
+        groupId = groupId == null ? "" : groupId;
+        String paginatedURL = RestApiConstants.SUBSCRIPTIONS_GET_PAGINATION_URL_APIID;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
+        return paginatedURL;
+    }
+
+    /**
      * Returns the paginated url for subscriptions for a particular application
      *
      * @param offset        starting index

@@ -66,8 +66,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         query = query == null ? APIConstants.CHAR_ASTERIX : query;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getOrganization(messageContext);
-        Map<String, Object> result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit, 
-                RestApiConstants.DEFAULT_SORT_BY, RestApiConstants.DEFAULT_SORT_ORDER);
+        Map<String, Object> result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
         List<Object> apis = SearchApiServiceImplUtil.getAPIListFromAPISearchResult(result);
         List<ApiResultDTO> allMatchedResults = getAllMatchedResults(apis);
         resultListDTO.setApis(allMatchedResults);

@@ -979,7 +979,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
-                                                           UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException {
+                                                           UserContext ctx) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
 
         boolean isTenantFlowStarted = false;
