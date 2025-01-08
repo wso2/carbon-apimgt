@@ -175,6 +175,8 @@
 
         <AuthToken></AuthToken>
 
+        <AnalyticsImpl></AnalyticsImpl>
+
         <!-- Event publisher implementation -->
         <!-- <ReporterClass></ReporterClass> -->
 
