@@ -99,18 +99,6 @@ public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecut
     }
 
     @Override
-    public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, API api) throws WorkflowException {
-        // implementation is not provided in this version
-        return execute(workflowDTO);
-    }
-
-    @Override
-    public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, APIProduct apiProduct) throws WorkflowException {
-        // implementation is not provided in this version
-        return execute(workflowDTO);
-    }
-
-    @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
 
         String errorMsg;
