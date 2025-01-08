@@ -2191,6 +2191,8 @@ public final class APIConstants {
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
         public static final String KEY_MANAGER = "KeyManager/IdP";
+        public static final String DOCUMENT = "Document";
+        public static final String DOCUMENT_CONTENT = "DocumentContent";
 
         public static final String NAME = "name";
         public static final String SCOPE = "scope";
@@ -2200,6 +2202,9 @@ public final class APIConstants {
         public static final String PROVIDER = "provider";
         public static final String OWNER = "owner";
         public static final String TIER = "tier";
+        public static final String API_ID = "apiId";
+        public static final String DOCUMENT_ID = "documentId";
+        public static final String TYPE = "type";
         public static final String REQUESTED_TIER = "requested_tier";
         public static final String CALLBACK = "callbackURL";
         public static final String GROUPS = "groups";
