@@ -1946,7 +1946,7 @@ public class RegistryPersistenceUtil {
                     break;
                 default:
                     // Add any other cases if needed
-                    outputMap.put("overview_" + key, value);
+                    outputMap.put("overview_" + key, value.toLowerCase());
                     break;
             }
         }
