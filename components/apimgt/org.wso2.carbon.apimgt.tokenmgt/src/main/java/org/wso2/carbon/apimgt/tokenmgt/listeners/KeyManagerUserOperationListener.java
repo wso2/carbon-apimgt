@@ -177,6 +177,18 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     }
 
     @Override
+    public boolean doPreUpdateInternalRoleListOfUser(String userName, String[] deletedRoles,
+                                                     String[] newRoles,
+                                                     UserStoreManager userStoreManager) {
+
+        if (!isEnable()) {
+            return true;
+        }
+        APIUtil.clearRoleCache(getUserName(userName, userStoreManager));
+        return true;
+    }
+
+    @Override
     public boolean doPreUpdateUserListOfRole(String roleName, String[] deletedUsers, String[] newUsers,
                                              UserStoreManager userStoreManager) {
 
