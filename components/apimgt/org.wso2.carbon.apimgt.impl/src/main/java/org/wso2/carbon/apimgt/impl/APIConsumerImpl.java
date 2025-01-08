@@ -101,7 +101,9 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.monetization.AbstractMonetization;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.monetization.MonetizationSubscription;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyResetEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
@@ -184,6 +186,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private static final Log log = LogFactory.getLog(APIConsumerImpl.class);
     private RecommendationEnvironment recommendationEnvironment;
+    private AbstractMonetization monetizationImpl = (AbstractMonetization) getMonetizationImplClass();
+    private MonetizationSubscription subscriptionImpl = monetizationImpl.getMonetizationSubscriptionClass();
 
     private static final Log audit = CarbonConstants.AUDIT_LOG;
     public static final char COLON_CHAR = ':';
@@ -924,18 +928,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     isMonetizationEnabled = api.getMonetizationStatus();
                     //check whether monetization is enabled for API and tier plan is commercial
                     if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = addSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
-                    } else {
-                        workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
+                        subscriptionImpl.monetizeSubscription(workflowDTO, api);
                     }
+                    workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
                 } else {
                     isMonetizationEnabled = product.getMonetizationStatus();
                     //check whether monetization is enabled for API and tier plan is commercial
                     if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = addSubscriptionWFExecutor.monetizeSubscription(workflowDTO, product);
-                    } else {
-                        workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
+                        subscriptionImpl.monetizeSubscription(workflowDTO, product);
                     }
+                    workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
                 }
             } catch (WorkflowException e) {
                 //If the workflow execution fails, roll back transaction by removing the subscription entry.
@@ -1114,18 +1116,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     isMonetizationEnabled = api.getMonetizationStatus();
                     //check whether monetization is enabled for API and tier plan is commercial
                     if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
-                    } else {
-                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
+                        subscriptionImpl.monetizeSubscription(workflowDTO, api);
                     }
+                    workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
                 } else {
                     isMonetizationEnabled = product.getMonetizationStatus();
                     //check whether monetization is enabled for API and tier plan is commercial
                     if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        workflowResponse = updateSubscriptionWFExecutor.monetizeSubscription(workflowDTO, product);
-                    } else {
-                        workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
+                        subscriptionImpl.monetizeSubscription(workflowDTO, product);
                     }
+                    workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
                 }
             } catch (WorkflowException e) {
                 throw new APIManagementException("Could not execute Workflow", e);
@@ -1381,17 +1381,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (api != null) {
                 //check whether monetization is enabled for API and tier plan is commercial
                 if (api.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, api);
-                } else {
-                    removeSubscriptionWFExecutor.execute(workflowDTO);
+                    subscriptionImpl.deleteMonetizedSubscription(workflowDTO, api);
                 }
+                removeSubscriptionWFExecutor.execute(workflowDTO);
             } else if (product != null) {
                 //check whether monetization is enabled for API product and tier plan is commercial
                 if (product.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, product);
-                } else {
-                    removeSubscriptionWFExecutor.execute(workflowDTO);
+                    subscriptionImpl.deleteMonetizedSubscription(workflowDTO, product);
                 }
+                removeSubscriptionWFExecutor.execute(workflowDTO);
             }
             JSONObject subsLogObject = new JSONObject();
             subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
