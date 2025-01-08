@@ -10128,6 +10128,21 @@ public final class APIUtil {
         return null;
     }
 
+    public static boolean isNewPortalEnabled() {
+        return Boolean.parseBoolean(getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_ENABLED, "false"));
+    }
+
+    public static String getNewPortalURL() {
+        return getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_URL, "");
+    }
+
+    private static String getConfigProperty(String key, String defaultValue) {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String propertyValue = apiManagerConfiguration.getFirstProperty(key);
+        return StringUtils.isNotEmpty(propertyValue) ? propertyValue : defaultValue;
+    }
+
     public static boolean isDefaultApplicationCreationEnabled() {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();

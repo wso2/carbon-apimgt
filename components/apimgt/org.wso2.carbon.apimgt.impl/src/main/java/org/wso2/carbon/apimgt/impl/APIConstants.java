@@ -933,6 +933,8 @@ public final class APIConstants {
     public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
             "DefaultReservedUsername";
     public static final String API_STORE_CREATE_DEFAULT_APPLICATION = API_STORE + "CreateDefaultApplication";
+    public static final String API_STORE_NEW_PORTAL_ENABLED = API_STORE + "NewPortalEnabled";
+    public static final String API_STORE_NEW_PORTAL_URL = API_STORE + "NewPortalURL";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";

@@ -74,6 +74,11 @@ public class LifeCycleUtils {
             sendEmailNotification(apiTypeWrapper, orgId);
         }
 
+        // Next Gen Dev Portal Publication
+        if (APIConstants.PUBLISHED.equals(targetStatus) && APIUtil.isNewPortalEnabled()) {
+            publishInNewPortal();
+        }
+
         // Change the lifecycle state in the database
         addLCStateChangeInDatabase(user, apiTypeWrapper, currentStatus, targetStatus, uuid);
 
@@ -102,6 +107,12 @@ public class LifeCycleUtils {
         if (!apiTypeWrapper.isAPIProduct()) {
             extractRecommendationDetails(apiTypeWrapper.getApi(), orgId);
         }
+    }
+
+    public static void publishInNewPortal() throws APIManagementException {
+        String url = APIUtil.getNewPortalURL();
+        log.info("Publishing to NextGen Developer Portal");
+        log.info("Publsihing URL: " + url);
     }
 
     private static void updateLifeCycleState(APIProvider apiProvider, String orgId, ApiTypeWrapper apiTypeWrapper,
