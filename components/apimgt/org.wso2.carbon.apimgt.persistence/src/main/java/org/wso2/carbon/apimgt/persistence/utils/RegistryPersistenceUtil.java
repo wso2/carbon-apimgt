@@ -83,6 +83,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -186,7 +187,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE, Boolean.toString(api.isEnableStore()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_TESTKEY, api.getTestKey());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, api.getVersionTimestamp());
-
+            
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
@@ -864,6 +865,11 @@ public class RegistryPersistenceUtil {
             }
         }
         api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
+        String visibleOrg = apiResource.getProperty(APIConstants.VISIBLE_ORGANIZATIONS);
+        if (visibleOrg != null) {
+            visibleOrg = visibleOrg.replace("+", " ");
+        }
+        api.setVisibleOrganizations(visibleOrg);
 
         String accessControlRoles = null;
 
@@ -1900,5 +1906,85 @@ public class RegistryPersistenceUtil {
 
     private static RegistryService getRegistryService() {
         return ServiceReferenceHolder.getInstance().getRegistryService();
+    }
+    
+    public static Map<String, String> getFields(String query) {
+        // Map to hold the final output
+        Map<String, String> outputMap = new HashMap<>();
+
+        // Split the query by '&'
+        String[] parameters = query.split("&");
+
+        // Process each parameter
+        for (String parameter : parameters) {
+            // Split each parameter by '=' to get key and value
+            String[] keyValue = parameter.split("=");
+
+            // Extract the key and value
+            String key = keyValue[0];
+            String value = keyValue.length > 1 ? keyValue[1] : "";
+
+            // Map keys to the corresponding output format
+            switch (key) {
+                case "group":
+                    outputMap.put("group", value);
+                    break;
+                case "group.field":
+                    outputMap.put("group.field", "overview_" + value);
+                    break;
+                case "group.ngroups":
+                    outputMap.put("group.ngroups", value);
+                    break;
+                case "group.sort":
+                    outputMap.put("group.sort", "overview_" + value);
+                    break;
+                case "tags":
+                    outputMap.put("tags", value);
+                    break;
+                case "apiCategories_categoryName":
+                    outputMap.put("apiCategories_categoryName", value.toLowerCase());
+                    break;
+                default:
+                    // Add any other cases if needed
+                    outputMap.put("overview_" + key, value.toLowerCase());
+                    break;
+            }
+        }
+
+        outputMap.put("mediaType", "application/vnd.wso2-api+xml");
+
+        return outputMap;
+    }
+
+    public static String buildFQStringForProperties(String query) {
+        String fq = "";
+        boolean hasStoreViewRoles = query.contains("store_view_roles");
+        boolean hasVisibleOrganizations = query.contains("visible_organizations");
+
+        // Build fq string based on the availability of store_view_roles and visible_organizations
+        if (hasStoreViewRoles) {
+            String storeViewRoles = extractValue(query, "store_view_roles");
+            fq += "fq=store_view_roles_ss:" + storeViewRoles;
+        }
+
+        if (hasVisibleOrganizations) {
+            if (!fq.isEmpty()) {
+                fq += "&";
+            }
+            String visibleOrganizations = extractValue(query, "visible_organizations");
+            fq += "fq=visible_organizations_ss:" + visibleOrganizations;
+        }
+
+        return fq;
+    }
+
+    private static String extractValue(String query, String paramName) {
+        String paramPrefix = paramName + "=";
+        int startIndex = query.indexOf(paramPrefix) + paramPrefix.length();
+        int endIndex = query.indexOf("&", startIndex);
+        if (endIndex == -1) {
+            endIndex = query.length();
+        }
+        return query.substring(startIndex, endIndex);
     }
 }
