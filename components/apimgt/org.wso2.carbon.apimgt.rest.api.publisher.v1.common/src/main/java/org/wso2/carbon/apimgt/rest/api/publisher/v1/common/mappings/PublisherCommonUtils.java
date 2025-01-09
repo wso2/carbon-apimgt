@@ -150,6 +150,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.AI_API_QUOTA_TYPE;
+import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.EVENT_COUNT_TYPE;
+
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_KEY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.PUBLISH;
@@ -347,6 +350,7 @@ public class PublisherCommonUtils {
                 || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
                 || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType())
                 || APIConstants.APITransportType.ASYNC.toString().equals(originalAPI.getType()));
+        boolean isAIAPI = APIConstants.API_SUBTYPE_AI_API.equals(originalAPI.getSubtype());
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -508,9 +512,20 @@ public class PublisherCommonUtils {
         if (!APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
             if (apiSecurity != null && (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
                     .contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
-                throw new APIManagementException(
-                        "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
-                        ExceptionCodes.TIER_CANNOT_BE_NULL);
+                Set<Tier> availableThrottlingPolicyList = apiProvider.getTiers();
+                tiersFromDTO = availableThrottlingPolicyList.stream()
+                        .filter(tier -> isApplicableTier(tier, isAsyncAPI, isAIAPI))
+                        .map(Tier::getName)
+                        .findFirst()
+                        .map(Collections::singletonList)
+                        .orElse(Collections.emptyList());
+                apiDtoToUpdate.setPolicies(tiersFromDTO);
+
+                if (tiersFromDTO.isEmpty()) {
+                    throw new APIManagementException(
+                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
+                            ExceptionCodes.TIER_CANNOT_BE_NULL);
+                }
             }
         } else {
             if (apiSecurity != null) {
@@ -702,6 +717,33 @@ public class PublisherCommonUtils {
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         return apiToUpdate;
+    }
+
+    private static boolean isApplicableTier(Tier tier, boolean isAsyncAPI, boolean isAIAPI) {
+        if (isAsyncAPI) {
+            return isAsyncAPITier(tier);
+        }
+
+        if (isAIAPI) {
+            return isAIAPITier(tier);
+        }
+
+        return isRegularAPITier(tier);
+    }
+
+    private static boolean isAsyncAPITier(Tier tier) {
+        return EVENT_COUNT_TYPE.equals(tier.getQuotaPolicyType());
+    }
+
+    private static boolean isAIAPITier(Tier tier) {
+        return AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType()) ||
+                tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) ||
+                tier.getQuotaPolicyType() == null;
+    }
+
+    private static boolean isRegularAPITier(Tier tier) {
+        return !AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType()) &&
+                !EVENT_COUNT_TYPE.equals(tier.getQuotaPolicyType());
     }
 
     /**
