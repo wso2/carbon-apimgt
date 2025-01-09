@@ -83,8 +83,7 @@ public class SearchApiServiceImpl implements SearchApiService {
                 if (isOrganizationSupportEnabled) {
                     result = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset, limit, null, null);
                 } else {
-                    result = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset, limit, null,
-                            null);
+                    result = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset, limit);
                 }
             }
 

@@ -216,6 +216,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private final Object tagCacheMutex = new Object();
     protected String userNameWithoutChange;
 
+    boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
+
     public APIConsumerImpl() throws APIManagementException {
 
         super();
@@ -1794,7 +1796,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             isUserAppOwner = application.getSubscriber().getName().equals(existingApp.getSubscriber().getName());
         }
 
-        if (!isUserAppOwner) {
+        if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
             throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
                     "attempted to update application owned by: " + existingApp.getSubscriber().getName());
         }
@@ -1989,7 +1991,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             isUserAppOwner = application.getSubscriber().getName().equals(username);
         }
 
-        if (!isUserAppOwner) {
+        if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
             throw new APIManagementException("user: " + username + ", " + "attempted to remove application owned by: "
                     + application.getSubscriber().getName());
         }
@@ -2363,7 +2365,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 isUserAppOwner = application.getSubscriber().getName().equals(userId);
             }
 
-            if (!isUserAppOwner) {
+            if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
                 throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
                         "attempted to generate tokens for application owned by: " + userId);
             }
@@ -2389,7 +2391,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             } else {
                 throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
             }
-            
+
             if (appRegistrationWorkflow == null ) {
                 appRegistrationWorkflow = new ApplicationRegistrationSimpleWorkflowExecutor();
             }
@@ -2864,7 +2866,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 isUserAppOwner = subscriberName.equals(userId);
             }
 
-            if (!isUserAppOwner) {
+            if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
                 throw new APIManagementException("user: " + userId + ", attempted to update OAuth application " +
                         "owned by: " + subscriberName);
             }
@@ -3846,8 +3848,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
-                                                   String sortBy, String sortOrder) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
+                                                 throws APIManagementException {
     	
         Organization org = new Organization(organization);
         String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
@@ -3934,7 +3936,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
-                        devPortalApi.getVisibleRoles());
+                        devPortalApi.getVisibleRoles(), devPortalApi.getPublisherAccessControl(),
+                        devPortalApi.getPublisherAccessControlRoles());
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
@@ -3963,7 +3966,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
     }
 
-    protected void checkVisibilityPermission(String userNameWithTenantDomain, String visibility, String visibilityRoles)
+    protected void checkVisibilityPermission(String userNameWithTenantDomain, String visibility, String visibilityRoles,
+                                             String publisherAccessControl, String publisherAccessControlRoles)
             throws APIManagementException {
 
         if (visibility == null || visibility.trim().isEmpty()
@@ -3973,10 +3977,38 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
             return;
         }
-        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)
-                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_CREATE)
-                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_PUBLISH)) {
+        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
             return;
+        }
+        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_CREATE)
+                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_PUBLISH)) {
+            if (publisherAccessControl == null || publisherAccessControl.trim().isEmpty()
+                    || publisherAccessControl.equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
+                // If the API has not been restricted with publisher access control, the API will be visible to all
+                // creators and publishers irrespective of devportal visibility restrictions.
+                return;
+            } else {
+                // If the API has been restricted with publisher access control, the API will be visible to creators
+                // and publishers having the roles which has been specified under publisher access control irrespective
+                // of devportal visibility restrictions.
+                if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
+                    String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
+                    if (log.isDebugEnabled()) {
+                        log.debug("API has restricted access to creators and publishers with the roles : "
+                                + Arrays.toString(accessControlRoleList));
+                    }
+                    String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
+                    if (log.isDebugEnabled()) {
+                        log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
+                    }
+                    for (String role : accessControlRoleList) {
+                        if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)
+                                && APIUtil.compareRoleList(userRoleList, role)) {
+                            return;
+                        }
+                    }
+                }
+            }
         }
 
         if (visibilityRoles != null && !visibilityRoles.trim().isEmpty()) {
@@ -4061,7 +4093,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
-                        devPortalApi.getVisibleRoles());
+                        devPortalApi.getVisibleRoles(), devPortalApi.getPublisherAccessControl(),
+                        devPortalApi.getPublisherAccessControlRoles());
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
 
                 /// populate relavant external info
@@ -4313,7 +4346,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         try {
             DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(organization), apiId);
             if (api != null) {
-                checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles());
+                checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles(),
+                        api.getPublisherAccessControl(), api.getPublisherAccessControlRoles());
             }
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while accessing dev portal API", e);

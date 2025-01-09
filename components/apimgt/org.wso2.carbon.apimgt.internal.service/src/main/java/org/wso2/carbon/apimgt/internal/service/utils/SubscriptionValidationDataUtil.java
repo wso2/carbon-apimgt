@@ -67,6 +67,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setVersion(model.getVersion());
             apidto.setName(model.getName());
             apidto.setContext(model.getContext());
+            apidto.setContextTemplate(model.getContextTemplate());
             apidto.setPolicy(model.getPolicy());
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
@@ -134,6 +135,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setApiId(model.getApiId());
             apidto.setVersion(model.getVersion());
             apidto.setContext(model.getContext());
+            apidto.setContextTemplate(model.getContextTemplate());
             apidto.setPolicy(model.getPolicy());
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());

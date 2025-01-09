@@ -432,6 +432,7 @@ public class SubscriptionValidationDAO {
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+                        api.setContextTemplate(contextTemplate);
 
                         setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context, contextTemplate);
 
@@ -1151,6 +1152,7 @@ public class SubscriptionValidationDAO {
                         }
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+                        api.setContextTemplate(contextTemplate);
 
                         setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context,
                                 contextTemplate);
@@ -1192,6 +1194,7 @@ public class SubscriptionValidationDAO {
             }
             String synapseContext = context + "/" + APIConstants.API_PRODUCT_VERSION_1_0_0;
             api.setContext(synapseContext);
+            api.setContextTemplate(context);
         }
     }
 
@@ -1267,6 +1270,7 @@ public class SubscriptionValidationDAO {
                         api.setApiType(apiType);
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
+                        api.setContextTemplate(resultSet.getString("CONTEXT_TEMPLATE"));
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
@@ -1486,6 +1490,7 @@ public class SubscriptionValidationDAO {
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(context);
                         api.setStatus(resultSet.getString("STATUS"));
+                        api.setContextTemplate(contextTemplate);
                         if (resultSet.getString("IS_EGRESS") != null) {
                             api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
                         }
@@ -1591,6 +1596,7 @@ public class SubscriptionValidationDAO {
                         }
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+                        api.setContextTemplate(contextTemplate);
 
                         setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context,
                                 contextTemplate);

@@ -1657,9 +1657,7 @@ public class APIProviderImplTest {
                 Mockito.anyString(),
                 Mockito.anyInt(),
                 Mockito.anyInt(),
-                Mockito.any(UserContext.class),
-                Mockito.anyString(),
-                Mockito.anyString())).thenReturn(returnSearchAPIs);
+                Mockito.any(UserContext.class))).thenReturn(returnSearchAPIs);
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
 
@@ -1692,9 +1690,7 @@ public class APIProviderImplTest {
                 Mockito.anyString(),
                 Mockito.anyInt(),
                 Mockito.anyInt(),
-                Mockito.any(UserContext.class),
-                Mockito.anyString(),
-                Mockito.anyString())).thenReturn(null);
+                Mockito.any(UserContext.class))).thenReturn(null);
 
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO);
 
