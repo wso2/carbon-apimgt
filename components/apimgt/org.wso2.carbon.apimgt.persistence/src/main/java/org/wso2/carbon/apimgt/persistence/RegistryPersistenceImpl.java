@@ -1000,7 +1000,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
-                                                           UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException {
+                                                           UserContext ctx) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
 
         boolean isTenantFlowStarted = false;
@@ -2854,7 +2854,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             int prependIndex = apiPath.lastIndexOf("/api");
             String apiResourcePath = apiPath.substring(0, prependIndex);
             String policyPath = GovernanceUtils.getArtifactPath(registry, mediationPolicyId);
-            if (!policyPath.startsWith(apiResourcePath)) {
+            if (!policyPath.toLowerCase().startsWith(apiResourcePath.toLowerCase())) {
                 throw new MediationPolicyPersistenceException("Policy not foud ", ExceptionCodes.POLICY_NOT_FOUND);
             }
             Resource mediationResource = registry.get(policyPath);

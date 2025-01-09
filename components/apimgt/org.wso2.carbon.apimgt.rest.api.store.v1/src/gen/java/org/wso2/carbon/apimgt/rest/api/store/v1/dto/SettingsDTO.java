@@ -43,6 +43,7 @@ public class SettingsDTO   {
     private Boolean apiChatEnabled = true;
     private Boolean aiAuthTokenProvided = false;
     private Boolean marketplaceAssistantEnabled = true;
+    private Boolean orgWideAppUpdateEnabled = false;
 
   /**
    **/
@@ -393,6 +394,23 @@ public class SettingsDTO   {
     this.marketplaceAssistantEnabled = marketplaceAssistantEnabled;
   }
 
+  /**
+   **/
+  public SettingsDTO orgWideAppUpdateEnabled(Boolean orgWideAppUpdateEnabled) {
+    this.orgWideAppUpdateEnabled = orgWideAppUpdateEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("orgWideAppUpdateEnabled")
+  public Boolean isOrgWideAppUpdateEnabled() {
+    return orgWideAppUpdateEnabled;
+  }
+  public void setOrgWideAppUpdateEnabled(Boolean orgWideAppUpdateEnabled) {
+    this.orgWideAppUpdateEnabled = orgWideAppUpdateEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -422,12 +440,13 @@ public class SettingsDTO   {
         Objects.equals(passwordPolicyMaxLength, settings.passwordPolicyMaxLength) &&
         Objects.equals(apiChatEnabled, settings.apiChatEnabled) &&
         Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
-        Objects.equals(marketplaceAssistantEnabled, settings.marketplaceAssistantEnabled);
+        Objects.equals(marketplaceAssistantEnabled, settings.marketplaceAssistantEnabled) &&
+        Objects.equals(orgWideAppUpdateEnabled, settings.orgWideAppUpdateEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled, orgWideAppUpdateEnabled);
   }
 
   @Override
@@ -455,6 +474,7 @@ public class SettingsDTO   {
     sb.append("    apiChatEnabled: ").append(toIndentedString(apiChatEnabled)).append("\n");
     sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
     sb.append("    marketplaceAssistantEnabled: ").append(toIndentedString(marketplaceAssistantEnabled)).append("\n");
+    sb.append("    orgWideAppUpdateEnabled: ").append(toIndentedString(orgWideAppUpdateEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -141,7 +141,8 @@ public class FaultCodeClassifier {
         if (messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)) {
             int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
             return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
-                    && errorCode == Constants.RESOURCE_NOT_FOUND_ERROR_CODE;
+                    && (errorCode == Constants.RESOURCE_NOT_FOUND_ERROR_CODE
+                    || errorCode == Constants.RESOURCE_NOT_FOUND_APIM_ERROR_CODE);
         }
         return false;
     }

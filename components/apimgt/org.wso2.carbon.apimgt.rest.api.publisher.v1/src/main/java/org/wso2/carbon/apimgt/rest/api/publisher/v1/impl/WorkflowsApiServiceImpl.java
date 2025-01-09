@@ -117,8 +117,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             return Response.ok().entity(workflowListDTO).build();
         }
         while (start >= 0) {
-            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, start, start + 100,
-                    RestApiConstants.DEFAULT_SORT_CRITERION, RestApiConstants.DESCENDING_SORT_ORDER);
+            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, start, start + 100);
             Set<API> apis = (Set<API>) result.get("apis");
             for (API api : apis) {
                 String organization = (RestApiUtil.getOrganization(messageContext) != null) ?

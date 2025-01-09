@@ -110,6 +110,8 @@ public interface APIMapper {
     //@Mapping(source = "visibleTenants", target = "visibleOrganizations")
     @Mapping(source = "subscriptionAvailableTenants", target = "subscriptionAvailableOrgs")
     //@Mapping(source = "environmentList", target = "environments")
+    @Mapping(source = "accessControl", target = "publisherAccessControl")
+    @Mapping(source = "accessControlRoles", target = "publisherAccessControlRoles")
     DevPortalAPI toDevPortalApi(API api);
     
     //@Mapping(source = "providerName", target = "id.providerName")

@@ -12,7 +12,7 @@ on:
 permissions:
   contents: read # to fetch code (actions/checkout)
 concurrency:
-  group: ${{ github.event.number }}
+  group: ${{ github.event.number || github.run_id }}
   cancel-in-progress: true
 jobs:
   build-carbon:

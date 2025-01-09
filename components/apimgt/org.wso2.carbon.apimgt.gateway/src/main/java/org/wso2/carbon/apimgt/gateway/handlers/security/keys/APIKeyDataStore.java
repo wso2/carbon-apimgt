@@ -107,7 +107,7 @@ public interface APIKeyDataStore {
      * @return an APIKeyValidationInfoDTO instance containing key validation data
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
-    APIKeyValidationInfoDTO validateSubscription(String context, String version, int appId, String tenantDomain)
+    APIKeyValidationInfoDTO validateSubscription(String context, String version, int appId, String tenantDomain, String keyType)
             throws APISecurityException;
     /**
      * Validate scopes bound to the resource of the API being invoked against the scopes of the token.
