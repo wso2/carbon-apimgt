@@ -3548,8 +3548,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 graphQLSchema = PublisherCommonUtils.retrieveGraphQLSchemaFromURL(url);
             }
             else {
-                LinkedHashMap<String, String > endpoints = (LinkedHashMap<String, String>) ((LinkedHashMap) additionalPropertiesAPI.getEndpointConfig()).get("production_endpoints");
-                String endpointURL = endpoints.get("url");
+                Map<String, Object> endpointConfigurationMap = (Map<String, Object>) additionalPropertiesAPI.getEndpointConfig();
+                String endpointURL = "";
+                if (endpointConfigurationMap.containsKey("production_endpoints")) {
+                    Map<String, String> productionEndpoints = (Map<String, String>) endpointConfigurationMap.get("production_endpoints");
+                    endpointURL = productionEndpoints.get("url");
+                }
                 graphQLSchema = PublisherCommonUtils.generateGraphQLSchemaFromIntrospection(endpointURL);
             }
 
