@@ -1618,7 +1618,7 @@ public class ImportUtils {
         try {
             String schemaDefinition = loadGraphqlSDLFile(pathToArchive);
             GraphQLValidationResponseDTO graphQLValidationResponseDTO = PublisherCommonUtils
-                    .validateGraphQLSchema(file.getName(), schemaDefinition);
+                    .validateGraphQLSchema(file.getName(), schemaDefinition, null, false);
             if (!graphQLValidationResponseDTO.isIsValid()) {
                 String errorMessage = "Error occurred while importing the API. Invalid GraphQL schema definition "
                         + "found. " + graphQLValidationResponseDTO.getErrorMessage();

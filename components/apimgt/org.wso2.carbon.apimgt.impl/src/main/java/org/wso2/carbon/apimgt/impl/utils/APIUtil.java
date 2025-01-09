@@ -253,6 +253,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -1402,6 +1403,18 @@ public final class APIUtil {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    public static String getIntrospectionQuery() throws APIManagementException {
+        String introspectionQueryFilePath = "graphql/introspection_query.txt";
+        try (InputStream fileStream = APIUtil.class.getClassLoader().getResourceAsStream(introspectionQueryFilePath)) {
+            if (fileStream == null) {
+                throw new APIManagementException("File not found: " + introspectionQueryFilePath);
+            }
+            return IOUtils.toString(fileStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new APIManagementException("Error reading introspection query file", e);
+        }
     }
 
     public static String getRevisionPath(String apiUUID, int revisionId) {

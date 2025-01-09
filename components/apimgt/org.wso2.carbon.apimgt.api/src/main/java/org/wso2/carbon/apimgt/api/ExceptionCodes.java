@@ -291,7 +291,12 @@ public enum ExceptionCodes implements ErrorHandler {
             "GraphQL Schema cannot be empty or null"),
     UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900802, "Unsupported GraphQL Schema File Extension", 400,
             "Unsupported extension. Only supported extensions are .graphql, .txt and .sdl"),
-
+    INVALID_GRAPHQL_FILE(900803, "GraphQL filename cannot be null or invalid", 400,
+            "GraphQL filename cannot be null or invalid"),
+    GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR(900804, "Error while generating GraphQL schema from introspection",
+            500, "Error while generating GraphQL schema from introspection"),
+    RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR(900805, "Error while retrieving GraphQL schema from URL", 500,
+            "Error while retrieving GraphQL schema from URL"),
 
     // Oauth related codes
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
