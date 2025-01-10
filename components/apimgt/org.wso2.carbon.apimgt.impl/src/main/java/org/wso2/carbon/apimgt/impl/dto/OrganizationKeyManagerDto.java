@@ -23,14 +23,16 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class OrganizationKeyManagerDto {
 
     private Map<String, KeyManagerDto> keyManagerMap = new LinkedHashMap<>();
-    private Map<String, List<String>> issuerNameMap = new HashMap<>();
+    private Map<String, Set<String>> issuerNameMap = new HashMap<>();
 
     public Map<String, KeyManagerDto> getKeyManagerMap() {
 
@@ -53,7 +55,7 @@ public class OrganizationKeyManagerDto {
         } else {
             keyManagerMap.put(keyManagerDto.getName(), keyManagerDto);
         }
-        issuerNameMap.computeIfAbsent(keyManagerDto.getIssuer(), k -> new ArrayList<>()).add(keyManagerDto.getName());
+        issuerNameMap.computeIfAbsent(keyManagerDto.getIssuer(), k -> new HashSet<>()).add(keyManagerDto.getName());
         
     }
 
@@ -71,9 +73,10 @@ public class OrganizationKeyManagerDto {
 
     public JWTValidator getJWTValidatorByIssuer(String issuer) {
 
-        List<String> keyManagerNames = issuerNameMap.get(issuer);
+        Set<String> keyManagerNames = issuerNameMap.get(issuer);
         if (keyManagerNames != null && !keyManagerNames.isEmpty()) {
-            KeyManagerDto keyManagerDto = keyManagerMap.get(keyManagerNames.get(0));
+            String keyManagerName = keyManagerNames.iterator().next();
+            KeyManagerDto keyManagerDto = keyManagerMap.get(keyManagerName);
             if (keyManagerDto != null) {
                 return keyManagerDto.getJwtValidator();
             }
@@ -84,7 +87,7 @@ public class OrganizationKeyManagerDto {
     public List<KeyManagerDto> getKeyManagerDtoByIssuer(String issuer) {
 
         List<KeyManagerDto> dtoList = new ArrayList<KeyManagerDto>();
-        List<String> keyManagerNames = issuerNameMap.get(issuer);
+        Set<String> keyManagerNames = issuerNameMap.get(issuer);
         if (keyManagerNames != null && !keyManagerNames.isEmpty()) {
             for (String keyManagerName : keyManagerNames) {
                 dtoList.add(keyManagerMap.get(keyManagerName));
