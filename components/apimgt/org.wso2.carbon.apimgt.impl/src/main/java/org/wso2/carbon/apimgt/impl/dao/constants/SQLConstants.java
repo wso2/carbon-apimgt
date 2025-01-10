@@ -2758,8 +2758,18 @@ public class SQLConstants {
     public static final String DELETE_ENVIRONMENT_SQL = "DELETE FROM AM_GATEWAY_ENVIRONMENT WHERE UUID = ?";
 
     public static final String UPDATE_ENVIRONMENT_SQL = "UPDATE AM_GATEWAY_ENVIRONMENT " +
-            "SET DISPLAY_NAME = ?, DESCRIPTION = ? " +
+            "SET DISPLAY_NAME = ?, DESCRIPTION = ?" +
             "WHERE UUID = ?";
+
+    public static final String ADD_GATEWAY_VISIBILITY_PERMISSION_SQL =
+            " INSERT INTO" +
+                    " AM_GATEWAY_PERMISSIONS (GATEWAY_UUID, PERMISSIONS_TYPE, ROLE)" +
+                    " VALUES(?, ?, ?)";
+
+    public static final String DELETE_ALL_GATEWAY_VISIBILITY_PERMISSION_SQL = "DELETE FROM AM_GATEWAY_PERMISSIONS" +
+            " WHERE GATEWAY_UUID = ?";
+
+    public static final String GET_GATEWAY_VISIBILITY_PERMISSIONS_SQL = "SELECT PERMISSIONS_TYPE, ROLE FROM AM_GATEWAY_PERMISSIONS WHERE GATEWAY_UUID = ?";
 
     public static final String INSERT_LLM_PROVIDER_SQL =
             "INSERT INTO AM_LLM_PROVIDER (UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, ORGANIZATION, DESCRIPTION, " +
@@ -3939,8 +3949,8 @@ public class SQLConstants {
         public static final String GET_REVISIONS_BY_API_UUID = "SELECT ID, REVISION_UUID, DESCRIPTION, CREATED_TIME, " +
                 "CREATED_BY FROM AM_REVISION WHERE API_UUID = ? ORDER BY ID";
         public static final String ADD_API_REVISION_DEPLOYMENT_MAPPING =
-                " INSERT INTO AM_DEPLOYMENT_REVISION_MAPPING (NAME, VHOST, REVISION_UUID, DISPLAY_ON_DEVPORTAL, DEPLOYED_TIME)" +
-                        " VALUES (?,?,?,?,?)";
+                " INSERT INTO AM_DEPLOYMENT_REVISION_MAPPING (NAME, VHOST, REVISION_UUID, DISPLAY_ON_DEVPORTAL, DEPLOYED_TIME, GW_VISIBILITY, PERMISSION_TYPE)" +
+                        " VALUES (?,?,?,?,?,?,?)";
         public static final String ADD_DEPLOYED_API_REVISION =
                 "INSERT INTO AM_DEPLOYED_REVISION (NAME, VHOST, REVISION_UUID, DEPLOYED_TIME)" +
                         " VALUES (?,?,?,?)";

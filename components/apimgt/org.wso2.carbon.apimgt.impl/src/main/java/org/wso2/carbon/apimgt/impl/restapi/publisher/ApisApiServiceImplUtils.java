@@ -908,7 +908,7 @@ public class ApisApiServiceImplUtils {
             throw new APIManagementException("Invalid Vhost: " + vhost, ExceptionCodes.INVALID_VHOST);
         }
 
-        return mapApiRevisionDeployment(revisionId, vhost, displayOnDevportal, environment);
+        return mapApiRevisionDeployment(revisionId, vhost, displayOnDevportal, environment, environments.get(environment).getVisibility(), environments.get(environment).getPermissions().getPermissionType());
     }
 
     /**
@@ -919,13 +919,15 @@ public class ApisApiServiceImplUtils {
      * @return Mapped {@link APIRevisionDeployment}
      */
     public static APIRevisionDeployment mapApiRevisionDeployment(String revisionId, String vhost, Boolean displayOnDevportal,
-                                                                 String deployment) {
+                                                                 String deployment, String visibility, String permissionType) {
 
         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
         apiRevisionDeployment.setRevisionUUID(revisionId);
         apiRevisionDeployment.setDeployment(deployment);
         apiRevisionDeployment.setVhost(vhost);
         apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
+        apiRevisionDeployment.setVisibility(visibility);
+        apiRevisionDeployment.setPermissionType(permissionType);
         return apiRevisionDeployment;
     }
 

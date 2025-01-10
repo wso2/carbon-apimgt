@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -759,6 +760,26 @@ public class APIManagerConfiguration {
             gatewayType = APIConstants.API_GATEWAY_TYPE_REGULAR;
         }
         environment.setGatewayType(gatewayType);
+        GatewayVisibilityPermissionConfigurationDTO permissionsDTO = new GatewayVisibilityPermissionConfigurationDTO();
+        OMElement visibility = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_VISIBILITY));
+        List<String> visibilityRoles = new LinkedList<>();
+        String[] visibilityRolesArray;
+        if (visibility == null) {
+            permissionsDTO.setPermissionType("PUBLIC");
+            environment.setVisibility("PUBLIC");
+            visibilityRolesArray = new String[]{APIConstants.EVERYONE_ROLE};
+        } else {
+            String visibilityString = visibility.getText();
+            visibilityRolesArray = visibilityString.split(",");
+            for (int i = 0; i < visibilityRolesArray.length; i++) {
+                visibilityRoles.add(visibilityRolesArray[i]);
+            }
+            permissionsDTO.setPermissionType("ALLOW");
+            permissionsDTO.setRoles(visibilityRoles);
+            environment.setVisibility(visibilityString);
+        }
+        environment.setVisibility(visibilityRolesArray);
+        environment.setPermissions(permissionsDTO);
         if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
         environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_SERVER_URL)).getText()));

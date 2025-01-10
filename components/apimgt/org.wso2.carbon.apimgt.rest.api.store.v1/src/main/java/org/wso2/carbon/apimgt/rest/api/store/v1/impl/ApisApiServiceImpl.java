@@ -1103,14 +1103,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
         APIIdentifier apiIdentifier = api.getId();
 
-        List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         if (environments != null && environments.size() > 0) {
             if (StringUtils.isEmpty(environmentName)) {
                 environmentName = api.getEnvironments().iterator().next();
             }
 
             Environment selectedEnvironment = null;
-            for (Environment environment: environments) {
+            for (Environment environment: environments.values()) {
                if (environment.getName().equals(environmentName)) {
                    selectedEnvironment = environment;
                    break;

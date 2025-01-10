@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIConstants;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -54,6 +55,11 @@ public class Environment implements Serializable {
     private String provider;
     private String gatewayType;
     private Map<String, String> additionalProperties = new HashMap<>();
+
+    private String[] visibilityRoles;
+    private String visibility;
+
+    private GatewayVisibilityPermissionConfigurationDTO permissions = new GatewayVisibilityPermissionConfigurationDTO();
 
     public boolean isDefault() {
         return isDefault;
@@ -157,6 +163,49 @@ public class Environment implements Serializable {
         if (StringUtils.isEmpty(this.displayName)) {
             this.displayName = name;
         }
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+
+    public String[] getVisibilityRoles() {
+        if (visibilityRoles != null) {
+            return visibilityRoles;
+        } else if (visibility != null) {
+            return visibility.split(",");
+        }
+        return null;
+    }
+
+    public void setVisibility(String[] visibilityRoles) {
+        if (visibilityRoles != null && !"".equals(visibilityRoles[0].trim())) {
+            StringBuilder builder = new StringBuilder();
+            for (String role : visibilityRoles) {
+                builder.append(role).append(',');
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            this.visibility = builder.toString();
+        } else {
+            this.visibility = "PUBLIC";
+            this.visibilityRoles[0] = "internal/everyone";
+        }
+        this.visibilityRoles = visibilityRoles;
+    }
+
+    public GatewayVisibilityPermissionConfigurationDTO getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(GatewayVisibilityPermissionConfigurationDTO permissions) {
+        if (permissions == null) {
+            permissions = new GatewayVisibilityPermissionConfigurationDTO();
+        }
+        this.permissions = permissions;
     }
 
     public String getDisplayName() {
