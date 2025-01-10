@@ -3,6 +3,13 @@ package org.wso2.carbon.apimgt.impl.utils;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -38,6 +45,16 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.KeyManagementException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.*;
 
 /**
@@ -76,7 +93,7 @@ public class LifeCycleUtils {
 
         // Next Gen Dev Portal Publication
         if (APIConstants.PUBLISHED.equals(targetStatus) && APIUtil.isNewPortalEnabled()) {
-            publishInNewPortal();
+            publishInNewPortal(orgId);
         }
 
         // Change the lifecycle state in the database
@@ -109,11 +126,69 @@ public class LifeCycleUtils {
         }
     }
 
-    public static void publishInNewPortal() throws APIManagementException {
-        String url = APIUtil.getNewPortalURL();
-        log.info("Publishing to NextGen Developer Portal");
-        log.info("Publsihing URL: " + url);
+    public static void publishInNewPortal(String tenantName) throws APIManagementException {
+        String baseUrl = APIUtil.getNewPortalURL();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantName);
+        String apiUrl = baseUrl + "/devportal/b2b/organizations/" + tenantName;
+
+        Certificate cert = SigningUtil.getPublicCertificate(tenantId);
+        PrivateKey privateKey = SigningUtil.getSigningKey(tenantId);
+
+        SSLContext sslContext = configureSSLContext(cert, privateKey);
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
+
+        String orgId = getNewPortalOrgId(apiUrl, sslsf);
+
+        if (orgId.isEmpty()){
+            // Create a new org from tenant Name
+            // Get that org ID and update orgID
+        }
+
+        // Get API Specification
+        // Construct API Info
+        // Publish API
+
+        log.info("orgID: " + orgId);
+
     }
+
+    private static String getNewPortalOrgId(String apiUrl, SSLConnectionSocketFactory sslsf) throws APIManagementException {
+        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+            HttpGet httpGet = new HttpGet(apiUrl);
+            HttpResponse response = httpClient.execute(httpGet);
+            int statusCode = response.getStatusLine().getStatusCode();
+            String responseBody = EntityUtils.toString(response.getEntity());
+            if (statusCode == 200) {
+                com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                Map jsonMap = objectMapper.readValue(responseBody, Map.class);
+                return (String) jsonMap.get("orgId");
+            } else if (statusCode == 404) {
+                return "";
+            } else {
+                throw new APIManagementException("Unexpected response: " + statusCode + " - " + responseBody);
+            }
+        } catch (IOException e) {
+            throw new APIManagementException(e);
+        }
+    }
+
+    private static SSLContext configureSSLContext(Certificate cert, PrivateKey privateKey) throws APIManagementException {
+        try {
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(null, null);
+            keyStore.setKeyEntry("key", privateKey, null, new Certificate[]{cert});
+
+            return SSLContexts.custom()
+                    .loadKeyMaterial(keyStore, null)
+                    .loadTrustMaterial((chain, authType) -> true)
+                    .build();
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException
+                 | UnrecoverableKeyException | KeyManagementException e) {
+            throw new APIManagementException(e);
+        }
+    }
+
+
 
     private static void updateLifeCycleState(APIProvider apiProvider, String orgId, ApiTypeWrapper apiTypeWrapper,
             Map<String, Boolean> checklist, String targetStatus, String currentStatus) throws APIManagementException {
