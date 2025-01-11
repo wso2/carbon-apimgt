@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.jwt;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +41,18 @@ public class JWTValidationServiceImpl implements JWTValidationService {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         if (StringUtils.isNotEmpty(issuer)) {
-            KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
+            List<KeyManagerDto> keyManagerDtoList = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
+            KeyManagerDto keyManagerDto = null;
+            if (keyManagerDtoList.size() == 1) { // only one keymanager. no need to check if it can handle token
+                keyManagerDto = keyManagerDtoList.get(0);
+            } else {
+                for (KeyManagerDto kmrDto : keyManagerDtoList) {
+                    if (kmrDto.getKeyManager().canHandleToken(signedJWTInfo.getToken())) {
+                        keyManagerDto = kmrDto;
+                        break;
+                    }
+                }
+            }
             if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
                 JWTValidationInfo validationInfo = keyManagerDto.getJwtValidator().validateToken(signedJWTInfo);
                 validationInfo.setKeyManager(keyManagerDto.getName());
@@ -56,7 +69,20 @@ public class JWTValidationServiceImpl implements JWTValidationService {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
-        KeyManagerDto keyManagerDto = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
+        List<KeyManagerDto> keyManagerDtoList = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
+        KeyManagerDto keyManagerDto = null;
+        if (keyManagerDtoList != null) {
+            if (keyManagerDtoList.size() == 1) { // only one keymanager. no need to check if it can handle token
+                keyManagerDto = keyManagerDtoList.get(0);
+            } else {
+                for (KeyManagerDto kmrDto : keyManagerDtoList) {
+                    if (kmrDto.getKeyManager().canHandleToken(signedJWTInfo.getToken())) {
+                        keyManagerDto = kmrDto;
+                        break;
+                    }
+                }
+            }
+        }
         if (keyManagerDto != null && keyManagerDto.getJwtValidator() != null) {
             return keyManagerDto.getName();
         }else{

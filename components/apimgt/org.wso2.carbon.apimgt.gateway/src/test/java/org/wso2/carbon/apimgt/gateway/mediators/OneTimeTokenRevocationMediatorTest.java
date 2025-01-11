@@ -72,8 +72,10 @@ public class OneTimeTokenRevocationMediatorTest {
         Mockito.when(authContext.getIssuer()).thenReturn("https://localhost:9443/oauth2/token");
         Mockito.when(authContext.getRequestTokenScopes()).thenReturn(scopes);
 
+        List<KeyManagerDto> keymanagerList = new ArrayList<KeyManagerDto>();
+        keymanagerList.add(keyManagerDto);
         Mockito.when(KeyManagerHolder.getKeyManagerByIssuer(Mockito.anyString(), Mockito.anyString())).
-                thenReturn(keyManagerDto);
+                thenReturn(keymanagerList);
         Mockito.when(keyManagerDto.getKeyManager()).thenReturn(keyManager);
         Mockito.doNothing().when(oneTimeExecutorService).execute(() ->
                 keyManagerDto.getKeyManager().revokeOneTimeToken(Mockito.anyString(), Mockito.anyString()));
@@ -115,7 +117,7 @@ public class OneTimeTokenRevocationMediatorTest {
      * KeyManagerDto is set to null
      */
     @Test
-    public void testMediateWithNullKeyManagerDto() {
+    public void testMediateWithNullKeyManagerDtoList() {
 
         Mockito.when(KeyManagerHolder.getKeyManagerByIssuer(Mockito.anyString(), Mockito.anyString())).
                 thenReturn(null);

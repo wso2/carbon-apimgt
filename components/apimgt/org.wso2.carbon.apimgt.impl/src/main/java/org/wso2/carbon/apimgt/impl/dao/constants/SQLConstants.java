@@ -1013,8 +1013,8 @@ public class SQLConstants {
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
-                    "UUID, TOKEN_TYPE, ORGANIZATION)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "UUID, TOKEN_TYPE, ORGANIZATION, SHARED_ORGANIZATION)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_SQL =
             " UPDATE " +
@@ -1026,7 +1026,8 @@ public class SQLConstants {
             "   DESCRIPTION = ?, " +
             "   UPDATED_BY = ?, " +
             "   UPDATED_TIME = ?, " +
-            "   TOKEN_TYPE = ? " +
+            "   TOKEN_TYPE = ?, " +
+            "   SHARED_ORGANIZATION = ? " +
             " WHERE" +
             "   APPLICATION_ID = ?";
 
@@ -1634,6 +1635,7 @@ public class SQLConstants {
             "   APP.TOKEN_TYPE," +
             "   APP.CREATED_BY," +
             "   APP.ORGANIZATION ORGANIZATION,"+
+            "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION, " +
             "   SUB.USER_ID " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -3846,6 +3848,40 @@ public class SQLConstants {
                         " WHERE KEY_MANAGER_UUID = ?";
     }
 
+    /**
+     * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
+     */
+    public static class KeyManagerOrgVisibilitySqlConstants {
+
+        public static final String ADD_KEY_MANAGER_ORG_VISIBILITY_SQL =
+                " INSERT INTO" +
+                        " AM_KEY_MANAGER_ALLOWED_ORGS (KEY_MANAGER_UUID, ALLOWED_ORGANIZATIONS)" +
+                        " VALUES(?, ?)";
+
+        public static final String DELETE_ALL_KEY_MANAGER_ORG_VISIBILITY_SQL = "DELETE FROM AM_KEY_MANAGER_ALLOWED_ORGS" +
+                " WHERE KEY_MANAGER_UUID = ?";
+
+        public static final String GET_KEY_MANAGER_ORG_VISIBILITY_SQL =
+                "SELECT ALLOWED_ORGANIZATIONS" +
+                        " FROM AM_KEY_MANAGER_ALLOWED_ORGS " +
+                        " WHERE KEY_MANAGER_UUID = ?";
+    }
+    
+    public static class PolicyOrgVisibilitySqlConstants {
+
+        public static final String ADD_POLICY_ORG_VISIBILITY_SQL =
+                " INSERT INTO" +
+                        " AM_POLICY_ALLOWED_ORGS (POLICY_UUID, ALLOWED_ORGANIZATIONS)" +
+                        " VALUES(?, ?)";
+
+        public static final String DELETE_ALL_POLICY_ORG_VISIBILITY_SQL = "DELETE FROM AM_POLICY_ALLOWED_ORGS" +
+                " WHERE POLICY_UUID = ?";
+
+        public static final String GET_POLICY_ORG_VISIBILITY_SQL =
+                "SELECT ALLOWED_ORGANIZATIONS" +
+                        " FROM AM_POLICY_ALLOWED_ORGS " +
+                        " WHERE POLICY_UUID = ?";
+    }
     /**
      * Static class to hold database queries related to AM_TENANT_THEMES table
      */

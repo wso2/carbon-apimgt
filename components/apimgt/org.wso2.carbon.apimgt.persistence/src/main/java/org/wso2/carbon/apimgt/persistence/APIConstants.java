@@ -215,9 +215,11 @@ public final class APIConstants {
     public static final String DISPLAY_PUBLISHER_ROLES = "display_publisher_roles";
     public static final String ACCESS_CONTROL = "publisher_access_control";
     public static final String NO_ACCESS_CONTROL = "all";
+    public static final String VISIBLE_ORGANIZATIONS = "visible_organizations";
     public static final String NULL_USER_ROLE_LIST = "null";
     public static final String API_RESTRICTED_VISIBILITY = "restricted";
     public static final String API_PRIVATE_VISIBILITY = "private";
+    public static final String API_RESTRICTED_BY_ORG = "restricted_by_org";
     public static final String API_CONTROLLED_VISIBILITY = "controlled";
     public static final String DOC_OWNER_VISIBILITY = "OWNER_ONLY";
     public static final String API_GLOBAL_VISIBILITY = "public";
@@ -405,4 +407,6 @@ public final class APIConstants {
 
     public static final String API_OVERVIEW_GATEWAY_VENDOR = "overview_gatewayVendor";
     public static final String ASYNC_API_TRANSPORT_PROTOCOLS = "overview_asyncTransportProtocols";
+    
+    public static final String DEFAULT_VISIBLE_ORG = "all";
 }

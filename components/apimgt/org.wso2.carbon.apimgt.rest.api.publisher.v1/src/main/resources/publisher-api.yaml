@@ -10158,6 +10158,12 @@ components:
           example: []
           items:
             type: string
+        visibleOrganizations:
+          type: array
+          description: The organizations that are able to access the API in Developer Portal
+          example: []
+          items:
+            type: string
         mediationPolicies:
           type: array
           example:
@@ -13196,6 +13202,11 @@ components:
         IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
+        orgAccessControlEnabled:
+          type: boolean
+          description: |
+            Is Organization-based access control configuration enabled
+          example: true
         allowSubscriptionValidationDisabling:
           type: boolean
           description: |

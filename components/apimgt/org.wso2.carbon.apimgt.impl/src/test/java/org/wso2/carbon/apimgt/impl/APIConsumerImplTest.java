@@ -530,13 +530,14 @@ public class APIConsumerImplTest {
     public void testGetApplicationsWithPagination() throws APIManagementException {
         Application[] applications = new Application[] { new Application(1), new Application(2) };
         Mockito.when(apiMgtDAO
-                .getApplicationsWithPagination((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
+                .getApplicationsWithPagination(Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                         Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
-                        Mockito.anyString())).thenReturn(applications);
+                        Mockito.anyString(), Mockito.anyString())).thenReturn(applications);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Assert.assertEquals(
                 apiConsumer.getApplicationsWithPagination(new Subscriber("sub1"), "1", 0, 5,
-                        "", "", "ASC", "testorg").length, 2);
+                        "", "", "ASC", "testorg",
+                        "sharedOrg").length, 2);
     }
 
     @Test

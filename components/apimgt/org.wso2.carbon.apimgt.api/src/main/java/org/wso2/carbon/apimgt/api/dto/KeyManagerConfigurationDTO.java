@@ -19,7 +19,9 @@
 package org.wso2.carbon.apimgt.api.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +46,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
     private String alias = null;
     private KeyManagerPermissionConfigurationDTO permissions = new KeyManagerPermissionConfigurationDTO();
     private Boolean isUsed = null;
+    private List<String> allowedOrganizations = new ArrayList<String>();
 
     public KeyManagerConfigurationDTO() {
     }
@@ -62,6 +65,7 @@ public class KeyManagerConfigurationDTO implements Serializable {
         this.externalReferenceId = keyManagerConfigurationDTO.getExternalReferenceId();
         this.endpoints = keyManagerConfigurationDTO.getEndpoints();
         this.setPermissions(keyManagerConfigurationDTO.getPermissions());
+        this.allowedOrganizations = keyManagerConfigurationDTO.getAllowedOrganizations();
     }
     public String getName() {
 
@@ -206,5 +210,13 @@ public class KeyManagerConfigurationDTO implements Serializable {
     public void setUsed(Boolean isUsed) {
 
         this.isUsed = isUsed;
+    }
+
+    public List<String> getAllowedOrganizations() {
+        return allowedOrganizations;
+    }
+
+    public void setAllowedOrganizations(List<String> allowedOrganizations) {
+        this.allowedOrganizations = allowedOrganizations;
     }
 }

@@ -105,6 +105,15 @@
         </GatewayJWTGeneration>
     </JWTConfiguration>
 
+    {% if apim.organization_based_access_control is defined %}
+    <OrganizationBasedAccessControl>
+        <Enable>{{apim.organization_based_access_control.enable}}</Enable>
+        <OrganizationNameLocalClaim>{{apim.organization_based_access_control.organization_name_local_claim}}</OrganizationNameLocalClaim>
+        <OrganizationIDLocalClaim>{{apim.organization_based_access_control.organization_id_local_claim}}</OrganizationIDLocalClaim>
+        <OrgaizationSelectorLocalClaim>{{apim.organization_based_access_control.organization_selector_local_claim}}</OrgaizationSelectorLocalClaim>
+    </OrganizationBasedAccessControl>
+    {% endif %}
+    
     <!-- Primary/secondary login configuration for API Developer Portal. If user likes to keep two login attributes in a distributed setup, to login the API Developer Portal,
 		he should configure this section. Primary login doesn't have a claimUri associated with it. But secondary login, which is a claim attribute,
 		is associated with a claimuri.-->
