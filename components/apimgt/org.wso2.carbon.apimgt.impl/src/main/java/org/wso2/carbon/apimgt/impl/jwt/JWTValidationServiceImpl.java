@@ -71,13 +71,15 @@ public class JWTValidationServiceImpl implements JWTValidationService {
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         List<KeyManagerDto> keyManagerDtoList = KeyManagerHolder.getKeyManagerByIssuer(tenantDomain, issuer);
         KeyManagerDto keyManagerDto = null;
-        if (keyManagerDtoList.size() == 1) { // only one keymanager. no need to check if it can handle token
-            keyManagerDto = keyManagerDtoList.get(0);
-        } else {
-            for (KeyManagerDto kmrDto : keyManagerDtoList) {
-                if (kmrDto.getKeyManager().canHandleToken(signedJWTInfo.getToken())) {
-                    keyManagerDto = kmrDto;
-                    break;
+        if (keyManagerDtoList != null) {
+            if (keyManagerDtoList.size() == 1) { // only one keymanager. no need to check if it can handle token
+                keyManagerDto = keyManagerDtoList.get(0);
+            } else {
+                for (KeyManagerDto kmrDto : keyManagerDtoList) {
+                    if (kmrDto.getKeyManager().canHandleToken(signedJWTInfo.getToken())) {
+                        keyManagerDto = kmrDto;
+                        break;
+                    }
                 }
             }
         }
