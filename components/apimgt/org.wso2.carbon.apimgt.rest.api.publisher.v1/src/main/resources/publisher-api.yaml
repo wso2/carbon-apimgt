@@ -8532,6 +8532,123 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
   ######################################################
+  # API Labels APIs
+  ######################################################
+  /apis/{apiId}/labels:
+    get:
+      tags:
+          - API Labels
+      summary: Get Labels of an API
+      description: |
+          This operation can be used to get the labels of an API.
+      parameters:
+          - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with Label object list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+          - OAuth2Security:
+              - apim:api_view
+              - apim:api_create
+              - apim:api_manage
+              - apim:api_publish
+      x-code-samples:
+          - lang: Curl
+            source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/labels"'
+      operationId: getLabelsOfAPI
+
+  /apis/{apiId}/attach-labels:
+    post:
+      tags:
+        - API Labels Attach
+      summary: Attach Labels to an API
+      description: |
+        This operation can be used to attach labels to an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        description: |
+          List of labels to be attached to the API
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestLabelList'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Label object list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+            "https://127.0.0.1:9443/api/am/publisher/v4/apis/01234567-0123-0123-0123-012345678901/attach-labels"'
+      operationId: attachLabelsToAPI
+
+  /apis/{apiId}/detach-labels:
+    post:
+      tags:
+        - API Labels Detach
+      summary: Detach Labels from an API
+      description: |
+        This operation can be used to detach labels from an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        description: |
+          List of labels to be detached from the API
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestLabelList'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Label object list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+            "https://127.0.0.1:9443/api/am/publisher/v4/apis/01234567-0123-0123-0123-012345678901/detach-labels"'
+      operationId: detachLabelsFromAPI
+
+  ######################################################
   # LLM Providers resource APIs
   ######################################################
   /llm-providers:
@@ -9578,6 +9695,36 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
+
+  ######################################################
+  # The "Label Collection" resource API
+  ######################################################
+  /labels:
+    get:
+      tags:
+        - Labels (Collection)
+      summary: Get all Labels
+      description: |
+        Get all Labels
+      responses:
+        200:
+          description: |
+            OK.
+            Labels returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/labels"'
+      operationId: getAllLabels
+
 components:
   schemas:
     SequenceBackendList:
@@ -13913,6 +14060,50 @@ components:
           description: |
             Revision of the imported API
           example: 1
+    Label:
+      title: Label
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: d7cf8523-9180-4255-84fa-6cb171c1f779
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: Health
+        description:
+          maxLength: 1024
+          type: string
+          example: Health related APIs
+    RequestLabelList:
+      title: Label ID List for Request
+      type: object
+      properties:
+        labels:
+          type: array
+          description: List of label IDs.
+          items:
+            type: string
+            example: d7cf8523-9180-4255-84fa-6cb171c1f779
+    LabelList:
+      title: Label List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of labels returned.
+          example: 1
+        list:
+          type: array
+          description: List of labels.
+          items:
+            $ref: '#/components/schemas/Label'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

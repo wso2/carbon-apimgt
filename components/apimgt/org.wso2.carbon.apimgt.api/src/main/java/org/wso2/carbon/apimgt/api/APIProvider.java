@@ -1535,6 +1535,46 @@ public interface APIProvider extends APIManager {
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
 
     /**
+     * Returns all labels of the tenant
+     *
+     * @param tenantDomain    tenant domain
+     * @return List<Label> list of Label objects
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns all attached labels of the API
+     *
+     * @param apiID      API UUID
+     * @return List<Label> list of Label objects
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getAllLabelsOfApi(String apiID) throws APIManagementException;
+
+    /**
+     * Attach labels to an API
+     *
+     * @param apiID        API UUID
+     * @param labelList    List of Labels
+     * @param tenantDomain Tenant domain
+     * @return List<String> list of Label IDs
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> attachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Detach labels from an API
+     *
+     * @param apiID        API UUID
+     * @param labelList    List of Labels
+     * @param tenantDomain Tenant domain
+     * @return List<String> list of Label IDs
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> detachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException;
+
+    /**
      * Set existing operation policy mapping to the URI Templates
      *
      * @param apiId        API UUID
