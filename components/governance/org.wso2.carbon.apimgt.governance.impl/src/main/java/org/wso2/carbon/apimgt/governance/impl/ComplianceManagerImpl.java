@@ -21,16 +21,16 @@ package org.wso2.carbon.apimgt.governance.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.manager.ComplianceManager;
-import org.wso2.carbon.apimgt.governance.impl.client.apim.APIM;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
+import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
+import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
+import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
+import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents the Compliance Manager, which is responsible for managing compliance related operations
@@ -39,55 +39,75 @@ public class ComplianceManagerImpl implements ComplianceManager {
     private static final Log log = LogFactory.getLog(ComplianceManagerImpl.class);
 
     private ComplianceMgtDAO complianceMgtDAO;
+    private GovernancePolicyMgtDAO governancePolicyMgtDAO;
+
+    private RulesetMgtDAO rulesetMgtDAO;
 
     public ComplianceManagerImpl() {
         complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
+        governancePolicyMgtDAO = GovernancePolicyMgtDAOImpl.getInstance();
+        rulesetMgtDAO = RulesetMgtDAOImpl.getInstance();
     }
 
-    /**
-     * Get the associated rulesets by policy
-     *
-     * @param organization Organization Name
-     * @return Map of associated rulesets
-     * @throws GovernanceException If an error occurs while getting the associated rulesets
-     */
-    @Override
-    public Map<String, Map<String, String>> getAssociatedRulesetsByPolicy(String organization)
-            throws GovernanceException {
-        return complianceMgtDAO.getAssociatedRulesetsByPolicy(null, organization);
-    }
 
     /**
-     * Assess the compliance of an API
+     * Handle Policy Change Event
      *
-     * @param apiId                       API ID
-     * @param organization                Organization Name
-     * @param policyToRulesetToContentMap Map of policy to ruleset to content
-     * @param authHeader                  Auth header
+     * @param policyId     Policy ID
+     * @param organization Organization
      */
     @Override
-    public void assessAPICompliance(String apiId, String organization,
-                                    Map<String, Map<String, String>> policyToRulesetToContentMap,
-                                    String authHeader) {
-        try {
-            InputStream apimProject = APIM.getAPIMProject(apiId, authHeader);
-            if (apimProject != null) {
-                // Extract swagger content from apim project.
-                byte[] projectBytes = GovernanceUtil.toByteArray(apimProject);
-                String swaggerContent = GovernanceUtil.getSwaggerFileFromZip(projectBytes, apiId);
-                if (swaggerContent == null) {
-                    log.debug("API definition not found for api: " + apiId + " in the organization: " +
-                            organization);
-                    throw new GovernanceException(GovernanceExceptionCodes.API_DEFINITION_NOT_FOUND, apiId,
-                            organization);
-                } else {
-                    log.info(swaggerContent);
-                }
-            }
-        } catch (GovernanceException | IOException e) {
-            log.error(e);
+    public void handlePolicyChangeEvent(String policyId, String organization) throws GovernanceException {
+
+        // Get labels for policy
+        List<String> labels = governancePolicyMgtDAO.getLabelsByPolicyId(policyId);
+        List<String> artifacts = new ArrayList<>();
+
+        for (String label : labels) {
+            // TODO: Get artifacts by label and state from APIM
         }
-        log.info("Assessment Completed.");
+
+        for (String artifactId : artifacts) {
+            String artifactType = "REST_API"; //TODO: Get artifact type from APIM
+            complianceMgtDAO.addArtifactComplianceEvaluationRequestEvent(artifactId, artifactType,
+                    policyId, organization);
+        }
+    }
+
+    /**
+     * Handle Ruleset Change Event
+     *
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
+     */
+    @Override
+    public void handleRulesetChangeEvent(String rulesetId, String organization) throws GovernanceException {
+        List<String> policies = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
+
+        for (String policyId : policies) {
+            handlePolicyChangeEvent(policyId, organization);
+        }
+    }
+
+    /**
+     * Handle API Compliance Evaluation Request Async
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param govPolicies  List of governance policies to be evaluated
+     * @param organization Organization
+     * @throws GovernanceException If an error occurs while handling the API compliance evaluation
+     */
+    @Override
+    public void handleAPIComplianceEvaluationAsync(String artifactId, String artifactType,
+                                                   List<String> govPolicies,
+                                                   String organization) throws GovernanceException {
+
+        for (String policyId : govPolicies) {
+            complianceMgtDAO.addArtifactComplianceEvaluationRequestEvent(artifactId, artifactType,
+                    policyId, organization);
+        }
+
     }
 
 

@@ -20,33 +20,24 @@ package org.wso2.carbon.apimgt.governance.impl.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.ssl.SSLContexts;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
-import org.wso2.carbon.apimgt.governance.impl.client.apim.APIM;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.governance.impl.ValidationTaskScheduler;
 import org.wso2.carbon.apimgt.governance.impl.observer.GovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import java.io.File;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
 @Component(
         name = "org.wso2.apimgt.governance.impl.services",
@@ -73,7 +64,7 @@ public class GovernanceComponent {
                 new GovernanceConfigurationServiceImpl(configuration);
         ServiceReferenceHolder.getInstance().setGovernanceConfigurationService(configurationService);
         GovernanceDBUtil.initialize();
-        APIM.init();
+        ValidationTaskScheduler.initialize();
 
         String migrationEnabled = System.getProperty(GovernanceConstants.MIGRATE);
         if (migrationEnabled == null) {
@@ -88,6 +79,7 @@ public class GovernanceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
+        ValidationTaskScheduler.shutdown();
         if (log.isDebugEnabled()) {
             log.debug("Deactivating Governance component");
         }

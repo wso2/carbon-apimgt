@@ -25,14 +25,12 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This class represents the DAO class related to assessing compliance of APIs
@@ -58,56 +56,31 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         return INSTANCE;
     }
 
-
     /**
-     * Get the associated rulesets by policy
+     * Add an artifact compliance evaluation request event
      *
-     * @param policyId     Policy ID, if null all the policies will be considered
-     * @param organization Organization Name
-     * @return Map of associated rulesets
-     * @throws GovernanceException If an error occurs while getting the associated rulesets
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param policyId     Policy ID
+     * @param organization Organization
+     * @throws GovernanceException If an error occurs while adding the artifact compliance evaluation request event
      */
     @Override
-    public Map<String, Map<String, String>> getAssociatedRulesetsByPolicy(String policyId,
-                                                                          String organization)
-            throws GovernanceException {
-        Map<String, Map<String, String>> rulesetMap = new HashMap<>();
-        String query;
-        try (Connection connection = GovernanceDBUtil.getConnection()) {
-            PreparedStatement preparedStatement;
-            if (policyId != null) {
-                // If policyId is not null, get rulesets for that particular policy.
-                query = SQLConstants.GET_RULESETS_BY_POLICY_ID;
-                preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setString(1, policyId);
-            } else {
-                // If policyId is null, get rulesets for all policies within the organization.
-                if (log.isDebugEnabled()) {
-                    log.debug("Retrieving all rulesets as policy id is not specified.");
-                }
-                query = SQLConstants.GET_RULESETS_BY_POLICY;
-                preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setString(1, organization);
-            }
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                String rulesetId = resultSet.getString("RULESET_ID");
-                byte[] rulesetContentBytes = resultSet.getBytes("RULESET_CONTENT");
-                policyId = resultSet.getString("POLICY_ID");
-                // Convert byte array to YAML string
-                String rulesetContentYaml = new String(rulesetContentBytes, StandardCharsets.UTF_8);
-                // Retrieve the existing map for the current policyId, or create a new one if it doesn't exist.
-                Map<String, String> rulesetDetails = rulesetMap.getOrDefault(policyId, new HashMap<>());
-                // Add the current rulesetId and its content to the rulesetDetails map.
-                rulesetDetails.put(rulesetId, rulesetContentYaml);
-                // Put the updated values map back into the rulesetMap for the current policyId.
-                rulesetMap.put(policyId, rulesetDetails);
-            }
+    public void addArtifactComplianceEvaluationRequestEvent(String artifactId, String artifactType,
+                                                            String policyId,
+                                                            String organization) throws GovernanceException {
+        String SQLQuery = SQLConstants.ADD_GOV_EVALUATION_REQUEST;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, GovernanceUtil.generateUUID());
+            prepStmnt.setString(2, artifactId);
+            prepStmnt.setString(3, artifactType);
+            prepStmnt.setString(4, policyId);
+            prepStmnt.setString(6, organization);
+            prepStmnt.executeUpdate();
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.
-                    ERROR_WHILE_RETRIEVING_RULESET_CONTENT_ASSOCIATED_WITH_POLICIES,
-                    e, organization);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_PROCESSING_GOVERNANCE_EVALUATION_REQUEST,
+                    e, artifactId, organization);
         }
-        return rulesetMap;
     }
 }

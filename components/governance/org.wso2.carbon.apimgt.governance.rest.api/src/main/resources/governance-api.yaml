@@ -34,8 +34,8 @@ tags:
     description: for managing rulesets.
   - name: Governance Policies
     description: for managing governance policies.
-  - name: Governance Validation
-    description: for validating governance compliance.
+  - name: Governance Evaluation
+    description: for evaluating governance compliance.
   - name: Governance Results
     description: for accessing governance results.
   - name: Health Check
@@ -605,20 +605,20 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
-  /validate:
+  /evaluate-compliance:
     post:
-      summary: Validate governance compliance
-      description: Validates the compliance of an artifact with the governance policies.
-      operationId: validateGovernanceCompliance
+      summary: Evaluate governance compliance
+      description: Evaluates the compliance of an artifact with the governance policies of the organization.
+      operationId: evaluateCompliance
       tags:
-        - Governance Validation
+        - Governance Evaluation
       requestBody:
         required: true
         description: JSON object containing the details of the artifact to be checked.
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/GovernanceValidationRequest'
+              $ref: '#/components/schemas/GovernanceEvaluationRequest'
       responses:
         "200":
           description: OK. Governance check successful.
@@ -654,7 +654,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_validation
+            - apim:gov_evaluate_compliance
   /artifact-governance-results:
     get:
       summary: Retrieves governance results of all artifacts
@@ -1049,7 +1049,7 @@ components:
           type: string
           description: A brief description of the governance policy.
           example: "Policy for enforcing security standards across all APIs."
-        applicableStates:
+        governableStates:
           type: array
           description: List of states at which the governance policy should be enforced.
           items:
@@ -1108,7 +1108,7 @@ components:
         - name
         - rulesets
         - labels
-        - applicableStates
+        - governableStates
         - actions
     Action:
       type: object
@@ -1404,9 +1404,9 @@ components:
           description: Severity level of the rule violation.
           enum:
             - ERROR
-            - WARNING
+            - WARN
             - INFO
-          example: WARNING
+          example: WARN
         violatedPaths:
           type: array
           description: List of paths that violate the rule.
@@ -1417,7 +1417,7 @@ components:
           type: string
           description: Message to be displayed when the rule is violated.
           example: "API name can not be too long or short"
-    GovernanceValidationRequest:
+    GovernanceEvaluationRequest:
       type: object
       description: Request object for governance compliance validation.
       properties:
@@ -1434,6 +1434,28 @@ components:
             - GRAPHQL_API
             - ASYNC_API
           example: REST_API
+        artifactZip:
+          type: string
+          description: The zip of the artifact project.
+          format: binary
+        artifactEvaluationState:
+          type: string
+          description: The state of the artifact at which the evaluation should run
+          enum:
+            - API_CREATE
+            - API_UPDATE
+            - API_DEPLOY
+            - API_PUBLISH
+          example: API_DEPLOY
+          x-enum-varnames:
+            - API_CREATE
+            - API_UPDATE
+            - API_DEPLOY
+            - API_PUBLISH
+      required:
+        - artifactId
+        - artifactType
+        - artifactEvaluationState
   #####
   # TODO: Fix scope validation logic. Currently scope validation is broken due to logic in apimgt.rest.api.common.RestAPICommonUtil
   #####
@@ -1449,7 +1471,7 @@ components:
             apim:gov_rule_manage: Manage governance rulesets
             apim:gov_policy_read: Read governance policies
             apim:gov_policy_manage: Manage governance policies
-            apim:gov_validation: Validate governance policies
+            apim:gov_evaluate_compliance: Evaluate governance compliance
             apim:gov_result_read: Read governance results
   parameters:
     artifactId:

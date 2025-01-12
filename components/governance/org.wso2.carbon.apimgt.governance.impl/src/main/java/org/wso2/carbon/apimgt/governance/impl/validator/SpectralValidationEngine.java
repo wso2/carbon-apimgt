@@ -16,13 +16,14 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl.client.validationengine;
+package org.wso2.carbon.apimgt.governance.impl.validator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
@@ -36,6 +37,34 @@ import java.util.Map;
  * spectral
  */
 public class SpectralValidationEngine implements ValidationEngine {
+
+    private static final SpectralValidationEngine instance = new SpectralValidationEngine();
+
+    private SpectralValidationEngine() {
+    }
+
+    /**
+     * Get the instance of the SpectralValidationEngine
+     *
+     * @return SpectralValidationEngine instance
+     */
+    public static SpectralValidationEngine getInstance() {
+        return instance;
+    }
+
+
+    /**
+     * Check if a ruleset is valid
+     *
+     * @param ruleset Ruleset
+     * @return True if the ruleset is valid, False otherwise
+     * @throws GovernanceException If an error occurs while validating the ruleset
+     */
+    @Override
+    public boolean isRulesetValid(Ruleset ruleset) throws GovernanceException {
+        // TODO: Add implementation to validate the ruleset
+        return true;
+    }
 
     /**
      * Extract rules from a ruleset content
@@ -64,7 +93,7 @@ public class SpectralValidationEngine implements ValidationEngine {
                 String messageOnValidationFailure = (String) ruleDetails.get("message");
 
                 String severityString = (String) ruleDetails.get("severity");
-                String severity = Severity.fromString(severityString).getValue();
+                Severity severity = Severity.fromString(severityString);
 
                 ObjectMapper objectMapper = new ObjectMapper();
 

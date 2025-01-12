@@ -19,8 +19,12 @@
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * This interface represents the DAO layer for Governance Policy Management
@@ -89,5 +93,55 @@ public interface GovernancePolicyMgtDAO {
                                             GovernancePolicy
                                                     governancePolicy)
             throws GovernanceException;
+
+
+    /**
+     * Get the associated rulesets by policy
+     *
+     * @param policyId       Policy ID, if null all the policies will be considered
+     * @param organizationId Organization ID
+     * @return Map of associated rulesets
+     * @throws GovernanceException If an error occurs while getting the associated rulesets
+     */
+    Map<String, Map<String, String>> getRulesetsByPolicyId(String policyId, String organizationId)
+            throws GovernanceException;
+
+    /**
+     * Get PolicyIds by label
+     *
+     * @param label        Label
+     * @param state        Governable State for the policy
+     * @param organization Organization
+     * @return List of Policy IDs
+     */
+    List<String> getPoliciesByLabelAndState(String label, String state, String organization) throws GovernanceException;
+
+    /**
+     * Get Policies without labels by state
+     *
+     * @param state        Governable State for the policy
+     * @param organization Organization
+     * @return List of Policy IDs
+     */
+    List<String> getPoliciesWithoutLabelsByState(String state, String organization) throws GovernanceException;
+
+    /**
+     * Get the actions of a policy
+     *
+     * @param policyId Policy ID
+     * @return List of Governance Actions
+     * @throws GovernanceException If an error occurs while getting the actions
+     */
+    List<GovernanceAction> getActionsByPolicyId(String policyId) throws GovernanceException;
+
+    /**
+     * Get the labels of a policy
+     *
+     * @param policyId Policy ID
+     * @return List of Labels
+     * @throws GovernanceException If an error occurs while getting the labels
+     */
+    List<String> getLabelsByPolicyId(String policyId) throws GovernanceException;
 }
+
 

@@ -66,7 +66,7 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             "contents associated with policies failed for the organization %s", true),
     ERROR_WHILE_INSERTING_RULES(301011, "Rule insertion failed", 500, "Rule insertion failed for the ruleset with id:" +
             " '%s'", true),
-    INVALID_RULESET_CONTENT(301012, "Ruleset content is invalid", 400, "Ruleset content is invalid with id: '%s'"),
+    INVALID_RULESET_CONTENT(301012, "Ruleset content is invalid", 400, "Content of ruleset '%s' is invalid"),
     INVALID_RULESET_CONTENT_WITH_INFO(301013, "Invalid Ruleset content", 400, "Invalid Ruleset content, message: '%s'"),
     ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(301014, "Error while loading default ruleset content", 500, "Error while loading " +
             "default ruleset provided by WSO2.", true),
@@ -104,13 +104,20 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_RETRIEVING_POLICY_BY_NAME(401008, "Retrieving policy by name failed", 500, "Error while retrieving " +
             "policy with name: %s for the organization: %s", true),
 
-    // Endpoint related codes
-    ERROR_WHILE_INSERTING_ENDPOINT_DETAILS(501001, "Error while inserting endpoint details.", 500, "Error while inserting details for endpoint: %s in organization: %s", true),
-    ERROR_WHILE_CHECKING_ENDPOINT_AVAILABILITY(501002, "Error while checking endpoint availability.", 500, "Error while checking endpoint availability for " +
-            "endpoint: %s in organization: %s", true),
-    ERROR_WHILE_DELETING_ENDPOINT(501003, "Error while deleting endpoint.", 500, "Error while deleting endpoint with ID: %s in the organization: %s"),
-    ENDPOINT_NOT_FOUND(501004, "Endpoint not found", 404, "Endpoint with ID: %s not found in the organization: %s"),
-    ENDPOINT_NOT_FOUND_GENERAL(501004, "Endpoint not found", 404, "Endpoint with ID: %s is not found"),
+    ERROR_WHILE_RETRIEVING_POLICIES_BY_LABEL(401009, "Retrieving policies by label failed", 500, "Error while retrieving " +
+            "policies by label: %s for the organization: %s", true),
+
+    ERROR_WHILE_RETRIEVING_ACTIONS_BY_POLICY_ID(401010, "Retrieving actions by policy id failed", 500, "Error while " +
+            "retrieving actions by policy id: %s", true),
+
+    ERROR_WHILE_RETRIEVING_LABELS_BY_POLICY_ID(401011, "Retrieving labels by policy id failed", 500, "Error while " +
+            "retrieving labels by policy id: %s", true),
+    // Artifact related codes
+
+    ERROR_WHILE_PROCESSING_GOVERNANCE_EVALUATION_REQUEST(501001, "Error while processing governance evaluation " +
+            "request.",
+            500,
+            "Error while processing governance evaluation request for artifact/api: %s in the organization: %s", true),
 
     // Linting related codes
     ERROR_WHILE_SAVING_LINTING_RESULT(601001, "Error while saving linting result.", 500, "Error while saving linting result for endpoint: %s", true),

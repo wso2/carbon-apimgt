@@ -21,11 +21,16 @@ package org.wso2.carbon.apimgt.governance.impl;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.manager.PolicyManager;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the Governance Policy Manager Implementation
@@ -109,4 +114,72 @@ public class PolicyManagerImpl implements PolicyManager {
             throws GovernanceException {
         return policyMgtDAO.updateGovernancePolicy(policyId, organization, governancePolicy);
     }
+
+    /**
+     * Get the associated rulesets by policy
+     *
+     * @param policyId     Policy ID, if null all the policies will be considered
+     * @param organization Organization Name
+     * @return Map of associated rulesets and details of each ruleset as a map
+     * @throws GovernanceException If an error occurs while getting the associated rulesets
+     */
+    @Override
+    public Map<String, Map<String, String>> getRulesetsForPolicy(String policyId, String organization)
+            throws GovernanceException {
+        return policyMgtDAO.getRulesetsByPolicyId(policyId, organization);
+    }
+
+    /**
+     * Get the list of policies by label and state
+     *
+     * @param label        Label
+     * @param state        Governable State for the policy
+     * @param organization Organization
+     * @return List of policy IDs
+     * @throws GovernanceException If an error occurs while getting the policies
+     */
+    @Override
+    public List<String> getPoliciesByLabelAndState(String label, String state, String organization)
+            throws GovernanceException {
+        return policyMgtDAO.getPoliciesByLabelAndState(label, state, organization);
+    }
+
+    /**
+     * Get the list of organization wide policies by state
+     *
+     * @param state        Governable State for the policy
+     * @param organization organization
+     * @return List of policy IDs
+     * @throws GovernanceException If an error occurs while getting the policies
+     */
+    @Override
+    public List<String> getOrganizationWidePoliciesByState(String state, String organization)
+            throws GovernanceException {
+        return policyMgtDAO.getPoliciesWithoutLabelsByState(state, organization);
+    }
+
+    /**
+     * This method checks whether a blocking action is present for a given governable state of a policy
+     *
+     * @param policyId Policy ID
+     * @param state    Governable State
+     * @return true if a blocking action is present, false otherwise
+     * @throws GovernanceException If an error occurs while checking the presence of blocking action
+     */
+    @Override
+    public boolean isBlockingActionPresentForState(String policyId, String state) throws GovernanceException {
+        boolean isBlockingActionPresent = false;
+        List<GovernanceAction> actions = policyMgtDAO.getActionsByPolicyId(policyId);
+        for (GovernanceAction action : actions) {
+            if (GovernanceActionType.BLOCK
+                    .equals(action.getType()) &&
+                    String.valueOf(action.getGovernableState()).equals(state)) {
+                isBlockingActionPresent = true;
+                break;
+            }
+        }
+        return isBlockingActionPresent;
+    }
+
+
 }

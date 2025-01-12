@@ -2,9 +2,9 @@ package org.wso2.carbon.apimgt.governance.rest.api;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactGovernanceResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernanceValidationRequestDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.ValidateApiService;
-import org.wso2.carbon.apimgt.governance.rest.api.impl.ValidateApiServiceImpl;
+import java.io.File;
+import org.wso2.carbon.apimgt.governance.rest.api.EvaluateComplianceApiService;
+import org.wso2.carbon.apimgt.governance.rest.api.impl.EvaluateComplianceApiServiceImpl;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import javax.ws.rs.*;
@@ -23,29 +23,29 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import java.util.Map;
 import java.util.List;
 import javax.validation.constraints.*;
-@Path("/validate")
+@Path("/evaluate-compliance")
 
-@Api(description = "the validate API")
-
-
+@Api(description = "the evaluate-compliance API")
 
 
-public class ValidateApi  {
+
+
+public class EvaluateComplianceApi  {
 
   @Context MessageContext securityContext;
 
-ValidateApiService delegate = new ValidateApiServiceImpl();
+EvaluateComplianceApiService delegate = new EvaluateComplianceApiServiceImpl();
 
 
     @POST
     
-    @Consumes({ "application/json" })
+    @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Validate governance compliance", notes = "Validates the compliance of an artifact with the governance policies.", response = ArtifactGovernanceResultDTO.class, authorizations = {
+    @ApiOperation(value = "Evaluate governance compliance", notes = "Evaluates the compliance of an artifact with the governance policies of the organization.", response = ArtifactGovernanceResultDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_validation", description = "Validate governance policies")
+            @AuthorizationScope(scope = "apim:gov_evaluate_compliance", description = "Evaluate governance compliance")
         })
-    }, tags={ "Governance Validation" })
+    }, tags={ "Governance Evaluation" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Governance check successful.", response = ArtifactGovernanceResultDTO.class),
         @ApiResponse(code = 204, message = "No Content. No governance check triggered in the background.", response = Void.class),
@@ -53,7 +53,7 @@ ValidateApiService delegate = new ValidateApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response validateGovernanceCompliance(@ApiParam(value = "JSON object containing the details of the artifact to be checked." ,required=true) GovernanceValidationRequestDTO governanceValidationRequestDTO) throws GovernanceException{
-        return delegate.validateGovernanceCompliance(governanceValidationRequestDTO, securityContext);
+    public Response evaluateCompliance(@Multipart(value = "artifactId")  String artifactId, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "artifactEvaluationState")  String artifactEvaluationState,  @Multipart(value = "artifactZip", required = false) InputStream artifactZipInputStream, @Multipart(value = "artifactZip" , required = false) Attachment artifactZipDetail) throws GovernanceException{
+        return delegate.evaluateCompliance(artifactId, artifactType, artifactEvaluationState, artifactZipInputStream, artifactZipDetail, securityContext);
     }
 }

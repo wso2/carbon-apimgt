@@ -64,7 +64,7 @@ return null;
     @XmlEnum(String.class)
     public enum SeverityEnum {
         ERROR("ERROR"),
-        WARNING("WARNING"),
+        WARN("WARN"),
         INFO("INFO");
         private String value;
 
@@ -158,7 +158,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "WARNING", value = "Severity level of the rule violation.")
+  @ApiModelProperty(example = "WARN", value = "Severity level of the rule violation.")
   @JsonProperty("severity")
   public SeverityEnum getSeverity() {
     return severity;

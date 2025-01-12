@@ -23,9 +23,11 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.manager.RulesetManager;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
@@ -76,7 +78,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         Ruleset ruleset = new Ruleset();
         try {
             ruleset.setName(name);
-            ruleset.setRuleType(ruleType);
+            ruleset.setRuleType(RuleType.fromString(ruleType));
             ruleset.setArtifactType(artifactType);
             ruleset.setProvider(provider);
             ruleset.setDescription(description);
@@ -274,7 +276,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                                       MessageContext messageContext) throws GovernanceException {
         Ruleset ruleset = new Ruleset();
         ruleset.setName(name);
-        ruleset.setRuleType(ruleType);
+        ruleset.setRuleType(RuleType.fromString(ruleType));
         ruleset.setArtifactType(artifactType);
         ruleset.setProvider(provider);
         ruleset.setId(rulesetId);
@@ -288,7 +290,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
         RulesetManager rulesetManager = new RulesetManagerImpl();
         RulesetInfo updatedRuleset = rulesetManager.updateRuleset(organization, rulesetId, ruleset);
-        // TODO: Retrigger Policy Validation
+
+        // Re-access policy compliance in the background
+        new ComplianceManagerImpl().handleRulesetChangeEvent(rulesetId, organization);
+
         return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
                 fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
     }

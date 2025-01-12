@@ -24,9 +24,10 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
-import org.wso2.carbon.apimgt.governance.impl.dao.RulsetMgtDAO;
-import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulsetMgtDAOImpl;
+import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
+import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
+import org.wso2.carbon.apimgt.governance.impl.validator.SpectralValidationEngine;
 
 import java.util.List;
 
@@ -35,10 +36,10 @@ import java.util.List;
  */
 public class RulesetManagerImpl implements RulesetManager {
 
-    private RulsetMgtDAO rulesetMgtDAO;
+    private RulesetMgtDAO rulesetMgtDAO;
 
     public RulesetManagerImpl() {
-        rulesetMgtDAO = RulsetMgtDAOImpl.getInstance();
+        rulesetMgtDAO = RulesetMgtDAOImpl.getInstance();
     }
 
     /**
@@ -52,7 +53,11 @@ public class RulesetManagerImpl implements RulesetManager {
     @Override
     public RulesetInfo createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException {
         ruleset.setId(GovernanceUtil.generateUUID());
-        //TODO: Validate ruleset content with spectral service before creation
+        boolean isRulesetContentValid = SpectralValidationEngine.getInstance().isRulesetValid(ruleset);
+        if (!isRulesetContentValid) {
+            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
+                    ruleset.getName());
+        }
         return rulesetMgtDAO.createRuleset(organization, ruleset);
     }
 
@@ -139,7 +144,11 @@ public class RulesetManagerImpl implements RulesetManager {
      */
     @Override
     public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
-        //TODO: Validate ruleset content with spectral service before update
+        boolean isRulesetContentValid = SpectralValidationEngine.getInstance().isRulesetValid(ruleset);
+        if (!isRulesetContentValid) {
+            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
+                    ruleset.getName());
+        }
         return rulesetMgtDAO.updateRuleset(organization, rulesetId, ruleset);
     }
 

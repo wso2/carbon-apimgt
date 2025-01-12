@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.governance.impl.dao;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
-import java.util.Map;
+import java.io.InputStream;
 
 /**
  * This interface represents the DAO class related assessing compliance of APIs
@@ -28,14 +28,17 @@ import java.util.Map;
 public interface ComplianceMgtDAO {
 
     /**
-     * Get the associated rulesets by policy
+     * Add an artifact compliance evaluation request event
      *
-     * @param policyId       Policy ID, if null all the policies will be considered
-     * @param organizationId Organization ID
-     * @return Map of associated rulesets
-     * @throws GovernanceException If an error occurs while getting the associated rulesets
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param policyId     Policy ID
+     * @param organization Organization
+     * @throws GovernanceException If an error occurs while adding the artifact compliance evaluation request event
      */
-    Map<String, Map<String, String>> getAssociatedRulesetsByPolicy(String policyId, String organizationId)
-            throws GovernanceException;
+    void addArtifactComplianceEvaluationRequestEvent(String artifactId, String artifactType,
+                                                     String policyId,
+                                                     String organization) throws GovernanceException;
+
 
 }

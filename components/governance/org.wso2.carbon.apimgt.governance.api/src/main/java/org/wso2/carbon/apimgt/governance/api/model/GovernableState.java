@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,24 +19,26 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 
 /**
- * This class represents a governance rule Severity
+ * This class represents a governable state
  */
-public enum Severity {
-    ERROR,
-    WARN,
-    INFO;
+public enum GovernableState {
+    API_CREATE,
+    API_UPDATE,
+    API_DEPLOY,
+    API_PUBLISH;
 
-    public static Severity fromString(String severityString) {
-        if ("error".equals(severityString)) {
-            return Severity.ERROR;
-        } else if ("warn".equals(severityString)) {
-            return Severity.WARN;
-        } else if ("info".equals(severityString)) {
-            return Severity.INFO;
+    public static GovernableState fromString(String stateString) {
+        if ("api_create".equalsIgnoreCase(stateString)) {
+            return GovernableState.API_CREATE;
+        } else if ("api_update".equalsIgnoreCase(stateString)) {
+            return GovernableState.API_UPDATE;
+        } else if ("api_deploy".equalsIgnoreCase(stateString)) {
+            return GovernableState.API_DEPLOY;
+        } else if ("api_publish".equalsIgnoreCase(stateString)) {
+            return GovernableState.API_PUBLISH;
         }
-        return Severity.WARN;
+        return null;
     }
 }

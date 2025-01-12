@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.manager.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -76,7 +77,9 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
             governancePolicy = policyManager.createGovernancePolicy(organization,
                     governancePolicy);
 
-            // TODO: Assess compliance for APIs
+            // Access policy compliance in the background
+            new ComplianceManagerImpl().handlePolicyChangeEvent(governancePolicy.getId(), organization);
+
             createdPolicyDTO = PolicyMappingUtil.
                     fromGovernancePolicyToGovernancePolicyDTO(governancePolicy);
             createdPolicyURI = new URI(
@@ -229,7 +232,8 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
         GovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
                 fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
 
-        //TODO: Access Compliance of existing components
+        // Re-access policy compliance in the background
+        new ComplianceManagerImpl().handlePolicyChangeEvent(policyId, organization);
 
         return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
     }

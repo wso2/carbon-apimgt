@@ -43,7 +43,7 @@ public class RulesetMappingUtil {
         rulesetInfoDTO.setName(rulesetInfo.getName());
         rulesetInfoDTO.setDescription(rulesetInfo.getDescription());
         rulesetInfoDTO.setRuleType(RulesetInfoDTO.
-                RuleTypeEnum.fromValue(rulesetInfo.getRuleType()));
+                RuleTypeEnum.fromValue(String.valueOf(rulesetInfo.getRuleType())));
         rulesetInfoDTO.setArtifactType(RulesetInfoDTO.
                 ArtifactTypeEnum.fromValue(rulesetInfo.getArtifactType()));
         rulesetInfoDTO.setDocumentationLink(rulesetInfo.getDocumentationLink());

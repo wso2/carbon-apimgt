@@ -28,7 +28,7 @@ public class Ruleset {
     private String name;
     private String description;
     private InputStream rulesetContent;
-    private String ruleType;
+    private RuleType ruleType;
     private String artifactType;
     private String documentationLink;
     private String provider;
@@ -69,11 +69,11 @@ public class Ruleset {
         this.rulesetContent = rulesetContent;
     }
 
-    public String getRuleType() {
+    public RuleType getRuleType() {
         return ruleType;
     }
 
-    public void setRuleType(String ruleType) {
+    public void setRuleType(RuleType ruleType) {
         this.ruleType = ruleType;
     }
 

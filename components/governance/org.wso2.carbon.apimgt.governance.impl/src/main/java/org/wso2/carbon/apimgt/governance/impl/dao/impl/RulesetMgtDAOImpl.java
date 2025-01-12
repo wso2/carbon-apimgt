@@ -23,15 +23,15 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
-import org.wso2.carbon.apimgt.governance.impl.client.validationengine.SpectralValidationEngine;
-import org.wso2.carbon.apimgt.governance.impl.client.validationengine.ValidationEngine;
-import org.wso2.carbon.apimgt.governance.impl.dao.RulsetMgtDAO;
+import org.wso2.carbon.apimgt.governance.impl.validator.SpectralValidationEngine;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngine;
+import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -46,24 +46,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementation of the RulsetMgtDAO interface.
+ * Implementation of the RulesetMgtDAO interface.
  */
-public class RulsetMgtDAOImpl implements RulsetMgtDAO {
+public class RulesetMgtDAOImpl implements RulesetMgtDAO {
 
-    private static final Log log = LogFactory.getLog(RulsetMgtDAOImpl.class);
-    private static RulsetMgtDAO INSTANCE = null;
+    private static final Log log = LogFactory.getLog(RulesetMgtDAOImpl.class);
+    private static RulesetMgtDAO INSTANCE = null;
 
-    private RulsetMgtDAOImpl() {
+    private RulesetMgtDAOImpl() {
     }
 
     /**
-     * Get an instance of the RulsetMgtDAO
+     * Get an instance of the RulesetMgtDAO
      *
-     * @return RulsetMgtDAO instance
+     * @return RulesetMgtDAO instance
      */
-    public static RulsetMgtDAO getInstance() {
+    public static RulesetMgtDAO getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new RulsetMgtDAOImpl();
+            INSTANCE = new RulesetMgtDAOImpl();
         }
         return INSTANCE;
     }
@@ -90,7 +90,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(2, ruleset.getName());
                 prepStmt.setString(3, ruleset.getDescription());
                 prepStmt.setBlob(4, rulesetContentStream);
-                prepStmt.setString(5, ruleset.getRuleType());
+                prepStmt.setString(5, String.valueOf(ruleset.getRuleType()));
                 prepStmt.setString(6, ruleset.getArtifactType());
                 prepStmt.setString(7, ruleset.getDocumentationLink());
                 prepStmt.setString(8, ruleset.getProvider());
@@ -98,13 +98,13 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(10, ruleset.getCreatedBy());
                 prepStmt.execute();
 
-                ValidationEngine validationEngine = new SpectralValidationEngine();
+                ValidationEngine validationEngine = SpectralValidationEngine.getInstance();
                 List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset.getRulesetContent());
                 if (rules.size() > 0) {
                     addRules(ruleset.getId(), rules, connection);
                 } else {
                     throw new GovernanceException(
-                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getId());
+                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
                 }
                 connection.commit();
             } catch (SQLException | GovernanceException e) {
@@ -143,7 +143,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(3, rule.getCode());
                 prepStmt.setString(4, rule.getMessageOnFailure());
                 prepStmt.setString(5, rule.getDescription());
-                prepStmt.setString(6, rule.getSeverity());
+                prepStmt.setString(6, String.valueOf(rule.getSeverity()));
                 prepStmt.setBlob(7, new ByteArrayInputStream(rule.getContent()
                         .getBytes(Charset.defaultCharset())));
                 prepStmt.addBatch();
@@ -176,7 +176,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     rulesetInfo.setId(rs.getString("RULESET_ID"));
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setRuleType(rs.getString("RULE_TYPE"));
+                    rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
                     rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
@@ -217,7 +217,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     rulesetInfo.setId(rs.getString("RULESET_ID"));
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setRuleType(rs.getString("RULE_TYPE"));
+                    rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
                     rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
@@ -256,7 +256,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                     rulesetInfo.setId(rs.getString("RULESET_ID"));
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setRuleType(rs.getString("RULE_TYPE"));
+                    rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
                     rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
@@ -361,7 +361,7 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 prepStmt.setString(1, ruleset.getName());
                 prepStmt.setString(2, ruleset.getDescription());
                 prepStmt.setBlob(3, rulesetContent);
-                prepStmt.setString(4, ruleset.getRuleType());
+                prepStmt.setString(4, String.valueOf(ruleset.getRuleType()));
                 prepStmt.setString(5, ruleset.getArtifactType());
                 prepStmt.setString(6, ruleset.getDocumentationLink());
                 prepStmt.setString(7, ruleset.getProvider());
@@ -376,13 +376,13 @@ public class RulsetMgtDAOImpl implements RulsetMgtDAO {
                 // Delete existing rules related to this ruleset.
                 deleteRules(rulesetId, connection);
                 // Insert updated rules.
-                ValidationEngine validationEngine = new SpectralValidationEngine();
+                ValidationEngine validationEngine = SpectralValidationEngine.getInstance();
                 List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset.getRulesetContent());
                 if (rules.size() > 0) {
                     addRules(ruleset.getId(), rules, connection);
                 } else {
                     throw new GovernanceException(
-                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getId());
+                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
                 }
                 connection.commit();
             } catch (SQLException e) {

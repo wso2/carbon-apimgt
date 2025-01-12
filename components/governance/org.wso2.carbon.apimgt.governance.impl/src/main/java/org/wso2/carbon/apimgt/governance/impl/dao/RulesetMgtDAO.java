@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * This interface represents the Governance Ruleset DAO
  */
-public interface RulsetMgtDAO {
+public interface RulesetMgtDAO {
 
     /**
      * Create a new Governance Ruleset

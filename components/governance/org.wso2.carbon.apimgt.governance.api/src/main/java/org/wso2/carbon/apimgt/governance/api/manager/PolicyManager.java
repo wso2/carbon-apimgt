@@ -22,6 +22,9 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * This interface represents the Governance Policy Manager
  */
@@ -78,5 +81,47 @@ public interface PolicyManager {
                                             GovernancePolicy
                                                     governancePolicy)
             throws GovernanceException;
+
+
+    /**
+     * Get the associated rulesets by policy
+     *
+     * @param organization Organization Name
+     * @return Map of associated rulesets and details of each ruleset as a map
+     * @throws GovernanceException If an error occurs while getting the associated rulesets
+     */
+    Map<String, Map<String, String>> getRulesetsForPolicy(String policyId, String organization)
+            throws GovernanceException;
+
+    /**
+     * Get the list of policies by label and state
+     *
+     * @param label        label
+     * @param state        governable state for policy
+     * @param organization organization
+     * @return List of policy IDs
+     * @throws GovernanceException If an error occurs while getting the policies
+     */
+    List<String> getPoliciesByLabelAndState(String label, String state, String organization) throws GovernanceException;
+
+    /**
+     * Get the list of organization wide policies by state
+     *
+     * @param state        governable state for policy
+     * @param organization organization
+     * @return List of policy IDs
+     * @throws GovernanceException If an error occurs while getting the policies
+     */
+    List<String> getOrganizationWidePoliciesByState(String state, String organization) throws GovernanceException;
+
+    /**
+     * This method checks whether a blocking action is present for a given governable state of a policy
+     *
+     * @param policyId Policy ID
+     * @param state    Governable State
+     * @return
+     * @throws GovernanceException
+     */
+    boolean isBlockingActionPresentForState(String policyId, String state) throws GovernanceException;
 
 }

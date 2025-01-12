@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactGovernanceResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernanceValidationRequestDTO;
+import java.io.File;
 
 import java.util.List;
 
@@ -21,6 +21,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public interface ValidateApiService {
-      public Response validateGovernanceCompliance(GovernanceValidationRequestDTO governanceValidationRequestDTO, MessageContext messageContext) throws GovernanceException;
+public interface EvaluateComplianceApiService {
+      public Response evaluateCompliance(String artifactId, String artifactType, String artifactEvaluationState, InputStream artifactZipInputStream, Attachment artifactZipDetail, MessageContext messageContext) throws GovernanceException;
 }

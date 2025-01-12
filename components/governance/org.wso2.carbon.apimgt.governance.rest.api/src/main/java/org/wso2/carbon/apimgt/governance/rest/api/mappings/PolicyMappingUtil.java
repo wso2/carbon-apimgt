@@ -18,9 +18,12 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 
+import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ActionDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
@@ -54,8 +57,9 @@ public class PolicyMappingUtil {
         govPolicy.setRulesetIds(dto.getRulesets());
         govPolicy.setLabels(dto.getLabels());
         govPolicy.setActions(fromActionDTOListtoActionList(dto.getActions()));
-        govPolicy.setApplicableStates(dto.getApplicableStates().stream()
+        govPolicy.setGovernableStates(dto.getGovernableStates().stream()
                 .map(Enum::name)
+                .map(GovernableState::fromString)
                 .collect(Collectors.toList()));
         return govPolicy;
     }
@@ -80,8 +84,9 @@ public class PolicyMappingUtil {
         governancePolicyDTO.setRulesets(governancePolicy.getRulesetIds());
         governancePolicyDTO.setActions(
                 fromActionListtoActionDTOList(governancePolicy.getActions()));
-        governancePolicyDTO.setApplicableStates(governancePolicy.getApplicableStates().stream()
-                .map(GovernancePolicyDTO.ApplicableStatesEnum::valueOf)
+        governancePolicyDTO.setGovernableStates(governancePolicy.getGovernableStates().stream()
+                .map(Enum::name)
+                .map(GovernancePolicyDTO.GovernableStatesEnum::valueOf)
                 .collect(Collectors.toList()));
         return governancePolicyDTO;
     }
@@ -113,9 +118,10 @@ public class PolicyMappingUtil {
         List<GovernanceAction> governanceActions = new ArrayList<>();
         for (ActionDTO action : actions) {
             GovernanceAction governanceAction = new GovernanceAction();
-            governanceAction.setState(String.valueOf(action.getState()));
-            governanceAction.setRuleSeverity(String.valueOf(action.getRuleSeverity()));
-            governanceAction.setType(String.valueOf(action.getType()));
+            governanceAction.setGovernableState(GovernableState.fromString(String.valueOf(
+                    action.getState())));
+            governanceAction.setRuleSeverity(Severity.fromString(String.valueOf(action.getRuleSeverity())));
+            governanceAction.setType(GovernanceActionType.fromString(String.valueOf(action.getType())));
             governanceActions.add(governanceAction);
         }
         return governanceActions;
@@ -131,9 +137,11 @@ public class PolicyMappingUtil {
         List<ActionDTO> actionDTOs = new ArrayList<>();
         for (GovernanceAction action : actions) {
             ActionDTO actionDTO = new ActionDTO();
-            actionDTO.setState(ActionDTO.StateEnum.valueOf(action.getState()));
-            actionDTO.setRuleSeverity(ActionDTO.RuleSeverityEnum.valueOf(action.getRuleSeverity()));
-            actionDTO.setType(ActionDTO.TypeEnum.valueOf(action.getType()));
+            String governableState = String.valueOf(action.getGovernableState());
+            actionDTO.setState(ActionDTO.StateEnum.valueOf(governableState));
+            String severity = String.valueOf(action.getRuleSeverity());
+            actionDTO.setRuleSeverity(ActionDTO.RuleSeverityEnum.valueOf(severity));
+            actionDTO.setType(ActionDTO.TypeEnum.valueOf(String.valueOf(action.getType())));
             actionDTOs.add(actionDTO);
         }
         return actionDTOs;

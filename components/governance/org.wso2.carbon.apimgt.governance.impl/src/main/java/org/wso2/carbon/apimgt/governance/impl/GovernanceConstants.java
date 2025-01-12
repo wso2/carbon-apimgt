@@ -43,7 +43,10 @@ public class GovernanceConstants {
         public static final Integer APIM_DEFAULT_CLIENT_MAX_RETRIES = 2;
         public static final Integer APIM_DEFAULT_CLIENT_RETRY_DELAY = 500;
 
+    }
 
+    public enum GovernanceActionType {
+        BLOCK, NOTIFY
     }
 
 }

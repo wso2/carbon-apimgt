@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.governance.api.manager;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
+import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,23 +30,35 @@ import java.util.Map;
 public interface ComplianceManager {
 
     /**
-     * Get the associated rulesets by policy
+     * Handle Policy Change Event
      *
-     * @param organization Organization Name
-     * @return Map of associated rulesets
-     * @throws GovernanceException If an error occurs while getting the associated rulesets
+     * @param policyId     Policy ID
+     * @param organization Organization
      */
-    Map<String, Map<String, String>> getAssociatedRulesetsByPolicy(String organization)
-            throws GovernanceException;
+    void handlePolicyChangeEvent(String policyId, String organization) throws GovernanceException;
+
 
     /**
-     * Assess the compliance of an API
+     * Handle Ruleset Change Event
      *
-     * @param apiId                       API ID
-     * @param organization                Organization Name
-     * @param policyToRulesetToContentMap Map of policy to ruleset to content
-     * @param authHeader                  Auth header
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      */
-    void assessAPICompliance(String apiId, String organization, Map<String, Map<String, String>>
-            policyToRulesetToContentMap, String authHeader);
+    void handleRulesetChangeEvent(String rulesetId, String organization) throws GovernanceException;
+
+
+    /**
+     * Handle API Compliance Evaluation Request Async
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param govPolicies  List of governance policies to be evaluated
+     * @param organization Organization
+     * @throws GovernanceException If an error occurs while handling the API compliance evaluation
+     */
+    void handleAPIComplianceEvaluationAsync(String artifactId, String artifactType,
+                                            List<String> govPolicies, String organization)
+            throws GovernanceException;
+
+
 }

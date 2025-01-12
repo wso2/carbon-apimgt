@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,25 +18,22 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-
 /**
- * This class represents a governance rule Severity
+ * This class represents a governance rule type
  */
-public enum Severity {
-    ERROR,
-    WARN,
-    INFO;
+public enum RuleType {
+    API_METADATA,
+    API_DEFINITION,
+    API_DOCUMENTATION;
 
-    public static Severity fromString(String severityString) {
-        if ("error".equals(severityString)) {
-            return Severity.ERROR;
-        } else if ("warn".equals(severityString)) {
-            return Severity.WARN;
-        } else if ("info".equals(severityString)) {
-            return Severity.INFO;
+    public static RuleType fromString(String ruleTypeString) {
+        if ("api_metadata".equalsIgnoreCase(ruleTypeString)) {
+            return RuleType.API_METADATA;
+        } else if ("api_definition".equalsIgnoreCase(ruleTypeString)) {
+            return RuleType.API_DEFINITION;
+        } else if ("api_documentation".equalsIgnoreCase(ruleTypeString)) {
+            return RuleType.API_DOCUMENTATION;
         }
-        return Severity.WARN;
+        return null;
     }
 }

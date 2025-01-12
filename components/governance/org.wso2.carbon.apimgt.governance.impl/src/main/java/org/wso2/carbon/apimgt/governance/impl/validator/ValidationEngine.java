@@ -16,10 +16,11 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl.client.validationengine;
+package org.wso2.carbon.apimgt.governance.impl.validator;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 
 import java.io.InputStream;
 import java.util.List;
@@ -29,6 +30,15 @@ import java.util.List;
  * spectral
  */
 public interface ValidationEngine {
+
+    /**
+     * Check if a ruleset is valid
+     *
+     * @param ruleset Ruleset
+     * @return True if the ruleset is valid, False otherwise
+     * @throws GovernanceException If an error occurs while validating the ruleset
+     */
+    boolean isRulesetValid(Ruleset ruleset) throws GovernanceException;
 
     /**
      * Extract rules from a ruleset content
