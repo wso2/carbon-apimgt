@@ -127,7 +127,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     prepStmt.executeBatch();
                 }
 
-                // Insert into GOV_POLICY_APPLICABLE_STATE table
+                // Insert into GOV_POLICY_GOVERNABLE_STATE table
                 try (PreparedStatement prepStmt =
                              connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_STATE_MAPPING)) {
                     states = governancePolicy.getGovernableStates();
