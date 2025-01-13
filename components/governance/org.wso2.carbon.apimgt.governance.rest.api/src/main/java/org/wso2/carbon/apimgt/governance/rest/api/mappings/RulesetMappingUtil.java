@@ -45,7 +45,7 @@ public class RulesetMappingUtil {
         rulesetInfoDTO.setRuleType(RulesetInfoDTO.
                 RuleTypeEnum.fromValue(String.valueOf(rulesetInfo.getRuleType())));
         rulesetInfoDTO.setArtifactType(RulesetInfoDTO.
-                ArtifactTypeEnum.fromValue(rulesetInfo.getArtifactType()));
+                ArtifactTypeEnum.fromValue(String.valueOf(rulesetInfo.getArtifactType())));
         rulesetInfoDTO.setDocumentationLink(rulesetInfo.getDocumentationLink());
         rulesetInfoDTO.setProvider(rulesetInfo.getProvider());
         rulesetInfoDTO.setCreatedBy(rulesetInfo.getCreatedBy());

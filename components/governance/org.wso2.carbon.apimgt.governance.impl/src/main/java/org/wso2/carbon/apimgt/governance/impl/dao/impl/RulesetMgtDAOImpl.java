@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -91,7 +92,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 prepStmt.setString(3, ruleset.getDescription());
                 prepStmt.setBlob(4, rulesetContentStream);
                 prepStmt.setString(5, String.valueOf(ruleset.getRuleType()));
-                prepStmt.setString(6, ruleset.getArtifactType());
+                prepStmt.setString(6, String.valueOf(ruleset.getArtifactType()));
                 prepStmt.setString(7, ruleset.getDocumentationLink());
                 prepStmt.setString(8, ruleset.getProvider());
                 prepStmt.setString(9, organization);
@@ -177,7 +178,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
                     rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
+                    rulesetInfo.setArtifactType(ArtifactType.fromString(rs.getString("ARTIFACT_TYPE")));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
                     rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
@@ -218,7 +219,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
                     rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
+                    rulesetInfo.setArtifactType(ArtifactType.fromString(rs.getString("ARTIFACT_TYPE")));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
                     rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
@@ -257,7 +258,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
                     rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(rs.getString("ARTIFACT_TYPE"));
+                    rulesetInfo.setArtifactType(ArtifactType.fromString(rs.getString("ARTIFACT_TYPE")));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
                     rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
@@ -362,7 +363,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 prepStmt.setString(2, ruleset.getDescription());
                 prepStmt.setBlob(3, rulesetContent);
                 prepStmt.setString(4, String.valueOf(ruleset.getRuleType()));
-                prepStmt.setString(5, ruleset.getArtifactType());
+                prepStmt.setString(5, String.valueOf(ruleset.getArtifactType()));
                 prepStmt.setString(6, ruleset.getDocumentationLink());
                 prepStmt.setString(7, ruleset.getProvider());
                 prepStmt.setString(8, ruleset.getUpdatedBy());

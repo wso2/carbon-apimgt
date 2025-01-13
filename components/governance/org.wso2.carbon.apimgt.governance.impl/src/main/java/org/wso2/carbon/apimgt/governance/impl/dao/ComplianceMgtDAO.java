@@ -19,8 +19,10 @@
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.EvaluationRequest;
+import org.wso2.carbon.apimgt.governance.api.model.EvaluationStatus;
 
-import java.io.InputStream;
+import java.util.List;
 
 /**
  * This interface represents the DAO class related assessing compliance of APIs
@@ -28,17 +30,43 @@ import java.io.InputStream;
 public interface ComplianceMgtDAO {
 
     /**
-     * Add an artifact compliance evaluation request event
+     * Add an artifact compliance evaluation request
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
      * @param policyId     Policy ID
      * @param organization Organization
-     * @throws GovernanceException If an error occurs while adding the artifact compliance evaluation request event
+     * @throws GovernanceException If an error occurs while adding the artifact
+     *                             compliance evaluation request event
      */
-    void addArtifactComplianceEvaluationRequestEvent(String artifactId, String artifactType,
-                                                     String policyId,
-                                                     String organization) throws GovernanceException;
+    void addComplianceEvaluationRequest(String artifactId, String artifactType,
+                                        String policyId,
+                                        String organization) throws GovernanceException;
+
+    /**
+     * Get pending evaluation requests
+     *
+     * @return List of pending evaluation requests
+     * @throws GovernanceException If an error occurs while getting the pending evaluation requests
+     */
+    List<EvaluationRequest> getPendingEvaluationRequests() throws GovernanceException;
+
+    /**
+     * Update the evaluation status of a request
+     *
+     * @param requestId Evaluation request ID
+     * @param status    Evaluation status
+     * @throws GovernanceException If an error occurs while updating the evaluation status
+     */
+    void updateEvaluationStatus(String requestId, EvaluationStatus status) throws GovernanceException;
+
+    /**
+     * Delete an evaluation request
+     *
+     * @param requestId Evaluation request ID
+     * @throws GovernanceException If an error occurs while deleting the evaluation request
+     */
+    void deleteEvaluationRequest(String requestId) throws GovernanceException;
 
 
 }

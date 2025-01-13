@@ -21,9 +21,9 @@ package org.wso2.carbon.apimgt.governance.api.manager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * This interface represents the Governance Policy Manager
@@ -84,14 +84,13 @@ public interface PolicyManager {
 
 
     /**
-     * Get the associated rulesets by policy
+     * Get the list of rulesets for a given policy
      *
-     * @param organization Organization Name
-     * @return Map of associated rulesets and details of each ruleset as a map
-     * @throws GovernanceException If an error occurs while getting the associated rulesets
+     * @param policyId Policy ID
+     * @return List of rulesets
+     * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    Map<String, Map<String, String>> getRulesetsForPolicy(String policyId, String organization)
-            throws GovernanceException;
+    List<Ruleset> getRulesetsByPolicyId(String policyId) throws GovernanceException;
 
     /**
      * Get the list of policies by label and state

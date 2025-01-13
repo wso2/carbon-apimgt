@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
@@ -116,18 +117,17 @@ public class PolicyManagerImpl implements PolicyManager {
     }
 
     /**
-     * Get the associated rulesets by policy
+     * Get the list of rulesets for a given policy
      *
-     * @param policyId     Policy ID, if null all the policies will be considered
-     * @param organization Organization Name
-     * @return Map of associated rulesets and details of each ruleset as a map
-     * @throws GovernanceException If an error occurs while getting the associated rulesets
+     * @param policyId Policy ID
+     * @return List of rulesets
+     * @throws GovernanceException If an error occurs while getting the rulesets
      */
     @Override
-    public Map<String, Map<String, String>> getRulesetsForPolicy(String policyId, String organization)
-            throws GovernanceException {
-        return policyMgtDAO.getRulesetsByPolicyId(policyId, organization);
+    public List<Ruleset> getRulesetsByPolicyId(String policyId) throws GovernanceException {
+        return policyMgtDAO.getRulesetsByPolicyId(policyId);
     }
+
 
     /**
      * Get the list of policies by label and state

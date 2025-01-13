@@ -62,8 +62,9 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             "stream to a string for the ruleset with id: %s in the organization: %s", true),
     ERROR_WHILE_RETRIEVING_RULESET_CONTENT(301009, "Retrieving ruleset content failed", 500, "Error while retrieving " +
             "the content of the ruleset with id: %s in the organization: %s", true),
-    ERROR_WHILE_RETRIEVING_RULESET_CONTENT_ASSOCIATED_WITH_POLICIES(301010, "Retrieving ruleset contents associated with policies failed", 500, "Retrieving ruleset " +
-            "contents associated with policies failed for the organization %s", true),
+    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY(301010, "Error while retrieving rulesets associated with " +
+            "policy", 500, "Error while retrieving " +
+            "rulesets associated with policy with id: %s", true),
     ERROR_WHILE_INSERTING_RULES(301011, "Rule insertion failed", 500, "Rule insertion failed for the ruleset with id:" +
             " '%s'", true),
     INVALID_RULESET_CONTENT(301012, "Ruleset content is invalid", 400, "Content of ruleset '%s' is invalid"),
@@ -118,6 +119,16 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             "request.",
             500,
             "Error while processing governance evaluation request for artifact/api: %s in the organization: %s", true),
+
+    ERROR_WHILE_GETTING_GOVERNANCE_EVALUATION_REQUESTS(501002, "Error while getting governance evaluation requests.",
+            500,
+            "Error while getting governance evaluation requests"),
+
+    ERROR_WHILE_UPDATING_GOVERNANCE_EVALUATION_REQUEST(501003, "Error while updating governance evaluation request.",
+            500, "Error while updating governance evaluation request with ID: %s", true),
+
+    ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUEST(501004, "Error while deleting governance evaluation request.",
+            500, "Error while deleting governance evaluation request with ID: %s"),
 
     // Linting related codes
     ERROR_WHILE_SAVING_LINTING_RESULT(601001, "Error while saving linting result.", 500, "Error while saving linting result for endpoint: %s", true),

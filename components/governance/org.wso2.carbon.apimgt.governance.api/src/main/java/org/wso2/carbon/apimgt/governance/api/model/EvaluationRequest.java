@@ -18,15 +18,27 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-public class ValidationTask {
+public class EvaluationRequest {
+
+    private String id;
 
     private String artifactId;
 
-    private String artifactType;
+    private ArtifactType artifactType;
 
     private String policyId;
 
     private String organization;
+
+    private EvaluationStatus evaluationStatus;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getArtifactId() {
         return artifactId;
@@ -36,11 +48,11 @@ public class ValidationTask {
         this.artifactId = artifactId;
     }
 
-    public String getArtifactType() {
+    public ArtifactType getArtifactType() {
         return artifactType;
     }
 
-    public void setArtifactType(String artifactType) {
+    public void setArtifactType(ArtifactType artifactType) {
         this.artifactType = artifactType;
     }
 
@@ -58,5 +70,13 @@ public class ValidationTask {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public EvaluationStatus getEvaluationStatus() {
+        return evaluationStatus;
+    }
+
+    public void setEvaluationStatus(EvaluationStatus evaluationStatus) {
+        this.evaluationStatus = evaluationStatus;
     }
 }

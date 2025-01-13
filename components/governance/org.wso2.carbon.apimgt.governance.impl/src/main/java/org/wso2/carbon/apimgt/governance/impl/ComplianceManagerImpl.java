@@ -69,7 +69,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
         for (String artifactId : artifacts) {
             String artifactType = "REST_API"; //TODO: Get artifact type from APIM
-            complianceMgtDAO.addArtifactComplianceEvaluationRequestEvent(artifactId, artifactType,
+            complianceMgtDAO.addComplianceEvaluationRequest(artifactId, artifactType,
                     policyId, organization);
         }
     }
@@ -99,12 +99,12 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
     @Override
-    public void handleAPIComplianceEvaluationAsync(String artifactId, String artifactType,
-                                                   List<String> govPolicies,
-                                                   String organization) throws GovernanceException {
+    public void handleComplianceEvaluationAsync(String artifactId, String artifactType,
+                                                List<String> govPolicies,
+                                                String organization) throws GovernanceException {
 
         for (String policyId : govPolicies) {
-            complianceMgtDAO.addArtifactComplianceEvaluationRequestEvent(artifactId, artifactType,
+            complianceMgtDAO.addComplianceEvaluationRequest(artifactId, artifactType,
                     policyId, organization);
         }
 

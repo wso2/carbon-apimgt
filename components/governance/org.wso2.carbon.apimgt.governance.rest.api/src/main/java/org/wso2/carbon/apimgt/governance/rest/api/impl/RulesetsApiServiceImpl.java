@@ -23,6 +23,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.manager.RulesetManager;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
@@ -79,7 +80,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         try {
             ruleset.setName(name);
             ruleset.setRuleType(RuleType.fromString(ruleType));
-            ruleset.setArtifactType(artifactType);
+            ruleset.setArtifactType(ArtifactType.fromString(artifactType));
             ruleset.setProvider(provider);
             ruleset.setDescription(description);
             ruleset.setDocumentationLink(documentationLink);
@@ -277,7 +278,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         Ruleset ruleset = new Ruleset();
         ruleset.setName(name);
         ruleset.setRuleType(RuleType.fromString(ruleType));
-        ruleset.setArtifactType(artifactType);
+        ruleset.setArtifactType(ArtifactType.fromString(artifactType));
         ruleset.setProvider(provider);
         ruleset.setId(rulesetId);
         ruleset.setDescription(description);

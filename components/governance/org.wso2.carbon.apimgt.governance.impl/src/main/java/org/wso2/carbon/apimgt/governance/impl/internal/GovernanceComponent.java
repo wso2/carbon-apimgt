@@ -26,12 +26,11 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.governance.impl.ValidationTaskScheduler;
+import org.wso2.carbon.apimgt.governance.impl.EvaluationRequestScheduler;
 import org.wso2.carbon.apimgt.governance.impl.observer.GovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
@@ -64,7 +63,7 @@ public class GovernanceComponent {
                 new GovernanceConfigurationServiceImpl(configuration);
         ServiceReferenceHolder.getInstance().setGovernanceConfigurationService(configurationService);
         GovernanceDBUtil.initialize();
-        ValidationTaskScheduler.initialize();
+        EvaluationRequestScheduler.initialize();
 
         String migrationEnabled = System.getProperty(GovernanceConstants.MIGRATE);
         if (migrationEnabled == null) {
@@ -79,7 +78,7 @@ public class GovernanceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-        ValidationTaskScheduler.shutdown();
+        EvaluationRequestScheduler.shutdown();
         if (log.isDebugEnabled()) {
             log.debug("Deactivating Governance component");
         }
