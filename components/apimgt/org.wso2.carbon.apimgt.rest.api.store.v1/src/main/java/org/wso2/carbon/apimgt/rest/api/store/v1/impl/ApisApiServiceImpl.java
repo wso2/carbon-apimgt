@@ -1194,13 +1194,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
-                if (!api.isAPIProduct()) {
-                    // Add only organization specific tiers
-                    Set<Tier> tiers = APIUtil.getAllowedTiersForTheOrganization(api.getApi().getAvailableTiers(),
-                            userOrgInfo.getOrganizationSelector(), userOrgInfo.getSuperOrganization());
-                    api.getApi().removeAllTiers();
-                    api.getApi().setAvailableTiers(tiers);
-                }
 
                 APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, organization);
                 long subscriptionCountOfAPI = apiConsumer.getSubscriptionCountOfAPI(apiId, organization);

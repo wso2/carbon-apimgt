@@ -3867,21 +3867,6 @@ public class SQLConstants {
                         " WHERE KEY_MANAGER_UUID = ?";
     }
     
-    public static class PolicyOrgVisibilitySqlConstants {
-
-        public static final String ADD_POLICY_ORG_VISIBILITY_SQL =
-                " INSERT INTO" +
-                        " AM_POLICY_ALLOWED_ORGS (POLICY_UUID, ALLOWED_ORGANIZATIONS)" +
-                        " VALUES(?, ?)";
-
-        public static final String DELETE_ALL_POLICY_ORG_VISIBILITY_SQL = "DELETE FROM AM_POLICY_ALLOWED_ORGS" +
-                " WHERE POLICY_UUID = ?";
-
-        public static final String GET_POLICY_ORG_VISIBILITY_SQL =
-                "SELECT ALLOWED_ORGANIZATIONS" +
-                        " FROM AM_POLICY_ALLOWED_ORGS " +
-                        " WHERE POLICY_UUID = ?";
-    }
     /**
      * Static class to hold database queries related to AM_TENANT_THEMES table
      */
