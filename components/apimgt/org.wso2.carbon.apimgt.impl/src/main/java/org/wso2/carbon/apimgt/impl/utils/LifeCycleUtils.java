@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -133,12 +134,13 @@ public class LifeCycleUtils {
         }
     }
 
-    public static void publishInNewPortal(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
+    public static void publishInNewPortal(String tenantName, ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
         String baseUrl = APIUtil.getNewPortalURL();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantName);
-
-        Certificate cert = SigningUtil.getPublicCertificate(tenantId);
-        PrivateKey privateKey = SigningUtil.getSigningKey(tenantId);
+        // int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantName);
+        // TODO: Finalised the right cert
+        Certificate cert = SigningUtil.getPublicCertificate(-1234);
+        PrivateKey privateKey = SigningUtil.getSigningKey(-1234);
 
         SSLContext sslContext = configureSSLContext(cert, privateKey);
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
@@ -146,8 +148,13 @@ public class LifeCycleUtils {
         String orgId = getNewPortalOrgId(baseUrl + "/devportal/b2b/organizations/" + tenantName, sslsf);
 
         if (orgId.isEmpty()){
-            // Create a new org from tenant Name
-            // Get that org ID and update orgID
+            // Create a new org for the current tenant since no org in developer portal matches tenant
+            String newOrgInfo = generateNewOrgInfoForDeveloperPortal(tenantName);
+            orgId = createNewOrg(baseUrl + "/devportal/b2b/organizations", newOrgInfo, sslsf);
+            if (orgId.isEmpty()) {
+                log.error("Something went wrong while creating an org in new developer portal");
+                return;
+            }
         }
         API api = apiTypeWrapper.getApi();
         String apiDefinition = ApisApiServiceImplUtils.getApiDefinition(api);
@@ -198,8 +205,10 @@ public class LifeCycleUtils {
         apiInfo.put("apiType", apiTypeWrapper.getType() != null ? apiTypeWrapper.getType() : "");
 
         JSONObject endPoints = new JSONObject();
-        endPoints.put("sandboxURL", api.getApiExternalSandboxEndpoint() != null ? api.getApiExternalSandboxEndpoint() : "");
-        endPoints.put("productionURL", api.getApiExternalProductionEndpoint() != null ? api.getApiExternalProductionEndpoint() : "");
+        endPoints.put("sandboxURL", api.getApiExternalSandboxEndpoint() != null ?
+                api.getApiExternalSandboxEndpoint() : "");
+        endPoints.put("productionURL", api.getApiExternalProductionEndpoint() != null ?
+                api.getApiExternalProductionEndpoint() : "");
 
         JSONObject response = new JSONObject();
         response.put("apiInfo", apiInfo);
@@ -210,14 +219,33 @@ public class LifeCycleUtils {
         return response.toJSONString();
     }
 
-    private static String getNewPortalOrgId(String apiUrl, SSLConnectionSocketFactory sslsf) throws APIManagementException {
+    private static String generateNewOrgInfoForDeveloperPortal(String tenantName) {
+        JSONObject orgInfo = new JSONObject();
+        orgInfo.put("orgName", tenantName);
+        orgInfo.put("businessOwner", tenantName);
+        orgInfo.put("businessOwnerContact", "none");
+        orgInfo.put("businessOwnerEmail", "admin@none.com");
+        orgInfo.put("devPortalURLIdentifier", tenantName);
+        orgInfo.put("roleClaimName", "roles");
+        orgInfo.put("groupsClaimName", "groups");
+        orgInfo.put("organizationClaimName", "organizationID");
+        orgInfo.put("organizationIdentifier", tenantName);
+        orgInfo.put("adminRole", "admin");
+        orgInfo.put("subscriberRole", "subscriber");
+        orgInfo.put("superAdminRole", "superAdmin");
+        return orgInfo.toJSONString();
+    }
+
+    private static String getNewPortalOrgId(String apiUrl, SSLConnectionSocketFactory sslsf)
+            throws APIManagementException {
         try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
             HttpGet httpGet = new HttpGet(apiUrl);
             HttpResponse response = httpClient.execute(httpGet);
             int statusCode = response.getStatusLine().getStatusCode();
             String responseBody = EntityUtils.toString(response.getEntity());
             if (statusCode == 200) {
-                com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                com.fasterxml.jackson.databind.ObjectMapper objectMapper
+                        = new com.fasterxml.jackson.databind.ObjectMapper();
                 Map jsonMap = objectMapper.readValue(responseBody, Map.class);
                 return (String) jsonMap.get("orgId");
             } else if (statusCode == 404) {
@@ -230,13 +258,15 @@ public class LifeCycleUtils {
         }
     }
 
-    public static int publishApiMetadata(String apiUrl, String apiMetadata, String apiDefinition, SSLConnectionSocketFactory sslsf) throws APIManagementException {
+    public static int publishApiMetadata(String apiUrl, String apiMetadata, String apiDefinition,
+                                         SSLConnectionSocketFactory sslsf) throws APIManagementException {
         try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
             HttpPost httpPost = new HttpPost(apiUrl);
 
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addTextBody("apiMetadata", apiMetadata, ContentType.APPLICATION_JSON);
-            builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON, "apiDefinition.json");
+            builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON,
+                    "apiDefinition.json");
 
             HttpEntity multipart = builder.build();
             httpPost.setEntity(multipart);
@@ -246,6 +276,32 @@ public class LifeCycleUtils {
             }
         } catch (IOException e) {
             throw new APIManagementException("Error while sending API metadata and definition: " + e.getMessage(), e);
+        }
+    }
+
+    public static String createNewOrg(String apiUrl, String orgInfo, SSLConnectionSocketFactory sslsf)
+            throws APIManagementException {
+        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+            HttpPost httpPost = new HttpPost(apiUrl);
+            httpPost.setHeader("Content-Type", "application/json");
+            StringEntity entity = new StringEntity(orgInfo, ContentType.APPLICATION_JSON);
+            httpPost.setEntity(entity);
+
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                int statusCode = response.getStatusLine().getStatusCode();
+                String responseBody = EntityUtils.toString(response.getEntity());
+                if (statusCode == 201) {
+                    com.fasterxml.jackson.databind.ObjectMapper objectMapper
+                            = new com.fasterxml.jackson.databind.ObjectMapper();
+                    Map<?, ?> jsonMap = objectMapper.readValue(responseBody, Map.class);
+                    return (String) jsonMap.get("orgId");
+                } else {
+                    return "";
+                }
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while creating an organization for tenant in new developer portal: "
+                    + e.getMessage(), e);
         }
     }
 
@@ -264,8 +320,6 @@ public class LifeCycleUtils {
             throw new APIManagementException(e);
         }
     }
-
-
 
     private static void updateLifeCycleState(APIProvider apiProvider, String orgId, ApiTypeWrapper apiTypeWrapper,
             Map<String, Boolean> checklist, String targetStatus, String currentStatus) throws APIManagementException {
