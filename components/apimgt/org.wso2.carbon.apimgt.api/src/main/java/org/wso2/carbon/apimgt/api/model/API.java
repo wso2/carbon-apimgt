@@ -208,6 +208,8 @@ public class API implements Serializable {
 
     private List<APICategory> apiCategories;
 
+    private List<Label> apiLabels;
+
     /**
      * Property to hold enable/disable status of the store visibility.
      */
@@ -1415,6 +1417,14 @@ public class API implements Serializable {
 
     public List<APICategory> getApiCategories() {
         return apiCategories;
+    }
+
+    public void setApiLabels(List<Label> apiLabels) {
+        this.apiLabels = apiLabels;
+    }
+
+    public List<Label> getApiLabels() {
+        return apiLabels;
     }
 
     public List<String> getKeyManagers() {

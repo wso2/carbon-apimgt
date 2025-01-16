@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,9 +26,9 @@ import java.util.Objects;
 public class Label {
     private String labelId;
     private String name;
-    private String tenantId;
+    private String type;
     private String description;
-    private List<String> accessUrls = new ArrayList<>();
+    private String tenantDomain;
 
     public Label() {
     }
@@ -51,20 +49,12 @@ public class Label {
         this.name = name;
     }
 
-    public String getTenantId() {
-        return tenantId;
+    public String getType() {
+        return type;
     }
 
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public List<String> getAccessUrls() {
-        return accessUrls;
-    }
-
-    public void setAccessUrls(List<String> accessUrls) {
-        this.accessUrls = accessUrls;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getDescription() {
@@ -75,6 +65,14 @@ public class Label {
         this.description = description;
     }
 
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;
@@ -82,13 +80,13 @@ public class Label {
         Label other = (Label) obj;
         if (!Objects.equals(this.name, other.name)) return false;
         if (!Objects.equals(this.labelId, other.labelId)) return false;
+        if (!Objects.equals(this.type, other.type)) return false;
         if (!Objects.equals(this.description, other.description)) return false;
-        if (!Objects.equals(this.tenantId, other.tenantId)) return false;
-        if (!Objects.equals(this.accessUrls, other.accessUrls)) return false;
+        if (!Objects.equals(this.tenantDomain, other.tenantDomain)) return false;
         return true;
     }
 
     public int hashCode() {
-        return Objects.hash(super.hashCode(), labelId, name, tenantId, description, accessUrls);
+        return Objects.hash(super.hashCode(), labelId, name, type, description, tenantDomain);
     }
 }

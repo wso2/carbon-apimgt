@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -1218,6 +1220,44 @@ public class APIAdminImpl implements APIAdmin {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         Map<String, Object> result = apiProvider.searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE);
         return (int) (Integer) result.get("length");
+    }
+
+    public Label addLabel(Label label, String tenantDomain) throws APIManagementException {
+
+        return apiMgtDAO.addLabel(label, tenantDomain);
+    }
+
+    public void updateLabel(Label label) throws APIManagementException {
+
+        apiMgtDAO.updateLabel(label);
+    }
+
+    public void deleteLabel(String labelID) throws APIManagementException {
+
+        if (apiMgtDAO.hasAPIsForLabel(labelID)) {
+            APIUtil.handleException("Label is attached to APIs and cannot be deleted. Label ID: " + labelID);
+        }
+        apiMgtDAO.deleteLabel(labelID);
+    }
+
+    public List<Label> getAllLabelsOfTenant(String tenantDomain) throws APIManagementException {
+
+        return apiMgtDAO.getAllLabels(tenantDomain);
+    }
+
+    public boolean isLabelNameExists(String labelName, String type, String uuid, String tenantDomain) throws APIManagementException {
+
+        return apiMgtDAO.isLabelNameExists(labelName, type, uuid, tenantDomain);
+    }
+
+    public Label getLabelByID(String labelID) throws APIManagementException {
+
+        return apiMgtDAO.getLabelByID(labelID);
+    }
+
+    public List<ApiResult> getMappedApisForLabel(String labelID) throws APIManagementException {
+
+        return apiMgtDAO.getMappedApisForLabel(labelID);
     }
 
     private void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)

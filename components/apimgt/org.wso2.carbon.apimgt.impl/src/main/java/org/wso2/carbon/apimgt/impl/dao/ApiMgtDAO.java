@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -59,6 +60,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -5643,6 +5645,12 @@ public class ApiMgtDAO {
             if (StringUtils.isNotEmpty(serviceKey)) {
                 addAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantId, connection);
             }
+
+            if (api.getApiLabels() != null && !api.getApiLabels().isEmpty()) {
+                for (Label label: api.getApiLabels()) {
+                    addApiLabelMapping(api.getUuid(), label.getLabelId());
+                }
+            }
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -7191,6 +7199,32 @@ public class ApiMgtDAO {
             if (isServiceInfoAvailable) {
                 updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantID, connection);
             }
+
+            if (api.getApiLabels() != null && !api.getApiLabels().isEmpty()) {
+                List<String> mappedLabelIDs = getMappedLabelIDsForApi(api.getUuid());
+                List<String> newLabelIDs = new ArrayList<>();
+                for (Label label: api.getApiLabels()) {
+                    newLabelIDs.add(label.getLabelId());
+                }
+                List<String> addList = new ArrayList<>(newLabelIDs);
+                addList.removeAll(mappedLabelIDs);
+
+                List<String> deleteList = new ArrayList<>(mappedLabelIDs);
+                deleteList.removeAll(newLabelIDs);
+
+                for (String labelID: addList) {
+                    addApiLabelMapping(api.getUuid(), labelID);
+                }
+
+                for (String labelID: deleteList) {
+                    deleteApiLabelMapping(api.getUuid(), labelID);
+                }
+            } else if (hasLabelsForApi(api.getUuid())) {
+                for (String labelID: getMappedLabelIDsForApi(api.getUuid())) {
+                    deleteApiLabelMapping(api.getUuid(), labelID);
+                }
+            }
+
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -16713,6 +16747,341 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to delete API category : " + categoryID, e);
         }
+    }
+
+    /**
+     * Adds an Label
+     *
+     * @param label label to be added
+     * @param tenantDomain tenant domain
+     * @return Label added label
+     * @throws APIManagementException if failed to add the label
+     */
+    public Label addLabel(Label label, String tenantDomain) throws APIManagementException {
+
+        String uuid = UUID.randomUUID().toString();
+        label.setLabelId(uuid);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_SQL)) {
+            statement.setString(1, uuid);
+            statement.setString(2, label.getName());
+            statement.setString(3, label.getType());
+            statement.setString(4, label.getDescription());
+            statement.setString(5, tenantDomain);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to add Label: " + label.getName(), e);
+        }
+        return label;
+    }
+
+    /**
+     * Update Label
+     *
+     * @param label Label object with updated details
+     * @throws APIManagementException if failed to update
+     */
+    public void updateLabel(Label label) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_LABEL_SQL)) {
+            statement.setString(1, label.getName());
+            statement.setString(2, label.getType());
+            statement.setString(3, label.getDescription());
+            statement.setString(4, label.getTenantDomain());
+            statement.setString(5, label.getLabelId());
+            statement.execute();
+        } catch (SQLException e) {
+            handleException("Failed to update Label : " + label.getName() +
+                    " of tenant " + label.getTenantDomain() , e);
+        }
+    }
+
+    /**
+     * Get all available Labels of the Tenant Domain
+     *
+     * @param tenantDomain tenant domain
+     * @return List<Label> list of labels
+     * @throws APIManagementException if failed to get labels
+     */
+    public List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
+
+        List<Label> labelsList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.GET_LABELS_BY_TENANT_DOMAIN_SQL)) {
+            statement.setString(1, tenantDomain);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Label label = new Label();
+                    label.setLabelId(rs.getString("UUID"));
+                    label.setName(rs.getString("NAME"));
+                    label.setType(rs.getString("TYPE"));
+                    label.setDescription(rs.getString("DESCRIPTION"));
+                    label.setTenantDomain(tenantDomain);
+
+                    labelsList.add(label);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Labels for Tenant Domain " + tenantDomain, e);
+        }
+        return labelsList;
+    }
+
+    /**
+     * Checks whether the given label name is already available under given tenant domain and type
+     *
+     * @param labelName label name
+     * @param type label type
+     * @param uuid label UUID
+     * @param tenantDomain tenant domain
+     * @return true if the given name is already exists
+     * @throws APIManagementException if failed to get name existence
+     */
+    public boolean isLabelNameExists(String labelName, String type, String uuid, String tenantDomain) throws APIManagementException {
+
+        String sql = SQLConstants.IS_LABEL_NAME_EXISTS_SQL; // Adding new label
+        if (uuid != null) {
+            sql = SQLConstants.IS_LABEL_NAME_EXISTS_FOR_ANOTHER_UUID_SQL;   // Update the label name
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, labelName);
+            statement.setString(2, type);
+            statement.setString(3, tenantDomain);
+            if (uuid != null) {
+                statement.setString(4, uuid);
+            }
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("LABEL_COUNT");
+                if (count > 0) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check whether Label name : " + labelName + " exists", e);
+        }
+        return false;
+    }
+
+    /**
+     * Get a label by UUID
+     *
+     * @param labelID label UUID
+     * @return Label label object
+     * @throws APIManagementException if failed to get
+     */
+    public Label getLabelByID(String labelID) throws APIManagementException {
+
+        Label label = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_LABEL_BY_UUID_SQL)) {
+            statement.setString(1, labelID);
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                label = new Label();
+                label.setName(rs.getString("NAME"));
+                label.setType(rs.getString("TYPE"));
+                label.setDescription(rs.getString("DESCRIPTION"));
+                label.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                label.setLabelId(labelID);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch Label : " + labelID, e);
+        }
+        return label;
+    }
+
+    /**
+     * Delete a label
+     *
+     * @param labelID label UUID
+     * @throws APIManagementException if failed to delete label
+     */
+    public void deleteLabel(String labelID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_SQL)) {
+            statement.setString(1, labelID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete Label : " + labelID, e);
+        }
+    }
+
+    /**
+     * Checks whether APIs are mapped with the given label
+     *
+     * @param labelID label UUID
+     * @return true if there are API mappings for the given label
+     * @throws APIManagementException if failed to get mappings
+     */
+    public boolean hasAPIsForLabel(String labelID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_ANY_MAPPING_EXISTS_FOR_LABEL_SQL)) {
+            statement.setString(1, labelID);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("MAPPING_COUNT") > 0;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check API mappings for label ID: " + labelID, e);
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether labels are mapped with the given API
+     *
+     * @param apiID API UUID
+     * @return true if there are label mappings for the given API
+     * @throws APIManagementException if failed to get mappings
+     */
+    public boolean hasLabelsForApi(String apiID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.IS_ANY_MAPPING_EXISTS_FOR_API_SQL)) {
+            statement.setString(1, apiID);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("MAPPING_COUNT") > 0;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check label mappings for API UUID: " + apiID, e);
+        }
+        return false;
+    }
+
+    /**
+     * Add a label mapping to an API
+     *
+     * @param apiID API Id
+     * @param labelID label UUID
+     * @throws APIManagementException if failed to add mapping
+     */
+    public void addApiLabelMapping (String apiID, String labelID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_API_LABEL_MAPPING_SQL)) {
+            statement.setString(1, apiID);
+            statement.setString(2, labelID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Error occurred while adding mapping between API ID: " + apiID + " and Label ID: " +
+                    labelID, e);
+        }
+    }
+
+    /**
+     * Remove a label mapping from an API
+     *
+     * @param apiID   API Id
+     * @param labelID label UUID
+     * @throws APIManagementException if failed to remove mapping
+     */
+    public void deleteApiLabelMapping(String apiID, String labelID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_LABEL_MAPPING_SQL)) {
+            statement.setString(1, apiID);
+            statement.setString(2, labelID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Error occurred while deleting mapping between API ID: " + apiID + " and Label ID: " +
+                    labelID, e);
+        }
+    }
+
+    /**
+     * Get all mapped label IDs of the given API
+     *
+     * @param apiID API Id
+     * @return List<String> list of label UUIDs
+     * @throws APIManagementException if failed to get mappings
+     */
+    public List<String> getMappedLabelIDsForApi(String apiID) throws APIManagementException {
+
+        List<String> mappedLabelIDs = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_MAPPED_LABEL_IDS_BY_API_ID_SQL)) {
+            statement.setString(1, apiID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    mappedLabelIDs.add(rs.getString("LABEL_UUID"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting mapped label IDs of the API ID: " + apiID, e);
+        }
+        return mappedLabelIDs;
+    }
+
+    /**
+     * Get all mapped APIs of the given Label
+     *
+     * @param labelID label UUID
+     * @return List<ApiResult> list of ApiResult
+     * @throws APIManagementException if failed to get mappings
+     */
+    public List<ApiResult> getMappedApisForLabel(String labelID) throws APIManagementException {
+
+        List<ApiResult> mappedApis = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_MAPPED_APIS_BY_LABEL_UUID_SQL)) {
+            statement.setString(1, labelID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    ApiResult apiResult = new ApiResult();
+                    apiResult.setId(rs.getString("API_UUID"));
+                    apiResult.setName(rs.getString("API_NAME"));
+                    apiResult.setVersion(rs.getString("API_VERSION"));
+                    apiResult.setProvider(rs.getString("API_PROVIDER"));
+
+                    mappedApis.add(apiResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting mapped APIs of the label ID: " + labelID, e);
+        }
+        return mappedApis;
+    }
+
+    /**
+     * Get all mapped Labels of the given API
+     *
+     * @param apiID API UUID
+     * @return List<Label> list of labels
+     * @throws APIManagementException if failed to get mappings
+     */
+    public List<Label> getMappedLabelsForApi(String apiID) throws APIManagementException {
+        List<Label> mappedLabels = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_MAPPED_LABELS_BY_API_UUID_SQL)) {
+            statement.setString(1, apiID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Label label = new Label();
+                    label.setLabelId(rs.getString("UUID"));
+                    label.setName(rs.getString("NAME"));
+                    label.setType(rs.getString("TYPE"));
+                    label.setDescription(rs.getString("DESCRIPTION"));
+                    label.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                    mappedLabels.add(label);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting mapped Labels of the API ID: " + apiID, e);
+        }
+        return mappedLabels;
     }
 
     public String addUserID(String userID, String userName) throws APIManagementException {

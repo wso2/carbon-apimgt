@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -572,6 +573,15 @@ public class PublisherCommonUtils {
             if (!APIUtil.validateAPICategories(apiCategoriesList, originalAPI.getOrganization())) {
                 throw new APIManagementException("Invalid API Category name(s) defined",
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID, originalAPI.getId().getName()));
+            }
+        }
+
+        // validate api labels
+        if (apiToUpdate.getApiLabels() != null) {
+            List<Label> labels = apiToUpdate.getApiLabels();
+            if (!APIUtil.validateAPILabels(labels, originalAPI.getOrganization())) {
+                throw new APIManagementException("Invalid API label(s) defined",
+                        ExceptionCodes.from(ExceptionCodes.API_LABEL_INVALID, originalAPI.getId().getName()));
             }
         }
 
@@ -1173,6 +1183,15 @@ public class PublisherCommonUtils {
             if (!APIUtil.validateAPICategories(apiCategoriesList, organization)) {
                 throw new APIManagementException("Invalid API Category name(s) defined",
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
+            }
+        }
+
+        // validate api labels
+        if (apiToAdd.getApiLabels() != null) {
+            List<Label> labels = apiToAdd.getApiLabels();
+            if (!APIUtil.validateAPILabels(labels, organization)) {
+                throw new APIManagementException("Invalid API label(s) defined",
+                        ExceptionCodes.from(ExceptionCodes.API_LABEL_INVALID));
             }
         }
 

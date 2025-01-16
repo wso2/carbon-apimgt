@@ -9534,6 +9534,35 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
+
+  ######################################################
+  # The "Label Collection" resource API
+  ######################################################
+  /labels:
+    get:
+      tags:
+        - Labels (Collection)
+      summary: Get all Labels
+      description: |
+        Get all Labels
+      responses:
+        200:
+          description: |
+            OK.
+            Labels returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/labels"'
+
 components:
   schemas:
     SequenceBackendList:
@@ -10432,6 +10461,14 @@ components:
             example: ""
           x-otherScopes:
             - apim:api_publish
+        labels:
+          type: array
+          description: |
+              API labels
+          items:
+              $ref: '#/components/schemas/Label'
+          x-otherScopes:
+              - apim:api_publish
         keyManagers:
           type: object
           properties: {}
@@ -10963,6 +11000,14 @@ components:
           example: []
           items:
             type: string
+        labels:
+          type: array
+          description: |
+            API labels
+          items:
+            $ref: '#/components/schemas/Label'
+          x-otherScopes:
+            - apim:api_publish
         workflowStatus:
           type: string
           example: APPROVED
@@ -13771,6 +13816,38 @@ components:
           description: |
             Revision of the imported API
           example: 1
+    Label:
+      title: Label
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: d7cf8523-9180-4255-84fa-6cb171c1f779
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: Health
+        description:
+          maxLength: 1024
+          type: string
+          example: Health related APIs
+    LabelList:
+      title: Label List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of labels returned.
+          example: 1
+        list:
+          type: array
+          description: List of labels.
+          items:
+            $ref: '#/components/schemas/Label'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

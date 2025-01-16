@@ -413,6 +413,10 @@ public class APIMappingUtil {
 
         //attach api categories to API model
         setAPICategoriesToModel(dto, model, provider);
+
+        model.setApiLabels(LabelMappingUtil.fromLabelDTOListToLabelList(dto.getLabels(),
+                MultitenantUtils.getTenantDomain(provider.replace("-AT-", "@"))));
+
         if (dto.getKeyManagers() instanceof List) {
             model.setKeyManagers((List<String>) dto.getKeyManagers());
         } else if (dto.getKeyManagers() == null) {
@@ -1507,6 +1511,9 @@ public class APIMappingUtil {
             }
         }
         dto.setCategories(categoryNameList);
+
+        dto.setLabels(LabelMappingUtil.fromLabelListToLabelDTOList(model.getApiLabels()));
+
         dto.setKeyManagers(model.getKeyManagers());
         
         if (model.getAudience() != null) {
@@ -2694,6 +2701,8 @@ public class APIMappingUtil {
         }
         productDto.setCategories(categoryNameList);
 
+        productDto.setLabels(LabelMappingUtil.fromLabelListToLabelDTOList(product.getApiLabels()));
+
         if (null != product.getLastUpdated()) {
             Date lastUpdateDate = product.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
@@ -2926,6 +2935,9 @@ public class APIMappingUtil {
 
         //attach api categories to API model
         setAPICategoriesToModel(dto, product, provider);
+
+        product.setApiLabels(LabelMappingUtil.fromLabelDTOListToLabelList(dto.getLabels(),
+                MultitenantUtils.getTenantDomain(provider.replace("-AT-", "@"))));
         return product;
     }
 

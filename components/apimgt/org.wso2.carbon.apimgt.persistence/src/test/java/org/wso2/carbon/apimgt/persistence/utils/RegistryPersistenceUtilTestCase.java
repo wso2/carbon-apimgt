@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
@@ -145,10 +144,6 @@ public class RegistryPersistenceUtilTestCase {
         category.setName("testcategory");
         categories.add(category);
         api.setApiCategories(categories);
-        List<Label> gatewayLabels = new ArrayList<Label>();
-        Label label = new Label();
-        label.setName("TestLabel");
-        gatewayLabels.add(label);
 
         GenericArtifact genericArtifact = new GenericArtifactImpl(new QName("", "TestAPI", ""),
                 "application/vnd.wso2-api+xml");

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.persistence.dto;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 
 import java.util.ArrayList;
@@ -81,6 +82,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private CORSConfiguration corsConfiguration;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
     private Set<String> apiCategories;
+    private List<Label> apiLabels;
     private boolean isMonetizationEnabled;
     private Map<String, String> monetizationProperties = new JSONObject();
     private List<String> keyManagers = new ArrayList<>();
@@ -495,6 +497,14 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.apiCategories = apiCategories;
     }
 
+    public List<Label> getApiLabels() {
+        return apiLabels;
+    }
+
+    public void setApiLabels(List<Label> apiLabels) {
+        this.apiLabels = apiLabels;
+    }
+
     public boolean isMonetizationEnabled() {
         return isMonetizationEnabled;
     }
@@ -687,7 +697,8 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + availableTierNames + ", environments=" + environments
                 + ", corsConfiguration=" + corsConfiguration + ", websubSubscriptionConfiguration="
                 + websubSubscriptionConfiguration + ", apiCategories="
-                + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", monetizationProperties="
+                + apiCategories + ", apiLabels==" + apiLabels + ", isMonetizationEnabled="
+                + isMonetizationEnabled + ", monetizationProperties="
                 + monetizationProperties + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
                 + deploymentEnvironments + ", tags=" + tags + ", accessControl=" + accessControl + ", gatewayVendor="
                 + gatewayVendor +  ", asyncTransportProtocols=" + asyncTransportProtocols + ", accessControlRoles="

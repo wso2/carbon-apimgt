@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -5487,6 +5488,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setEgress(apiInfo.isEgress());
         api.setStatus(apiInfo.getStatus());
         api.setSubtype(apiInfo.getApiSubtype());
+
+        List<Label> labels = apiMgtDAO.getMappedLabelsForApi(apiId);
+
+        if (labels != null) {
+            api.setApiLabels(labels);
+        }
     }
 
     private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {

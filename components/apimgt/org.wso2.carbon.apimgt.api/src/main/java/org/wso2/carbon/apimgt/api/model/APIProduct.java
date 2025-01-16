@@ -103,6 +103,7 @@ public class APIProduct implements Serializable {
     private String accessControlRoles;
 
     private List<APICategory> apiCategories;
+    private List<Label> apiLabels;
 
     private Date lastUpdated;
     private Date createdTime;
@@ -632,6 +633,14 @@ public class APIProduct implements Serializable {
 
     public List<APICategory> getApiCategories() {
         return apiCategories;
+    }
+
+    public void setApiLabels(List<Label> apiLabels) {
+        this.apiLabels = apiLabels;
+    }
+
+    public List<Label> getApiLabels() {
+        return apiLabels;
     }
 
     public boolean isAsync() {

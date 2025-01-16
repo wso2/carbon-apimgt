@@ -108,6 +108,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
@@ -8739,6 +8740,19 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to get the labels in a given tenant domain
+     *
+     * @param tenantDomain tenant domain
+     * @return List<Label> list of labels
+     * @throws APIManagementException if failed to fetch labels
+     */
+    public static List<Label> getAllLabelsOfTenant(String tenantDomain) throws APIManagementException {
+
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        return apiMgtDAO.getAllLabels(tenantDomain);
+    }
+
+    /**
      * Validates the API category names to be attached to an API
      *
      * @param categories
@@ -8756,6 +8770,27 @@ public final class APIUtil {
         }
         return true;
     }
+
+    /**
+     * Validates the label names to be attached to an API
+     *
+     * @param labels list of labels
+     * @param tenantDomain tenant domain
+     * @return true if all labels are valid
+     * @throws APIManagementException if failed to validate
+     */
+    public static boolean validateAPILabels(List<Label> labels, String tenantDomain)
+            throws APIManagementException {
+
+        List<Label> availableLabels = getAllLabelsOfTenant(tenantDomain);
+        for (Label label : labels) {
+            if (!availableLabels.contains(label)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     public static String getTenantBasedDevPortalContext(String tenantDomain) throws APIManagementException {
 

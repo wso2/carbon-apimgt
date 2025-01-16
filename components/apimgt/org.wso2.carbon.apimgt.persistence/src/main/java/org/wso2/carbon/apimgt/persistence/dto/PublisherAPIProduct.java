@@ -19,8 +19,10 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.model.Label;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,6 +55,7 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private boolean isMonetizationEnabled;
     private Map<String, String> monetizationProperties = new JSONObject();
     private Set<String> apiCategories;
+    private List<Label> apiLabels;
     private String definition;
     private boolean enableStore;
     private String thumbnail;
@@ -207,6 +210,12 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     }
     public void setApiCategories(Set<String> apiCategories) {
         this.apiCategories = apiCategories;
+    }
+    public List<Label> getApiLabels() {
+        return apiLabels;
+    }
+    public void setApiLabels(List<Label> apiLabels) {
+        this.apiLabels = apiLabels;
     }
     public String getDefinition() {
         return definition;

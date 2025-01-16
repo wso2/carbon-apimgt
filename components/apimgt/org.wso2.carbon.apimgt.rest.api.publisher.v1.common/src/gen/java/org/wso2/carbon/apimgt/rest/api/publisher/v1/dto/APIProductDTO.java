@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import javax.validation.constraints.*;
 
@@ -201,6 +202,8 @@ return null;
     private List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<String> categories = new ArrayList<String>();
+    @Scope(name = "apim:api_publish", description="", value ="")
+    private List<LabelDTO> labels = new ArrayList<LabelDTO>();
     private String workflowStatus = null;
     private List<String> audiences = new ArrayList<String>();
     private Boolean egress = false;
@@ -948,6 +951,25 @@ return null;
   }
 
   /**
+   * API labels 
+   **/
+  public APIProductDTO labels(List<LabelDTO> labels) {
+    this.labels = labels;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "API labels ")
+      @Valid
+  @JsonProperty("labels")
+  public List<LabelDTO> getLabels() {
+    return labels;
+  }
+  public void setLabels(List<LabelDTO> labels) {
+    this.labels = labels;
+  }
+
+  /**
    **/
   public APIProductDTO workflowStatus(String workflowStatus) {
     this.workflowStatus = workflowStatus;
@@ -1052,6 +1074,7 @@ return null;
         Objects.equals(apis, apIProduct.apis) &&
         Objects.equals(scopes, apIProduct.scopes) &&
         Objects.equals(categories, apIProduct.categories) &&
+        Objects.equals(labels, apIProduct.labels) &&
         Objects.equals(workflowStatus, apIProduct.workflowStatus) &&
         Objects.equals(audiences, apIProduct.audiences) &&
         Objects.equals(egress, apIProduct.egress);
@@ -1059,7 +1082,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, version, description, provider, hasThumbnail, state, enableSchemaValidation, isDefaultVersion, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus, audiences, egress);
+    return Objects.hash(id, name, context, version, description, provider, hasThumbnail, state, enableSchemaValidation, isDefaultVersion, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, labels, workflowStatus, audiences, egress);
   }
 
   @Override
@@ -1109,6 +1132,7 @@ return null;
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
+    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    audiences: ").append(toIndentedString(audiences)).append("\n");
     sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
