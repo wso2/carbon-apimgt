@@ -169,21 +169,37 @@ public class EvaluationRequestScheduler {
      * @param request Evaluation request to process
      */
     private static void processRequest(EvaluationRequest request) {
+        //TODO: Add missing pieces of impl
         try {
             ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
             complianceMgtDAO.updateEvaluationStatus(request.getId(), EvaluationStatus.PROCESSING);
 
-            // TODO: Check presence of artifact on APIM
-            // TODO: Get artifact project from APIM
+            // Check presence of artifact on APIM and get Artifact Type
+            String apimArtifactType = "";
+
+            // Get artifact project from APIM
 
             // Get Rulesets for Policy
             GovernancePolicyMgtDAO policyMgtDAO = GovernancePolicyMgtDAOImpl.getInstance();
             List<Ruleset> rulesets = policyMgtDAO.getRulesetsByPolicyId(request.getPolicyId());
 
             for (Ruleset ruleset : rulesets) {
-                InputStream content = ruleset.getRulesetContent();
-                RuleType ruleType = ruleset.getRuleType();
                 ArtifactType artifactType = request.getArtifactType();
+
+                // Check if artifact type matches
+                if (!ArtifactType.ALL_API.equals(artifactType)) {
+                    if (!artifactType.equals(ArtifactType.fromAPIMArtifactType(apimArtifactType))) {
+                        continue;
+                    }
+                }
+
+                // Get target file content from APIM project based on ruleType
+                RuleType ruleType = ruleset.getRuleType();
+
+                // Send target file and ruleset content for spectral for validation
+                InputStream content = ruleset.getRulesetContent();
+
+
             }
 
         } catch (GovernanceException e) {

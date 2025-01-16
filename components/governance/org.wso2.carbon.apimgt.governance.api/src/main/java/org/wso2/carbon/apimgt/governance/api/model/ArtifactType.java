@@ -42,4 +42,20 @@ public enum ArtifactType {
         }
         return REST_API;
     }
+
+    // TODO: Fix logic to get artifact type from APIM artifact type
+    public static ArtifactType fromAPIMArtifactType(String artifactType) {
+        if ("rest_api".equalsIgnoreCase(artifactType)) {
+            return REST_API;
+        } else if ("soap_api".equalsIgnoreCase(artifactType)) {
+            return SOAP_API;
+        } else if ("graphql_api".equalsIgnoreCase(artifactType)) {
+            return GRAPHQL_API;
+        } else if ("async_api".equalsIgnoreCase(artifactType)) {
+            return ASYNC_API;
+        } else if ("all_api".equalsIgnoreCase(artifactType)) {
+            return ALL_API;
+        }
+        return REST_API;
+    }
 }
