@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 
 import javax.net.ssl.SSLContext;
+import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -52,11 +53,16 @@ public class APIPublisherForNewPortal {
 
     private static final Log log = LogFactory.getLog(APIPublisherForNewPortal.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final char[] trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
+    private static final String trustStoreLocation = System.getProperty("javax.net.ssl.trustStore");
 
     public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
+
+        // TODO: This section is not finalized yet
         String baseUrl = APIUtil.getNewPortalURL();
         Certificate cert = SigningUtil.getPublicCertificate(-1234);
         PrivateKey privateKey = SigningUtil.getSigningKey(-1234);
+
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(configureSSLContext(cert, privateKey));
 
         String orgId = fetchOrgIdOrCreateNew(baseUrl, tenantName, sslsf);
@@ -99,6 +105,7 @@ public class APIPublisherForNewPortal {
         API api = apiTypeWrapper.getApi();
 
         JSONObject apiInfo = new JSONObject();
+        //TODO: Verify below data
         apiInfo.put("referenceID", defaultString(apiTypeWrapper.getUuid()));
         apiInfo.put("apiName", defaultString(apiTypeWrapper.getName()));
         apiInfo.put("orgName", defaultString(orgName));
@@ -127,6 +134,7 @@ public class APIPublisherForNewPortal {
         return value != null ? value : "";
     }
 
+    // TODO: Verify below data
     private static JSONArray generateVisibleGroupsArray(API api) {
         JSONArray visibleGroupsArray = new JSONArray();
         if (api.getVisibleRoles() != null) {
@@ -139,6 +147,7 @@ public class APIPublisherForNewPortal {
 
     private static JSONObject generateOwnersObject(API api) {
         JSONObject owners = new JSONObject();
+        // TODO: verify below data
         owners.put("technicalOwner", defaultString(api.getTechnicalOwner()));
         owners.put("technicalOwnerEmail", defaultString(api.getTechnicalOwnerEmail()));
         owners.put("businessOwner", defaultString(api.getBusinessOwner()));
@@ -148,6 +157,7 @@ public class APIPublisherForNewPortal {
 
     private static String generateNewOrgInfoForDeveloperPortal(String tenantName) {
         JSONObject orgInfo = new JSONObject();
+        // TODO: verify below data
         orgInfo.put("orgName", tenantName);
         orgInfo.put("businessOwner", tenantName);
         orgInfo.put("businessOwnerContact", "none");
@@ -232,7 +242,8 @@ public class APIPublisherForNewPortal {
 
             return SSLContexts.custom()
                     .loadKeyMaterial(keyStore, null)
-                    .loadTrustMaterial((chain, authType) -> true)
+//                  .loadTrustMaterial((chain, authType) -> true)
+                    .loadTrustMaterial(new File(trustStoreLocation), trustStorePassword)
                     .build();
         } catch (GeneralSecurityException | IOException e) {
             throw new APIManagementException(e);
