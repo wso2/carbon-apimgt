@@ -1438,7 +1438,7 @@ components:
           type: string
           description: The zip of the artifact project.
           format: binary
-        artifactEvaluationState:
+        governableState:
           type: string
           description: The state of the artifact at which the evaluation should run
           enum:
@@ -1455,7 +1455,7 @@ components:
       required:
         - artifactId
         - artifactType
-        - artifactEvaluationState
+        - governableState
   #####
   # TODO: Fix scope validation logic. Currently scope validation is broken due to logic in apimgt.rest.api.common.RestAPICommonUtil
   #####

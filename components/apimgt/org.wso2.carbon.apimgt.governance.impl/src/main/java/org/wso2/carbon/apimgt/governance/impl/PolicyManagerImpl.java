@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl;
 import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
@@ -138,7 +139,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @throws GovernanceException If an error occurs while getting the policies
      */
     @Override
-    public List<String> getPoliciesByLabelAndState(String label, String state, String organization)
+    public List<String> getPoliciesByLabelAndState(String label, GovernableState state, String organization)
             throws GovernanceException {
         return policyMgtDAO.getPoliciesByLabelAndState(label, state, organization);
     }
@@ -152,7 +153,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @throws GovernanceException If an error occurs while getting the policies
      */
     @Override
-    public List<String> getOrganizationWidePoliciesByState(String state, String organization)
+    public List<String> getOrganizationWidePoliciesByState(GovernableState state, String organization)
             throws GovernanceException {
         return policyMgtDAO.getPoliciesWithoutLabelsByState(state, organization);
     }
@@ -166,7 +167,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @throws GovernanceException If an error occurs while checking the presence of blocking action
      */
     @Override
-    public boolean isBlockingActionPresentForState(String policyId, String state) throws GovernanceException {
+    public boolean isBlockingActionPresentForState(String policyId, GovernableState state) throws GovernanceException {
         boolean isBlockingActionPresent = false;
         List<GovernanceAction> actions = policyMgtDAO.getActionsByPolicyId(policyId);
         for (GovernanceAction action : actions) {

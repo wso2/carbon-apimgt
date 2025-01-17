@@ -68,10 +68,11 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @param artifactType Artifact Type
      * @param policyId     Policy ID
      * @param organization Organization
-     * @throws GovernanceException If an error occurs while adding the artifact compliance evaluation request event
+     * @throws GovernanceException If an error occurs while adding the artifact
+     *                             compliance evaluation request event
      */
     @Override
-    public void addComplianceEvaluationRequest(String artifactId, String artifactType,
+    public void addComplianceEvaluationRequest(String artifactId, ArtifactType artifactType,
                                                String policyId,
                                                String organization) throws GovernanceException {
         String SQLQuery = SQLConstants.ADD_GOV_EVALUATION_REQUEST;
@@ -79,7 +80,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
             prepStmnt.setString(1, GovernanceUtil.generateUUID());
             prepStmnt.setString(2, artifactId);
-            prepStmnt.setString(3, artifactType);
+            prepStmnt.setString(3, String.valueOf(artifactType));
             prepStmnt.setString(4, policyId);
             prepStmnt.setString(6, organization);
             prepStmnt.executeUpdate();

@@ -61,16 +61,16 @@ return null;
     private ArtifactTypeEnum artifactType = null;
     private File artifactZip = null;
 
-          @XmlType(name="ArtifactEvaluationStateEnum")
+          @XmlType(name="GovernableStateEnum")
     @XmlEnum(String.class)
-    public enum ArtifactEvaluationStateEnum {
+    public enum GovernableStateEnum {
         API_CREATE("API_CREATE"),
         API_UPDATE("API_UPDATE"),
         API_DEPLOY("API_DEPLOY"),
         API_PUBLISH("API_PUBLISH");
         private String value;
 
-        ArtifactEvaluationStateEnum (String v) {
+        GovernableStateEnum (String v) {
             value = v;
         }
 
@@ -84,8 +84,8 @@ return null;
         }
 
         @JsonCreator
-        public static ArtifactEvaluationStateEnum fromValue(String v) {
-            for (ArtifactEvaluationStateEnum b : ArtifactEvaluationStateEnum.values()) {
+        public static GovernableStateEnum fromValue(String v) {
+            for (GovernableStateEnum b : GovernableStateEnum.values()) {
                 if (String.valueOf(b.value).equals(v)) {
                     return b;
                 }
@@ -93,7 +93,7 @@ return null;
 return null;
         }
     } 
-    private ArtifactEvaluationStateEnum artifactEvaluationState = null;
+    private GovernableStateEnum governableState = null;
 
   /**
    * UUID of the artifact.
@@ -154,20 +154,20 @@ return null;
   /**
    * The state of the artifact at which the evaluation should run
    **/
-  public GovernanceEvaluationRequestDTO artifactEvaluationState(ArtifactEvaluationStateEnum artifactEvaluationState) {
-    this.artifactEvaluationState = artifactEvaluationState;
+  public GovernanceEvaluationRequestDTO governableState(GovernableStateEnum governableState) {
+    this.governableState = governableState;
     return this;
   }
 
   
   @ApiModelProperty(example = "API_DEPLOY", required = true, value = "The state of the artifact at which the evaluation should run")
-  @JsonProperty("artifactEvaluationState")
+  @JsonProperty("governableState")
   @NotNull
-  public ArtifactEvaluationStateEnum getArtifactEvaluationState() {
-    return artifactEvaluationState;
+  public GovernableStateEnum getGovernableState() {
+    return governableState;
   }
-  public void setArtifactEvaluationState(ArtifactEvaluationStateEnum artifactEvaluationState) {
-    this.artifactEvaluationState = artifactEvaluationState;
+  public void setGovernableState(GovernableStateEnum governableState) {
+    this.governableState = governableState;
   }
 
 
@@ -183,12 +183,12 @@ return null;
     return Objects.equals(artifactId, governanceEvaluationRequest.artifactId) &&
         Objects.equals(artifactType, governanceEvaluationRequest.artifactType) &&
         Objects.equals(artifactZip, governanceEvaluationRequest.artifactZip) &&
-        Objects.equals(artifactEvaluationState, governanceEvaluationRequest.artifactEvaluationState);
+        Objects.equals(governableState, governanceEvaluationRequest.governableState);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifactId, artifactType, artifactZip, artifactEvaluationState);
+    return Objects.hash(artifactId, artifactType, artifactZip, governableState);
   }
 
   @Override
@@ -199,7 +199,7 @@ return null;
     sb.append("    artifactId: ").append(toIndentedString(artifactId)).append("\n");
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    artifactZip: ").append(toIndentedString(artifactZip)).append("\n");
-    sb.append("    artifactEvaluationState: ").append(toIndentedString(artifactEvaluationState)).append("\n");
+    sb.append("    governableState: ").append(toIndentedString(governableState)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
@@ -68,7 +69,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
         }
 
         for (String artifactId : artifacts) {
-            String artifactType = "REST_API"; //TODO: Get artifact type from APIM
+            ArtifactType artifactType = ArtifactType.REST_API; //TODO: Get artifact type from APIM
             complianceMgtDAO.addComplianceEvaluationRequest(artifactId, artifactType,
                     policyId, organization);
         }
@@ -99,7 +100,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
     @Override
-    public void handleComplianceEvaluationAsync(String artifactId, String artifactType,
+    public void handleComplianceEvaluationAsync(String artifactId, ArtifactType artifactType,
                                                 List<String> govPolicies,
                                                 String organization) throws GovernanceException {
 

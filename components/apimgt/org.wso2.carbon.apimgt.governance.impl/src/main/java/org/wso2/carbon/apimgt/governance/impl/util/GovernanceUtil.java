@@ -26,16 +26,19 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
+import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -48,6 +51,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -311,6 +315,61 @@ public class GovernanceUtil {
         } catch (IOException e) {
             throw new GovernanceException("Error while reading content from input stream", e);
         }
+    }
+
+    /**
+     * Get all applicable policy IDs for an artifact
+     *
+     * @param artifactId      Artifact ID
+     * @param governableState Governable state (The state at which the artifact should be governed)
+     * @param organization    Organization
+     * @return List of applicable policy IDS
+     * @throws GovernanceException if an error occurs while checking for applicable policies
+     */
+    public static List<String> getApplicableGovPoliciesForArtifact(String artifactId,
+                                                                   GovernableState governableState,
+                                                                   String organization) throws GovernanceException {
+
+        List<String> labels = new ArrayList<>(); // TODO: Get labels from APIM
+        PolicyManager policyManager = new PolicyManagerImpl();
+
+        // Check for policies using labels and the state
+        List<String> policies = new ArrayList<>();
+        for (String label : labels) {
+            // Get policies for the label and state
+            List<String> policiesForLabel = policyManager.getPoliciesByLabelAndState(label,
+                    governableState, organization);
+            if (policiesForLabel != null) {
+                policies.addAll(policiesForLabel);
+            }
+        }
+
+        policies.addAll(policyManager.getOrganizationWidePoliciesByState(governableState,
+                organization));
+
+        return policies;
+
+    }
+
+    /**
+     * Check for blocking actions in policies
+     *
+     * @param policyIds       List of policy IDs
+     * @param governableState Governable state
+     * @return boolean
+     * @throws GovernanceException if an error occurs while checking for blocking actions
+     */
+    public static boolean isBlockingActionsPresent(List<String> policyIds, GovernableState governableState)
+            throws GovernanceException {
+        PolicyManager policyManager = new PolicyManagerImpl();
+        boolean isBlocking = false;
+        for (String policyId : policyIds) {
+            if (policyManager.isBlockingActionPresentForState(policyId, governableState)) {
+                isBlocking = true;
+                break;
+            }
+        }
+        return isBlocking;
     }
 
 }

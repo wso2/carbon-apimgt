@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
@@ -112,7 +113,8 @@ public interface GovernancePolicyMgtDAO {
      * @param organization Organization
      * @return List of Policy IDs
      */
-    List<String> getPoliciesByLabelAndState(String label, String state, String organization) throws GovernanceException;
+    List<String> getPoliciesByLabelAndState(String label, GovernableState state, String organization)
+            throws GovernanceException;
 
     /**
      * Get Policies without labels by state
@@ -121,7 +123,8 @@ public interface GovernancePolicyMgtDAO {
      * @param organization Organization
      * @return List of Policy IDs
      */
-    List<String> getPoliciesWithoutLabelsByState(String state, String organization) throws GovernanceException;
+    List<String> getPoliciesWithoutLabelsByState(GovernableState state, String organization)
+            throws GovernanceException;
 
     /**
      * Get the actions of a policy

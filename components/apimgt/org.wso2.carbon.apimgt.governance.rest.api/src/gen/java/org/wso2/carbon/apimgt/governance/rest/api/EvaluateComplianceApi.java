@@ -53,7 +53,7 @@ EvaluateComplianceApiService delegate = new EvaluateComplianceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response evaluateCompliance(@Multipart(value = "artifactId")  String artifactId, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "artifactEvaluationState")  String artifactEvaluationState,  @Multipart(value = "artifactZip", required = false) InputStream artifactZipInputStream, @Multipart(value = "artifactZip" , required = false) Attachment artifactZipDetail) throws GovernanceException{
-        return delegate.evaluateCompliance(artifactId, artifactType, artifactEvaluationState, artifactZipInputStream, artifactZipDetail, securityContext);
+    public Response evaluateCompliance(@Multipart(value = "artifactId")  String artifactId, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "governableState")  String governableState,  @Multipart(value = "artifactZip", required = false) InputStream artifactZipInputStream, @Multipart(value = "artifactZip" , required = false) Attachment artifactZipDetail) throws GovernanceException{
+        return delegate.evaluateCompliance(artifactId, artifactType, governableState, artifactZipInputStream, artifactZipDetail, securityContext);
     }
 }

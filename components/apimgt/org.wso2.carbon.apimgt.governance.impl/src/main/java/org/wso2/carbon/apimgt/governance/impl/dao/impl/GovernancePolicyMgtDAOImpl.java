@@ -716,13 +716,13 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @return List of Policy IDs
      */
     @Override
-    public List<String> getPoliciesByLabelAndState(String label, String state, String organization)
+    public List<String> getPoliciesByLabelAndState(String label, GovernableState state, String organization)
             throws GovernanceException {
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_BY_LABEL_AND_STATE)) {
             prepStmt.setString(1, label);
-            prepStmt.setString(2, state);
+            prepStmt.setString(2, String.valueOf(state));
             prepStmt.setString(3, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -744,11 +744,11 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @return List of Policy IDs
      */
     @Override
-    public List<String> getPoliciesWithoutLabelsByState(String state, String organization) throws GovernanceException {
+    public List<String> getPoliciesWithoutLabelsByState(GovernableState state, String organization) throws GovernanceException {
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_WITHOUT_LABELS_BY_STATE)) {
-            prepStmt.setString(1, state);
+            prepStmt.setString(1, String.valueOf(state));
             prepStmt.setString(2, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {

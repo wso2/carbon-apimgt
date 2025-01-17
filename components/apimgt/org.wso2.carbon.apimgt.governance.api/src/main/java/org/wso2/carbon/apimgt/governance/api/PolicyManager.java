@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.api;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -101,7 +102,8 @@ public interface PolicyManager {
      * @return List of policy IDs
      * @throws GovernanceException If an error occurs while getting the policies
      */
-    List<String> getPoliciesByLabelAndState(String label, String state, String organization) throws GovernanceException;
+    List<String> getPoliciesByLabelAndState(String label, GovernableState state,
+                                            String organization) throws GovernanceException;
 
     /**
      * Get the list of organization wide policies by state
@@ -111,7 +113,8 @@ public interface PolicyManager {
      * @return List of policy IDs
      * @throws GovernanceException If an error occurs while getting the policies
      */
-    List<String> getOrganizationWidePoliciesByState(String state, String organization) throws GovernanceException;
+    List<String> getOrganizationWidePoliciesByState(GovernableState state,
+                                                    String organization) throws GovernanceException;
 
     /**
      * This method checks whether a blocking action is present for a given governable state of a policy
@@ -121,6 +124,7 @@ public interface PolicyManager {
      * @return
      * @throws GovernanceException
      */
-    boolean isBlockingActionPresentForState(String policyId, String state) throws GovernanceException;
+    boolean isBlockingActionPresentForState(String policyId, GovernableState state)
+            throws GovernanceException;
 
 }

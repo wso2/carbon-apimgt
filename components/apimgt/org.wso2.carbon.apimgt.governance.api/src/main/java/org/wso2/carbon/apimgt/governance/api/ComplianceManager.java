@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.api;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 
 import java.util.List;
 
@@ -54,7 +55,7 @@ public interface ComplianceManager {
      * @param organization Organization
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    void handleComplianceEvaluationAsync(String artifactId, String artifactType,
+    void handleComplianceEvaluationAsync(String artifactId, ArtifactType artifactType,
                                          List<String> govPolicies, String organization)
             throws GovernanceException;
 

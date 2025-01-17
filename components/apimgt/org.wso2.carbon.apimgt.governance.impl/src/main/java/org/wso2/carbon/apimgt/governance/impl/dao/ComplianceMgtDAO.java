@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.EvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.EvaluationStatus;
 
@@ -39,7 +40,7 @@ public interface ComplianceMgtDAO {
      * @throws GovernanceException If an error occurs while adding the artifact
      *                             compliance evaluation request event
      */
-    void addComplianceEvaluationRequest(String artifactId, String artifactType,
+    void addComplianceEvaluationRequest(String artifactId, ArtifactType artifactType,
                                         String policyId,
                                         String organization) throws GovernanceException;
 
