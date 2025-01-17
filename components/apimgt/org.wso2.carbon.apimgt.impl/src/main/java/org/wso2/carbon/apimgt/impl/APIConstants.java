@@ -2022,7 +2022,6 @@ public final class APIConstants {
     public static final String API_POLICY_API_LEVEL = "apiLevel";
 
     public static final String BILLING_PLAN_FREE = "FREE";
-    public static final String ALLOWED_ORGANIZATIONS_DEFAULT = "ALL";
     public static final String DEFAULT_VISIBLE_ORG = "all";
     public static final String POLICY_RESET = "reset";
 

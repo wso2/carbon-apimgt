@@ -40,7 +40,6 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
     private SubscriptionThrottlePolicyPermissionDTO permissions = null;
-    private List<String> allowedOrganizations = new ArrayList<String>();
 
   /**
    * Maximum Complexity of the GraphQL query
@@ -242,23 +241,6 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     this.permissions = permissions;
   }
 
-  /**
-   **/
-  public SubscriptionThrottlePolicyDTO allowedOrganizations(List<String> allowedOrganizations) {
-    this.allowedOrganizations = allowedOrganizations;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("allowedOrganizations")
-  public List<String> getAllowedOrganizations() {
-    return allowedOrganizations;
-  }
-  public void setAllowedOrganizations(List<String> allowedOrganizations) {
-    this.allowedOrganizations = allowedOrganizations;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -279,13 +261,12 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
         Objects.equals(customAttributes, subscriptionThrottlePolicy.customAttributes) &&
         Objects.equals(stopOnQuotaReach, subscriptionThrottlePolicy.stopOnQuotaReach) &&
         Objects.equals(billingPlan, subscriptionThrottlePolicy.billingPlan) &&
-        Objects.equals(permissions, subscriptionThrottlePolicy.permissions) &&
-        Objects.equals(allowedOrganizations, subscriptionThrottlePolicy.allowedOrganizations);
+        Objects.equals(permissions, subscriptionThrottlePolicy.permissions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(graphQLMaxComplexity, graphQLMaxDepth, defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, subscriberCount, customAttributes, stopOnQuotaReach, billingPlan, permissions, allowedOrganizations);
+    return Objects.hash(graphQLMaxComplexity, graphQLMaxDepth, defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, subscriberCount, customAttributes, stopOnQuotaReach, billingPlan, permissions);
   }
 
   @Override
@@ -304,7 +285,6 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
     sb.append("    billingPlan: ").append(toIndentedString(billingPlan)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
-    sb.append("    allowedOrganizations: ").append(toIndentedString(allowedOrganizations)).append("\n");
     sb.append("}");
     return sb.toString();
   }

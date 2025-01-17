@@ -4036,7 +4036,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         Set<Tier> tierNames = api.getAvailableTiers();
-        apiMgtDAO.getSubscriptionPolicies(tenantId);
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
 
         Set<Tier> availableTiers = new HashSet<Tier>();

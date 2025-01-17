@@ -4061,10 +4061,6 @@ components:
               example: FREE
             permissions:
               $ref: '#/components/schemas/SubscriptionThrottlePolicyPermission'
-            allowedOrganizations:
-              type: array
-              items:
-                type: string
     SubscriptionThrottlePolicyPermission:
       title: SubscriptionThrottlePolicyPermission
       required:

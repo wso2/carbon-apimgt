@@ -11812,18 +11812,6 @@ public class ApiMgtDAO {
                 policyStatement.setInt(26, policy.getSubscriberCount());
             }
             
-            List<String> allowedOrgs = policy.getAllowedOrganizations();
-            if (allowedOrgs != null && !allowedOrgs.isEmpty()) {
-                try (PreparedStatement addVisibleOrgsStatement = conn
-                        .prepareStatement(SQLConstants.PolicyOrgVisibilitySqlConstants.ADD_POLICY_ORG_VISIBILITY_SQL)) {
-                    for (String org : allowedOrgs) {
-                        addVisibleOrgsStatement.setString(1, policy.getUUID());
-                        addVisibleOrgsStatement.setString(2, org);
-                        addVisibleOrgsStatement.addBatch();
-                    }
-                    addVisibleOrgsStatement.executeBatch();
-                }
-            }
             policyStatement.executeUpdate();
             conn.commit();
         } catch (SQLIntegrityConstraintViolationException e) {
@@ -12537,7 +12525,6 @@ public class ApiMgtDAO {
                 monetizationPlanProperties.put(APIConstants.Monetization.CURRENCY,
                         rs.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
                 subPolicy.setMonetizationPlanProperties(monetizationPlanProperties);
-                subPolicy.setAllowedOrganizations(getPolicyVisibleOrgs(subPolicy.getUUID()));
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -12965,7 +12952,6 @@ public class ApiMgtDAO {
                 policy.setGraphQLMaxDepth(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
                 policy.setGraphQLMaxComplexity(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
                 policy.setSubscriberCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONNECTION_COUNT));
-                policy.setAllowedOrganizations(getPolicyVisibleOrgs(policy.getUUID()));
                 InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -13018,7 +13004,6 @@ public class ApiMgtDAO {
                 policy.setGraphQLMaxDepth(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
                 policy.setGraphQLMaxComplexity(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
                 policy.setSubscriberCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONNECTION_COUNT));
-                policy.setAllowedOrganizations(getPolicyVisibleOrgs(policy.getUUID()));
                 
                 InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
@@ -13050,29 +13035,6 @@ public class ApiMgtDAO {
         return policy;
     }
     
-    public List<String> getPolicyVisibleOrgs(String policyUUID) throws APIManagementException {
-        List<String> orgList = new ArrayList<String>();
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            try {
-                String getPolicyPermissionQuery = SQLConstants.PolicyOrgVisibilitySqlConstants.GET_POLICY_ORG_VISIBILITY_SQL;
-                PreparedStatement ps = conn.prepareStatement(getPolicyPermissionQuery);
-                ps.setString(1, policyUUID);
-                ResultSet resultSet = ps.executeQuery();
-                while (resultSet.next()) {
-                    orgList.add(resultSet.getString(ThrottlePolicyConstants.COLUMN_ALLOWED_ORGANIZATIONS));
-                }
-            } catch (SQLException e) {
-                conn.rollback();
-                handleException("Failed to get policy allowed organizations " + policyUUID,
-                        e);
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException(
-                    "Error while retrieving policy organizations with id " + policyUUID, e);
-        }
-        return orgList;
-    }
-
     /**
      * Retrieves list of pipelines for the policy with policy Id: <code>policyId</code>
      *
@@ -13558,23 +13520,6 @@ public class ApiMgtDAO {
             }
             updateStatement.executeUpdate();
             
-            try (PreparedStatement deleteOrgsStatement = connection.prepareStatement(SQLConstants
-                    .PolicyOrgVisibilitySqlConstants.DELETE_ALL_POLICY_ORG_VISIBILITY_SQL)) {
-                deleteOrgsStatement.setString(1, policy.getUUID());
-                deleteOrgsStatement.executeUpdate();
-            }
-            List<String> allowedOrgs = policy.getAllowedOrganizations();
-            if (allowedOrgs != null && !allowedOrgs.isEmpty()) {
-                try (PreparedStatement addOrgsStatement = connection.prepareStatement(SQLConstants
-                        .PolicyOrgVisibilitySqlConstants.ADD_POLICY_ORG_VISIBILITY_SQL)) {
-                    for (String org : allowedOrgs) {
-                        addOrgsStatement.setString(1, policy.getUUID());
-                        addOrgsStatement.setString(2, org);
-                        addOrgsStatement.addBatch();
-                    }
-                    addOrgsStatement.executeBatch();
-                }
-            }
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
