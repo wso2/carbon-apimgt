@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.governance.rest.api;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.HealthzResponseDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.HealthzApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.HealthzApiServiceImpl;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;

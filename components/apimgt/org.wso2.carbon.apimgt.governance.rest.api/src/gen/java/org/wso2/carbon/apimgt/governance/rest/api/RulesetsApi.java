@@ -6,7 +6,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.RulesetsApiServiceImpl;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;

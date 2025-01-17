@@ -28,7 +28,7 @@
         <module>service-stubs/apimgt</module>
         <module>components/apimgt</module>
         <module>features/apimgt</module>
-<!--        <module>components/governance</module>-->
+        <!--        <module>components/governance</module>-->
     </modules>
 
     <build>

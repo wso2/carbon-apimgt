@@ -21,8 +21,8 @@ package org.wso2.carbon.apimgt.governance.rest.api.util;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.impl.error.ErrorHandler;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 
 import javax.ws.rs.core.MediaType;

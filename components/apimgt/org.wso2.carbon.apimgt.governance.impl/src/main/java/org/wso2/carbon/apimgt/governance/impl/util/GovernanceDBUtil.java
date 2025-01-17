@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl.util;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 

@@ -2,9 +2,9 @@ package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
-import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
+import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
+import org.wso2.carbon.apimgt.governance.api.PolicyManager;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 

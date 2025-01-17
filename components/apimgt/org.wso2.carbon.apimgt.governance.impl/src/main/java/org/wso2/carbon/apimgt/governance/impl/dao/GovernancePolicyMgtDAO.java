@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernanceAction;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicy;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicyList;
-import org.wso2.carbon.apimgt.governance.impl.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 
 import java.util.List;
 

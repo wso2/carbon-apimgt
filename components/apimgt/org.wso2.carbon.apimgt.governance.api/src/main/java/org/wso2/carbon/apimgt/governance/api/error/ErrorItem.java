@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl.error;
+package org.wso2.carbon.apimgt.governance.api.error;
 
 /**
  * This class represents a governance error handler

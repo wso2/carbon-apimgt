@@ -16,9 +16,9 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl;
+package org.wso2.carbon.apimgt.governance.api;
 
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import java.util.List;
 

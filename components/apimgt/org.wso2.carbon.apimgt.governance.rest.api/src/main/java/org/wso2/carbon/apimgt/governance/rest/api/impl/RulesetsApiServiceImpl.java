@@ -21,13 +21,13 @@ package org.wso2.carbon.apimgt.governance.rest.api.impl;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
-import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
-import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
-import org.wso2.carbon.apimgt.governance.impl.model.ArtifactType;
-import org.wso2.carbon.apimgt.governance.impl.model.RuleType;
-import org.wso2.carbon.apimgt.governance.impl.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.impl.model.RulesetInfo;
-import org.wso2.carbon.apimgt.governance.impl.model.RulesetList;
+import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.RulesetManager;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
@@ -36,8 +36,8 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.RulesetMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
@@ -95,7 +95,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
             createdRulesetDTO = RulesetMappingUtil.fromRulesetInfoToRulesetInfoDTO(createdRuleset);
             createdRulesetURI = new URI(
-                    GovernanceConstants.RULESET_PATH + "/" + createdRulesetDTO.getId());
+                    GovernanceAPIConstants.RULESET_PATH + "/" + createdRulesetDTO.getId());
             return Response.created(createdRulesetURI).entity(createdRulesetDTO).build();
 
         } catch (URISyntaxException e) {
@@ -238,12 +238,12 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceConstants.RULESETS_GET_URL,
+            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.RULESETS_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceConstants.RULESETS_GET_URL,
+            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.RULESETS_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }

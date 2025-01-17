@@ -20,11 +20,11 @@ package org.wso2.carbon.apimgt.governance.impl.validator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.impl.model.Rule;
-import org.wso2.carbon.apimgt.governance.impl.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.impl.model.Severity;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.model.Rule;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.io.InputStream;

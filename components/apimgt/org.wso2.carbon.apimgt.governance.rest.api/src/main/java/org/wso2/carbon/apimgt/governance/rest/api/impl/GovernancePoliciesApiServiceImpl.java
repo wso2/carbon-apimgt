@@ -19,12 +19,13 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
+import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicy;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.PolicyManager;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApiService;
@@ -83,7 +84,7 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
             createdPolicyDTO = PolicyMappingUtil.
                     fromGovernancePolicyToGovernancePolicyDTO(governancePolicy);
             createdPolicyURI = new URI(
-                    GovernanceConstants.POLICY_PATH + "/" + createdPolicyDTO.getId());
+                    GovernanceAPIConstants.POLICY_PATH + "/" + createdPolicyDTO.getId());
 
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Governance Policy %s",
@@ -174,12 +175,12 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceConstants.POLICIES_GET_URL,
+            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICIES_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceConstants.POLICIES_GET_URL,
+            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICIES_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }

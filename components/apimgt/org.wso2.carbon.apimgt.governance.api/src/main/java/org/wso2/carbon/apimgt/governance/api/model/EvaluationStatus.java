@@ -16,27 +16,21 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl.model;
-
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceExceptionCodes;
+package org.wso2.carbon.apimgt.governance.api.model;
 
 /**
- * This class represents a governance rule Severity
+ * This class represents an evaluation status of a request
  */
-public enum Severity {
-    ERROR,
-    WARN,
-    INFO;
+public enum EvaluationStatus {
+    PENDING,
+    PROCESSING;
 
-    public static Severity fromString(String severityString) {
-        if ("error".equals(severityString)) {
-            return Severity.ERROR;
-        } else if ("warn".equals(severityString)) {
-            return Severity.WARN;
-        } else if ("info".equals(severityString)) {
-            return Severity.INFO;
+    public static EvaluationStatus fromString(String statusString) {
+        if ("pending".equalsIgnoreCase(statusString)) {
+            return EvaluationStatus.PENDING;
+        } else if ("processing".equalsIgnoreCase(statusString)) {
+            return EvaluationStatus.PROCESSING;
         }
-        return Severity.WARN;
+        return EvaluationStatus.PENDING;
     }
 }

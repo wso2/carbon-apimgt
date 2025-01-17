@@ -28,12 +28,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.model.ArtifactType;
-import org.wso2.carbon.apimgt.governance.impl.model.EvaluationRequest;
-import org.wso2.carbon.apimgt.governance.impl.model.EvaluationStatus;
-import org.wso2.carbon.apimgt.governance.impl.model.RuleType;
-import org.wso2.carbon.apimgt.governance.impl.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.EvaluationRequest;
+import org.wso2.carbon.apimgt.governance.api.model.EvaluationStatus;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;

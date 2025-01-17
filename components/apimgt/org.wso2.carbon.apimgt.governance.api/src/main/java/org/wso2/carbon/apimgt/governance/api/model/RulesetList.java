@@ -16,21 +16,32 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl.model;
+package org.wso2.carbon.apimgt.governance.api.model;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * This enum represents a governance action type
+ * This class represents a list of governance Rulesets
  */
-public enum GovernanceActionType {
-    BLOCK,
-    NOTIFY;
+public class RulesetList {
+    private Integer count;
 
-    public static GovernanceActionType fromString(String actionTypeString) {
-        if ("block".equalsIgnoreCase(actionTypeString)) {
-            return GovernanceActionType.BLOCK;
-        } else if ("notify".equalsIgnoreCase(actionTypeString)) {
-            return GovernanceActionType.NOTIFY;
-        }
-        return null;
+    private List<RulesetInfo> rulesetList = new ArrayList<>();
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public List<RulesetInfo> getRulesetList() {
+        return rulesetList;
+    }
+
+    public void setRulesetList(List<RulesetInfo> rulesetList) {
+        this.rulesetList = rulesetList;
     }
 }

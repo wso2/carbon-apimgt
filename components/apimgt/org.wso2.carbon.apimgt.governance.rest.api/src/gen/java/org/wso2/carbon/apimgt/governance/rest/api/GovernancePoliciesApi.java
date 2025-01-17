@@ -5,7 +5,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.GovernancePoliciesApiServiceImpl;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;

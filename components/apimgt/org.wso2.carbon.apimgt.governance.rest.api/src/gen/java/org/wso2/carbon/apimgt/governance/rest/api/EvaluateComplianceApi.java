@@ -5,7 +5,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.governance.rest.api.EvaluateComplianceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.EvaluateComplianceApiServiceImpl;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;

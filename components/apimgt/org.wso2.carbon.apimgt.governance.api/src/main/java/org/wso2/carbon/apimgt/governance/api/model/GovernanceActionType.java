@@ -16,23 +16,20 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl.model;
+package org.wso2.carbon.apimgt.governance.api.model;
 
 /**
- * This class represents a governance rule type
+ * This enum represents a governance action type
  */
-public enum RuleType {
-    API_METADATA,
-    API_DEFINITION,
-    API_DOCUMENTATION;
+public enum GovernanceActionType {
+    BLOCK,
+    NOTIFY;
 
-    public static RuleType fromString(String ruleTypeString) {
-        if ("api_metadata".equalsIgnoreCase(ruleTypeString)) {
-            return RuleType.API_METADATA;
-        } else if ("api_definition".equalsIgnoreCase(ruleTypeString)) {
-            return RuleType.API_DEFINITION;
-        } else if ("api_documentation".equalsIgnoreCase(ruleTypeString)) {
-            return RuleType.API_DOCUMENTATION;
+    public static GovernanceActionType fromString(String actionTypeString) {
+        if ("block".equalsIgnoreCase(actionTypeString)) {
+            return GovernanceActionType.BLOCK;
+        } else if ("notify".equalsIgnoreCase(actionTypeString)) {
+            return GovernanceActionType.NOTIFY;
         }
         return null;
     }

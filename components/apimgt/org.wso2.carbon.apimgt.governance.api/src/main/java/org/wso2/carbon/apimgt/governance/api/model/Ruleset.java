@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl.model;
+package org.wso2.carbon.apimgt.governance.api.model;
 
 import java.io.InputStream;
 

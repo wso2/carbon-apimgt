@@ -18,13 +18,9 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 
-import org.wso2.carbon.apimgt.governance.impl.model.RulesetInfo;
-import org.wso2.carbon.apimgt.governance.impl.model.RulesetList;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represents the Ruleset Mapping Utility

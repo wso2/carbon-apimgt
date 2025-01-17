@@ -18,14 +18,14 @@
 
 package org.wso2.carbon.apimgt.governance.impl;
 
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernanceAction;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernanceActionType;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicy;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicyList;
-import org.wso2.carbon.apimgt.governance.impl.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.PolicyManager;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;

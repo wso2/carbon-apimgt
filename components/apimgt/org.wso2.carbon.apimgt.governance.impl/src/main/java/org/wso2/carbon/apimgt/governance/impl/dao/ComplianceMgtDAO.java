@@ -18,9 +18,9 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.model.EvaluationRequest;
-import org.wso2.carbon.apimgt.governance.impl.model.EvaluationStatus;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.EvaluationRequest;
+import org.wso2.carbon.apimgt.governance.api.model.EvaluationStatus;
 
 import java.util.List;
 

@@ -18,12 +18,12 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 
-import org.wso2.carbon.apimgt.governance.impl.model.GovernableState;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernanceAction;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernanceActionType;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicy;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicyList;
-import org.wso2.carbon.apimgt.governance.impl.model.Severity;
+import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ActionDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;

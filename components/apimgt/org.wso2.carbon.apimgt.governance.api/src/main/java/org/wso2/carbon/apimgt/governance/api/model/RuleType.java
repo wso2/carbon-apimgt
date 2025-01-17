@@ -16,32 +16,24 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl.model;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.wso2.carbon.apimgt.governance.api.model;
 
 /**
- * This class represents a list of governance Rulesets
+ * This class represents a governance rule type
  */
-public class RulesetList {
-    private Integer count;
+public enum RuleType {
+    API_METADATA,
+    API_DEFINITION,
+    API_DOCUMENTATION;
 
-    private List<RulesetInfo> rulesetList = new ArrayList<>();
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
-    }
-
-    public List<RulesetInfo> getRulesetList() {
-        return rulesetList;
-    }
-
-    public void setRulesetList(List<RulesetInfo> rulesetList) {
-        this.rulesetList = rulesetList;
+    public static RuleType fromString(String ruleTypeString) {
+        if ("api_metadata".equalsIgnoreCase(ruleTypeString)) {
+            return RuleType.API_METADATA;
+        } else if ("api_definition".equalsIgnoreCase(ruleTypeString)) {
+            return RuleType.API_DEFINITION;
+        } else if ("api_documentation".equalsIgnoreCase(ruleTypeString)) {
+            return RuleType.API_DOCUMENTATION;
+        }
+        return null;
     }
 }

@@ -16,12 +16,12 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl;
+package org.wso2.carbon.apimgt.governance.api;
 
-import org.wso2.carbon.apimgt.governance.impl.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicy;
-import org.wso2.carbon.apimgt.governance.impl.model.GovernancePolicyList;
-import org.wso2.carbon.apimgt.governance.impl.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 
 import java.util.List;
 
