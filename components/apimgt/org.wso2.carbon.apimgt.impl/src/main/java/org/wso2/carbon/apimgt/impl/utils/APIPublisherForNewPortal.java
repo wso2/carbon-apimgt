@@ -37,6 +37,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 
 import javax.net.ssl.SSLContext;
@@ -47,6 +48,9 @@ import java.security.cert.Certificate;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class APIPublisherForNewPortal {
@@ -105,15 +109,16 @@ public class APIPublisherForNewPortal {
         API api = apiTypeWrapper.getApi();
 
         JSONObject apiInfo = new JSONObject();
-        //TODO: Verify below data
         apiInfo.put("referenceID", defaultString(apiTypeWrapper.getUuid()));
-        apiInfo.put("apiName", defaultString(apiTypeWrapper.getName()));
-        apiInfo.put("orgName", defaultString(orgName));
         apiInfo.put("provider", defaultString(api.getId().getProviderName()));
-        apiInfo.put("apiCategory", "");
+        apiInfo.put("apiName", defaultString(apiTypeWrapper.getName()));
         apiInfo.put("apiDescription", defaultString(api.getDescription()));
-        apiInfo.put("visibility", defaultString(api.getVisibility()));
-        apiInfo.put("visibleGroups", generateVisibleGroupsArray(api));
+        if (defaultString(api.getVisibility()).equals("public")){
+            apiInfo.put("visibility", "PUBLIC");
+        } else {
+            apiInfo.put("visibility", defaultString(api.getVisibility()));
+            apiInfo.put("visibleGroups", generateVisibleGroupsArray(api));
+        }
         apiInfo.put("owners", generateOwnersObject(api));
         apiInfo.put("apiVersion", defaultString(api.getId().getVersion()));
         apiInfo.put("apiType", defaultString(apiTypeWrapper.getType()));
@@ -124,17 +129,30 @@ public class APIPublisherForNewPortal {
 
         JSONObject response = new JSONObject();
         response.put("apiInfo", apiInfo);
-        response.put("subscriptionPolicies", new JSONArray());
+        response.put("subscriptionPolicies", convertToSubscriptionPolicies(api.getAvailableTiers().toArray()));
         response.put("endPoints", endPoints);
 
         return response.toJSONString();
+    }
+
+    public static List<Map<String, String>> convertToSubscriptionPolicies(Object[] tiers) {
+        List<Map<String, String>> subscriptionPolicies = new ArrayList<>();
+        for (Object tier : tiers) {
+            if (tier instanceof Tier) {
+                Tier tierObject = (Tier) tier;
+                String name = tierObject.getName();
+                if (name != null) {
+                    subscriptionPolicies.add(Collections.singletonMap("policyName", name));
+                }
+            }
+        }
+        return subscriptionPolicies;
     }
 
     private static String defaultString(String value) {
         return value != null ? value : "";
     }
 
-    // TODO: Verify below data
     private static JSONArray generateVisibleGroupsArray(API api) {
         JSONArray visibleGroupsArray = new JSONArray();
         if (api.getVisibleRoles() != null) {
