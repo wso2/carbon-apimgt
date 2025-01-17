@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -42,43 +41,35 @@ import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.security.KeyStore;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.KeyStoreException;
-import java.security.UnrecoverableKeyException;
 import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class APIPublisherForNewPortal {
-    private static final Log log = LogFactory.getLog(LifeCycleUtils.class);
 
-    public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper)
-            throws APIManagementException {
+    private static final Log log = LogFactory.getLog(APIPublisherForNewPortal.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
         String baseUrl = APIUtil.getNewPortalURL();
-        // int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantName);
-        // TODO: Finalised the right cert
         Certificate cert = SigningUtil.getPublicCertificate(-1234);
         PrivateKey privateKey = SigningUtil.getSigningKey(-1234);
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(configureSSLContext(cert, privateKey));
 
-        SSLContext sslContext = configureSSLContext(cert, privateKey);
-        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
-
-        String orgId = getNewPortalOrgId(baseUrl + "/devportal/b2b/organizations/" + tenantName, sslsf);
-
-        if (orgId.isEmpty()){
-            // Create a new org for the current tenant since no org in developer portal matches tenant
-            String newOrgInfo = generateNewOrgInfoForDeveloperPortal(tenantName);
-            orgId = createNewOrg(baseUrl + "/devportal/b2b/organizations", newOrgInfo, sslsf);
-            if (orgId.isEmpty()) {
-                log.error("Something went wrong while creating an org in new developer portal");
-                return;
-            }
+        String orgId = fetchOrgIdOrCreateNew(baseUrl, tenantName, sslsf);
+        if (orgId.isEmpty()) {
+            log.error("Failed to create or fetch organization ID.");
+            return;
         }
+
+        publishAPI(baseUrl, apiTypeWrapper, tenantName, orgId, sslsf);
+    }
+
+    private static void publishAPI(String baseUrl, ApiTypeWrapper apiTypeWrapper, String tenantName, String orgId,
+                                   SSLConnectionSocketFactory sslsf) throws APIManagementException {
         API api = apiTypeWrapper.getApi();
         String apiDefinition = ApisApiServiceImplUtils.getApiDefinition(api);
         String apiMetaData = getApiMetaData(tenantName, apiTypeWrapper);
@@ -87,59 +78,72 @@ public class APIPublisherForNewPortal {
                 apiMetaData, apiDefinition, sslsf);
 
         if (statusCode == 201) {
-            log.info("The API " + apiTypeWrapper.getName() +
-                    " has been successfully published to the NextGen Developer Portal at " + baseUrl + ".");
+            log.info("API " + apiTypeWrapper.getName() + " successfully published to " + baseUrl);
         } else {
-            log.error("Failed to publish the API " + apiTypeWrapper.getName() +
-                    " to the NextGen Developer Portal at " + baseUrl + ". Status code: " + statusCode);
+            log.error("Failed to publish API " + apiTypeWrapper.getName() + ". Status code: " + statusCode);
         }
+    }
+
+    private static String fetchOrgIdOrCreateNew(String baseUrl, String tenantName, SSLConnectionSocketFactory sslsf)
+            throws APIManagementException {
+        String orgId = getNewPortalOrgId(baseUrl + "/devportal/b2b/organizations/" + tenantName, sslsf);
+
+        if (orgId.isEmpty()) {
+            String newOrgInfo = generateNewOrgInfoForDeveloperPortal(tenantName);
+            orgId = createNewOrg(baseUrl + "/devportal/b2b/organizations", newOrgInfo, sslsf);
+        }
+        return orgId;
     }
 
     private static String getApiMetaData(String orgName, ApiTypeWrapper apiTypeWrapper) {
         API api = apiTypeWrapper.getApi();
 
         JSONObject apiInfo = new JSONObject();
-        apiInfo.put("referenceID", apiTypeWrapper.getUuid() != null ? apiTypeWrapper.getUuid() : "");
-        apiInfo.put("apiName", apiTypeWrapper.getName() != null ? apiTypeWrapper.getName() : "");
-        apiInfo.put("orgName", orgName != null ? orgName : "");
-        apiInfo.put("provider", api.getId().getProviderName() != null ? api.getId().getProviderName() : "");
-        // TODO: Find What is the single category
+        apiInfo.put("referenceID", defaultString(apiTypeWrapper.getUuid()));
+        apiInfo.put("apiName", defaultString(apiTypeWrapper.getName()));
+        apiInfo.put("orgName", defaultString(orgName));
+        apiInfo.put("provider", defaultString(api.getId().getProviderName()));
         apiInfo.put("apiCategory", "");
-        apiInfo.put("apiDescription", api.getDescription() != null ? api.getDescription() : "");
-        apiInfo.put("visibility", api.getVisibility() != null ? api.getVisibility() : "");
-
-        JSONArray visibleGroupsArray = new JSONArray();
-        if (api.getVisibleRoles() != null) {
-            String[] visibleRoles = api.getVisibleRoles().split(",");
-            for (String role : visibleRoles) {
-                visibleGroupsArray.add(role);
-            }
-        }
-        apiInfo.put("visibleGroups", visibleGroupsArray);
-
-        JSONObject owners = new JSONObject();
-        owners.put("technicalOwner", api.getTechnicalOwner() != null ? api.getTechnicalOwner() : "");
-        owners.put("technicalOwnerEmail", api.getTechnicalOwnerEmail() != null ? api.getTechnicalOwnerEmail() : "");
-        owners.put("businessOwner", api.getBusinessOwner() != null ? api.getBusinessOwner() : "");
-        owners.put("businessOwnerEmail", api.getBusinessOwnerEmail() != null ? api.getBusinessOwnerEmail() : "");
-
-        apiInfo.put("owners", owners);
-        apiInfo.put("apiVersion", api.getId().getVersion() != null ? api.getId().getVersion() : "");
-        apiInfo.put("apiType", apiTypeWrapper.getType() != null ? apiTypeWrapper.getType() : "");
+        apiInfo.put("apiDescription", defaultString(api.getDescription()));
+        apiInfo.put("visibility", defaultString(api.getVisibility()));
+        apiInfo.put("visibleGroups", generateVisibleGroupsArray(api));
+        apiInfo.put("owners", generateOwnersObject(api));
+        apiInfo.put("apiVersion", defaultString(api.getId().getVersion()));
+        apiInfo.put("apiType", defaultString(apiTypeWrapper.getType()));
 
         JSONObject endPoints = new JSONObject();
-        endPoints.put("sandboxURL", api.getApiExternalSandboxEndpoint() != null ?
-                api.getApiExternalSandboxEndpoint() : "");
-        endPoints.put("productionURL", api.getApiExternalProductionEndpoint() != null ?
-                api.getApiExternalProductionEndpoint() : "");
+        endPoints.put("sandboxURL", defaultString(api.getApiExternalSandboxEndpoint()));
+        endPoints.put("productionURL", defaultString(api.getApiExternalProductionEndpoint()));
 
         JSONObject response = new JSONObject();
         response.put("apiInfo", apiInfo);
-        // TODO: Find where we can get policies for Apps
         response.put("subscriptionPolicies", new JSONArray());
         response.put("endPoints", endPoints);
 
         return response.toJSONString();
+    }
+
+    private static String defaultString(String value) {
+        return value != null ? value : "";
+    }
+
+    private static JSONArray generateVisibleGroupsArray(API api) {
+        JSONArray visibleGroupsArray = new JSONArray();
+        if (api.getVisibleRoles() != null) {
+            for (String role : api.getVisibleRoles().split(",")) {
+                visibleGroupsArray.add(role);
+            }
+        }
+        return visibleGroupsArray;
+    }
+
+    private static JSONObject generateOwnersObject(API api) {
+        JSONObject owners = new JSONObject();
+        owners.put("technicalOwner", defaultString(api.getTechnicalOwner()));
+        owners.put("technicalOwnerEmail", defaultString(api.getTechnicalOwnerEmail()));
+        owners.put("businessOwner", defaultString(api.getBusinessOwner()));
+        owners.put("businessOwnerEmail", defaultString(api.getBusinessOwnerEmail()));
+        return owners;
     }
 
     private static String generateNewOrgInfoForDeveloperPortal(String tenantName) {
@@ -167,8 +171,7 @@ public class APIPublisherForNewPortal {
             int statusCode = response.getStatusLine().getStatusCode();
             String responseBody = EntityUtils.toString(response.getEntity());
             if (statusCode == 200) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                Map jsonMap = objectMapper.readValue(responseBody, Map.class);
+                Map<?, ?> jsonMap = objectMapper.readValue(responseBody, Map.class);
                 return (String) jsonMap.get("orgId");
             } else if (statusCode == 404) {
                 return "";
@@ -190,14 +193,13 @@ public class APIPublisherForNewPortal {
             builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON,
                     "apiDefinition.json");
 
-            HttpEntity multipart = builder.build();
-            httpPost.setEntity(multipart);
+            httpPost.setEntity(builder.build());
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 return response.getStatusLine().getStatusCode();
             }
         } catch (IOException e) {
-            throw new APIManagementException("Error while sending API metadata and definition: " + e.getMessage(), e);
+            throw new APIManagementException("Error sending API metadata and definition: " + e.getMessage(), e);
         }
     }
 
@@ -206,23 +208,19 @@ public class APIPublisherForNewPortal {
         try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
             HttpPost httpPost = new HttpPost(apiUrl);
             httpPost.setHeader("Content-Type", "application/json");
-            StringEntity entity = new StringEntity(orgInfo, ContentType.APPLICATION_JSON);
-            httpPost.setEntity(entity);
+            httpPost.setEntity(new StringEntity(orgInfo, ContentType.APPLICATION_JSON));
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String responseBody = EntityUtils.toString(response.getEntity());
                 if (statusCode == 201) {
-                    ObjectMapper objectMapper = new ObjectMapper();
                     Map<?, ?> jsonMap = objectMapper.readValue(responseBody, Map.class);
                     return (String) jsonMap.get("orgId");
-                } else {
-                    return "";
                 }
+                return "";
             }
         } catch (IOException e) {
-            throw new APIManagementException("Error while creating an organization for tenant in new developer portal: "
-                    + e.getMessage(), e);
+            throw new APIManagementException("Error creating organization: " + e.getMessage(), e);
         }
     }
 
@@ -236,8 +234,7 @@ public class APIPublisherForNewPortal {
                     .loadKeyMaterial(keyStore, null)
                     .loadTrustMaterial((chain, authType) -> true)
                     .build();
-        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException
-                 | UnrecoverableKeyException | KeyManagementException e) {
+        } catch (GeneralSecurityException | IOException e) {
             throw new APIManagementException(e);
         }
     }
