@@ -16,10 +16,12 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.governance.impl.validator;
+package org.wso2.carbon.apimgt.governance.engine;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
@@ -36,22 +38,12 @@ import java.util.Map;
  * This class represents a Validation Engine. This can be extended to implement a specific validation engine like
  * spectral
  */
+@Component(
+        name = "org.wso2.carbon.apimgt.governance.engine.SpectralValidationEngine",
+        immediate = true,
+        service = ValidationEngine.class
+)
 public class SpectralValidationEngine implements ValidationEngine {
-
-    private static final SpectralValidationEngine instance = new SpectralValidationEngine();
-
-    private SpectralValidationEngine() {
-    }
-
-    /**
-     * Get the instance of the SpectralValidationEngine
-     *
-     * @return SpectralValidationEngine instance
-     */
-    public static SpectralValidationEngine getInstance() {
-        return instance;
-    }
-
 
     /**
      * Check if a ruleset is valid

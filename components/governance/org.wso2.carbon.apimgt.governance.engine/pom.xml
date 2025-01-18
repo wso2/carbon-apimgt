@@ -29,14 +29,22 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.apimgt.governance.api</artifactId>
+    <artifactId>org.wso2.carbon.apimgt.governance.engine</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 API Manager Governance API</name>
+    <name>WSO2 API Manager Governance Engine</name>
 
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.governance.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.governance.impl</artifactId>
         </dependency>
     </dependencies>
 
@@ -51,7 +59,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.governance.api.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.governance.engine.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional

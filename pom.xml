@@ -28,7 +28,7 @@
         <module>service-stubs/apimgt</module>
         <module>components/apimgt</module>
         <module>features/apimgt</module>
-        <!--        <module>components/governance</module>-->
+        <module>components/governance</module>
     </modules>
 
     <build>
@@ -2013,6 +2013,11 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.governance.impl</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.governance.engine</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
         </dependencies>

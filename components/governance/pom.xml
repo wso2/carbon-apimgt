@@ -33,5 +33,7 @@
     <packaging>pom</packaging>
     <name>WSO2 Carbon API Management Governance Component</name>
 
-    <modules></modules>
+    <modules>
+        <module>org.wso2.carbon.apimgt.governance.engine</module>
+    </modules>
 </project>

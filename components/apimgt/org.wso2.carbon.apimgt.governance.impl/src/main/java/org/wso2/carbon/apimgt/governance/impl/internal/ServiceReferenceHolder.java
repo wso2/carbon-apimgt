@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.governance.impl.internal;
 
+import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 
 /**
  * This class represents the Governance Service Reference Holder
@@ -27,6 +29,7 @@ public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private GovernanceConfigurationService govConfigurationService;
+    private ValidationEngineService validationEngineService;
 
     public static ServiceReferenceHolder getInstance() {
 
@@ -41,5 +44,13 @@ public class ServiceReferenceHolder {
     public void setGovernanceConfigurationService(GovernanceConfigurationService amConfigurationService) {
 
         this.govConfigurationService = amConfigurationService;
+    }
+
+    public ValidationEngineService getValidationEngineService() {
+        return validationEngineService;
+    }
+
+    public void setValidationEngineService(ValidationEngineService validationEngineService) {
+        this.validationEngineService = validationEngineService;
     }
 }

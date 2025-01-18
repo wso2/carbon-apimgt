@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.impl;
 
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
+import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -26,8 +27,8 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
+import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
-import org.wso2.carbon.apimgt.governance.impl.validator.SpectralValidationEngine;
 
 import java.util.List;
 
@@ -52,7 +53,9 @@ public class RulesetManagerImpl implements RulesetManager {
     @Override
     public RulesetInfo createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException {
         ruleset.setId(GovernanceUtil.generateUUID());
-        boolean isRulesetContentValid = SpectralValidationEngine.getInstance().isRulesetValid(ruleset);
+        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
+                getValidationEngineService().getValidationEngine();
+        boolean isRulesetContentValid = validationEngine.isRulesetValid(ruleset);
         if (!isRulesetContentValid) {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
                     ruleset.getName());
@@ -143,7 +146,9 @@ public class RulesetManagerImpl implements RulesetManager {
      */
     @Override
     public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
-        boolean isRulesetContentValid = SpectralValidationEngine.getInstance().isRulesetValid(ruleset);
+        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
+                getValidationEngineService().getValidationEngine();
+        boolean isRulesetContentValid = validationEngine.isRulesetValid(ruleset);
         if (!isRulesetContentValid) {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
                     ruleset.getName());

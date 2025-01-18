@@ -29,8 +29,8 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
-import org.wso2.carbon.apimgt.governance.impl.validator.SpectralValidationEngine;
-import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngine;
+import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
@@ -101,7 +101,8 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 prepStmt.setString(11, ruleset.getCreatedBy());
                 prepStmt.execute();
 
-                ValidationEngine validationEngine = SpectralValidationEngine.getInstance();
+                ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
+                        .getValidationEngineService().getValidationEngine();
                 List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset.getRulesetContent());
                 if (rules.size() > 0) {
                     addRules(ruleset.getId(), rules, connection);
@@ -390,7 +391,8 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 // Delete existing rules related to this ruleset.
                 deleteRules(rulesetId, connection);
                 // Insert updated rules.
-                ValidationEngine validationEngine = SpectralValidationEngine.getInstance();
+                ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
+                        .getValidationEngineService().getValidationEngine();
                 List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset.getRulesetContent());
                 if (rules.size() > 0) {
                     addRules(ruleset.getId(), rules, connection);

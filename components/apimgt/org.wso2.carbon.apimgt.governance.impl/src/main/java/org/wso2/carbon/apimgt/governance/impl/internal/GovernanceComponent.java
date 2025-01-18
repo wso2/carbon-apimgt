@@ -26,6 +26,10 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
@@ -33,6 +37,8 @@ import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationServ
 import org.wso2.carbon.apimgt.governance.impl.EvaluationRequestScheduler;
 import org.wso2.carbon.apimgt.governance.impl.observer.GovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineServiceImpl;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -83,6 +89,22 @@ public class GovernanceComponent {
         }
 
         registration.unregister();
+    }
+
+    @Reference(
+            name = "org.wso2.carbon.apimgt.governance.engine.SpectralValidationEngine",
+            service = ValidationEngine.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetValidationEngineService"
+    )
+    protected void setValidationEngineService(ValidationEngine validationEngine) {
+        ValidationEngineService validationEngineService = new ValidationEngineServiceImpl(validationEngine);
+        ServiceReferenceHolder.getInstance().setValidationEngineService(validationEngineService);
+    }
+
+    protected void unsetValidationEngineService(ValidationEngine validationEngine) {
+        ServiceReferenceHolder.getInstance().setValidationEngineService(null);
     }
 
 }
