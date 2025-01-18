@@ -53,8 +53,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response createRuleset(@Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "provider")  String provider, @Multipart(value = "description", required = false)  String description, @Multipart(value = "documentationLink", required = false)  String documentationLink) throws GovernanceException{
-        return delegate.createRuleset(name, rulesetContentInputStream, rulesetContentDetail, ruleType, artifactType, provider, description, documentationLink, securityContext);
+    public Response createRuleset(@Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "provider")  String provider, @Multipart(value = "description", required = false)  String description, @Multipart(value = "ruleCategory", required = false)  String ruleCategory, @Multipart(value = "documentationLink", required = false)  String documentationLink) throws GovernanceException{
+        return delegate.createRuleset(name, rulesetContentInputStream, rulesetContentDetail, ruleType, artifactType, provider, description, ruleCategory, documentationLink, securityContext);
     }
 
     @DELETE
@@ -167,7 +167,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response updateRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId, @Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "provider")  String provider, @Multipart(value = "description", required = false)  String description, @Multipart(value = "documentationLink", required = false)  String documentationLink) throws GovernanceException{
-        return delegate.updateRulesetById(rulesetId, name, rulesetContentInputStream, rulesetContentDetail, ruleType, artifactType, provider, description, documentationLink, securityContext);
+    public Response updateRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId, @Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "provider")  String provider, @Multipart(value = "description", required = false)  String description, @Multipart(value = "ruleCategory", required = false)  String ruleCategory, @Multipart(value = "documentationLink", required = false)  String documentationLink) throws GovernanceException{
+        return delegate.updateRulesetById(rulesetId, name, rulesetContentInputStream, rulesetContentDetail, ruleType, artifactType, provider, description, ruleCategory, documentationLink, securityContext);
     }
 }

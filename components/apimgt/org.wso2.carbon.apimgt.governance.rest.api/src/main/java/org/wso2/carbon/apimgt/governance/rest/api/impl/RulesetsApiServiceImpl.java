@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
@@ -61,6 +62,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param name                      Name
      * @param rulesetContentInputStream Ruleset content input stream
      * @param rulesetContentDetail      Ruleset content detail
+     * @param ruleCategory              Rule category
      * @param ruleType                  Rule type
      * @param artifactType              Artifact type
      * @param provider                  Provider
@@ -72,13 +74,15 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      */
     @Override
     public Response createRuleset(String name, InputStream rulesetContentInputStream, Attachment rulesetContentDetail,
-                                  String ruleType, String artifactType, String provider, String description,
-                                  String documentationLink, MessageContext messageContext) throws GovernanceException {
+                                  String ruleType, String artifactType, String provider,
+                                  String description, String ruleCategory, String documentationLink,
+                                  MessageContext messageContext) throws GovernanceException {
         RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
         Ruleset ruleset = new Ruleset();
         try {
             ruleset.setName(name);
+            ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
             ruleset.setRuleType(RuleType.fromString(ruleType));
             ruleset.setArtifactType(ArtifactType.fromString(artifactType));
             ruleset.setProvider(provider);
@@ -261,6 +265,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param name                      Name
      * @param rulesetContentInputStream Ruleset content input stream
      * @param rulesetContentDetail      Ruleset content detail
+     * @param ruleCategory              Rule category
      * @param ruleType                  Rule type
      * @param artifactType              Artifact type
      * @param provider                  Provider
@@ -273,10 +278,11 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     @Override
     public Response updateRulesetById(String rulesetId, String name, InputStream rulesetContentInputStream,
                                       Attachment rulesetContentDetail, String ruleType, String artifactType,
-                                      String provider, String description, String documentationLink,
-                                      MessageContext messageContext) throws GovernanceException {
+                                      String provider, String description, String ruleCategory,
+                                      String documentationLink, MessageContext messageContext) throws GovernanceException {
         Ruleset ruleset = new Ruleset();
         ruleset.setName(name);
+        ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
         ruleset.setRuleType(RuleType.fromString(ruleType));
         ruleset.setArtifactType(ArtifactType.fromString(artifactType));
         ruleset.setProvider(provider);

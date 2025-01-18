@@ -33,7 +33,8 @@ public class DefaultRuleset {
     private String id;
     private String name;
     private String description;
-    private String appliesTo;
+    private String ruleCategory;
+    private String ruleType;
     private String artifactType;
     private String documentationLink;
     private String provider;
@@ -61,14 +62,6 @@ public class DefaultRuleset {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getAppliesTo() {
-        return appliesTo;
-    }
-
-    public void setAppliesTo(String appliesTo) {
-        this.appliesTo = appliesTo;
     }
 
     public String getDocumentationLink() {
@@ -112,5 +105,21 @@ public class DefaultRuleset {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT);
         }
 
+    }
+
+    public String getRuleCategory() {
+        return ruleCategory;
+    }
+
+    public void setRuleCategory(String ruleCategory) {
+        this.ruleCategory = ruleCategory;
+    }
+
+    public String getRuleType() {
+        return ruleType;
+    }
+
+    public void setRuleType(String ruleType) {
+        this.ruleType = ruleType;
     }
 }

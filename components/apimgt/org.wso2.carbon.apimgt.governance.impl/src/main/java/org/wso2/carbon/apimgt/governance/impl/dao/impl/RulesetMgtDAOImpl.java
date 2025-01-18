@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
@@ -91,12 +92,13 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 prepStmt.setString(2, ruleset.getName());
                 prepStmt.setString(3, ruleset.getDescription());
                 prepStmt.setBlob(4, rulesetContentStream);
-                prepStmt.setString(5, String.valueOf(ruleset.getRuleType()));
-                prepStmt.setString(6, String.valueOf(ruleset.getArtifactType()));
-                prepStmt.setString(7, ruleset.getDocumentationLink());
-                prepStmt.setString(8, ruleset.getProvider());
-                prepStmt.setString(9, organization);
-                prepStmt.setString(10, ruleset.getCreatedBy());
+                prepStmt.setString(5, String.valueOf(ruleset.getRuleCategory()));
+                prepStmt.setString(6, String.valueOf(ruleset.getRuleType()));
+                prepStmt.setString(7, String.valueOf(ruleset.getArtifactType()));
+                prepStmt.setString(8, ruleset.getDocumentationLink());
+                prepStmt.setString(9, ruleset.getProvider());
+                prepStmt.setString(10, organization);
+                prepStmt.setString(11, ruleset.getCreatedBy());
                 prepStmt.execute();
 
                 ValidationEngine validationEngine = SpectralValidationEngine.getInstance();
@@ -177,8 +179,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setId(rs.getString("RULESET_ID"));
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
+                    rulesetInfo.setRuleCategory(RuleCategory.fromString(
+                            rs.getString("RULE_CATEGORY")));
                     rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(ArtifactType.fromString(rs.getString("ARTIFACT_TYPE")));
+                    rulesetInfo.setArtifactType(ArtifactType.fromString(
+                            rs.getString("ARTIFACT_TYPE")));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
                     rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
@@ -218,8 +223,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setId(rs.getString("RULESET_ID"));
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
+                    rulesetInfo.setRuleCategory(RuleCategory.fromString(
+                            rs.getString("RULE_CATEGORY")));
                     rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(ArtifactType.fromString(rs.getString("ARTIFACT_TYPE")));
+                    rulesetInfo.setArtifactType(ArtifactType.fromString(
+                            rs.getString("ARTIFACT_TYPE")));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
                     rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
@@ -257,8 +265,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setId(rs.getString("RULESET_ID"));
                     rulesetInfo.setName(rs.getString("NAME"));
                     rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
+                    rulesetInfo.setRuleCategory(RuleCategory.fromString(
+                            rs.getString("RULE_CATEGORY")));
                     rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(ArtifactType.fromString(rs.getString("ARTIFACT_TYPE")));
+                    rulesetInfo.setArtifactType(ArtifactType.fromString(
+                            rs.getString("ARTIFACT_TYPE")));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
                     rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
@@ -267,7 +278,8 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
                     return rulesetInfo;
                 } else {
-                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId, organization);
+                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
+                            rulesetId, organization);
                 }
             }
         } catch (SQLException e) {
@@ -362,13 +374,14 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 prepStmt.setString(1, ruleset.getName());
                 prepStmt.setString(2, ruleset.getDescription());
                 prepStmt.setBlob(3, rulesetContent);
-                prepStmt.setString(4, String.valueOf(ruleset.getRuleType()));
-                prepStmt.setString(5, String.valueOf(ruleset.getArtifactType()));
-                prepStmt.setString(6, ruleset.getDocumentationLink());
-                prepStmt.setString(7, ruleset.getProvider());
-                prepStmt.setString(8, ruleset.getUpdatedBy());
-                prepStmt.setString(9, rulesetId);
-                prepStmt.setString(10, organization);
+                prepStmt.setString(4, String.valueOf(ruleset.getRuleCategory()));
+                prepStmt.setString(5, String.valueOf(ruleset.getRuleType()));
+                prepStmt.setString(6, String.valueOf(ruleset.getArtifactType()));
+                prepStmt.setString(7, ruleset.getDocumentationLink());
+                prepStmt.setString(8, ruleset.getProvider());
+                prepStmt.setString(9, ruleset.getUpdatedBy());
+                prepStmt.setString(10, rulesetId);
+                prepStmt.setString(11, organization);
                 int rowsAffected = prepStmt.executeUpdate();
                 if (rowsAffected == 0) {
                     throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,

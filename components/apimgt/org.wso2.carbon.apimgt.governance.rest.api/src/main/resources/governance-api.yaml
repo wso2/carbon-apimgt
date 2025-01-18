@@ -924,6 +924,13 @@ components:
                 message: API host schemes must use the HTTPS protocol.
                 formats:
                   - oas2
+        ruleCategory:
+          type: string
+          description: Category the rules included in ruleset.
+          enum:
+            - SPECTRAL
+          example: SPECTRAL
+          default: SPECTRAL
         ruleType:
           type: string
           description: Context or area to which the ruleset applies.
@@ -977,6 +984,12 @@ components:
           type: string
           description: A brief description of the ruleset.
           example: "A ruleset designed to enforce security standards for APIs."
+        ruleCategory:
+          type: string
+          description: Category the rules included in ruleset.
+          enum:
+            - SPECTRAL
+          example: SPECTRAL
         ruleType:
           type: string
           description: Context or area to which the ruleset applies.

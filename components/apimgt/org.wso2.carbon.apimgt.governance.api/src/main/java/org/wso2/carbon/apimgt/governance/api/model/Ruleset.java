@@ -28,6 +28,7 @@ public class Ruleset {
     private String name;
     private String description;
     private InputStream rulesetContent;
+    private RuleCategory ruleCategory;
     private RuleType ruleType;
     private ArtifactType artifactType;
     private String documentationLink;
@@ -131,6 +132,14 @@ public class Ruleset {
 
     public void setUpdatedTime(String updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public RuleCategory getRuleCategory() {
+        return ruleCategory;
+    }
+
+    public void setRuleCategory(RuleCategory ruleCategory) {
+        this.ruleCategory = ruleCategory;
     }
 }
 

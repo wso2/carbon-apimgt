@@ -27,6 +27,37 @@ public class RulesetInfoDTO   {
     private String name = null;
     private String description = null;
 
+          @XmlType(name="RuleCategoryEnum")
+    @XmlEnum(String.class)
+    public enum RuleCategoryEnum {
+        SPECTRAL("SPECTRAL");
+        private String value;
+
+        RuleCategoryEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static RuleCategoryEnum fromValue(String v) {
+            for (RuleCategoryEnum b : RuleCategoryEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    } 
+    private RuleCategoryEnum ruleCategory = null;
+
           @XmlType(name="RuleTypeEnum")
     @XmlEnum(String.class)
     public enum RuleTypeEnum {
@@ -154,6 +185,24 @@ return null;
   }
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  /**
+   * Category the rules included in ruleset.
+   **/
+  public RulesetInfoDTO ruleCategory(RuleCategoryEnum ruleCategory) {
+    this.ruleCategory = ruleCategory;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "SPECTRAL", value = "Category the rules included in ruleset.")
+  @JsonProperty("ruleCategory")
+  public RuleCategoryEnum getRuleCategory() {
+    return ruleCategory;
+  }
+  public void setRuleCategory(RuleCategoryEnum ruleCategory) {
+    this.ruleCategory = ruleCategory;
   }
 
   /**
@@ -316,6 +365,7 @@ return null;
     return Objects.equals(id, rulesetInfo.id) &&
         Objects.equals(name, rulesetInfo.name) &&
         Objects.equals(description, rulesetInfo.description) &&
+        Objects.equals(ruleCategory, rulesetInfo.ruleCategory) &&
         Objects.equals(ruleType, rulesetInfo.ruleType) &&
         Objects.equals(artifactType, rulesetInfo.artifactType) &&
         Objects.equals(documentationLink, rulesetInfo.documentationLink) &&
@@ -328,7 +378,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, ruleType, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(id, name, description, ruleCategory, ruleType, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
   }
 
   @Override
@@ -339,6 +389,7 @@ return null;
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    ruleCategory: ").append(toIndentedString(ruleCategory)).append("\n");
     sb.append("    ruleType: ").append(toIndentedString(ruleType)).append("\n");
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    documentationLink: ").append(toIndentedString(documentationLink)).append("\n");

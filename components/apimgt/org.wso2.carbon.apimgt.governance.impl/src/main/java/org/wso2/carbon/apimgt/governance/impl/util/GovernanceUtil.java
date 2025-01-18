@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
@@ -179,7 +180,8 @@ public class GovernanceUtil {
         ruleset.setId(defaultRuleset.getId());
         ruleset.setName(defaultRuleset.getName());
         ruleset.setDescription(defaultRuleset.getDescription());
-        ruleset.setRuleType(RuleType.fromString(defaultRuleset.getAppliesTo()));
+        ruleset.setRuleCategory(RuleCategory.fromString(defaultRuleset.getRuleCategory()));
+        ruleset.setRuleType(RuleType.fromString(defaultRuleset.getRuleType()));
         ruleset.setArtifactType(ArtifactType.fromString(defaultRuleset.getArtifactType()));
         ruleset.setProvider(defaultRuleset.getProvider());
         ruleset.setRulesetContent(defaultRuleset.getRulesetContentAsInputStream());

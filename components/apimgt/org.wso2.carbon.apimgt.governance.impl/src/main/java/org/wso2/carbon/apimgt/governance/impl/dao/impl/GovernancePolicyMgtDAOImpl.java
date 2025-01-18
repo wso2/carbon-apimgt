@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
@@ -694,8 +695,11 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     ruleset.setId(rs.getString("RULESET_ID"));
                     byte[] rulesetContent = rs.getBytes("RULESET_CONTENT");
                     ruleset.setRulesetContent(new ByteArrayInputStream(rulesetContent));
+                    ruleset.setRuleCategory(RuleCategory.fromString(
+                            rs.getString("RULE_CATEGORY")));
                     ruleset.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    ruleset.setArtifactType(ArtifactType.fromString(rs.getString("ARTIFACT_TYPE")));
+                    ruleset.setArtifactType(ArtifactType.fromString(
+                            rs.getString("ARTIFACT_TYPE")));
                     rulesetList.add(ruleset);
                 }
             }
