@@ -23,8 +23,8 @@
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <artifactId>governance</artifactId>
-        <version>9.30.69-SNAPSHOT</version>
+        <artifactId>apimgt</artifactId>
+        <version>9.30.99-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
