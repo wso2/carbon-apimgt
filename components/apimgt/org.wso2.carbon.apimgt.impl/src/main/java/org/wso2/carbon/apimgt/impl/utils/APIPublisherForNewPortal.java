@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -60,22 +60,37 @@ public class APIPublisherForNewPortal {
     private static final char[] trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
     private static final String trustStoreLocation = System.getProperty("javax.net.ssl.trustStore");
 
-    public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
+    public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
 
-        // TODO: This section is not finalized yet
-        String baseUrl = APIUtil.getNewPortalURL();
-        Certificate cert = SigningUtil.getPublicCertificate(-1234);
-        PrivateKey privateKey = SigningUtil.getSigningKey(-1234);
-
-        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(configureSSLContext(cert, privateKey));
-
-        String orgId = fetchOrgIdOrCreateNew(baseUrl, tenantName, sslsf);
-        if (orgId.isEmpty()) {
-            log.error("Failed to create or fetch organization ID.");
-            return;
+        try {
+            String baseUrl = APIUtil.getNewPortalURL();
+            SSLConnectionSocketFactory sslsf = generateSSLSF();
+            String orgId = fetchOrgIdOrCreateNew(baseUrl, tenantName, sslsf);
+            if (orgId.isEmpty()) {
+                log.error("Failed to create an organization for tenant: "
+                        + tenantName + ". Unable to proceed with publishing API.");
+                return;
+            }
+            publishAPI(baseUrl, apiTypeWrapper, tenantName, orgId, sslsf);
+        } catch (APIManagementException e) {
+            log.error("Error while publishing API for new developer portal. Error: " + e.getMessage());
         }
+    }
 
-        publishAPI(baseUrl, apiTypeWrapper, tenantName, orgId, sslsf);
+    public static void unpublish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
+        try {
+            String baseUrl = APIUtil.getNewPortalURL();
+            SSLConnectionSocketFactory sslsf = generateSSLSF();
+            String orgId = getNewPortalOrgId(baseUrl + "/devportal/b2b/organizations/" + tenantName, sslsf);
+            if (orgId.isEmpty()) {
+                log.warn("No organization found for tenant: "
+                        + tenantName + ". Aborting unpublish operation in the new portal.");
+                return;
+            }
+            unpublishAPI(baseUrl, apiTypeWrapper, orgId, sslsf);
+        } catch (APIManagementException e) {
+            log.error("Error while unpublishing API from new developer portal. Error: " + e.getMessage());
+        }
     }
 
     private static void publishAPI(String baseUrl, ApiTypeWrapper apiTypeWrapper, String tenantName, String orgId,
@@ -90,7 +105,24 @@ public class APIPublisherForNewPortal {
         if (statusCode == 201) {
             log.info("API " + apiTypeWrapper.getName() + " successfully published to " + baseUrl);
         } else {
-            log.error("Failed to publish API " + apiTypeWrapper.getName() + ". Status code: " + statusCode);
+            log.error("Failed to publish API " + apiTypeWrapper.getName() + " to the new portal. Status code: "
+                    + statusCode);
+        }
+    }
+
+    private static void unpublishAPI(String baseUrl, ApiTypeWrapper apiTypeWrapper, String orgId,
+                                   SSLConnectionSocketFactory sslsf) throws APIManagementException {
+        int statusCode = unpublishApi(
+                baseUrl + "/devportal/b2b/organizations/" + orgId + "/apis/" + apiTypeWrapper.getUuid(), sslsf);
+
+        if (statusCode == 200) {
+            log.info("API " + apiTypeWrapper.getName() + " successfully unpublished from " + baseUrl);
+        } else if (statusCode == 404) {
+            log.warn("API " + apiTypeWrapper.getName() + " is not available in "
+                    + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
+        } else {
+            log.error("Failed to unpublish API " + apiTypeWrapper.getName() + " from new portal. Status code: "
+                    + statusCode);
         }
     }
 
@@ -104,6 +136,8 @@ public class APIPublisherForNewPortal {
         }
         return orgId;
     }
+
+    // Data Structuring Related Methods
 
     private static String getApiMetaData(String orgName, ApiTypeWrapper apiTypeWrapper) {
         API api = apiTypeWrapper.getApi();
@@ -191,13 +225,16 @@ public class APIPublisherForNewPortal {
         return orgInfo.toJSONString();
     }
 
+    // HTTPS Request Related Methods
+
     private static String getNewPortalOrgId(String apiUrl, SSLConnectionSocketFactory sslsf)
             throws APIManagementException {
-        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
-            HttpGet httpGet = new HttpGet(apiUrl);
-            HttpResponse response = httpClient.execute(httpGet);
+        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+             CloseableHttpResponse response = httpClient.execute(new HttpGet(apiUrl))) {
+
             int statusCode = response.getStatusLine().getStatusCode();
             String responseBody = EntityUtils.toString(response.getEntity());
+
             if (statusCode == 200) {
                 Map<?, ?> jsonMap = objectMapper.readValue(responseBody, Map.class);
                 return (String) jsonMap.get("orgId");
@@ -207,7 +244,7 @@ public class APIPublisherForNewPortal {
                 throw new APIManagementException("Unexpected response: " + statusCode + " - " + responseBody);
             }
         } catch (IOException e) {
-            throw new APIManagementException(e);
+            throw new APIManagementException("Error retrieving organization ID: " + e.getMessage(), e);
         }
     }
 
@@ -215,11 +252,9 @@ public class APIPublisherForNewPortal {
                                          SSLConnectionSocketFactory sslsf) throws APIManagementException {
         try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
             HttpPost httpPost = new HttpPost(apiUrl);
-
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addTextBody("apiMetadata", apiMetadata, ContentType.APPLICATION_JSON);
-            builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON,
-                    "apiDefinition.json");
+            builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON, "apiDefinition.json");
 
             httpPost.setEntity(builder.build());
 
@@ -228,6 +263,15 @@ public class APIPublisherForNewPortal {
             }
         } catch (IOException e) {
             throw new APIManagementException("Error sending API metadata and definition: " + e.getMessage(), e);
+        }
+    }
+
+    public static int unpublishApi(String apiUrl, SSLConnectionSocketFactory sslsf) throws APIManagementException {
+        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+             CloseableHttpResponse response = httpClient.execute(new HttpDelete(apiUrl))) {
+            return response.getStatusLine().getStatusCode();
+        } catch (IOException e) {
+            throw new APIManagementException("Error removing API from new portal: " + e.getMessage(), e);
         }
     }
 
@@ -241,6 +285,7 @@ public class APIPublisherForNewPortal {
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String responseBody = EntityUtils.toString(response.getEntity());
+
                 if (statusCode == 201) {
                     Map<?, ?> jsonMap = objectMapper.readValue(responseBody, Map.class);
                     return (String) jsonMap.get("orgId");
@@ -250,6 +295,16 @@ public class APIPublisherForNewPortal {
         } catch (IOException e) {
             throw new APIManagementException("Error creating organization: " + e.getMessage(), e);
         }
+    }
+
+    // Certificate Related Methods
+
+    private static SSLConnectionSocketFactory generateSSLSF() throws APIManagementException {
+        // TODO: This section is not finalized yet
+        Certificate cert = SigningUtil.getPublicCertificate(-1234);
+        PrivateKey privateKey = SigningUtil.getSigningKey(-1234);
+
+        return new SSLConnectionSocketFactory(configureSSLContext(cert, privateKey));
     }
 
     private static SSLContext configureSSLContext(Certificate cert, PrivateKey privateKey) throws APIManagementException {

@@ -75,8 +75,15 @@ public class LifeCycleUtils {
         }
 
         // Next Gen Dev Portal Publication
-        if (APIConstants.PUBLISHED.equals(targetStatus) && APIUtil.isNewPortalEnabled()) {
+        if (Arrays.asList(APIConstants.PUBLISH, APIConstants.REPUBLISH).contains(action)
+                && APIUtil.isNewPortalEnabled()) {
             APIPublisherForNewPortal.publish(orgId, apiTypeWrapper);
+        }
+
+        // Next Gen Dev Portal Un-Publication
+        if (Arrays.asList(APIConstants.DEPRECATE, APIConstants.BLOCK, APIConstants.DEMOTE_TO_CREATED).contains(action)
+                && APIUtil.isNewPortalEnabled()) {
+            APIPublisherForNewPortal.unpublish(orgId, apiTypeWrapper);
         }
 
         // Change the lifecycle state in the database
