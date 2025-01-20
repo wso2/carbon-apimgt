@@ -26,6 +26,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -372,6 +373,46 @@ public class GovernanceUtil {
             }
         }
         return isBlocking;
+    }
+
+
+    /**
+     * Get governable states for artifact
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @return List of Governable States
+     * @throws GovernanceException If an exception occurs
+     */
+    public List<GovernableState> getGovernableStatesForArtifact(String artifactId,
+                                                                ArtifactType artifactType)
+            throws GovernanceException {
+        List<GovernableState> governableStates = new ArrayList<>();
+        String artifactTypeStr = String.valueOf(artifactType);
+
+        if (artifactTypeStr.contains("API")) {
+
+            // Every created api should be governed with create and update policies
+            governableStates.add(GovernableState.API_CREATE);
+            governableStates.add(GovernableState.API_UPDATE);
+
+            if (APIMUtil.isAPIDeployed(artifactId)) {
+                // If the API is deployed, it should be governed with the deploy policy
+                governableStates.add(GovernableState.API_DEPLOY);
+            }
+
+            String status = APIMUtil.getAPIStatus(artifactId);
+            if (APIStatus.PUBLISHED.getStatus().equals(status)
+                    || APIStatus.DEPRECATED.getStatus().equals(status)
+                    || APIStatus.BLOCKED.getStatus().equals(status)) {
+                // If the API is published, deprecated or blocked, it should be governed with the publish policy
+                // as API has already been published
+                governableStates.add(GovernableState.API_PUBLISH);
+            }
+        }
+
+        return governableStates;
+
     }
 
 }
