@@ -224,6 +224,15 @@ public class CertificateMgtDAO {
         return result;
     }
 
+    public boolean isCertificateExist(String alias, int tenantId) throws CertificateManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return isCertificateExist(connection, alias, tenantId);
+        } catch (SQLException e) {
+            handleException("Error while retrieving connection or checking whether certificate exist", e);
+        }
+        return false;
+    }
+
     private boolean isCertificateExist(Connection connection, String alias,int tenantId) throws SQLException {
         String query = SQLConstants.CertificateConstants.CERTIFICATE_EXIST;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {

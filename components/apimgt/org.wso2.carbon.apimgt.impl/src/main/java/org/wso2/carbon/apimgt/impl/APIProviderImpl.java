@@ -4046,10 +4046,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
             responseCode = certificateManager
-                    .addCertificateToParentNode(certificate, alias, endpoint, tenantId);
+                    .addCertificate(certificate, alias, endpoint, tenantId);
             CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(),APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
                     tenantDomain,alias,endpoint);
+            certificateEvent.setTenantId(tenantId);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
@@ -4080,7 +4081,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            responseCode = certificateManager.deleteCertificateFromParentNode(alias, endpoint, tenantId);
+            responseCode = certificateManager.deleteCertificate(alias, endpoint, tenantId);
             CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.ENDPOINT_CERTIFICATE_REMOVE.toString(),
                     tenantDomain, alias, endpoint);

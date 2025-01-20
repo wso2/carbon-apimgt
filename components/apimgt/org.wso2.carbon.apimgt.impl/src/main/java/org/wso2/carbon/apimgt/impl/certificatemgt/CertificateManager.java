@@ -45,7 +45,7 @@ public interface CertificateManager {
      * CERTIFICATE_EXPIRED : If the certificate is expired.
      * CERTIFICATE_FOR_ENDPOINT_EXISTS : If the endpoint exists in the database.
      */
-    ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId);
+    ResponseCode addCertificate(String certificate, String alias, String endpoint, int tenantId);
 
     /**
      * Method to delete certificate from publisher trust store.
@@ -57,7 +57,7 @@ public interface CertificateManager {
      * INTERNAL_SERVER_ERROR: If any internal error occurred
      * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
-    ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId);
+    ResponseCode deleteCertificate(String alias, String endpoint, int tenantId);
 
     /**
      * Method to add the certificate to gateway nodes.

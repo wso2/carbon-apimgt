@@ -78,31 +78,47 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId) {
+    public ResponseCode addCertificate(String certificate, String alias, String endpoint, int tenantId) {
 
         try {
-            if (certificateMgtDAO.addCertificate(certificate, alias, endpoint, tenantId)) {
-                ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
-                if (responseCode.getResponseCode() ==
-                        ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode()) {
-                    log.error("Error adding the certificate to Publisher Trust Store. Rolling back...");
-                    certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
-                } else if (responseCode.getResponseCode() == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE
-                        .getResponseCode()) {
-                    log.error("Could not add Certificate to Trust Store. Certificate Exists. Rolling back...");
-                    certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
-                } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_EXPIRED.getResponseCode()) {
-                    log.error("Could not add Certificate. Certificate has already expired.");
-                    certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
+            if (StringUtils.isNotEmpty(certificate)) {
+                if (certificateMgtDAO.addCertificate(certificate, alias, endpoint, tenantId)) {
+                    ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
+                    if (responseCode.getResponseCode() ==
+                            ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode()) {
+                        log.error("Error adding the certificate to Publisher Trust Store. Rolling back...");
+                        certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
+                    } else if (responseCode.getResponseCode() == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE
+                            .getResponseCode()) {
+                        log.error("Could not add Certificate to Trust Store. Certificate Exists. Rolling back...");
+                        certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
+                    } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_EXPIRED.getResponseCode()) {
+                        log.error("Could not add Certificate. Certificate has already expired.");
+                        certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
+                    } else {
+                        log.info("Certificate is successfully added to the Publisher client Trust Store with Alias '"
+                                + alias + "'");
+                    }
+                    return responseCode;
                 } else {
-                    log.info("Certificate is successfully added to the Publisher client Trust Store with Alias '"
+                    log.error("Error persisting the certificate meta data in db. Certificate could not be added to " +
+                            "publisher Trust Store.");
+                    return ResponseCode.INTERNAL_SERVER_ERROR;
+                }
+            } else if (StringUtils.isEmpty(certificate) && certificateMgtDAO.isCertificateExist(alias, tenantId)) {
+                // Get the certificate from the database
+                CertificateMetadataDTO certificateMetadataDTO = certificateMgtDAO.getCertificate(alias, endpoint, tenantId);
+                ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificateMetadataDTO.getCertificate(),
+                        certificateMetadataDTO.getAlias());
+                if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
+                    log.error("Error adding the certificate to Publisher trust store.");
+                } else if (responseCode == ResponseCode.CERTIFICATE_EXPIRED) {
+                    log.error("Unable to add the certificate because it has already expired.");
+                } else if (responseCode == ResponseCode.SUCCESS) {
+                    log.info("The certificate has been successfully added to the Publisher Client trust store with the alias '"
                             + alias + "'");
                 }
                 return responseCode;
-            } else {
-                log.error("Error persisting the certificate meta data in db. Certificate could not be added to " +
-                        "publisher Trust Store.");
-                return ResponseCode.INTERNAL_SERVER_ERROR;
             }
         } catch (CertificateManagementException e) {
             log.error("Error when persisting/ deleting certificate metadata. ", e);
@@ -110,6 +126,7 @@ public class CertificateManagerImpl implements CertificateManager {
         } catch (CertificateAliasExistsException e) {
             return ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
         }
+        return null;
     }
 
     @Override
@@ -137,7 +154,7 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId) {
+    public ResponseCode deleteCertificate(String alias, String endpoint, int tenantId) {
 
         try {
             List<CertificateMetadataDTO> certificateMetadataDTOList =
@@ -164,6 +181,16 @@ public class CertificateManagerImpl implements CertificateManager {
                                     ".");
                     return ResponseCode.INTERNAL_SERVER_ERROR;
                 }
+            } else {
+                // When certificate is not exist in the database but exist in the trust store
+                ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
+                if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
+                    log.error("Error removing the Certificate from the trust store.");
+                } else if (responseCode == ResponseCode.SUCCESS) {
+                    log.info("The certificate has been successfully removed from the Publisher trust store with alias '"
+                            + alias + "'");
+                }
+                return responseCode;
             }
         } catch (CertificateManagementException e) {
             log.error("Error persisting/ deleting certificate metadata. ", e);
@@ -171,7 +198,6 @@ public class CertificateManagerImpl implements CertificateManager {
         } catch (CertificateAliasExistsException e) {
             return ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
         }
-        return ResponseCode.CERTIFICATE_NOT_FOUND;
     }
 
     @Override
