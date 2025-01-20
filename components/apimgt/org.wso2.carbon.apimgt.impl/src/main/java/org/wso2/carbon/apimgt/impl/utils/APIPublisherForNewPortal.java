@@ -77,7 +77,7 @@ public class APIPublisherForNewPortal {
         }
     }
 
-    public static void unpublish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
+    public static void unpublish(String tenantName, API api) {
         try {
             String baseUrl = APIUtil.getNewPortalURL();
             SSLConnectionSocketFactory sslsf = generateSSLSF();
@@ -87,7 +87,7 @@ public class APIPublisherForNewPortal {
                         + tenantName + ". Aborting unpublish operation in the new portal.");
                 return;
             }
-            unpublishAPI(baseUrl, apiTypeWrapper, orgId, sslsf);
+            unpublishAPI(baseUrl, api, orgId, sslsf);
         } catch (APIManagementException e) {
             log.error("Error while unpublishing API from new developer portal. Error: " + e.getMessage());
         }
@@ -110,18 +110,18 @@ public class APIPublisherForNewPortal {
         }
     }
 
-    private static void unpublishAPI(String baseUrl, ApiTypeWrapper apiTypeWrapper, String orgId,
+    private static void unpublishAPI(String baseUrl, API api, String orgId,
                                    SSLConnectionSocketFactory sslsf) throws APIManagementException {
         int statusCode = unpublishApi(
-                baseUrl + "/devportal/b2b/organizations/" + orgId + "/apis/" + apiTypeWrapper.getUuid(), sslsf);
+                baseUrl + "/devportal/b2b/organizations/" + orgId + "/apis/" + api.getId().getUUID(), sslsf);
 
         if (statusCode == 200) {
-            log.info("API " + apiTypeWrapper.getName() + " successfully unpublished from " + baseUrl);
+            log.info("API " + api.getId().getApiName() + " successfully unpublished from " + baseUrl);
         } else if (statusCode == 404) {
-            log.warn("API " + apiTypeWrapper.getName() + " is not available in "
+            log.warn("API " + api.getId().getApiName() + " is not available in "
                     + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
         } else {
-            log.error("Failed to unpublish API " + apiTypeWrapper.getName() + " from new portal. Status code: "
+            log.error("Failed to unpublish API " + api.getId().getApiName() + " from new portal. Status code: "
                     + statusCode);
         }
     }
