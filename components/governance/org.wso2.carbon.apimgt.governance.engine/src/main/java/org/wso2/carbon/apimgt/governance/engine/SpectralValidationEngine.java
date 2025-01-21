@@ -19,14 +19,18 @@
 package org.wso2.carbon.apimgt.governance.engine;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.model.EvaluationTarget;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.api.model.ValidationResult;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.io.InputStream;
@@ -54,20 +58,20 @@ public class SpectralValidationEngine implements ValidationEngine {
      */
     @Override
     public boolean isRulesetValid(Ruleset ruleset) throws GovernanceException {
-        // TODO: Add implementation to validate the ruleset
+        // TODO: Call the Spectral engine to validate the ruleset
         return true;
     }
 
     /**
-     * Extract rules from a ruleset content
+     * Extract rules from a ruleset
      *
-     * @param rulesetContent Ruleset content
+     * @param ruleset Ruleset
      * @return List of rules
      * @throws GovernanceException If an error occurs while extracting rules
      */
     @Override
-    public List<Rule> extractRulesFromRuleset(InputStream rulesetContent) throws GovernanceException {
-        String ruleContentString = GovernanceUtil.getStringContentFromInputStream(rulesetContent);
+    public List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws GovernanceException {
+        String ruleContentString = ruleset.getRulesetContent();
         Map<String, Object> contentMap = GovernanceUtil.getMapFromYAMLStringContent(ruleContentString);
         List<Rule> rulesList = new ArrayList<>();
 
@@ -109,4 +113,44 @@ public class SpectralValidationEngine implements ValidationEngine {
 
         return rulesList;
     }
+
+    /**
+     * Validate a target content against a ruleset
+     *
+     * @param target  Target content
+     * @param ruleset Ruleset
+     * @return List of validation results
+     * @throws GovernanceException If an error occurs while validating the target
+     */
+    @Override
+    public List<ValidationResult> validate(String target, Ruleset ruleset) throws GovernanceException {
+
+        // TODO: Call the Spectral engine to validate the target content against the ruleset
+        String validationResultJsonString = "";
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<ValidationResult> results = new ArrayList<>();
+
+        try {
+            // Parse JSON string to JsonNode
+            JsonNode jsonNode = objectMapper.readTree(validationResultJsonString);
+
+            // Convert JsonNode to list of Result objects
+            for (JsonNode node : jsonNode) {
+                ValidationResult result = new ValidationResult();
+                result.setResultId(GovernanceUtil.generateUUID());
+                result.setRuleCode(node.get("ruleName").asText());
+                result.setRuleValid(node.get("passed").asBoolean());
+                result.setValidatedPath(node.get("path").asText());
+                result.setRulesetId(ruleset.getId());
+                results.add(result);
+            }
+            return results;
+
+        } catch (JsonProcessingException e) {
+            throw new GovernanceException("Error while parsing validation result JSON string", e);
+        }
+    }
+
+
 }

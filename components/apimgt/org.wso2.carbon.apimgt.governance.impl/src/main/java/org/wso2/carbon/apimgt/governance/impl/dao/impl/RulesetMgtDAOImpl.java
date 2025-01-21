@@ -39,6 +39,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -81,11 +82,12 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     @Override
     public RulesetInfo createRuleset(String organization, Ruleset ruleset) throws GovernanceException {
 
-        InputStream rulesetContentStream = ruleset.getRulesetContent();
+        String rulesetContent = ruleset.getRulesetContent();
 
         String sqlQuery = SQLConstants.CREATE_RULESET;
         try (Connection connection = GovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
+             InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getBytes(StandardCharsets.UTF_8))) {
             try {
                 connection.setAutoCommit(false);
                 prepStmt.setString(1, ruleset.getId());
@@ -103,7 +105,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
 
                 ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                         .getValidationEngineService().getValidationEngine();
-                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset.getRulesetContent());
+                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
                 if (rules.size() > 0) {
                     addRules(ruleset.getId(), rules, connection);
                 } else {
@@ -115,7 +117,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 connection.rollback();
                 throw e;
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             if (e instanceof SQLIntegrityConstraintViolationException) {
                 if (getRulesetByName(organization, ruleset.getName()) != null) {
                     throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
@@ -367,14 +369,16 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      */
     @Override
     public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
-        InputStream rulesetContent = ruleset.getRulesetContent();
+        String rulesetContent = ruleset.getRulesetContent();
+
         try (Connection connection = GovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_RULESET)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_RULESET);
+             InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getBytes(StandardCharsets.UTF_8))) {
             try {
                 connection.setAutoCommit(false);
                 prepStmt.setString(1, ruleset.getName());
                 prepStmt.setString(2, ruleset.getDescription());
-                prepStmt.setBlob(3, rulesetContent);
+                prepStmt.setBlob(3, rulesetContentStream);
                 prepStmt.setString(4, String.valueOf(ruleset.getRuleCategory()));
                 prepStmt.setString(5, String.valueOf(ruleset.getRuleType()));
                 prepStmt.setString(6, String.valueOf(ruleset.getArtifactType()));
@@ -393,7 +397,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 // Insert updated rules.
                 ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                         .getValidationEngineService().getValidationEngine();
-                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset.getRulesetContent());
+                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
                 if (rules.size() > 0) {
                     addRules(ruleset.getId(), rules, connection);
                 } else {
@@ -405,7 +409,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 connection.rollback();
                 throw e;
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             throw new GovernanceException(GovernanceExceptionCodes.
                     ERROR_WHILE_UPDATING_RULESET, e, rulesetId, organization);
         }

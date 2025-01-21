@@ -181,4 +181,8 @@ public class SQLConstants {
     public static final String DELETE_GOV_EVALUATION_REQUEST = "DELETE FROM GOV_EVALUATION_REQUEST" +
             " WHERE REQUEST_ID = ?";
 
+    public static final String ADD_VALIDATION_RESULT = "INSERT INTO GOV_RESULT " +
+            "(RESULT_ID, ORGANIZATION, ARTIFACT_ID, POLICY_ID, RULESET_ID, RULE_CODE, VALIDATED_PATH, VALIDATION_RESULT) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
 }
