@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+import java.util.HashMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class APIPublisherForNewPortal {
@@ -60,6 +61,7 @@ public class APIPublisherForNewPortal {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final char[] trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
     private static final String trustStoreLocation = System.getProperty("javax.net.ssl.trustStore");
+    private static final Map<String, String> orgIdCache = new HashMap<>();
 
     public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
         try {
@@ -97,7 +99,7 @@ public class APIPublisherForNewPortal {
         try {
             String baseUrl = APIUtil.getNewPortalURL();
             SSLConnectionSocketFactory sslsf = generateSSLSF();
-            String orgId = getNewPortalOrgId(baseUrl + "/devportal/b2b/organizations/" + tenantName, sslsf);
+            String orgId = getOrgId(tenantName, baseUrl, sslsf);
             if (orgId.isEmpty()) {
                 log.warn("No organization found for tenant: "
                         + tenantName + ". Aborting unpublish operation in the new portal.");
@@ -182,12 +184,28 @@ public class APIPublisherForNewPortal {
 
     private static String fetchOrgIdOrCreateNew(String baseUrl, String tenantName, SSLConnectionSocketFactory sslsf)
             throws APIManagementException {
-        String orgId = getNewPortalOrgId(baseUrl + "/devportal/b2b/organizations/" + tenantName, sslsf);
+        String orgId = getOrgId(tenantName, baseUrl, sslsf);
 
         if (orgId.isEmpty()) {
             String newOrgInfo = generateNewOrgInfoForDeveloperPortal(tenantName);
             orgId = createNewOrg(baseUrl + "/devportal/b2b/organizations", newOrgInfo, sslsf);
         }
+        return orgId;
+    }
+
+    private static String getOrgId(String tenantName, String baseUrl, SSLConnectionSocketFactory sslsf)
+            throws APIManagementException {
+        if (orgIdCache.containsKey(tenantName)) {
+            // OrgID cache hit
+            return orgIdCache.get(tenantName);
+        }
+
+        String orgId = getNewPortalOrgId(baseUrl + "/devportal/b2b/organizations/" + tenantName, sslsf);
+
+        if (orgId != null && !orgId.isEmpty()) {
+            orgIdCache.put(tenantName, orgId);
+        }
+
         return orgId;
     }
 
