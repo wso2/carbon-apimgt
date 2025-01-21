@@ -375,6 +375,19 @@ public class GovernanceUtil {
         return isBlocking;
     }
 
+    /**
+     * Check if a blocking policy is available for the artifact
+     * @param artifactId
+     * @param organization
+     * @return
+     * @throws GovernanceException
+     */
+    public static boolean isBlockingPolicyAvailable(String artifactId, String organization)
+            throws GovernanceException {
+        List<String> policyIds = getApplicableGovPoliciesForArtifact(artifactId, GovernableState.API_CREATE, organization);
+        return isBlockingActionsPresent(policyIds, GovernableState.API_CREATE);
+    }
+
 
     /**
      * Get governable states for artifact

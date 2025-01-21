@@ -174,6 +174,10 @@ public class PublisherCommonUtils {
             prepareForUpdateSwagger(originalAPI.getUuid(), response, false, apiProvider, organization,
                     response.getParser(), apiToUpdate, generateSoapToRestSequences);
         }
+
+        log.info("******* Gov Check: UpdateAPIDefinition *******");
+        log.info(validationArtifact(originalAPI));
+
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
     }
@@ -194,6 +198,9 @@ public class PublisherCommonUtils {
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
 
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
+        log.info("******* Gov Check: PublisherCommonUtils updateApi *******");
+        log.info(validationArtifact(originalAPI));
+
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
@@ -1207,6 +1214,8 @@ public class PublisherCommonUtils {
         }
 
         //adding the api
+        log.info("******* Gov Check: PublisherCommonUtils addAPIWithGeneratedSwaggerDefinition *******");
+        log.info(validationArtifact(apiToAdd));
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;
     }
@@ -1740,6 +1749,8 @@ public class PublisherCommonUtils {
         //updating APi with the new AsyncAPI definition
         existingAPI.setAsyncApiDefinition(apiDefinition);
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
+        log.info("******* Gov Check: PublisherCommonUtils updateAsyncAPIDefinition *******");
+        log.info(validationArtifact(existingAPI));
         apiProvider.updateAPI(existingAPI, oldapi);
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId().getUUID(), organization);
@@ -1787,6 +1798,8 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
+        log.info("******* Gov Check: PublisherCommonUtils updateSwagger *******");
+        log.info(validationArtifact(existingAPI));
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
 
         //retrieves the updated swagger definition
@@ -1991,6 +2004,9 @@ public class PublisherCommonUtils {
         originalAPI.setUriTemplates(uriTemplates);
 
         apiProvider.saveGraphqlSchemaDefinition(originalAPI.getUuid(), schemaDefinition, originalAPI.getOrganization());
+        log.info("******* Gov Check: PublisherCommonUtils updateAsyncAPIDefinition *******");
+        log.info(validationArtifact(originalAPI));
+
         apiProvider.updateAPI(originalAPI, oldApi);
 
         return originalAPI;
@@ -2524,6 +2540,8 @@ public class PublisherCommonUtils {
         List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent);
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), organization);
         updatedAPI.setSoapToRestSequences(list);
+        log.info("******* Gov Check: PublisherCommonUtils updateAPIBySettingGenerateSequencesFromSwagger *******");
+        log.info(validationArtifact(updatedAPI));
         return apiProvider.updateAPI(updatedAPI, api);
     }
 
@@ -2664,7 +2682,8 @@ public class PublisherCommonUtils {
                         apiToAdd.getGatewayVendor())));
         apiToAdd.setOrganization(organization);
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
-
+        log.info("******* Gov Check: importAsyncAPIWithDefinition *******");
+        log.info(validationArtifact(apiToAdd));
         apiProvider.addAPI(apiToAdd);
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
     }
@@ -2709,5 +2728,18 @@ public class PublisherCommonUtils {
             }
         }
         return errorPropertyNames;
+    }
+
+    public static String validationArtifact(API api) {
+        try {
+            APIDTO dto = APIMappingUtil.fromAPItoDTO(api);
+            String apiDtoString = new ObjectMapper().writeValueAsString(dto);
+            return apiDtoString;
+        } catch (APIManagementException e) {
+            log.error("Error occurred while validating the API artifact", e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return "";
     }
 }

@@ -64,6 +64,18 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     }
 
     /**
+     * Check if a blocking policy is available for the artifact
+     * @param artifactId
+     * @param organization
+     * @return
+     * @throws GovernanceException
+     */
+    @Override
+    public boolean isBlockingPolicyAvailable(String artifactId, String organization) throws GovernanceException {
+        return GovernanceUtil.isBlockingPolicyAvailable(artifactId, organization);
+    }
+
+    /**
      * Evaluate compliance of the artifact asynchronously
      *
      * @param artifactId   Artifact ID

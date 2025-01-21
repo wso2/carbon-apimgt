@@ -48,6 +48,15 @@ public interface APIMGovernanceService {
     boolean checkForBlockingActions(List<String> policyIds, GovernableState governableState) throws GovernanceException;
 
     /**
+     * Check if a blocking policy is available for the artifact
+     * @param artifactId
+     * @param organization
+     * @return
+     * @throws GovernanceException
+     */
+    boolean isBlockingPolicyAvailable(String artifactId, String organization) throws GovernanceException;
+
+    /**
      * Evaluate compliance of the artifact asynchronously
      *
      * @param artifactId   Artifact ID
@@ -58,4 +67,6 @@ public interface APIMGovernanceService {
     void evaluateComplianceAsync(String artifactId, ArtifactType artifactType,
                                  List<String> policyIds,
                                  String organization) throws GovernanceException;
+
+
 }

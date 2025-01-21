@@ -91,6 +91,7 @@ import java.nio.file.Files;
 import java.util.*;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
+import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.validationArtifact;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -603,6 +604,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         // TODO: Add scopes
         updatedAPI.setOrganization(organization);
         try {
+            log.info("******* Gov Check: UpdateTopics *******");
+            log.info(validationArtifact(updatedAPI));
             apiProvider.updateAPI(updatedAPI, existingAPI);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
@@ -2512,6 +2515,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         }
                     }
                     API originalAPI = provider.getAPIbyUUID(apiId, organization);
+                    log.info("******* Gov Check: updateAPIResourcePoliciesByPolicyId *******");
+                    log.info(validationArtifact(api));
                     provider.updateAPI(api, originalAPI);
                     SequenceUtils.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
                             body.getContent());
@@ -3129,6 +3134,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
             if (isSoapAPI) {
+                log.info("******* Gov Check: importWSDLDefinition *******");
+                log.info(validationArtifact(apiToAdd));
                 createdApi = importSOAPAPI(validationResponse.getWsdlProcessor().getWSDL(), fileDetail, url,
                         apiToAdd, organization, null);
             } else if (isSoapToRestConvertedAPI) {
@@ -3190,6 +3197,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             //adding the api
+            log.info("******* Gov Check: importSOAPAPI *******");
+            log.info(validationArtifact(apiToAdd));
             apiProvider.addAPI(apiToAdd);
 
             if (StringUtils.isNotBlank(url)) {
@@ -3234,6 +3243,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //adding the api
+            log.info("******* Gov Check: importSOAPToRESTAPI *******");
+            log.info(validationArtifact(apiToAdd));
             API createdApi = apiProvider.addAPI(apiToAdd);
             String filename = null;
             if (fileDetail != null) {
@@ -3399,6 +3410,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                             null, service, organization);
                 }
             } else {
+                log.info("******* Gov Check: createNewAPIVersion *******");
+                //todo : need to verify
                 API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, organization);
                 if (APIConstants.API_TYPE_SOAPTOREST.equals(versionedAPI.getType())) {
                     updateSwagger(versionedAPI.getUuid(), versionedAPI.getSwaggerDefinition(), organization);
@@ -3554,6 +3567,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setSwaggerDefinition(apiDefinition);
 
             //adding the api
+            log.info("******* Gov Check:  importGraphQLSchema *******");
+            log.info(validationArtifact(apiToAdd));
+
             API createdApi = apiProvider.addAPI(apiToAdd);
 
             apiProvider.saveGraphqlSchemaDefinition(createdApi.getUuid(), schema, organization);
@@ -3979,6 +3995,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     environments, environment, displayOnDevportal, vhost, true);
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
+        log.info("******* Gov Check: deployAPIRevision *******");
+        //todo: no APIDTO, has to take from the DB
         apiProvider.deployAPIRevision(apiId, revisionId, apiRevisionDeployments, organization);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionsDeploymentList(apiId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
@@ -4371,6 +4389,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiToAdd.setServiceInfo("md5", service.getMd5());
                 apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
                         .getServiceUrl(), null));
+                log.info("******* Gov Check: importServiceFromCatalog *******");
+                log.info(validationArtifact(apiToAdd));
                 API api = importSOAPAPI(service.getEndpointDef(), null, null,
                         apiToAdd, organization, service);
                 createdApiDTO = APIMappingUtil.fromAPItoDTO(api);
@@ -4452,6 +4472,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 api.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(),
                         protocol));
             }
+            log.info("******* Gov Check: reimportServiceFromCatalog *******");
+            log.info(validationArtifact(api));
             API updatedApi = apiProvider.updateAPI(api, originalAPI);
             if (validationAPIResponse != null) {
                 PublisherCommonUtils.updateAPIDefinition(apiId, validationAPIResponse, service, organization);
@@ -4521,6 +4543,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
+        log.info("******* Gov Check: importAPIDefinition *******");
+        log.info(validationArtifact(apiToAdd));
         API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
                 service, validationResponse, isServiceAPI, syncOperations);
         return APIMappingUtil.fromAPItoDTO(addedAPI);
