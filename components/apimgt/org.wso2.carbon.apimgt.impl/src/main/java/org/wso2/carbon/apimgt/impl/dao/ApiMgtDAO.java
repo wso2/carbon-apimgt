@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -10294,6 +10295,120 @@ public class ApiMgtDAO {
         }
     }
 
+    
+    public void addOrganization(OrganizationDetailsDTO organizationDTO) throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn
+                    .prepareStatement(SQLConstants.OrganizationSqlConstants.ADD_ORGANIZATION)) {
+                preparedStatement.setString(1, organizationDTO.getOrganizationId());
+                preparedStatement.setString(2, organizationDTO.getName());
+                preparedStatement.setString(3, organizationDTO.getParentOrganizationId());
+                preparedStatement.setString(4, organizationDTO.getDescription());
+                preparedStatement.setString(5, organizationDTO.getTenantDomain());
+                preparedStatement.executeUpdate();
+                conn.commit();
+            }
+        } catch (SQLException e) {
+            String message = "Error while saving organization " + organizationDTO.getName()
+                    + " in tenant " + organizationDTO.getTenantDomain();
+            handleException(message, e);
+        }
+    }
+    
+    public List<OrganizationDetailsDTO> getOrganizations(String parentOrganizationId, String tenantDomain)
+            throws APIManagementException {
+
+        List<OrganizationDetailsDTO> organizationList = new ArrayList<OrganizationDetailsDTO>();
+        String query;
+        String param;
+        if (!StringUtils.isEmpty(parentOrganizationId)) {
+            query = SQLConstants.OrganizationSqlConstants.GET_ORGANIZATIONS_BY_PARENT_ORG_ID;
+            param = parentOrganizationId;
+        } else {
+            query = SQLConstants.OrganizationSqlConstants.GET_ORGANIZATIONS_BY_TENAND_DOMAIN;
+            param = tenantDomain;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection
+                        .prepareStatement(query)) {
+            prepStmt.setString(1, param);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    OrganizationDetailsDTO organization = new OrganizationDetailsDTO();
+                    organization.setOrganizationId(resultSet.getString("ORG_UUID"));
+                    organization.setParentOrganizationId(resultSet.getString("PARENT_ORG_UUID"));
+                    organization.setName(resultSet.getString("DISPLAY_NAME"));
+                    organization.setDescription(resultSet.getString("DESCRIPTION"));
+                    organization.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                    organizationList.add(organization);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get organizations : ", e);
+        }
+        return organizationList;
+    }
+    
+    public OrganizationDetailsDTO getOrganizationDetails(String organizationId, String tenantDomain)
+            throws APIManagementException {
+
+        OrganizationDetailsDTO organization = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection
+                        .prepareStatement(SQLConstants.OrganizationSqlConstants.GET_ORGANIZATION_BY_ORG_ID);) {
+            prepStmt.setString(1, organizationId);
+            prepStmt.setString(2, tenantDomain);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                if (resultSet.next()) {
+                    organization = new OrganizationDetailsDTO();
+                    organization.setOrganizationId(resultSet.getString("ORG_UUID"));
+                    organization.setParentOrganizationId(resultSet.getString("PARENT_ORG_UUID"));
+                    organization.setName(resultSet.getString("DISPLAY_NAME"));
+                    organization.setDescription(resultSet.getString("DESCRIPTION"));
+                    organization.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get organization for organization Id : " + organizationId, e);
+        }
+        return organization;
+    }
+    
+    public void deleteOrganizationDetails(String organizationId, String tenantDomain)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection
+                        .prepareStatement(SQLConstants.OrganizationSqlConstants.DELETE_ORGANIZATION);) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, organizationId);
+            prepStmt.setString(2, tenantDomain);
+            prepStmt.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to delete organization Id : " + organizationId, e);
+        }
+    }
+    
+    public void updateOrganizationDetails(OrganizationDetailsDTO organizationDetailsDTO) throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement preparedStatement = conn
+                    .prepareStatement(SQLConstants.OrganizationSqlConstants.UPDATE_ORGANIZATION)) {
+                preparedStatement.setString(1, organizationDetailsDTO.getName());
+                preparedStatement.setString(2, organizationDetailsDTO.getDescription());
+                preparedStatement.setString(3, organizationDetailsDTO.getOrganizationId());
+                preparedStatement.executeUpdate();
+                conn.commit();
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete organization Id : " + "Error while Updating organization details for "
+                    + organizationDetailsDTO.getOrganizationId(), e);
+        }
+    }
+    
     public API getLightWeightAPIInfoByAPIIdentifier(APIIdentifier apiIdentifier, String organization)
             throws APIManagementException {
 
