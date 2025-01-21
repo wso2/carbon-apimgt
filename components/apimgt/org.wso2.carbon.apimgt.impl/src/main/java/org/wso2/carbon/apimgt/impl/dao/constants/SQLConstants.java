@@ -3828,6 +3828,27 @@ public class SQLConstants {
                         "AM_APPLICATION_KEY_MAPPING AAKM WHERE APPLICATION_ID=? AND AAKM.UUID = ? " +
                         "AND AKM.UUID=AAKM.KEY_MANAGER";
     }
+    
+    public static class OrganizationSqlConstants {
+        public static final String ADD_ORGANIZATION =
+                " INSERT INTO AM_ORGANIZATION_MAPPING (ORG_UUID,DISPLAY_NAME,PARENT_ORG_UUID,DESCRIPTION,TENANT_DOMAIN) " +
+                "VALUES (?,?,?,?,?)";
+
+        public static final String UPDATE_ORGANIZATION =
+                "UPDATE AM_ORGANIZATION_MAPPING SET DISPLAY_NAME = ?, DESCRIPTION = ? WHERE ORG_UUID = ?";
+
+        public static final String DELETE_ORGANIZATION =
+                "DELETE FROM AM_ORGANIZATION_MAPPING WHERE ORG_UUID = ? AND TENANT_DOMAIN=?";
+
+        public static final String GET_ORGANIZATIONS_BY_PARENT_ORG_ID =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE PARENT_ORG_UUID=?";
+        
+        public static final String GET_ORGANIZATION_BY_ORG_ID =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE ORG_UUID=? AND TENANT_DOMAIN=?";
+        
+        public static final String GET_ORGANIZATIONS_BY_TENAND_DOMAIN =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE TENANT_DOMAIN=?";
+    }
 
     /**
      * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
