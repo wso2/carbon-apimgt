@@ -24,6 +24,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -61,7 +62,6 @@ public class APIPublisherForNewPortal {
     private static final String trustStoreLocation = System.getProperty("javax.net.ssl.trustStore");
 
     public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
-
         try {
             String baseUrl = APIUtil.getNewPortalURL();
             SSLConnectionSocketFactory sslsf = generateSSLSF();
@@ -72,6 +72,22 @@ public class APIPublisherForNewPortal {
                 return;
             }
             publishAPI(baseUrl, apiTypeWrapper, tenantName, orgId, sslsf);
+        } catch (APIManagementException e) {
+            log.error("Error while publishing API for new developer portal. Error: " + e.getMessage());
+        }
+    }
+
+    public static void update(String tenantName, ApiTypeWrapper apiTypeWrapper) {
+        try {
+            String baseUrl = APIUtil.getNewPortalURL();
+            SSLConnectionSocketFactory sslsf = generateSSLSF();
+            String orgId = fetchOrgIdOrCreateNew(baseUrl, tenantName, sslsf);
+            if (orgId.isEmpty()) {
+                log.error("Organization for tenant cannot be found and failed to create an organization for tenant: "
+                        + tenantName + ". Unable to proceed with updating API.");
+                return;
+            }
+            updateAPI(baseUrl, apiTypeWrapper, tenantName, orgId, sslsf);
         } catch (APIManagementException e) {
             log.error("Error while publishing API for new developer portal. Error: " + e.getMessage());
         }
@@ -107,6 +123,44 @@ public class APIPublisherForNewPortal {
         } else {
             log.error("Failed to publish API " + apiTypeWrapper.getName() + " to the new portal. Status code: "
                     + statusCode);
+        }
+    }
+
+    private static void updateAPI(String baseUrl, ApiTypeWrapper apiTypeWrapper, String tenantName, String orgId,
+                                   SSLConnectionSocketFactory sslsf) throws APIManagementException {
+        API api = apiTypeWrapper.getApi();
+        String apiDefinition = ApisApiServiceImplUtils.getApiDefinition(api);
+        String apiMetaData = getApiMetaData(tenantName, apiTypeWrapper);
+
+        // TODO: THIS REST IS NOT FINALISED. WE NEED TO COME UP WITH SIMILAR REST FROM DEV PORTAL
+        // TODO: THAT SHOULD RETURN 200 IF API IS AVAILABLE AND 404 IF API IS NOT AVAILABLE FOR GIVEN REFERENCE_ID
+        int statusCodeOfAPIAvailability = getAPIByReferenceId(baseUrl + "/devportal/b2b/organizations/"
+                + orgId + "/apis/" + apiTypeWrapper.getUuid(), sslsf);
+
+        if (statusCodeOfAPIAvailability == 200) {
+            // API is available, hence update API
+            int statusCodeOfUpdatingAPI = updateApiMetadata(baseUrl + "/devportal/b2b/organizations/"
+                            + orgId + "/apis/" + apiTypeWrapper.getUuid(),
+                    apiMetaData, apiDefinition, sslsf);
+            if (statusCodeOfUpdatingAPI == 200) {
+                log.info("API " + apiTypeWrapper.getName() + " successfully updated in " + baseUrl);
+            } else {
+                log.error("Failed to update API " + apiTypeWrapper.getName() + " in the new portal. Status code: "
+                        + statusCodeOfUpdatingAPI);
+            }
+        } else if (statusCodeOfAPIAvailability == 404) {
+            // API is not available, hence publish API
+            int statusCodeOfPublishingAPI = publishApiMetadata(baseUrl +
+                            "/devportal/b2b/organizations/" + orgId + "/apis", apiMetaData, apiDefinition, sslsf);
+            if (statusCodeOfPublishingAPI == 201) {
+                log.info("API " + apiTypeWrapper.getName() + " successfully published to " + baseUrl);
+            } else {
+                log.error("Failed to publish API " + apiTypeWrapper.getName() + " to the new portal. Status code: "
+                        + statusCodeOfPublishingAPI);
+            }
+        } else {
+            log.error("Failed to find to update or publish API " + apiTypeWrapper.getName() +
+                    " to the new portal. Status code: " + statusCodeOfAPIAvailability);
         }
     }
 
@@ -227,6 +281,16 @@ public class APIPublisherForNewPortal {
 
     // HTTPS Request Related Methods
 
+    private static int getAPIByReferenceId(String apiUrl, SSLConnectionSocketFactory sslsf)
+            throws APIManagementException {
+        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+             CloseableHttpResponse response = httpClient.execute(new HttpGet(apiUrl))) {
+            return response.getStatusLine().getStatusCode();
+        } catch (IOException e) {
+            throw new APIManagementException("Error retrieving organization ID: " + e.getMessage(), e);
+        }
+    }
+
     private static String getNewPortalOrgId(String apiUrl, SSLConnectionSocketFactory sslsf)
             throws APIManagementException {
         try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
@@ -263,6 +327,24 @@ public class APIPublisherForNewPortal {
             }
         } catch (IOException e) {
             throw new APIManagementException("Error sending API metadata and definition: " + e.getMessage(), e);
+        }
+    }
+
+    public static int updateApiMetadata(String apiUrl, String apiMetadata, String apiDefinition,
+                                         SSLConnectionSocketFactory sslsf) throws APIManagementException {
+        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+            HttpPut httpPut = new HttpPut(apiUrl);
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.addTextBody("apiMetadata", apiMetadata, ContentType.APPLICATION_JSON);
+            builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON, "apiDefinition.json");
+
+            httpPut.setEntity(builder.build());
+
+            try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
+                return response.getStatusLine().getStatusCode();
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error updating API metadata and definition: " + e.getMessage(), e);
         }
     }
 
