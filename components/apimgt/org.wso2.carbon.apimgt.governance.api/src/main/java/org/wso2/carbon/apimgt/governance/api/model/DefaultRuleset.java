@@ -96,15 +96,15 @@ public class DefaultRuleset {
         this.artifactType = artifactType;
     }
 
-    public InputStream getRulesetContentAsInputStream() throws GovernanceException {
+    public String getRulesetContentString() throws GovernanceException {
         ObjectMapper objectMapper = new ObjectMapper();
+        String rulesetContentString;
         try {
-            String rulesetContentString = objectMapper.writeValueAsString(rulesetContent);
-            return new ByteArrayInputStream(rulesetContentString.getBytes());
+            rulesetContentString = objectMapper.writeValueAsString(rulesetContent);
         } catch (JsonProcessingException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT);
         }
-
+        return rulesetContentString;
     }
 
     public String getRuleCategory() {

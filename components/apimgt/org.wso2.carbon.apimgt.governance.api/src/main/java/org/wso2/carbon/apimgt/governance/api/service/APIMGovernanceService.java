@@ -25,27 +25,22 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 
 import java.util.List;
 
+/**
+ * This class represents the Governance Service, which is responsible for managing governance related operations
+ */
 public interface APIMGovernanceService {
 
     /**
-     * Get IDs of applicable policies for the artifact
+     * Check if there are any policies with blocking actions for the artifact
      *
      * @param artifactId   Artifact ID
      * @param state        State to be governed
      * @param organization Organization
-     * @return List of policy IDs
+     * @return True if there are policies with blocking actions, False otherwise
+     * @throws GovernanceException If an error occurs while checking for policies with blocking actions
      */
-    List<String> getApplicablePolicies(String artifactId,
-                                       GovernableState state, String organization) throws GovernanceException;
-
-    /**
-     * Check if there are any blocking actions for the artifact based on the policies
-     *
-     * @param policyIds       List of policy IDs to evaluate
-     * @param governableState State to be governed
-     * @return True if there are blocking actions, False otherwise
-     */
-    boolean checkForBlockingActions(List<String> policyIds, GovernableState governableState) throws GovernanceException;
+    boolean isPoliciesWithBlockingActionExist(String artifactId,
+                                              GovernableState state, String organization) throws GovernanceException;
 
     /**
      * Check if a blocking policy is available for the artifact
@@ -58,14 +53,14 @@ public interface APIMGovernanceService {
 
     /**
      * Evaluate compliance of the artifact asynchronously
-     *
-     * @param artifactId   Artifact ID
+     * @param artifactId Artifact ID
      * @param artifactType Artifact type
-     * @param policyIds    List of policy IDs to evaluate
+     * @param state State to be governed
      * @param organization Organization
+     * @throws GovernanceException If an error occurs while evaluating compliance
      */
     void evaluateComplianceAsync(String artifactId, ArtifactType artifactType,
-                                 List<String> policyIds,
+                                 GovernableState state,
                                  String organization) throws GovernanceException;
 
 

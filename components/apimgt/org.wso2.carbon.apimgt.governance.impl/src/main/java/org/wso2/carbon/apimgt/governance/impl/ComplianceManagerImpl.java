@@ -20,18 +20,24 @@ package org.wso2.carbon.apimgt.governance.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the Compliance Manager, which is responsible for managing compliance related operations
@@ -60,19 +66,43 @@ public class ComplianceManagerImpl implements ComplianceManager {
     @Override
     public void handlePolicyChangeEvent(String policyId, String organization) throws GovernanceException {
 
-        // Get labels for policy
-        List<String> labels = governancePolicyMgtDAO.getLabelsByPolicyId(policyId);
-        List<String> artifacts = new ArrayList<>();
+        // Get the policy and its labels and associated governable states
 
-        for (String label : labels) {
-            // TODO: Get artifacts by label and state from APIM
-        }
+        GovernancePolicy policy = governancePolicyMgtDAO.getGovernancePolicyByID(organization, policyId);
+        List<String> labels = policy.getLabels();
 
-        for (String artifactId : artifacts) {
-            ArtifactType artifactType = ArtifactType.REST_API; //TODO: Get artifact type from APIM
+        List<GovernableState> governableStates = policy.getGovernableStates();
+
+        // Get artifacts that should be governed by the policy as a Map of artifact ID and artifact type
+        Map<String, String> artifacts = new HashMap<>();
+        artifacts.putAll(getAPIArtifactsByLabelsAndGovernableState(labels, governableStates));
+
+        for (Map.Entry<String, String> artifact : artifacts.entrySet()) {
+            String artifactId = artifact.getKey();
+            ArtifactType artifactType = ArtifactType.fromString(artifact.getValue());
             complianceMgtDAO.addComplianceEvaluationRequest(artifactId, artifactType,
                     policyId, organization);
         }
+    }
+
+    /**
+     * Get API Artifacts by Labels and Governable State
+     *
+     * @param labels           List of labels
+     * @param governableStates List of governable states
+     * @return Map of artifact ID and artifact type
+     */
+    private Map<String, String> getAPIArtifactsByLabelsAndGovernableState(List<String> labels,
+                                                                          List<GovernableState> governableStates) {
+        Map<String, String> apiIdTypeMap = new HashMap<>();
+        List<String> correspondingAPIStates =
+                APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
+        for (String label : labels) {
+            // TODO: Get artifacts by label
+            // TODO: Filter APIs from state
+            //TODO: Get artifact type from APIM
+        }
+        return apiIdTypeMap;
     }
 
     /**
