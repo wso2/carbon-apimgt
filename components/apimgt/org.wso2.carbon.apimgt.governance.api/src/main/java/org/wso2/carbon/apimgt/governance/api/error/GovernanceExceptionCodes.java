@@ -125,8 +125,9 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUEST(501004, "Error while deleting governance evaluation request.",
             500, "Error while deleting governance evaluation request with ID: %s"),
 
-    // Linting related codes
-    ERROR_WHILE_SAVING_LINTING_RESULT(601001, "Error while saving linting result.", 500, "Error while saving linting result for endpoint: %s", true),
+    // Governance Results related codes
+    ERROR_WHILE_SAVING_GOVERNANCE_RESULT(601001, "Error while saving governance result.", 500, "Error while saving " +
+            "governance result for artifact: %s", true),
     ERROR_WHILE_ADDING_LINTING_RUN(601002, "Error while adding linting run.", 500, "Error while adding linting run for endpoint: %s policy: %s ruleset: %s", true),
     LINTING_RUN_IN_PROGRESS(601003, "There is currently a linting run in progress.", 503, "There is currently a linting run in progress for endpoint: %s policy: %s ruleset: %s"),
     ERROR_WHILE_UPDATING_LINTING_RUN(601004, "Error while updating linting run.", 500, "Error while updating linting run for endpoint: %s policy: %s ruleset: %s", true),
@@ -141,9 +142,10 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     API_DEFINITION_NOT_FOUND(701003, "API definition not found.", 404, "API definition not found for api: %s in the " +
             "organization: %s"),
     API_DETAILS_NOT_FOUND(701004, "API details not found.", 404, "API details not found for endpoint: %s in the organization: %s"),
-    ERROR_WHILE_EXTRACTING_SWAGGER_CONTENT(701005, "Error while extracting swagger content.", 500, "Error while " +
-            "extracting swagger content from zip for the api : %s", true),
-    ERROR_WHILE_EXTRACTING_API_DETAILS(701006, "Error while extracting api details.", 500, "Error while extracting api details from zip for the endpoint: %s", true),
+    ERROR_WHILE_EXTRACTING_API_DEFINITION(701005, "Error while extracting API Definition content.", 500, "Error " +
+            "while extracting API definition content from zip for the api : %s", true),
+    ERROR_WHILE_EXTRACTING_API_METADATA(701006, "Error while extracting api details.", 500, "Error while extracting " +
+            "api details from zip for the api: %s", true),
     ERROR_WHILE_GETTING_API_LIST(701007, "Error while getting API list.", 500, "Error while getting API list in the " +
             "organization: %s", true),
     ENDPOINT_NOT_FOUND_IN_APIM(701008, "Endpoint not found.", 404, "Endpoint can not be found on APIM",

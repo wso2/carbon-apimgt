@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.EvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.EvaluationStatus;
+import org.wso2.carbon.apimgt.governance.api.model.ValidationResult;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
@@ -161,6 +162,31 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes
                     .ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUEST,
                     e, requestId);
+        }
+    }
+
+    /**
+     * Add a validation result
+     *
+     * @param validationResult Validation result
+     * @throws GovernanceException If an error occurs while adding the validation result
+     */
+    @Override
+    public void addValidationResult(ValidationResult validationResult) throws GovernanceException {
+        String SQLQuery = SQLConstants.ADD_VALIDATION_RESULT;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, validationResult.getResultId());
+            prepStmnt.setString(2, validationResult.getOrganization());
+            prepStmnt.setString(3, validationResult.getArtifactId());
+            prepStmnt.setString(4, validationResult.getPolicyId());
+            prepStmnt.setString(5, validationResult.getRulesetId());
+            prepStmnt.setString(6, validationResult.getRuleCode());
+            prepStmnt.setInt(7, validationResult.isRuleValid() ? 1 : 0);
+            prepStmnt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SAVING_GOVERNANCE_RESULT,
+                    e, validationResult.getArtifactId());
         }
     }
 

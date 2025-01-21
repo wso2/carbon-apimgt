@@ -694,7 +694,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     Ruleset ruleset = new Ruleset();
                     ruleset.setId(rs.getString("RULESET_ID"));
                     byte[] rulesetContent = rs.getBytes("RULESET_CONTENT");
-                    ruleset.setRulesetContent(new ByteArrayInputStream(rulesetContent));
+                    ruleset.setRulesetContent(new String(rulesetContent));
                     ruleset.setRuleCategory(RuleCategory.fromString(
                             rs.getString("RULE_CATEGORY")));
                     ruleset.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));

@@ -36,46 +36,39 @@ import java.util.List;
 public class APIMGovernanceServiceImpl implements APIMGovernanceService {
 
     /**
-     * Get IDs of applicable policies for the artifact
+     * Check if there are any policies with blocking actions for the artifact
      *
      * @param artifactId   Artifact ID
      * @param state        State to be governed
      * @param organization Organization
-     * @return List of policy IDs
+     * @return True if there are policies with blocking actions, False otherwise
+     * @throws GovernanceException If an error occurs while checking for policies with blocking actions
      */
     @Override
-    public List<String> getApplicablePolicies(String artifactId, GovernableState state, String organization)
+    public boolean isPoliciesWithBlockingActionExist(String artifactId, GovernableState state, String organization)
             throws GovernanceException {
-        return GovernanceUtil.getApplicableGovPoliciesForArtifact(artifactId, state,
+        List<String> applicablePolicyIds = GovernanceUtil.getApplicableGovPoliciesForArtifact(artifactId, state,
                 organization);
+        return GovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state);
     }
 
-    /**
-     * Check if there are any blocking actions for the artifact based on the policies
-     *
-     * @param policyIds       List of policy IDs to evaluate
-     * @param governableState State to be governed
-     * @return True if there are blocking actions, False otherwise
-     */
-    @Override
-    public boolean checkForBlockingActions(List<String> policyIds, GovernableState governableState) throws
-            GovernanceException {
-        return GovernanceUtil.isBlockingActionsPresent(policyIds, governableState);
-    }
 
     /**
      * Evaluate compliance of the artifact asynchronously
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact type
-     * @param policyIds    List of policy IDs to evaluate
+     * @param state        State to be governed
      * @param organization Organization
+     * @throws GovernanceException If an error occurs while evaluating compliance
      */
     @Override
     public void evaluateComplianceAsync(String artifactId, ArtifactType artifactType,
-                                        List<String> policyIds, String organization) throws
+                                        GovernableState state, String organization) throws
             GovernanceException {
+        List<String> applicablePolicyIds = GovernanceUtil.getApplicableGovPoliciesForArtifact(artifactId,
+                state, organization);
         new ComplianceManagerImpl().handleComplianceEvaluationAsync
-                (artifactId, artifactType, policyIds, organization);
+                (artifactId, artifactType, applicablePolicyIds, organization);
     }
 }
