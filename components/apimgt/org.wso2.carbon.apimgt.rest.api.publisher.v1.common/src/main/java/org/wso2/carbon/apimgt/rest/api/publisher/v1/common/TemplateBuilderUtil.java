@@ -674,7 +674,8 @@ public class TemplateBuilderUtil {
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(APIProduct apiProduct, Environment environment,
-                                                      String tenantDomain, String extractedFolderPath)
+            String tenantDomain, String extractedFolderPath,
+            APIDefinitionValidationResponse apiDefinitionValidationResponse)
             throws APIManagementException, XMLStreamException, APITemplateException {
 
         List<ClientCertificateDTO> clientCertificatesDTOListProduction =
@@ -683,12 +684,33 @@ public class TemplateBuilderUtil {
                 ImportUtils.retrieveClientCertificates(extractedFolderPath, APIConstants.API_KEY_TYPE_SANDBOX);
         Map<String, APIDTO> apidtoMap = retrieveAssociatedApis(extractedFolderPath);
         Map<String, APIDTO> associatedAPIsMap = convertAPIIdToDto(apidtoMap.values());
+        Set<URITemplate> uriTemplates = Collections.emptySet();
+        if (apiDefinitionValidationResponse.isValid()) {
+            APIDefinition parser = apiDefinitionValidationResponse.getParser();
+            String definition = apiDefinitionValidationResponse.getJsonContent();
+            if (parser != null) {
+                uriTemplates = parser.getURITemplates(definition);
+            }
+        }
+
         for (APIProductResource productResource : apiProduct.getProductResources()) {
             String apiId = productResource.getApiId();
             APIDTO apidto = associatedAPIsMap.get(apiId);
             if (apidto != null) {
                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
                 productResource.setApiIdentifier(api.getId());
+                if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+                    // Sync URITemplate mediation scripts if matches are found
+                    for (URITemplate uriTemplate : uriTemplates) {
+                        URITemplate template = productResource.getUriTemplate();
+                        if (template.getHTTPVerb().equalsIgnoreCase(uriTemplate.getHTTPVerb()) &&
+                                template.getUriTemplate().equals(uriTemplate.getUriTemplate())) {
+                            template.setMediationScript(uriTemplate.getMediationScript());
+                            template.setMediationScripts(uriTemplate.getHTTPVerb(), uriTemplate.getMediationScript());
+                            break;
+                        }
+                    }
+                }
                 if (api.isAdvertiseOnly()) {
                     productResource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
                 } else {
@@ -762,8 +784,9 @@ public class TemplateBuilderUtil {
             // check the endpoint type
             if (!StringUtils.isEmpty(api.getEndpointConfig())) {
                 JsonObject endpointConfObj = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-                if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                        endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+                if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                        .getAsString()) && !APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(
+                        api.getImplementation())) {
                     addEndpoints(api, apiTemplateBuilder, productAPIDto);
                 }
             } else {
