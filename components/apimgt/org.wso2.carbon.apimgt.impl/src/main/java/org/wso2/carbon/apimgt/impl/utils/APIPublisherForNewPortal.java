@@ -41,13 +41,11 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 
-import javax.net.ssl.SSLContext;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
-import java.security.cert.Certificate;
 import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +57,6 @@ public class APIPublisherForNewPortal {
 
     private static final Log log = LogFactory.getLog(APIPublisherForNewPortal.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final char[] trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
-    private static final String trustStoreLocation = System.getProperty("javax.net.ssl.trustStore");
     private static final Map<String, String> orgIdCache = new HashMap<>();
 
     public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
@@ -91,7 +87,7 @@ public class APIPublisherForNewPortal {
             }
             updateAPI(baseUrl, apiTypeWrapper, tenantName, orgId, sslsf);
         } catch (APIManagementException e) {
-            log.error("Error while publishing API for new developer portal. Error: " + e.getMessage());
+            log.error("Error while updating API for new developer portal. Error: " + e.getMessage());
         }
     }
 
@@ -397,27 +393,32 @@ public class APIPublisherForNewPortal {
         }
     }
 
-    // Certificate Related Methods
-
     private static SSLConnectionSocketFactory generateSSLSF() throws APIManagementException {
-        // TODO: This section is not finalized yet
-        Certificate cert = SigningUtil.getPublicCertificate(-1234);
-        PrivateKey privateKey = SigningUtil.getSigningKey(-1234);
-
-        return new SSLConnectionSocketFactory(configureSSLContext(cert, privateKey));
-    }
-
-    private static SSLContext configureSSLContext(Certificate cert, PrivateKey privateKey) throws APIManagementException {
         try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null, null);
-            keyStore.setKeyEntry("key", privateKey, null, new Certificate[]{cert});
+            Map<String, String> serverSecurityStores = APIUtil.getServerSecurityStores();
 
-            return SSLContexts.custom()
-                    .loadKeyMaterial(keyStore, null)
-//                  .loadTrustMaterial((chain, authType) -> true)
-                    .loadTrustMaterial(new File(trustStoreLocation), trustStorePassword)
-                    .build();
+            KeyStore keyStore;
+            String keyStoreType = serverSecurityStores.get("keyStoreType");
+            if (keyStoreType != null) {
+                keyStore = KeyStore.getInstance(keyStoreType);
+            } else {
+                keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            }
+
+            try (FileInputStream keyStoreStream = new FileInputStream(serverSecurityStores.get("keyStoreLocation"))) {
+                keyStore.load(keyStoreStream, serverSecurityStores.get("keyStorePassword").toCharArray());
+            }
+            return new SSLConnectionSocketFactory(
+                    SSLContexts.custom()
+                            .loadKeyMaterial(
+                                    keyStore,
+                                    serverSecurityStores.get("keyPassword").toCharArray(),
+                                    (aliases, socket) -> serverSecurityStores.get("keyAlias"))
+                            .loadTrustMaterial(
+                                    new File(serverSecurityStores.get("trustStoreLocation")),
+                                    serverSecurityStores.get("trustStorePassword").toCharArray())
+                            .build()
+            );
         } catch (GeneralSecurityException | IOException e) {
             throw new APIManagementException(e);
         }
