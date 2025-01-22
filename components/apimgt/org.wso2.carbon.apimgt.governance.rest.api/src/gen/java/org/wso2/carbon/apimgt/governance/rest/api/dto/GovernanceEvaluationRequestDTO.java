@@ -30,8 +30,6 @@ public class GovernanceEvaluationRequestDTO   {
     @XmlEnum(String.class)
     public enum ArtifactTypeEnum {
         REST_API("REST_API"),
-        SOAP_API("SOAP_API"),
-        GRAPHQL_API("GRAPHQL_API"),
         ASYNC_API("ASYNC_API");
         private String value;
 
@@ -59,7 +57,7 @@ return null;
         }
     } 
     private ArtifactTypeEnum artifactType = null;
-    private File artifactZip = null;
+    private File targetFile = null;
 
           @XmlType(name="GovernableStateEnum")
     @XmlEnum(String.class)
@@ -134,21 +132,21 @@ return null;
   }
 
   /**
-   * The zip of the artifact project.
+   * The file to be evaluated. Required only in blocking scenario.
    **/
-  public GovernanceEvaluationRequestDTO artifactZip(File artifactZip) {
-    this.artifactZip = artifactZip;
+  public GovernanceEvaluationRequestDTO targetFile(File targetFile) {
+    this.targetFile = targetFile;
     return this;
   }
 
   
-  @ApiModelProperty(value = "The zip of the artifact project.")
-  @JsonProperty("artifactZip")
-  public File getArtifactZip() {
-    return artifactZip;
+  @ApiModelProperty(value = "The file to be evaluated. Required only in blocking scenario.")
+  @JsonProperty("targetFile")
+  public File getTargetFile() {
+    return targetFile;
   }
-  public void setArtifactZip(File artifactZip) {
-    this.artifactZip = artifactZip;
+  public void setTargetFile(File targetFile) {
+    this.targetFile = targetFile;
   }
 
   /**
@@ -182,13 +180,13 @@ return null;
     GovernanceEvaluationRequestDTO governanceEvaluationRequest = (GovernanceEvaluationRequestDTO) o;
     return Objects.equals(artifactId, governanceEvaluationRequest.artifactId) &&
         Objects.equals(artifactType, governanceEvaluationRequest.artifactType) &&
-        Objects.equals(artifactZip, governanceEvaluationRequest.artifactZip) &&
+        Objects.equals(targetFile, governanceEvaluationRequest.targetFile) &&
         Objects.equals(governableState, governanceEvaluationRequest.governableState);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifactId, artifactType, artifactZip, governableState);
+    return Objects.hash(artifactId, artifactType, targetFile, governableState);
   }
 
   @Override
@@ -198,7 +196,7 @@ return null;
     
     sb.append("    artifactId: ").append(toIndentedString(artifactId)).append("\n");
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
-    sb.append("    artifactZip: ").append(toIndentedString(artifactZip)).append("\n");
+    sb.append("    targetFile: ").append(toIndentedString(targetFile)).append("\n");
     sb.append("    governableState: ").append(toIndentedString(governableState)).append("\n");
     sb.append("}");
     return sb.toString();

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -21,7 +24,7 @@ import javax.validation.Valid;
 
 @ApiModel(description = "Provides governance results of a policy.")
 
-public class PolicyGovernanceResultInfoDTO   {
+public class PolicyGovernanceResultWithArtifactsDTO   {
   
     private String policyId = null;
     private String policyName = null;
@@ -58,13 +61,12 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private Integer totalGovernedArtifacts = null;
-    private Integer nonCompliantArtifacts = null;
+    private List<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO> governedArtifacts = new ArrayList<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO>();
 
   /**
    * UUID of the policy.
    **/
-  public PolicyGovernanceResultInfoDTO policyId(String policyId) {
+  public PolicyGovernanceResultWithArtifactsDTO policyId(String policyId) {
     this.policyId = policyId;
     return this;
   }
@@ -82,7 +84,7 @@ return null;
   /**
    * Name of the policy.
    **/
-  public PolicyGovernanceResultInfoDTO policyName(String policyName) {
+  public PolicyGovernanceResultWithArtifactsDTO policyName(String policyName) {
     this.policyName = policyName;
     return this;
   }
@@ -100,7 +102,7 @@ return null;
   /**
    * Status of the policy&#39;s governance compliance.
    **/
-  public PolicyGovernanceResultInfoDTO status(StatusEnum status) {
+  public PolicyGovernanceResultWithArtifactsDTO status(StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -116,39 +118,22 @@ return null;
   }
 
   /**
-   * Number of artifacts governed by the policy.
+   * Governance results of the artifacts attached to the policy.
    **/
-  public PolicyGovernanceResultInfoDTO totalGovernedArtifacts(Integer totalGovernedArtifacts) {
-    this.totalGovernedArtifacts = totalGovernedArtifacts;
+  public PolicyGovernanceResultWithArtifactsDTO governedArtifacts(List<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO> governedArtifacts) {
+    this.governedArtifacts = governedArtifacts;
     return this;
   }
 
   
-  @ApiModelProperty(example = "2", value = "Number of artifacts governed by the policy.")
-  @JsonProperty("totalGovernedArtifacts")
-  public Integer getTotalGovernedArtifacts() {
-    return totalGovernedArtifacts;
+  @ApiModelProperty(value = "Governance results of the artifacts attached to the policy.")
+      @Valid
+  @JsonProperty("governedArtifacts")
+  public List<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO> getGovernedArtifacts() {
+    return governedArtifacts;
   }
-  public void setTotalGovernedArtifacts(Integer totalGovernedArtifacts) {
-    this.totalGovernedArtifacts = totalGovernedArtifacts;
-  }
-
-  /**
-   * Number of non-compliant artifacts governed by the policy.
-   **/
-  public PolicyGovernanceResultInfoDTO nonCompliantArtifacts(Integer nonCompliantArtifacts) {
-    this.nonCompliantArtifacts = nonCompliantArtifacts;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "1", value = "Number of non-compliant artifacts governed by the policy.")
-  @JsonProperty("nonCompliantArtifacts")
-  public Integer getNonCompliantArtifacts() {
-    return nonCompliantArtifacts;
-  }
-  public void setNonCompliantArtifacts(Integer nonCompliantArtifacts) {
-    this.nonCompliantArtifacts = nonCompliantArtifacts;
+  public void setGovernedArtifacts(List<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO> governedArtifacts) {
+    this.governedArtifacts = governedArtifacts;
   }
 
 
@@ -160,29 +145,27 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PolicyGovernanceResultInfoDTO policyGovernanceResultInfo = (PolicyGovernanceResultInfoDTO) o;
-    return Objects.equals(policyId, policyGovernanceResultInfo.policyId) &&
-        Objects.equals(policyName, policyGovernanceResultInfo.policyName) &&
-        Objects.equals(status, policyGovernanceResultInfo.status) &&
-        Objects.equals(totalGovernedArtifacts, policyGovernanceResultInfo.totalGovernedArtifacts) &&
-        Objects.equals(nonCompliantArtifacts, policyGovernanceResultInfo.nonCompliantArtifacts);
+    PolicyGovernanceResultWithArtifactsDTO policyGovernanceResultWithArtifacts = (PolicyGovernanceResultWithArtifactsDTO) o;
+    return Objects.equals(policyId, policyGovernanceResultWithArtifacts.policyId) &&
+        Objects.equals(policyName, policyGovernanceResultWithArtifacts.policyName) &&
+        Objects.equals(status, policyGovernanceResultWithArtifacts.status) &&
+        Objects.equals(governedArtifacts, policyGovernanceResultWithArtifacts.governedArtifacts);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyId, policyName, status, totalGovernedArtifacts, nonCompliantArtifacts);
+    return Objects.hash(policyId, policyName, status, governedArtifacts);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PolicyGovernanceResultInfoDTO {\n");
+    sb.append("class PolicyGovernanceResultWithArtifactsDTO {\n");
     
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    totalGovernedArtifacts: ").append(toIndentedString(totalGovernedArtifacts)).append("\n");
-    sb.append("    nonCompliantArtifacts: ").append(toIndentedString(nonCompliantArtifacts)).append("\n");
+    sb.append("    governedArtifacts: ").append(toIndentedString(governedArtifacts)).append("\n");
     sb.append("}");
     return sb.toString();
   }

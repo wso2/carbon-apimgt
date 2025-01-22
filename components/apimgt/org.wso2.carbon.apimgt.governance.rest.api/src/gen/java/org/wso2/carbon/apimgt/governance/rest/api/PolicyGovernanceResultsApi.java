@@ -1,8 +1,9 @@
 package org.wso2.carbon.apimgt.governance.rest.api;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultListDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultWithArtifactsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultsSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.PolicyGovernanceResultsApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.PolicyGovernanceResultsApiServiceImpl;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -41,13 +42,13 @@ PolicyGovernanceResultsApiService delegate = new PolicyGovernanceResultsApiServi
     @Path("/{policyId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve governance results for a specific policy", notes = "Retrieve governance results associated with a specific governance policy within the organization using its unique ID.", response = PolicyGovernanceResultDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve governance results for a specific policy", notes = "Retrieve governance results associated with a specific governance policy within the organization using its unique ID.", response = PolicyGovernanceResultWithArtifactsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
     }, tags={ "Governance Results",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Successful response with governance results for the specified policy.", response = PolicyGovernanceResultDTO.class),
+        @ApiResponse(code = 200, message = "Ok. Successful response with governance results for the specified policy.", response = PolicyGovernanceResultWithArtifactsDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
@@ -60,18 +61,37 @@ PolicyGovernanceResultsApiService delegate = new PolicyGovernanceResultsApiServi
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve governance results for all policies", notes = "Retrieve governance results of all governance policies within the organization.", response = PolicyGovernanceResultsDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve governance results for all policies", notes = "Retrieve governance results of all governance policies within the organization.", response = PolicyGovernanceResultListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
-    }, tags={ "Governance Results" })
+    }, tags={ "Governance Results",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Successful response with governance results for the specified policy.", response = PolicyGovernanceResultsDTO.class),
+        @ApiResponse(code = 200, message = "Ok. Successful response with governance results for all policies.", response = PolicyGovernanceResultListDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
     public Response getGovernanceResultsForAllPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
         return delegate.getGovernanceResultsForAllPolicies(limit, offset, securityContext);
+    }
+
+    @GET
+    @Path("/summary")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieves the summary of governance results for all policies", notes = "Retrieves the summary of governance results for all governance policies within the organization.", response = PolicyGovernanceResultsSummaryDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
+        })
+    }, tags={ "Governance Results" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with governance results summary.", response = PolicyGovernanceResultsSummaryDTO.class),
+        @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
+    public Response getPolicyGovernanceResultsSummary() throws GovernanceException{
+        return delegate.getPolicyGovernanceResultsSummary(securityContext);
     }
 }

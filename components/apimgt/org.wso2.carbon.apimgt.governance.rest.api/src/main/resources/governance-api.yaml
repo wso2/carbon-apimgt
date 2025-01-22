@@ -659,7 +659,7 @@ paths:
     get:
       summary: Retrieves governance results of all artifacts
       description: Retrieves governance results of all artifacts in the organization.
-      operationId: getGovernanceResultsForAllArtifacts
+      operationId: getArtifactGovernanceResults
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -671,7 +671,48 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArtifactGovernanceResults'
+                $ref: '#/components/schemas/ArtifactGovernanceResultList'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_result_read
+  /artifact-governance-results/summary:
+    get:
+      summary: Retrieves the summary of governance results of all artifacts
+      description: Retrieves the summary of governance results of all artifacts in the organization.
+      operationId: getArtifactGovernanceResultsSummary
+      tags:
+        - Governance Results
+      responses:
+        "200":
+          description: OK. Successful response with governance results summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtifactGovernanceResultsSummary'
         "400":
           description: Bad request
           content:
@@ -702,7 +743,7 @@ paths:
   /artifact-governance-results/{artifactId}:
     get:
       summary: Retrieve governance results for a specific artifact
-      description: Retrieve governance results associated with a specific artifact including APIs within the organization using its unique ID.
+      description: Retrieve governance results associated with a specific artifact including APIs within the organization using its unique UUID.
       operationId: getGovernanceResultsByArtifactId
       tags:
         - Governance Results
@@ -754,11 +795,52 @@ paths:
         - Governance Results
       responses:
         "200":
-          description: Successful response with governance results for the specified policy.
+          description: Ok. Successful response with governance results for all policies.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicyGovernanceResults'
+                $ref: '#/components/schemas/PolicyGovernanceResultList'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_result_read
+  /policy-governance-results/summary:
+    get:
+      summary: Retrieves the summary of governance results for all policies
+      description: Retrieves the summary of governance results for all governance policies within the organization.
+      operationId: getPolicyGovernanceResultsSummary
+      tags:
+        - Governance Results
+      responses:
+        "200":
+          description: OK. Successful response with governance results summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyGovernanceResultsSummary'
         "400":
           description: Bad request
           content:
@@ -797,11 +879,11 @@ paths:
         - $ref: '#/components/parameters/policyId'
       responses:
         "200":
-          description: Successful response with governance results for the specified policy.
+          description: Ok. Successful response with governance results for the specified policy.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicyGovernanceResult'
+                $ref: '#/components/schemas/PolicyGovernanceResultWithArtifacts'
         "400":
           description: Bad request
           content:
@@ -948,10 +1030,7 @@ components:
           description: The type of artifact that the ruleset validates.
           enum:
             - REST_API
-            - SOAP_API
-            - GRAPHQL_API
             - ASYNC_API
-            - ALL_API
           example: REST_API
         documentationLink:
           type: string
@@ -1007,10 +1086,7 @@ components:
           description: The type of artifact that the ruleset validates.
           enum:
             - REST_API
-            - SOAP_API
-            - GRAPHQL_API
             - ASYNC_API
-            - ALL_API
           example: REST_API
         documentationLink:
           type: string
@@ -1156,6 +1232,43 @@ components:
             - BLOCK
             - NOTIFY
           example: "BLOCK"
+    GovernanceEvaluationRequest:
+      type: object
+      description: Request object for governance compliance validation.
+      properties:
+        artifactId:
+          type: string
+          description: UUID of the artifact.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        artifactType:
+          type: string
+          description: Type of the artifact.
+          enum:
+            - REST_API
+            - ASYNC_API
+          example: REST_API
+        targetFile:
+          type: string
+          description: The file to be evaluated. Required only in blocking scenario.
+          format: binary
+        governableState:
+          type: string
+          description: The state of the artifact at which the evaluation should run
+          enum:
+            - API_CREATE
+            - API_UPDATE
+            - API_DEPLOY
+            - API_PUBLISH
+          example: API_DEPLOY
+          x-enum-varnames:
+            - API_CREATE
+            - API_UPDATE
+            - API_DEPLOY
+            - API_PUBLISH
+      required:
+        - artifactId
+        - artifactType
+        - governableState
     GovernancePolicyList:
       type: object
       description: A list of governance policies.
@@ -1171,6 +1284,53 @@ components:
             $ref: '#/components/schemas/GovernancePolicy'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    ArtifactGovernanceResultsSummary:
+      type: object
+      description: Summary of governance compliance status of artifacts in the organization.
+      properties:
+        results:
+          type: array
+          description: List of summaries for each artifact type.
+          items:
+            type: object
+            properties:
+              artifactType:
+                type: string
+                description: Type of the artifact.
+                enum:
+                  - API
+              totalArtifacts:
+                type: integer
+                description: Total number of artifacts.
+                example: 10
+              compliantArtifacts:
+                type: integer
+                description: Number of compliant artifacts.
+                example: 6
+              nonCompliantArtifacts:
+                type: integer
+                description: Number of non-compliant artifacts.
+                example: 4
+    PolicyGovernanceResultsSummary:
+      type: object
+      description: Summary of governance policy compliance.
+      properties:
+        totalPolicies:
+          type: integer
+          description: Total number of policies.
+          example: 10
+        followedPolicies:
+          type: integer
+          description: Number of policies followed to.
+          example: 6
+        violatedPolicies:
+          type: integer
+          description: Number of policies violated.
+          example: 4
+        unappliedPolicies:
+          type: integer
+          description: Number of policies unapplied.
+          example: 0
     ArtifactGovernanceResultList:
       type: object
       description: A list of artifact governance results.
@@ -1186,14 +1346,6 @@ components:
             $ref: '#/components/schemas/ArtifactGovernanceResultInfo'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    ArtifactGovernanceResults:
-      type: object
-      description: Governance results of all artifacts of an organization.
-      properties:
-        summary:
-          $ref: '#/components/schemas/GovernanceSummaryForArtifacts'
-        results:
-          $ref: '#/components/schemas/ArtifactGovernanceResultList'
     PolicyGovernanceResultList:
       type: object
       description: A list of policy governance results.
@@ -1209,54 +1361,6 @@ components:
             $ref: '#/components/schemas/PolicyGovernanceResultInfo'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    PolicyGovernanceResults:
-      type: object
-      description: Governance results of all policies of an organization.
-      properties:
-        summary:
-          $ref: '#/components/schemas/GovernanceSummaryForPolicies'
-        results:
-          $ref: '#/components/schemas/PolicyGovernanceResultList'
-    GovernanceSummaryForPolicies:
-      type: object
-      description: Summary of governance policy compliance.
-      properties:
-        total:
-          type: integer
-          description: Total number of policies.
-          example: 10
-        followed:
-          type: integer
-          description: Number of policies followed to.
-          example: 6
-        violated:
-          type: integer
-          description: Number of policies violated.
-          example: 4
-        unapplied:
-          type: integer
-          description: Number of policies unapplied.
-          example: 0
-    GovernanceSummaryForArtifacts:
-      type: object
-      description: Summary of artifact compliance status.
-      properties:
-        total:
-          type: integer
-          description: Total number of artifacts.
-          example: 10
-        compliant:
-          type: integer
-          description: Number of compliant artifacts.
-          example: 6
-        nonCompliant:
-          type: integer
-          description: Number of non-compliant artifacts.
-          example: 4
-        notApplicable:
-          type: integer
-          description: Number of artifacts not applicable.
-          example: 0
     ArtifactGovernanceResultInfo:
       type: object
       description: Provides governance results of an artifact.
@@ -1265,18 +1369,47 @@ components:
           type: string
           description: UUID of the artifact.
           example: "123e4567-e89b-12d3-a456-426614174000"
+        artifactType:
+          type: string
+          description: Type of the artifact.
+          enum:
+            - API
+          example: "API"
         artifactName:
           type: string
-          description: Name of the artifact.
-          example: "API1"
+          description: Display name of the artifact.
+          example: "Test API v1"
         status:
           type: string
           description: Status of the artifact's governance compliance.
           enum:
             - COMPLAINT
             - NON-COMPLAINT
-            - NOT-APPLICABLE
           example: "COMPLAINT"
+        applicablePolicyCount:
+          type: integer
+          description: Number of policies applicable to the artifact.
+          example: 2
+        violatedPolicyCount:
+          type: integer
+          description: Number of policies violated by the artifact.
+          example: 1
+        rulesetValidationResults:
+          type: object
+          description: List of rule validation information.
+          properties:
+            severity:
+              type: string
+              description: Severity level of the rule violation.
+              enum:
+                - ERROR
+                - WARN
+                - INFO
+              example: WARN
+            violatedRulesCount:
+              type: integer
+              description: Number of rules violated by the artifact under each severity.
+              example: 1
     PolicyGovernanceResultInfo:
       type: object
       description: Provides governance results of a policy.
@@ -1297,6 +1430,14 @@ components:
             - VIOLATED
             - UNAPPLIED
           example: "FOLLOWED"
+        totalGovernedArtifacts:
+          type: integer
+          description: Number of artifacts governed by the policy.
+          example: 2
+        nonCompliantArtifacts:
+          type: integer
+          description: Number of non-compliant artifacts governed by the policy.
+          example: 1
     ArtifactGovernanceResult:
       type: object
       description: Provides governance results of an artifact.
@@ -1305,10 +1446,16 @@ components:
           type: string
           description: UUID of the artifact.
           example: "123e4567-e89b-12d3-a456-426614174000"
+        artifactType:
+          type: string
+          description: Type of the artifact.
+          enum:
+            - API
+          example: "API"
         artifactName:
           type: string
-          description: Name of the artifact.
-          example: "API1"
+          description: Display name of the artifact.
+          example: "Test API v1"
         status:
           type: string
           description: Status of the artifact's governance compliance.
@@ -1317,14 +1464,14 @@ components:
             - NON-COMPLAINT
             - NOT-APPLICABLE
           example: "COMPLAINT"
-        rulesetValidationResults:
+        policyGovernanceResults:
           type: array
-          description: List of rule validation information.
+          description: List of policies under which the artifact was governed.
           items:
-            $ref: '#/components/schemas/RulesetValidationResult'
-    PolicyGovernanceResult:
+            $ref: '#/components/schemas/PolicyGovernanceResultWithRulesets'
+    PolicyGovernanceResultWithRulesets:
       type: object
-      description: Provides governance results of a policy.
+      description: Governance results of a policy for an artifact.
       properties:
         policyId:
           type: string
@@ -1340,30 +1487,11 @@ components:
           enum:
             - FOLLOWED
             - VIOLATED
-            - UNAPPLIED
-          example: "FOLLOWED"
-        governedArtifacts:
+        rulesetValidationResults:
           type: array
-          description: Governance results of the artifacts attached to the policy.
+          description: List of ruleset validation information.
           items:
-            type: object
-            properties:
-              artifactId:
-                type: string
-                description: UUID of the artifact.
-                example: "123e4567-e89b-12d3-a456-426614174000"
-              artifactName:
-                type: string
-                description: Name of the artifact.
-                example: "API1"
-              status:
-                type: string
-                description: Status of the artifact's governance compliance.
-                enum:
-                  - COMPLAINT
-                  - NON-COMPLAINT
-                  - NOT-APPLICABLE
-                example: "COMPLAINT"
+            $ref: '#/components/schemas/RulesetValidationResult'
     RulesetValidationResult:
       type: object
       description: Result of the ruleset validation.
@@ -1430,45 +1558,56 @@ components:
           type: string
           description: Message to be displayed when the rule is violated.
           example: "API name can not be too long or short"
-    GovernanceEvaluationRequest:
+    PolicyGovernanceResultWithArtifacts:
       type: object
-      description: Request object for governance compliance validation.
+      description: Provides governance results of a policy.
       properties:
-        artifactId:
+        policyId:
           type: string
-          description: UUID of the artifact.
+          description: UUID of the policy.
           example: "123e4567-e89b-12d3-a456-426614174000"
-        artifactType:
+        policyName:
           type: string
-          description: Type of the artifact.
+          description: Name of the policy.
+          example: "Policy1"
+        status:
+          type: string
+          description: Status of the policy's governance compliance.
           enum:
-            - REST_API
-            - SOAP_API
-            - GRAPHQL_API
-            - ASYNC_API
-          example: REST_API
-        artifactZip:
-          type: string
-          description: The zip of the artifact project.
-          format: binary
-        governableState:
-          type: string
-          description: The state of the artifact at which the evaluation should run
-          enum:
-            - API_CREATE
-            - API_UPDATE
-            - API_DEPLOY
-            - API_PUBLISH
-          example: API_DEPLOY
-          x-enum-varnames:
-            - API_CREATE
-            - API_UPDATE
-            - API_DEPLOY
-            - API_PUBLISH
-      required:
-        - artifactId
-        - artifactType
-        - governableState
+            - FOLLOWED
+            - VIOLATED
+            - UNAPPLIED
+          example: "FOLLOWED"
+        governedArtifacts:
+          type: array
+          description: Governance results of the artifacts attached to the policy.
+          items:
+            type: object
+            properties:
+              artifactId:
+                type: string
+                description: UUID of the artifact.
+                example: "123e4567-e89b-12d3-a456-426614174000"
+              artifactType:
+                type: string
+                description: Type of the artifact.
+                enum:
+                  - API
+                example: "API"
+              artifactName:
+                type: string
+                description: Name of the artifact.
+                example: "API1"
+              status:
+                type: string
+                description: Status of the artifact's governance compliance.
+                enum:
+                  - COMPLAINT
+                  - NON-COMPLAINT
+                  - NOT-APPLICABLE
+                example: "COMPLAINT"
+
+
   #####
   # TODO: Fix scope validation logic. Currently scope validation is broken due to logic in apimgt.rest.api.common.RestAPICommonUtil
   #####

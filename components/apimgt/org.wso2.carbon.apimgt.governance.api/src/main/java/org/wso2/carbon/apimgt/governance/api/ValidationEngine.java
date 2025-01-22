@@ -19,12 +19,10 @@
 package org.wso2.carbon.apimgt.governance.api;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.model.EvaluationTarget;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.api.model.ValidationResult;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -52,12 +50,12 @@ public interface ValidationEngine {
     List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws GovernanceException;
 
     /**
-     * Validate a target content against a ruleset
+     * Validate a target against a ruleset
      *
-     * @param target  Target content
+     * @param target  Target to be validated
      * @param ruleset Ruleset
-     * @return List of validation results
+     * @return List of rule violations
      * @throws GovernanceException If an error occurs while validating the target
      */
-    List<ValidationResult> validate(String target, Ruleset ruleset) throws GovernanceException;
+    List<RuleViolation> validate(String target, Ruleset ruleset) throws GovernanceException;
 }

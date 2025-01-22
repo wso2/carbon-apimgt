@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultWithRulesetsDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -27,6 +27,37 @@ import javax.validation.Valid;
 public class ArtifactGovernanceResultDTO   {
   
     private String artifactId = null;
+
+          @XmlType(name="ArtifactTypeEnum")
+    @XmlEnum(String.class)
+    public enum ArtifactTypeEnum {
+        API("API");
+        private String value;
+
+        ArtifactTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ArtifactTypeEnum fromValue(String v) {
+            for (ArtifactTypeEnum b : ArtifactTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    } 
+    private ArtifactTypeEnum artifactType = null;
     private String artifactName = null;
 
           @XmlType(name="StatusEnum")
@@ -61,7 +92,7 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private List<RulesetValidationResultDTO> rulesetValidationResults = new ArrayList<RulesetValidationResultDTO>();
+    private List<PolicyGovernanceResultWithRulesetsDTO> policyGovernanceResults = new ArrayList<PolicyGovernanceResultWithRulesetsDTO>();
 
   /**
    * UUID of the artifact.
@@ -82,7 +113,25 @@ return null;
   }
 
   /**
-   * Name of the artifact.
+   * Type of the artifact.
+   **/
+  public ArtifactGovernanceResultDTO artifactType(ArtifactTypeEnum artifactType) {
+    this.artifactType = artifactType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "API", value = "Type of the artifact.")
+  @JsonProperty("artifactType")
+  public ArtifactTypeEnum getArtifactType() {
+    return artifactType;
+  }
+  public void setArtifactType(ArtifactTypeEnum artifactType) {
+    this.artifactType = artifactType;
+  }
+
+  /**
+   * Display name of the artifact.
    **/
   public ArtifactGovernanceResultDTO artifactName(String artifactName) {
     this.artifactName = artifactName;
@@ -90,7 +139,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "API1", value = "Name of the artifact.")
+  @ApiModelProperty(example = "Test API v1", value = "Display name of the artifact.")
   @JsonProperty("artifactName")
   public String getArtifactName() {
     return artifactName;
@@ -118,22 +167,22 @@ return null;
   }
 
   /**
-   * List of rule validation information.
+   * List of policies under which the artifact was governed.
    **/
-  public ArtifactGovernanceResultDTO rulesetValidationResults(List<RulesetValidationResultDTO> rulesetValidationResults) {
-    this.rulesetValidationResults = rulesetValidationResults;
+  public ArtifactGovernanceResultDTO policyGovernanceResults(List<PolicyGovernanceResultWithRulesetsDTO> policyGovernanceResults) {
+    this.policyGovernanceResults = policyGovernanceResults;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of rule validation information.")
+  @ApiModelProperty(value = "List of policies under which the artifact was governed.")
       @Valid
-  @JsonProperty("rulesetValidationResults")
-  public List<RulesetValidationResultDTO> getRulesetValidationResults() {
-    return rulesetValidationResults;
+  @JsonProperty("policyGovernanceResults")
+  public List<PolicyGovernanceResultWithRulesetsDTO> getPolicyGovernanceResults() {
+    return policyGovernanceResults;
   }
-  public void setRulesetValidationResults(List<RulesetValidationResultDTO> rulesetValidationResults) {
-    this.rulesetValidationResults = rulesetValidationResults;
+  public void setPolicyGovernanceResults(List<PolicyGovernanceResultWithRulesetsDTO> policyGovernanceResults) {
+    this.policyGovernanceResults = policyGovernanceResults;
   }
 
 
@@ -147,14 +196,15 @@ return null;
     }
     ArtifactGovernanceResultDTO artifactGovernanceResult = (ArtifactGovernanceResultDTO) o;
     return Objects.equals(artifactId, artifactGovernanceResult.artifactId) &&
+        Objects.equals(artifactType, artifactGovernanceResult.artifactType) &&
         Objects.equals(artifactName, artifactGovernanceResult.artifactName) &&
         Objects.equals(status, artifactGovernanceResult.status) &&
-        Objects.equals(rulesetValidationResults, artifactGovernanceResult.rulesetValidationResults);
+        Objects.equals(policyGovernanceResults, artifactGovernanceResult.policyGovernanceResults);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifactId, artifactName, status, rulesetValidationResults);
+    return Objects.hash(artifactId, artifactType, artifactName, status, policyGovernanceResults);
   }
 
   @Override
@@ -163,9 +213,10 @@ return null;
     sb.append("class ArtifactGovernanceResultDTO {\n");
     
     sb.append("    artifactId: ").append(toIndentedString(artifactId)).append("\n");
+    sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    artifactName: ").append(toIndentedString(artifactName)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    rulesetValidationResults: ").append(toIndentedString(rulesetValidationResults)).append("\n");
+    sb.append("    policyGovernanceResults: ").append(toIndentedString(policyGovernanceResults)).append("\n");
     sb.append("}");
     return sb.toString();
   }

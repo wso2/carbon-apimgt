@@ -31,19 +31,19 @@ public class EvaluateComplianceApiServiceImpl implements EvaluateComplianceApiSe
     /**
      * Evaluate compliance of an artifact
      *
-     * @param artifactId             Artifact ID
-     * @param artifactType           Artifact Type
-     * @param governableState        The state at which the artifact should be governed
-     * @param artifactZipInputStream Artifact ZIP InputStream
-     * @param artifactZipDetail      Artifact ZIP Detail
-     * @param messageContext         Message Context
+     * @param artifactId            Artifact ID
+     * @param artifactType          Artifact Type
+     * @param governableState       The state at which the artifact should be governed
+     * @param targetFileInputStream Target File Input Stream
+     * @param targetFileDetail      Target File Detail
+     * @param messageContext        Message Context
      * @return Response
      * @throws GovernanceException If an error occurs while evaluating the compliance of the artifact
      */
     public Response evaluateCompliance(String artifactId, String artifactType,
-                                       String governableState, InputStream artifactZipInputStream,
-                                       Attachment artifactZipDetail, MessageContext messageContext)
-            throws GovernanceException {
+                                       String governableState, InputStream targetFileInputStream,
+                                       Attachment targetFileDetail, MessageContext messageContext)
+    throws GovernanceException {
 
 
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);

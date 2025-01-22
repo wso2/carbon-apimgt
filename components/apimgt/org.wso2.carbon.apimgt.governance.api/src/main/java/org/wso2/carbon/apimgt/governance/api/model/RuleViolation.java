@@ -19,26 +19,15 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 /**
- * This class represents the result of a validation
+ * This class represents a rule violation.
  */
-public class ValidationResult {
-
-    private String resultId; // Contains the id of the result
-    private String organization; // Contains the organization that was validated
-    private String artifactId; // Contains the id of the artifact that was validated
-    private String policyId; // Contains the id of the policy that was validated
-    private String rulesetId; // Contains the id of the ruleset that was validated
-    private String ruleCode; // Contains the code of the rule that was validated
-    private String validatedPath; // Contains the path that was validated
-    private boolean isRuleValid; // Contains the result of the validation
-
-    public String getResultId() {
-        return resultId;
-    }
-
-    public void setResultId(String resultId) {
-        this.resultId = resultId;
-    }
+public class RuleViolation {
+    private String organization; // Organization in which the violation occurred
+    private String artifactId; // Artifact which contains the violation
+    private String policyId; // Policy which was violated
+    private String rulesetId; // Ruleset which contains the violated rule
+    private String ruleCode;  // Code of the violated rule
+    private String violatedPath; // Path in which the violation occurred
 
     public String getOrganization() {
         return organization;
@@ -80,20 +69,11 @@ public class ValidationResult {
         this.ruleCode = ruleCode;
     }
 
-    public String getValidatedPath() {
-        return validatedPath;
+    public String getViolatedPath() {
+        return violatedPath;
     }
 
-    public void setValidatedPath(String validatedPath) {
-        this.validatedPath = validatedPath;
+    public void setViolatedPath(String violatedPath) {
+        this.violatedPath = violatedPath;
     }
-
-    public boolean isRuleValid() {
-        return isRuleValid;
-    }
-
-    public void setRuleValid(boolean ruleValid) {
-        isRuleValid = ruleValid;
-    }
-
 }

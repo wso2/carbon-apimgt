@@ -178,14 +178,10 @@ public class EvaluationRequestScheduler {
                     String contentToValidate = ruleTypeToContentMap.get(ruleType);
 
                     // Send target content and ruleset for validation
-                    List<ValidationResult> validationResults = validationEngine.validate(
+                    List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
-                    for (ValidationResult result : validationResults) {
-                        result.setOrganization(organization);
-                        result.setPolicyId(policyId);
-                        result.setArtifactId(artifactId);
-                    }
-                    saveValidationResults(validationResults);
+
+                    saveGovernanceResults(artifactId, artifactType, policyId, ruleViolations, organization);
 
                 } else {
                     if (log.isDebugEnabled()) {
@@ -204,21 +200,32 @@ public class EvaluationRequestScheduler {
     }
 
     /**
-     * Save validation results.
+     * Save governance evaluation results to the database.
      *
-     * @param results Validation results.
+     * @param artifactId     ID of the artifact.
+     * @param artifactType   Type of the artifact.
+     * @param policyId       ID of the policy.
+     * @param ruleViolations List of rule violations.
+     * @param organization   Organization
      */
-    private static void saveValidationResults(List<ValidationResult> results) {
-        for (ValidationResult result : results) {
-            try {
-                ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
-                complianceMgtDAO.addValidationResult(result);
-            } catch (GovernanceException e) {
-                log.error("Error saving validation result: " + result, e);
+    private static void saveGovernanceResults(String artifactId, ArtifactType artifactType, String policyId,
+                                              List<RuleViolation> ruleViolations, String organization) {
+        ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
+        try {
+            complianceMgtDAO.addGovernanceResult(artifactId, artifactType, policyId, organization,
+                    ruleViolations.isEmpty());
+
+            for (RuleViolation violation : ruleViolations) {
+                violation.setOrganization(organization);
+                violation.setPolicyId(policyId);
+                violation.setArtifactId(artifactId);
+                complianceMgtDAO.addRuleViolation(violation);
             }
+        } catch (GovernanceException e) {
+            log.error("Error saving governance result for artifact ID: " + artifactId, e);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Validation results saved: " + results);
+            log.debug("New governance result saved for artifact ID: " + artifactId);
         }
     }
 

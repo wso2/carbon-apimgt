@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.EvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.EvaluationStatus;
-import org.wso2.carbon.apimgt.governance.api.model.ValidationResult;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 
 import java.util.List;
 
@@ -71,12 +71,25 @@ public interface ComplianceMgtDAO {
     void deleteEvaluationRequest(String requestId) throws GovernanceException;
 
     /**
-     * Add a validation result
+     * Add a governance result
      *
-     * @param validationResult Validation result
-     * @throws GovernanceException If an error occurs while adding the validation result
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param policyId     Policy ID
+     * @param organization Organization
+     * @param isPassed     Whether the evaluation passed
+     * @throws GovernanceException If an error occurs while adding the governance result
      */
-    void addValidationResult(ValidationResult validationResult) throws GovernanceException;
+    void addGovernanceResult(String artifactId, ArtifactType artifactType, String policyId,
+                             String organization, boolean isPassed) throws GovernanceException;
+
+    /**
+     * Add a rule violation
+     *
+     * @param ruleViolation Rule violation
+     * @throws GovernanceException If an error occurs while adding the rule violation
+     */
+    void addRuleViolation(RuleViolation ruleViolation) throws GovernanceException;
 
 
 }

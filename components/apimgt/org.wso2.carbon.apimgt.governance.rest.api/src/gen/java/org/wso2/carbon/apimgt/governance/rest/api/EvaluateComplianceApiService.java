@@ -22,5 +22,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface EvaluateComplianceApiService {
-      public Response evaluateCompliance(String artifactId, String artifactType, String governableState, InputStream artifactZipInputStream, Attachment artifactZipDetail, MessageContext messageContext) throws GovernanceException;
+      public Response evaluateCompliance(String artifactId, String artifactType, String governableState, InputStream targetFileInputStream, Attachment targetFileDetail, MessageContext messageContext) throws GovernanceException;
 }
