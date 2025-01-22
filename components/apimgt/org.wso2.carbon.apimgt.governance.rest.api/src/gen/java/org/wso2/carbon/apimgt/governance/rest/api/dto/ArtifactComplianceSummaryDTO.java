@@ -6,11 +6,11 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactGovernanceResultsSummaryResultsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryResultsDTO;
 import javax.validation.constraints.*;
 
 /**
- * Summary of governance compliance status of artifacts in the organization.
+ * Summary of compliance of artifacts in the organization.
  **/
 
 import io.swagger.annotations.*;
@@ -22,16 +22,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Summary of governance compliance status of artifacts in the organization.")
+@ApiModel(description = "Summary of compliance of artifacts in the organization.")
 
-public class ArtifactGovernanceResultsSummaryDTO   {
+public class ArtifactComplianceSummaryDTO   {
   
-    private List<ArtifactGovernanceResultsSummaryResultsDTO> results = new ArrayList<ArtifactGovernanceResultsSummaryResultsDTO>();
+    private List<ArtifactComplianceSummaryResultsDTO> results = new ArrayList<ArtifactComplianceSummaryResultsDTO>();
 
   /**
    * List of summaries for each artifact type.
    **/
-  public ArtifactGovernanceResultsSummaryDTO results(List<ArtifactGovernanceResultsSummaryResultsDTO> results) {
+  public ArtifactComplianceSummaryDTO results(List<ArtifactComplianceSummaryResultsDTO> results) {
     this.results = results;
     return this;
   }
@@ -40,10 +40,10 @@ public class ArtifactGovernanceResultsSummaryDTO   {
   @ApiModelProperty(value = "List of summaries for each artifact type.")
       @Valid
   @JsonProperty("results")
-  public List<ArtifactGovernanceResultsSummaryResultsDTO> getResults() {
+  public List<ArtifactComplianceSummaryResultsDTO> getResults() {
     return results;
   }
-  public void setResults(List<ArtifactGovernanceResultsSummaryResultsDTO> results) {
+  public void setResults(List<ArtifactComplianceSummaryResultsDTO> results) {
     this.results = results;
   }
 
@@ -56,8 +56,8 @@ public class ArtifactGovernanceResultsSummaryDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ArtifactGovernanceResultsSummaryDTO artifactGovernanceResultsSummary = (ArtifactGovernanceResultsSummaryDTO) o;
-    return Objects.equals(results, artifactGovernanceResultsSummary.results);
+    ArtifactComplianceSummaryDTO artifactComplianceSummary = (ArtifactComplianceSummaryDTO) o;
+    return Objects.equals(results, artifactComplianceSummary.results);
   }
 
   @Override
@@ -68,7 +68,7 @@ public class ArtifactGovernanceResultsSummaryDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ArtifactGovernanceResultsSummaryDTO {\n");
+    sb.append("class ArtifactComplianceSummaryDTO {\n");
     
     sb.append("    results: ").append(toIndentedString(results)).append("\n");
     sb.append("}");

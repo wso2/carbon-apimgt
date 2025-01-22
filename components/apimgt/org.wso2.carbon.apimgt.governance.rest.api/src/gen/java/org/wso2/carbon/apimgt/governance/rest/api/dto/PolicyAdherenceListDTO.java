@@ -6,12 +6,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactGovernanceResultInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceStatusDTO;
 import javax.validation.constraints.*;
 
 /**
- * A list of artifact governance results.
+ * Policy adherence status of a list of policies.
  **/
 
 import io.swagger.annotations.*;
@@ -23,24 +23,24 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "A list of artifact governance results.")
+@ApiModel(description = "Policy adherence status of a list of policies.")
 
-public class ArtifactGovernanceResultListDTO   {
+public class PolicyAdherenceListDTO   {
   
     private Integer count = null;
-    private List<ArtifactGovernanceResultInfoDTO> list = new ArrayList<ArtifactGovernanceResultInfoDTO>();
+    private List<PolicyAdherenceStatusDTO> list = new ArrayList<PolicyAdherenceStatusDTO>();
     private PaginationDTO pagination = null;
 
   /**
-   * Number of artifact governance results returned.
+   * Number of policies returned.
    **/
-  public ArtifactGovernanceResultListDTO count(Integer count) {
+  public PolicyAdherenceListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
   
-  @ApiModelProperty(example = "10", value = "Number of artifact governance results returned.")
+  @ApiModelProperty(example = "10", value = "Number of policies returned.")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -50,27 +50,26 @@ public class ArtifactGovernanceResultListDTO   {
   }
 
   /**
-   * List of artifact governance results.
    **/
-  public ArtifactGovernanceResultListDTO list(List<ArtifactGovernanceResultInfoDTO> list) {
+  public PolicyAdherenceListDTO list(List<PolicyAdherenceStatusDTO> list) {
     this.list = list;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of artifact governance results.")
+  @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<ArtifactGovernanceResultInfoDTO> getList() {
+  public List<PolicyAdherenceStatusDTO> getList() {
     return list;
   }
-  public void setList(List<ArtifactGovernanceResultInfoDTO> list) {
+  public void setList(List<PolicyAdherenceStatusDTO> list) {
     this.list = list;
   }
 
   /**
    **/
-  public ArtifactGovernanceResultListDTO pagination(PaginationDTO pagination) {
+  public PolicyAdherenceListDTO pagination(PaginationDTO pagination) {
     this.pagination = pagination;
     return this;
   }
@@ -95,10 +94,10 @@ public class ArtifactGovernanceResultListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ArtifactGovernanceResultListDTO artifactGovernanceResultList = (ArtifactGovernanceResultListDTO) o;
-    return Objects.equals(count, artifactGovernanceResultList.count) &&
-        Objects.equals(list, artifactGovernanceResultList.list) &&
-        Objects.equals(pagination, artifactGovernanceResultList.pagination);
+    PolicyAdherenceListDTO policyAdherenceList = (PolicyAdherenceListDTO) o;
+    return Objects.equals(count, policyAdherenceList.count) &&
+        Objects.equals(list, policyAdherenceList.list) &&
+        Objects.equals(pagination, policyAdherenceList.pagination);
   }
 
   @Override
@@ -109,7 +108,7 @@ public class ArtifactGovernanceResultListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ArtifactGovernanceResultListDTO {\n");
+    sb.append("class PolicyAdherenceListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

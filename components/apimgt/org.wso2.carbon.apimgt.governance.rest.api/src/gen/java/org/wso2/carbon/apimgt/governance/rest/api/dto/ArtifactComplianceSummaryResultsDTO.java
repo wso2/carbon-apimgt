@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class ArtifactGovernanceResultsSummaryResultsDTO   {
+public class ArtifactComplianceSummaryResultsDTO   {
   
 
           @XmlType(name="ArtifactTypeEnum")
@@ -58,7 +58,7 @@ return null;
   /**
    * Type of the artifact.
    **/
-  public ArtifactGovernanceResultsSummaryResultsDTO artifactType(ArtifactTypeEnum artifactType) {
+  public ArtifactComplianceSummaryResultsDTO artifactType(ArtifactTypeEnum artifactType) {
     this.artifactType = artifactType;
     return this;
   }
@@ -76,7 +76,7 @@ return null;
   /**
    * Total number of artifacts.
    **/
-  public ArtifactGovernanceResultsSummaryResultsDTO totalArtifacts(Integer totalArtifacts) {
+  public ArtifactComplianceSummaryResultsDTO totalArtifacts(Integer totalArtifacts) {
     this.totalArtifacts = totalArtifacts;
     return this;
   }
@@ -94,7 +94,7 @@ return null;
   /**
    * Number of compliant artifacts.
    **/
-  public ArtifactGovernanceResultsSummaryResultsDTO compliantArtifacts(Integer compliantArtifacts) {
+  public ArtifactComplianceSummaryResultsDTO compliantArtifacts(Integer compliantArtifacts) {
     this.compliantArtifacts = compliantArtifacts;
     return this;
   }
@@ -112,7 +112,7 @@ return null;
   /**
    * Number of non-compliant artifacts.
    **/
-  public ArtifactGovernanceResultsSummaryResultsDTO nonCompliantArtifacts(Integer nonCompliantArtifacts) {
+  public ArtifactComplianceSummaryResultsDTO nonCompliantArtifacts(Integer nonCompliantArtifacts) {
     this.nonCompliantArtifacts = nonCompliantArtifacts;
     return this;
   }
@@ -136,11 +136,11 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ArtifactGovernanceResultsSummaryResultsDTO artifactGovernanceResultsSummaryResults = (ArtifactGovernanceResultsSummaryResultsDTO) o;
-    return Objects.equals(artifactType, artifactGovernanceResultsSummaryResults.artifactType) &&
-        Objects.equals(totalArtifacts, artifactGovernanceResultsSummaryResults.totalArtifacts) &&
-        Objects.equals(compliantArtifacts, artifactGovernanceResultsSummaryResults.compliantArtifacts) &&
-        Objects.equals(nonCompliantArtifacts, artifactGovernanceResultsSummaryResults.nonCompliantArtifacts);
+    ArtifactComplianceSummaryResultsDTO artifactComplianceSummaryResults = (ArtifactComplianceSummaryResultsDTO) o;
+    return Objects.equals(artifactType, artifactComplianceSummaryResults.artifactType) &&
+        Objects.equals(totalArtifacts, artifactComplianceSummaryResults.totalArtifacts) &&
+        Objects.equals(compliantArtifacts, artifactComplianceSummaryResults.compliantArtifacts) &&
+        Objects.equals(nonCompliantArtifacts, artifactComplianceSummaryResults.nonCompliantArtifacts);
   }
 
   @Override
@@ -151,7 +151,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ArtifactGovernanceResultsSummaryResultsDTO {\n");
+    sb.append("class ArtifactComplianceSummaryResultsDTO {\n");
     
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    totalArtifacts: ").append(toIndentedString(totalArtifacts)).append("\n");

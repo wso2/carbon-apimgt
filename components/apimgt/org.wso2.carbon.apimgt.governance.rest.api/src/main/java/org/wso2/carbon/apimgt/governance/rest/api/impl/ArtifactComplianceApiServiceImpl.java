@@ -6,9 +6,9 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.*;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactGovernanceResultDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactGovernanceResultListDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactGovernanceResultsSummaryDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 
 import java.util.List;
@@ -19,9 +19,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public class ArtifactGovernanceResultsApiServiceImpl implements ArtifactGovernanceResultsApiService {
+public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiService {
 
-    public Response getArtifactGovernanceResults(Integer limit, Integer offset, MessageContext messageContext) {
+    public Response getArtifactComplianceByArtifactId(String artifactId, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
@@ -31,7 +31,7 @@ public class ArtifactGovernanceResultsApiServiceImpl implements ArtifactGovernan
         return Response.status(status).entity(errorObject).build();
     }
 
-    public Response getArtifactGovernanceResultsSummary(MessageContext messageContext) {
+    public Response getArtifactComplianceForAllArtifacts(Integer limit, Integer offset, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
@@ -41,10 +41,7 @@ public class ArtifactGovernanceResultsApiServiceImpl implements ArtifactGovernan
         return Response.status(status).entity(errorObject).build();
     }
 
-    public Response getGovernanceResultsByArtifactId(String artifactId, MessageContext messageContext) {
-
-        ArtifactGovernanceResultDTO artifactGovernanceResultDTO = new ArtifactGovernanceResultDTO();
-
+    public Response getOrganizationalArtifactComplianceSummary(MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;

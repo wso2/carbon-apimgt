@@ -37,7 +37,7 @@ public enum ArtifactType {
             return GRAPHQL_API;
         } else if ("async_api".equalsIgnoreCase(text)) {
             return ASYNC_API;
-        } else if ("api".equalsIgnoreCase(text) || "all_api".equalsIgnoreCase(text)) {
+        } else if ("api".equalsIgnoreCase(text)) {
             return API;
         }
         return API;

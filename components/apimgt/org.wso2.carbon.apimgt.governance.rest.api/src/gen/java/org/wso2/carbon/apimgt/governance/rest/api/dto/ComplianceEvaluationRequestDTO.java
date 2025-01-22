@@ -22,7 +22,7 @@ import javax.validation.Valid;
 
 @ApiModel(description = "Request object for governance compliance validation.")
 
-public class GovernanceEvaluationRequestDTO   {
+public class ComplianceEvaluationRequestDTO   {
   
     private String artifactId = null;
 
@@ -96,7 +96,7 @@ return null;
   /**
    * UUID of the artifact.
    **/
-  public GovernanceEvaluationRequestDTO artifactId(String artifactId) {
+  public ComplianceEvaluationRequestDTO artifactId(String artifactId) {
     this.artifactId = artifactId;
     return this;
   }
@@ -115,7 +115,7 @@ return null;
   /**
    * Type of the artifact.
    **/
-  public GovernanceEvaluationRequestDTO artifactType(ArtifactTypeEnum artifactType) {
+  public ComplianceEvaluationRequestDTO artifactType(ArtifactTypeEnum artifactType) {
     this.artifactType = artifactType;
     return this;
   }
@@ -134,7 +134,7 @@ return null;
   /**
    * The file to be evaluated. Required only in blocking scenario.
    **/
-  public GovernanceEvaluationRequestDTO targetFile(File targetFile) {
+  public ComplianceEvaluationRequestDTO targetFile(File targetFile) {
     this.targetFile = targetFile;
     return this;
   }
@@ -152,7 +152,7 @@ return null;
   /**
    * The state of the artifact at which the evaluation should run
    **/
-  public GovernanceEvaluationRequestDTO governableState(GovernableStateEnum governableState) {
+  public ComplianceEvaluationRequestDTO governableState(GovernableStateEnum governableState) {
     this.governableState = governableState;
     return this;
   }
@@ -177,11 +177,11 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GovernanceEvaluationRequestDTO governanceEvaluationRequest = (GovernanceEvaluationRequestDTO) o;
-    return Objects.equals(artifactId, governanceEvaluationRequest.artifactId) &&
-        Objects.equals(artifactType, governanceEvaluationRequest.artifactType) &&
-        Objects.equals(targetFile, governanceEvaluationRequest.targetFile) &&
-        Objects.equals(governableState, governanceEvaluationRequest.governableState);
+    ComplianceEvaluationRequestDTO complianceEvaluationRequest = (ComplianceEvaluationRequestDTO) o;
+    return Objects.equals(artifactId, complianceEvaluationRequest.artifactId) &&
+        Objects.equals(artifactType, complianceEvaluationRequest.artifactType) &&
+        Objects.equals(targetFile, complianceEvaluationRequest.targetFile) &&
+        Objects.equals(governableState, complianceEvaluationRequest.governableState);
   }
 
   @Override
@@ -192,7 +192,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GovernanceEvaluationRequestDTO {\n");
+    sb.append("class ComplianceEvaluationRequestDTO {\n");
     
     sb.append("    artifactId: ").append(toIndentedString(artifactId)).append("\n");
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");

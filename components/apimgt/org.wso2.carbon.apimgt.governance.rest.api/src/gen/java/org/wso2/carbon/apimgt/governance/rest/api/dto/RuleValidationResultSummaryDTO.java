@@ -21,7 +21,7 @@ import javax.validation.Valid;
 
 @ApiModel(description = "List of rule validation information.")
 
-public class ArtifactGovernanceResultInfoRulesetValidationResultsDTO   {
+public class RuleValidationResultSummaryDTO   {
   
 
           @XmlType(name="SeverityEnum")
@@ -61,7 +61,7 @@ return null;
   /**
    * Severity level of the rule violation.
    **/
-  public ArtifactGovernanceResultInfoRulesetValidationResultsDTO severity(SeverityEnum severity) {
+  public RuleValidationResultSummaryDTO severity(SeverityEnum severity) {
     this.severity = severity;
     return this;
   }
@@ -79,7 +79,7 @@ return null;
   /**
    * Number of rules violated by the artifact under each severity.
    **/
-  public ArtifactGovernanceResultInfoRulesetValidationResultsDTO violatedRulesCount(Integer violatedRulesCount) {
+  public RuleValidationResultSummaryDTO violatedRulesCount(Integer violatedRulesCount) {
     this.violatedRulesCount = violatedRulesCount;
     return this;
   }
@@ -103,9 +103,9 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ArtifactGovernanceResultInfoRulesetValidationResultsDTO artifactGovernanceResultInfoRulesetValidationResults = (ArtifactGovernanceResultInfoRulesetValidationResultsDTO) o;
-    return Objects.equals(severity, artifactGovernanceResultInfoRulesetValidationResults.severity) &&
-        Objects.equals(violatedRulesCount, artifactGovernanceResultInfoRulesetValidationResults.violatedRulesCount);
+    RuleValidationResultSummaryDTO ruleValidationResultSummary = (RuleValidationResultSummaryDTO) o;
+    return Objects.equals(severity, ruleValidationResultSummary.severity) &&
+        Objects.equals(violatedRulesCount, ruleValidationResultSummary.violatedRulesCount);
   }
 
   @Override
@@ -116,7 +116,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ArtifactGovernanceResultInfoRulesetValidationResultsDTO {\n");
+    sb.append("class RuleValidationResultSummaryDTO {\n");
     
     sb.append("    severity: ").append(toIndentedString(severity)).append("\n");
     sb.append("    violatedRulesCount: ").append(toIndentedString(violatedRulesCount)).append("\n");

@@ -6,11 +6,11 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceForPolicyDTO;
 import javax.validation.constraints.*;
 
 /**
- * Governance results of a policy for an artifact.
+ * Provides adherence details of a policy.
  **/
 
 import io.swagger.annotations.*;
@@ -22,9 +22,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Governance results of a policy for an artifact.")
+@ApiModel(description = "Provides adherence details of a policy.")
 
-public class PolicyGovernanceResultWithRulesetsDTO   {
+public class PolicyAdherenceDetailsDTO   {
   
     private String policyId = null;
     private String policyName = null;
@@ -33,7 +33,8 @@ public class PolicyGovernanceResultWithRulesetsDTO   {
     @XmlEnum(String.class)
     public enum StatusEnum {
         FOLLOWED("FOLLOWED"),
-        VIOLATED("VIOLATED");
+        VIOLATED("VIOLATED"),
+        UNAPPLIED("UNAPPLIED");
         private String value;
 
         StatusEnum (String v) {
@@ -60,12 +61,12 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private List<RulesetValidationResultDTO> rulesetValidationResults = new ArrayList<RulesetValidationResultDTO>();
+    private List<ArtifactComplianceForPolicyDTO> governedArtifacts = new ArrayList<ArtifactComplianceForPolicyDTO>();
 
   /**
    * UUID of the policy.
    **/
-  public PolicyGovernanceResultWithRulesetsDTO policyId(String policyId) {
+  public PolicyAdherenceDetailsDTO policyId(String policyId) {
     this.policyId = policyId;
     return this;
   }
@@ -83,7 +84,7 @@ return null;
   /**
    * Name of the policy.
    **/
-  public PolicyGovernanceResultWithRulesetsDTO policyName(String policyName) {
+  public PolicyAdherenceDetailsDTO policyName(String policyName) {
     this.policyName = policyName;
     return this;
   }
@@ -101,13 +102,13 @@ return null;
   /**
    * Status of the policy&#39;s governance compliance.
    **/
-  public PolicyGovernanceResultWithRulesetsDTO status(StatusEnum status) {
+  public PolicyAdherenceDetailsDTO status(StatusEnum status) {
     this.status = status;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Status of the policy's governance compliance.")
+  @ApiModelProperty(example = "FOLLOWED", value = "Status of the policy's governance compliance.")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;
@@ -117,22 +118,22 @@ return null;
   }
 
   /**
-   * List of ruleset validation information.
+   * Compliance status of the artifacts attached to the policy.
    **/
-  public PolicyGovernanceResultWithRulesetsDTO rulesetValidationResults(List<RulesetValidationResultDTO> rulesetValidationResults) {
-    this.rulesetValidationResults = rulesetValidationResults;
+  public PolicyAdherenceDetailsDTO governedArtifacts(List<ArtifactComplianceForPolicyDTO> governedArtifacts) {
+    this.governedArtifacts = governedArtifacts;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of ruleset validation information.")
+  @ApiModelProperty(value = "Compliance status of the artifacts attached to the policy.")
       @Valid
-  @JsonProperty("rulesetValidationResults")
-  public List<RulesetValidationResultDTO> getRulesetValidationResults() {
-    return rulesetValidationResults;
+  @JsonProperty("governedArtifacts")
+  public List<ArtifactComplianceForPolicyDTO> getGovernedArtifacts() {
+    return governedArtifacts;
   }
-  public void setRulesetValidationResults(List<RulesetValidationResultDTO> rulesetValidationResults) {
-    this.rulesetValidationResults = rulesetValidationResults;
+  public void setGovernedArtifacts(List<ArtifactComplianceForPolicyDTO> governedArtifacts) {
+    this.governedArtifacts = governedArtifacts;
   }
 
 
@@ -144,27 +145,27 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PolicyGovernanceResultWithRulesetsDTO policyGovernanceResultWithRulesets = (PolicyGovernanceResultWithRulesetsDTO) o;
-    return Objects.equals(policyId, policyGovernanceResultWithRulesets.policyId) &&
-        Objects.equals(policyName, policyGovernanceResultWithRulesets.policyName) &&
-        Objects.equals(status, policyGovernanceResultWithRulesets.status) &&
-        Objects.equals(rulesetValidationResults, policyGovernanceResultWithRulesets.rulesetValidationResults);
+    PolicyAdherenceDetailsDTO policyAdherenceDetails = (PolicyAdherenceDetailsDTO) o;
+    return Objects.equals(policyId, policyAdherenceDetails.policyId) &&
+        Objects.equals(policyName, policyAdherenceDetails.policyName) &&
+        Objects.equals(status, policyAdherenceDetails.status) &&
+        Objects.equals(governedArtifacts, policyAdherenceDetails.governedArtifacts);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyId, policyName, status, rulesetValidationResults);
+    return Objects.hash(policyId, policyName, status, governedArtifacts);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PolicyGovernanceResultWithRulesetsDTO {\n");
+    sb.append("class PolicyAdherenceDetailsDTO {\n");
     
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    rulesetValidationResults: ").append(toIndentedString(rulesetValidationResults)).append("\n");
+    sb.append("    governedArtifacts: ").append(toIndentedString(governedArtifacts)).append("\n");
     sb.append("}");
     return sb.toString();
   }

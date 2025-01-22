@@ -21,16 +21,16 @@ package org.wso2.carbon.apimgt.governance.api.model;
 /**
  * This class represents an evaluation status of a request
  */
-public enum EvaluationStatus {
+public enum ComplianceEvaluationStatus {
     PENDING,
     PROCESSING;
 
-    public static EvaluationStatus fromString(String statusString) {
+    public static ComplianceEvaluationStatus fromString(String statusString) {
         if ("pending".equalsIgnoreCase(statusString)) {
-            return EvaluationStatus.PENDING;
+            return ComplianceEvaluationStatus.PENDING;
         } else if ("processing".equalsIgnoreCase(statusString)) {
-            return EvaluationStatus.PROCESSING;
+            return ComplianceEvaluationStatus.PROCESSING;
         }
-        return EvaluationStatus.PENDING;
+        return ComplianceEvaluationStatus.PENDING;
     }
 }

@@ -10,8 +10,9 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import java.io.File;
 
 import java.util.List;
 
@@ -21,6 +22,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public interface EvaluateComplianceApiService {
-      public Response evaluateCompliance(String artifactId, String artifactType, String governableState, InputStream targetFileInputStream, Attachment targetFileDetail, MessageContext messageContext) throws GovernanceException;
+public interface ArtifactComplianceApiService {
+      public Response getArtifactComplianceByArtifactId(String artifactId, MessageContext messageContext) throws GovernanceException;
+      public Response getArtifactComplianceForAllArtifacts(Integer limit, Integer offset, MessageContext messageContext) throws GovernanceException;
+      public Response getOrganizationalArtifactComplianceSummary(MessageContext messageContext) throws GovernanceException;
 }

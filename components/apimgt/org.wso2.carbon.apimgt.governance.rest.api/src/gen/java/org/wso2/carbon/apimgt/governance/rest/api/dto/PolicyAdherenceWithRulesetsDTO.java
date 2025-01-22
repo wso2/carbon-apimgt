@@ -6,11 +6,11 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
 import javax.validation.constraints.*;
 
 /**
- * Provides governance results of a policy.
+ * Adherence status of a policy with ruleset details.
  **/
 
 import io.swagger.annotations.*;
@@ -22,9 +22,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Provides governance results of a policy.")
+@ApiModel(description = "Adherence status of a policy with ruleset details.")
 
-public class PolicyGovernanceResultWithArtifactsDTO   {
+public class PolicyAdherenceWithRulesetsDTO   {
   
     private String policyId = null;
     private String policyName = null;
@@ -33,8 +33,7 @@ public class PolicyGovernanceResultWithArtifactsDTO   {
     @XmlEnum(String.class)
     public enum StatusEnum {
         FOLLOWED("FOLLOWED"),
-        VIOLATED("VIOLATED"),
-        UNAPPLIED("UNAPPLIED");
+        VIOLATED("VIOLATED");
         private String value;
 
         StatusEnum (String v) {
@@ -61,12 +60,12 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private List<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO> governedArtifacts = new ArrayList<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO>();
+    private List<RulesetValidationResultDTO> rulesetValidationResults = new ArrayList<RulesetValidationResultDTO>();
 
   /**
    * UUID of the policy.
    **/
-  public PolicyGovernanceResultWithArtifactsDTO policyId(String policyId) {
+  public PolicyAdherenceWithRulesetsDTO policyId(String policyId) {
     this.policyId = policyId;
     return this;
   }
@@ -84,7 +83,7 @@ return null;
   /**
    * Name of the policy.
    **/
-  public PolicyGovernanceResultWithArtifactsDTO policyName(String policyName) {
+  public PolicyAdherenceWithRulesetsDTO policyName(String policyName) {
     this.policyName = policyName;
     return this;
   }
@@ -102,13 +101,13 @@ return null;
   /**
    * Status of the policy&#39;s governance compliance.
    **/
-  public PolicyGovernanceResultWithArtifactsDTO status(StatusEnum status) {
+  public PolicyAdherenceWithRulesetsDTO status(StatusEnum status) {
     this.status = status;
     return this;
   }
 
   
-  @ApiModelProperty(example = "FOLLOWED", value = "Status of the policy's governance compliance.")
+  @ApiModelProperty(value = "Status of the policy's governance compliance.")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;
@@ -118,22 +117,22 @@ return null;
   }
 
   /**
-   * Governance results of the artifacts attached to the policy.
+   * List of ruleset validation information.
    **/
-  public PolicyGovernanceResultWithArtifactsDTO governedArtifacts(List<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO> governedArtifacts) {
-    this.governedArtifacts = governedArtifacts;
+  public PolicyAdherenceWithRulesetsDTO rulesetValidationResults(List<RulesetValidationResultDTO> rulesetValidationResults) {
+    this.rulesetValidationResults = rulesetValidationResults;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Governance results of the artifacts attached to the policy.")
+  @ApiModelProperty(value = "List of ruleset validation information.")
       @Valid
-  @JsonProperty("governedArtifacts")
-  public List<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO> getGovernedArtifacts() {
-    return governedArtifacts;
+  @JsonProperty("rulesetValidationResults")
+  public List<RulesetValidationResultDTO> getRulesetValidationResults() {
+    return rulesetValidationResults;
   }
-  public void setGovernedArtifacts(List<PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO> governedArtifacts) {
-    this.governedArtifacts = governedArtifacts;
+  public void setRulesetValidationResults(List<RulesetValidationResultDTO> rulesetValidationResults) {
+    this.rulesetValidationResults = rulesetValidationResults;
   }
 
 
@@ -145,27 +144,27 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PolicyGovernanceResultWithArtifactsDTO policyGovernanceResultWithArtifacts = (PolicyGovernanceResultWithArtifactsDTO) o;
-    return Objects.equals(policyId, policyGovernanceResultWithArtifacts.policyId) &&
-        Objects.equals(policyName, policyGovernanceResultWithArtifacts.policyName) &&
-        Objects.equals(status, policyGovernanceResultWithArtifacts.status) &&
-        Objects.equals(governedArtifacts, policyGovernanceResultWithArtifacts.governedArtifacts);
+    PolicyAdherenceWithRulesetsDTO policyAdherenceWithRulesets = (PolicyAdherenceWithRulesetsDTO) o;
+    return Objects.equals(policyId, policyAdherenceWithRulesets.policyId) &&
+        Objects.equals(policyName, policyAdherenceWithRulesets.policyName) &&
+        Objects.equals(status, policyAdherenceWithRulesets.status) &&
+        Objects.equals(rulesetValidationResults, policyAdherenceWithRulesets.rulesetValidationResults);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyId, policyName, status, governedArtifacts);
+    return Objects.hash(policyId, policyName, status, rulesetValidationResults);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PolicyGovernanceResultWithArtifactsDTO {\n");
+    sb.append("class PolicyAdherenceWithRulesetsDTO {\n");
     
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    governedArtifacts: ").append(toIndentedString(governedArtifacts)).append("\n");
+    sb.append("    rulesetValidationResults: ").append(toIndentedString(rulesetValidationResults)).append("\n");
     sb.append("}");
     return sb.toString();
   }

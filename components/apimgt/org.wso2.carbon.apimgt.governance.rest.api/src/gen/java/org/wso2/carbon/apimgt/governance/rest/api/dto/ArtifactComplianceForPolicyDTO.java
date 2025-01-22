@@ -6,6 +6,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
+/**
+ * Compliance status of an artifact for a specific policy.
+ **/
 
 import io.swagger.annotations.*;
 import java.util.Objects;
@@ -16,9 +19,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
+@ApiModel(description = "Compliance status of an artifact for a specific policy.")
 
-
-public class PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO   {
+public class ArtifactComplianceForPolicyDTO   {
   
     private String artifactId = null;
 
@@ -90,7 +93,7 @@ return null;
   /**
    * UUID of the artifact.
    **/
-  public PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO artifactId(String artifactId) {
+  public ArtifactComplianceForPolicyDTO artifactId(String artifactId) {
     this.artifactId = artifactId;
     return this;
   }
@@ -108,7 +111,7 @@ return null;
   /**
    * Type of the artifact.
    **/
-  public PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO artifactType(ArtifactTypeEnum artifactType) {
+  public ArtifactComplianceForPolicyDTO artifactType(ArtifactTypeEnum artifactType) {
     this.artifactType = artifactType;
     return this;
   }
@@ -126,7 +129,7 @@ return null;
   /**
    * Name of the artifact.
    **/
-  public PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO artifactName(String artifactName) {
+  public ArtifactComplianceForPolicyDTO artifactName(String artifactName) {
     this.artifactName = artifactName;
     return this;
   }
@@ -142,15 +145,15 @@ return null;
   }
 
   /**
-   * Status of the artifact&#39;s governance compliance.
+   * Status of the artifact&#39;s compliance to the policy.
    **/
-  public PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO status(StatusEnum status) {
+  public ArtifactComplianceForPolicyDTO status(StatusEnum status) {
     this.status = status;
     return this;
   }
 
   
-  @ApiModelProperty(example = "COMPLAINT", value = "Status of the artifact's governance compliance.")
+  @ApiModelProperty(example = "COMPLAINT", value = "Status of the artifact's compliance to the policy.")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;
@@ -168,11 +171,11 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO policyGovernanceResultWithArtifactsGovernedArtifacts = (PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO) o;
-    return Objects.equals(artifactId, policyGovernanceResultWithArtifactsGovernedArtifacts.artifactId) &&
-        Objects.equals(artifactType, policyGovernanceResultWithArtifactsGovernedArtifacts.artifactType) &&
-        Objects.equals(artifactName, policyGovernanceResultWithArtifactsGovernedArtifacts.artifactName) &&
-        Objects.equals(status, policyGovernanceResultWithArtifactsGovernedArtifacts.status);
+    ArtifactComplianceForPolicyDTO artifactComplianceForPolicy = (ArtifactComplianceForPolicyDTO) o;
+    return Objects.equals(artifactId, artifactComplianceForPolicy.artifactId) &&
+        Objects.equals(artifactType, artifactComplianceForPolicy.artifactType) &&
+        Objects.equals(artifactName, artifactComplianceForPolicy.artifactName) &&
+        Objects.equals(status, artifactComplianceForPolicy.status);
   }
 
   @Override
@@ -183,7 +186,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PolicyGovernanceResultWithArtifactsGovernedArtifactsDTO {\n");
+    sb.append("class ArtifactComplianceForPolicyDTO {\n");
     
     sb.append("    artifactId: ").append(toIndentedString(artifactId)).append("\n");
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
