@@ -51,6 +51,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Arrays;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class APIPublisherForNewPortal {
@@ -394,9 +396,11 @@ public class APIPublisherForNewPortal {
     }
 
     private static SSLConnectionSocketFactory generateSSLSF() throws APIManagementException {
+        Map<String, String> serverSecurityStores = APIUtil.getServerSecurityStores();
+        char[] keyStorePassword = serverSecurityStores.get("keyStorePassword").toCharArray();
+        char[] keyPassword = serverSecurityStores.get("keyPassword").toCharArray();
+        char[] trustStorePassword = serverSecurityStores.get("trustStorePassword").toCharArray();
         try {
-            Map<String, String> serverSecurityStores = APIUtil.getServerSecurityStores();
-
             KeyStore keyStore;
             String keyStoreType = serverSecurityStores.get("keyStoreType");
             if (keyStoreType != null) {
@@ -406,21 +410,26 @@ public class APIPublisherForNewPortal {
             }
 
             try (FileInputStream keyStoreStream = new FileInputStream(serverSecurityStores.get("keyStoreLocation"))) {
-                keyStore.load(keyStoreStream, serverSecurityStores.get("keyStorePassword").toCharArray());
+                keyStore.load(keyStoreStream, keyStorePassword);
             }
             return new SSLConnectionSocketFactory(
                     SSLContexts.custom()
                             .loadKeyMaterial(
                                     keyStore,
-                                    serverSecurityStores.get("keyPassword").toCharArray(),
+                                    keyPassword,
                                     (aliases, socket) -> serverSecurityStores.get("keyAlias"))
                             .loadTrustMaterial(
                                     new File(serverSecurityStores.get("trustStoreLocation")),
-                                    serverSecurityStores.get("trustStorePassword").toCharArray())
+                                    trustStorePassword)
                             .build()
             );
         } catch (GeneralSecurityException | IOException e) {
             throw new APIManagementException(e);
+        } finally {
+            // Clear sensitive data from memory
+            Arrays.fill(keyStorePassword, ' ');
+            Arrays.fill(keyPassword, ' ');
+            Arrays.fill(trustStorePassword, ' ');
         }
     }
 }
