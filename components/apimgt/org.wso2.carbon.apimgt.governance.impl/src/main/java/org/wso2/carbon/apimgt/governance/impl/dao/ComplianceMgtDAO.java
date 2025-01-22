@@ -20,14 +20,15 @@ package org.wso2.carbon.apimgt.governance.impl.dao;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.EvaluationRequest;
-import org.wso2.carbon.apimgt.governance.api.model.EvaluationStatus;
-import org.wso2.carbon.apimgt.governance.api.model.ValidationResult;
+import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
+import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
+import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationStatus;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 
 import java.util.List;
 
 /**
- * This interface represents the DAO class related assessing compliance of APIs
+ * This interface represents the DAO class related assessing compliance
  */
 public interface ComplianceMgtDAO {
 
@@ -51,7 +52,7 @@ public interface ComplianceMgtDAO {
      * @return List of pending evaluation requests
      * @throws GovernanceException If an error occurs while getting the pending evaluation requests
      */
-    List<EvaluationRequest> getPendingEvaluationRequests() throws GovernanceException;
+    List<ComplianceEvaluationRequest> getPendingComplianceEvaluationRequests() throws GovernanceException;
 
     /**
      * Update the evaluation status of a request
@@ -60,7 +61,7 @@ public interface ComplianceMgtDAO {
      * @param status    Evaluation status
      * @throws GovernanceException If an error occurs while updating the evaluation status
      */
-    void updateEvaluationStatus(String requestId, EvaluationStatus status) throws GovernanceException;
+    void updateComplianceEvaluationStatus(String requestId, ComplianceEvaluationStatus status) throws GovernanceException;
 
     /**
      * Delete an evaluation request
@@ -68,15 +69,23 @@ public interface ComplianceMgtDAO {
      * @param requestId Evaluation request ID
      * @throws GovernanceException If an error occurs while deleting the evaluation request
      */
-    void deleteEvaluationRequest(String requestId) throws GovernanceException;
+    void deleteComplianceEvaluationRequest(String requestId) throws GovernanceException;
 
     /**
-     * Add a validation result
+     * Add a evaluation result
      *
-     * @param validationResult Validation result
-     * @throws GovernanceException If an error occurs while adding the validation result
+     * @param result Evaluation result
+     * @throws GovernanceException If an error occurs while adding the compliance evaluation result
      */
-    void addValidationResult(ValidationResult validationResult) throws GovernanceException;
+    void addComplianceEvaluationResult(ComplianceEvaluationResult result) throws GovernanceException;
+
+    /**
+     * Add a rule violation
+     *
+     * @param ruleViolation Rule violation
+     * @throws GovernanceException If an error occurs while adding the rule violation
+     */
+    void addRuleViolation(RuleViolation ruleViolation) throws GovernanceException;
 
 
 }

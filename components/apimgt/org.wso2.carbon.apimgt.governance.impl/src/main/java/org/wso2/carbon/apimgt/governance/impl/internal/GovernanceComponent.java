@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.governance.impl.EvaluationRequestScheduler;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceEvaluationScheduler;
 import org.wso2.carbon.apimgt.governance.impl.observer.GovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
@@ -69,7 +69,7 @@ public class GovernanceComponent {
                 new GovernanceConfigurationServiceImpl(configuration);
         ServiceReferenceHolder.getInstance().setGovernanceConfigurationService(configurationService);
         GovernanceDBUtil.initialize();
-        EvaluationRequestScheduler.initialize();
+        ComplianceEvaluationScheduler.initialize();
 
         String migrationEnabled = System.getProperty(GovernanceConstants.MIGRATE);
         if (migrationEnabled == null) {
@@ -83,7 +83,7 @@ public class GovernanceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-        EvaluationRequestScheduler.shutdown();
+        ComplianceEvaluationScheduler.shutdown();
         if (log.isDebugEnabled()) {
             log.debug("Deactivating Governance component");
         }

@@ -6,11 +6,11 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyGovernanceResultGovernedArtifactsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceForPolicyDTO;
 import javax.validation.constraints.*;
 
 /**
- * Provides governance results of a policy.
+ * Provides adherence details of a policy.
  **/
 
 import io.swagger.annotations.*;
@@ -22,9 +22,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Provides governance results of a policy.")
+@ApiModel(description = "Provides adherence details of a policy.")
 
-public class PolicyGovernanceResultDTO   {
+public class PolicyAdherenceDetailsDTO   {
   
     private String policyId = null;
     private String policyName = null;
@@ -61,12 +61,12 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private List<PolicyGovernanceResultGovernedArtifactsDTO> governedArtifacts = new ArrayList<PolicyGovernanceResultGovernedArtifactsDTO>();
+    private List<ArtifactComplianceForPolicyDTO> governedArtifacts = new ArrayList<ArtifactComplianceForPolicyDTO>();
 
   /**
    * UUID of the policy.
    **/
-  public PolicyGovernanceResultDTO policyId(String policyId) {
+  public PolicyAdherenceDetailsDTO policyId(String policyId) {
     this.policyId = policyId;
     return this;
   }
@@ -84,7 +84,7 @@ return null;
   /**
    * Name of the policy.
    **/
-  public PolicyGovernanceResultDTO policyName(String policyName) {
+  public PolicyAdherenceDetailsDTO policyName(String policyName) {
     this.policyName = policyName;
     return this;
   }
@@ -102,7 +102,7 @@ return null;
   /**
    * Status of the policy&#39;s governance compliance.
    **/
-  public PolicyGovernanceResultDTO status(StatusEnum status) {
+  public PolicyAdherenceDetailsDTO status(StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -118,21 +118,21 @@ return null;
   }
 
   /**
-   * Governance results of the artifacts attached to the policy.
+   * Compliance status of the artifacts attached to the policy.
    **/
-  public PolicyGovernanceResultDTO governedArtifacts(List<PolicyGovernanceResultGovernedArtifactsDTO> governedArtifacts) {
+  public PolicyAdherenceDetailsDTO governedArtifacts(List<ArtifactComplianceForPolicyDTO> governedArtifacts) {
     this.governedArtifacts = governedArtifacts;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Governance results of the artifacts attached to the policy.")
+  @ApiModelProperty(value = "Compliance status of the artifacts attached to the policy.")
       @Valid
   @JsonProperty("governedArtifacts")
-  public List<PolicyGovernanceResultGovernedArtifactsDTO> getGovernedArtifacts() {
+  public List<ArtifactComplianceForPolicyDTO> getGovernedArtifacts() {
     return governedArtifacts;
   }
-  public void setGovernedArtifacts(List<PolicyGovernanceResultGovernedArtifactsDTO> governedArtifacts) {
+  public void setGovernedArtifacts(List<ArtifactComplianceForPolicyDTO> governedArtifacts) {
     this.governedArtifacts = governedArtifacts;
   }
 
@@ -145,11 +145,11 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PolicyGovernanceResultDTO policyGovernanceResult = (PolicyGovernanceResultDTO) o;
-    return Objects.equals(policyId, policyGovernanceResult.policyId) &&
-        Objects.equals(policyName, policyGovernanceResult.policyName) &&
-        Objects.equals(status, policyGovernanceResult.status) &&
-        Objects.equals(governedArtifacts, policyGovernanceResult.governedArtifacts);
+    PolicyAdherenceDetailsDTO policyAdherenceDetails = (PolicyAdherenceDetailsDTO) o;
+    return Objects.equals(policyId, policyAdherenceDetails.policyId) &&
+        Objects.equals(policyName, policyAdherenceDetails.policyName) &&
+        Objects.equals(status, policyAdherenceDetails.status) &&
+        Objects.equals(governedArtifacts, policyAdherenceDetails.governedArtifacts);
   }
 
   @Override
@@ -160,7 +160,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PolicyGovernanceResultDTO {\n");
+    sb.append("class PolicyAdherenceDetailsDTO {\n");
     
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");

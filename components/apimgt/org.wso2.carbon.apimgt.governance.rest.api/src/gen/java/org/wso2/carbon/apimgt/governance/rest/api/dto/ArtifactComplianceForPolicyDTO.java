@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * Provides governance results of an artifact.
+ * Compliance status of an artifact for a specific policy.
  **/
 
 import io.swagger.annotations.*;
@@ -19,11 +19,42 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Provides governance results of an artifact.")
+@ApiModel(description = "Compliance status of an artifact for a specific policy.")
 
-public class ArtifactGovernanceResultInfoDTO   {
+public class ArtifactComplianceForPolicyDTO   {
   
     private String artifactId = null;
+
+          @XmlType(name="ArtifactTypeEnum")
+    @XmlEnum(String.class)
+    public enum ArtifactTypeEnum {
+        API("API");
+        private String value;
+
+        ArtifactTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ArtifactTypeEnum fromValue(String v) {
+            for (ArtifactTypeEnum b : ArtifactTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    } 
+    private ArtifactTypeEnum artifactType = null;
     private String artifactName = null;
 
           @XmlType(name="StatusEnum")
@@ -62,7 +93,7 @@ return null;
   /**
    * UUID of the artifact.
    **/
-  public ArtifactGovernanceResultInfoDTO artifactId(String artifactId) {
+  public ArtifactComplianceForPolicyDTO artifactId(String artifactId) {
     this.artifactId = artifactId;
     return this;
   }
@@ -78,9 +109,27 @@ return null;
   }
 
   /**
+   * Type of the artifact.
+   **/
+  public ArtifactComplianceForPolicyDTO artifactType(ArtifactTypeEnum artifactType) {
+    this.artifactType = artifactType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "API", value = "Type of the artifact.")
+  @JsonProperty("artifactType")
+  public ArtifactTypeEnum getArtifactType() {
+    return artifactType;
+  }
+  public void setArtifactType(ArtifactTypeEnum artifactType) {
+    this.artifactType = artifactType;
+  }
+
+  /**
    * Name of the artifact.
    **/
-  public ArtifactGovernanceResultInfoDTO artifactName(String artifactName) {
+  public ArtifactComplianceForPolicyDTO artifactName(String artifactName) {
     this.artifactName = artifactName;
     return this;
   }
@@ -96,15 +145,15 @@ return null;
   }
 
   /**
-   * Status of the artifact&#39;s governance compliance.
+   * Status of the artifact&#39;s compliance to the policy.
    **/
-  public ArtifactGovernanceResultInfoDTO status(StatusEnum status) {
+  public ArtifactComplianceForPolicyDTO status(StatusEnum status) {
     this.status = status;
     return this;
   }
 
   
-  @ApiModelProperty(example = "COMPLAINT", value = "Status of the artifact's governance compliance.")
+  @ApiModelProperty(example = "COMPLAINT", value = "Status of the artifact's compliance to the policy.")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;
@@ -122,23 +171,25 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ArtifactGovernanceResultInfoDTO artifactGovernanceResultInfo = (ArtifactGovernanceResultInfoDTO) o;
-    return Objects.equals(artifactId, artifactGovernanceResultInfo.artifactId) &&
-        Objects.equals(artifactName, artifactGovernanceResultInfo.artifactName) &&
-        Objects.equals(status, artifactGovernanceResultInfo.status);
+    ArtifactComplianceForPolicyDTO artifactComplianceForPolicy = (ArtifactComplianceForPolicyDTO) o;
+    return Objects.equals(artifactId, artifactComplianceForPolicy.artifactId) &&
+        Objects.equals(artifactType, artifactComplianceForPolicy.artifactType) &&
+        Objects.equals(artifactName, artifactComplianceForPolicy.artifactName) &&
+        Objects.equals(status, artifactComplianceForPolicy.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifactId, artifactName, status);
+    return Objects.hash(artifactId, artifactType, artifactName, status);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ArtifactGovernanceResultInfoDTO {\n");
+    sb.append("class ArtifactComplianceForPolicyDTO {\n");
     
     sb.append("    artifactId: ").append(toIndentedString(artifactId)).append("\n");
+    sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    artifactName: ").append(toIndentedString(artifactName)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");

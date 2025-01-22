@@ -18,7 +18,10 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-public class EvaluationRequest {
+/**
+ * This class represents a compliance evaluation request
+ */
+public class ComplianceEvaluationRequest {
 
     private String id;
 
@@ -30,7 +33,7 @@ public class EvaluationRequest {
 
     private String organization;
 
-    private EvaluationStatus evaluationStatus;
+    private ComplianceEvaluationStatus evaluationStatus;
 
     public String getId() {
         return id;
@@ -72,11 +75,11 @@ public class EvaluationRequest {
         this.organization = organization;
     }
 
-    public EvaluationStatus getEvaluationStatus() {
+    public ComplianceEvaluationStatus getEvaluationStatus() {
         return evaluationStatus;
     }
 
-    public void setEvaluationStatus(EvaluationStatus evaluationStatus) {
+    public void setEvaluationStatus(ComplianceEvaluationStatus evaluationStatus) {
         this.evaluationStatus = evaluationStatus;
     }
 }

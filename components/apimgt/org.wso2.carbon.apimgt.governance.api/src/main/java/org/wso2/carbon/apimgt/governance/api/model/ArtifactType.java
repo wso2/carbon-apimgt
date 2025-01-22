@@ -26,7 +26,7 @@ public enum ArtifactType {
     SOAP_API,
     GRAPHQL_API,
     ASYNC_API,
-    ALL_API;
+    API;
 
     public static ArtifactType fromString(String text) {
         if ("rest_api".equalsIgnoreCase(text)) {
@@ -37,10 +37,10 @@ public enum ArtifactType {
             return GRAPHQL_API;
         } else if ("async_api".equalsIgnoreCase(text)) {
             return ASYNC_API;
-        } else if ("all_api".equalsIgnoreCase(text)) {
-            return ALL_API;
+        } else if ("api".equalsIgnoreCase(text)) {
+            return API;
         }
-        return REST_API;
+        return API;
     }
 
     /**
@@ -51,23 +51,22 @@ public enum ArtifactType {
      */
     public static boolean isArtifactAPI(ArtifactType artifactType) {
         return artifactType == REST_API || artifactType == SOAP_API ||
-                artifactType == GRAPHQL_API || artifactType == ASYNC_API;
+                artifactType == GRAPHQL_API || artifactType == ASYNC_API
+                || artifactType == API;
     }
 
     // TODO: Fix logic to get artifact type from APIM artifact type
     public static ArtifactType fromAPIMArtifactType(String artifactType) {
-        if ("rest_api".equalsIgnoreCase(artifactType)) {
+        if ("rest".equalsIgnoreCase(artifactType)) {
             return REST_API;
-        } else if ("soap_api".equalsIgnoreCase(artifactType)) {
+        } else if ("soap".equalsIgnoreCase(artifactType)) {
             return SOAP_API;
-        } else if ("graphql_api".equalsIgnoreCase(artifactType)) {
+        } else if ("graphql".equalsIgnoreCase(artifactType)) {
             return GRAPHQL_API;
-        } else if ("async_api".equalsIgnoreCase(artifactType)) {
+        } else if ("async".equalsIgnoreCase(artifactType)) {
             return ASYNC_API;
-        } else if ("all_api".equalsIgnoreCase(artifactType)) {
-            return ALL_API;
         }
-        return REST_API;
+        return null;
     }
 
 

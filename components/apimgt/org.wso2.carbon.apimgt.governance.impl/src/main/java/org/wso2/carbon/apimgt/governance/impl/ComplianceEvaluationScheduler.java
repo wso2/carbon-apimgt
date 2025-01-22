@@ -42,16 +42,17 @@ import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 /**
- * Scheduler to process pending governance evaluation requests.
+ * Scheduler to process pending compliance evaluation requests.
  */
-public class EvaluationRequestScheduler {
+public class ComplianceEvaluationScheduler {
 
-    private static final Log log = LogFactory.getLog(EvaluationRequestScheduler.class);
+    private static final Log log = LogFactory.getLog(ComplianceEvaluationScheduler.class);
     private static final int THREAD_POOL_SIZE = 10;
     private static final int QUEUE_SIZE = 255;
     private static final int CHECK_INTERVAL_MINUTES = 5;
     private static ScheduledExecutorService scheduler;
     private static ThreadPoolExecutor processorPool;
+    private static ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
 
     /**
      * Initialize the evaluation request scheduler.
@@ -63,7 +64,7 @@ public class EvaluationRequestScheduler {
         processorPool = createProcessorPool();
 
         scheduler.scheduleAtFixedRate(
-                EvaluationRequestScheduler::processPendingRequests,
+                ComplianceEvaluationScheduler::processPendingRequests,
                 0, CHECK_INTERVAL_MINUTES, TimeUnit.MINUTES);
     }
 
@@ -90,7 +91,7 @@ public class EvaluationRequestScheduler {
             log.debug("Checking for pending evaluation requests...");
         }
 
-        List<EvaluationRequest> pendingRequests = fetchPendingRequests();
+        List<ComplianceEvaluationRequest> pendingRequests = fetchPendingRequests();
 
         if (pendingRequests == null || pendingRequests.isEmpty()) {
             if (log.isDebugEnabled()) {
@@ -99,7 +100,7 @@ public class EvaluationRequestScheduler {
             return;
         }
 
-        for (EvaluationRequest request : pendingRequests) {
+        for (ComplianceEvaluationRequest request : pendingRequests) {
             processorPool.submit(() -> processRequest(request));
         }
     }
@@ -109,10 +110,9 @@ public class EvaluationRequestScheduler {
      *
      * @return List of pending requests.
      */
-    private static List<EvaluationRequest> fetchPendingRequests() {
+    private static List<ComplianceEvaluationRequest> fetchPendingRequests() {
         try {
-            ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
-            return complianceMgtDAO.getPendingEvaluationRequests();
+            return complianceMgtDAO.getPendingComplianceEvaluationRequests();
         } catch (GovernanceException e) {
             log.error("Error fetching pending requests: " + e.getMessage(), e);
         }
@@ -124,7 +124,7 @@ public class EvaluationRequestScheduler {
      *
      * @param request The evaluation request to process.
      */
-    private static void processRequest(EvaluationRequest request) {
+    private static void processRequest(ComplianceEvaluationRequest request) {
 
         String artifactId = request.getArtifactId();
         ArtifactType artifactType = request.getArtifactType();
@@ -134,8 +134,7 @@ public class EvaluationRequestScheduler {
                 .getValidationEngineService().getValidationEngine();
 
         try {
-            ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
-            complianceMgtDAO.updateEvaluationStatus(request.getId(), EvaluationStatus.PROCESSING);
+            complianceMgtDAO.updateComplianceEvaluationStatus(request.getId(), ComplianceEvaluationStatus.PROCESSING);
 
             // If artifact does not exist, skip evaluation
             if (!GovernanceUtil.isArtifactAvailable(artifactId, artifactType)) {
@@ -170,7 +169,7 @@ public class EvaluationRequestScheduler {
 
                 // Check if ruleset's artifact type matches with the artifact's type
                 if ((ArtifactType.isArtifactAPI(artifactType) &&
-                        ArtifactType.ALL_API.equals(rulesetArtifactType)) ||
+                        ArtifactType.API.equals(rulesetArtifactType)) ||
                         (rulesetArtifactType.equals(request.getArtifactType()))) {
 
                     // Get target file content from artifact project based on ruleType
@@ -178,14 +177,10 @@ public class EvaluationRequestScheduler {
                     String contentToValidate = ruleTypeToContentMap.get(ruleType);
 
                     // Send target content and ruleset for validation
-                    List<ValidationResult> validationResults = validationEngine.validate(
+                    List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
-                    for (ValidationResult result : validationResults) {
-                        result.setOrganization(organization);
-                        result.setPolicyId(policyId);
-                        result.setArtifactId(artifactId);
-                    }
-                    saveValidationResults(validationResults);
+
+                    saveEvaluationResults(artifactId, policyId, ruleViolations);
 
                 } else {
                     if (log.isDebugEnabled()) {
@@ -196,7 +191,7 @@ public class EvaluationRequestScheduler {
             }
 
             // Delete the evaluation request after processing completes
-            complianceMgtDAO.deleteEvaluationRequest(request.getId());
+            complianceMgtDAO.deleteComplianceEvaluationRequest(request.getId());
 
         } catch (GovernanceException e) {
             log.error("Error processing evaluation request: " + request.getId(), e);
@@ -204,21 +199,29 @@ public class EvaluationRequestScheduler {
     }
 
     /**
-     * Save validation results.
+     * Save compliance evaluation results to the database.
      *
-     * @param results Validation results.
+     * @param artifactId     ID of the artifact.
+     * @param policyId       ID of the policy.
+     * @param ruleViolations List of rule violations.
      */
-    private static void saveValidationResults(List<ValidationResult> results) {
-        for (ValidationResult result : results) {
-            try {
-                ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
-                complianceMgtDAO.addValidationResult(result);
-            } catch (GovernanceException e) {
-                log.error("Error saving validation result: " + result, e);
+    private static void saveEvaluationResults(String artifactId, String policyId,
+                                              List<RuleViolation> ruleViolations) {
+        try {
+            ComplianceEvaluationResult result = new ComplianceEvaluationResult(artifactId,
+                    policyId, ruleViolations.isEmpty());
+            complianceMgtDAO.addComplianceEvaluationResult(result);
+
+            for (RuleViolation violation : ruleViolations) {
+                violation.setPolicyId(policyId);
+                violation.setArtifactId(artifactId);
+                complianceMgtDAO.addRuleViolation(violation);
             }
+        } catch (GovernanceException e) {
+            log.error("Error saving governance result for artifact ID: " + artifactId, e);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Validation results saved: " + results);
+            log.debug("New governance result saved for artifact ID: " + artifactId);
         }
     }
 
