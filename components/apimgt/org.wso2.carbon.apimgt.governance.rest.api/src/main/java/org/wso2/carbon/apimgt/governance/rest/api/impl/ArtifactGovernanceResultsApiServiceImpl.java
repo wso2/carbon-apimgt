@@ -43,6 +43,7 @@ public class ArtifactGovernanceResultsApiServiceImpl implements ArtifactGovernan
 
     public Response getGovernanceResultsByArtifactId(String artifactId, MessageContext messageContext) {
 
+        ArtifactGovernanceResultDTO artifactGovernanceResultDTO = new ArtifactGovernanceResultDTO();
 
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();

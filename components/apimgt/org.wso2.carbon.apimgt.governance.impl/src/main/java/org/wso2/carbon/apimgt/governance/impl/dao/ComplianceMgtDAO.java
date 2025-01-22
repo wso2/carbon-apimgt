@@ -73,15 +73,12 @@ public interface ComplianceMgtDAO {
     /**
      * Add a governance result
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param policyId     Policy ID
-     * @param organization Organization
-     * @param isPassed     Whether the evaluation passed
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @param isPassed   Whether the evaluation passed
      * @throws GovernanceException If an error occurs while adding the governance result
      */
-    void addGovernanceResult(String artifactId, ArtifactType artifactType, String policyId,
-                             String organization, boolean isPassed) throws GovernanceException;
+    void addGovernanceResult(String artifactId, String policyId, boolean isPassed) throws GovernanceException;
 
     /**
      * Add a rule violation

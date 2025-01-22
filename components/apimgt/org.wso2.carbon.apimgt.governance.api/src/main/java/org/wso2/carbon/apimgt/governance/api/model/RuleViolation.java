@@ -22,20 +22,11 @@ package org.wso2.carbon.apimgt.governance.api.model;
  * This class represents a rule violation.
  */
 public class RuleViolation {
-    private String organization; // Organization in which the violation occurred
     private String artifactId; // Artifact which contains the violation
     private String policyId; // Policy which was violated
     private String rulesetId; // Ruleset which contains the violated rule
     private String ruleCode;  // Code of the violated rule
     private String violatedPath; // Path in which the violation occurred
-
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
-    }
 
     public String getArtifactId() {
         return artifactId;

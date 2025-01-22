@@ -167,9 +167,14 @@ public class SQLConstants {
                     "WHERE GOV_POLICY_LABEL.POLICY_ID IS NULL " +
                     "AND GOV_POLICY_GOVERNABLE_STATE.STATE = ? " +
                     "AND GOV_POLICY.ORGANIZATION = ?";
+
+    public static final String ADD_GOV_ARTIFACT_INFO = "INSERT INTO GOV_ARTIFACT_INFO " +
+            "(ARTIFACT_ID, ARTIFACT_TYPE, ORGANIZATION) " +
+            "VALUES (?, ?, ?)";
+
     public static final String ADD_GOV_EVALUATION_REQUEST = "INSERT INTO GOV_EVALUATION_REQUEST " +
-            "(REQUEST_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, ORGANIZATION) " +
-            "VALUES (?, ?, ?, ?, ?, ?)";
+            "(REQUEST_ID, ARTIFACT_ID, POLICY_ID) " +
+            "VALUES (?, ?, ?)";
 
     public static final String GET_PENDING_EVALUATION_REQUESTS = "SELECT " +
             "REQUEST_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, ORGANIZATION " +
@@ -182,11 +187,12 @@ public class SQLConstants {
             " WHERE REQUEST_ID = ?";
 
     public static final String ADD_GOV_EVALUATION_RESULT = "INSERT INTO GOV_EVALUATION_RESULT " +
-            "(RESULT_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, ORGANIZATION, EVALUATION_RESULT) " +
-            "VALUES (?, ?, ?, ?, ?, ?)";
+            "(RESULT_ID, ARTIFACT_ID, POLICY_ID, EVALUATION_RESULT) " +
+            "VALUES (?, ?, ?, ?)";
 
     public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION " +
-            "(VIOLATION_ID, ARTIFACT_ID, POLICY_ID, RULESET_ID, RULE_CODE, VALIDATED_PATH, ORGANIZATION) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+            "(VIOLATION_ID, ARTIFACT_ID, POLICY_ID, RULESET_ID, RULE_CODE, VIOLATED_PATH) " +
+            "VALUES (?, ?, ?, ?, ?, ?)";
+
 
 }

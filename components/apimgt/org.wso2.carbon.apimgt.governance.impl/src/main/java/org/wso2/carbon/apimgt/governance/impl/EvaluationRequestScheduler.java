@@ -170,7 +170,7 @@ public class EvaluationRequestScheduler {
 
                 // Check if ruleset's artifact type matches with the artifact's type
                 if ((ArtifactType.isArtifactAPI(artifactType) &&
-                        ArtifactType.ALL_API.equals(rulesetArtifactType)) ||
+                        ArtifactType.API.equals(rulesetArtifactType)) ||
                         (rulesetArtifactType.equals(request.getArtifactType()))) {
 
                     // Get target file content from artifact project based on ruleType
@@ -181,7 +181,7 @@ public class EvaluationRequestScheduler {
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
 
-                    saveGovernanceResults(artifactId, artifactType, policyId, ruleViolations, organization);
+                    saveGovernanceResults(artifactId, policyId, ruleViolations);
 
                 } else {
                     if (log.isDebugEnabled()) {
@@ -203,20 +203,16 @@ public class EvaluationRequestScheduler {
      * Save governance evaluation results to the database.
      *
      * @param artifactId     ID of the artifact.
-     * @param artifactType   Type of the artifact.
      * @param policyId       ID of the policy.
      * @param ruleViolations List of rule violations.
-     * @param organization   Organization
      */
-    private static void saveGovernanceResults(String artifactId, ArtifactType artifactType, String policyId,
-                                              List<RuleViolation> ruleViolations, String organization) {
+    private static void saveGovernanceResults(String artifactId, String policyId,
+                                              List<RuleViolation> ruleViolations) {
         ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
         try {
-            complianceMgtDAO.addGovernanceResult(artifactId, artifactType, policyId, organization,
-                    ruleViolations.isEmpty());
+            complianceMgtDAO.addGovernanceResult(artifactId, policyId, ruleViolations.isEmpty());
 
             for (RuleViolation violation : ruleViolations) {
-                violation.setOrganization(organization);
                 violation.setPolicyId(policyId);
                 violation.setArtifactId(artifactId);
                 complianceMgtDAO.addRuleViolation(violation);

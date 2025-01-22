@@ -62,31 +62,52 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         return INSTANCE;
     }
 
+
     /**
      * Add an artifact compliance evaluation request event
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
      * @param policyId     Policy ID
-     * @param organization Organization
      * @throws GovernanceException If an error occurs while adding the artifact
      *                             compliance evaluation request event
      */
     @Override
     public void addComplianceEvaluationRequest(String artifactId, ArtifactType artifactType,
-                                               String policyId,
-                                               String organization) throws GovernanceException {
+                                               String policyId, String organization) throws GovernanceException {
         String SQLQuery = SQLConstants.ADD_GOV_EVALUATION_REQUEST;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            addGovernanceArtifactInfo(artifactId, artifactType, organization, connection);
             prepStmnt.setString(1, GovernanceUtil.generateUUID());
             prepStmnt.setString(2, artifactId);
-            prepStmnt.setString(3, String.valueOf(artifactType));
-            prepStmnt.setString(4, policyId);
-            prepStmnt.setString(6, organization);
+            prepStmnt.setString(3, policyId);
             prepStmnt.executeUpdate();
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_PROCESSING_GOVERNANCE_EVALUATION_REQUEST,
+                    e, artifactId, organization);
+        }
+    }
+
+    /**
+     * Add an artifact governance event
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @param connection   Connection
+     * @throws GovernanceException If an error occurs while adding the artifact governance event
+     */
+    private void addGovernanceArtifactInfo(String artifactId, ArtifactType artifactType, String organization,
+                                           Connection connection) throws GovernanceException {
+        String SQLQuery = SQLConstants.ADD_GOV_ARTIFACT_INFO;
+        try (PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            prepStmnt.setString(2, String.valueOf(artifactType));
+            prepStmnt.setString(3, organization);
+            prepStmnt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SAVING_ARTIFACT_INFO,
                     e, artifactId, organization);
         }
     }
@@ -168,32 +189,27 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     /**
      * Add a governance result
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param policyId     Policy ID
-     * @param organization Organization
-     * @param isPassed     Whether the evaluation passed
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @param isPassed   Whether the evaluation passed
      * @throws GovernanceException If an error occurs while adding the governance result
      */
     @Override
-    public void addGovernanceResult(String artifactId, ArtifactType artifactType,
-                                    String policyId, String organization, boolean isPassed) throws GovernanceException {
+    public void addGovernanceResult(String artifactId,
+                                    String policyId, boolean isPassed) throws GovernanceException {
         String SQLQuery = SQLConstants.ADD_GOV_EVALUATION_RESULT;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
             prepStmnt.setString(1, GovernanceUtil.generateUUID());
             prepStmnt.setString(2, artifactId);
-            prepStmnt.setString(3, String.valueOf(artifactType));
-            prepStmnt.setString(4, policyId);
-            prepStmnt.setString(5, organization);
-            prepStmnt.setInt(6, isPassed ? 1 : 0);
+            prepStmnt.setString(3, policyId);
+            prepStmnt.setInt(4, isPassed ? 1 : 0);
             prepStmnt.executeUpdate();
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SAVING_GOVERNANCE_RESULT,
-                    e, artifactId, organization);
+                    e, artifactId);
         }
     }
-
 
     /**
      * Add a rule violation
@@ -212,11 +228,10 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             prepStmnt.setString(4, ruleViolation.getRulesetId());
             prepStmnt.setString(5, ruleViolation.getRuleCode());
             prepStmnt.setString(6, ruleViolation.getViolatedPath());
-            prepStmnt.setString(7, ruleViolation.getOrganization());
             prepStmnt.executeUpdate();
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SAVING_RULE_VIOLATION,
-                    e, ruleViolation.getArtifactId(), ruleViolation.getOrganization());
+                    e, ruleViolation.getArtifactId());
         }
     }
 
