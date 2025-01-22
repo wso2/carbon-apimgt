@@ -78,6 +78,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String testKey;
     private String contextTemplate;
     private Set<String> availableTierNames;
+    private Set<OrganizationTiers> availableTiersForOrganizations;
     private Set<String> environments;
     private CORSConfiguration corsConfiguration;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
@@ -462,6 +463,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setAvailableTierNames(Set<String> availableTierNames) {
         this.availableTierNames = availableTierNames;
+    }
+
+    public Set<OrganizationTiers> getAvailableTiersForOrganizations() {
+        return availableTiersForOrganizations;
+    }
+
+    public void setAvailableTiersForOrganizations(Set<OrganizationTiers> availableTiersForOrganizations) {
+        this.availableTiersForOrganizations = availableTiersForOrganizations;
     }
 
     public Set<String> getEnvironments() {

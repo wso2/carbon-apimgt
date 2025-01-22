@@ -10127,6 +10127,13 @@ components:
           x-otherScopes:
             - apim:api_publish
             - apim:api_manage
+        organizationPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationPolicies'
+          x-otherScopes:
+            - apim:api_publish
+            - apim:api_manage
         apiThrottlingPolicy:
           type: string
           description: The API level throttling policy selected for the particular
@@ -12469,6 +12476,23 @@ components:
           example: ""
         operationPolicies:
           $ref: '#/components/schemas/APIOperationPolicies'
+    OrganizationPolicies:
+      title: Organization based Subscription Policies
+      type: object
+      required:
+        - organizationID
+      properties:
+        organizationID:
+          type: string
+          example: "36c87e00-57f0-4000-9f97-b379acc4e577"
+        organizationName:
+          type: string
+          example: "wso2"
+        policies:
+          type: array
+          example: ["Silver", "Gold", "Unlimited"]
+          items:
+            type: string
     ScopeList:
       title: Scope List
       type: object

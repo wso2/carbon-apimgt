@@ -691,6 +691,10 @@ public final class APIUtil {
                 }
             }
 
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
+
             api.addAvailableTiers(availablePolicy);
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
@@ -815,6 +819,11 @@ public final class APIUtil {
                 }
             }
             api.addAvailableTiers(availablePolicy);
+
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
+
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
 
@@ -994,6 +1003,11 @@ public final class APIUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
 
+            if (api.getAvailableTiersForOrganizationsAsString() != null) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS,
+                        api.getAvailableTiersForOrganizationsAsString());
+            }
+
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
             }
@@ -1050,6 +1064,7 @@ public final class APIUtil {
             if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
                     !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS, "");
             }
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -2704,6 +2719,10 @@ public final class APIUtil {
             Map<String, Tier> definedTiers = getTiers(tenantId);
             Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
             api.addAvailableTiers(availableTier);
+
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
 
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
