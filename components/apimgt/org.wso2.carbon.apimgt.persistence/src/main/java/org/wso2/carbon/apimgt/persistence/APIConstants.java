@@ -41,6 +41,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_THUMBNAIL_URL = "overview_thumbnail";
     public static final String API_OVERVIEW_STATUS = "overview_status";
     public static final String API_OVERVIEW_TIER = "overview_tier";
+    public static final String API_OVERVIEW_ORGANIZATION_TIERS = "overview_organizationTiers";
     public static final String API_OVERVIEW_SUB_POLICY = "overview_subPolicy";
     public static final String API_OVERVIEW_API_POLICY = "overview_apiPolicy";
     public static final String API_OVERVIEW_IS_LATEST = "overview_isLatest";

@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OrganizationTiers;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
@@ -113,6 +114,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadInfoD
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
@@ -302,12 +304,34 @@ public class APIMappingUtil {
             model.addTags(apiTags);
         }
 
+        // Set tiers without considering organizations
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
         for (String tier : tiersFromDTO) {
             apiTiers.add(new Tier(tier));
         }
         model.addAvailableTiers(apiTiers);
+
+        if (APIUtil.isOrganizationAccessControlEnabled()) {
+            // Set tiers for organizations
+            Set<OrganizationTiers> organizationAPITiers = new HashSet<>();
+            List<OrganizationPoliciesDTO> organizationPoliciesDTOs = dto.getOrganizationPolicies();
+
+            for (OrganizationPoliciesDTO organizationPoliciesDTO : organizationPoliciesDTOs) {
+                OrganizationTiers organizationTiers = new OrganizationTiers();
+                Set<Tier> apiTiersForOrganization = new HashSet<>();
+                for (String tier : organizationPoliciesDTO.getPolicies()) {
+                    apiTiersForOrganization.add(new Tier(tier));
+                }
+                organizationTiers.setOrganizationID(organizationPoliciesDTO.getOrganizationID());
+                organizationTiers.setOrganizationName(organizationPoliciesDTO.getOrganizationName());
+                organizationTiers.setTiers(apiTiersForOrganization);
+                organizationAPITiers.add(organizationTiers);
+            }
+            model.setAvailableTiersForOrganizations(organizationAPITiers);
+        }
+
+
         model.setApiLevelPolicy(dto.getApiThrottlingPolicy());
 
         String transports = StringUtils.join(dto.getTransport(), ',');
@@ -1367,6 +1391,17 @@ public class APIMappingUtil {
         }
         dto.setPolicies(tiersToReturn);
         dto.setApiThrottlingPolicy(model.getApiLevelPolicy());
+
+        if (APIUtil.isOrganizationAccessControlEnabled() && model.getAvailableTiersForOrganizations() != null) {
+            Set<OrganizationTiers> organizationAPITiers = model.getAvailableTiersForOrganizations();
+            List<OrganizationPoliciesDTO> organizationPolicies = new ArrayList<>();
+
+            for (OrganizationTiers organizationTiers : organizationAPITiers) {
+                OrganizationPoliciesDTO organizationPoliciesDTO = getOrganizationPoliciesDTO(organizationTiers);
+                organizationPolicies.add(organizationPoliciesDTO);
+            }
+            dto.setOrganizationPolicies(organizationPolicies);
+        }
 
         //APIs created with type set to "NULL" will be considered as "HTTP"
         if (model.getType() == null || model.getType().toLowerCase().equals("null")) {
@@ -2724,6 +2759,24 @@ public class APIMappingUtil {
         return productDto;
     }
 
+    /**
+     * This method converts OrganizationTiers object to OrganizationPoliciesDTO.
+     * @param organizationTiers OrganizationTiers object
+     * @return
+     */
+    private static OrganizationPoliciesDTO getOrganizationPoliciesDTO(OrganizationTiers organizationTiers) {
+        OrganizationPoliciesDTO organizationPoliciesDTO = new OrganizationPoliciesDTO();
+        Set<Tier> apiTiers = organizationTiers.getTiers();
+        List<String> tiersToReturn = new ArrayList<>();
+        for (Tier tier : apiTiers) {
+            tiersToReturn.add(tier.getName());
+        }
+        organizationPoliciesDTO.setPolicies(tiersToReturn);
+        organizationPoliciesDTO.setOrganizationID(organizationTiers.getOrganizationID());
+        organizationPoliciesDTO.setOrganizationName(organizationTiers.getOrganizationName());
+        return organizationPoliciesDTO;
+    }
+
     private static APIProductDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPIProducttoDTO(
             String subscriptionAvailability) {
 
@@ -2826,9 +2879,6 @@ public class APIMappingUtil {
             product.setAudiences(new HashSet<>(audiences));
         }
 
-        Set<Tier> apiTiers = new HashSet<>();
-        List<String> tiersFromDTO = dto.getPolicies();
-
         if (dto.getVisibility() != null) {
             product.setVisibility(mapVisibilityFromDTOtoAPIProduct(dto.getVisibility()));
         }
@@ -2850,11 +2900,13 @@ public class APIMappingUtil {
             product.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
+        // Set Tiers without considering organizations
+        Set<Tier> apiTiers = new HashSet<>();
+        List<String> tiersFromDTO = dto.getPolicies();
         for (String tier : tiersFromDTO) {
             apiTiers.add(new Tier(tier));
         }
         product.setAvailableTiers(apiTiers);
-
         product.setProductLevelPolicy(dto.getApiThrottlingPolicy());
 
         product.setGatewayVendor(dto.getGatewayVendor());
