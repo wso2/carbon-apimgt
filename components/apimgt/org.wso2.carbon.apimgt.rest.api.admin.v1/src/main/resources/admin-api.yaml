@@ -4879,10 +4879,17 @@ components:
         organizationId:
           type: string
           example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          readOnly: true
           description: |
-            UUID of the organizatoin.
-        parentId:
+            UUID of the organization.
+        externalOrganizationId:
           type: string
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          description: |
+            External id of the organization.
+        parentOrganizationId:
+          type: string
+          readOnly: true
           example: ece92bdc-e1e6-325c-b6f4-656208a041e9
           description: |
             UUID of the parent organization if there is any.

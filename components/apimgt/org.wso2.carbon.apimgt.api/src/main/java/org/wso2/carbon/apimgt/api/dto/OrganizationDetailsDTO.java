@@ -23,6 +23,7 @@ public class OrganizationDetailsDTO {
     
     private String organizationId;
     private String parentOrganizationId;
+    private String externalOrganizationReference;
     private String Name;
     private String tenantDomain;
     private String description;
@@ -56,11 +57,17 @@ public class OrganizationDetailsDTO {
     public void setDescription(String description) {
         this.description = description;
     }
+    public String getExternalOrganizationReference() {
+        return externalOrganizationReference;
+    }
+    public void setExternalOrganizationReference(String externalOrganizationReference) {
+        this.externalOrganizationReference = externalOrganizationReference;
+    }
     @Override
     public String toString() {
-        return "OrganizationDTO [organizationId=" + organizationId + ", parentOrganizationId=" + parentOrganizationId
-                + ", Name=" + Name + ", tenantDomain=" + tenantDomain + ", description=" + description + "]";
+        return "OrganizationDetailsDTO [organizationId=" + organizationId + ", parentOrganizationId="
+                + parentOrganizationId + ", externalOrganizationReference=" + externalOrganizationReference + ", Name="
+                + Name + ", tenantDomain=" + tenantDomain + ", description=" + description + "]";
     }
-    
 
 }

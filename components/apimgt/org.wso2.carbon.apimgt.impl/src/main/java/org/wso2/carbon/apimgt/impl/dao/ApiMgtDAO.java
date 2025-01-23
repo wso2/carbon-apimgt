@@ -10296,17 +10296,18 @@ public class ApiMgtDAO {
     }
 
     
-    public void addOrganization(OrganizationDetailsDTO organizationDTO) throws APIManagementException {
-
+    public OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO organizationDTO) throws APIManagementException {
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement preparedStatement = conn
                     .prepareStatement(SQLConstants.OrganizationSqlConstants.ADD_ORGANIZATION)) {
+                organizationDTO.setOrganizationId(UUID.randomUUID().toString());
                 preparedStatement.setString(1, organizationDTO.getOrganizationId());
-                preparedStatement.setString(2, organizationDTO.getName());
-                preparedStatement.setString(3, organizationDTO.getParentOrganizationId());
-                preparedStatement.setString(4, organizationDTO.getDescription());
-                preparedStatement.setString(5, organizationDTO.getTenantDomain());
+                preparedStatement.setString(2, organizationDTO.getExternalOrganizationReference());
+                preparedStatement.setString(3, organizationDTO.getName());
+                preparedStatement.setString(4, organizationDTO.getParentOrganizationId());
+                preparedStatement.setString(5, organizationDTO.getDescription());
+                preparedStatement.setString(6, organizationDTO.getTenantDomain());
                 preparedStatement.executeUpdate();
                 conn.commit();
             }
@@ -10315,33 +10316,27 @@ public class ApiMgtDAO {
                     + " in tenant " + organizationDTO.getTenantDomain();
             handleException(message, e);
         }
+        return organizationDTO;
     }
     
-    public List<OrganizationDetailsDTO> getOrganizations(String parentOrganizationId, String tenantDomain)
+    public List<OrganizationDetailsDTO> getChildOrganizations(String parentOrganizationId, String rootOrg)
             throws APIManagementException {
 
         List<OrganizationDetailsDTO> organizationList = new ArrayList<OrganizationDetailsDTO>();
-        String query;
-        String param;
-        if (!StringUtils.isEmpty(parentOrganizationId)) {
-            query = SQLConstants.OrganizationSqlConstants.GET_ORGANIZATIONS_BY_PARENT_ORG_ID;
-            param = parentOrganizationId;
-        } else {
-            query = SQLConstants.OrganizationSqlConstants.GET_ORGANIZATIONS_BY_TENAND_DOMAIN;
-            param = tenantDomain;
-        }
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection
-                        .prepareStatement(query)) {
-            prepStmt.setString(1, param);
+                        .prepareStatement(SQLConstants.OrganizationSqlConstants.GET_ORGANIZATIONS_BY_PARENT_ORG_ID)) {
+            prepStmt.setString(1, parentOrganizationId);
+            prepStmt.setString(2, rootOrg);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     OrganizationDetailsDTO organization = new OrganizationDetailsDTO();
                     organization.setOrganizationId(resultSet.getString("ORG_UUID"));
                     organization.setParentOrganizationId(resultSet.getString("PARENT_ORG_UUID"));
+                    organization.setExternalOrganizationReference(resultSet.getString("EXT_ORG_ID"));
                     organization.setName(resultSet.getString("DISPLAY_NAME"));
                     organization.setDescription(resultSet.getString("DESCRIPTION"));
-                    organization.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                    organization.setTenantDomain(resultSet.getString("ROOT_ORGANIZATION"));
                     organizationList.add(organization);
                 }
             }
@@ -10351,7 +10346,7 @@ public class ApiMgtDAO {
         return organizationList;
     }
     
-    public OrganizationDetailsDTO getOrganizationDetails(String organizationId, String tenantDomain)
+    public OrganizationDetailsDTO getOrganizationDetails(String organizationId, String rootOrg)
             throws APIManagementException {
 
         OrganizationDetailsDTO organization = null;
@@ -10359,15 +10354,16 @@ public class ApiMgtDAO {
                 PreparedStatement prepStmt = connection
                         .prepareStatement(SQLConstants.OrganizationSqlConstants.GET_ORGANIZATION_BY_ORG_ID);) {
             prepStmt.setString(1, organizationId);
-            prepStmt.setString(2, tenantDomain);
+            prepStmt.setString(2, rootOrg);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 if (resultSet.next()) {
                     organization = new OrganizationDetailsDTO();
                     organization.setOrganizationId(resultSet.getString("ORG_UUID"));
                     organization.setParentOrganizationId(resultSet.getString("PARENT_ORG_UUID"));
+                    organization.setExternalOrganizationReference(resultSet.getString("EXT_ORG_ID"));
                     organization.setName(resultSet.getString("DISPLAY_NAME"));
                     organization.setDescription(resultSet.getString("DESCRIPTION"));
-                    organization.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                    organization.setTenantDomain(resultSet.getString("ROOT_ORGANIZATION"));
                 }
             }
         } catch (SQLException e) {
@@ -10376,14 +10372,14 @@ public class ApiMgtDAO {
         return organization;
     }
     
-    public void deleteOrganizationDetails(String organizationId, String tenantDomain)
+    public void deleteOrganizationDetails(String organizationId, String rootOrg)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection
                         .prepareStatement(SQLConstants.OrganizationSqlConstants.DELETE_ORGANIZATION);) {
             connection.setAutoCommit(false);
             prepStmt.setString(1, organizationId);
-            prepStmt.setString(2, tenantDomain);
+            prepStmt.setString(2, rootOrg);
             prepStmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -10399,7 +10395,8 @@ public class ApiMgtDAO {
                     .prepareStatement(SQLConstants.OrganizationSqlConstants.UPDATE_ORGANIZATION)) {
                 preparedStatement.setString(1, organizationDetailsDTO.getName());
                 preparedStatement.setString(2, organizationDetailsDTO.getDescription());
-                preparedStatement.setString(3, organizationDetailsDTO.getOrganizationId());
+                preparedStatement.setString(3, organizationDetailsDTO.getExternalOrganizationReference());
+                preparedStatement.setString(4, organizationDetailsDTO.getOrganizationId());
                 preparedStatement.executeUpdate();
                 conn.commit();
             }
@@ -10407,6 +10404,31 @@ public class ApiMgtDAO {
             handleException("Failed to delete organization Id : " + "Error while Updating organization details for "
                     + organizationDetailsDTO.getOrganizationId(), e);
         }
+    }
+    
+    public OrganizationDetailsDTO getOrganizationDetalsByExternalOrgId(String externalOrgId, String rootOrg)
+            throws APIManagementException {
+        OrganizationDetailsDTO organization = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection
+                        .prepareStatement(SQLConstants.OrganizationSqlConstants.GET_ORGANIZATION_BY_EXTERNAL_ORG_ID);) {
+            prepStmt.setString(1, externalOrgId);
+            prepStmt.setString(2, rootOrg);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                if (resultSet.next()) {
+                    organization = new OrganizationDetailsDTO();
+                    organization.setOrganizationId(resultSet.getString("ORG_UUID"));
+                    organization.setParentOrganizationId(resultSet.getString("PARENT_ORG_UUID"));
+                    organization.setExternalOrganizationReference(resultSet.getString("EXT_ORG_ID"));
+                    organization.setName(resultSet.getString("DISPLAY_NAME"));
+                    organization.setDescription(resultSet.getString("DESCRIPTION"));
+                    organization.setTenantDomain(resultSet.getString("ROOT_ORGANIZATION"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get organization for organization Id : " + externalOrgId, e);
+        }
+        return organization;
     }
     
     public API getLightWeightAPIInfoByAPIIdentifier(APIIdentifier apiIdentifier, String organization)

@@ -128,7 +128,7 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
             String orgId = null;
             if (orgInfo != null && orgInfo.getOrganizationSelector() != null) {
                 orgId = orgInfo.getOrganizationSelector();
-                organizationDTO.setParentId(orgId); // set current users organization as parent id if available.
+                organizationDTO.setParentOrganizationId(orgId); // set current users organization as parent id if available.
             }
             OrganizationDetailsDTO orgDto = OrganizationsMappingUtil.toOrganizationDetailsDTO(organizationDTO);
             orgDto.setTenantDomain(superOrganization);

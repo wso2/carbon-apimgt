@@ -34,7 +34,9 @@ public class OrganizationsMappingUtil {
             OrganizationDTO dto = new OrganizationDTO();
             dto.displayName(organizationDTO.getName());
             dto.setOrganizationId(organizationDTO.getOrganizationId());
-            dto.setParentId(organizationDTO.getParentOrganizationId());
+            dto.parentOrganizationId(organizationDTO.getParentOrganizationId());
+            dto.externalOrganizationId(organizationDTO.getExternalOrganizationReference());
+            dto.setDescription(organizationDTO.getDescription());
             list.add(dto);
         }
         listDto.setList(list);

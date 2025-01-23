@@ -34,7 +34,8 @@ public class OrganizationsMappingUtil {
             OrganizationDTO dto = new OrganizationDTO();
             dto.displayName(organizationDTO.getName());
             dto.setOrganizationId(organizationDTO.getOrganizationId());
-            dto.setParentId(organizationDTO.getParentOrganizationId());
+            dto.setParentOrganizationId(organizationDTO.getParentOrganizationId());
+            dto.setExternalOrganizationId(organizationDTO.getExternalOrganizationReference());
             dto.setDescription(organizationDTO.getDescription());
             list.add(dto);
         }
@@ -46,7 +47,8 @@ public class OrganizationsMappingUtil {
         OrganizationDetailsDTO orgDetailsDto = new OrganizationDetailsDTO();
         orgDetailsDto.setName(organizationDTO.getDisplayName());
         orgDetailsDto.setOrganizationId(organizationDTO.getOrganizationId());
-        orgDetailsDto.setParentOrganizationId(organizationDTO.getParentId());
+        orgDetailsDto.setParentOrganizationId(organizationDTO.getParentOrganizationId());
+        orgDetailsDto.setExternalOrganizationReference(organizationDTO.getExternalOrganizationId());
         orgDetailsDto.setDescription(organizationDTO.getDescription());
         return orgDetailsDto;
     }
@@ -55,7 +57,8 @@ public class OrganizationsMappingUtil {
         OrganizationDTO orgDto = new OrganizationDTO();
         orgDto.setDisplayName(organizationDetailsDto.getName());
         orgDto.setOrganizationId(organizationDetailsDto.getOrganizationId());
-        orgDto.setParentId(organizationDetailsDto.getParentOrganizationId());
+        orgDto.setParentOrganizationId(organizationDetailsDto.getParentOrganizationId());
+        orgDto.setExternalOrganizationId(organizationDetailsDto.getExternalOrganizationReference());
         orgDto.setDescription(organizationDetailsDto.getDescription());
         return orgDto;
     }

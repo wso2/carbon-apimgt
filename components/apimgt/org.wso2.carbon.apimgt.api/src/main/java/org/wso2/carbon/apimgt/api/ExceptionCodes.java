@@ -425,8 +425,9 @@ public enum ExceptionCodes implements ErrorHandler {
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
     
-    // Tenant related
+    // Organization related
     INVALID_ORGANINATION(901301,"Organization Not Found", 404, "Organization Not Found"),
+    MISSING_ORGANINATION(901302,"Organization Not Found", 403, "User does not belong to any organization"),
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
