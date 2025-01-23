@@ -19,21 +19,18 @@
 package org.wso2.carbon.apimgt.governance.engine;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.api.model.EvaluationTarget;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
-import org.wso2.carbon.apimgt.governance.api.model.ValidationResult;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -115,21 +112,21 @@ public class SpectralValidationEngine implements ValidationEngine {
     }
 
     /**
-     * Validate a target content against a ruleset
+     * Validate a target against a ruleset
      *
-     * @param target  Target content
+     * @param target  Target to be validated
      * @param ruleset Ruleset
-     * @return List of validation results
+     * @return List of rule violations
      * @throws GovernanceException If an error occurs while validating the target
      */
     @Override
-    public List<ValidationResult> validate(String target, Ruleset ruleset) throws GovernanceException {
+    public List<RuleViolation> validate(String target, Ruleset ruleset) throws GovernanceException {
 
         // TODO: Call the Spectral engine to validate the target content against the ruleset
         String validationResultJsonString = "";
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<ValidationResult> results = new ArrayList<>();
+        List<RuleViolation> violations = new ArrayList<>();
 
         try {
             // Parse JSON string to JsonNode
@@ -137,15 +134,16 @@ public class SpectralValidationEngine implements ValidationEngine {
 
             // Convert JsonNode to list of Result objects
             for (JsonNode node : jsonNode) {
-                ValidationResult result = new ValidationResult();
-                result.setResultId(GovernanceUtil.generateUUID());
-                result.setRuleCode(node.get("ruleName").asText());
-                result.setRuleValid(node.get("passed").asBoolean());
-                result.setValidatedPath(node.get("path").asText());
-                result.setRulesetId(ruleset.getId());
-                results.add(result);
+                boolean isViolation = !node.get("passed").asBoolean();
+                if (isViolation) {
+                    RuleViolation violation = new RuleViolation();
+                    violation.setRuleCode(node.get("ruleName").asText());
+                    violation.setViolatedPath(node.get("path").asText());
+                    violation.setRulesetId(ruleset.getId());
+                    violations.add(violation);
+                }
             }
-            return results;
+            return violations;
 
         } catch (JsonProcessingException e) {
             throw new GovernanceException("Error while parsing validation result JSON string", e);

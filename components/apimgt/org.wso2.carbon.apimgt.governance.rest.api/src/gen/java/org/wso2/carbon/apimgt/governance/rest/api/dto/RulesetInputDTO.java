@@ -96,10 +96,7 @@ return null;
     @XmlEnum(String.class)
     public enum ArtifactTypeEnum {
         REST_API("REST_API"),
-        SOAP_API("SOAP_API"),
-        GRAPHQL_API("GRAPHQL_API"),
-        ASYNC_API("ASYNC_API"),
-        ALL_API("ALL_API");
+        ASYNC_API("ASYNC_API");
         private String value;
 
         ArtifactTypeEnum (String v) {

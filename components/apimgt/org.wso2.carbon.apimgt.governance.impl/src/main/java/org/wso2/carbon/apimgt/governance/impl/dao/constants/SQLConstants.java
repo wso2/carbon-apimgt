@@ -167,13 +167,21 @@ public class SQLConstants {
                     "WHERE GOV_POLICY_LABEL.POLICY_ID IS NULL " +
                     "AND GOV_POLICY_GOVERNABLE_STATE.STATE = ? " +
                     "AND GOV_POLICY.ORGANIZATION = ?";
-    public static final String ADD_GOV_EVALUATION_REQUEST = "INSERT INTO GOV_EVALUATION_REQUEST " +
-            "(REQUEST_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, ORGANIZATION) " +
-            "VALUES (?, ?, ?, ?, ?, ?)";
 
-    public static final String GET_PENDING_EVALUATION_REQUESTS = "SELECT " +
-            "REQUEST_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, ORGANIZATION " +
-            "FROM GOV_EVALUATION_REQUEST WHERE EVALUATION_STATUS = 'PENDING'";
+    public static final String ADD_GOV_ARTIFACT_INFO = "INSERT INTO GOV_ARTIFACT_INFO " +
+            "(ARTIFACT_ID, ARTIFACT_TYPE, ORGANIZATION) " +
+            "VALUES (?, ?, ?)";
+
+    public static final String ADD_GOV_EVALUATION_REQUEST = "INSERT INTO GOV_EVALUATION_REQUEST " +
+            "(REQUEST_ID, ARTIFACT_ID, POLICY_ID) " +
+            "VALUES (?, ?, ?)";
+
+    public static final String GET_PENDING_EVALUATION_REQUESTS =
+            "SELECT " +
+                    "ER.REQUEST_ID, ER.ARTIFACT_ID, ER.ARTIFACT_TYPE, ER.POLICY_ID, AI.ORGANIZATION " +
+                    "FROM GOV_EVALUATION_REQUEST ER " +
+                    "LEFT JOIN GOV_ARTIFACT_INFO AI ON ER.ARTIFACT_ID = AI.ARTIFACT_ID " +
+                    "WHERE ER.EVALUATION_STATUS = 'PENDING'";
 
     public static final String UPDATE_GOV_EVALUATION_REQUEST_STATUS = "UPDATE GOV_EVALUATION_REQUEST " +
             "SET STATUS = ? WHERE REQUEST_ID = ?";
@@ -181,8 +189,13 @@ public class SQLConstants {
     public static final String DELETE_GOV_EVALUATION_REQUEST = "DELETE FROM GOV_EVALUATION_REQUEST" +
             " WHERE REQUEST_ID = ?";
 
-    public static final String ADD_VALIDATION_RESULT = "INSERT INTO GOV_RESULT " +
-            "(RESULT_ID, ORGANIZATION, ARTIFACT_ID, POLICY_ID, RULESET_ID, RULE_CODE, VALIDATED_PATH, VALIDATION_RESULT) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    public static final String ADD_GOV_COMPLIANCE_EVALUATION_RESULT = "INSERT INTO GOV_COMPLIANCE_EVALUATION_RESULT " +
+            "(RESULT_ID, ARTIFACT_ID, POLICY_ID, EVALUATION_RESULT) " +
+            "VALUES (?, ?, ?, ?)";
+
+    public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION " +
+            "(VIOLATION_ID, ARTIFACT_ID, POLICY_ID, RULESET_ID, RULE_CODE, VIOLATED_PATH) " +
+            "VALUES (?, ?, ?, ?, ?, ?)";
+
 
 }

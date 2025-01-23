@@ -110,6 +110,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             "retrieving labels by policy id: %s", true),
     // Artifact related codes
 
+    ERROR_WHILE_SAVING_ARTIFACT_INFO(501000, "Error while saving artifact info.", 500, "Error while saving " +
+            "artifact info for artifact: %s in the organization: %s"),
     ERROR_WHILE_PROCESSING_GOVERNANCE_EVALUATION_REQUEST(501001, "Error while processing governance evaluation " +
             "request.",
             500,
@@ -126,8 +128,12 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             500, "Error while deleting governance evaluation request with ID: %s"),
 
     // Governance Results related codes
+
     ERROR_WHILE_SAVING_GOVERNANCE_RESULT(601001, "Error while saving governance result.", 500, "Error while saving " +
             "governance result for artifact: %s", true),
+    ERROR_WHILE_SAVING_RULE_VIOLATION(601002, "Error while saving rule violation.", 500, "Error while saving rule " +
+            "violation for artifact: %s", true),
+
     ERROR_WHILE_ADDING_LINTING_RUN(601002, "Error while adding linting run.", 500, "Error while adding linting run for endpoint: %s policy: %s ruleset: %s", true),
     LINTING_RUN_IN_PROGRESS(601003, "There is currently a linting run in progress.", 503, "There is currently a linting run in progress for endpoint: %s policy: %s ruleset: %s"),
     ERROR_WHILE_UPDATING_LINTING_RUN(601004, "Error while updating linting run.", 500, "Error while updating linting run for endpoint: %s policy: %s ruleset: %s", true),
