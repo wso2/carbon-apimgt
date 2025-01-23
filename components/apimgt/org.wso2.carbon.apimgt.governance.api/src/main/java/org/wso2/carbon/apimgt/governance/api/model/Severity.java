@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-
 /**
  * This class represents a governance rule Severity
  */

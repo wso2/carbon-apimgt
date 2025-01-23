@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 
 /**

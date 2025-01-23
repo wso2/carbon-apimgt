@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.governance.impl.internal;
 
-import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 

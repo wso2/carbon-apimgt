@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
-import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -23,20 +22,16 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsD
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceStatusDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceWithRulesetsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.ResultsMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -269,33 +264,9 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         complianceListDTO.setList(complianceStatusList);
         complianceListDTO.setCount(complianceStatusList.size());
 
-        // Set pagination details
-        PaginationDTO paginationDTO = new PaginationDTO();
-        paginationDTO.setLimit(limit);
-        paginationDTO.setOffset(offset);
-        paginationDTO.setTotal(complianceStatusList.size());
-
-        // Set previous and next URLs for pagination
-        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit,
-                complianceStatusList.size());
-        String paginatedPrevious = "";
-        String paginatedNext = "";
-
-        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getArtifactCompliancePageURL(
-                    GovernanceAPIConstants.RULESETS_GET_URL,
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), artifactType);
-        }
-        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getArtifactCompliancePageURL(GovernanceAPIConstants.RULESETS_GET_URL,
-                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), artifactType);
-        }
-        paginationDTO.setNext(paginatedNext);
-        paginationDTO.setPrevious(paginatedPrevious);
-
-        complianceListDTO.setPagination(paginationDTO);
+        // Set pagination details for the artifact compliance list
+        ResultsMappingUtil.setPaginationDetailsForArtifactCompliance(complianceListDTO, limit, offset,
+                complianceStatusList.size(), artifactType);
 
         return Response.ok().entity(complianceListDTO).build();
 

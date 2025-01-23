@@ -21,9 +21,6 @@ package org.wso2.carbon.apimgt.governance.api.service;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
-
-import java.util.List;
 
 /**
  * This class represents the Governance Service, which is responsible for managing governance related operations
