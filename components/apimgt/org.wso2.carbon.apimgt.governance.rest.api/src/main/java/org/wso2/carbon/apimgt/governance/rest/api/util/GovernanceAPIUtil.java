@@ -20,12 +20,10 @@ package org.wso2.carbon.apimgt.governance.rest.api.util;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.context.CarbonContext;
 
 public class GovernanceAPIUtil {
@@ -81,8 +79,25 @@ public class GovernanceAPIUtil {
      */
     public static String getPaginatedURL(String paginatedURL, Integer offset,
                                          Integer limit) {
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
+    }
+
+    /**
+     * Method to get the paginated URL for artifact compliance
+     *
+     * @param paginatedURL paginated URL
+     * @param offset       offset
+     * @param limit        limit
+     * @param artifactType artifact type
+     * @return paginated URL
+     */
+    public static String getArtifactCompliancePageURL(String paginatedURL, Integer offset, Integer limit,
+                                                      String artifactType) {
+        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.ARTIFACT_TYPE_PARAM, artifactType);
         return paginatedURL;
     }
 }

@@ -94,6 +94,7 @@ return null;
     private SeverityEnum severity = null;
     private List<String> violatedPaths = new ArrayList<String>();
     private String message = null;
+    private String description = null;
 
   /**
    * UUID of the rule.
@@ -203,6 +204,24 @@ return null;
     this.message = message;
   }
 
+  /**
+   * Description of the rule.
+   **/
+  public RuleValidationResultDTO description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "API name should be between 5 to 50 characters", value = "Description of the rule.")
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
+  }
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -218,12 +237,13 @@ return null;
         Objects.equals(status, ruleValidationResult.status) &&
         Objects.equals(severity, ruleValidationResult.severity) &&
         Objects.equals(violatedPaths, ruleValidationResult.violatedPaths) &&
-        Objects.equals(message, ruleValidationResult.message);
+        Objects.equals(message, ruleValidationResult.message) &&
+        Objects.equals(description, ruleValidationResult.description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, status, severity, violatedPaths, message);
+    return Objects.hash(id, name, status, severity, violatedPaths, message, description);
   }
 
   @Override
@@ -237,6 +257,7 @@ return null;
     sb.append("    severity: ").append(toIndentedString(severity)).append("\n");
     sb.append("    violatedPaths: ").append(toIndentedString(violatedPaths)).append("\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("}");
     return sb.toString();
   }

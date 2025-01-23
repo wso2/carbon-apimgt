@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
+import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
@@ -463,6 +464,37 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             }
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULES, e, rulesetId);
+        }
+    }
+
+    /**
+     * Get the rules of a Ruleset (without the content)
+     *
+     * @param rulesetId Ruleset ID
+     * @return List of rules
+     */
+    @Override
+    public List<Rule> getRulesByRulesetId(String rulesetId) throws GovernanceException {
+        List<Rule> rules = new ArrayList<>();
+        String sqlQuery = SQLConstants.GET_RULES_WITHOUT_CONTENT;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, rulesetId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    Rule rule = new Rule();
+                    rule.setId(rs.getString("RULESET_RULE_ID"));
+                    rule.setCode(rs.getString("RULE_CODE"));
+                    rule.setDescription(rs.getString("RULE_DESCRIPTION"));
+                    rule.setMessageOnFailure(rs.getString("RULE_MESSAGE"));
+                    rule.setSeverity(Severity.fromString(rs.getString("RULE_SEVERITY")));
+                    rules.add(rule);
+                }
+            }
+            return rules;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID
+                    , e, rulesetId);
         }
     }
 }

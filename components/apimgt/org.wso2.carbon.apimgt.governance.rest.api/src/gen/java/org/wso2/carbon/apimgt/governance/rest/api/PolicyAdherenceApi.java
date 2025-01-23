@@ -39,25 +39,6 @@ PolicyAdherenceApiService delegate = new PolicyAdherenceApiServiceImpl();
 
 
     @GET
-    @Path("/summary")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves the summary of adherence for all policies", notes = "Retrieves the summary of adherence for all governance policies within the organization.", response = PolicyAdherenceSummaryDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
-        })
-    }, tags={ "Governance Results",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with adherence summary.", response = PolicyAdherenceSummaryDTO.class),
-        @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getOrganizationalPolicyAdherenceSummary() throws GovernanceException{
-        return delegate.getOrganizationalPolicyAdherenceSummary(securityContext);
-    }
-
-    @GET
     @Path("/{policyId}")
     
     @Produces({ "application/json" })
@@ -65,7 +46,7 @@ PolicyAdherenceApiService delegate = new PolicyAdherenceApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
-    }, tags={ "Governance Results",  })
+    }, tags={ "Policy Adherence",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Ok. Successful response with adherence details for the specified policy.", response = PolicyAdherenceDetailsDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
@@ -84,7 +65,7 @@ PolicyAdherenceApiService delegate = new PolicyAdherenceApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
-    }, tags={ "Governance Results" })
+    }, tags={ "Policy Adherence",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Ok. Successful response with adherence details for all policies.", response = PolicyAdherenceListDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
@@ -93,5 +74,24 @@ PolicyAdherenceApiService delegate = new PolicyAdherenceApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
     public Response getPolicyAdherenceForAllPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
         return delegate.getPolicyAdherenceForAllPolicies(limit, offset, securityContext);
+    }
+
+    @GET
+    @Path("/summary")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieves the summary of adherence for all policies", notes = "Retrieves the summary of adherence for all governance policies within the organization.", response = PolicyAdherenceSummaryDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
+        })
+    }, tags={ "Policy Adherence" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with adherence summary.", response = PolicyAdherenceSummaryDTO.class),
+        @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
+    public Response getPolicyAdherenceSummary() throws GovernanceException{
+        return delegate.getPolicyAdherenceSummary(securityContext);
     }
 }

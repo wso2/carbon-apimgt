@@ -33,7 +33,8 @@ public class PolicyAdherenceWithRulesetsDTO   {
     @XmlEnum(String.class)
     public enum StatusEnum {
         FOLLOWED("FOLLOWED"),
-        VIOLATED("VIOLATED");
+        VIOLATED("VIOLATED"),
+        UNAPPLIED("UNAPPLIED");
         private String value;
 
         StatusEnum (String v) {
@@ -107,7 +108,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Status of the policy's governance compliance.")
+  @ApiModelProperty(example = "FOLLOWED", value = "Status of the policy's governance compliance.")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;

@@ -180,7 +180,8 @@ public class ComplianceEvaluationScheduler {
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
 
-                    saveEvaluationResults(artifactId, policyId, ruleViolations);
+                    saveEvaluationResults(artifactId, policyId, ruleset.getId(),
+                            ruleViolations);
 
                 } else {
                     if (log.isDebugEnabled()) {
@@ -203,20 +204,23 @@ public class ComplianceEvaluationScheduler {
      *
      * @param artifactId     ID of the artifact.
      * @param policyId       ID of the policy.
+     * @param rulesetId      ID of the ruleset.
      * @param ruleViolations List of rule violations.
      */
     private static void saveEvaluationResults(String artifactId, String policyId,
+                                              String rulesetId,
                                               List<RuleViolation> ruleViolations) {
         try {
             ComplianceEvaluationResult result = new ComplianceEvaluationResult(artifactId,
-                    policyId, ruleViolations.isEmpty());
-            complianceMgtDAO.addComplianceEvaluationResult(result);
+                    policyId, rulesetId, ruleViolations.isEmpty());
 
             for (RuleViolation violation : ruleViolations) {
                 violation.setPolicyId(policyId);
                 violation.setArtifactId(artifactId);
-                complianceMgtDAO.addRuleViolation(violation);
             }
+
+            complianceMgtDAO.addComplianceEvaluationResult(result, ruleViolations);
+
         } catch (GovernanceException e) {
             log.error("Error saving governance result for artifact ID: " + artifactId, e);
         }

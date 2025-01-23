@@ -46,7 +46,7 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
-    }, tags={ "Governance Results",  })
+    }, tags={ "Artifact Compliance",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successful response with compliance details for the specified artifact.", response = ArtifactComplianceDetailsDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
@@ -61,37 +61,37 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves compliance of all artifacts", notes = "Retrieves compliance of all artifacts in the organization.", response = ArtifactComplianceListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieves compliance of all artifacts of a certain type", notes = "Retrieves compliance of all artifacts of a certain type within the organization.", response = ArtifactComplianceListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
-    }, tags={ "Governance Results",  })
+    }, tags={ "Artifact Compliance",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with artifact compliance results.", response = ArtifactComplianceListDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getArtifactComplianceForAllArtifacts( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
-        return delegate.getArtifactComplianceForAllArtifacts(limit, offset, securityContext);
+    public Response getArtifactComplianceForAllArtifacts( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Type of the artifact. ", allowableValues="API", defaultValue="API") @DefaultValue("API") @QueryParam("artifactType") String artifactType) throws GovernanceException{
+        return delegate.getArtifactComplianceForAllArtifacts(limit, offset, artifactType, securityContext);
     }
 
     @GET
     @Path("/summary")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves the summary of compliance of all artifacts", notes = "Retrieves the summary of compliance of all artifacts in the organization.", response = ArtifactComplianceSummaryDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieves the summary of compliance of all artifacts of a certain type", notes = "Retrieves the summary of compliance of all artifacts of a certain type within the organization.", response = ArtifactComplianceSummaryDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
-    }, tags={ "Governance Results" })
+    }, tags={ "Artifact Compliance" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with compliance summary.", response = ArtifactComplianceSummaryDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getOrganizationalArtifactComplianceSummary() throws GovernanceException{
-        return delegate.getOrganizationalArtifactComplianceSummary(securityContext);
+    public Response getArtifactComplianceSummary( @ApiParam(value = "Type of the artifact. ", allowableValues="API", defaultValue="API") @DefaultValue("API") @QueryParam("artifactType") String artifactType) throws GovernanceException{
+        return delegate.getArtifactComplianceSummary(artifactType, securityContext);
     }
 }
