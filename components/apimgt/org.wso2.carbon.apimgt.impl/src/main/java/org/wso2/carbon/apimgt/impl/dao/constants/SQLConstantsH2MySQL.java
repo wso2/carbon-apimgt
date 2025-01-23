@@ -42,7 +42,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   GROUP_ID, " +
             "   UUID, " +
             "   APP.CREATED_BY AS CREATED_BY, " +
-            "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+            "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+            "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
@@ -74,7 +75,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   GROUP_ID, " +
             "   UUID, " +
             "   APP.CREATED_BY AS CREATED_BY, " +
-            "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+            "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+            "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
@@ -105,7 +107,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   GROUP_ID, " +
                     "   UUID, " +
                     "   APP.CREATED_BY AS CREATED_BY, " +
-                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -143,7 +146,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "   GROUP_ID, " +
                     "   UUID, " +
                     "   APP.CREATED_BY AS CREATED_BY, " +
-                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
