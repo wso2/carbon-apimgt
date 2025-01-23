@@ -105,6 +105,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
         try {
             if (tokenInfo == null) {
                 tokenInfo = getTokenMetaData(accessToken);
+                tokenInfo.setUserOrganizationInfo(getOrganizationInfo(tokenInfo.getEndUserName()));
             }
         } catch (APIManagementException e) {
             log.error("Error while retrieving token information for token: " + accessToken, e);
@@ -157,7 +158,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     message.put(RestApiConstants.SUB_ORGANIZATION, tenantDomain);
                     if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                             .getAPIManagerConfiguration().getOrgAccessControl().isEnabled()) {
-                        message.put(RestApiConstants.ORGANIZATION_INFO, getOrganizationInfo(tenantDomain, username));
+                        message.put(RestApiConstants.ORGANIZATION_INFO, tokenInfo.getUserOrganizationInfo());
                     }
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);
@@ -248,7 +249,11 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 .getFirstProperty(property);
     }
     
-    public OrganizationInfo getOrganizationInfo(String tenantDomain, String username) {
+    public OrganizationInfo getOrganizationInfo(String username) {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving organization information for user: " + username);
+        }
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
         OrganizationInfo orgInfo = new OrganizationInfo();
         orgInfo.setSuperOrganization(tenantDomain);
 
@@ -258,7 +263,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String orgNameClaim = config.getOrgAccessControl().getOrgNameLocalClaim();
         String orgIdClaim = config.getOrgAccessControl().getOrgIdLocalClaim();
-        String orgSelectorClaim = config.getOrgAccessControl().getOrgSelectorClaim();
+
         if (StringUtils.isBlank(orgNameClaim)) {
             orgNameClaim = "http://wso2.org/claims/organization";
         }
@@ -266,10 +271,9 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
             orgIdClaim = "http://wso2.org/claims/organizationId";
         }
         
+        
         String organization = null;
         String organizationId = null;
-        String orgSelector = null;
-        String[] groupIdArray = null;
         try {
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 isSuperTenant = true;
@@ -279,39 +283,33 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
 
             //if the user is not in the super tenant domain then find the domain name and tenant id.
             if (!isSuperTenant) {
-                tenantDomain = MultitenantUtils.getTenantDomain(username);
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
             }
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                //when the username is an email in supertenant, it has at least 2 occurrences of '@'
+                long count = username.chars().filter(ch -> ch == '@').count();
+                //in the case of email, there will be more than one '@'
+                boolean isEmailUsernameEnabled = Boolean.parseBoolean(CarbonUtils.getServerConfiguration().
+                        getFirstProperty("EnableEmailUserName"));
+                if (isEmailUsernameEnabled || (username.endsWith(SUPER_TENANT_SUFFIX) && count <= 1)) {
+                    username = MultitenantUtils.getTenantAwareUsername(username);
+                }
+            }
 
+            
             UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
             UserStoreManager manager = realm.getUserStoreManager();
             organization =
                     manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgNameClaim, null);
             organizationId =
                     manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgIdClaim, null);
-            if (StringUtils.isBlank(orgSelectorClaim)) {
-                orgSelector = organization; // default selector will be organization name
-            } else {
-                orgSelector = manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username),
-                        orgSelectorClaim, null);
-            }
-            if (organization != null) {
-                if (organization.contains(",")) {
-                    groupIdArray = organization.split(",");
-                    for (int i = 0; i < groupIdArray.length; i++) {
-                        groupIdArray[i] = groupIdArray[i].toString().trim();
-                    }
-                } else {
-                    organization = organization.trim();
-                    groupIdArray = new String[] {organization};
-                    orgInfo.setName(organization); // check for multiple orgs
-                    orgInfo.setId(organizationId);
-                    orgInfo.setOrganizationSelector(orgSelector);
-                }
-            } else {
-                // If claim is null then returning a empty string
-                groupIdArray = new String[] {};
+
+            orgInfo.setName(organization);
+            orgInfo.setOrganizationId(organizationId);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("organization = " + organization + " ,organizationId = " + organizationId);
             }
         } catch (JSONException e) {
             log.error("Exception occured while trying to get group Identifier from login response", e);

@@ -57,8 +57,8 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             String orgId = null;
-            if (orgInfo != null && orgInfo.getOrganizationSelector() != null) {
-                orgId = orgInfo.getOrganizationSelector();
+            if (orgInfo != null && orgInfo.getOrganizationId() != null) {
+                orgId = orgInfo.getOrganizationId();
             }
             List<OrganizationDetailsDTO> orgList = apiAdmin.getOrganizations(orgId,
                     superOrganization);
@@ -126,8 +126,8 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
             String orgId = null;
-            if (orgInfo != null && orgInfo.getOrganizationSelector() != null) {
-                orgId = orgInfo.getOrganizationSelector();
+            if (orgInfo != null && orgInfo.getOrganizationId() != null) {
+                orgId = orgInfo.getOrganizationId();
                 organizationDTO.setParentOrganizationId(orgId); // set current users organization as parent id if available.
             }
             OrganizationDetailsDTO orgDto = OrganizationsMappingUtil.toOrganizationDetailsDTO(organizationDTO);

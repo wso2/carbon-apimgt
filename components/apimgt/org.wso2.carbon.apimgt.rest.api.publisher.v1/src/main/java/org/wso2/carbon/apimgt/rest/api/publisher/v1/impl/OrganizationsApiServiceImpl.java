@@ -50,8 +50,8 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             String orgId = null;
-            if (orgInfo != null && orgInfo.getOrganizationSelector() != null) {
-                orgId = orgInfo.getOrganizationSelector();
+            if (orgInfo != null && orgInfo.getOrganizationId() != null) {
+                orgId = orgInfo.getOrganizationId();
             } else {
                 String errorMessage = "User does not belong to any organization.";
                 throw new APIManagementException(errorMessage, ExceptionCodes.MISSING_ORGANINATION);

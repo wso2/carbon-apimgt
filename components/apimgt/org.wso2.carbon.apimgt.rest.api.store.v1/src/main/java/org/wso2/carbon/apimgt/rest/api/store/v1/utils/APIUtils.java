@@ -206,7 +206,7 @@ public class APIUtils {
             List<KeyManagerConfigurationDTO> keymanagerConfigs, OrganizationInfo orgInfo) {
 
         List<KeyManagerConfigurationDTO> allowedList = new ArrayList<KeyManagerConfigurationDTO>();
-        String organization = orgInfo.getOrganizationSelector();
+        String organization = orgInfo.getOrganizationId();
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keymanagerConfigs) {
             List<String> allowedOrgs = keyManagerConfigurationDTO.getAllowedOrganizations();
             // Add to allowedList if no organizations are restricted or if the organization is allowed

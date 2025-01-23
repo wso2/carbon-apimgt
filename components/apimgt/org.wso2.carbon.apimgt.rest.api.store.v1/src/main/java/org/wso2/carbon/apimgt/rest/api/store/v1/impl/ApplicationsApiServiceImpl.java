@@ -144,7 +144,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             Subscriber subscriber = new Subscriber(username);
             Application[] applications;
-            String sharedOrganization = orgInfo.getOrganizationSelector();
+            String sharedOrganization = orgInfo.getOrganizationId();
             applications = apiConsumer
                     .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy,
                             sortOrder, organization, sharedOrganization);
@@ -255,9 +255,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 int appId = APIUtil.getApplicationId(applicationDTO.getName(), ownerId);
                 Application oldApplication = apiConsumer.getApplicationById(appId);
                 application = preProcessAndUpdateApplication(ownerId, applicationDTO, oldApplication,
-                        oldApplication.getUUID(), orgInfo.getOrganizationSelector());
+                        oldApplication.getUUID(), orgInfo.getOrganizationId());
             } else {
-                application = preProcessAndAddApplication(ownerId, applicationDTO, organization, orgInfo.getOrganizationSelector());
+                application = preProcessAndAddApplication(ownerId, applicationDTO, organization, orgInfo.getOrganizationId());
                 update = Boolean.FALSE;
             }
 
@@ -331,7 +331,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             Application createdApplication = preProcessAndAddApplication(username, body, organization,
-                    orgInfo.getOrganizationSelector());
+                    orgInfo.getOrganizationId());
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
             //to be set as the Location header
@@ -435,8 +435,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 }
                 application.setApplicationAttributes(applicationAttributes);
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)
-                        || (orgInfo.getOrganizationSelector() != null
-                                && orgInfo.getOrganizationSelector().equals(application.getSharedOrganization()))) {
+                        || (orgInfo.getOrganizationId() != null
+                                && orgInfo.getOrganizationId().equals(application.getSharedOrganization()))) {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                     applicationDTO.setHashEnabled(OAuthServerConfiguration.getInstance().isClientSecretHashEnabled());
                     Set<Scope> scopes = apiConsumer
@@ -487,7 +487,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
-                    applicationId, orgInfo.getOrganizationSelector());
+                    applicationId, orgInfo.getOrganizationId());
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             return Response.ok().entity(updatedApplicationDTO).build();
 
@@ -935,8 +935,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationUUID);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)
-                        || (orgInfo != null && orgInfo.getOrganizationSelector() != null
-                                && orgInfo.getOrganizationSelector().equals(application.getSharedOrganization()))) {
+                        || (orgInfo != null && orgInfo.getOrganizationId() != null
+                                && orgInfo.getOrganizationId().equals(application.getSharedOrganization()))) {
                     return apiConsumer.getApplicationKeysOfApplication(application.getId(), tenantDomain);
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUID, log);
@@ -1304,8 +1304,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
 
         if (application != null) {
-            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application) || (orgInfo.getOrganizationSelector() != null
-                    && orgInfo.getOrganizationSelector().equals(application.getSharedOrganization()))) {
+            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application) || (orgInfo.getOrganizationId() != null
+                    && orgInfo.getOrganizationId().equals(application.getSharedOrganization()))) {
                 ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
                 if (appKey != null) {
                     String jsonInput = null;

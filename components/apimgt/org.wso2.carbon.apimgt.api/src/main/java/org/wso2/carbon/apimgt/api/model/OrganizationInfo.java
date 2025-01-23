@@ -23,7 +23,7 @@ public class OrganizationInfo {
     String superOrganization;
     String name;
     String id;
-    String organizationSelector;
+    String organizationId;
     OrganizationInfo parentOrganization;
     OrganizationInfo[] childOrganizations;
     
@@ -57,10 +57,10 @@ public class OrganizationInfo {
     public void setChildOrganizations(OrganizationInfo[] childOrganizations) {
         this.childOrganizations = childOrganizations;
     }
-    public String getOrganizationSelector() {
-        return organizationSelector;
+    public String getOrganizationId() {
+        return organizationId;
     }
-    public void setOrganizationSelector(String organizationSelector) {
-        this.organizationSelector = organizationSelector;
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 }

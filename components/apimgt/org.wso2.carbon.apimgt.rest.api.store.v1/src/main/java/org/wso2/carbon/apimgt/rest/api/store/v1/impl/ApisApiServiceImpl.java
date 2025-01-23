@@ -1180,7 +1180,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
             String status = api.getStatus();
-            String userOrg = userOrgInfo.getOrganizationSelector();
+            String userOrg = userOrgInfo.getOrganizationId();
 
             String userName = RestApiCommonUtil.getLoggedInUsername();
 
