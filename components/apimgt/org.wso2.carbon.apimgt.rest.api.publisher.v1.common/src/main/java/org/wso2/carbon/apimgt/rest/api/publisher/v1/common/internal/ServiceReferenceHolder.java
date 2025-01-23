@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal;
 
+import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -32,6 +33,7 @@ public class ServiceReferenceHolder {
 
     private APIManagerConfiguration apimConfiguration;
     private RealmService realmService;
+    private APIMGovernanceService apimGovernanceService;
 
     /**
      * Returns the singleton instance of {@code ServiceReferenceHolder}.
@@ -88,5 +90,22 @@ public class ServiceReferenceHolder {
      */
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
+    }
+
+    /**
+     * The APIM Governance Service instance.
+     * @return the APIM Governance Service instance
+     *
+     */
+    public void setAPIMGovernanceService(APIMGovernanceService service) {
+        if (service != null) {
+            this.apimGovernanceService = null;
+        } else {
+            this.apimGovernanceService = service;
+        }
+    }
+
+    public APIMGovernanceService getAPIMGovernanceService() {
+        return apimGovernanceService;
     }
 }

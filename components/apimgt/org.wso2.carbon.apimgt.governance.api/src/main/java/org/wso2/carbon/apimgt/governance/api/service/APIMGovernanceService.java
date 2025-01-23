@@ -43,15 +43,6 @@ public interface APIMGovernanceService {
                                               GovernableState state, String organization) throws GovernanceException;
 
     /**
-     * Check if a blocking policy is available for the artifact
-     * @param artifactId
-     * @param organization
-     * @return
-     * @throws GovernanceException
-     */
-    boolean isBlockingPolicyAvailable(String artifactId, String organization) throws GovernanceException;
-
-    /**
      * Evaluate compliance of the artifact asynchronously
      * @param artifactId Artifact ID
      * @param artifactType Artifact type

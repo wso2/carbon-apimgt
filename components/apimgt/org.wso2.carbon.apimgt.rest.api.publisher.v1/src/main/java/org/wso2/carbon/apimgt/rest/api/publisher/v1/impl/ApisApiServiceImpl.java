@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
+import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;

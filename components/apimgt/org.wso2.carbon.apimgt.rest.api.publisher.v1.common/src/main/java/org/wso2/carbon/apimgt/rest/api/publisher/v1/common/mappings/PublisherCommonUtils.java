@@ -72,6 +72,10 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
@@ -84,6 +88,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
@@ -1215,6 +1220,16 @@ public class PublisherCommonUtils {
 
         //adding the api
         log.info("******* Gov Check: PublisherCommonUtils addAPIWithGeneratedSwaggerDefinition *******");
+        APIMGovernanceService apimGovernanceService = ServiceReferenceHolder.getInstance().getAPIMGovernanceService();
+        try {
+            if (apimGovernanceService.isPoliciesWithBlockingActionExist(apiDto.getId(), GovernableState.API_CREATE,
+                    organization)) {
+                apimGovernanceService.evaluateComplianceAsync(apiDto.getId(), ArtifactType.REST_API, GovernableState.API_CREATE,
+                        organization);
+            }
+        } catch (GovernanceException e) {
+            log.error("Error occurred while executing governance ", e);
+        }
         log.info(validationArtifact(apiToAdd));
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;

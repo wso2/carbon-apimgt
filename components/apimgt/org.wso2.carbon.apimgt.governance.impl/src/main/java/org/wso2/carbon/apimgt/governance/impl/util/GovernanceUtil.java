@@ -244,6 +244,7 @@ public class GovernanceUtil {
      */
     public static boolean isBlockingActionsPresent(List<String> policyIds, GovernableState governableState)
             throws GovernanceException {
+        log.info("Checking for blocking actions in policies for state: " + governableState);
         PolicyManager policyManager = new PolicyManagerImpl();
         boolean isBlocking = false;
         for (String policyId : policyIds) {

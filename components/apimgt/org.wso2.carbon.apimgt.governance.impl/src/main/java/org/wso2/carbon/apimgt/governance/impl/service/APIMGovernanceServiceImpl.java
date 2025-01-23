@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.impl.service;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
@@ -34,6 +36,7 @@ import java.util.List;
         immediate = true
 )
 public class APIMGovernanceServiceImpl implements APIMGovernanceService {
+    private static final Log log = LogFactory.getLog(APIMGovernanceServiceImpl.class);
 
     /**
      * Check if there are any policies with blocking actions for the artifact
@@ -47,22 +50,10 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     @Override
     public boolean isPoliciesWithBlockingActionExist(String artifactId, GovernableState state, String organization)
             throws GovernanceException {
+        log.info("Checking for policies with blocking actions for artifact: " + artifactId);
         List<String> applicablePolicyIds = GovernanceUtil.getApplicableGovPoliciesForArtifact(artifactId, state,
                 organization);
         return GovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state);
-    }
-
-
-    /**
-     * Check if a blocking policy is available for the artifact
-     * @param artifactId
-     * @param organization
-     * @return
-     * @throws GovernanceException
-     */
-    @Override
-    public boolean isBlockingPolicyAvailable(String artifactId, String organization) throws GovernanceException {
-        return GovernanceUtil.isBlockingPolicyAvailable(artifactId, organization);
     }
 
     /**
