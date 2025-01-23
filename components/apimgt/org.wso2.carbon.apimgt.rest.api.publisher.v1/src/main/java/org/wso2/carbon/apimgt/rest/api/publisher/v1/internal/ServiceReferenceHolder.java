@@ -20,9 +20,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.internal;
 
+import lombok.Getter;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 
 public class ServiceReferenceHolder {
+    @Getter
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIMGovernanceService apimGovernanceService;
@@ -31,16 +33,8 @@ public class ServiceReferenceHolder {
     private ServiceReferenceHolder() {
     }
 
-    public static ServiceReferenceHolder getInstance() {
-        return instance;
-    }
-
     public void setAPIMGovernanceService(APIMGovernanceService service) {
-        if (service != null) {
-            this.apimGovernanceService = null;
-        } else {
-            this.apimGovernanceService = service;
-        }
+        this.apimGovernanceService = null;
     }
 
     public APIMGovernanceService getAPIMGovernanceService() {

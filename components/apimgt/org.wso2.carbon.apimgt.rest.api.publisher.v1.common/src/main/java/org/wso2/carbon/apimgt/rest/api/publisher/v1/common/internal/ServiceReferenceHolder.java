@@ -98,11 +98,7 @@ public class ServiceReferenceHolder {
      *
      */
     public void setAPIMGovernanceService(APIMGovernanceService service) {
-        if (service != null) {
-            this.apimGovernanceService = null;
-        } else {
-            this.apimGovernanceService = service;
-        }
+        this.apimGovernanceService = service;
     }
 
     public APIMGovernanceService getAPIMGovernanceService() {

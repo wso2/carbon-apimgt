@@ -98,6 +98,8 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Private-Package>
+                        </Private-Package>
                         <Export-Package>
                             org.wso2.carbon.apimgt.governance.impl.*;version="${carbon.apimgt.version}"
                         </Export-Package>
