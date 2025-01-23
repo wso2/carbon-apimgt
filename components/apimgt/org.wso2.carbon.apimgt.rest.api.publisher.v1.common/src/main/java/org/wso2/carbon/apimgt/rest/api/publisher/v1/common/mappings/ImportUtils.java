@@ -396,6 +396,7 @@ public class ImportUtils {
             }
 
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
+            log.info("******* Gov Check: importApi *******");
             apiProvider.updateAPI(importedApi, oldAPI);
 
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
