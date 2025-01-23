@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationStatus;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
+import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
@@ -382,6 +383,40 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setRulesetId(rulesetId);
                     ruleViolation.setRuleCode(resultSet.getString("RULE_CODE"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
+                    ruleViolation.setSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
+                    ruleViolations.add(ruleViolation);
+                }
+            }
+            return ruleViolations;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_RULE_VIOLATIONS,
+                    e);
+        }
+    }
+
+    /**
+     * Get the rule violations by artifact ID
+     *
+     * @param artifactId Artifact ID
+     * @return List of Rule Violations
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    @Override
+    public List<RuleViolation> getRuleViolationsByArtifactId(String artifactId) throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_RULE_VIOLATIONS_BY_ARTIFACT;
+        List<RuleViolation> ruleViolations = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    RuleViolation ruleViolation = new RuleViolation();
+                    ruleViolation.setArtifactId(artifactId);
+                    ruleViolation.setPolicyId(resultSet.getString("POLICY_ID"));
+                    ruleViolation.setRulesetId(resultSet.getString("RULESET_ID"));
+                    ruleViolation.setRuleCode(resultSet.getString("RULE_CODE"));
+                    ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
+                    ruleViolation.setSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolations.add(ruleViolation);
                 }
             }

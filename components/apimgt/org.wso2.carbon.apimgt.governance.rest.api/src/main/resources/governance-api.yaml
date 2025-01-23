@@ -1396,11 +1396,11 @@ components:
           type: integer
           description: Number of policies violated by the artifact.
           example: 1
-        ruleValidationResultSummary:
-          type: object
-          description: Summary of rule validation results.
+        severityBasedRuleViolationCount:
+          type: array
+          description: Summary of severity based rule violations.
           items:
-            $ref: '#/components/schemas/RuleValidationResultSummary'
+            $ref: '#/components/schemas/SeverityBasedRuleViolationCount'
     PolicyAdherenceStatus:
       type: object
       description: Provides adherence status of a policy.
@@ -1607,9 +1607,9 @@ components:
           type: string
           description: Description of the rule.
           example: "API name should be between 5 to 50 characters"
-    RuleValidationResultSummary:
+    SeverityBasedRuleViolationCount:
       type: object
-      description: List of rule validation information.
+      description: List of rules violated by the artifact under each severity.
       properties:
         severity:
           type: string

@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
+import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -11,6 +12,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
@@ -18,16 +20,23 @@ import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceStatusDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceWithRulesetsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.ResultsMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -223,15 +232,135 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         return rulesetValidationResultDTO;
     }
 
+    /**
+     * Get compliance evaluation results for all artifacts
+     *
+     * @param limit          limit
+     * @param offset         offset
+     * @param artifactType   artifact type
+     * @param messageContext message context
+     * @return Response
+     * @throws GovernanceException if an error occurs while getting the artifact compliance evaluation results
+     */
     public Response getArtifactComplianceForAllArtifacts(Integer limit, Integer offset,
-                                                         String artifactType, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+                                                         String artifactType,
+                                                         MessageContext messageContext) throws GovernanceException {
+
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        List<ArtifactComplianceStatusDTO> complianceStatusList = new ArrayList<>();
+
+        // Check if the artifact type is API and proceed accordingly
+        if (ArtifactType.isArtifactAPI(artifactType)) {
+            // Retrieve APIs the given organization
+            List<String> apiIds = APIMUtil.getPaginatedAPIs(organization, limit, offset);
+
+            for (String apiId : apiIds) {
+                ArtifactComplianceStatusDTO complianceStatus = getArtifactComplianceStatus(apiId,
+                        ArtifactType.API, organization);
+                complianceStatusList.add(complianceStatus);
+            }
+        }
+
+        ArtifactComplianceListDTO complianceListDTO = new ArtifactComplianceListDTO();
+        complianceListDTO.setList(complianceStatusList);
+        complianceListDTO.setCount(complianceStatusList.size());
+
+        // Set pagination details
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setTotal(complianceStatusList.size());
+
+        // Set previous and next URLs for pagination
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit,
+                complianceStatusList.size());
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = GovernanceAPIUtil.getArtifactCompliancePageURL(
+                    GovernanceAPIConstants.RULESETS_GET_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), artifactType);
+        }
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = GovernanceAPIUtil.getArtifactCompliancePageURL(GovernanceAPIConstants.RULESETS_GET_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), artifactType);
+        }
+        paginationDTO.setNext(paginatedNext);
+        paginationDTO.setPrevious(paginatedPrevious);
+
+        complianceListDTO.setPagination(paginationDTO);
+
+        return Response.ok().entity(complianceListDTO).build();
+
+    }
+
+    /**
+     * Get artifact compliance status for the artifact
+     *
+     * @param artifactId   artifact ID
+     * @param artifactType artifact type
+     * @param organization organization
+     * @return ArtifactComplianceStatusDTO
+     * @throws GovernanceException if an error occurs while getting the artifact compliance status
+     */
+    private ArtifactComplianceStatusDTO getArtifactComplianceStatus(String artifactId, ArtifactType artifactType,
+                                                                    String organization)
+            throws GovernanceException {
+
+        ComplianceManager complianceManager = new ComplianceManagerImpl();
+
+        // Create a new DTO to store compliance status for the current API
+        ArtifactComplianceStatusDTO complianceStatus = new ArtifactComplianceStatusDTO();
+
+        complianceStatus.setArtifactId(artifactId);
+        complianceStatus.setArtifactName(GovernanceUtil.getArtifactName(artifactId, artifactType));
+        complianceStatus.setArtifactType(
+                ArtifactComplianceStatusDTO.ArtifactTypeEnum.fromValue(
+                        String.valueOf(artifactType)));
+
+        // Retrieve applicable policies for the current artifact
+        Map<String, String> applicablePolicies = GovernanceUtil
+                .getApplicablePoliciesForArtifact(artifactId, artifactType, organization);
+        complianceStatus.setApplicablePolicyCount(applicablePolicies.size());
+
+        // Retrieve rule violations categorized by severity for the current artifact
+        Map<Severity, List<RuleViolation>> ruleViolationsBySeverity = complianceManager
+                .getSeverityBasedRuleViolationsForArtifact(artifactId);
+
+        Set<String> violatedPolicyIds = new HashSet<>();
+        List<SeverityBasedRuleViolationCountDTO> ruleViolationCounts = new ArrayList<>();
+
+        // Process each severity level and its associated rule violations
+        for (Map.Entry<Severity, List<RuleViolation>> entry : ruleViolationsBySeverity.entrySet()) {
+            Severity severity = entry.getKey();
+            List<RuleViolation> ruleViolations = entry.getValue();
+
+            // Create a DTO to store the count of violations for the current severity
+            SeverityBasedRuleViolationCountDTO violationCountDTO = new SeverityBasedRuleViolationCountDTO();
+
+            violationCountDTO.setSeverity(SeverityBasedRuleViolationCountDTO
+                    .SeverityEnum.fromValue(String.valueOf(severity)));
+            violationCountDTO.setViolatedRulesCount(ruleViolations.size());
+
+            ruleViolationCounts.add(violationCountDTO);
+
+            // Track the IDs of violated policies
+            for (RuleViolation ruleViolation : ruleViolations) {
+                violatedPolicyIds.add(ruleViolation.getPolicyId());
+            }
+        }
+
+        complianceStatus.setViolatedPolicyCount(violatedPolicyIds.size());
+        complianceStatus.setSeverityBasedRuleViolationCount(ruleViolationCounts);
+
+        return complianceStatus;
     }
 
     /**

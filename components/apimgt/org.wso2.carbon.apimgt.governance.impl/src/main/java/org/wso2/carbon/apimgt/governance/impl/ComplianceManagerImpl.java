@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
+import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
@@ -157,6 +158,31 @@ public class ComplianceManagerImpl implements ComplianceManager {
     public List<RuleViolation> getRuleViolations(String artifactId, String policyId, String rulesetId)
             throws GovernanceException {
         return complianceMgtDAO.getRuleViolations(artifactId, policyId, rulesetId);
+    }
+
+    /**
+     * Get the rule violations by artifact ID based on severity
+     *
+     * @param artifactId Artifact ID
+     * @return Map of Rule Violations based on severity
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    @Override
+    public Map<Severity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactId)
+            throws GovernanceException {
+        List<RuleViolation> ruleViolations = complianceMgtDAO.getRuleViolationsByArtifactId(artifactId);
+        Map<Severity, List<RuleViolation>> severityBasedRuleViolations = new HashMap<>();
+        for (RuleViolation ruleViolation : ruleViolations) {
+            Severity severity = ruleViolation.getSeverity();
+            if (severityBasedRuleViolations.containsKey(severity)) {
+                severityBasedRuleViolations.get(severity).add(ruleViolation);
+            } else {
+                List<RuleViolation> ruleViolationList = new ArrayList<>();
+                ruleViolationList.add(ruleViolation);
+                severityBasedRuleViolations.put(severity, ruleViolationList);
+            }
+        }
+        return severityBasedRuleViolations;
     }
 
     /**

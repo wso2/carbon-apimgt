@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
+import org.wso2.carbon.apimgt.governance.api.model.Severity;
 
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,16 @@ public interface ComplianceManager {
      * @throws GovernanceException If an error occurs while getting the rule violations
      */
     List<RuleViolation> getRuleViolations(String artifactId, String policyId, String rulesetId)
+            throws GovernanceException;
+
+    /**
+     * Get the rule violations by artifact ID based on severity
+     *
+     * @param artifactId Artifact ID
+     * @return Map of Rule Violations based on severity
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    Map<Severity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactId)
             throws GovernanceException;
 
     /**

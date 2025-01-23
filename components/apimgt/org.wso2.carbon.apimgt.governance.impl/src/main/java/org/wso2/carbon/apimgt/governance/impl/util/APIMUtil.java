@@ -290,4 +290,16 @@ public class APIMUtil {
         return new ArrayList<>(); // TODO: Connect to the database and get all APIs for the organization
     }
 
+    /**
+     * Get all APIs for the organization with pagination
+     *
+     * @param organizationId Organization ID
+     * @param limit          Limit
+     * @param offset         Offset
+     * @return List of API IDs
+     */
+    public static List<String> getPaginatedAPIs(String organizationId, int limit, int offset) {
+        return new ArrayList<>(); // TODO: Connect to the database and get all APIs for the organization
+    }
+
 }

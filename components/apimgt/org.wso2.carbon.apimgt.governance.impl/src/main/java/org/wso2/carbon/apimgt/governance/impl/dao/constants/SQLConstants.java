@@ -240,8 +240,20 @@ public class SQLConstants {
             "(VIOLATION_ID, ARTIFACT_ID, POLICY_ID, RULESET_ID, RULE_CODE, VIOLATED_PATH) " +
             "VALUES (?, ?, ?, ?, ?, ?)";
 
-    public static final String GET_RULE_VIOLATIONS = "SELECT * FROM GOV_RULE_VIOLATION " +
-            "WHERE ARTIFACT_ID = ? AND POLICY_ID = ? AND RULESET_ID = ?";
+
+    public static final String GET_RULE_VIOLATIONS = "SELECT GV.ARTIFACT_ID, GV.POLICY_ID, " +
+            "GV.RULESET_ID, GV.RULE_CODE, GRR.SEVERITY " +
+            "FROM GOV_RULE_VIOLATION GV " +
+            "LEFT JOIN GOV_RULESET_RULE GRR " +
+            "ON GV.RULESET_ID = GRR.RULESET_ID AND GV.RULE_CODE = GRR.RULE_CODE " +
+            "WHERE GV.ARTIFACT_ID = ? AND GV.POLICY_ID = ? AND GV.RULESET_ID = ?";
+
+    public static final String GET_RULE_VIOLATIONS_BY_ARTIFACT = "SELECT GV.ARTIFACT_ID, GV.POLICY_ID, " +
+            "GV.RULESET_ID, GV.RULE_CODE, GRR.SEVERITY " +
+            "FROM GOV_RULE_VIOLATION GV " +
+            "LEFT JOIN GOV_RULESET_RULE GRR " +
+            "ON GV.RULESET_ID = GRR.RULESET_ID AND GV.RULE_CODE = GRR.RULE_CODE " +
+            "WHERE GV.ARTIFACT_ID = ?";
 
     public static final String DELETE_RULE_VIOLATION = "DELETE FROM GOV_RULE_VIOLATION " +
             "WHERE ARTIFACT_ID = ? AND POLICY_ID = ?";

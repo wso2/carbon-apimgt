@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * List of rule validation information.
+ * List of rules violated by the artifact under each severity.
  **/
 
 import io.swagger.annotations.*;
@@ -19,9 +19,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "List of rule validation information.")
+@ApiModel(description = "List of rules violated by the artifact under each severity.")
 
-public class RuleValidationResultSummaryDTO   {
+public class SeverityBasedRuleViolationCountDTO   {
   
 
           @XmlType(name="SeverityEnum")
@@ -61,7 +61,7 @@ return null;
   /**
    * Severity level of the rule violation.
    **/
-  public RuleValidationResultSummaryDTO severity(SeverityEnum severity) {
+  public SeverityBasedRuleViolationCountDTO severity(SeverityEnum severity) {
     this.severity = severity;
     return this;
   }
@@ -79,7 +79,7 @@ return null;
   /**
    * Number of rules violated by the artifact under each severity.
    **/
-  public RuleValidationResultSummaryDTO violatedRulesCount(Integer violatedRulesCount) {
+  public SeverityBasedRuleViolationCountDTO violatedRulesCount(Integer violatedRulesCount) {
     this.violatedRulesCount = violatedRulesCount;
     return this;
   }
@@ -103,9 +103,9 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RuleValidationResultSummaryDTO ruleValidationResultSummary = (RuleValidationResultSummaryDTO) o;
-    return Objects.equals(severity, ruleValidationResultSummary.severity) &&
-        Objects.equals(violatedRulesCount, ruleValidationResultSummary.violatedRulesCount);
+    SeverityBasedRuleViolationCountDTO severityBasedRuleViolationCount = (SeverityBasedRuleViolationCountDTO) o;
+    return Objects.equals(severity, severityBasedRuleViolationCount.severity) &&
+        Objects.equals(violatedRulesCount, severityBasedRuleViolationCount.violatedRulesCount);
   }
 
   @Override
@@ -116,7 +116,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RuleValidationResultSummaryDTO {\n");
+    sb.append("class SeverityBasedRuleViolationCountDTO {\n");
     
     sb.append("    severity: ").append(toIndentedString(severity)).append("\n");
     sb.append("    violatedRulesCount: ").append(toIndentedString(violatedRulesCount)).append("\n");
