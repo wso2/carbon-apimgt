@@ -34,7 +34,7 @@ public class ServiceReferenceHolder {
     }
 
     public void setAPIMGovernanceService(APIMGovernanceService service) {
-        this.apimGovernanceService = null;
+        this.apimGovernanceService = service;
     }
 
     public APIMGovernanceService getAPIMGovernanceService() {

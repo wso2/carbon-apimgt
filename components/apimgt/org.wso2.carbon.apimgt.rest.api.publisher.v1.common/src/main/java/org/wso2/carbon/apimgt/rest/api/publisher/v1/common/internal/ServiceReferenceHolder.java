@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -29,20 +31,29 @@ import org.wso2.carbon.user.core.service.RealmService;
  */
 public class ServiceReferenceHolder {
 
+    /**
+     * -- GETTER --
+     *  Returns the singleton instance of
+     * .
+     *
+     */
+    @Getter
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfiguration apimConfiguration;
+    /**
+     * -- GETTER --
+     *  Retrieves the current instance of the RealmService.
+     *
+     *
+     * -- SETTER --
+     *  Sets the RealmService instance.
+     *
+     */
+    @Setter
+    @Getter
     private RealmService realmService;
     private APIMGovernanceService apimGovernanceService;
-
-    /**
-     * Returns the singleton instance of {@code ServiceReferenceHolder}.
-     *
-     * @return The singleton instance of {@code ServiceReferenceHolder}.
-     */
-    public static ServiceReferenceHolder getInstance() {
-        return instance;
-    }
 
     /**
      * Private constructor to prevent instantiation.
@@ -75,26 +86,7 @@ public class ServiceReferenceHolder {
     }
 
     /**
-     * Retrieves the current instance of the RealmService.
-     *
-     * @return the RealmService instance
-     */
-    public RealmService getRealmService() {
-        return realmService;
-    }
-
-    /**
-     * Sets the RealmService instance.
-     *
-     * @param realmService the RealmService to be set
-     */
-    public void setRealmService(RealmService realmService) {
-        this.realmService = realmService;
-    }
-
-    /**
      * The APIM Governance Service instance.
-     * @return the APIM Governance Service instance
      *
      */
     public void setAPIMGovernanceService(APIMGovernanceService service) {
