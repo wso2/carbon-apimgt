@@ -131,7 +131,9 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
                         swagger = localEntryObj.getValue().toString();
                         OpenAPIParser parser = new OpenAPIParser();
                         ParseOptions parseOptions = new ParseOptions();
+                        parseOptions.setResolve(true);
                         parseOptions.setResolveFully(true);
+                        parseOptions.setResolveCombinators(false);
                         openAPI = parser.readContents(swagger, null, parseOptions).getOpenAPI();
                         // HTTP headers should be case insensitive as for HTTP 1.1 RFC
                         // Thus converting headers to lowercase for schema validation.
