@@ -46,7 +46,9 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of the GovernancePolicyMgtDAO interface.
@@ -711,6 +713,37 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         }
     }
 
+
+    /**
+     * Get the list of policies by label
+     *
+     * @param label        label
+     * @param organization organization
+     * @return Map of Policy IDs, Policy Names
+     * @throws GovernanceException If an error occurs while getting the policies
+     */
+    @Override
+    public Map<String, String> getPoliciesByLabel(String label, String organization)
+            throws GovernanceException {
+        Map<String, String> policyIds = new HashMap();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_BY_LABEL)) {
+            prepStmt.setString(1, label);
+            prepStmt.setString(2, organization);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    policyIds.put(resultSet.getString("POLICY_ID"),
+                            resultSet.getString("NAME"));
+                }
+            }
+            return policyIds;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+                    organization);
+        }
+
+    }
+
     /**
      * Get PolicyIds by label
      *
@@ -736,6 +769,31 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             return policyIds;
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+                    organization);
+        }
+    }
+
+    /**
+     * Get Policies without labels
+     *
+     * @param organization Organization
+     * @return Map of Policy IDs, Policy Names
+     */
+    public Map<String, String> getPoliciesWithoutLabels(String organization)
+            throws GovernanceException {
+        Map<String, String> policyIds = new HashMap<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_WITHOUT_LABELS)) {
+            prepStmt.setString(1, organization);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    policyIds.put(resultSet.getString("POLICY_ID"),
+                            resultSet.getString("NAME"));
+                }
+            }
+            return policyIds;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES,
                     organization);
         }
     }
@@ -805,7 +863,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      */
     @Override
     public List<String> getLabelsByPolicyId(String policyId) throws GovernanceException {
-        List<String> labels = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection()) {
             return getLabelsByPolicyId(policyId, connection);
         } catch (SQLException e) {

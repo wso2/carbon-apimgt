@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -39,6 +40,8 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
+import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
+import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -47,6 +50,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -201,19 +205,67 @@ public class GovernanceUtil {
     }
 
     /**
-     * Get all applicable policy IDs for an artifact
+     * Get labels for an artifact
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @return List of label IDs
+     */
+    public static List<String> getLabelsForArtifact(String artifactId, ArtifactType artifactType) {
+        List<String> labels = new ArrayList<>();
+        if (ArtifactType.isArtifactAPI(artifactType)) {
+            labels = APIMUtil.getLabelIDsForAPI(artifactId);
+        }
+        return labels;
+    }
+
+    /**
+     * Get applicable policies for an artifact
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return Map of Policy IDs, Policy Names
+     */
+    public static Map<String, String> getApplicablePoliciesForArtifact(String artifactId,
+                                                                       ArtifactType artifactType,
+                                                                       String organization) throws GovernanceException {
+
+        List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactId, artifactType);
+        PolicyManager policyManager = new PolicyManagerImpl();
+
+        Map<String, String> policies = new HashMap<>();
+        for (String label : labels) {
+            Map<String, String> policiesForLabel = policyManager.getPoliciesByLabel(label, organization);
+            if (policiesForLabel != null) {
+                policies.putAll(policiesForLabel);
+            }
+        }
+
+        policies.putAll(policyManager.getOrganizationWidePolicies(organization));
+
+        return policies; // Return a map of policy IDs and policy names
+    }
+
+
+    /**
+     * Get all applicable policy IDs for an artifact given a specific state at which
+     * the artifact should be governed
      *
      * @param artifactId      Artifact ID
+     * @param artifactType    Artifact Type
      * @param governableState Governable state (The state at which the artifact should be governed)
      * @param organization    Organization
-     * @return List of applicable policy IDS
+     * @return List of applicable policy IDs
      * @throws GovernanceException if an error occurs while checking for applicable policies
      */
-    public static List<String> getApplicableGovPoliciesForArtifact(String artifactId,
-                                                                   GovernableState governableState,
-                                                                   String organization) throws GovernanceException {
+    public static List<String> getApplicablePoliciesForArtifactWithState(String artifactId,
+                                                                         ArtifactType artifactType,
+                                                                         GovernableState governableState,
+                                                                         String organization)
+            throws GovernanceException {
 
-        List<String> labels = new ArrayList<>(); // TODO: Get labels from APIM
+        List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactId, artifactType);
         PolicyManager policyManager = new PolicyManagerImpl();
 
         // Check for policies using labels and the state
@@ -231,7 +283,6 @@ public class GovernanceUtil {
                 organization));
 
         return policies;
-
     }
 
     /**
@@ -271,6 +322,34 @@ public class GovernanceUtil {
             artifactExists = APIMUtil.isAPIExist(artifactId);
         }
         return artifactExists;
+    }
+
+    /**
+     * Get artifact type
+     *
+     * @param artifactId Artifact ID
+     * @return ArtifactType
+     */
+    public static ArtifactType getArtifactType(String artifactId) throws GovernanceException {
+        ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
+        return complianceMgtDAO.getArtifactInfo(artifactId).getArtifactType();
+    }
+
+    /**
+     * Get artifact name
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @return String
+     * @throws GovernanceException If an error occurs while getting the artifact name
+     */
+    public static String getArtifactName(String artifactId, ArtifactType artifactType)
+            throws GovernanceException {
+        String artifactName = null;
+        if (ArtifactType.isArtifactAPI(artifactType)) {
+            artifactName = APIMUtil.getAPINameCombinedWithVersion(artifactId);
+        }
+        return artifactName;
     }
 
     /**

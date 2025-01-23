@@ -24,8 +24,10 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
@@ -141,5 +143,34 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
     }
 
+    /**
+     * Get Rule Violations
+     *
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @param rulesetId  Ruleset ID
+     * @return List of Rule Violations
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    @Override
+    public List<RuleViolation> getRuleViolations(String artifactId, String policyId, String rulesetId)
+            throws GovernanceException {
+        return complianceMgtDAO.getRuleViolations(artifactId, policyId, rulesetId);
+    }
 
+    /**
+     * Get Compliance Evaluation Result
+     *
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @param rulesetId  Ruleset ID
+     * @return Compliance Evaluation Result
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation result
+     */
+    @Override
+    public ComplianceEvaluationResult getComplianceEvaluationResult(String artifactId,
+                                                                    String policyId, String rulesetId)
+            throws GovernanceException {
+        return complianceMgtDAO.getComplianceEvaluationResult(artifactId, policyId, rulesetId);
+    }
 }

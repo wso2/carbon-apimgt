@@ -39,16 +39,19 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * Check if there are any policies with blocking actions for the artifact
      *
      * @param artifactId   Artifact ID
+     * @param artifactType Artifact type (ArtifactType.API)
      * @param state        State to be governed
      * @param organization Organization
      * @return True if there are policies with blocking actions, False otherwise
      * @throws GovernanceException If an error occurs while checking for policies with blocking actions
      */
     @Override
-    public boolean isPoliciesWithBlockingActionExist(String artifactId, GovernableState state, String organization)
+    public boolean isPoliciesWithBlockingActionExist(String artifactId,
+                                                     ArtifactType artifactType, GovernableState state,
+                                                     String organization)
             throws GovernanceException {
-        List<String> applicablePolicyIds = GovernanceUtil.getApplicableGovPoliciesForArtifact(artifactId, state,
-                organization);
+        List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
+                artifactType, state, organization);
         return GovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state);
     }
 
@@ -57,8 +60,8 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * Evaluate compliance of the artifact asynchronously
      *
      * @param artifactId   Artifact ID
-     * @param artifactType Artifact type
-     * @param state        State to be governed
+     * @param artifactType Artifact type (ArtifactType.API)
+     * @param state        State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param organization Organization
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
@@ -66,8 +69,8 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     public void evaluateComplianceAsync(String artifactId, ArtifactType artifactType,
                                         GovernableState state, String organization) throws
             GovernanceException {
-        List<String> applicablePolicyIds = GovernanceUtil.getApplicableGovPoliciesForArtifact(artifactId,
-                state, organization);
+        List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
+                artifactType, state, organization);
         new ComplianceManagerImpl().handleComplianceEvaluationAsync
                 (artifactId, artifactType, applicablePolicyIds, organization);
     }

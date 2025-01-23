@@ -68,6 +68,10 @@ public class SQLConstants {
     public static final String DELETE_RULES =
             "DELETE FROM GOV_RULESET_RULE WHERE RULESET_ID = ?";
 
+    public static final String GET_RULES_WITHOUT_CONTENT =
+            "SELECT RULESET_RULE_ID, RULESET_ID, RULE_CODE, RULE_MESSAGE, RULE_DESCRIPTION, SEVERITY" +
+                    "FROM GOV_RULESET_RULE WHERE RULESET_ID = ?";
+
     public static final String CREATE_POLICY =
             "INSERT INTO GOV_POLICY (POLICY_ID, NAME, DESCRIPTION, " +
                     "ORGANIZATION, CREATED_BY, CREATED_TIME) " +
@@ -150,6 +154,20 @@ public class SQLConstants {
                     "POLICY_RULESET_MAPPING.RULESET_ID " +
                     "WHERE POLICY_RULESET_MAPPING.POLICY_ID = ?";
 
+    public static final String GET_POLICIES_BY_LABEL =
+            "SELECT DISTINCT GOV_POLICY.POLICY_ID " +
+                    "FROM GOV_POLICY " +
+                    "LEFT JOIN GOV_POLICY_LABEL ON GOV_POLICY.POLICY_ID = GOV_POLICY_LABEL.POLICY_ID " +
+                    "WHERE GOV_POLICY_LABEL.LABEL = ? " +
+                    "AND GOV_POLICY.ORGANIZATION = ?";
+
+    public static final String GET_POLICIES_WITHOUT_LABELS =
+            "SELECT DISTINCT GOV_POLICY.POLICY_ID " +
+                    "FROM GOV_POLICY " +
+                    "LEFT JOIN GOV_POLICY_LABEL ON GOV_POLICY.POLICY_ID = GOV_POLICY_LABEL.POLICY_ID " +
+                    "WHERE GOV_POLICY_LABEL.POLICY_ID IS NULL " +
+                    "AND GOV_POLICY.ORGANIZATION = ?";
+
     public static final String GET_POLICIES_BY_LABEL_AND_STATE =
             "SELECT DISTINCT GOV_POLICY.POLICY_ID " +
                     "FROM GOV_POLICY " +
@@ -190,12 +208,25 @@ public class SQLConstants {
             " WHERE REQUEST_ID = ?";
 
     public static final String ADD_GOV_COMPLIANCE_EVALUATION_RESULT = "INSERT INTO GOV_COMPLIANCE_EVALUATION_RESULT " +
-            "(RESULT_ID, ARTIFACT_ID, POLICY_ID, EVALUATION_RESULT) " +
-            "VALUES (?, ?, ?, ?)";
+            "(RESULT_ID, ARTIFACT_ID, POLICY_ID, RULESET_ID, EVALUATION_RESULT) " +
+            "VALUES (?, ?, ?, ?, ?)";
+
+    public static final String GET_GOV_COMPLIANCE_EVALUATION_RESULT = "SELECT * FROM GOV_COMPLIANCE_EVALUATION_RESULT " +
+            "WHERE ARTIFACT_ID = ? AND POLICY_ID = ? AND RULESET_ID = ?";
+
+    public static final String DELETE_GOV_COMPLIANCE_EVALUATION_RESULT = "DELETE FROM GOV_COMPLIANCE_EVALUATION_RESULT " +
+            "WHERE ARTIFACT_ID = ? AND POLICY_ID = ? AND RULESET_ID = ?";
 
     public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION " +
             "(VIOLATION_ID, ARTIFACT_ID, POLICY_ID, RULESET_ID, RULE_CODE, VIOLATED_PATH) " +
             "VALUES (?, ?, ?, ?, ?, ?)";
 
+    public static final String GET_RULE_VIOLATIONS = "SELECT * FROM GOV_RULE_VIOLATION " +
+            "WHERE ARTIFACT_ID = ? AND POLICY_ID = ? AND RULESET_ID = ?";
+
+    public static final String DELETE_RULE_VIOLATION = "DELETE FROM GOV_RULE_VIOLATION " +
+            "WHERE ARTIFACT_ID = ? AND POLICY_ID = ?";
+
+    public static final String GET_ARTIFACT_INFO = "SELECT * FROM GOV_ARTIFACT_INFO WHERE ARTIFACT_ID = ?";
 
 }

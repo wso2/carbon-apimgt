@@ -33,7 +33,8 @@ public class RulesetValidationResultDTO   {
     @XmlEnum(String.class)
     public enum StatusEnum {
         PASSED("PASSED"),
-        FAILED("FAILED");
+        FAILED("FAILED"),
+        PENDING("PENDING");
         private String value;
 
         StatusEnum (String v) {

@@ -84,6 +84,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             "Error while retrieving associated policies for the ruleset with ID: %s", true),
     ERROR_WHILE_EXTRACTING_RULE_CONTENT(301018, "Error while extracting rule content", 500, "Error while extracting " +
             "rule content from the ruleset", true),
+    ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID(301019, "Error while retrieving rules by ruleset id", 500, "Error while " +
+            "retrieving rules by ruleset id: %s", true),
 
     // Policy related codes
     ERROR_WHILE_CREATING_POLICY(401001, "Policy creation failed.", 500, "Error while creating governance policy in the organization %s", true),
@@ -108,8 +110,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     ERROR_WHILE_RETRIEVING_LABELS_BY_POLICY_ID(401011, "Retrieving labels by policy id failed", 500, "Error while " +
             "retrieving labels by policy id: %s", true),
-    // Artifact related codes
 
+    // Artifact related codes
     ERROR_WHILE_SAVING_ARTIFACT_INFO(501000, "Error while saving artifact info.", 500, "Error while saving " +
             "artifact info for artifact: %s in the organization: %s"),
     ERROR_WHILE_PROCESSING_GOVERNANCE_EVALUATION_REQUEST(501001, "Error while processing governance evaluation " +
@@ -127,20 +129,30 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUEST(501004, "Error while deleting governance evaluation request.",
             500, "Error while deleting governance evaluation request with ID: %s"),
 
+    ERROR_WHILE_RETRIEVING_ARTIFACT_INFO(501005, "Error while retrieving artifact info.", 500, "Error while " +
+            "retrieving artifact info for artifact: %s", true),
+
+    ARTIFACT_INFO_NOT_FOUND(501006, "Artifact info not found.", 404, "Artifact info not found for artifact: %s in the "),
+
     // Governance Results related codes
 
     ERROR_WHILE_SAVING_GOVERNANCE_RESULT(601001, "Error while saving governance result.", 500, "Error while saving " +
             "governance result for artifact: %s", true),
-    ERROR_WHILE_SAVING_RULE_VIOLATION(601002, "Error while saving rule violation.", 500, "Error while saving rule " +
-            "violation for artifact: %s", true),
 
-    ERROR_WHILE_ADDING_LINTING_RUN(601002, "Error while adding linting run.", 500, "Error while adding linting run for endpoint: %s policy: %s ruleset: %s", true),
-    LINTING_RUN_IN_PROGRESS(601003, "There is currently a linting run in progress.", 503, "There is currently a linting run in progress for endpoint: %s policy: %s ruleset: %s"),
-    ERROR_WHILE_UPDATING_LINTING_RUN(601004, "Error while updating linting run.", 500, "Error while updating linting run for endpoint: %s policy: %s ruleset: %s", true),
-    ERROR_WHILE_CHECKING_PENDING_LINTING_RUNS(601004, "Error while checking pending linting runs.", 500, "Error while checking pending linting runs for endpoint: %s", true),
-    MAX_RETRIES_EXCEEDED_FOR_LINTING_RUN_CHECK(601005, "Exceeded maximum retry attempts for checking pending linting runs.", 429, "Exceeded maximum retry attempts for " +
-            "checking pending linting runs for endpoint: %s"),
-    ERROR_WHILE_DELETING_LINTING_RESULTS_FOR_ENDPOINT(601006, "Error while deleting linting results.", 500, "Error while deleting linting results for the endpoint: %s", true),
+    ERROR_WHILE_DELETING_GOVERNANCE_RESULT(601002, "Error while deleting governance result.", 500, "Error while deleting " +
+            "governance result with ID: %s", true),
+    ERROR_WHILE_SAVING_RULE_VIOLATIONS(601003, "Error while saving rule violations.", 500, "Error while saving rule " +
+            "violations", true),
+
+    ERROR_WHILE_CLEARING_RULE_VIOLATIONS(601004, "Error while clearing rule violations.", 500, "Error while clearing " +
+            "rule violations", true),
+
+    ERROR_WHILE_GETTING_RULE_VIOLATIONS(601005, "Error while getting rule violations.", 500, "Error while getting " +
+            "rule violations", true),
+
+    ERROR_WHILE_GETTING_GOVERNANCE_RESULTS(601006, "Error while getting governance results.", 500, "Error while getting " +
+            "governance results", true),
+
 
     // APIM related codes
     INVALID_APIM_CREDENTIALS(701001, "Invalid credentials", 500, "Invalid APIM admin credentials", true),

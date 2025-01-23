@@ -34,19 +34,20 @@ public interface APIMGovernanceService {
      * Check if there are any policies with blocking actions for the artifact
      *
      * @param artifactId   Artifact ID
+     * @param artifactType Artifact type (ArtifactType.API)
      * @param state        State to be governed
      * @param organization Organization
      * @return True if there are policies with blocking actions, False otherwise
      * @throws GovernanceException If an error occurs while checking for policies with blocking actions
      */
-    boolean isPoliciesWithBlockingActionExist(String artifactId,
+    boolean isPoliciesWithBlockingActionExist(String artifactId, ArtifactType artifactType,
                                               GovernableState state, String organization) throws GovernanceException;
 
     /**
      * Evaluate compliance of the artifact asynchronously
      * @param artifactId Artifact ID
-     * @param artifactType Artifact type
-     * @param state State to be governed
+     * @param artifactType Artifact type (ArtifactType.API)
+     * @param state        State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param organization Organization
      * @throws GovernanceException If an error occurs while evaluating compliance
      */

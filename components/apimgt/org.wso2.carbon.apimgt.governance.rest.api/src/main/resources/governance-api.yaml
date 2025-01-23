@@ -1548,6 +1548,7 @@ components:
           enum:
             - PASSED
             - FAILED
+            - PENDING
           example: "PASSED"
         failedRules:
           type: array
@@ -1596,6 +1597,10 @@ components:
           type: string
           description: Message to be displayed when the rule is violated.
           example: "API name can not be too long or short"
+        description:
+          type: string
+          description: Description of the rule.
+          example: "API name should be between 5 to 50 characters"
     RuleValidationResultSummary:
       type: object
       description: List of rule validation information.

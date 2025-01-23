@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.governance.api;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 
 import java.util.List;
 
@@ -60,4 +62,27 @@ public interface ComplianceManager {
             throws GovernanceException;
 
 
+    /**
+     * Get Rule Violations
+     *
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @param rulesetId  Ruleset ID
+     * @return List of Rule Violations
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    List<RuleViolation> getRuleViolations(String artifactId, String policyId, String rulesetId)
+            throws GovernanceException;
+
+    /**
+     * Get Compliance Evaluation Result
+     *
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @param rulesetId  Ruleset ID
+     * @return Compliance Evaluation Result
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation result
+     */
+    ComplianceEvaluationResult getComplianceEvaluationResult(String artifactId, String policyId, String rulesetId)
+            throws GovernanceException;
 }
