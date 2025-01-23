@@ -52,6 +52,9 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
             String orgId = null;
             if (orgInfo != null && orgInfo.getOrganizationSelector() != null) {
                 orgId = orgInfo.getOrganizationSelector();
+            } else {
+                String errorMessage = "User does not belong to any organization.";
+                throw new APIManagementException(errorMessage, ExceptionCodes.MISSING_ORGANINATION);
             }
             List<OrganizationDetailsDTO> orgList = apiProvider.getOrganizations(orgId, superOrganization);
 

@@ -1830,13 +1830,24 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public List<OrganizationDetailsDTO> getOrganizations(String parentOrgId, String tenantDomain) throws APIManagementException {
-        List<OrganizationDetailsDTO> organizationsList = apiMgtDAO.getOrganizations(parentOrgId, tenantDomain);
+        List<OrganizationDetailsDTO> organizationsList = apiMgtDAO.getChildOrganizations(parentOrgId, tenantDomain);
         return organizationsList;
     }
 
     @Override
     public OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO orgDto) throws APIManagementException {
-        apiMgtDAO.addOrganization(orgDto);
+        
+        //If there is an organization entry already available for external reference, update it
+        OrganizationDetailsDTO savedOrgInfo = apiMgtDAO.getOrganizationDetalsByExternalOrgId(
+                orgDto.getExternalOrganizationReference(), orgDto.getTenantDomain());
+        if (savedOrgInfo != null) {
+            orgDto.setOrganizationId(savedOrgInfo.getOrganizationId());
+            apiMgtDAO.updateOrganizationDetails(orgDto);
+        } else {
+            savedOrgInfo = apiMgtDAO.addOrganization(orgDto);
+            orgDto.setOrganizationId(savedOrgInfo.getOrganizationId());
+        }
+
         return orgDto;
     }
 

@@ -7783,7 +7783,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public List<OrganizationDetailsDTO> getOrganizations(String orgId, String tenantDomain) throws APIManagementException {
-        List<OrganizationDetailsDTO> organizationsList = apiMgtDAO.getOrganizations(orgId, tenantDomain);
+        List<OrganizationDetailsDTO> organizationsList = apiMgtDAO.getChildOrganizations(orgId, tenantDomain);
         return organizationsList;
     }
 
