@@ -5313,11 +5313,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (policy.getPolicyId() == null) {
             policyType = ImportExportConstants.POLICY_TYPE_API;
         } else {
-            // In an api product resource update scenario, when existing policy has been removed from an api,
-            // there's no entry attached to api policy id and apiId in AM_API_OPERATION_POLICY table
-            if (!apiOperationPolicyIdToClonedPolicyIdMap.containsKey(policy.getPolicyId())) {
-                return null;
-            }
             // check if cloned policy id is null
             if (apiOperationPolicyIdToClonedPolicyIdMap.get(policy.getPolicyId()) == null) {
                 policyType = ImportExportConstants.POLICY_TYPE_API;
