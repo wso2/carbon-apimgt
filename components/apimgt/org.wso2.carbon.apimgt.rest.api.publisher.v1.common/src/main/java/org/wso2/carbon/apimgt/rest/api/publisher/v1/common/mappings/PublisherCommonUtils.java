@@ -1222,10 +1222,10 @@ public class PublisherCommonUtils {
         log.info("******* Gov Check: PublisherCommonUtils addAPIWithGeneratedSwaggerDefinition *******");
         APIMGovernanceService apimGovernanceService = ServiceReferenceHolder.getInstance().getAPIMGovernanceService();
         try {
-            if (apimGovernanceService.isPoliciesWithBlockingActionExist(apiDto.getId(), GovernableState.API_CREATE,
-                    organization)) {
-                apimGovernanceService.evaluateComplianceAsync(apiDto.getId(), ArtifactType.REST_API, GovernableState.API_CREATE,
-                        organization);
+            if (apimGovernanceService.isPoliciesWithBlockingActionExist(apiDto.getId(), ArtifactType.REST_API,
+                    GovernableState.API_CREATE, organization)) {
+                apimGovernanceService.evaluateComplianceAsync(apiDto.getId(), ArtifactType.REST_API,
+                        GovernableState.API_CREATE, organization);
             }
         } catch (GovernanceException e) {
             log.error("Error occurred while executing governance ", e);
