@@ -79,6 +79,22 @@ public class APIMUtil {
     }
 
     /**
+     * Get the API name combined with the version
+     *
+     * @param apiId API ID
+     * @return API name combined with the version
+     * @throws GovernanceException If an error occurs while getting the API name and version
+     */
+    public static String getAPINameCombinedWithVersion(String apiId) throws GovernanceException {
+        try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            return apiIdentifier.getApiName() + " " + apiIdentifier.getVersion();
+        } catch (APIManagementException e) {
+            throw new GovernanceException("Error while getting the API name and version with ID: " + apiId, e);
+        }
+    }
+
+    /**
      * Get the status of the API
      *
      * @param apiId API ID
@@ -252,6 +268,38 @@ public class APIMUtil {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_DEFINITION, apiId);
         }
         return null; // Return null if no matching swagger content is found
+    }
+
+    /**
+     * Get the labels for the API
+     *
+     * @param apiId API ID
+     * @return List of labels IDs
+     */
+    public static List<String> getLabelIDsForAPI(String apiId) {
+        return new ArrayList<>(); // TODO: Connect to  the database and get the labels for the API
+    }
+
+    /**
+     * Get all APIs for the organization
+     *
+     * @param organizationId Organization ID
+     * @return List of API IDs
+     */
+    public static List<String> getAllAPIs(String organizationId) {
+        return new ArrayList<>(); // TODO: Connect to the database and get all APIs for the organization
+    }
+
+    /**
+     * Get all APIs for the organization with pagination
+     *
+     * @param organizationId Organization ID
+     * @param limit          Limit
+     * @param offset         Offset
+     * @return List of API IDs
+     */
+    public static List<String> getPaginatedAPIs(String organizationId, int limit, int offset) {
+        return new ArrayList<>(); // TODO: Connect to the database and get all APIs for the organization
     }
 
 }

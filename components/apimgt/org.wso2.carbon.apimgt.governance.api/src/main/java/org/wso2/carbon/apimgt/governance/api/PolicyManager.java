@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface represents the Governance Policy Manager
@@ -93,6 +94,26 @@ public interface PolicyManager {
      */
     List<Ruleset> getRulesetsByPolicyId(String policyId) throws GovernanceException;
 
+
+    /**
+     * Get the list of policies by label
+     *
+     * @param label        label
+     * @param organization organization
+     * @return Map of Policy IDs, Policy Names
+     * @throws GovernanceException If an error occurs while getting the policies
+     */
+    Map<String, String> getPoliciesByLabel(String label, String organization) throws GovernanceException;
+
+    /**
+     * Get the list of organization wide policies
+     *
+     * @param organization organization
+     * @return Map of Policy IDs, Policy Names
+     * @throws GovernanceException If an error occurs while getting the policies
+     */
+    Map<String, String> getOrganizationWidePolicies(String organization) throws GovernanceException;
+
     /**
      * Get the list of policies by label and state
      *
@@ -121,8 +142,8 @@ public interface PolicyManager {
      *
      * @param policyId Policy ID
      * @param state    Governable State
-     * @return
-     * @throws GovernanceException
+     * @return True if a blocking action is present, False otherwise
+     * @throws GovernanceException If an error occurs while checking for blocking actions
      */
     boolean isBlockingActionPresentForState(String policyId, GovernableState state)
             throws GovernanceException;

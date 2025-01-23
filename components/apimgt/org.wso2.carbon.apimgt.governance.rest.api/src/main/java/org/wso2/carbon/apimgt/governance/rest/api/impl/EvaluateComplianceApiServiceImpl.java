@@ -47,7 +47,8 @@ public class EvaluateComplianceApiServiceImpl implements EvaluateComplianceApiSe
 
 
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        List<String> policyIds = GovernanceUtil.getApplicableGovPoliciesForArtifact(artifactId,
+        List<String> policyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
+                ArtifactType.fromString(artifactType),
                 GovernableState.fromString(governableState), organization);
 
         // Skip compliance evaluation if no policies are found for the particular set of labels and state

@@ -19,21 +19,21 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 /**
- * This class represents a governance rule Severity
+ * This class represents the compliance state of an artifact
  */
-public enum Severity {
-    ERROR,
-    WARN,
-    INFO;
+public enum ArtifactComplianceState {
+    COMPLIANT,
+    NON_COMPLIANT,
+    NOT_APPLICABLE;
 
-    public static Severity fromString(String severityString) {
-        if ("error".equals(severityString)) {
-            return Severity.ERROR;
-        } else if ("warn".equals(severityString)) {
-            return Severity.WARN;
-        } else if ("info".equals(severityString)) {
-            return Severity.INFO;
+    public static ArtifactComplianceState fromString(String text) {
+        if ("compliant".equalsIgnoreCase(text)) {
+            return COMPLIANT;
+        } else if ("non_compliant".equalsIgnoreCase(text)) {
+            return NON_COMPLIANT;
+        } else if ("not_applicable".equalsIgnoreCase(text)) {
+            return NOT_APPLICABLE;
         }
-        return Severity.WARN;
+        return NOT_APPLICABLE;
     }
 }

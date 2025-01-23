@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultSummaryDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -93,7 +93,7 @@ return null;
     private StatusEnum status = null;
     private Integer applicablePolicyCount = null;
     private Integer violatedPolicyCount = null;
-    private List<RuleValidationResultSummaryDTO> ruleValidationResultSummary = new ArrayList<RuleValidationResultSummaryDTO>();
+    private List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationCount = new ArrayList<SeverityBasedRuleViolationCountDTO>();
 
   /**
    * UUID of the artifact.
@@ -204,22 +204,22 @@ return null;
   }
 
   /**
-   * Summary of rule validation results.
+   * Summary of severity based rule violations.
    **/
-  public ArtifactComplianceStatusDTO ruleValidationResultSummary(List<RuleValidationResultSummaryDTO> ruleValidationResultSummary) {
-    this.ruleValidationResultSummary = ruleValidationResultSummary;
+  public ArtifactComplianceStatusDTO severityBasedRuleViolationCount(List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationCount) {
+    this.severityBasedRuleViolationCount = severityBasedRuleViolationCount;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Summary of rule validation results.")
+  @ApiModelProperty(value = "Summary of severity based rule violations.")
       @Valid
-  @JsonProperty("ruleValidationResultSummary")
-  public List<RuleValidationResultSummaryDTO> getRuleValidationResultSummary() {
-    return ruleValidationResultSummary;
+  @JsonProperty("severityBasedRuleViolationCount")
+  public List<SeverityBasedRuleViolationCountDTO> getSeverityBasedRuleViolationCount() {
+    return severityBasedRuleViolationCount;
   }
-  public void setRuleValidationResultSummary(List<RuleValidationResultSummaryDTO> ruleValidationResultSummary) {
-    this.ruleValidationResultSummary = ruleValidationResultSummary;
+  public void setSeverityBasedRuleViolationCount(List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationCount) {
+    this.severityBasedRuleViolationCount = severityBasedRuleViolationCount;
   }
 
 
@@ -238,12 +238,12 @@ return null;
         Objects.equals(status, artifactComplianceStatus.status) &&
         Objects.equals(applicablePolicyCount, artifactComplianceStatus.applicablePolicyCount) &&
         Objects.equals(violatedPolicyCount, artifactComplianceStatus.violatedPolicyCount) &&
-        Objects.equals(ruleValidationResultSummary, artifactComplianceStatus.ruleValidationResultSummary);
+        Objects.equals(severityBasedRuleViolationCount, artifactComplianceStatus.severityBasedRuleViolationCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifactId, artifactType, artifactName, status, applicablePolicyCount, violatedPolicyCount, ruleValidationResultSummary);
+    return Objects.hash(artifactId, artifactType, artifactName, status, applicablePolicyCount, violatedPolicyCount, severityBasedRuleViolationCount);
   }
 
   @Override
@@ -257,7 +257,7 @@ return null;
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    applicablePolicyCount: ").append(toIndentedString(applicablePolicyCount)).append("\n");
     sb.append("    violatedPolicyCount: ").append(toIndentedString(violatedPolicyCount)).append("\n");
-    sb.append("    ruleValidationResultSummary: ").append(toIndentedString(ruleValidationResultSummary)).append("\n");
+    sb.append("    severityBasedRuleViolationCount: ").append(toIndentedString(severityBasedRuleViolationCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }

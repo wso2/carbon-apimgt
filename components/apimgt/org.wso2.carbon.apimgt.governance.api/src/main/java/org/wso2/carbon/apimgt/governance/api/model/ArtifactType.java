@@ -55,6 +55,19 @@ public enum ArtifactType {
                 || artifactType == API;
     }
 
+    /**
+     * Check whether the artifact type is an API
+     *
+     * @param artifactType Artifact type
+     * @return True if the artifact type is an API
+     */
+    public static boolean isArtifactAPI(String artifactType) {
+        ArtifactType type = fromString(artifactType);
+        return type == REST_API || type == SOAP_API ||
+                type == GRAPHQL_API || type == ASYNC_API
+                || type == API;
+    }
+
     // TODO: Fix logic to get artifact type from APIM artifact type
     public static ArtifactType fromAPIMArtifactType(String artifactType) {
         if ("rest".equalsIgnoreCase(artifactType)) {

@@ -23,7 +23,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface PolicyAdherenceApiService {
-      public Response getOrganizationalPolicyAdherenceSummary(MessageContext messageContext) throws GovernanceException;
       public Response getPolicyAdherenceByPolicyId(String policyId, MessageContext messageContext) throws GovernanceException;
       public Response getPolicyAdherenceForAllPolicies(Integer limit, Integer offset, MessageContext messageContext) throws GovernanceException;
+      public Response getPolicyAdherenceSummary(MessageContext messageContext) throws GovernanceException;
 }

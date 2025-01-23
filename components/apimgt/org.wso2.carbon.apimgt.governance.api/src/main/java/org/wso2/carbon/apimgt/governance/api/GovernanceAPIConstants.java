@@ -25,14 +25,21 @@ public class GovernanceAPIConstants {
     public static final String ORGANIZATION = "organization";
     public static final String RULESET_PATH = "/rulesets";
     public static final String POLICY_PATH = "/governance-policies";
+    public static final String ARTIFACT_COMPLIANCE_PATH = "/artifact-compliance";
 
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";
+    public static final String ARTIFACT_TYPE_PARAM = "{artifactType}";
 
     public static final String RULESETS_GET_URL =
             RULESET_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String POLICIES_GET_URL =
             POLICY_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
+    public static final String ARTIFACT_COMPLIANCE_GET_URL =
+            ARTIFACT_COMPLIANCE_PATH + "?artifactType="
+                    + ARTIFACT_TYPE_PARAM + "&limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
 
 }

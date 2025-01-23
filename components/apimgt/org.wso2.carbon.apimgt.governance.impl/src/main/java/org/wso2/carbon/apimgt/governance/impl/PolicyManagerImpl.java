@@ -32,13 +32,14 @@ import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImp
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the Governance Policy Manager Implementation
  */
 public class PolicyManagerImpl implements PolicyManager {
 
-    private GovernancePolicyMgtDAO policyMgtDAO;
+    private final GovernancePolicyMgtDAO policyMgtDAO;
 
     public PolicyManagerImpl() {
         policyMgtDAO = GovernancePolicyMgtDAOImpl.getInstance();
@@ -68,7 +69,8 @@ public class PolicyManagerImpl implements PolicyManager {
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     @Override
-    public GovernancePolicy getGovernancePolicyByID(String organization, String policyID) throws GovernanceException {
+    public GovernancePolicy getGovernancePolicyByID(String organization, String policyID)
+            throws GovernanceException {
         GovernancePolicy policyInfo = policyMgtDAO.getGovernancePolicyByID(organization, policyID);
         if (policyInfo == null) {
             throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyID, organization);
@@ -128,6 +130,31 @@ public class PolicyManagerImpl implements PolicyManager {
         return policyMgtDAO.getRulesetsByPolicyId(policyId);
     }
 
+    /**
+     * Get the list of policies by label
+     *
+     * @param label        label
+     * @param organization organization
+     * @return Map of Policy IDs, Policy Names
+     * @throws GovernanceException If an error occurs while getting the policies
+     */
+    @Override
+    public Map<String, String> getPoliciesByLabel(String label, String organization)
+            throws GovernanceException {
+        return policyMgtDAO.getPoliciesByLabel(label, organization);
+    }
+
+    /**
+     * Get the list of organization wide policies
+     *
+     * @param organization organization
+     * @return Map of Policy IDs, Policy Names
+     * @throws GovernanceException If an error occurs while getting the policies
+     */
+    @Override
+    public Map<String, String> getOrganizationWidePolicies(String organization) throws GovernanceException {
+        return policyMgtDAO.getPoliciesWithoutLabels(organization);
+    }
 
     /**
      * Get the list of policies by label and state
@@ -167,18 +194,19 @@ public class PolicyManagerImpl implements PolicyManager {
      * @throws GovernanceException If an error occurs while checking the presence of blocking action
      */
     @Override
-    public boolean isBlockingActionPresentForState(String policyId, GovernableState state) throws GovernanceException {
+    public boolean isBlockingActionPresentForState(String policyId, GovernableState state)
+            throws GovernanceException {
         boolean isBlockingActionPresent = false;
         List<GovernanceAction> actions = policyMgtDAO.getActionsByPolicyId(policyId);
         for (GovernanceAction action : actions) {
             if (GovernanceActionType.BLOCK
                     .equals(action.getType()) &&
-                    String.valueOf(action.getGovernableState()).equals(state)) {
+                    action.getGovernableState().equals(state)) {
                 isBlockingActionPresent = true;
                 break;
             }
         }
-        return isBlockingActionPresent;
+        return false;
     }
 
 
