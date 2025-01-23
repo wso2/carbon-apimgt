@@ -5,6 +5,7 @@ import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
@@ -13,9 +14,11 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceWithRulesetsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultDTO;
@@ -42,52 +45,61 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
      * @param artifactId     Artifact ID
      * @param messageContext Message Context
      * @return Response
+     * @throws GovernanceException if an error occurs while getting the artifact compliance evaluation results
      */
-    public Response getArtifactComplianceByArtifactId(String artifactId, MessageContext messageContext) {
+    public Response getArtifactComplianceByArtifactId(String artifactId, MessageContext messageContext)
+            throws GovernanceException {
 
-        try {
-            String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        ComplianceManager complianceManager = new ComplianceManagerImpl();
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-            // Get artifact type
-            ArtifactType artifactType = GovernanceUtil.getArtifactType(artifactId);
+        // Get artifact type
+        ArtifactType artifactType = GovernanceUtil.getArtifactType(artifactId);
 
-            // Initialize the response DTO
-            ArtifactComplianceDetailsDTO artifactComplianceDetailsDTO = new ArtifactComplianceDetailsDTO();
+        // Initialize the response DTO
+        ArtifactComplianceDetailsDTO artifactComplianceDetailsDTO = new ArtifactComplianceDetailsDTO();
 
-            artifactComplianceDetailsDTO.setArtifactId(artifactId);
-            artifactComplianceDetailsDTO.setArtifactType(
-                    ArtifactComplianceDetailsDTO.ArtifactTypeEnum.fromValue(String.valueOf(artifactType)));
-            artifactComplianceDetailsDTO.setArtifactName(GovernanceUtil
-                    .getArtifactName(artifactId, artifactType));
+        artifactComplianceDetailsDTO.setArtifactId(artifactId);
+        artifactComplianceDetailsDTO.setArtifactType(
+                ArtifactComplianceDetailsDTO.ArtifactTypeEnum.fromValue(String.valueOf(artifactType)));
+        artifactComplianceDetailsDTO.setArtifactName(GovernanceUtil
+                .getArtifactName(artifactId, artifactType));
 
-            // Get policies applicable to the artifact within the organization
-            Map<String, String> applicablePolicyIds = GovernanceUtil
-                    .getApplicablePoliciesForArtifact(artifactId, artifactType, organization);
+        // Check if artifact has been governed
+        boolean isArtifactGoverned = complianceManager.isArtifactEvaluationResultsExist(artifactId);
 
-            List<PolicyAdherenceWithRulesetsDTO> policyAdherenceDetails = new ArrayList<>();
+        // If the artifact is not governed, set the compliance status to not applicable and return
+        if (!isArtifactGoverned) {
+            artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.NOT_APPLICABLE);
+            return Response.ok().entity(artifactComplianceDetailsDTO).build();
+        }
 
-            // Get policy adherence results for each policy
-            for (Map.Entry<String, String> entry : applicablePolicyIds.entrySet()) {
-                String policyId = entry.getKey();
-                String policyName = entry.getValue();
-                PolicyAdherenceWithRulesetsDTO policyAdherence = getPolicyAdherenceResults(policyId, policyName,
-                        artifactId);
+        // Get policies applicable to the artifact within the organization
+        Map<String, String> applicablePolicyIds = GovernanceUtil
+                .getApplicablePoliciesForArtifact(artifactId, artifactType, organization);
 
-                // If the policy is violated, set the artifact compliance status to non-compliant
-                if (policyAdherence.getStatus() == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED) {
-                    artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO
-                            .StatusEnum.NON_COMPLAINT);
-                }
+        List<PolicyAdherenceWithRulesetsDTO> policyAdherenceDetails = new ArrayList<>();
 
+        // Get policy adherence results for each policy
+        for (Map.Entry<String, String> entry : applicablePolicyIds.entrySet()) {
+            String policyId = entry.getKey();
+            String policyName = entry.getValue();
+            PolicyAdherenceWithRulesetsDTO policyAdherence = getPolicyAdherenceResults(policyId, policyName,
+                    artifactId);
+
+            // If the policy is violated, set the artifact compliance status to non-compliant
+            if (policyAdherence.getStatus() == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED) {
+                artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO
+                        .StatusEnum.NON_COMPLAINT);
             }
 
-            artifactComplianceDetailsDTO.setGovernedPolicies(policyAdherenceDetails);
-
-            return Response.ok().entity(artifactComplianceDetailsDTO).build();
-
-        } catch (GovernanceException e) {
-            throw new RuntimeException(e);
         }
+
+        artifactComplianceDetailsDTO.setGovernedPolicies(policyAdherenceDetails);
+
+        return Response.ok().entity(artifactComplianceDetailsDTO).build();
+
+
     }
 
     /**
@@ -104,10 +116,20 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
 
 
         PolicyManager policyManager = new PolicyManagerImpl();
+        ComplianceManager complianceManager = new ComplianceManagerImpl();
 
         PolicyAdherenceWithRulesetsDTO policyAdherenceWithRulesetsDTO = new PolicyAdherenceWithRulesetsDTO();
         policyAdherenceWithRulesetsDTO.setPolicyId(policyId);
         policyAdherenceWithRulesetsDTO.setPolicyName(policyName);
+
+        // Check if policy has been evaluated for the artifact
+        boolean isPolicyEvaluated = complianceManager.isPolicyEvaluationResultsExist(artifactId, policyId);
+
+        // If the policy has not been evaluated, set the policy adherence status to unapplied
+        if (!isPolicyEvaluated) {
+            policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.UNAPPLIED);
+            return policyAdherenceWithRulesetsDTO;
+        }
 
         // Retrieve rulesets tied to the policy
         List<Ruleset> rulesets = policyManager.getRulesetsByPolicyId(policyId);
@@ -155,9 +177,9 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         rulesetValidationResultDTO.setName(ruleset.getName());
 
 
-        Set<String> failedRuleCodes = new HashSet<>();
-        List<RuleValidationResultDTO> failedRules = new ArrayList<>();
-        List<RuleValidationResultDTO> passedRules = new ArrayList<>();
+        Set<String> violatedRuleCodes = new HashSet<>();
+        List<RuleValidationResultDTO> violatedRules = new ArrayList<>();
+        List<RuleValidationResultDTO> followedRules = new ArrayList<>();
 
         // Fetch all rules within the current ruleset
         List<Rule> allRules = rulesetManager.getRules(rulesetId);
@@ -182,26 +204,27 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         // IMPORTANT: NOTE THAT THERE CAN BE MULTIPLE VIOLATIONS WITH SAME CODE BUT DIFFERENT PATH
         for (RuleViolation ruleViolation : ruleViolations) {
             Rule rule = rulesMap.get(ruleViolation.getRuleCode());
-            failedRules.add(ResultsMappingUtil.getRuleValidationResultDTO(rule, ruleViolation));
-            failedRuleCodes.add(rule.getCode());
+            violatedRules.add(ResultsMappingUtil.getRuleValidationResultDTO(rule, ruleViolation));
+            violatedRuleCodes.add(rule.getCode());
         }
 
         for (Rule rule : allRules) {
-            if (!failedRuleCodes.contains(rule.getCode())) {
-                passedRules.add(ResultsMappingUtil.getRuleValidationResultDTO(rule, null));
+            if (!violatedRuleCodes.contains(rule.getCode())) {
+                followedRules.add(ResultsMappingUtil.getRuleValidationResultDTO(rule, null));
             }
         }
 
-        rulesetValidationResultDTO.setFailedRules(failedRules);
-        rulesetValidationResultDTO.setPassedRules(passedRules);
-        rulesetValidationResultDTO.setStatus(failedRules.isEmpty() ?
+        rulesetValidationResultDTO.setViolatedRules(violatedRules);
+        rulesetValidationResultDTO.setFollowedRules(followedRules);
+        rulesetValidationResultDTO.setStatus(violatedRules.isEmpty() ?
                 RulesetValidationResultDTO.StatusEnum.PASSED :
                 RulesetValidationResultDTO.StatusEnum.FAILED);
 
         return rulesetValidationResultDTO;
     }
 
-    public Response getArtifactComplianceForAllArtifacts(Integer limit, Integer offset, MessageContext messageContext) {
+    public Response getArtifactComplianceForAllArtifacts(Integer limit, Integer offset,
+                                                         String artifactType, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
@@ -211,13 +234,42 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         return Response.status(status).entity(errorObject).build();
     }
 
-    public Response getOrganizationalArtifactComplianceSummary(MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+    /**
+     * Get organizational artifact compliance summary
+     *
+     * @param artifactType   artifact type
+     * @param messageContext message context
+     * @return Response
+     * @throws GovernanceException if an error occurs while getting the artifact compliance summary
+     */
+    public Response getArtifactComplianceSummary(String artifactType,
+                                                 MessageContext messageContext) throws GovernanceException {
+
+        ArtifactComplianceSummaryDTO summaryDTO = new ArtifactComplianceSummaryDTO();
+        ComplianceManager complianceManager = new ComplianceManagerImpl();
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        if (ArtifactType.isArtifactAPI(artifactType)) {
+            // Get total number of APIs in the organization
+            int totalAPIsCount = APIMUtil.getAllAPIs(organization).size();
+
+            // Get total number of APIs that are compliant and non-compliant
+            Map<ArtifactComplianceState, List<String>> compliancyMap =
+                    complianceManager.getCompliantAndNonCompliantArtifacts(
+                            ArtifactType.API, organization);
+
+            int compliantAPIsCount = compliancyMap.get(ArtifactComplianceState.COMPLIANT).size();
+            int nonCompliantAPIsCount = compliancyMap.get(ArtifactComplianceState.NON_COMPLIANT).size();
+            int notApplicableAPIsCount = totalAPIsCount - compliantAPIsCount - nonCompliantAPIsCount;
+
+            summaryDTO.setArtifactType(ArtifactComplianceSummaryDTO.ArtifactTypeEnum.API);
+            summaryDTO.setTotalArtifacts(totalAPIsCount);
+            summaryDTO.setCompliantArtifacts(compliantAPIsCount);
+            summaryDTO.setNonCompliantArtifacts(nonCompliantAPIsCount);
+            summaryDTO.setNotApplicableArtifacts(notApplicableAPIsCount);
+
+        }
+
+        return Response.ok().entity(summaryDTO).build();
     }
 }

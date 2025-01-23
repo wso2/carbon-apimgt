@@ -426,4 +426,129 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         }
         return null;
     }
+
+    /**
+     * Get compliance evaluation results by artifact ID
+     *
+     * @param artifactId Artifact ID
+     * @return List of ComplianceEvaluationResult
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     */
+    @Override
+    public List<ComplianceEvaluationResult> getComplianceEvaluationResultsByArtifactId(String artifactId)
+            throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_GOV_COMPLIANCE_EVALUATION_RESULTS_FOR_ARTIFACT;
+        List<ComplianceEvaluationResult> complianceEvaluationResults = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    ComplianceEvaluationResult result = new ComplianceEvaluationResult();
+                    result.setArtifactId(artifactId);
+                    result.setPolicyId(resultSet.getString("POLICY_ID"));
+                    result.setRulesetId(resultSet.getString("RULESET_ID"));
+                    result.setEvaluationSuccess(resultSet.getInt("EVALUATION_RESULT") == 1);
+                    complianceEvaluationResults.add(result);
+                }
+            }
+            return complianceEvaluationResults;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS,
+                    e);
+        }
+    }
+
+    /**
+     * Get compliance evaluation results by artifact ID and policy ID
+     *
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @return List of ComplianceEvaluationResult
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     */
+    @Override
+    public List<ComplianceEvaluationResult>
+    getComplianceEvaluationResultsByArtifactAndPolicyId(String artifactId, String policyId) throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_GOV_COMPLIANCE_EVALUATION_RESULTS_BY_ARTIFACT_AND_POLICY;
+        List<ComplianceEvaluationResult> complianceEvaluationResults = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            prepStmnt.setString(2, policyId);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    ComplianceEvaluationResult result = new ComplianceEvaluationResult();
+                    result.setArtifactId(artifactId);
+                    result.setPolicyId(policyId);
+                    result.setRulesetId(resultSet.getString("RULESET_ID"));
+                    result.setEvaluationSuccess(resultSet.getInt("EVALUATION_RESULT") == 1);
+                    complianceEvaluationResults.add(result);
+                }
+            }
+            return complianceEvaluationResults;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS,
+                    e);
+        }
+
+    }
+
+    /**
+     * Get list of all compliance evaluated artifacts
+     *
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of all compliance evaluated artifacts
+     * @throws GovernanceException If an error occurs while getting the list of all compliance evaluated artifacts
+     */
+    @Override
+    public List<String> getAllComplianceEvaluatedArtifacts(ArtifactType artifactType, String organization)
+            throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_NON_COMPLIANT_ARTIFACTS;
+        List<String> artifactIds = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, String.valueOf(artifactType));
+            prepStmnt.setString(2, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    artifactIds.add(resultSet.getString("ARTIFACT_ID"));
+                }
+            }
+            return artifactIds;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS,
+                    e);
+        }
+    }
+
+    /**
+     * Get list of non-compliant artifacts
+     *
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of non-compliant artifacts
+     * @throws GovernanceException If an error occurs while getting the list of non-compliant artifacts
+     */
+    @Override
+    public List<String> getNonCompliantArtifacts(ArtifactType artifactType, String organization)
+            throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_NON_COMPLIANT_ARTIFACTS;
+        List<String> artifactIds = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, String.valueOf(artifactType));
+            prepStmnt.setString(2, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    artifactIds.add(resultSet.getString("ARTIFACT_ID"));
+                }
+            }
+            return artifactIds;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS,
+                    e);
+        }
+    }
 }

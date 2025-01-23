@@ -61,8 +61,8 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private List<RuleValidationResultDTO> failedRules = new ArrayList<RuleValidationResultDTO>();
-    private List<RuleValidationResultDTO> passedRules = new ArrayList<RuleValidationResultDTO>();
+    private List<RuleValidationResultDTO> violatedRules = new ArrayList<RuleValidationResultDTO>();
+    private List<RuleValidationResultDTO> followedRules = new ArrayList<RuleValidationResultDTO>();
 
   /**
    * UUID of the ruleset.
@@ -119,41 +119,41 @@ return null;
   }
 
   /**
-   * List of rule validation information.
+   * List of violated rules.
    **/
-  public RulesetValidationResultDTO failedRules(List<RuleValidationResultDTO> failedRules) {
-    this.failedRules = failedRules;
+  public RulesetValidationResultDTO violatedRules(List<RuleValidationResultDTO> violatedRules) {
+    this.violatedRules = violatedRules;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of rule validation information.")
+  @ApiModelProperty(value = "List of violated rules.")
       @Valid
-  @JsonProperty("failedRules")
-  public List<RuleValidationResultDTO> getFailedRules() {
-    return failedRules;
+  @JsonProperty("violatedRules")
+  public List<RuleValidationResultDTO> getViolatedRules() {
+    return violatedRules;
   }
-  public void setFailedRules(List<RuleValidationResultDTO> failedRules) {
-    this.failedRules = failedRules;
+  public void setViolatedRules(List<RuleValidationResultDTO> violatedRules) {
+    this.violatedRules = violatedRules;
   }
 
   /**
-   * List of rule validation information.
+   * List of followed rules.
    **/
-  public RulesetValidationResultDTO passedRules(List<RuleValidationResultDTO> passedRules) {
-    this.passedRules = passedRules;
+  public RulesetValidationResultDTO followedRules(List<RuleValidationResultDTO> followedRules) {
+    this.followedRules = followedRules;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of rule validation information.")
+  @ApiModelProperty(value = "List of followed rules.")
       @Valid
-  @JsonProperty("passedRules")
-  public List<RuleValidationResultDTO> getPassedRules() {
-    return passedRules;
+  @JsonProperty("followedRules")
+  public List<RuleValidationResultDTO> getFollowedRules() {
+    return followedRules;
   }
-  public void setPassedRules(List<RuleValidationResultDTO> passedRules) {
-    this.passedRules = passedRules;
+  public void setFollowedRules(List<RuleValidationResultDTO> followedRules) {
+    this.followedRules = followedRules;
   }
 
 
@@ -169,13 +169,13 @@ return null;
     return Objects.equals(id, rulesetValidationResult.id) &&
         Objects.equals(name, rulesetValidationResult.name) &&
         Objects.equals(status, rulesetValidationResult.status) &&
-        Objects.equals(failedRules, rulesetValidationResult.failedRules) &&
-        Objects.equals(passedRules, rulesetValidationResult.passedRules);
+        Objects.equals(violatedRules, rulesetValidationResult.violatedRules) &&
+        Objects.equals(followedRules, rulesetValidationResult.followedRules);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, status, failedRules, passedRules);
+    return Objects.hash(id, name, status, violatedRules, followedRules);
   }
 
   @Override
@@ -186,8 +186,8 @@ return null;
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    failedRules: ").append(toIndentedString(failedRules)).append("\n");
-    sb.append("    passedRules: ").append(toIndentedString(passedRules)).append("\n");
+    sb.append("    violatedRules: ").append(toIndentedString(violatedRules)).append("\n");
+    sb.append("    followedRules: ").append(toIndentedString(followedRules)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -116,4 +116,46 @@ public interface ComplianceMgtDAO {
     ComplianceEvaluationResult getComplianceEvaluationResult(String artifactId, String policyId,
                                                              String rulesetId) throws GovernanceException;
 
+    /**
+     * Get compliance evaluation results by artifact ID
+     *
+     * @param artifactId Artifact ID
+     * @return List of ComplianceEvaluationResult
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     */
+    List<ComplianceEvaluationResult> getComplianceEvaluationResultsByArtifactId(String artifactId)
+            throws GovernanceException;
+
+    /**
+     * Get compliance evaluation results by artifact ID and policy ID
+     *
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @return List of ComplianceEvaluationResult
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     */
+    List<ComplianceEvaluationResult> getComplianceEvaluationResultsByArtifactAndPolicyId(
+            String artifactId, String policyId) throws GovernanceException;
+
+    /**
+     * Get list of all compliance evaluated artifacts
+     *
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of all compliance evaluated artifacts
+     * @throws GovernanceException If an error occurs while getting the list of all compliance evaluated artifacts
+     */
+    List<String> getAllComplianceEvaluatedArtifacts(ArtifactType artifactType,
+                                                    String organization) throws GovernanceException;
+
+    /**
+     * Get list of non-compliant artifacts
+     *
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of non-compliant artifacts
+     * @throws GovernanceException If an error occurs while getting the list of non-compliant artifacts
+     */
+    List<String> getNonCompliantArtifacts(ArtifactType artifactType,
+                                          String organization) throws GovernanceException;
 }

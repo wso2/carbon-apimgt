@@ -280,4 +280,14 @@ public class APIMUtil {
         return new ArrayList<>(); // TODO: Connect to  the database and get the labels for the API
     }
 
+    /**
+     * Get all APIs for the organization
+     *
+     * @param organizationId Organization ID
+     * @return List of API IDs
+     */
+    public static List<String> getAllAPIs(String organizationId) {
+        return new ArrayList<>(); // TODO: Connect to the database and get all APIs for the organization
+    }
+
 }

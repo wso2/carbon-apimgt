@@ -36,8 +36,10 @@ tags:
     description: for managing governance policies.
   - name: Governance Evaluation
     description: for evaluating governance compliance.
-  - name: Governance Results
-    description: for accessing governance results.
+  - name: Artifact Compliance
+    description: for accessing artifact compliance.
+  - name: Policy Adherence
+    description: for accessing policy adherence.
   - name: Health Check
     description: for health check.
   - name: Deprecated
@@ -657,14 +659,15 @@ paths:
             - apim:gov_evaluate_compliance
   /artifact-compliance:
     get:
-      summary: Retrieves compliance of all artifacts
-      description: Retrieves compliance of all artifacts in the organization.
+      summary: Retrieves compliance of all artifacts of a certain type
+      description: Retrieves compliance of all artifacts of a certain type within the organization.
       operationId: getArtifactComplianceForAllArtifacts
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/artifactType'
       tags:
-        - Governance Results
+        - Artifact Compliance
       responses:
         "200":
           description: OK. Successful response with artifact compliance results.
@@ -701,11 +704,13 @@ paths:
             - apim:gov_result_read
   /artifact-compliance/summary:
     get:
-      summary: Retrieves the summary of compliance of all artifacts
-      description: Retrieves the summary of compliance of all artifacts in the organization.
-      operationId: getOrganizationalArtifactComplianceSummary
+      summary: Retrieves the summary of compliance of all artifacts of a certain type
+      description: Retrieves the summary of compliance of all artifacts of a certain type within the organization.
+      operationId: getArtifactComplianceSummary
+      parameters:
+        - $ref: '#/components/parameters/artifactType'
       tags:
-        - Governance Results
+        - Artifact Compliance
       responses:
         "200":
           description: OK. Successful response with compliance summary.
@@ -746,7 +751,7 @@ paths:
       description: Retrieve compliance details associated with a specific artifact including APIs within the organization using its unique UUID.
       operationId: getArtifactComplianceByArtifactId
       tags:
-        - Governance Results
+        - Artifact Compliance
       parameters:
         - $ref: '#/components/parameters/artifactId'
       responses:
@@ -792,7 +797,7 @@ paths:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
       tags:
-        - Governance Results
+        - Policy Adherence
       responses:
         "200":
           description: Ok. Successful response with adherence details for all policies.
@@ -831,9 +836,9 @@ paths:
     get:
       summary: Retrieves the summary of adherence for all policies
       description: Retrieves the summary of adherence for all governance policies within the organization.
-      operationId: getOrganizationalPolicyAdherenceSummary
+      operationId: getPolicyAdherenceSummary
       tags:
-        - Governance Results
+        - Policy Adherence
       responses:
         "200":
           description: OK. Successful response with adherence summary.
@@ -874,7 +879,7 @@ paths:
       description: Retrieve adherence details associated with a specific governance policy within the organization using its unique ID.
       operationId: getPolicyAdherenceByPolicyId
       tags:
-        - Governance Results
+        - Policy Adherence
       parameters:
         - $ref: '#/components/parameters/policyId'
       responses:
@@ -1288,29 +1293,28 @@ components:
       type: object
       description: Summary of compliance of artifacts in the organization.
       properties:
-        results:
-          type: array
-          description: List of summaries for each artifact type.
-          items:
-            type: object
-            properties:
-              artifactType:
-                type: string
-                description: Type of the artifact.
-                enum:
-                  - API
-              totalArtifacts:
-                type: integer
-                description: Total number of artifacts.
-                example: 10
-              compliantArtifacts:
-                type: integer
-                description: Number of compliant artifacts.
-                example: 6
-              nonCompliantArtifacts:
-                type: integer
-                description: Number of non-compliant artifacts.
-                example: 4
+        artifactType:
+          type: string
+          description: Type of the artifact.
+          enum:
+            - API
+          example: API
+        totalArtifacts:
+          type: integer
+          description: Total number of artifacts.
+          example: 10
+        compliantArtifacts:
+          type: integer
+          description: Number of compliant artifacts.
+          example: 6
+        nonCompliantArtifacts:
+          type: integer
+          description: Number of non-compliant artifacts.
+          example: 4
+        notApplicableArtifacts:
+          type: integer
+          description: Number of artifacts not applicable for compliance yet.
+          example: 0
     PolicyAdherenceSummary:
       type: object
       description: Summary of governance policy adherence in the organization.
@@ -1499,6 +1503,8 @@ components:
           enum:
             - FOLLOWED
             - VIOLATED
+            - UNAPPLIED
+          example: "FOLLOWED"
         rulesetValidationResults:
           type: array
           description: List of ruleset validation information.
@@ -1550,14 +1556,14 @@ components:
             - FAILED
             - PENDING
           example: "PASSED"
-        failedRules:
+        violatedRules:
           type: array
-          description: List of rule validation information.
+          description: List of violated rules.
           items:
             $ref: '#/components/schemas/RuleValidationResult'
-        passedRules:
+        followedRules:
           type: array
-          description: List of rule validation information.
+          description: List of followed rules.
           items:
             $ref: '#/components/schemas/RuleValidationResult'
     RuleValidationResult:
@@ -1646,6 +1652,17 @@ components:
       required: true
       schema:
         type: string
+    artifactType:
+      name: artifactType
+      in: query
+      description: |
+        Type of the artifact.
+      schema:
+        type: string
+        enum:
+          - API
+        default: API
+        example: API
     rulesetId:
       name: rulesetId
       in: path

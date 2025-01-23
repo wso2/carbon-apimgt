@@ -21,7 +21,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService {
 
-    public Response getOrganizationalPolicyAdherenceSummary(MessageContext messageContext) {
+    public Response getPolicyAdherenceSummary(MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
