@@ -196,7 +196,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, analyticsEnabled, transactionCounterEnable);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, federatedGatewayConfiguration, analyticsEnabled, transactionCounterEnable);
   }
 
   @Override
