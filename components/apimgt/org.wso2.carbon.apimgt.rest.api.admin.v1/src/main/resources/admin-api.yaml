@@ -5018,7 +5018,7 @@ components:
           type: array
           items:
             type: string
-        IsJWTEnabledForLoginTokens: 
+        IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
         keyManagerConfiguration:
@@ -5041,11 +5041,26 @@ components:
               configurations:
                 type: array
                 items:
-                  $ref: '#/components/schemas/KeyManagerConfiguration'
+                  $ref: '#/components/schemas/Configuration'
               endpointConfigurations:
                 type: array
                 items:
-                  $ref: '#/components/schemas/KeyManagerConfiguration'
+                  $ref: '#/components/schemas/Configuration'
+        federatedGatewayConfiguration:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: default
+              displayName:
+                type: string
+                example: default
+              configurations:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Configuration'
         analyticsEnabled:
           type: boolean
           description: To determine whether analytics is enabled or not
@@ -5334,8 +5349,8 @@ components:
             - EXCHANGED
             - DIRECT
             - BOTH
-    KeyManagerConfiguration:
-      title: Key Manager Configuration
+    Configuration:
+      title: Custom Configuration
       type: object
       properties:
         name:
@@ -5358,7 +5373,7 @@ components:
           example: true
         tooltip:
           type: string
-          example: Enter username to connect to key manager
+          example: Enter username
         default:
           type: object
           properties: {}

@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.internal;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.model.FederatedGatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
@@ -81,6 +82,8 @@ public class ServiceReferenceHolder {
     private WorkflowTaskService workflowTaskService;
 
     private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
+
+    private Map<String, FederatedGatewayAgentConfiguration> federatedGatewayAgentConfigurationMap = new HashMap<>();
 
     private ServiceReferenceHolder() {
 
@@ -399,6 +402,22 @@ public class ServiceReferenceHolder {
     public Map<String, LLMProviderService> getLLMProviderServiceMap() {
 
         return this.llmProviderServiceMap;
+    }
+
+    public void addFederatedGatewayAgentConfiguration(String type,
+                                                    FederatedGatewayAgentConfiguration gatewayAgentConfiguration) {
+
+        federatedGatewayAgentConfigurationMap.put(type, gatewayAgentConfiguration);
+    }
+
+    public void removeFederatedGatewayAgentConfiguration(String type) {
+
+        federatedGatewayAgentConfigurationMap.remove(type);
+    }
+
+    public Map<String, FederatedGatewayAgentConfiguration> getFederatedGatewayConnectorConfigurations() {
+
+        return federatedGatewayAgentConfigurationMap;
     }
 
 }
