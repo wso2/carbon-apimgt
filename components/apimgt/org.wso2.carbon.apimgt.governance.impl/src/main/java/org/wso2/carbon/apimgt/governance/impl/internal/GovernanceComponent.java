@@ -62,7 +62,7 @@ public class GovernanceComponent {
 
         BundleContext bundleContext = componentContext.getBundleContext();
 
-        String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-governance.xml";
+        String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
         configuration.load(filePath);
 
         GovernanceConfigurationServiceImpl configurationService =
@@ -94,7 +94,7 @@ public class GovernanceComponent {
     @Reference(
             name = "org.wso2.carbon.apimgt.governance.engine.SpectralValidationEngine",
             service = ValidationEngine.class,
-            cardinality = ReferenceCardinality.MANDATORY,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetValidationEngineService"
     )
