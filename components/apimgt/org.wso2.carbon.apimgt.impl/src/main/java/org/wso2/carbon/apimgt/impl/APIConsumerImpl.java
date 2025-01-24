@@ -908,37 +908,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationName(applicationName);
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
-
-                Tier tier = null;
-                Set<Tier> policies = Collections.emptySet();
-                if (!isApiProduct) {
-                    policies = api.getAvailableTiers();
-                } else {
-                    policies = product.getAvailableTiers();
-                }
-
-                for (Tier policy : policies) {
-                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
-                        tier = policy;
-                    }
-                }
-                boolean isMonetizationEnabled = false;
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.API_UUID, apiUUID);
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.TIER_NAME, workflowDTO.getTierName());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.SUBSCRIBER, userId);
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APINAME, identifier.getName());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APIVERSION, identifier.getVersion());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APICONTEXT, identifier.getVersion());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APIPROVIDER, identifier.getProviderName());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APPLICATIONNAME, applicationName);
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APPLICATIONID, String.valueOf(application.getId()));
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.REQUESTED_TIER_NAME, identifier.getTier());
 
                 if (api != null) {
-                    isMonetizationEnabled = api.getMonetizationStatus();
-                    //check whether monetization is enabled for API and tier plan is commercial
-                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        subscriptionImpl.monetizeSubscription(workflowDTO, api);
-                    }
                     workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
                 } else {
-                    isMonetizationEnabled = product.getMonetizationStatus();
-                    //check whether monetization is enabled for API and tier plan is commercial
-                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        subscriptionImpl.monetizeSubscription(workflowDTO, product);
-                    }
                     workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
                 }
+
             } catch (WorkflowException e) {
                 //If the workflow execution fails, roll back transaction by removing the subscription entry.
                 apiMgtDAO.removeSubscriptionById(subscriptionId);
@@ -1096,37 +1082,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationName(application.getName());
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
-
-                Tier tier = null;
-                Set<Tier> policies = Collections.emptySet();
-                if (!isApiProduct) {
-                    policies = api.getAvailableTiers();
-                } else {
-                    policies = product.getAvailableTiers();
-                }
-
-                for (Tier policy : policies) {
-                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
-                        tier = policy;
-                    }
-                }
-                boolean isMonetizationEnabled = false;
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.API_UUID, apiUUId);
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.TIER_NAME, workflowDTO.getTierName());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.SUBSCRIBER, userId);
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APINAME, identifier.getName());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APIVERSION, identifier.getVersion());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APICONTEXT, identifier.getVersion());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APIPROVIDER, identifier.getProviderName());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APPLICATIONNAME, application.getName());
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APPLICATIONID, String.valueOf(application.getId()));
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.REQUESTED_TIER_NAME, identifier.getTier());
 
                 if (api != null) {
-                    isMonetizationEnabled = api.getMonetizationStatus();
-                    //check whether monetization is enabled for API and tier plan is commercial
-                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        subscriptionImpl.monetizeSubscription(workflowDTO, api);
-                    }
                     workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
                 } else {
-                    isMonetizationEnabled = product.getMonetizationStatus();
-                    //check whether monetization is enabled for API and tier plan is commercial
-                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                        subscriptionImpl.monetizeSubscription(workflowDTO, product);
-                    }
                     workflowResponse = updateSubscriptionWFExecutor.execute(workflowDTO);
                 }
+
             } catch (WorkflowException e) {
                 throw new APIManagementException("Could not execute Workflow", e);
             } finally {
@@ -1295,12 +1267,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setCallbackUrl(removeSubscriptionWFExecutor.getCallbackURL());
             workflowDTO.setApplicationId(applicationId);
             workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.API_ID, String.valueOf(identifier.getId()));
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.TIER_NAME, workflowDTO.getTierName());
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.SUBSCRIBER, userId);
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APINAME, identifier.getName());
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APIVERSION, identifier.getVersion());
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APICONTEXT, identifier.getVersion());
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APIPROVIDER, identifier.getProviderName());
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APPLICATIONNAME, applicationName);
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.VARIABLE_APPLICATIONID, String.valueOf(applicationId));
+            workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.REQUESTED_TIER_NAME, identifier.getTier());
 
             String status = null;
             if (apiIdentifier != null) {
                 status = apiMgtDAO.getSubscriptionStatus(apiIdentifier.getUUID(), applicationId);
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.API_UUID, apiIdentifier.getUUID());
             } else if (apiProdIdentifier != null) {
                 status = apiMgtDAO.getSubscriptionStatus(apiProdIdentifier.getUUID(), applicationId);
+                workflowDTO.setMetadata(WorkflowConstants.PayloadConstants.API_UUID, apiProdIdentifier.getUUID());
             }
 
             String subId = null;
@@ -1356,41 +1339,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
 
-            Tier tier = null;
             if (api != null) {
-                Set<Tier> policies = api.getAvailableTiers();
-                Iterator<Tier> iterator = policies.iterator();
-                boolean isPolicyAllowed = false;
-                while (iterator.hasNext()) {
-                    Tier policy = iterator.next();
-                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
-                        tier = policy;
-                    }
-                }
-            } else if (product != null) {
-                Set<Tier> policies = product.getAvailableTiers();
-                Iterator<Tier> iterator = policies.iterator();
-                boolean isPolicyAllowed = false;
-                while (iterator.hasNext()) {
-                    Tier policy = iterator.next();
-                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
-                        tier = policy;
-                    }
-                }
-            }
-            if (api != null) {
-                //check whether monetization is enabled for API and tier plan is commercial
-                if (api.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    subscriptionImpl.deleteMonetizedSubscription(workflowDTO, api);
-                }
                 removeSubscriptionWFExecutor.execute(workflowDTO);
             } else if (product != null) {
-                //check whether monetization is enabled for API product and tier plan is commercial
-                if (product.getMonetizationStatus() && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
-                    subscriptionImpl.deleteMonetizedSubscription(workflowDTO, product);
-                }
                 removeSubscriptionWFExecutor.execute(workflowDTO);
             }
+
             JSONObject subsLogObject = new JSONObject();
             subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
             subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
