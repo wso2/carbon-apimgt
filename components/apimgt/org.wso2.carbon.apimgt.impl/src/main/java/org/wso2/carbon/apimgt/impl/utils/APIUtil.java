@@ -117,6 +117,12 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -11375,16 +11381,6 @@ public final class APIUtil {
 
         return Boolean.getBoolean(
                 APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
-    }
-
-    public static Map<String, FederatedGatewayAgentConfiguration> getFederatedGatewayConfigurations() {
-
-        return ServiceReferenceHolder.getInstance().getFederatedGatewayConnectorConfigurations();
-    }
-
-    public static Map<String, FederatedGatewayAgentConfiguration> getFederatedGatewayConfigurations() {
-
-        return ServiceReferenceHolder.getInstance().getFederatedGatewayConnectorConfigurations();
     }
 
     /**
