@@ -185,7 +185,7 @@ return null;
   }
 
   /**
-   * Labels associated with the governance policy.
+   * List of labels IDs associated with the governance policy.
    **/
   public GovernancePolicyDTO labels(List<String> labels) {
     this.labels = labels;
@@ -193,7 +193,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"healthcare\"]", required = true, value = "Labels associated with the governance policy.")
+  @ApiModelProperty(example = "[\"healthcare\"]", required = true, value = "List of labels IDs associated with the governance policy.")
   @JsonProperty("labels")
   @NotNull
   public List<String> getLabels() {

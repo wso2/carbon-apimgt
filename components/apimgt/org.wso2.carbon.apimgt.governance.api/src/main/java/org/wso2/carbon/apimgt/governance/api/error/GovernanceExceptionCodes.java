@@ -129,6 +129,10 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUEST(501004, "Error while deleting governance evaluation request.",
             500, "Error while deleting governance evaluation request with ID: %s"),
 
+    ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUESTS(501004, "Error while deleting governance evaluation " +
+            "requests.",
+            500, "Error while deleting governance evaluation requests."),
+
     ERROR_WHILE_RETRIEVING_ARTIFACT_INFO(501005, "Error while retrieving artifact info.", 500, "Error while " +
             "retrieving artifact info for artifact: %s", true),
 
