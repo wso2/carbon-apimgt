@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
@@ -288,23 +289,46 @@ public class APIMUtil {
     /**
      * Get all APIs for the organization
      *
-     * @param organizationId Organization ID
+     * @param organization Organization
      * @return List of API IDs
      */
-    public static List<String> getAllAPIs(String organizationId) {
-        return new ArrayList<>(); // TODO: Connect to the database and get all APIs for the organization
+    public static List<String> getAllAPIs(String organization) {
+
+        List<String> apiIds = new ArrayList<>();
+        List<org.wso2.carbon.apimgt.api.model.subscription.API> apis =
+                new SubscriptionValidationDAO().getAllApis(organization, false);
+        for (org.wso2.carbon.apimgt.api.model.subscription.API api : apis) {
+            apiIds.add(api.getApiUUID());
+        }
+        return apiIds;
     }
 
     /**
      * Get all APIs for the organization with pagination
      *
-     * @param organizationId Organization ID
-     * @param limit          Limit
-     * @param offset         Offset
+     * @param organization Organization
+     * @param limit        Limit
+     * @param offset       Offset
      * @return List of API IDs
      */
-    public static List<String> getPaginatedAPIs(String organizationId, int limit, int offset) {
-        return new ArrayList<>(); // TODO: Connect to the database and get all APIs for the organization
+    public static List<String> getPaginatedAPIs(String organization, int limit, int offset) {
+        List<String> apiIds = getAllAPIs(organization);
+        return apiIds.subList(offset, Math.min(offset + limit, apiIds.size()));
+    }
+
+    /**
+     * Get the API type
+     *
+     * @param apiId API ID
+     * @return API type
+     * @throws GovernanceException If an error occurs while getting the API type
+     */
+    public static String getAPIType(String apiId) throws GovernanceException {
+        try {
+            return ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
+        } catch (APIManagementException e) {
+            throw new GovernanceException("Error while getting the API type for the API with ID: " + apiId, e);
+        }
     }
 
 }
