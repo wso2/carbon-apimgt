@@ -85,6 +85,7 @@ public class RestApiUtil {
 
     public static final Log log = LogFactory.getLog(RestApiUtil.class);
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
+    private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> basicAuthBlockedUriToHttpMethodsMap;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
 
     public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations) {
@@ -1092,6 +1093,67 @@ public class RestApiUtil {
             uriToHttpMethodsMap = getAllowedURIsToMethodsMapFromConfig();
         }
         return uriToHttpMethodsMap;
+    }
+
+    /**
+     * Returns the Basic Auth Blocked URIs and associated HTTP methods for REST API
+     * by reading api-manager.xml configuration
+     *
+     * @return A Dictionary with the Basic Auth Blocked URIs and the associated HTTP methods.
+     * @throws APIManagementException
+     */
+    private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> getBasicAuthBlockedURIsMapFromConfig()
+            throws APIManagementException {
+        Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToMethodsMap = new Hashtable<>();
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        List<String> uriList = apiManagerConfiguration
+                .getProperty(APIConstants.API_RESTAPI_BASIC_AUTH_BLOCKED_URI_URI);
+        List<String> methodsList = apiManagerConfiguration
+                .getProperty(APIConstants.API_RESTAPI_BASIC_AUTH_BLOCKED_URI_HTTPMethods);
+
+        if (uriList != null && methodsList != null) {
+            if (uriList.size() != methodsList.size()) {
+                String errorMsg = "Provided Basic Auth Blocked URIs for REST API are invalid."
+                        + " Every 'BasicAuthAllowedURI' should include 'URI' and 'HTTPMethods' elements";
+                log.error(errorMsg);
+                return new Hashtable<>();
+            }
+
+            for (int i = 0; i < uriList.size(); i++) {
+                String uri = uriList.get(i);
+                uri = uri.replace("/{version}", "");
+                try {
+                    org.wso2.uri.template.URITemplate uriTemplate = new org.wso2.uri.template.URITemplate(uri);
+                    String methodsForUri = methodsList.get(i);
+                    List<String> methodListForUri = Arrays.asList(methodsForUri.split(","));
+                    uriToMethodsMap.put(uriTemplate, methodListForUri);
+                } catch (URITemplateException e) {
+                    String msg = "Error in parsing URI " + uri
+                            + " when retrieving Basic Auth Blocked URIs for REST API";
+                    log.error(msg, e);
+                    throw new APIManagementException(msg, e);
+                }
+            }
+        }
+        return uriToMethodsMap;
+    }
+
+    /**
+     * Returns the Basic Auth Blocked URIs and associated HTTP methods for REST API. If not already read before, reads
+     * api-manager.xml configuration, store the results in a static reference and returns the results.
+     * Otherwise, returns previously stored the static reference object.
+     *
+     * @return A Dictionary with the Basic Auth Allowed URIs and the associated HTTP methods.
+     * @throws APIManagementException
+     */
+    public static Dictionary<org.wso2.uri.template.URITemplate, List<String>> getBasicAuthBlockedURIsToMethodsMap()
+            throws APIManagementException {
+
+        if (basicAuthBlockedUriToHttpMethodsMap == null) {
+            basicAuthBlockedUriToHttpMethodsMap = getBasicAuthBlockedURIsMapFromConfig();
+        }
+        return basicAuthBlockedUriToHttpMethodsMap;
     }
 
     /**

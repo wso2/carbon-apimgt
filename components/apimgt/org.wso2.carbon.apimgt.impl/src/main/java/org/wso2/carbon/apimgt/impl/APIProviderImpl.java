@@ -2327,6 +2327,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void removeDocumentation(String apiId, String docId, String organization) throws APIManagementException {
         try {
             apiPersistenceInstance.deleteDocumentation(new Organization(organization), apiId, docId);
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.DOCUMENT_ID, docId);
+            apiLogObject.put(APIConstants.AuditLogConstants.API_ID, apiId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DOCUMENT, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while deleting the document " + docId);
         }
@@ -2351,6 +2356,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiPersistenceInstance
                         .updateDocumentation(new Organization(organization), apiId, mappedDoc);
                 if (updatedDoc != null) {
+                    JSONObject apiLogObject = new JSONObject();
+                    apiLogObject.put(APIConstants.AuditLogConstants.NAME, documentation.getName());
+                    apiLogObject.put(APIConstants.AuditLogConstants.TYPE, documentation.getType());
+                    apiLogObject.put(APIConstants.AuditLogConstants.DOCUMENT_ID, documentation.getId());
+                    apiLogObject.put(APIConstants.AuditLogConstants.API_ID, apiId);
+                    APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DOCUMENT, apiLogObject.toString(),
+                            APIConstants.AuditLogConstants.UPDATED, this.username);
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
                 }
             } catch (DocumentationPersistenceException e) {
@@ -2370,6 +2382,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiPersistenceInstance.addDocumentation(
                         new Organization(organization), uuid, mappedDoc);
                 if (addedDoc != null) {
+                    JSONObject apiLogObject = new JSONObject();
+                    apiLogObject.put(APIConstants.AuditLogConstants.NAME, addedDoc.getName());
+                    apiLogObject.put(APIConstants.AuditLogConstants.TYPE, addedDoc.getType());
+                    apiLogObject.put(APIConstants.AuditLogConstants.DOCUMENT_ID, addedDoc.getId());
+                    apiLogObject.put(APIConstants.AuditLogConstants.API_ID, uuid);
+                    APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DOCUMENT, apiLogObject.toString(),
+                            APIConstants.AuditLogConstants.CREATED, this.username);
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
                 }
             } catch (DocumentationPersistenceException e) {
@@ -5407,7 +5426,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         try {
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, query,
-                    offset, limit, userCtx, "createdTime", "desc");
+                    offset, limit, userCtx);
             if (log.isDebugEnabled()) {
                 log.debug("Running Solr query : " + query);
             }
@@ -5514,8 +5533,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end,
-            String sortBy, String sortOrder) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
+            throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
@@ -5527,7 +5546,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
             PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
-                    start, end, userCtx, sortBy, sortOrder);
+                    start, end, userCtx);
             if (log.isDebugEnabled()) {
                 log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
             }
@@ -5662,6 +5681,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             mappedContent = DocumentMapper.INSTANCE.toDocumentContent(content);
             DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(organization), uuid, docId,
                     mappedContent);
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.DOCUMENT_ID, docId);
+            apiLogObject.put(APIConstants.AuditLogConstants.API_ID, uuid);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DOCUMENT_CONTENT, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while adding content to doc " + docId);
         }

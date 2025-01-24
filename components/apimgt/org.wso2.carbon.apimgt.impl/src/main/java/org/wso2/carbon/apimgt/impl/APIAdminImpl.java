@@ -1216,7 +1216,7 @@ public class APIAdminImpl implements APIAdmin {
         //APIs and API categories
         String searchQuery = APIConstants.CATEGORY_SEARCH_TYPE_PREFIX + ":*" + category.getName() + "*";
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        Map<String, Object> result = apiProvider.searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE, null, null);
+        Map<String, Object> result = apiProvider.searchPaginatedAPIs(searchQuery, tenantDomain, 0, Integer.MAX_VALUE);
         return (int) (Integer) result.get("length");
     }
 

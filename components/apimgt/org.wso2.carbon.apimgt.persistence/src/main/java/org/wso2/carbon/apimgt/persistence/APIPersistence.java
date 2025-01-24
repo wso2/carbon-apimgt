@@ -170,13 +170,11 @@ public interface APIPersistence {
      * @param searchQuery search query
      * @param start       starting index
      * @param offset      offset to search
-     * @param sortBy      sort criteria
-     * @param sortOrder       sort order
      * @return Publisher API Search Result
      * @throws APIPersistenceException
      */
     PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start,
-            int offset, UserContext ctx, String sortBy, String sortOrder) throws APIPersistenceException;
+            int offset, UserContext ctx) throws APIPersistenceException;
 
     /**
      * Search APIs to be displayed on Dev Portal API listing

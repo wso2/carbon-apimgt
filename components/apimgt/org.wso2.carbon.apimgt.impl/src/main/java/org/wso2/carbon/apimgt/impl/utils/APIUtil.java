@@ -7045,7 +7045,7 @@ public final class APIUtil {
     public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy) {
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("typ", entityType);
+        jsonObject.put("type", entityType);
         jsonObject.put("action", action);
         jsonObject.put("performedBy", performedBy);
         if (entityInfo != null && !StringUtils.isBlank(entityInfo)) {
@@ -10971,5 +10971,21 @@ public final class APIUtil {
     public static boolean getTransactionCounterEnable() {
        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getTransactionCounterProperties();
+    }
+
+    /**
+     * Checks if organization-wide application updates are enabled.
+     * <p>
+     * This method retrieves the value of the system property defined by
+     * ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED.
+     * If the property is not set, it returns false by default.
+     *
+     * @return {true} if organization-wide application updates are enabled;
+     *         {false} otherwise.
+     */
+    public static Boolean isOrgWideAppUpdateEnabled() {
+
+        return Boolean.getBoolean(
+                APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
     }
 }

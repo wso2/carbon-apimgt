@@ -171,16 +171,31 @@ public class SubscriptionMappingUtil {
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiCommonUtil
-                    .getSubscriptionPaginatedURLForAPIId(
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId, groupId);
+            if (apiId != null) {
+                paginatedPrevious = RestApiCommonUtil
+                        .getSubscriptionPaginatedURLForAPIId(
+                                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId, groupId);
+            } else {
+                paginatedPrevious = RestApiCommonUtil
+                        .getSubscriptionPaginatedURL(
+                                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), groupId);
+            }
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiCommonUtil
-                    .getSubscriptionPaginatedURLForAPIId(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId, groupId);
+            if (apiId != null) {
+                paginatedPrevious = RestApiCommonUtil
+                        .getSubscriptionPaginatedURLForAPIId(
+                                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId, groupId);
+            } else {
+                paginatedPrevious = RestApiCommonUtil
+                        .getSubscriptionPaginatedURL(
+                                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), groupId);
+            }
         }
 
         PaginationDTO pagination = new PaginationDTO();

@@ -130,8 +130,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/sortBy'
-        - $ref: '#/components/parameters/sortOrder'
         - $ref: '#/components/parameters/requestedTenant'
         - name: query
           in: query
@@ -14195,30 +14193,6 @@ components:
       schema:
         type: integer
         default: 0
-    sortBy:
-      name: sortBy
-      in: query
-      description: |
-        Criteria for sorting.
-      schema:
-        type: string
-        default: createdTime
-        enum:
-          - apiName
-          - version
-          - createdTime
-          - status
-    sortOrder:
-      name: sortOrder
-      in: query
-      description: |
-        Order of sorting(ascending/descending).
-      schema:
-        type: string
-        default: desc
-        enum:
-          - asc
-          - desc
     If-None-Match:
       name: If-None-Match
       in: header
