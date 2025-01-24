@@ -26,9 +26,9 @@ import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
-import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.util.ArrayList;
@@ -56,6 +56,7 @@ public class SpectralValidationEngine implements ValidationEngine {
     @Override
     public boolean isRulesetValid(Ruleset ruleset) throws GovernanceException {
         // TODO: Call the Spectral engine to validate the ruleset
+        // Validator.validateRuleset(ruleset.getRulesetContent());
         return true;
     }
 
@@ -122,13 +123,15 @@ public class SpectralValidationEngine implements ValidationEngine {
     @Override
     public List<RuleViolation> validate(String target, Ruleset ruleset) throws GovernanceException {
 
-        // TODO: Call the Spectral engine to validate the target content against the ruleset
-        String validationResultJsonString = "";
-
         ObjectMapper objectMapper = new ObjectMapper();
         List<RuleViolation> violations = new ArrayList<>();
 
         try {
+
+//            String validationResultJsonString = Validator
+//                    .validateDocument(target, ruleset.getRulesetContent());
+            String validationResultJsonString = "";
+
             // Parse JSON string to JsonNode
             JsonNode jsonNode = objectMapper.readTree(validationResultJsonString);
 
