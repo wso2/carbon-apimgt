@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
 import javax.validation.constraints.*;
 
@@ -64,7 +65,8 @@ return null;
     @XmlEnum(String.class)
     public enum StatusEnum {
         COMPLAINT("COMPLAINT"),
-        NON_COMPLAINT("NON-COMPLAINT");
+        NON_COMPLAINT("NON-COMPLAINT"),
+        NOT_APPLICABLE("NOT-APPLICABLE");
         private String value;
 
         StatusEnum (String v) {
@@ -91,9 +93,8 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private Integer applicablePolicyCount = null;
-    private Integer violatedPolicyCount = null;
-    private List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationCount = new ArrayList<SeverityBasedRuleViolationCountDTO>();
+    private PolicyAdherenceSummaryDTO policyAdherenceSummary = null;
+    private List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationSummary = new ArrayList<SeverityBasedRuleViolationCountDTO>();
 
   /**
    * UUID of the artifact.
@@ -168,58 +169,40 @@ return null;
   }
 
   /**
-   * Number of policies applicable to the artifact.
    **/
-  public ArtifactComplianceStatusDTO applicablePolicyCount(Integer applicablePolicyCount) {
-    this.applicablePolicyCount = applicablePolicyCount;
+  public ArtifactComplianceStatusDTO policyAdherenceSummary(PolicyAdherenceSummaryDTO policyAdherenceSummary) {
+    this.policyAdherenceSummary = policyAdherenceSummary;
     return this;
   }
 
   
-  @ApiModelProperty(example = "2", value = "Number of policies applicable to the artifact.")
-  @JsonProperty("applicablePolicyCount")
-  public Integer getApplicablePolicyCount() {
-    return applicablePolicyCount;
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("policyAdherenceSummary")
+  public PolicyAdherenceSummaryDTO getPolicyAdherenceSummary() {
+    return policyAdherenceSummary;
   }
-  public void setApplicablePolicyCount(Integer applicablePolicyCount) {
-    this.applicablePolicyCount = applicablePolicyCount;
-  }
-
-  /**
-   * Number of policies violated by the artifact.
-   **/
-  public ArtifactComplianceStatusDTO violatedPolicyCount(Integer violatedPolicyCount) {
-    this.violatedPolicyCount = violatedPolicyCount;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "1", value = "Number of policies violated by the artifact.")
-  @JsonProperty("violatedPolicyCount")
-  public Integer getViolatedPolicyCount() {
-    return violatedPolicyCount;
-  }
-  public void setViolatedPolicyCount(Integer violatedPolicyCount) {
-    this.violatedPolicyCount = violatedPolicyCount;
+  public void setPolicyAdherenceSummary(PolicyAdherenceSummaryDTO policyAdherenceSummary) {
+    this.policyAdherenceSummary = policyAdherenceSummary;
   }
 
   /**
    * Summary of severity based rule violations.
    **/
-  public ArtifactComplianceStatusDTO severityBasedRuleViolationCount(List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationCount) {
-    this.severityBasedRuleViolationCount = severityBasedRuleViolationCount;
+  public ArtifactComplianceStatusDTO severityBasedRuleViolationSummary(List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationSummary) {
+    this.severityBasedRuleViolationSummary = severityBasedRuleViolationSummary;
     return this;
   }
 
   
   @ApiModelProperty(value = "Summary of severity based rule violations.")
       @Valid
-  @JsonProperty("severityBasedRuleViolationCount")
-  public List<SeverityBasedRuleViolationCountDTO> getSeverityBasedRuleViolationCount() {
-    return severityBasedRuleViolationCount;
+  @JsonProperty("severityBasedRuleViolationSummary")
+  public List<SeverityBasedRuleViolationCountDTO> getSeverityBasedRuleViolationSummary() {
+    return severityBasedRuleViolationSummary;
   }
-  public void setSeverityBasedRuleViolationCount(List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationCount) {
-    this.severityBasedRuleViolationCount = severityBasedRuleViolationCount;
+  public void setSeverityBasedRuleViolationSummary(List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationSummary) {
+    this.severityBasedRuleViolationSummary = severityBasedRuleViolationSummary;
   }
 
 
@@ -236,14 +219,13 @@ return null;
         Objects.equals(artifactType, artifactComplianceStatus.artifactType) &&
         Objects.equals(artifactName, artifactComplianceStatus.artifactName) &&
         Objects.equals(status, artifactComplianceStatus.status) &&
-        Objects.equals(applicablePolicyCount, artifactComplianceStatus.applicablePolicyCount) &&
-        Objects.equals(violatedPolicyCount, artifactComplianceStatus.violatedPolicyCount) &&
-        Objects.equals(severityBasedRuleViolationCount, artifactComplianceStatus.severityBasedRuleViolationCount);
+        Objects.equals(policyAdherenceSummary, artifactComplianceStatus.policyAdherenceSummary) &&
+        Objects.equals(severityBasedRuleViolationSummary, artifactComplianceStatus.severityBasedRuleViolationSummary);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifactId, artifactType, artifactName, status, applicablePolicyCount, violatedPolicyCount, severityBasedRuleViolationCount);
+    return Objects.hash(artifactId, artifactType, artifactName, status, policyAdherenceSummary, severityBasedRuleViolationSummary);
   }
 
   @Override
@@ -255,9 +237,8 @@ return null;
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    artifactName: ").append(toIndentedString(artifactName)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    applicablePolicyCount: ").append(toIndentedString(applicablePolicyCount)).append("\n");
-    sb.append("    violatedPolicyCount: ").append(toIndentedString(violatedPolicyCount)).append("\n");
-    sb.append("    severityBasedRuleViolationCount: ").append(toIndentedString(severityBasedRuleViolationCount)).append("\n");
+    sb.append("    policyAdherenceSummary: ").append(toIndentedString(policyAdherenceSummary)).append("\n");
+    sb.append("    severityBasedRuleViolationSummary: ").append(toIndentedString(severityBasedRuleViolationSummary)).append("\n");
     sb.append("}");
     return sb.toString();
   }

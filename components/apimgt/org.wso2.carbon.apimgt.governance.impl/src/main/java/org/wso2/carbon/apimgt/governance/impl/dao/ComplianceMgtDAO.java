@@ -73,6 +73,14 @@ public interface ComplianceMgtDAO {
     void deleteComplianceEvaluationRequest(String requestId) throws GovernanceException;
 
     /**
+     * Delete an evaluation request by artifact ID
+     *
+     * @param artifactId Artifact ID
+     * @throws GovernanceException If an error occurs while deleting the evaluation request
+     */
+    void deleteComplianceEvaluationRequestByArtifactId(String artifactId) throws GovernanceException;
+
+    /**
      * Add a compliance evaluation result to DB
      *
      * @param result         Evaluation result

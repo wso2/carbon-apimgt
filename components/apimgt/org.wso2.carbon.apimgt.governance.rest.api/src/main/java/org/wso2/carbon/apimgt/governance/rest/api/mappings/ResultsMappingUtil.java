@@ -22,7 +22,9 @@ import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -96,6 +98,46 @@ public class ResultsMappingUtil {
         paginationDTO.setPrevious(paginatedPrevious);
 
         complianceListDTO.setPagination(paginationDTO);
+    }
+
+
+    /**
+     * Get the policy adherence summary
+     *
+     * @param totalPoliciesCount     total number of policies
+     * @param evaluatedPoliciesCount total number of evaluated policies
+     * @param violatedPoliciesCount  total number of violated policies
+     * @return PolicyAdherenceSummaryDTO object
+     */
+    public static PolicyAdherenceSummaryDTO getPolicyAdherenceSummary(int totalPoliciesCount,
+                                                                      int evaluatedPoliciesCount,
+                                                                      int violatedPoliciesCount) {
+        PolicyAdherenceSummaryDTO policyAdherenceSummaryDTO = new PolicyAdherenceSummaryDTO();
+        policyAdherenceSummaryDTO.setTotalPolicies(totalPoliciesCount);
+        policyAdherenceSummaryDTO.setViolatedPolicies(violatedPoliciesCount);
+        policyAdherenceSummaryDTO.setFollowedPolicies(evaluatedPoliciesCount - violatedPoliciesCount);
+        policyAdherenceSummaryDTO.setUnAppliedPolicies(totalPoliciesCount - evaluatedPoliciesCount);
+        return policyAdherenceSummaryDTO;
+    }
+
+    /**
+     * Get the artifact compliance summary
+     *
+     * @param totalArtifactsCount        total number of artifacts
+     * @param compliantArtifactsCount    total number of compliant artifacts
+     * @param nonCompliantArtifactsCount total number of non-compliant artifacts
+     * @return ArtifactComplianceSummaryDTO object
+     */
+    public static ArtifactComplianceSummaryDTO getArtifactComplianceSummary(int totalArtifactsCount,
+                                                                            int compliantArtifactsCount,
+                                                                            int nonCompliantArtifactsCount) {
+        ArtifactComplianceSummaryDTO artifactComplianceSummaryDTO = new ArtifactComplianceSummaryDTO();
+        artifactComplianceSummaryDTO.setTotalArtifacts(totalArtifactsCount);
+        artifactComplianceSummaryDTO.setCompliantArtifacts(compliantArtifactsCount);
+        artifactComplianceSummaryDTO.setNonCompliantArtifacts(nonCompliantArtifactsCount);
+        artifactComplianceSummaryDTO.setNotApplicableArtifacts(totalArtifactsCount - compliantArtifactsCount -
+                nonCompliantArtifactsCount);
+        return artifactComplianceSummaryDTO;
     }
 
 }

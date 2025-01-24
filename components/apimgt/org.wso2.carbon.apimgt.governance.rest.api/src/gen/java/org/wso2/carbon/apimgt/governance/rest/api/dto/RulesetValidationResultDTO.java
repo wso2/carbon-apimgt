@@ -34,7 +34,7 @@ public class RulesetValidationResultDTO   {
     public enum StatusEnum {
         PASSED("PASSED"),
         FAILED("FAILED"),
-        PENDING("PENDING");
+        UNAPPLIED("UNAPPLIED");
         private String value;
 
         StatusEnum (String v) {

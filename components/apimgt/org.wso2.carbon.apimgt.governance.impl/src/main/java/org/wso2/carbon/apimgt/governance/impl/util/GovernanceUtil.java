@@ -50,8 +50,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -268,7 +270,7 @@ public class GovernanceUtil {
         PolicyManager policyManager = new PolicyManagerImpl();
 
         // Check for policies using labels and the state
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         for (String label : labels) {
             // Get policies for the label and state
             List<String> policiesForLabel = policyManager.getPoliciesByLabelAndState(label,
@@ -281,7 +283,7 @@ public class GovernanceUtil {
         policies.addAll(policyManager.getOrganizationWidePoliciesByState(governableState,
                 organization));
 
-        return policies;
+        return new ArrayList<>(policies);
     }
 
     /**
