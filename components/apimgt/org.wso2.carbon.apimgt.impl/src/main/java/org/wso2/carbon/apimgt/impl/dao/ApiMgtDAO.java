@@ -182,8 +182,7 @@ public class ApiMgtDAO {
     private final Object scopeMutex = new Object();
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
-    private String KeyManagerAccessPublic = "PUBLIC";
-    private String GatewayAccessPublic = "PUBLIC";
+    private String PublicAccessPermission = "PUBLIC";
     private static final String[] keyTypes =
             new String[]{APIConstants.API_KEY_TYPE_PRODUCTION, APIConstants.API_KEY_TYPE_SANDBOX};
     String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
@@ -9655,7 +9654,7 @@ public class ApiMgtDAO {
                 preparedStatement.setString(10, keyManagerConfigurationDTO.getExternalReferenceId());
                 preparedStatement.executeUpdate();
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && !KeyManagerAccessPublic.equals(permissionDTO.getPermissionType())) {
+                if (permissionDTO != null && !PublicAccessPermission.equals(permissionDTO.getPermissionType())) {
                     try (PreparedStatement addPermissionStatement = conn
                             .prepareStatement(SQLConstants.KeyManagerPermissionsSqlConstants
                                     .ADD_KEY_MANAGER_PERMISSION_SQL)) {
@@ -9736,7 +9735,7 @@ public class ApiMgtDAO {
                     deletePermissionsStatement.executeUpdate();
                 }
                 KeyManagerPermissionConfigurationDTO permissionDTO = keyManagerConfigurationDTO.getPermissions();
-                if (permissionDTO != null && !KeyManagerAccessPublic.equals(permissionDTO.getPermissionType())) {
+                if (permissionDTO != null && !PublicAccessPermission.equals(permissionDTO.getPermissionType())) {
                     try (PreparedStatement addPermissionStatement = conn.prepareStatement(SQLConstants
                             .KeyManagerPermissionsSqlConstants.ADD_KEY_MANAGER_PERMISSION_SQL)) {
                         for (String role : permissionDTO.getRoles()) {
@@ -9803,7 +9802,7 @@ public class ApiMgtDAO {
                 ps.setString(1, keyManagerUUID);
                 ResultSet resultSet = ps.executeQuery();
                 ArrayList<String> roles = new ArrayList<>();
-                keyManagerPermissions.setPermissionType(KeyManagerAccessPublic);
+                keyManagerPermissions.setPermissionType(PublicAccessPermission);
                 while (resultSet.next()) {
                     roles.add(resultSet.getString("ROLE"));
                     keyManagerPermissions.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
@@ -9836,7 +9835,7 @@ public class ApiMgtDAO {
                 ps.setString(1, gatewayUUID);
                 ResultSet resultSet = ps.executeQuery();
                 ArrayList<String> roles = new ArrayList<>();
-                gatewayVisibilityPermissions.setPermissionType(GatewayAccessPublic);
+                gatewayVisibilityPermissions.setPermissionType(PublicAccessPermission);
                 while (resultSet.next()) {
                     roles.add(resultSet.getString("ROLE"));
                     gatewayVisibilityPermissions.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
@@ -15157,7 +15156,7 @@ public class ApiMgtDAO {
                 prepStmt.executeUpdate();
 
                 GatewayVisibilityPermissionConfigurationDTO permissionDTO = environment.getPermissions();
-                if (permissionDTO != null && !GatewayAccessPublic.equals(permissionDTO.getPermissionType())) {
+                if (permissionDTO != null && !PublicAccessPermission.equals(permissionDTO.getPermissionType())) {
                     try (PreparedStatement addPermissionStatement = conn
                             .prepareStatement(SQLConstants.ADD_GATEWAY_VISIBILITY_PERMISSION_SQL)) {
                         for (String role : environment.getPermissions().getRoles()) {
@@ -15340,7 +15339,7 @@ public class ApiMgtDAO {
                     deletePermissionsStatement.executeUpdate();
                 }
                 GatewayVisibilityPermissionConfigurationDTO permissionDTO = environment.getPermissions();
-                if (permissionDTO != null && permissionDTO.getPermissionType() != GatewayAccessPublic) {
+                if (permissionDTO != null && permissionDTO.getPermissionType() != PublicAccessPermission) {
                     try (PreparedStatement addPermissionStatement = connection.prepareStatement(SQLConstants.ADD_GATEWAY_VISIBILITY_PERMISSION_SQL)) {
                         for (String role : permissionDTO.getRoles()) {
                             addPermissionStatement.setString(1, environment.getUuid());

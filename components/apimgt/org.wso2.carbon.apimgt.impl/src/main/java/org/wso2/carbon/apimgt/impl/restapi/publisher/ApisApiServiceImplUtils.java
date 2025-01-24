@@ -908,7 +908,9 @@ public class ApisApiServiceImplUtils {
             throw new APIManagementException("Invalid Vhost: " + vhost, ExceptionCodes.INVALID_VHOST);
         }
 
-        return mapApiRevisionDeployment(revisionId, vhost, displayOnDevportal, environment, environments.get(environment).getVisibility(), environments.get(environment).getPermissions().getPermissionType());
+        return mapApiRevisionDeployment(revisionId, vhost, displayOnDevportal, environment,
+                environments.get(environment).getVisibility(),
+                environments.get(environment).getPermissions().getPermissionType());
     }
 
     /**
