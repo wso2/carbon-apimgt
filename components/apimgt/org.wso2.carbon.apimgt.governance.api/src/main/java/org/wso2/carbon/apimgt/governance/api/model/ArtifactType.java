@@ -68,9 +68,14 @@ public enum ArtifactType {
                 || type == API;
     }
 
-    // TODO: Fix logic to get artifact type from APIM artifact type
+    /**
+     * Convert from API Manager artifact type to API Manager Governance artifact type
+     *
+     * @param artifactType Artifact type
+     * @return API Manager Governance artifact type
+     */
     public static ArtifactType fromAPIMArtifactType(String artifactType) {
-        if ("rest".equalsIgnoreCase(artifactType)) {
+        if ("rest".equalsIgnoreCase(artifactType) || "http".equalsIgnoreCase(artifactType)) {
             return REST_API;
         } else if ("soap".equalsIgnoreCase(artifactType)) {
             return SOAP_API;

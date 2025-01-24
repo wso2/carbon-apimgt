@@ -37,7 +37,9 @@
                 org.wso2.carbon.apimgt.governance.rest.api.HealthzApi,
                 org.wso2.carbon.apimgt.governance.rest.api.RulesetsApi,
                 org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApi,
-<!--                org.wso2.carbon.apimgt.governance.rest.api.AssessComplianceApi-->
+                org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi,
+                org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi,
+                org.wso2.carbon.apimgt.governance.rest.api.EvaluateComplianceApi,
             </param-value>
         </init-param>
         <init-param>

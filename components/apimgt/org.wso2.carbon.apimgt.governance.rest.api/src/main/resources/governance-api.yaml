@@ -1173,7 +1173,7 @@ components:
             example: "94566543-d21b-34d5-b678-912345678900"
         labels:
           type: array
-          description: Labels associated with the governance policy.
+          description: List of labels IDs associated with the governance policy.
           items:
             type: string
           example:
@@ -1252,10 +1252,6 @@ components:
             - REST_API
             - ASYNC_API
           example: REST_API
-        targetFile:
-          type: string
-          description: The file to be evaluated. Required only in blocking scenario.
-          format: binary
         governableState:
           type: string
           description: The state of the artifact at which the evaluation should run
@@ -1270,6 +1266,10 @@ components:
             - API_UPDATE
             - API_DEPLOY
             - API_PUBLISH
+        targetFile:
+          type: string
+          description: The artifact zip file to be evaluated against. If not provided, the artifact will be fetched from the DB.
+          format: binary
       required:
         - artifactId
         - artifactType
@@ -1387,16 +1387,11 @@ components:
           enum:
             - COMPLAINT
             - NON-COMPLAINT
+            - NOT-APPLICABLE
           example: "COMPLAINT"
-        applicablePolicyCount:
-          type: integer
-          description: Number of policies applicable to the artifact.
-          example: 2
-        violatedPolicyCount:
-          type: integer
-          description: Number of policies violated by the artifact.
-          example: 1
-        severityBasedRuleViolationCount:
+        policyAdherenceSummary:
+          $ref: '#/components/schemas/PolicyAdherenceSummary'
+        severityBasedRuleViolationSummary:
           type: array
           description: Summary of severity based rule violations.
           items:
@@ -1554,7 +1549,7 @@ components:
           enum:
             - PASSED
             - FAILED
-            - PENDING
+            - UNAPPLIED
           example: "PASSED"
         violatedRules:
           type: array

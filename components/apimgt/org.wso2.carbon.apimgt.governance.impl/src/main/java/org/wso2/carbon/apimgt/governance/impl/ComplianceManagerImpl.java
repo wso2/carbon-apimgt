@@ -20,10 +20,10 @@ package org.wso2.carbon.apimgt.governance.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
@@ -40,8 +40,10 @@ import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class represents the Compliance Manager, which is responsible for managing compliance related operations
@@ -49,10 +51,10 @@ import java.util.Map;
 public class ComplianceManagerImpl implements ComplianceManager {
     private static final Log log = LogFactory.getLog(ComplianceManagerImpl.class);
 
-    private ComplianceMgtDAO complianceMgtDAO;
-    private GovernancePolicyMgtDAO governancePolicyMgtDAO;
+    private final ComplianceMgtDAO complianceMgtDAO;
+    private final GovernancePolicyMgtDAO governancePolicyMgtDAO;
 
-    private RulesetMgtDAO rulesetMgtDAO;
+    private final RulesetMgtDAO rulesetMgtDAO;
 
     public ComplianceManagerImpl() {
         complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
@@ -77,36 +79,36 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
         List<GovernableState> governableStates = policy.getGovernableStates();
 
-        // Get artifacts that should be governed by the policy as a Map of artifact ID and artifact type
-        Map<String, String> artifacts = new HashMap<>();
-        artifacts.putAll(getAPIArtifactsByLabelsAndGovernableState(labels, governableStates));
+        // Get artifacts that should be governed by the policy
+        List<ArtifactInfo> artifacts = new ArrayList<>();
+        artifacts.addAll(getArtifactsByLabelsAndGovernableState(labels, governableStates));
 
-        for (Map.Entry<String, String> artifact : artifacts.entrySet()) {
-            String artifactId = artifact.getKey();
-            ArtifactType artifactType = ArtifactType.fromString(artifact.getValue());
+        for (ArtifactInfo artifact : artifacts) {
+            String artifactId = artifact.getArtifactId();
+            ArtifactType artifactType = artifact.getArtifactType();
             complianceMgtDAO.addComplianceEvaluationRequest(artifactId, artifactType,
                     policyId, organization);
         }
     }
 
     /**
-     * Get API Artifacts by Labels and Governable State
+     * Get Artifacts by Labels and Governable State
      *
      * @param labels           List of labels
      * @param governableStates List of governable states
      * @return Map of artifact ID and artifact type
      */
-    private Map<String, String> getAPIArtifactsByLabelsAndGovernableState(List<String> labels,
-                                                                          List<GovernableState> governableStates) {
-        Map<String, String> apiIdTypeMap = new HashMap<>();
+    private List<ArtifactInfo> getArtifactsByLabelsAndGovernableState(List<String> labels,
+                                                                      List<GovernableState> governableStates) {
+        List<ArtifactInfo> artifactInfoList = new ArrayList<>();
         List<String> correspondingAPIStates =
                 APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
+
+        // Get API Artifacts
         for (String label : labels) {
-            // TODO: Get artifacts by label
-            // TODO: Filter APIs from state
-            //TODO: Get artifact type from APIM
+            // TODO: Get artifacts by label, Filter APIs from state, Get artifact type from APIM
         }
-        return apiIdTypeMap;
+        return artifactInfoList;
     }
 
     /**
@@ -202,34 +204,43 @@ public class ComplianceManagerImpl implements ComplianceManager {
     }
 
     /**
-     * Check whether the artifact evaluation results exist
+     * Get list of evaluated policies by artifact ID
      *
      * @param artifactId Artifact ID
-     * @return True if the artifact evaluation results exist, False otherwise
-     * @throws GovernanceException If an error occurs while checking the existence of the artifact evaluation results
+     * @return List of evaluated policy IDs
+     * @throws GovernanceException If an error occurs while getting the list of evaluated policies
      */
     @Override
-    public boolean isArtifactEvaluationResultsExist(String artifactId) throws GovernanceException {
+    public List<String> getEvaluatedPoliciesByArtifactId(String artifactId) throws GovernanceException {
         List<ComplianceEvaluationResult> complianceEvaluationResults =
                 complianceMgtDAO.getComplianceEvaluationResultsByArtifactId(artifactId);
-        return complianceEvaluationResults != null && !complianceEvaluationResults.isEmpty();
+        Set<String> evaluatedPolicies = new HashSet<>();
+        for (ComplianceEvaluationResult complianceEvaluationResult : complianceEvaluationResults) {
+            evaluatedPolicies.add(complianceEvaluationResult.getPolicyId());
+        }
+        return new ArrayList<>(evaluatedPolicies);
     }
 
     /**
-     * Check whether the policy evaluation results exist for a given artifact
+     * Get list of evaluated rulesets by artifact ID and policy ID
      *
      * @param artifactId Artifact ID
      * @param policyId   Policy ID
-     * @return True if the policy evaluation results exist, False otherwise
-     * @throws GovernanceException If an error occurs while checking the existence of the policy evaluation results
+     * @return List of evaluated ruleset IDs
+     * @throws GovernanceException If an error occurs while getting the list of evaluated rulesets
      */
     @Override
-    public boolean isPolicyEvaluationResultsExist(String artifactId, String policyId) throws GovernanceException {
+    public List<String> getEvaluatedRulesetsByArtifactIdAndPolicyId(String artifactId, String policyId)
+            throws GovernanceException {
         List<ComplianceEvaluationResult> complianceEvaluationResults =
                 complianceMgtDAO.getComplianceEvaluationResultsByArtifactAndPolicyId(artifactId, policyId);
-        return complianceEvaluationResults != null && !complianceEvaluationResults.isEmpty();
-    }
+        Set<String> evaluatedRulesets = new HashSet<>();
+        for (ComplianceEvaluationResult complianceEvaluationResult : complianceEvaluationResults) {
+            evaluatedRulesets.add(complianceEvaluationResult.getRulesetId());
+        }
+        return new ArrayList<>(evaluatedRulesets);
 
+    }
 
     /**
      * Get a map of compliant and non-compliant artifacts

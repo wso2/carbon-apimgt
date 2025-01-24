@@ -100,23 +100,24 @@ public interface ComplianceManager {
             throws GovernanceException;
 
     /**
-     * Check whether the artifact evaluation results exist
+     * Get list of evaluated policies by artifact ID
      *
      * @param artifactId Artifact ID
-     * @return True if the artifact evaluation results exist, False otherwise
-     * @throws GovernanceException If an error occurs while checking the existence of the artifact evaluation results
+     * @return List of evaluated policies IDs
+     * @throws GovernanceException If an error occurs while getting the list of evaluated policies
      */
-    boolean isArtifactEvaluationResultsExist(String artifactId) throws GovernanceException;
+    List<String> getEvaluatedPoliciesByArtifactId(String artifactId) throws GovernanceException;
 
     /**
-     * Check whether the policy evaluation results exist for a given artifact
+     * Get list of evaluated rulesets by artifact ID and policy ID
      *
      * @param artifactId Artifact ID
      * @param policyId   Policy ID
-     * @return True if the policy evaluation results exist, False otherwise
-     * @throws GovernanceException If an error occurs while checking the existence of the policy evaluation results
+     * @return List of evaluated rulesets IDs
+     * @throws GovernanceException If an error occurs while getting the list of evaluated rulesets
      */
-    boolean isPolicyEvaluationResultsExist(String artifactId, String policyId) throws GovernanceException;
+    List<String> getEvaluatedRulesetsByArtifactIdAndPolicyId(String artifactId, String policyId)
+            throws GovernanceException;
 
     /**
      * Get a map of compliant and non-compliant artifacts

@@ -91,7 +91,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 try (PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
                     prepStmnt.setString(1, GovernanceUtil.generateUUID());
                     prepStmnt.setString(2, artifactId);
-                    prepStmnt.setString(3, policyId);
+                    prepStmnt.setString(3, String.valueOf(artifactType));
+                    prepStmnt.setString(4, policyId);
                     prepStmnt.execute();
                 }
 
@@ -146,10 +147,10 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<ComplianceEvaluationRequest> getPendingComplianceEvaluationRequests() throws GovernanceException {
         String SQLQuery = SQLConstants.GET_PENDING_EVALUATION_REQUESTS;
+        List<ComplianceEvaluationRequest> evaluationRequests = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
-                List<ComplianceEvaluationRequest> evaluationRequests = new ArrayList<>();
                 while (resultSet.next()) {
                     ComplianceEvaluationRequest evaluationRequest = new ComplianceEvaluationRequest();
                     evaluationRequest.setId(resultSet.getString("REQUEST_ID"));
@@ -209,6 +210,25 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes
                     .ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUEST,
                     e, requestId);
+        }
+    }
+
+    /**
+     * Delete an evaluation request by artifact ID
+     *
+     * @param artifactId Artifact ID
+     * @throws GovernanceException If an error occurs while deleting the evaluation request
+     */
+    @Override
+    public void deleteComplianceEvaluationRequestByArtifactId(String artifactId) throws GovernanceException {
+        String SQLQuery = SQLConstants.DELETE_GOV_EVALUATION_REQUEST_BY_ARTIFACT;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            prepStmnt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUESTS, e);
         }
     }
 
@@ -540,7 +560,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<String> getAllComplianceEvaluatedArtifacts(ArtifactType artifactType, String organization)
             throws GovernanceException {
-        String SQLQuery = SQLConstants.GET_NON_COMPLIANT_ARTIFACTS;
+        String SQLQuery = SQLConstants.GET_ALL_COMP_EVALUATED_ARTIFACTS;
         List<String> artifactIds = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {

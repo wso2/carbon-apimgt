@@ -57,7 +57,6 @@ return null;
         }
     } 
     private ArtifactTypeEnum artifactType = null;
-    private File targetFile = null;
 
           @XmlType(name="GovernableStateEnum")
     @XmlEnum(String.class)
@@ -92,6 +91,7 @@ return null;
         }
     } 
     private GovernableStateEnum governableState = null;
+    private File targetFile = null;
 
   /**
    * UUID of the artifact.
@@ -132,24 +132,6 @@ return null;
   }
 
   /**
-   * The file to be evaluated. Required only in blocking scenario.
-   **/
-  public ComplianceEvaluationRequestDTO targetFile(File targetFile) {
-    this.targetFile = targetFile;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "The file to be evaluated. Required only in blocking scenario.")
-  @JsonProperty("targetFile")
-  public File getTargetFile() {
-    return targetFile;
-  }
-  public void setTargetFile(File targetFile) {
-    this.targetFile = targetFile;
-  }
-
-  /**
    * The state of the artifact at which the evaluation should run
    **/
   public ComplianceEvaluationRequestDTO governableState(GovernableStateEnum governableState) {
@@ -168,6 +150,24 @@ return null;
     this.governableState = governableState;
   }
 
+  /**
+   * The artifact zip file to be evaluated against. If not provided, the artifact will be fetched from the DB.
+   **/
+  public ComplianceEvaluationRequestDTO targetFile(File targetFile) {
+    this.targetFile = targetFile;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The artifact zip file to be evaluated against. If not provided, the artifact will be fetched from the DB.")
+  @JsonProperty("targetFile")
+  public File getTargetFile() {
+    return targetFile;
+  }
+  public void setTargetFile(File targetFile) {
+    this.targetFile = targetFile;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -180,13 +180,13 @@ return null;
     ComplianceEvaluationRequestDTO complianceEvaluationRequest = (ComplianceEvaluationRequestDTO) o;
     return Objects.equals(artifactId, complianceEvaluationRequest.artifactId) &&
         Objects.equals(artifactType, complianceEvaluationRequest.artifactType) &&
-        Objects.equals(targetFile, complianceEvaluationRequest.targetFile) &&
-        Objects.equals(governableState, complianceEvaluationRequest.governableState);
+        Objects.equals(governableState, complianceEvaluationRequest.governableState) &&
+        Objects.equals(targetFile, complianceEvaluationRequest.targetFile);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifactId, artifactType, targetFile, governableState);
+    return Objects.hash(artifactId, artifactType, governableState, targetFile);
   }
 
   @Override
@@ -196,8 +196,8 @@ return null;
     
     sb.append("    artifactId: ").append(toIndentedString(artifactId)).append("\n");
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
-    sb.append("    targetFile: ").append(toIndentedString(targetFile)).append("\n");
     sb.append("    governableState: ").append(toIndentedString(governableState)).append("\n");
+    sb.append("    targetFile: ").append(toIndentedString(targetFile)).append("\n");
     sb.append("}");
     return sb.toString();
   }
