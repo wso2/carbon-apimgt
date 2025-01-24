@@ -32,8 +32,6 @@ public class APIRevisionDeployment implements Serializable {
     private boolean isDisplayOnDevportal;
     private String deployedTime;
     private String successDeployedTime;
-    private String visibility;
-    private String permissionType;
 
     public int getId() {
         return id;
@@ -97,21 +95,5 @@ public class APIRevisionDeployment implements Serializable {
 
     public void setStatus(WorkflowStatus status) {
         this.status = status;
-    }
-
-    public String getVisibility() {
-        return visibility;
-    }
-
-    public void setVisibility(String visibility) {
-        this.visibility = visibility;
-    }
-
-    public String getPermissionType() {
-        return permissionType;
-    }
-
-    public void setPermissionType(String permissionType) {
-        this.permissionType = permissionType;
     }
 }

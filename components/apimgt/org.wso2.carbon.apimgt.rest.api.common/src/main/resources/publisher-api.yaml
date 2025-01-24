@@ -10586,17 +10586,6 @@ components:
           pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
           type: string
           example: mg.wso2.com
-        visibility:
-          type: string
-          example: Role1, Role2
-        permissionType:
-          type: string
-          example: PUBLIC
-          default: PUBLIC
-          enum:
-            - PUBLIC
-            - ALLOW
-            - DENY
         displayOnDevportal:
           type: boolean
           example: true

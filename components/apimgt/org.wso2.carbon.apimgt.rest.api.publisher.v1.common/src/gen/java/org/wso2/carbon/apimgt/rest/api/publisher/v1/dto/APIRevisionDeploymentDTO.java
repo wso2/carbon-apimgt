@@ -56,40 +56,6 @@ return null;
     }
     private StatusEnum status = StatusEnum.CREATED;
     private String vhost = null;
-    private String visibility = null;
-
-    @XmlType(name="PermissionTypeEnum")
-    @XmlEnum(String.class)
-    public enum PermissionTypeEnum {
-        PUBLIC("PUBLIC"),
-        ALLOW("ALLOW"),
-        DENY("DENY");
-        private String value;
-
-        PermissionTypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static PermissionTypeEnum fromValue(String v) {
-            for (PermissionTypeEnum b : PermissionTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private PermissionTypeEnum permissionType = PermissionTypeEnum.PUBLIC;
     private Boolean displayOnDevportal = true;
     private java.util.Date deployedTime = null;
     private java.util.Date successDeployedTime = null;
@@ -164,40 +130,6 @@ return null;
 
   /**
    **/
-  public APIRevisionDeploymentDTO visibility(String visibility) {
-    this.visibility = visibility;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "Role1, Role2", value = "")
-  @JsonProperty("visibility")
-  public String getVisibility() {
-    return visibility;
-  }
-  public void setVisibility(String visibility) {
-    this.visibility = visibility;
-  }
-
-  /**
-   **/
-  public APIRevisionDeploymentDTO permissionType(PermissionTypeEnum permissionType) {
-    this.permissionType = permissionType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "PUBLIC", value = "")
-  @JsonProperty("permissionType")
-  public PermissionTypeEnum getPermissionType() {
-    return permissionType;
-  }
-  public void setPermissionType(PermissionTypeEnum permissionType) {
-    this.permissionType = permissionType;
-  }
-
-  /**
-   **/
   public APIRevisionDeploymentDTO displayOnDevportal(Boolean displayOnDevportal) {
     this.displayOnDevportal = displayOnDevportal;
     return this;
@@ -261,8 +193,6 @@ return null;
         Objects.equals(name, apIRevisionDeployment.name) &&
         Objects.equals(status, apIRevisionDeployment.status) &&
         Objects.equals(vhost, apIRevisionDeployment.vhost) &&
-        Objects.equals(visibility, apIRevisionDeployment.visibility) &&
-        Objects.equals(permissionType, apIRevisionDeployment.permissionType) &&
         Objects.equals(displayOnDevportal, apIRevisionDeployment.displayOnDevportal) &&
         Objects.equals(deployedTime, apIRevisionDeployment.deployedTime) &&
         Objects.equals(successDeployedTime, apIRevisionDeployment.successDeployedTime);
@@ -270,7 +200,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(revisionUuid, name, status, vhost, visibility, permissionType, displayOnDevportal, deployedTime, successDeployedTime);
+    return Objects.hash(revisionUuid, name, status, vhost, displayOnDevportal, deployedTime, successDeployedTime);
   }
 
   @Override
@@ -282,8 +212,6 @@ return null;
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
-    sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
-    sb.append("    permissionType: ").append(toIndentedString(permissionType)).append("\n");
     sb.append("    displayOnDevportal: ").append(toIndentedString(displayOnDevportal)).append("\n");
     sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");
     sb.append("    successDeployedTime: ").append(toIndentedString(successDeployedTime)).append("\n");

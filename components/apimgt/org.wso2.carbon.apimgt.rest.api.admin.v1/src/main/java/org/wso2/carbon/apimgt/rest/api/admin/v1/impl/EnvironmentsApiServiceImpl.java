@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -127,10 +128,10 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
                 throw new APIManagementException("Unsupported Vhost Configuration for gateway type: " + gatewayType);
             }
             Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
-            EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(apiAdmin.addEnvironment(organization, env));
             GatewayVisibilityPermissionConfigurationDTO gatewayVisibilityPermissionConfigurationDTO =
                     env.getPermissions();
-            this.validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
+            validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
+            EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(apiAdmin.addEnvironment(organization, env));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + envDTO.getId());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, new Gson().toJson(envDTO),
                     APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
@@ -146,7 +147,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         return null;
     }
 
-    public void validatePermissions(GatewayVisibilityPermissionConfigurationDTO permissionDTO)
+    private void validatePermissions(GatewayVisibilityPermissionConfigurationDTO permissionDTO)
             throws IllegalArgumentException, APIManagementException {
 
         if (permissionDTO != null && permissionDTO.getRoles() != null) {
@@ -156,10 +157,14 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             if (!Arrays.stream(allowedPermissionTypes).anyMatch(permissionType::equals)) {
                 throw new APIManagementException("Invalid permission type");
             }
+            List<String> invalidRoles = new ArrayList<>();
             for (String role : permissionDTO.getRoles()) {
                 if (!APIUtil.isRoleNameExist(username, role)) {
-                    throw new IllegalArgumentException("Invalid user roles found in visibleRoles list");
+                    invalidRoles.add(role);
                 }
+            }
+            if (!invalidRoles.isEmpty()) {
+                throw new APIManagementException("Invalid user roles found in visibleRoles list");
             }
         }
     }

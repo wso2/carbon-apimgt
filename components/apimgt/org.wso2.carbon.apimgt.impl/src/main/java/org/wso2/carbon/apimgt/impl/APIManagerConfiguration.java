@@ -63,6 +63,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -764,17 +765,15 @@ public class APIManagerConfiguration {
         OMElement visibility = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_VISIBILITY));
         List<String> visibilityRoles = new LinkedList<>();
         String[] visibilityRolesArray;
-        if (visibility == null) {
-            permissionsDTO.setPermissionType("PUBLIC");
-            environment.setVisibility("PUBLIC");
+        if (visibility == null || StringUtils.isEmpty(visibility.getText())) {
+            permissionsDTO.setPermissionType(APIConstants.PERMISSION_NOT_RESTRICTED);
+            environment.setVisibility(APIConstants.PERMISSION_NOT_RESTRICTED);
             visibilityRolesArray = new String[]{APIConstants.EVERYONE_ROLE};
         } else {
             String visibilityString = visibility.getText();
             visibilityRolesArray = visibilityString.split(",");
-            for (int i = 0; i < visibilityRolesArray.length; i++) {
-                visibilityRoles.add(visibilityRolesArray[i]);
-            }
-            permissionsDTO.setPermissionType("ALLOW");
+            Collections.addAll(visibilityRoles, visibilityRolesArray);
+            permissionsDTO.setPermissionType(APIConstants.PERMISSION_ALLOW);
             permissionsDTO.setRoles(visibilityRoles);
             environment.setVisibility(visibilityString);
         }

@@ -4583,8 +4583,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String decodedDeploymentName = ApisApiServiceImplUtils.getDecodedDeploymentName(deploymentId);
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         APIRevisionDeployment apiRevisionDeployment = ApisApiServiceImplUtils.mapApiRevisionDeployment(revisionId, vhost,
-                displayOnDevportal, decodedDeploymentName, environments.get(decodedDeploymentName).getVisibility(),
-                environments.get(decodedDeploymentName).getPermissions().getPermissionType());
+                displayOnDevportal, decodedDeploymentName);
         apiProvider.updateAPIDisplayOnDevportal(apiId, revisionId, apiRevisionDeployment);
         APIRevisionDeployment apiRevisionDeploymentsResponse = apiProvider.
                 getAPIRevisionDeployment(decodedDeploymentName, revisionId);
