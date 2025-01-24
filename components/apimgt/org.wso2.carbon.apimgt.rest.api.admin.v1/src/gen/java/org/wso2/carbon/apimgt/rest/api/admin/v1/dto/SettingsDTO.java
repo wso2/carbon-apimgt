@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsFederatedGatewayConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
 import javax.validation.constraints.*;
 
@@ -27,6 +28,7 @@ public class SettingsDTO   {
     private List<String> gatewayTypes = new ArrayList<String>();
     private Boolean isJWTEnabledForLoginTokens = false;
     private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<SettingsKeyManagerConfigurationDTO>();
+    private List<SettingsFederatedGatewayConfigurationDTO> federatedGatewayConfiguration = new ArrayList<SettingsFederatedGatewayConfigurationDTO>();
     private Boolean analyticsEnabled = null;
     private Boolean transactionCounterEnable = null;
 
@@ -100,6 +102,24 @@ public class SettingsDTO   {
   }
 
   /**
+   **/
+  public SettingsDTO federatedGatewayConfiguration(List<SettingsFederatedGatewayConfigurationDTO> federatedGatewayConfiguration) {
+    this.federatedGatewayConfiguration = federatedGatewayConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("federatedGatewayConfiguration")
+  public List<SettingsFederatedGatewayConfigurationDTO> getFederatedGatewayConfiguration() {
+    return federatedGatewayConfiguration;
+  }
+  public void setFederatedGatewayConfiguration(List<SettingsFederatedGatewayConfigurationDTO> federatedGatewayConfiguration) {
+    this.federatedGatewayConfiguration = federatedGatewayConfiguration;
+  }
+
+  /**
    * To determine whether analytics is enabled or not
    **/
   public SettingsDTO analyticsEnabled(Boolean analyticsEnabled) {
@@ -149,13 +169,14 @@ public class SettingsDTO   {
         Objects.equals(gatewayTypes, settings.gatewayTypes) &&
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(keyManagerConfiguration, settings.keyManagerConfiguration) &&
+        Objects.equals(federatedGatewayConfiguration, settings.federatedGatewayConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
         Objects.equals(transactionCounterEnable, settings.transactionCounterEnable);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, keyManagerConfiguration, analyticsEnabled, transactionCounterEnable);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, keyManagerConfiguration, federatedGatewayConfiguration, analyticsEnabled, transactionCounterEnable);
   }
 
   @Override
@@ -167,6 +188,7 @@ public class SettingsDTO   {
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    keyManagerConfiguration: ").append(toIndentedString(keyManagerConfiguration)).append("\n");
+    sb.append("    federatedGatewayConfiguration: ").append(toIndentedString(federatedGatewayConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
     sb.append("}");
