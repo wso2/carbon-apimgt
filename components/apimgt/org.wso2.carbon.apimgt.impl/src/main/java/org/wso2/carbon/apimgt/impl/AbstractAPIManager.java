@@ -1195,6 +1195,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected void populateAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException, AsyncSpecPersistenceException {
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         //UUID
         if (api.getUuid() == null) {
             api.setUuid(uuid);
@@ -1207,11 +1208,11 @@ public abstract class AbstractAPIManager implements APIManager {
         Organization org = new Organization(organization);
         api.setOrganization(organization);
         // environment
-        String environmentString = null;
+        List<Environment> environments = null;
         if (api.getEnvironments() != null) {
-            environmentString = String.join(",", api.getEnvironments());
+            environments = APIUtil.getEnvironmentsOfAPI(api);
         }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments, organization, username));
         // workflow status
         APIIdentifier apiId = api.getId();
         WorkflowDTO workflow;
@@ -1376,17 +1377,18 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void populateDevPortalAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException {
         Organization org = new Organization(organization);
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         //UUID
         if (api.getUuid() == null) {
             api.setUuid(uuid);
         }
         api.setOrganization(organization);
         // environment
-        String environmentString = null;
+        List<Environment> environments = null;
         if (api.getEnvironments() != null) {
-            environmentString = String.join(",", api.getEnvironments());
+            environments = APIUtil.getEnvironmentsOfAPI(api);
         }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments, organization, username));
         // workflow status
         APIIdentifier apiId = api.getId();
         String currentApiUuid = uuid;
@@ -1520,6 +1522,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void populateAPIProductInformation(String uuid, String organization, APIProduct apiProduct)
             throws APIManagementException, OASPersistenceException, ParseException {
         Organization org = new Organization(organization);
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         apiProduct.setOrganization(organization);
         ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
         apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
@@ -1568,11 +1571,11 @@ public abstract class AbstractAPIManager implements APIManager {
             apiProduct.setUuid(uuid);
         }
         // environment
-        String environmentString = null;
+        List<Environment> environments = null;
         if (apiProduct.getEnvironments() != null) {
-            environmentString = String.join(",", apiProduct.getEnvironments());
+            environments = APIUtil.getEnvironmentsOfAPIProduct(apiProduct);
         }
-        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments, organization, username));
 
         // workflow status
         APIProductIdentifier productIdentifier = apiProduct.getId();

@@ -4568,7 +4568,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIDeployment(String apiId, String deploymentId, APIRevisionDeploymentDTO
             apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         //validate if api exists
         APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
         //validate API update operation permitted based on the LC state
@@ -4578,6 +4578,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String vhost = apIRevisionDeploymentDTO.getVhost();
         Boolean displayOnDevportal = apIRevisionDeploymentDTO.isDisplayOnDevportal();
         String decodedDeploymentName = ApisApiServiceImplUtils.getDecodedDeploymentName(deploymentId);
+        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         APIRevisionDeployment apiRevisionDeployment = ApisApiServiceImplUtils.mapApiRevisionDeployment(revisionId, vhost,
                 displayOnDevportal, decodedDeploymentName);
         apiProvider.updateAPIDisplayOnDevportal(apiId, revisionId, apiRevisionDeployment);

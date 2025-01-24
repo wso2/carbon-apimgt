@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -62,6 +63,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -759,6 +761,24 @@ public class APIManagerConfiguration {
             gatewayType = APIConstants.API_GATEWAY_TYPE_REGULAR;
         }
         environment.setGatewayType(gatewayType);
+        GatewayVisibilityPermissionConfigurationDTO permissionsDTO = new GatewayVisibilityPermissionConfigurationDTO();
+        OMElement visibility = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_VISIBILITY));
+        List<String> visibilityRoles = new LinkedList<>();
+        String[] visibilityRolesArray;
+        if (visibility == null || StringUtils.isEmpty(visibility.getText())) {
+            permissionsDTO.setPermissionType(APIConstants.PERMISSION_NOT_RESTRICTED);
+            environment.setVisibility(APIConstants.PERMISSION_NOT_RESTRICTED);
+            visibilityRolesArray = new String[]{APIConstants.EVERYONE_ROLE};
+        } else {
+            String visibilityString = visibility.getText();
+            visibilityRolesArray = visibilityString.split(",");
+            Collections.addAll(visibilityRoles, visibilityRolesArray);
+            permissionsDTO.setPermissionType(APIConstants.PERMISSION_ALLOW);
+            permissionsDTO.setRoles(visibilityRoles);
+            environment.setVisibility(visibilityString);
+        }
+        environment.setVisibility(visibilityRolesArray);
+        environment.setPermissions(permissionsDTO);
         if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
         environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_SERVER_URL)).getText()));
