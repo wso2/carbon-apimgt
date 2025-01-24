@@ -23,13 +23,15 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
+import org.wso2.carbon.apimgt.api.model.FederatedGatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsFederatedGatewayConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -58,6 +60,7 @@ public class SettingsMappingUtil {
         if (isUserAvailable) {
             settingsDTO.setAnalyticsEnabled(APIUtil.isAnalyticsEnabled());
             settingsDTO.setKeyManagerConfiguration(getSettingsKeyManagerConfigurationDTOList());
+            settingsDTO.setFederatedGatewayConfiguration(getSettingsFederatedGatewayConfigurationDTOList());
         }
         settingsDTO.setScopes(getScopeList());
         settingsDTO.setGatewayTypes(APIUtil.getGatewayTypes());
@@ -111,35 +114,52 @@ public class SettingsMappingUtil {
         settingsKeyManagerConfigurationDTO.setDefaultConsumerKeyClaim(consumerKeyClaim);
         if (connectionConfigurationDtoList != null) {
             for (ConfigurationDto configurationDto : connectionConfigurationDtoList) {
-                KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
-                keyManagerConfigurationDTO.setName(configurationDto.getName());
-                keyManagerConfigurationDTO.setLabel(configurationDto.getLabel());
-                keyManagerConfigurationDTO.setType(configurationDto.getType());
-                keyManagerConfigurationDTO.setRequired(configurationDto.isRequired());
-                keyManagerConfigurationDTO.setMask(configurationDto.isMask());
-                keyManagerConfigurationDTO.setMultiple(configurationDto.isMultiple());
-                keyManagerConfigurationDTO.setTooltip(configurationDto.getTooltip());
-                keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
-                keyManagerConfigurationDTO.setValues(configurationDto.getValues());
+                ConfigurationDTO keyManagerConfigurationDTO = fromConfigurationToConfigurationDTO(configurationDto);
                 settingsKeyManagerConfigurationDTO.getConfigurations().add(keyManagerConfigurationDTO);
             }
         }
         if (endpointConfigurations != null) {
             for (ConfigurationDto configurationDto : endpointConfigurations) {
-                KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
-                keyManagerConfigurationDTO.setName(configurationDto.getName());
-                keyManagerConfigurationDTO.setLabel(configurationDto.getLabel());
-                keyManagerConfigurationDTO.setType(configurationDto.getType());
-                keyManagerConfigurationDTO.setRequired(configurationDto.isRequired());
-                keyManagerConfigurationDTO.setMask(configurationDto.isMask());
-                keyManagerConfigurationDTO.setMultiple(configurationDto.isMultiple());
-                keyManagerConfigurationDTO.setTooltip(configurationDto.getTooltip());
-                keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
-                keyManagerConfigurationDTO.setValues(configurationDto.getValues());
+                ConfigurationDTO keyManagerConfigurationDTO = fromConfigurationToConfigurationDTO(configurationDto);
                 settingsKeyManagerConfigurationDTO.getEndpointConfigurations().add(keyManagerConfigurationDTO);
             }
         }
         return settingsKeyManagerConfigurationDTO;
+    }
+
+    private static List<SettingsFederatedGatewayConfigurationDTO> getSettingsFederatedGatewayConfigurationDTOList() {
+        List<SettingsFederatedGatewayConfigurationDTO> list = new ArrayList<>();
+        Map<String, FederatedGatewayAgentConfiguration> federatedGatewayConnectorConfigurationMap =
+                APIUtil.getFederatedGatewayConfigurations();
+        federatedGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
+            SettingsFederatedGatewayConfigurationDTO settingsFederatedGatewayConfigurationDTO =
+                    new SettingsFederatedGatewayConfigurationDTO();
+            settingsFederatedGatewayConfigurationDTO.setType(gatewayConfiguration.getType());
+            settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getDisplayName());
+            List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
+            if (connectionConfigurations != null) {
+                for (ConfigurationDto dto : connectionConfigurations) {
+                    settingsFederatedGatewayConfigurationDTO.getConfigurations().add(fromConfigurationToConfigurationDTO(dto));
+                }
+            }
+            list.add(settingsFederatedGatewayConfigurationDTO);
+
+        });
+        return list;
+    }
+
+    private static ConfigurationDTO fromConfigurationToConfigurationDTO(ConfigurationDto configuration) {
+        ConfigurationDTO dto = new ConfigurationDTO();
+        dto.setName(configuration.getName());
+        dto.setLabel(configuration.getLabel());
+        dto.setType(configuration.getType());
+        dto.setRequired(configuration.isRequired());
+        dto.setMask(configuration.isMask());
+        dto.setMultiple(configuration.isMultiple());
+        dto.setTooltip(configuration.getTooltip());
+        dto.setDefault(configuration.getDefaultValue());
+        dto.setValues(configuration.getValues());
+        return dto;
     }
 
     public List<String> GetRoleScopeList(String[] userRoles, Map<String, String> scopeRoleMapping) {

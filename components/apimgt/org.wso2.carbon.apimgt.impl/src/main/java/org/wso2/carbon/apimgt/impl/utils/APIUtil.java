@@ -117,12 +117,6 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.ServiceEntry;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.VHost;
-import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -361,7 +355,7 @@ public final class APIUtil {
     private static Schema operationPolicySpecSchema;
     private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
     private static String hashingAlgorithm = SHA_256;
-    
+
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 
@@ -10221,7 +10215,7 @@ public final class APIUtil {
 
     /**
      * Get org access control enabled status
-     * 
+     *
      * @return true or false
      */
     public static boolean isOrganizationAccessControlEnabled() {
@@ -11034,7 +11028,7 @@ public final class APIUtil {
         }
         return applications.subList(offset, endIndex);
     }
-    
+
     public static String getAPIMVersion() {
         return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
     }
@@ -11194,6 +11188,11 @@ public final class APIUtil {
                 APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
     }
 
+    public static Map<String, FederatedGatewayAgentConfiguration> getFederatedGatewayConfigurations() {
+
+        return ServiceReferenceHolder.getInstance().getFederatedGatewayConnectorConfigurations();
+    }
+
     /**
      * Get available tiers for organizations as a string.
      *
@@ -11241,7 +11240,7 @@ public final class APIUtil {
             return new LinkedHashSet<>();
         }
     }
-    
+
     public static synchronized String getOrganizationIdFromExternalReference(String referenceId,
             String organizationName, String rootOrganization) throws APIManagementException {
         String organizationId = null;
@@ -11262,7 +11261,7 @@ public final class APIUtil {
         }
         return organizationId;
     }
-    
+
     public static String getOrganizationHandle(String name) {
         String sanatizedName = null;
         if (name == null) {

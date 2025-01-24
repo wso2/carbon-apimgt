@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsFederatedGatewayConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
 import javax.validation.constraints.*;
 
@@ -28,6 +29,7 @@ public class SettingsDTO   {
     private Boolean isJWTEnabledForLoginTokens = false;
     private Boolean orgAccessControlEnabled = null;
     private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<SettingsKeyManagerConfigurationDTO>();
+    private List<SettingsFederatedGatewayConfigurationDTO> federatedGatewayConfiguration = new ArrayList<SettingsFederatedGatewayConfigurationDTO>();
     private Boolean analyticsEnabled = null;
     private Boolean transactionCounterEnable = null;
 
@@ -83,14 +85,14 @@ public class SettingsDTO   {
   }
 
   /**
-   * Is Organization-based access control configuration enabled 
+   * Is Organization-based access control configuration enabled
    **/
   public SettingsDTO orgAccessControlEnabled(Boolean orgAccessControlEnabled) {
     this.orgAccessControlEnabled = orgAccessControlEnabled;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "true", value = "Is Organization-based access control configuration enabled ")
   @JsonProperty("orgAccessControlEnabled")
   public Boolean isOrgAccessControlEnabled() {
@@ -116,6 +118,24 @@ public class SettingsDTO   {
   }
   public void setKeyManagerConfiguration(List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration) {
     this.keyManagerConfiguration = keyManagerConfiguration;
+  }
+
+  /**
+   **/
+  public SettingsDTO federatedGatewayConfiguration(List<SettingsFederatedGatewayConfigurationDTO> federatedGatewayConfiguration) {
+    this.federatedGatewayConfiguration = federatedGatewayConfiguration;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("federatedGatewayConfiguration")
+  public List<SettingsFederatedGatewayConfigurationDTO> getFederatedGatewayConfiguration() {
+    return federatedGatewayConfiguration;
+  }
+  public void setFederatedGatewayConfiguration(List<SettingsFederatedGatewayConfigurationDTO> federatedGatewayConfiguration) {
+    this.federatedGatewayConfiguration = federatedGatewayConfiguration;
   }
 
   /**
@@ -169,6 +189,7 @@ public class SettingsDTO   {
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(orgAccessControlEnabled, settings.orgAccessControlEnabled) &&
         Objects.equals(keyManagerConfiguration, settings.keyManagerConfiguration) &&
+        Objects.equals(federatedGatewayConfiguration, settings.federatedGatewayConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
         Objects.equals(transactionCounterEnable, settings.transactionCounterEnable);
   }
@@ -188,6 +209,7 @@ public class SettingsDTO   {
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    orgAccessControlEnabled: ").append(toIndentedString(orgAccessControlEnabled)).append("\n");
     sb.append("    keyManagerConfiguration: ").append(toIndentedString(keyManagerConfiguration)).append("\n");
+    sb.append("    federatedGatewayConfiguration: ").append(toIndentedString(federatedGatewayConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
     sb.append("}");
