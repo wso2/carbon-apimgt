@@ -27,11 +27,11 @@ public enum Severity {
     INFO;
 
     public static Severity fromString(String severityString) {
-        if ("error".equals(severityString)) {
+        if ("error".equalsIgnoreCase(severityString)) {
             return Severity.ERROR;
-        } else if ("warn".equals(severityString)) {
+        } else if ("warn".equalsIgnoreCase(severityString)) {
             return Severity.WARN;
-        } else if ("info".equals(severityString)) {
+        } else if ("info".equalsIgnoreCase(severityString)) {
             return Severity.INFO;
         }
         return null;
