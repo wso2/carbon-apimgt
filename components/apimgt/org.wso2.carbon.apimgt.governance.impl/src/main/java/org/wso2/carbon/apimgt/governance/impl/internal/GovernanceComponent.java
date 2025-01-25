@@ -62,7 +62,7 @@ public class GovernanceComponent {
 
         BundleContext bundleContext = componentContext.getBundleContext();
 
-        String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-governance.xml";
+        String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
         configuration.load(filePath);
 
         GovernanceConfigurationServiceImpl configurationService =

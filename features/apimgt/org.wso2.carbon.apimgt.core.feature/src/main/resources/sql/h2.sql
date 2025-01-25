@@ -2490,6 +2490,140 @@ CREATE TABLE IF NOT EXISTS AM_API_AI_CONFIGURATION (
     FOREIGN KEY (LLM_PROVIDER_UUID) REFERENCES AM_LLM_PROVIDER(UUID)
 );
 
+CREATE TABLE IF NOT EXISTS GOV_RULESET (
+                                           RULESET_ID VARCHAR(45) NOT NULL,
+                                           NAME VARCHAR(200) NOT NULL,
+                                           DESCRIPTION VARCHAR(1024),
+                                           RULESET_CONTENT LONGBLOB NOT NULL,
+                                           ARTIFACT_TYPE VARCHAR(100) NOT NULL,
+                                           RULE_CATEGORY VARCHAR(100) NOT NULL,
+                                           RULE_TYPE VARCHAR(100) NOT NULL,
+                                           DOCUMENTATION_LINK VARCHAR(1024),
+                                           PROVIDER VARCHAR(200),
+                                           ORGANIZATION VARCHAR(100) NOT NULL,
+                                           CREATED_BY VARCHAR(255),
+                                           CREATED_TIME DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                           UPDATED_BY VARCHAR(255),
+                                           LAST_UPDATED_TIME DATETIME,
+                                           UNIQUE (NAME, ORGANIZATION),
+                                           PRIMARY KEY (RULESET_ID)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_RULESET_RULE (
+                                                RULESET_RULE_ID VARCHAR(45) NOT NULL,
+                                                RULESET_ID VARCHAR(45) NOT NULL,
+                                                RULE_CODE VARCHAR(200) NOT NULL,
+                                                RULE_MESSAGE VARCHAR(1024),
+                                                RULE_DESCRIPTION VARCHAR(2048),
+                                                SEVERITY VARCHAR(45) NOT NULL,
+                                                RULE_CONTENT BLOB NOT NULL,
+                                                FOREIGN KEY (RULESET_ID) REFERENCES GOV_RULESET(RULESET_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                UNIQUE (RULESET_ID, RULE_CODE),
+                                                PRIMARY KEY (RULESET_RULE_ID)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_POLICY (
+                                          POLICY_ID VARCHAR(45) NOT NULL,
+                                          NAME VARCHAR(200) NOT NULL,
+                                          DESCRIPTION VARCHAR(1024),
+                                          ORGANIZATION VARCHAR(100) NOT NULL,
+                                          CREATED_BY VARCHAR(255),
+                                          CREATED_TIME DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                          UPDATED_BY VARCHAR(255),
+                                          LAST_UPDATED_TIME DATETIME,
+                                          CONSTRAINT POLICY_UNIQUE_CONSTRAINT UNIQUE (NAME, ORGANIZATION),
+                                          PRIMARY KEY (POLICY_ID)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_POLICY_LABEL (
+                                                POLICY_LABEL_ID VARCHAR(45) NOT NULL,
+                                                POLICY_ID VARCHAR(45) NOT NULL,
+                                                LABEL VARCHAR(100) NOT NULL,
+                                                FOREIGN KEY (POLICY_ID) REFERENCES GOV_POLICY(POLICY_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                CONSTRAINT POLICY_LABEL_UNIQUE_CONSTRAINT UNIQUE (POLICY_ID, LABEL),
+                                                PRIMARY KEY (POLICY_LABEL_ID)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_POLICY_GOVERNABLE_STATE (
+                                                           POLICY_STATE_ID VARCHAR(45) NOT NULL,
+                                                           POLICY_ID VARCHAR(45) NOT NULL,
+                                                           STATE VARCHAR(100) NOT NULL,
+                                                           FOREIGN KEY (POLICY_ID) REFERENCES GOV_POLICY(POLICY_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                           CONSTRAINT POLICY_STATE_UNIQUE_CONSTRAINT UNIQUE (POLICY_ID, STATE),
+                                                           PRIMARY KEY (POLICY_STATE_ID)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_POLICY_ACTION (
+                                                 POLICY_ACTION_ID VARCHAR(45) NOT NULL,
+                                                 POLICY_ID VARCHAR(45) NOT NULL,
+                                                 STATE VARCHAR(100) NOT NULL,
+                                                 SEVERITY VARCHAR(45) NOT NULL,
+                                                 TYPE VARCHAR(100) NOT NULL,
+                                                 FOREIGN KEY (POLICY_ID) REFERENCES GOV_POLICY(POLICY_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                 FOREIGN KEY (POLICY_ID, STATE) REFERENCES GOV_POLICY_GOVERNABLE_STATE(POLICY_ID, STATE) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                 UNIQUE (POLICY_ID, STATE, SEVERITY, TYPE),
+                                                 PRIMARY KEY (POLICY_ACTION_ID)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_POLICY_RULESET_MAPPING (
+                                                          POLICY_RULESET_MAPPING_ID VARCHAR(45) NOT NULL,
+                                                          POLICY_ID VARCHAR(45) NOT NULL,
+                                                          RULESET_ID VARCHAR(45) NOT NULL,
+                                                          FOREIGN KEY (POLICY_ID) REFERENCES GOV_POLICY(POLICY_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                          FOREIGN KEY (RULESET_ID) REFERENCES GOV_RULESET(RULESET_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                          UNIQUE (POLICY_ID, RULESET_ID),
+                                                          PRIMARY KEY (POLICY_RULESET_MAPPING_ID)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_ARTIFACT_INFO (
+                                                 ARTIFACT_ID VARCHAR(45) NOT NULL,
+                                                 ARTIFACT_TYPE VARCHAR(45) NOT NULL,
+                                                 ORGANIZATION VARCHAR(100) NOT NULL,
+                                                 PRIMARY KEY (ARTIFACT_ID),
+                                                 UNIQUE (ARTIFACT_ID, ORGANIZATION)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_EVALUATION_REQUEST (
+                                                      REQUEST_ID VARCHAR(45) NOT NULL,
+                                                      ARTIFACT_ID VARCHAR(45) NOT NULL,
+                                                      ARTIFACT_TYPE VARCHAR(45) NOT NULL,
+                                                      POLICY_ID VARCHAR(45) NOT NULL,
+                                                      EVALUATION_STATUS VARCHAR(45) NOT NULL DEFAULT 'PENDING',
+                                                      REQUESTED_TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                                      UNIQUE (ARTIFACT_ID, POLICY_ID, EVALUATION_STATUS),
+                                                      FOREIGN KEY (ARTIFACT_ID) REFERENCES GOV_ARTIFACT_INFO(ARTIFACT_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                      FOREIGN KEY (POLICY_ID) REFERENCES GOV_POLICY(POLICY_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                      PRIMARY KEY (REQUEST_ID)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_EVALUATION_RESULT (
+                                                     RESULT_ID VARCHAR(45) NOT NULL,
+                                                     ARTIFACT_ID VARCHAR(45) NOT NULL,
+                                                     POLICY_ID VARCHAR(45) NOT NULL,
+                                                     RULESET_ID VARCHAR(45) NOT NULL,
+                                                     EVALUATION_RESULT INT NOT NULL DEFAULT 0, -- 1 - Success, 0 - Failed
+                                                     EVALUATED_TIMESTAMP DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                                     UNIQUE (ARTIFACT_ID, POLICY_ID, RULESET_ID),
+                                                     FOREIGN KEY (ARTIFACT_ID) REFERENCES GOV_ARTIFACT_INFO(ARTIFACT_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                     FOREIGN KEY (POLICY_ID) REFERENCES GOV_POLICY(POLICY_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                     FOREIGN KEY (RULESET_ID) REFERENCES GOV_RULESET(RULESET_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                     PRIMARY KEY (RESULT_ID)
+);
+
+CREATE TABLE IF NOT EXISTS GOV_RULE_VIOLATION (
+                                                  VIOLATION_ID VARCHAR(45) NOT NULL,
+                                                  ARTIFACT_ID VARCHAR(45) NOT NULL,
+                                                  POLICY_ID VARCHAR(45) NOT NULL,
+                                                  RULESET_ID VARCHAR(45) NOT NULL,
+                                                  RULE_CODE VARCHAR(200) NOT NULL,
+                                                  VIOLATED_PATH VARCHAR(1024) NOT NULL,
+                                                  UNIQUE (ARTIFACT_ID, POLICY_ID, RULESET_ID, RULE_CODE, VIOLATED_PATH),
+                                                  FOREIGN KEY (ARTIFACT_ID) REFERENCES GOV_ARTIFACT_INFO(ARTIFACT_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                  FOREIGN KEY (POLICY_ID) REFERENCES GOV_POLICY(POLICY_ID) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                  FOREIGN KEY (RULESET_ID,RULE_CODE) REFERENCES GOV_RULESET_RULE(RULESET_ID,RULE_CODE) ON UPDATE CASCADE ON DELETE CASCADE,
+                                                  PRIMARY KEY (VIOLATION_ID)
+);
+
 CREATE TABLE AM_TRANSACTION_RECORDS (
     ID VARCHAR(255) NOT NULL,
     HOST VARCHAR(255),
