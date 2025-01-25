@@ -39,6 +39,8 @@ import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -302,9 +304,10 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
             UserStoreManager manager = realm.getUserStoreManager();
             organization =
                     manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgNameClaim, null);
-            organizationId =
-                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgIdClaim, null);
-
+            if (realm.getClaimManager().getClaim(orgIdClaim) != null) {
+                organizationId =
+                        manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgIdClaim, null);
+            }
             orgInfo.setName(organization);
             orgInfo.setOrganizationId(organizationId);
             
