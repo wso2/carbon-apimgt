@@ -144,12 +144,15 @@ public class BasicAuthCredentialValidator {
         try {
             org.wso2.carbon.apimgt.impl.dto.xsd.BasicAuthValidationInfoDTO generatedInfoDTO = apiKeyMgtRemoteUserStoreMgtServiceStub
                     .getUserAuthenticationInfo(username, password);
+            log.info("apiKeyMgtRemoteUserStoreMgtServiceStub " + apiKeyMgtRemoteUserStoreMgtServiceStub);
+            log.info("generatedInfoDTO " + generatedInfoDTO);
             basicAuthValidationInfoDTO = convertToDTO(generatedInfoDTO);
             isAuthenticated = basicAuthValidationInfoDTO.isAuthenticated();
         } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
             log.error(
                     "Basic Authentication: Error while accessing backend services to validate user authentication for user : "
                             + username);
+            log.error(e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
 

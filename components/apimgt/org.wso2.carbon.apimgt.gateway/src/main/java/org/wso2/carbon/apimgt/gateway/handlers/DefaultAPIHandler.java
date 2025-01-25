@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +26,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.constants.HealthCheckConstants;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
@@ -49,6 +51,23 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
         if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
             return true;
         }
+        log.info("-----------------------------");
+        String u;
+        Object obj = messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        if (obj != null) {
+            u = (String) obj;
+            log.info("++++++ obj + " + u);
+        }
+        org.apache.axis2.context.MessageContext msgCtx = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        String u2 = (String) msgCtx.getProperty(Constants.Configuration.TRANSPORT_IN_URL);
+        log.info("+++++++ u2 bef " +  u2);
+        if (u2 == null) {
+            u2 = (String) messageContext.getProperty(NhttpConstants.SERVICE_PREFIX) + ": SERVICE_PREFIX";
+            log.info("+++++++ u2 in " +  u2);
+        }
+        
+        log.info("-----------------------------");
         String path = ApiUtils.getFullRequestPath(messageContext);
         String tenantDomain = GatewayUtils.getTenantDomain();
 

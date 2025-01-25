@@ -91,7 +91,7 @@ public class APIKeyMgtRemoteUserStoreMgtService extends AbstractAdmin {
 
     public BasicAuthValidationInfoDTO getUserAuthenticationInfo(String username, String password)
             throws APIManagementException {
-
+        log.info("Checking user authentication info for " + username);
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -103,6 +103,7 @@ public class APIKeyMgtRemoteUserStoreMgtService extends AbstractAdmin {
         String domainQualifiedUsername;
         try {
             userStoreManager = CarbonContext.getThreadLocalCarbonContext().getUserRealm().getUserStoreManager();
+            log.info("userStoreManager :" + userStoreManager);
             isAuthenticated = userStoreManager
                     .authenticate(MultitenantUtils.getTenantAwareUsername(username), password);
             if (isAuthenticated) {
