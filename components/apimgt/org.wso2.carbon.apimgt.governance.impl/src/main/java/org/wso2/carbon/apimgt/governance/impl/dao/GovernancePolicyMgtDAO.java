@@ -57,12 +57,11 @@ public interface GovernancePolicyMgtDAO {
     /**
      * Get Governance Policy by ID
      *
-     * @param organization Organization
-     * @param policyID     Policy ID
+     * @param policyID Policy ID
      * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
-    GovernancePolicy getGovernancePolicyByID(String organization, String policyID) throws GovernanceException;
+    GovernancePolicy getGovernancePolicyByID(String policyID) throws GovernanceException;
 
     /**
      * Get all the Governance Policies

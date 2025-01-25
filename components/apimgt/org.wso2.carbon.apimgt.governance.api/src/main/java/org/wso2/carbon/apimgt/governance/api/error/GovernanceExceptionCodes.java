@@ -52,7 +52,7 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_RULESET(301006, "Deleting ruleset failed", 500, "Error while deleting ruleset with ID: %s in" +
             " the organization: %s", true),
     ERROR_WHILE_DELETING_RULES(301007, "Deleting rules failed", 500, "Error while deleting rules for the ruleset with ID: %s", true),
-    RULESET_NOT_FOUND(301007, "Ruleset not found", 404, "Ruleset with ID: %s not found in the organization: %s"),
+    RULESET_NOT_FOUND(301007, "Ruleset not found", 404, "Ruleset with ID: %s not found"),
     RULESET_CONTENT_CONVERSION_ERROR(301008, "Ruleset content conversion failed", 500, "Error while converting input " +
             "stream to a string for the ruleset with id: %s in the organization: %s", true),
     ERROR_WHILE_RETRIEVING_RULESET_CONTENT(301009, "Retrieving ruleset content failed", 500, "Error while retrieving " +
@@ -89,10 +89,10 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     // Policy related codes
     ERROR_WHILE_CREATING_POLICY(401001, "Policy creation failed.", 500, "Error while creating governance policy in the organization %s", true),
-    POLICY_NOT_FOUND(401002, "Policy not found", 404, "Policy with ID: %s not found in the organization: %s"),
+    POLICY_NOT_FOUND(401002, "Policy not found", 404, "Policy with ID: %s not found"),
     ERROR_WHILE_RETRIEVING_POLICIES(401003, "Retrieving policies failed", 500, "Error while retrieving policies for the organization: %s", true),
     ERROR_WHILE_RETRIEVING_POLICY_BY_ID(401004, "Retrieving policy by id failed", 500, "Error while retrieving policy" +
-            " with id: %s for the organization: %s", true),
+            " with id: %s ", true),
     ERROR_WHILE_UPDATING_POLICY(401005, "Updating policy failed", 500, ("Error while updating policy with id: %s in " +
             "the organization: %s"), true),
     ERROR_WHILE_DELETING_POLICY(401006, "Deleting policy failed", 500, "Error while deleting policy with ID: %s in " +
@@ -156,6 +156,9 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     ERROR_WHILE_GETTING_GOVERNANCE_RESULTS(601006, "Error while getting governance results.", 500, "Error while getting " +
             "governance results", true),
+
+    ERROR_WHILE_DELETING_GOVERNANCE_RESULTS(601007, "Error while deleting governance results.", 500, "Error while " +
+            "deleting governance results", true),
 
 
     // APIM related codes

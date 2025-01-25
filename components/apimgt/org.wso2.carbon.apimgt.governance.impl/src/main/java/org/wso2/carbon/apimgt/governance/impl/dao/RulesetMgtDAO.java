@@ -63,12 +63,11 @@ public interface RulesetMgtDAO {
     /**
      * Get a Governance Ruleset by ID
      *
-     * @param organization Organization
-     * @param rulesetId    Ruleset ID
+     * @param rulesetId Ruleset ID
      * @return RulesetInfo object
      * @throws GovernanceException If an error occurs while getting the ruleset
      */
-    RulesetInfo getRulesetById(String organization, String rulesetId) throws GovernanceException;
+    RulesetInfo getRulesetById(String rulesetId) throws GovernanceException;
 
     /**
      * Get the content of a Governance Ruleset

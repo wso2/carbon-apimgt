@@ -34,6 +34,6 @@ public enum ArtifactComplianceState {
         } else if ("not_applicable".equalsIgnoreCase(text)) {
             return NOT_APPLICABLE;
         }
-        return NOT_APPLICABLE;
+        return null;
     }
 }

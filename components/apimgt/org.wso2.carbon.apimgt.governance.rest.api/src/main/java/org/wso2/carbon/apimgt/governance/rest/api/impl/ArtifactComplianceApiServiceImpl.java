@@ -384,7 +384,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
 
             // Get total number of APIs that are compliant and non-compliant
             Map<ArtifactComplianceState, List<String>> compliancyMap =
-                    complianceManager.getCompliantAndNonCompliantArtifacts(
+                    complianceManager.getComplianceStateOfEvaluatedArtifacts(
                             ArtifactType.API, organization);
 
             int compliantAPIsCount = compliancyMap.get(ArtifactComplianceState.COMPLIANT).size();

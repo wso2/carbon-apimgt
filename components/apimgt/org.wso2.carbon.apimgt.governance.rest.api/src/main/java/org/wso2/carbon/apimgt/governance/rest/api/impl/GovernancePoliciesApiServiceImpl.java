@@ -103,7 +103,7 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
         PolicyManager policyManager = new PolicyManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        GovernancePolicy policy = policyManager.getGovernancePolicyByID(organization, policyId);
+        GovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId);
         GovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
         return Response.status(Response.Status.OK).entity(policyDTO).build();
     }

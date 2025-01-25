@@ -79,14 +79,13 @@ public class RulesetManagerImpl implements RulesetManager {
     /**
      * Get a Governance Ruleset by ID
      *
-     * @param organization Organization
-     * @param rulesetId    Ruleset ID
+     * @param rulesetId Ruleset ID
      * @return RulesetInfo object
      * @throws GovernanceException If an error occurs while getting the ruleset
      */
     @Override
-    public RulesetInfo getRulesetById(String organization, String rulesetId) throws GovernanceException {
-        return rulesetMgtDAO.getRulesetById(organization, rulesetId);
+    public RulesetInfo getRulesetById(String rulesetId) throws GovernanceException {
+        return rulesetMgtDAO.getRulesetById(rulesetId);
     }
 
     /**
@@ -101,7 +100,7 @@ public class RulesetManagerImpl implements RulesetManager {
     public String getRulesetContent(String organization, String rulesetId) throws GovernanceException {
         String content = rulesetMgtDAO.getRulesetContent(organization, rulesetId);
         if (content == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId, organization);
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
         }
         return content;
 
@@ -117,7 +116,7 @@ public class RulesetManagerImpl implements RulesetManager {
      */
     @Override
     public void deleteRuleset(String organization, String rulesetId) throws GovernanceException {
-        RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(organization, rulesetId);
+        RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId);
         if (isRulesetAssociatedWithPolicies(rulesetId)) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
                     ruleset.getId(), organization);
