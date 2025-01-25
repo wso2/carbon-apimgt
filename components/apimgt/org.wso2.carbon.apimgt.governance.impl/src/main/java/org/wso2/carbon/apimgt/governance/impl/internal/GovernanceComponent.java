@@ -94,7 +94,7 @@ public class GovernanceComponent {
     @Reference(
             name = "org.wso2.carbon.apimgt.governance.engine.SpectralValidationEngine",
             service = ValidationEngine.class,
-            cardinality = ReferenceCardinality.OPTIONAL,
+            cardinality = ReferenceCardinality.MANDATORY,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetValidationEngineService"
     )
