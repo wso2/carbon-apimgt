@@ -104,10 +104,17 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new GovernanceException(
-                    GovernanceExceptionCodes.ERROR_WHILE_PROCESSING_GOVERNANCE_EVALUATION_REQUEST,
-                    e, artifactId, organization
-            );
+            if (e instanceof SQLIntegrityConstraintViolationException) {
+                // Ignore if the artifact compliance evaluation request already exists
+                if (log.isDebugEnabled()) {
+                    log.debug("Artifact compliance evaluation request already exists for artifact: " + artifactId);
+                }
+            } else {
+                throw new GovernanceException(
+                        GovernanceExceptionCodes.ERROR_WHILE_PROCESSING_GOVERNANCE_EVALUATION_REQUEST,
+                        e, artifactId, organization
+                );
+            }
         }
     }
 

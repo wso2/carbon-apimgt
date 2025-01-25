@@ -71,9 +71,16 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     public void evaluateComplianceAsync(String artifactId, ArtifactType artifactType,
                                         GovernableState state, String organization) throws
             GovernanceException {
-        List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
-                artifactType, state, organization);
-        new ComplianceManagerImpl().handleComplianceEvaluationAsync
-                (artifactId, artifactType, applicablePolicyIds, organization);
+
+        List<GovernableState> dependentGovernableStates = GovernableState.getDependentGovernableStates(state);
+
+        for (GovernableState dependentState : dependentGovernableStates) {
+            List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
+                    artifactType, dependentState, organization);
+            new ComplianceManagerImpl().handleComplianceEvaluationAsync
+                    (artifactId, artifactType, applicablePolicyIds, organization);
+        }
+
+
     }
 }
