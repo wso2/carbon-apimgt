@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDT
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -1838,5 +1839,47 @@ public class APIAdminImpl implements APIAdmin {
         }
         setKeyManagerUsageRelatedInformation(keyManagerConfigurations, organization);
         return keyManagerConfigurations;
+    }
+
+    @Override
+    public List<OrganizationDetailsDTO> getOrganizations(String parentOrgId, String tenantDomain) throws APIManagementException {
+        List<OrganizationDetailsDTO> organizationsList = apiMgtDAO.getChildOrganizations(parentOrgId, tenantDomain);
+        return organizationsList;
+    }
+
+    @Override
+    public OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO orgDto) throws APIManagementException {
+        
+        //If there is an organization entry already available for external reference, update it
+        OrganizationDetailsDTO savedOrgInfo = apiMgtDAO.getOrganizationDetalsByExternalOrgId(
+                orgDto.getExternalOrganizationReference(), orgDto.getTenantDomain());
+        if (savedOrgInfo != null) {
+            orgDto.setOrganizationId(savedOrgInfo.getOrganizationId());
+            apiMgtDAO.updateOrganizationDetails(orgDto);
+        } else {
+            savedOrgInfo = apiMgtDAO.addOrganization(orgDto);
+            orgDto.setOrganizationId(savedOrgInfo.getOrganizationId());
+        }
+
+        return orgDto;
+    }
+
+    @Override
+    public OrganizationDetailsDTO getOrganizationDetails(String organizationId, String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.getOrganizationDetails(organizationId, tenantDomain);
+    }
+
+    @Override
+    public OrganizationDetailsDTO updateOrganization(OrganizationDetailsDTO organizationInfoDTO)
+            throws APIManagementException {
+        apiMgtDAO.updateOrganizationDetails(organizationInfoDTO);
+        return apiMgtDAO.getOrganizationDetails(organizationInfoDTO.getOrganizationId(),
+                organizationInfoDTO.getTenantDomain());
+    }
+
+    @Override
+    public void deleteOrganization(String organizationId, String tenantDomain) throws APIManagementException {
+        apiMgtDAO.deleteOrganizationDetails(organizationId, tenantDomain);
     }
 }
