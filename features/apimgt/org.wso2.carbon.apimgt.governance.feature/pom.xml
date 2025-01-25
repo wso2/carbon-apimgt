@@ -42,6 +42,11 @@
             <artifactId>org.wso2.carbon.apimgt.governance.rest.api</artifactId>
             <type>war</type>
         </dependency>
+        <!--need to move this to Product added this for QA -->
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>rule.validator</artifactId>
+        </dependency>
     </dependencies>
     <reporting>
         <plugins>
@@ -109,6 +114,26 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-default-rules-resources</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources/default-rulesets</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.governance.impl/src/main/resources/default-rulesets
+                                    </directory>
+                                    <excludes>
+                                        <exclude>**/*.mustache</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -137,6 +162,7 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.governance.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.governance.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.governance.engine</bundleDef>
+                                <bundleDef>org.wso2.carbon:rule.validator</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
@@ -144,11 +170,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
 </project>

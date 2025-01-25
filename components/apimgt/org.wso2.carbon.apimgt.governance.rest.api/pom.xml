@@ -30,6 +30,8 @@
     <artifactId>org.wso2.carbon.apimgt.governance.rest.api</artifactId>
     <packaging>war</packaging>
     <name>WSO2 API Manager Governance REST API - v0</name>
+    <description>WSO2 API Manager REST API for API Governance</description>
+
 
     <dependencies>
         <dependency>
@@ -140,6 +142,17 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit47</artifactId>
+                        <version>${maven.surefire.plugin.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
