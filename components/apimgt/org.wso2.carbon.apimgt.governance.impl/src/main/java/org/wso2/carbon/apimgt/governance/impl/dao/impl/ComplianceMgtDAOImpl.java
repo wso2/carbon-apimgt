@@ -40,7 +40,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the DAO class related to assessing compliance of APIs
@@ -262,7 +264,6 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 prepStmnt.execute();
             }
 
-            clearOldRuleViolations(artifactId, policyId, connection);
             if (!ruleViolations.isEmpty()) {
                 addRuleViolations(ruleViolations, connection);
             }
@@ -294,27 +295,6 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_GOVERNANCE_RESULT,
                     e, artifactId);
-        }
-    }
-
-    /**
-     * Clear rule violations for the artifact, policy combination
-     *
-     * @param artifactId Artifact ID
-     * @param policyId   Policy ID
-     * @param connection Connection
-     * @throws GovernanceException If an error occurs while clearing the rule violations
-     */
-    private void clearOldRuleViolations(String artifactId, String policyId, Connection connection)
-            throws GovernanceException {
-        String SQLQuery = SQLConstants.DELETE_RULE_VIOLATION;
-        try (PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
-            prepStmnt.setString(1, artifactId);
-            prepStmnt.setString(2, policyId);
-            prepStmnt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_CLEARING_RULE_VIOLATIONS,
-                    e);
         }
     }
 
@@ -605,5 +585,98 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS,
                     e);
         }
+    }
+
+    /**
+     * Get list of all compliance evaluated policies
+     *
+     * @param organization Organization
+     * @return List of all compliance evaluated policies
+     * @throws GovernanceException If an error occurs while getting the list of all compliance evaluated policies
+     */
+    @Override
+    public List<String> getAllComplianceEvaluatedPolicies(String organization) throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_ALL_COMP_EVALUATED_POLICIES;
+        List<String> policyIds = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    policyIds.add(resultSet.getString("POLICY_ID"));
+                }
+            }
+            return policyIds;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS,
+                    e);
+        }
+    }
+
+    /**
+     * Get list of violated policies
+     *
+     * @param organization Organization
+     * @return List of violated policies
+     * @throws GovernanceException If an error occurs while getting the list of violated policies
+     */
+    @Override
+    public List<String> getViolatedPolicies(String organization) throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_VIOLATED_POLICIES;
+        List<String> policyIds = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    policyIds.add(resultSet.getString("POLICY_ID"));
+                }
+            }
+            return policyIds;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS,
+                    e);
+        }
+    }
+
+    /**
+     * Get compliance evaluation results for a given policy as a map of artifact type to list of compliance evaluation results
+     *
+     * @param policyId Policy ID
+     * @return Map of compliance evaluation results
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     */
+    @Override
+    public Map<ArtifactType, List<ComplianceEvaluationResult>> getEvaluationResultsForPolicy(String policyId)
+            throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_GOV_COMPLIANCE_EVALUATION_RESULTS_FOR_POLICY;
+        Map<ArtifactType, List<ComplianceEvaluationResult>> complianceEvaluationResultsMap = new HashMap<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, policyId);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    ComplianceEvaluationResult result = new ComplianceEvaluationResult();
+                    ArtifactType artifactType = ArtifactType.fromString(resultSet.getString("ARTIFACT_TYPE"));
+                    result.setPolicyId(policyId);
+                    result.setArtifactId("ARTIFACT_ID");
+                    result.setRulesetId(resultSet.getString("RULESET_ID"));
+                    result.setEvaluationSuccess(resultSet.getInt("EVALUATION_RESULT") == 1);
+
+                    if (complianceEvaluationResultsMap.containsKey(artifactType)) {
+                        complianceEvaluationResultsMap.get(artifactType).add(result);
+                    } else {
+                        List<ComplianceEvaluationResult> complianceEvaluationResults = new ArrayList<>();
+                        complianceEvaluationResults.add(result);
+                        complianceEvaluationResultsMap.put(artifactType, complianceEvaluationResults);
+                    }
+                }
+            }
+            return complianceEvaluationResultsMap;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS,
+                    e);
+        }
+
     }
 }

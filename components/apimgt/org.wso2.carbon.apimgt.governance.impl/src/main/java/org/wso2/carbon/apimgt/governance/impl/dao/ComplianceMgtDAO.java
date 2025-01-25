@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationStatus;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface represents the DAO class related assessing compliance
@@ -175,4 +176,33 @@ public interface ComplianceMgtDAO {
      */
     List<String> getNonCompliantArtifacts(ArtifactType artifactType,
                                           String organization) throws GovernanceException;
+
+    /**
+     * Get list of all compliance evaluated policies
+     *
+     * @param organization Organization
+     * @return List of all compliance evaluated policies
+     * @throws GovernanceException If an error occurs while getting the list of all compliance evaluated policies
+     */
+    List<String> getAllComplianceEvaluatedPolicies(String organization) throws GovernanceException;
+
+    /**
+     * Get list of violated policies
+     *
+     * @param organization Organization
+     * @return List of violated policies
+     * @throws GovernanceException If an error occurs while getting the list of violated policies
+     */
+    List<String> getViolatedPolicies(String organization) throws GovernanceException;
+
+    /**
+     * Get compliance evaluation results for a given policy as a map of artifact type to list of compliance evaluation results
+     *
+     * @param policyId Policy ID
+     * @return Map of compliance evaluation results
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     */
+    Map<ArtifactType, List<ComplianceEvaluationResult>> getEvaluationResultsForPolicy(String policyId)
+            throws GovernanceException;
+
 }

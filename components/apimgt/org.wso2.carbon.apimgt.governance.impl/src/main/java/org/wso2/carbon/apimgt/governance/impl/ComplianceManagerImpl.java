@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,7 +76,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
         // Get the policy and its labels and associated governable states
 
-        GovernancePolicy policy = governancePolicyMgtDAO.getGovernancePolicyByID(organization, policyId);
+        GovernancePolicy policy = governancePolicyMgtDAO.getGovernancePolicyByID(policyId);
         List<String> labels = policy.getLabels();
 
         List<GovernableState> governableStates = policy.getGovernableStates();
@@ -251,7 +253,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while getting the compliant and non-compliant artifacts
      */
     @Override
-    public Map<ArtifactComplianceState, List<String>> getCompliantAndNonCompliantArtifacts(
+    public Map<ArtifactComplianceState, List<String>> getComplianceStateOfEvaluatedArtifacts(
             ArtifactType artifactType, String organization) throws GovernanceException {
         List<String> allComplianceEvaluatedArtifacts =
                 complianceMgtDAO.getAllComplianceEvaluatedArtifacts(artifactType, organization);
@@ -270,5 +272,85 @@ public class ComplianceManagerImpl implements ComplianceManager {
         }
 
         return compliantAndNonCompliantArtifacts;
+    }
+
+    /**
+     * Get a map of policies followed and violated in the organization
+     *
+     * @param organization Organization
+     * @return Map of policies followed and violated
+     * @throws GovernanceException If an error occurs while getting the policy adherence
+     */
+    @Override
+    public Map<PolicyAdherenceSate, List<String>> getAdherenceStateofEvaluatedPolicies(String organization)
+            throws GovernanceException {
+        List<String> allComplianceEvaluatedPolicies = complianceMgtDAO.getAllComplianceEvaluatedPolicies(organization);
+        List<String> nonCompliantPolicies = complianceMgtDAO.getViolatedPolicies(organization);
+
+        Map<PolicyAdherenceSate, List<String>> policyAdherence = new HashMap<>();
+        policyAdherence.put(PolicyAdherenceSate.FOLLOWED, new ArrayList<>());
+        policyAdherence.put(PolicyAdherenceSate.VIOLATED, new ArrayList<>());
+
+        for (String policy : allComplianceEvaluatedPolicies) {
+            if (nonCompliantPolicies.contains(policy)) {
+                policyAdherence.get(PolicyAdherenceSate.VIOLATED).add(policy);
+            } else {
+                policyAdherence.get(PolicyAdherenceSate.FOLLOWED).add(policy);
+            }
+        }
+
+        return policyAdherence;
+    }
+
+    /**
+     * Get a map of artifacts evaluated by policy
+     *
+     * @param policyId            Policy ID
+     * @param resolveArtifactName Whether the artifact name should be resolved
+     * @return Map of artifacts evaluated by policy
+     * @throws GovernanceException If an error occurs while getting the artifacts evaluated by policy
+     */
+    @Override
+    public Map<ArtifactComplianceState, List<ArtifactInfo>> getComplianceStateOfEvaluatedArtifactsByPolicy
+    (String policyId, boolean resolveArtifactName) throws GovernanceException {
+
+        Map<ArtifactType, List<ComplianceEvaluationResult>> complianceEvaluationResults =
+                complianceMgtDAO.getEvaluationResultsForPolicy(policyId);
+
+        Map<ArtifactComplianceState, List<ArtifactInfo>> complianceStateOfEvaluatedArtifacts = new HashMap<>();
+
+        complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.COMPLIANT, new ArrayList<>());
+        complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.NON_COMPLIANT, new ArrayList<>());
+
+        for (ArtifactType artifactType : complianceEvaluationResults.keySet()) {
+            List<ComplianceEvaluationResult> evaluationResults = complianceEvaluationResults.get(artifactType);
+            Set<String> allEvaluatedArtifacts = new HashSet<>();
+            Set<String> nonCompliantArtifacts = new HashSet<>();
+
+            for (ComplianceEvaluationResult evaluationResult : evaluationResults) {
+                String artifactId = evaluationResult.getArtifactId();
+                boolean isEvaluationFailed = evaluationResult.isEvaluationSuccess();
+                allEvaluatedArtifacts.add(artifactId);
+                if (isEvaluationFailed) {
+                    nonCompliantArtifacts.add(artifactId);
+                }
+            }
+
+            for (String artifactId : allEvaluatedArtifacts) {
+                ArtifactInfo artifactInfo = new ArtifactInfo();
+                artifactInfo.setArtifactId(artifactId);
+                artifactInfo.setArtifactType(artifactType);
+                if (resolveArtifactName) {
+                    artifactInfo.setDisplayName(GovernanceUtil.getArtifactName(artifactId, artifactType));
+                }
+                if (nonCompliantArtifacts.contains(artifactId)) {
+                    complianceStateOfEvaluatedArtifacts.get(ArtifactComplianceState.NON_COMPLIANT).add(artifactInfo);
+                } else {
+                    complianceStateOfEvaluatedArtifacts.get(ArtifactComplianceState.COMPLIANT).add(artifactInfo);
+                }
+            }
+        }
+
+        return complianceStateOfEvaluatedArtifacts;
     }
 }

@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
-import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -159,7 +158,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     prepStmt.executeBatch();
                 }
                 connection.commit();
-                return getGovernancePolicyByID(organization, governancePolicy.getId()); // to return saved policy
+                return getGovernancePolicyByID(governancePolicy.getId()); // to return saved policy
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;
@@ -213,18 +212,16 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     /**
      * Get Governance Policy by ID
      *
-     * @param organization Organization
-     * @param policyID     Policy ID
+     * @param policyID Policy ID
      * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     @Override
-    public GovernancePolicy getGovernancePolicyByID(String organization, String policyID) throws GovernanceException {
+    public GovernancePolicy getGovernancePolicyByID(String policyID) throws GovernanceException {
         GovernancePolicy policy = null;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_BY_ID)) {
-            prepStmt.setString(1, organization);
-            prepStmt.setString(2, policyID);
+            prepStmt.setString(1, policyID);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 if (resultSet.next()) {
                     policy = new GovernancePolicy();
@@ -243,8 +240,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policy;
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_ID, e, policyID,
-                    organization);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_ID, e, policyID);
         }
     }
 
@@ -307,8 +303,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 prepStmt.setString(2, organization);
                 int rowsAffected = prepStmt.executeUpdate();
                 if (rowsAffected == 0) {
-                    throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND,
-                            policyId, organization);
+                    throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyId);
                 }
                 connection.commit();
             } catch (SQLException e) {
@@ -397,10 +392,11 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 updateLabelsForPolicy(policyId, governancePolicy, connection);
                 updateGovernableStatesForPolicy(policyId, governancePolicy, connection);
                 updateActionsForPolicy(policyId, governancePolicy, connection);
+                deleteComplianceEvaluationResultsForPolicy(policyId, connection);
 
                 // return updated GovernancePolicy object
                 connection.commit();
-                return getGovernancePolicyByID(organization, policyId);
+                return getGovernancePolicyByID(policyId);
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;
@@ -623,6 +619,22 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
         }
         return labels;
+    }
+
+    /**
+     * Delete Compliance Evaluation Results for a Policy
+     *
+     * @param policyId   Policy ID
+     * @param connection DB Connection
+     * @throws SQLException If an error occurs while deleting the results (Captured at higher level)
+     */
+    private void deleteComplianceEvaluationResultsForPolicy(String policyId, Connection connection)
+            throws SQLException {
+        try (PreparedStatement prepStmt = connection.prepareStatement
+                (SQLConstants.DELETE_GOV_COMPLIANCE_EVALUATION_RESULT_BY_POLICY)) {
+            prepStmt.setString(1, policyId);
+            prepStmt.executeUpdate();
+        }
     }
 
     /**

@@ -72,32 +72,32 @@ public class GovernanceAPIUtil {
     /**
      * Method to get the paginated URL
      *
-     * @param paginatedURL paginated URL
+     * @param templatedURL templated paginated URL
      * @param offset       offset
      * @param limit        limit
-     * @return paginated URL
+     * @return paginated URL with offset and limit
      */
-    public static String getPaginatedURL(String paginatedURL, Integer offset,
+    public static String getPaginatedURL(String templatedURL, Integer offset,
                                          Integer limit) {
-        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
-        return paginatedURL;
+        templatedURL = templatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
+        templatedURL = templatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
+        return templatedURL;
     }
 
     /**
      * Method to get the paginated URL for artifact compliance
      *
-     * @param paginatedURL paginated URL
+     * @param templatedURL templated paginated URL
      * @param offset       offset
      * @param limit        limit
      * @param artifactType artifact type
-     * @return paginated URL
+     * @return paginated URL with offset, limit and artifact type
      */
-    public static String getArtifactCompliancePageURL(String paginatedURL, Integer offset, Integer limit,
+    public static String getArtifactCompliancePageURL(String templatedURL, Integer offset, Integer limit,
                                                       String artifactType) {
-        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(GovernanceAPIConstants.ARTIFACT_TYPE_PARAM, artifactType);
-        return paginatedURL;
+        templatedURL = templatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
+        templatedURL = templatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
+        templatedURL = templatedURL.replace(GovernanceAPIConstants.ARTIFACT_TYPE_PARAM, artifactType);
+        return templatedURL;
     }
 }

@@ -18,21 +18,18 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-/**
- * This class represents a governance rule Severity
- */
-public enum Severity {
-    ERROR,
-    WARN,
-    INFO;
+public enum PolicyAdherenceSate {
+    FOLLOWED,
+    VIOLATED,
+    UNAPPPLIED;
 
-    public static Severity fromString(String severityString) {
-        if ("error".equals(severityString)) {
-            return Severity.ERROR;
-        } else if ("warn".equals(severityString)) {
-            return Severity.WARN;
-        } else if ("info".equals(severityString)) {
-            return Severity.INFO;
+    public static PolicyAdherenceSate fromString(String text) {
+        if ("followed".equalsIgnoreCase(text)) {
+            return FOLLOWED;
+        } else if ("violated".equalsIgnoreCase(text)) {
+            return VIOLATED;
+        } else if ("unapplied".equalsIgnoreCase(text)) {
+            return UNAPPPLIED;
         }
         return null;
     }

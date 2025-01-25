@@ -61,7 +61,7 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private List<ArtifactComplianceForPolicyDTO> governedArtifacts = new ArrayList<ArtifactComplianceForPolicyDTO>();
+    private List<ArtifactComplianceForPolicyDTO> evaluatedArtifacts = new ArrayList<ArtifactComplianceForPolicyDTO>();
 
   /**
    * UUID of the policy.
@@ -118,22 +118,22 @@ return null;
   }
 
   /**
-   * Compliance status of the artifacts attached to the policy.
+   * Compliance status of the artifacts evaluated against the policy.
    **/
-  public PolicyAdherenceDetailsDTO governedArtifacts(List<ArtifactComplianceForPolicyDTO> governedArtifacts) {
-    this.governedArtifacts = governedArtifacts;
+  public PolicyAdherenceDetailsDTO evaluatedArtifacts(List<ArtifactComplianceForPolicyDTO> evaluatedArtifacts) {
+    this.evaluatedArtifacts = evaluatedArtifacts;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Compliance status of the artifacts attached to the policy.")
+  @ApiModelProperty(value = "Compliance status of the artifacts evaluated against the policy.")
       @Valid
-  @JsonProperty("governedArtifacts")
-  public List<ArtifactComplianceForPolicyDTO> getGovernedArtifacts() {
-    return governedArtifacts;
+  @JsonProperty("evaluatedArtifacts")
+  public List<ArtifactComplianceForPolicyDTO> getEvaluatedArtifacts() {
+    return evaluatedArtifacts;
   }
-  public void setGovernedArtifacts(List<ArtifactComplianceForPolicyDTO> governedArtifacts) {
-    this.governedArtifacts = governedArtifacts;
+  public void setEvaluatedArtifacts(List<ArtifactComplianceForPolicyDTO> evaluatedArtifacts) {
+    this.evaluatedArtifacts = evaluatedArtifacts;
   }
 
 
@@ -149,12 +149,12 @@ return null;
     return Objects.equals(policyId, policyAdherenceDetails.policyId) &&
         Objects.equals(policyName, policyAdherenceDetails.policyName) &&
         Objects.equals(status, policyAdherenceDetails.status) &&
-        Objects.equals(governedArtifacts, policyAdherenceDetails.governedArtifacts);
+        Objects.equals(evaluatedArtifacts, policyAdherenceDetails.evaluatedArtifacts);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyId, policyName, status, governedArtifacts);
+    return Objects.hash(policyId, policyName, status, evaluatedArtifacts);
   }
 
   @Override
@@ -165,7 +165,7 @@ return null;
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    governedArtifacts: ").append(toIndentedString(governedArtifacts)).append("\n");
+    sb.append("    evaluatedArtifacts: ").append(toIndentedString(evaluatedArtifacts)).append("\n");
     sb.append("}");
     return sb.toString();
   }
