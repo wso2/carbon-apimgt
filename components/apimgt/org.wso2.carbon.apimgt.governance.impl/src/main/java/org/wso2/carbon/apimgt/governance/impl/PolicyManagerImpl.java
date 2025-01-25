@@ -63,17 +63,16 @@ public class PolicyManagerImpl implements PolicyManager {
     /**
      * Get Governance Policy by Name
      *
-     * @param organization Organization
-     * @param policyID     Policy ID
+     * @param policyID Policy ID
      * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     @Override
-    public GovernancePolicy getGovernancePolicyByID(String organization, String policyID)
+    public GovernancePolicy getGovernancePolicyByID(String policyID)
             throws GovernanceException {
-        GovernancePolicy policyInfo = policyMgtDAO.getGovernancePolicyByID(organization, policyID);
+        GovernancePolicy policyInfo = policyMgtDAO.getGovernancePolicyByID(policyID);
         if (policyInfo == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyID, organization);
+            throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyID);
         }
         return policyInfo;
     }

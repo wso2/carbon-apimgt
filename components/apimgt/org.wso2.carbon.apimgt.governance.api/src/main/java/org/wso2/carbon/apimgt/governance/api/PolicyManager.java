@@ -43,14 +43,13 @@ public interface PolicyManager {
             governancePolicy) throws GovernanceException;
 
     /**
-     * Get Governance Policy by Name
+     * Get Governance Policy by ID
      *
-     * @param organization Organization
-     * @param policyID     Policy ID
+     * @param policyID Policy ID
      * @return GovernancePolicyInfo
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
-    GovernancePolicy getGovernancePolicyByID(String organization, String policyID) throws GovernanceException;
+    GovernancePolicy getGovernancePolicyByID(String policyID) throws GovernanceException;
 
     /**
      * Get Governance Policies

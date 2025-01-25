@@ -1416,14 +1416,20 @@ components:
             - VIOLATED
             - UNAPPLIED
           example: "FOLLOWED"
-        totalGovernedArtifacts:
+        artifactComplianceSummary:
+          $ref: '#/components/schemas/ArtifactComplianceSummaryForPolicy'
+    ArtifactComplianceSummaryForPolicy:
+      type: object
+      description: Summary of compliance of artifacts evaluated against a specific policy.
+      properties:
+        compliantArtifacts:
           type: integer
-          description: Number of artifacts governed by the policy.
-          example: 2
+          description: Number of compliant artifacts.
+          example: 6
         nonCompliantArtifacts:
           type: integer
-          description: Number of non-compliant artifacts governed by the policy.
-          example: 1
+          description: Number of non-compliant artifacts.
+          example: 4
     ArtifactComplianceDetails:
       type: object
       description: Provides compliance details of an artifact.
@@ -1475,9 +1481,9 @@ components:
             - VIOLATED
             - UNAPPLIED
           example: "FOLLOWED"
-        governedArtifacts:
+        evaluatedArtifacts:
           type: array
-          description: Compliance status of the artifacts attached to the policy.
+          description: Compliance status of the artifacts evaluated against the policy.
           items:
             $ref: '#/components/schemas/ArtifactComplianceForPolicy'
     PolicyAdherenceWithRulesets:
