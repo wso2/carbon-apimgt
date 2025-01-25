@@ -45,6 +45,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     private String subscriptionAvailability; // need to decide isSubscriptionAvailable
     private String subscriptionAvailableOrgs; // (subscriptionAvailableTenants): need to decide the value of "isSubscriptionAvailable"
+    private String visibleOrganizations; //visible organizations
     private String authorizationHeader;
     private String apiKeyHeader;
     private List<String> securityScheme = new ArrayList<>();
@@ -342,12 +343,19 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.gatewayVendor = gatewayVendor;
     }
 
+    public String getVisibleOrganizations() {
+        return visibleOrganizations;
+    }
+
+    public void setVisibleOrganizations(String visibleOrganizations) {
+        this.visibleOrganizations = visibleOrganizations;
+    }
+    
     public String getAsyncTransportProtocols() { return asyncTransportProtocols; }
 
     public void setAsyncTransportProtocols(String asyncTransportProtocols) {
         this.asyncTransportProtocols = asyncTransportProtocols;
     }
-
 
     @Override
     public String toString() {
@@ -357,16 +365,17 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + businessOwnerEmail + ", transports=" + transports + ", redirectURL=" + redirectURL
                 + ", apiExternalProductionEndpoint=" + apiExternalProductionEndpoint + ", apiExternalSandboxEndpoint="
                 + apiExternalSandboxEndpoint + ", apiOwner=" + apiOwner + ", advertiseOnly=" + advertiseOnly
-                + ", subscriptionAvailability=" + subscriptionAvailability + ", subscriptionAvailableOrgs="
-                + subscriptionAvailableOrgs + ", authorizationHeader=" + authorizationHeader + ", securityScheme="
-                + securityScheme + ", environments=" + environments + ", gatewayVendor=" + gatewayVendor
-                +  ", asyncTransportProtocols=" + asyncTransportProtocols  + ", apiCategories=" + apiCategories
-                + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
-                + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
-                + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="
-                + advertisedOnly + ", swaggerDefinition=" + swaggerDefinition + ", contextTemplate=" + contextTemplate
-                + ", apiSecurity=" + apiSecurity + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
-                + "]";
+                + ", vendor=" + vendor + ", subscriptionAvailability=" + subscriptionAvailability
+                + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs + ", visibleOrganizations="
+                + visibleOrganizations + ", authorizationHeader=" + authorizationHeader + ", apiKeyHeader="
+                + apiKeyHeader + ", securityScheme=" + securityScheme + ", environments=" + environments
+                + ", apiCategories=" + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled
+                + ", keyManagers=" + keyManagers + ", deploymentEnvironments=" + deploymentEnvironments + ", tags="
+                + tags + ", additionalProperties=" + additionalProperties + ", endpointConfig=" + endpointConfig
+                + ", type=" + type + ", advertisedOnly=" + advertisedOnly + ", swaggerDefinition=" + swaggerDefinition
+                + ", contextTemplate=" + contextTemplate + ", apiSecurity=" + apiSecurity + ", visibility=" + visibility
+                + ", visibleRoles=" + visibleRoles + ", gatewayVendor=" + gatewayVendor + ", asyncTransportProtocols="
+                + asyncTransportProtocols + "]";
     }
 
     public String getApiSecurity() {

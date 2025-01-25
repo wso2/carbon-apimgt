@@ -10151,6 +10151,15 @@ public final class APIUtil {
     }
 
     /**
+     * Get org access control enabled status
+     * 
+     * @return true or false
+     */
+    public static boolean isOrganizationAccessControlEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getOrgAccessControl().isEnabled();
+    }
+    /**
      * Get registered API Definition Parsers as a Map
      *
      * @return Map of Registered API Definition Parsers
@@ -10952,7 +10961,7 @@ public final class APIUtil {
         }
         return applications.subList(offset, endIndex);
     }
-
+    
     public static String getAPIMVersion() {
         return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
     }

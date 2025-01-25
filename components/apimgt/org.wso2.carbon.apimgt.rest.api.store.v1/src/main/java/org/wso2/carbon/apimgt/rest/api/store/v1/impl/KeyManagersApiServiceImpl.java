@@ -7,11 +7,13 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConsumerImpl;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.KeyManagersApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.KeyManagerMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;
@@ -26,6 +28,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
         String organization = RestApiUtil.getOrganization(messageContext);
         try {
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             APIAdmin apiAdmin = new APIAdminImpl();
             APIConsumer apiConsumer = new APIConsumerImpl();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -34,6 +37,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             List<KeyManagerConfigurationDTO> globalKeyManagerConfigurations
                     = apiAdmin.getGlobalKeyManagerConfigurations();
             permittedKeyManagerConfigurations.addAll(globalKeyManagerConfigurations);
+            permittedKeyManagerConfigurations = APIUtils
+                    .filterAllowedKeyManagersForOrganizations(permittedKeyManagerConfigurations, orgInfo);
             return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(permittedKeyManagerConfigurations)).build();
 
         } catch (APIManagementException e) {

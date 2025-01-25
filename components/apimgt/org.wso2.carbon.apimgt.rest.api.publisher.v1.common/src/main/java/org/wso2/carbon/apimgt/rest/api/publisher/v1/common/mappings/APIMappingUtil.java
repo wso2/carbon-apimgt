@@ -326,6 +326,13 @@ public class APIMappingUtil {
                 model.setVisibleTenants(visibleTenants);
             }
         }
+        
+        if (dto.getVisibleOrganizations() != null && !dto.getVisibleOrganizations().isEmpty()) {
+            String visibleOrgs = StringUtils.join(dto.getVisibleOrganizations(), ',');
+            model.setVisibleOrganizations(visibleOrgs);
+        } else {
+            model.setVisibleOrganizations(APIConstants.DEFAULT_VISIBLE_ORG);
+        }
 
         List<String> accessControlRoles = dto.getAccessControlRoles();
         if (accessControlRoles == null || accessControlRoles.isEmpty()) {
@@ -1388,6 +1395,13 @@ public class APIMappingUtil {
 
         if (model.getVisibleTenants() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
+        }
+        
+        if (model.getVisibleOrganizations() != null
+                || !APIConstants.DEFAULT_VISIBLE_ORG.equals(model.getVisibleOrganizations())) {
+            dto.setVisibleOrganizations(Arrays.asList(model.getVisibleOrganizations().split(",")));
+        } else {
+            dto.setVisibleOrganizations(Collections.EMPTY_LIST);
         }
 
         if (model.getAdditionalProperties() != null) {

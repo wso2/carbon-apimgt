@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO.VisibilityEnum;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
@@ -63,6 +64,12 @@ public class ApplicationMappingUtil {
         if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
                 .equals(application.getTokenType())) {
             applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.valueOf(application.getTokenType()));
+        }
+        if ((application.getSharedOrganization() == null)
+                || (APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(application.getSharedOrganization()))) {
+            applicationDTO.setVisibility(VisibilityEnum.PRIVATE);
+        } else {
+            applicationDTO.setVisibility(VisibilityEnum.SHARED_WITH_ORG);
         }
 
         //todo: Uncomment when this is implemented
