@@ -71,6 +71,7 @@ public class BasicAuthCredentialValidator {
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
     public BasicAuthCredentialValidator() throws APISecurityException {
+        log.info("++++ BasicAuthCredentialValidator start");
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
         this.getGatewayUsernameCache();
         this.apiKeyValidator = new APIKeyValidator();
@@ -88,12 +89,14 @@ public class BasicAuthCredentialValidator {
         try {
             apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
                     "/services/APIKeyMgtRemoteUserStoreMgtService");
+            log.info("++++++++++ Init apiKeyMgtRemoteUserStoreMgtServiceStub " + apiKeyMgtRemoteUserStoreMgtServiceStub);
             ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setCallTransportCleanup(true);
             options.setManageSession(true);
             CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
         } catch (AxisFault axisFault) {
+            log.error("++++ BasicAuthCredentialValidator error ", axisFault);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
         }
     }
@@ -142,9 +145,9 @@ public class BasicAuthCredentialValidator {
 
         BasicAuthValidationInfoDTO basicAuthValidationInfoDTO;
         try {
+            log.info("apiKeyMgtRemoteUserStoreMgtServiceStub " + apiKeyMgtRemoteUserStoreMgtServiceStub);
             org.wso2.carbon.apimgt.impl.dto.xsd.BasicAuthValidationInfoDTO generatedInfoDTO = apiKeyMgtRemoteUserStoreMgtServiceStub
                     .getUserAuthenticationInfo(username, password);
-            log.info("apiKeyMgtRemoteUserStoreMgtServiceStub " + apiKeyMgtRemoteUserStoreMgtServiceStub);
             log.info("generatedInfoDTO " + generatedInfoDTO);
             basicAuthValidationInfoDTO = convertToDTO(generatedInfoDTO);
             isAuthenticated = basicAuthValidationInfoDTO.isAuthenticated();
