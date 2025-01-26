@@ -6094,21 +6094,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return null;
     }
 
-    /**
-     * Validates if the provided LLM provider ID exists in the organization.
-     *
-     * @param llmProviderId LLM provider UUID
-     * @param organization  Organization to which the API belongs
-     * @throws APIManagementException if the LLM provider is not found
-     */
-    private void validateLlmProviderById(String llmProviderId, String organization)
-            throws APIManagementException {
-
-        LLMProvider provider = apiMgtDAO.getLLMProvider(organization, llmProviderId);
-        if (provider == null) {
-            throw new APIManagementException("Incorrect LLM Provider UUID: " + llmProviderId);
-        }
-    }
+//    /**
+//     * Validates if the provided LLM provider ID exists in the organization.
+//     *
+//     * @param llmProviderId LLM provider UUID
+//     * @param organization  Organization to which the API belongs
+//     * @throws APIManagementException if the LLM provider is not found
+//     */
+//    private void validateLlmProviderById(String llmProviderId, String organization)
+//            throws APIManagementException {
+//
+//        LLMProvider provider = apiMgtDAO.getLLMProvider(organization, llmProviderId);
+//        if (provider == null) {
+//            throw new APIManagementException("Incorrect LLM Provider UUID: " + llmProviderId);
+//        }
+//    }
 
     /**
      * Util method to read and return the max revision count per API, using the tenant configs
