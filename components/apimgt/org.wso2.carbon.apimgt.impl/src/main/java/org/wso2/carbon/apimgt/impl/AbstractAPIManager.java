@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
+import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -82,6 +83,7 @@ public abstract class AbstractAPIManager implements APIManager {
     // API definitions from swagger v2.0
     protected Log log = LogFactory.getLog(getClass());
     protected ApiMgtDAO apiMgtDAO;
+    protected LabelsDAO labelsDAO;
     protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
@@ -107,6 +109,7 @@ public abstract class AbstractAPIManager implements APIManager {
         apiMgtDAO = ApiMgtDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
         environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
+        labelsDAO = LabelsDAO.getInstance();
 
         try {
             if (username == null) {

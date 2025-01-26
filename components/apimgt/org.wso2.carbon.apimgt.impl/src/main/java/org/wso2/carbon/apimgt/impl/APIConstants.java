@@ -2224,6 +2224,7 @@ public final class APIConstants {
         public static final String TENANT_CONFIG_INFO = "User updated Tenant Config";
 
         public static final String API_CATEGORIES = "APICategories";
+        public static final String LABELS = "Labels";
         public static final String APPLICATIONS = "Applications";
         public static final String GATEWAY_ENVIRONMENTS = "GatewayEnvironments";
         public static final String ROLES_FOR_SCOPE = "RolesForScope";

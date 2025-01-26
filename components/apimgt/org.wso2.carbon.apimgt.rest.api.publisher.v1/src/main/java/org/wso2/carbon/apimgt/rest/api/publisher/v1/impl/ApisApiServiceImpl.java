@@ -81,7 +81,6 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -4663,6 +4662,31 @@ public class ApisApiServiceImpl implements ApisApiService {
         String jsonContent = new Gson().toJson(properties);
 
         return Response.ok().entity(jsonContent).build();
+    }
+
+    public Response getLabelsOfAPI(String apiId, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<Label> labelList = apiProvider.getAllLabelsOfApi(apiId);
+        LabelListDTO labelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(labelList);
+        return Response.ok().entity(labelListDTO).build();
+    }
+
+    public Response attachLabelsToAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
+        List<Label> labelList = LabelMappingUtil.fromRequestLabelListDTOToLabelList(requestLabelListDTO);
+        List<Label> updatedLabelList = apiProvider.attachApiLabels(apiId, labelList, tenantDomain);
+        LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
+        return Response.ok().entity(updatedLabelListDTO).build();
+    }
+
+    public Response detachLabelsFromAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
+        List<Label> labelList = LabelMappingUtil.fromRequestLabelListDTOToLabelList(requestLabelListDTO);
+        List<Label> updatedLabelList = apiProvider.detachApiLabels(apiId, labelList, tenantDomain);
+        LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
+        return Response.ok().entity(updatedLabelListDTO).build();
     }
 
     private void validateEnvironment(String organization, String envId) throws APIManagementException {

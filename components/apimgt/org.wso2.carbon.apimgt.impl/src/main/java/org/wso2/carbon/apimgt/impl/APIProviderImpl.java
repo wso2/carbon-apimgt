@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -2501,6 +2502,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // DB delete operations
         if (!isError && api != null) {
             try {
+                // Remove API-Label mappings
+                removeAPILabelMappings(apiUuid);
                 // Remove Custom Backend entries of the API
                 deleteCustomBackendByAPIID(apiUuid);
                 deleteAPIRevisions(apiUuid, organization);
@@ -4556,6 +4559,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(message);
             }
 
+            // Remove API Product-Label Mappings
+            removeAPILabelMappings(apiProduct.getUuid());
+
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             deleteAPIProductRevisions(apiProduct.getUuid(), apiProduct.getOrganization());
@@ -5492,11 +5498,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
 
         APIInfo apiInfo;
-        if (apiProduct.isRevision()) {
-            apiInfo = apiMgtDAO.getAPIInfoByUUID(apiProduct.getRevisionedApiProductId());
-        } else {
-            apiInfo = apiMgtDAO.getAPIInfoByUUID(apiProduct.getUuid());
-        }
+        String apiProductId = apiProduct.isRevision() ? apiProduct.getRevisionedApiProductId() : apiProduct.getUuid();
+        apiInfo = apiMgtDAO.getAPIInfoByUUID(apiProductId);
+
         if (apiInfo != null) {
             apiProduct.setEgress(apiInfo.isEgress());
             apiProduct.setState(apiInfo.getStatus());
@@ -7011,6 +7015,75 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
+
+        return labelsDAO.getAllLabels(tenantDomain);
+    }
+
+    @Override
+    public List<Label> getAllLabelsOfApi(String apiID) throws APIManagementException {
+        API api = getAPIbyUUID(apiID, tenantDomain);
+        if (api == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
+                    + apiID, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiID));
+        }
+        apiID = api.isRevision() ? api.getRevisionedApiId() : api.getUuid();
+        return labelsDAO.getMappedLabelsForApi(apiID);
+    }
+
+    @Override
+    public List<Label> attachApiLabels(String apiID, List<Label> labelList, String tenantDomain) throws APIManagementException {
+        API api = getAPIbyUUID(apiID, tenantDomain);
+        if (api == null || api.isRevision()) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
+                    + apiID, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiID));
+        }
+        // validate labels
+        if (labelList.isEmpty()) {
+            throw new APIManagementException("No labels provided to attach to the API with ID: " + apiID,
+                    ExceptionCodes.from(ExceptionCodes.LABEL_ATTACHMENT_FAILED, "No labels provided"));
+        } else if (!allLabelsValid(labelList, tenantDomain)) {
+            throw new APIManagementException("Invalid label(s) provided to attach to the API with ID: " + apiID,
+                    ExceptionCodes.from(ExceptionCodes.LABEL_ATTACHMENT_FAILED, "Invalid label(s) provided"));
+        }
+        List<String> mappedLabelIDs = labelsDAO.getMappedLabelIDsForApi(apiID);
+        List<String> labelIDs = new ArrayList<>();
+        for (Label label : labelList) {
+            if (!mappedLabelIDs.contains(label.getLabelId())) {
+                labelIDs.add(label.getLabelId());
+            }
+        }
+        labelsDAO.addApiLabelMappings(apiID, labelIDs);
+        return labelsDAO.getMappedLabelsForApi(apiID);
+    }
+
+    @Override
+    public List<Label> detachApiLabels(String apiID, List<Label> labelList, String tenantDomain) throws APIManagementException {
+        API api = getAPIbyUUID(apiID, tenantDomain);
+        if (api == null || api.isRevision()) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
+                    + apiID, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiID));
+        }
+        // validate labels
+        if (labelList.isEmpty()) {
+            throw new APIManagementException("No labels provided to detach from the API with ID: " + apiID,
+                    ExceptionCodes.from(ExceptionCodes.LABEL_DETACHMENT_FAILED, "No labels provided"));
+        } else if (!allLabelsValid(labelList, tenantDomain)) {
+            throw new APIManagementException("Invalid label(s) provided to detach from the API with ID: " + apiID,
+                    ExceptionCodes.from(ExceptionCodes.LABEL_DETACHMENT_FAILED, "Invalid label(s) provided"));
+        }
+        List<String> mappedLabelIDs = labelsDAO.getMappedLabelIDsForApi(apiID);
+        List<String> labelIDs = new ArrayList<>();
+        for (Label label : labelList) {
+            if (mappedLabelIDs.contains(label.getLabelId())) {
+                labelIDs.add(label.getLabelId());
+            }
+        }
+        labelsDAO.deleteApiLabelMappings(apiID, labelIDs);
+        return labelsDAO.getMappedLabelsForApi(apiID);
+    }
+
+    @Override
     public void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates)
             throws APIManagementException {
         //In case the mediation sequences are not migrated yet with an API update, force an API update to  make sure
@@ -7780,4 +7853,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    private void removeAPILabelMappings(String apiId) throws APIManagementException {
+        try {
+            labelsDAO.deleteApiLabelMappings(apiId, labelsDAO.getMappedLabelIDsForApi(apiId));
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while removing label mappings for API " + apiId, e);
+        }
+    }
+
+    private boolean allLabelsValid(List<Label> labels, String tenantDomain)
+            throws APIManagementException {
+        try {
+            List<Label> availableLabels = getAllLabels(tenantDomain);
+            for (Label label : labels) {
+                if (!availableLabels.contains(label)) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while validating attached labels", e);
+        }
+    }
 }
