@@ -95,6 +95,7 @@ public class BasicAuthCredentialValidator {
             options.setCallTransportCleanup(true);
             options.setManageSession(true);
             CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
+            log.info("++++ BasicAuthCredentialValidator done");
         } catch (AxisFault axisFault) {
             log.error("++++ BasicAuthCredentialValidator error ", axisFault);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
@@ -145,7 +146,10 @@ public class BasicAuthCredentialValidator {
 
         BasicAuthValidationInfoDTO basicAuthValidationInfoDTO;
         try {
-            log.info("apiKeyMgtRemoteUserStoreMgtServiceStub " + apiKeyMgtRemoteUserStoreMgtServiceStub);
+            if(apiKeyMgtRemoteUserStoreMgtServiceStub == null) {
+                log.info("+++++++++++ apiKeyMgtRemoteUserStoreMgtServiceStub null");
+            }
+            log.info("+++++= apiKeyMgtRemoteUserStoreMgtServiceStub " + apiKeyMgtRemoteUserStoreMgtServiceStub);
             org.wso2.carbon.apimgt.impl.dto.xsd.BasicAuthValidationInfoDTO generatedInfoDTO = apiKeyMgtRemoteUserStoreMgtServiceStub
                     .getUserAuthenticationInfo(username, password);
             log.info("generatedInfoDTO " + generatedInfoDTO);
