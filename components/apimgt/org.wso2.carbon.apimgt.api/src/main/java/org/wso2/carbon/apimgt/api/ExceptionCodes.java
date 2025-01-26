@@ -294,8 +294,8 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_GRAPHQL_FILE(900803, "GraphQL filename cannot be null or invalid", 400,
             "GraphQL filename cannot be null or invalid"),
     GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR(900804, "Error while generating GraphQL schema from introspection",
-            500, "Error while generating GraphQL schema from introspection"),
-    RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR(900805, "Error while retrieving GraphQL schema from URL", 500,
+            400, "Error while generating GraphQL schema from introspection"),
+    RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR(900805, "Error while retrieving GraphQL schema from URL", 400,
             "Error while retrieving GraphQL schema from URL"),
 
     // Oauth related codes

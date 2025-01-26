@@ -3530,28 +3530,25 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO additionalPropertiesAPI = null;
         String graphQLSchema = null;
         try {
-            if (StringUtils.isBlank(additionalProperties)){
+            if (StringUtils.isBlank(additionalProperties)) {
                 String errorMessage = "Api details cannot be empty.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
-            }
-            else {
+            } else {
                 additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             }
 
-            if (schema != null && !schema.isEmpty()){
+            if (schema != null && !schema.isEmpty()) {
                 graphQLSchema = schema;
-            }
-            else if (fileInputStream != null && !StringUtils.isBlank(additionalProperties)){
+            } else if (fileInputStream != null && !StringUtils.isBlank(additionalProperties)) {
                 graphQLSchema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
-            }
-            else if (url != null) {
+            } else if (url != null) {
                 graphQLSchema = PublisherCommonUtils.retrieveGraphQLSchemaFromURL(url);
-            }
-            else {
+            } else {
                 Map<String, Object> endpointConfigurationMap = (Map<String, Object>) additionalPropertiesAPI.getEndpointConfig();
                 String endpointURL = "";
                 if (endpointConfigurationMap.containsKey("production_endpoints")) {
-                    Map<String, String> productionEndpoints = (Map<String, String>) endpointConfigurationMap.get("production_endpoints");
+                    Map<String, String> productionEndpoints = (Map<String, String>) endpointConfigurationMap.get(
+                            "production_endpoints");
                     endpointURL = productionEndpoints.get("url");
                 }
                 graphQLSchema = PublisherCommonUtils.generateGraphQLSchemaFromIntrospection(endpointURL);
@@ -3652,11 +3649,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Validate graphQL Schema
-     * @param useIntrospection  use introspection or not
+     *
+     * @param useIntrospection use introspection or not
      * @param fileInputStream  input file
-     * @param fileDetail file Detail
-     * @param url URL of the schema or endpoint
-     * @param messageContext messageContext
+     * @param fileDetail       file Detail
+     * @param url              URL of the schema or endpoint
+     * @param messageContext   messageContext
      * @return Validation response
      */
     @Override

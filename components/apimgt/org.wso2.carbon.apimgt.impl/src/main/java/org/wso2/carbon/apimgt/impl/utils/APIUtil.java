@@ -1406,7 +1406,7 @@ public final class APIUtil {
     }
 
     public static String getIntrospectionQuery() throws APIManagementException {
-        String introspectionQueryFilePath = "graphql/introspection_query.txt";
+        String introspectionQueryFilePath = "graphql/introspection_query.graphql";
         try (InputStream fileStream = APIUtil.class.getClassLoader().getResourceAsStream(introspectionQueryFilePath)) {
             if (fileStream == null) {
                 throw new APIManagementException("File not found: " + introspectionQueryFilePath);

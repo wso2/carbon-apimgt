@@ -2114,15 +2114,21 @@ public class PublisherCommonUtils {
                         (Map<String, Object>) schemaMap.get("data"));
                 schema = AstPrinter.printAst(schemaDocument);
             } else {
-                log.error("Unable to generate GraphQL schema from introspection. URL."
-                        + " Returned response code: " + response.getStatusLine().getStatusCode()
-                        + " from endpoint: " + url);
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Unable to generate GraphQL schema from introspection."
+                                    + " Endpoint returned response code: "
+                                    + response.getStatusLine().getStatusCode());
+                }
                 throw new APIManagementException("Error occurred while generating GraphQL schema from introspection",
                         ExceptionCodes.GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR);
             }
         } catch (Exception e) {
-            log.error("Exception occurred while generating GraphQL schema from introspection. URL: " + url
-                    + ". Exception: " + e.getMessage(), e);
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Exception occurred while generating GraphQL schema from endpoint. Exception: "
+                                + e.getMessage(), e);
+            }
             throw new APIManagementException("Error occurred while generating GraphQL schema from introspection",
                     ExceptionCodes.GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR);
         }
@@ -2146,10 +2152,22 @@ public class PublisherCommonUtils {
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 schema = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Unable to generate GraphQL schema from url." + " URL returned response code: "
+                                    + response.getStatusLine().getStatusCode());
+                    throw new APIManagementException("Error occurred while retrieving GraphQL schema from schema URL",
+                            ExceptionCodes.RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR);
+                }
             }
         } catch (IOException e) {
-            throw new APIManagementException("Error occurred while retrieving GraphQL schema from schema URL",
-                    ExceptionCodes.RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR);
+            if (log.isDebugEnabled()) {
+                log.debug("Exception occurred while generating GraphQL schema from url. Exception: " + e.getMessage(),
+                        e);
+                throw new APIManagementException("Error occurred while retrieving GraphQL schema from schema URL",
+                        ExceptionCodes.RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR);
+            }
         }
         return schema;
     }
