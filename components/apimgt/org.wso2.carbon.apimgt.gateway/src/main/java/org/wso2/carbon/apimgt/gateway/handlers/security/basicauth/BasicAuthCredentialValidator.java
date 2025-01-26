@@ -149,6 +149,7 @@ public class BasicAuthCredentialValidator {
             if(apiKeyMgtRemoteUserStoreMgtServiceStub == null) {
                 log.info("+++++++++++ apiKeyMgtRemoteUserStoreMgtServiceStub null");
             }
+            setupStub();
             log.info("+++++= apiKeyMgtRemoteUserStoreMgtServiceStub " + apiKeyMgtRemoteUserStoreMgtServiceStub);
             org.wso2.carbon.apimgt.impl.dto.xsd.BasicAuthValidationInfoDTO generatedInfoDTO = apiKeyMgtRemoteUserStoreMgtServiceStub
                     .getUserAuthenticationInfo(username, password);
@@ -175,6 +176,34 @@ public class BasicAuthCredentialValidator {
         }
 
         return basicAuthValidationInfoDTO;
+    }
+    
+    private void setupStub() throws APISecurityException {
+        ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        EventHubConfigurationDto eventHubConfigurationDto = config.getEventHubConfigurationDto();
+        String username = eventHubConfigurationDto.getUsername();
+        String password = eventHubConfigurationDto.getPassword();
+        String url = eventHubConfigurationDto.getServiceUrl();
+        if (url == null) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "API key manager URL unspecified");
+        }
+
+        try {
+            apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext, url +
+                    "/services/APIKeyMgtRemoteUserStoreMgtService");
+            log.info("++++++++++ Init apiKeyMgtRemoteUserStoreMgtServiceStub " + apiKeyMgtRemoteUserStoreMgtServiceStub);
+            ServiceClient client = apiKeyMgtRemoteUserStoreMgtServiceStub._getServiceClient();
+            Options options = client.getOptions();
+            options.setCallTransportCleanup(true);
+            options.setManageSession(true);
+            CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
+            log.info("++++ BasicAuthCredentialValidator done");
+        } catch (AxisFault axisFault) {
+            log.error("++++ BasicAuthCredentialValidator error ", axisFault);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
+        }
     }
 
     private BasicAuthValidationInfoDTO convertToDTO(
