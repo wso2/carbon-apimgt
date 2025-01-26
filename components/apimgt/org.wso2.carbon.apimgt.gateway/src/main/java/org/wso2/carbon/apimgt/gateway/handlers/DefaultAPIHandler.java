@@ -68,7 +68,14 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
         }
         
         log.info("-----------------------------");
-        String path = ApiUtils.getFullRequestPath(messageContext);
+        String path;
+        try {
+            path = ApiUtils.getFullRequestPath(messageContext);
+        } catch (RuntimeException e) {
+            log.error("Error while accessing message context ", e );
+            return true;
+        }
+
         String tenantDomain = GatewayUtils.getTenantDomain();
 
         // Handle JWKS API calls
