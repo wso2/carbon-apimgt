@@ -58,13 +58,13 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
     /**
      * Adds a new LLMProvider to the system and returns a response indicating the result.
      *
-//     * @param name                     The name of the LLMProvider.
-//     * @param apiVersion               The API version of the LLMProvider.
-//     * @param description              The description of the LLMProvider.
-//     * @param configurations           The configurations for the LLMProvider.
-//     * @param apiDefinitionInputStream InputStream containing the API definition.
-//     * @param apiDefinitionDetail      Attachment with additional details for the API definition.
-//     * @param modelList                The list of models associated with the LLMProvider.
+     * @param name                     The name of the LLMProvider.
+     * @param apiVersion               The API version of the LLMProvider.
+     * @param description              The description of the LLMProvider.
+     * @param configurations           The configurations for the LLMProvider.
+     * @param apiDefinitionInputStream InputStream containing the API definition.
+     * @param apiDefinitionDetail      Attachment with additional details for the API definition.
+     * @param modelList                Comma separated list of models associated with the LLMProvider.
      * @param messageContext           The MessageContext for the request.
      * @return Response indicating success or failure of the LLMProvider creation.
      * @throws APIManagementException If an error occurs while adding the LLMProvider.
@@ -74,17 +74,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                                    String configurations, InputStream apiDefinitionInputStream,
                                    Attachment apiDefinitionDetail, String modelList, MessageContext messageContext)
             throws APIManagementException {
-//        public Response addLLMProvider(LLMProviderRequestDTO llmProviderRequestDTO, MessageContext messageContext)
-//            throws APIManagementException {
 
-//        String name = llmProviderRequestDTO.getName();
-//        String apiVersion = llmProviderRequestDTO.getApiVersion();
-//        String description = llmProviderRequestDTO.getDescription();
-//        String configurations = llmProviderRequestDTO.getConfigurations();
-//        File apiDefinitionFile = llmProviderRequestDTO.getApiDefinition();
-//        List<String> modelList = llmProviderRequestDTO.getModelList();
-
-//        try (InputStream apiDefinitionInputStream = Files.newInputStream(apiDefinitionFile.toPath())) {
         try {
             List<String> vendorModelList = null;
             if (StringUtils.isNotEmpty(modelList)) {
@@ -214,13 +204,13 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * Updates an existing LLM Provider.
      *
      * @param llmProviderId            The ID of the LLM Provider to update.
-//     * @param name                     The name of the provider (unused in logic).
-//     * @param apiVersion               The API version of the provider (unused in logic).
-//     * @param description              The description of the provider.
-//     * @param configurations           The configurations of the provider.
-//     * @param apiDefinitionInputStream The InputStream for the API definition.
-//     * @param apiDefinitionDetail      The attachment containing API definition details.
-//     * @param modelList                The list of models associated with the LLMProvider.
+     * @param name                     The name of the provider (unused in logic).
+     * @param apiVersion               The API version of the provider (unused in logic).
+     * @param description              The description of the provider.
+     * @param configurations           The configurations of the provider.
+     * @param apiDefinitionInputStream The InputStream for the API definition.
+     * @param apiDefinitionDetail      The attachment containing API definition details.
+     * @param modelList                Comma separated list of models associated with the LLMProvider.
      * @param messageContext           The message context for the request.
      * @return The response with the updated LLM Provider or an error message.
      * @throws APIManagementException If an error occurs while updating the provider.
@@ -231,17 +221,6 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                                       Attachment apiDefinitionDetail, String modelList, MessageContext messageContext)
             throws APIManagementException {
 
-        //    public Response updateLLMProvider(String llmProviderId, LLMProviderRequestDTO llMProviderRequestDTO,
-        //                                      MessageContext messageContext) throws APIManagementException {
-
-        //        String name = llMProviderRequestDTO.getName();
-//        String apiVersion = llMProviderRequestDTO.getApiVersion();
-//        String description = llMProviderRequestDTO.getDescription();
-//        String configurations = llMProviderRequestDTO.getConfigurations();
-//        File apiDefinitionFile = llMProviderRequestDTO.getApiDefinition();
-//        List<String> modelList = llMProviderRequestDTO.getModelList();
-//
-//        try (InputStream apiDefinitionInputStream = Files.newInputStream(apiDefinitionFile.toPath())) {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIAdmin apiAdmin = new APIAdminImpl();

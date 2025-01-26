@@ -14938,10 +14938,6 @@ public class ApiMgtDAO {
                         .getApiDefinition().getBytes()));
                 prepStmtUpdateProvider.setBinaryStream(3, new ByteArrayInputStream(provider
                         .getConfigurations().getBytes()));
-
-//                Gson gson = new Gson();
-//                String modelListString = gson.toJson(provider.getModelList());
-//                prepStmt.setBytes(4, modelListString.getBytes());
                 prepStmtUpdateProvider.setString(4, organization);
                 prepStmtUpdateProvider.setString(5, provider.getId());
                 prepStmtUpdateProvider.executeUpdate();
@@ -15131,16 +15127,6 @@ public class ApiMgtDAO {
                 log.error("Error while retrieving LLM configuration", e);
             }
             provider.setModelList(modelList);
-//            try (InputStream modelListStream = resultSet.getBinaryStream("MODEL_LIST")) {
-//                if (modelListStream != null) {
-//                    String modelListString = IOUtils.toString(modelListStream);
-//                    Gson gson = new Gson();
-//                    provider.setModelList(gson.fromJson(modelListString, List.class));
-////                    provider.setModelList(Collections.singletonList(IOUtils.toString(modelListStream)));
-//                }
-//            } catch (IOException e) {
-//                log.error("Error while retrieving LLM model list", e);
-//            }
             return provider;
         }
     }
