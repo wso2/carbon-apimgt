@@ -375,7 +375,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<RuleViolation> getRuleViolations(String artifactId, String policyId, String rulesetId)
             throws GovernanceException {
-        String SQLQuery = SQLConstants.GET_RULE_VIOLATIONS;
+        String SQLQuery = SQLConstants.GET_RULE_VIOLATIONS_WITH_POLICY;
         List<RuleViolation> ruleViolations = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
@@ -387,6 +387,40 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     RuleViolation ruleViolation = new RuleViolation();
                     ruleViolation.setArtifactId(artifactId);
                     ruleViolation.setPolicyId(policyId);
+                    ruleViolation.setRulesetId(rulesetId);
+                    ruleViolation.setRuleCode(resultSet.getString("RULE_CODE"));
+                    ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
+                    ruleViolation.setSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
+                    ruleViolations.add(ruleViolation);
+                }
+            }
+            return ruleViolations;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_RULE_VIOLATIONS,
+                    e);
+        }
+    }
+
+    /**
+     * Get the rule violations
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return List of rule violations
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    @Override
+    public List<RuleViolation> getRuleViolations(String artifactId, String rulesetId) throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_RULE_VIOLATIONS;
+        List<RuleViolation> ruleViolations = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            prepStmnt.setString(3, rulesetId);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    RuleViolation ruleViolation = new RuleViolation();
+                    ruleViolation.setArtifactId(artifactId);
                     ruleViolation.setRulesetId(rulesetId);
                     ruleViolation.setRuleCode(resultSet.getString("RULE_CODE"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
@@ -534,6 +568,40 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     e);
         }
 
+    }
+
+    /**
+     * Get compliance evaluation results by artifact ID and ruleset ID
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return List of ComplianceEvaluationResult
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     */
+    @Override
+    public List<ComplianceEvaluationResult> getComplianceEvaluationResultsByArtifactIdAndRulesetId
+    (String artifactId, String rulesetId) throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_GOV_COMPLIANCE_EVALUATION_RESULTS_BY_ARTIFACT_AND_POLICY;
+        List<ComplianceEvaluationResult> complianceEvaluationResults = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            prepStmnt.setString(2, rulesetId);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    ComplianceEvaluationResult result = new ComplianceEvaluationResult();
+                    result.setArtifactId(artifactId);
+                    result.setPolicyId(resultSet.getString("POLICY_ID"));
+                    result.setRulesetId(resultSet.getString("RULESET_ID"));
+                    result.setEvaluationSuccess(resultSet.getInt("EVALUATION_RESULT") == 1);
+                    complianceEvaluationResults.add(result);
+                }
+            }
+            return complianceEvaluationResults;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS,
+                    e);
+        }
     }
 
     /**

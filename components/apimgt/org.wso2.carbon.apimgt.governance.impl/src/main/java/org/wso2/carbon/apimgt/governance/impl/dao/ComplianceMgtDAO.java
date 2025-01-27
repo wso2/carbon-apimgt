@@ -113,6 +113,17 @@ public interface ComplianceMgtDAO {
             throws GovernanceException;
 
     /**
+     * Get the rule violations
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return List of rule violations
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    List<RuleViolation> getRuleViolations(String artifactId, String rulesetId)
+            throws GovernanceException;
+
+    /**
      * Get the rule violations by artifact ID
      *
      * @param artifactId Artifact ID
@@ -142,6 +153,18 @@ public interface ComplianceMgtDAO {
      * @throws GovernanceException If an error occurs while getting the compliance evaluation results
      */
     List<ComplianceEvaluationResult> getComplianceEvaluationResultsByArtifactId(String artifactId)
+            throws GovernanceException;
+
+    /**
+     * Get compliance evaluation results by artifact ID and ruleset ID
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return List of ComplianceEvaluationResult
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     */
+    List<ComplianceEvaluationResult> getComplianceEvaluationResultsByArtifactIdAndRulesetId(String artifactId,
+                                                                                            String rulesetId)
             throws GovernanceException;
 
     /**
