@@ -321,7 +321,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
                     e);
         } catch (IOException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.RULESET_CONTENT_CONVERSION_ERROR, e,
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_CONTENT, e,
                     rulesetId, organization);
         }
     }

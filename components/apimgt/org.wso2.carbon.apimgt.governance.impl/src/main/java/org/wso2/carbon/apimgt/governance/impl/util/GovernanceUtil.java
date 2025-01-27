@@ -200,7 +200,7 @@ public class GovernanceUtil {
         try {
             rulesetMap = yamlReader.readValue(content, Map.class);
         } catch (JsonProcessingException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONETENT, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
         }
         return rulesetMap;
     }
@@ -212,12 +212,28 @@ public class GovernanceUtil {
      * @param artifactType Artifact Type
      * @return List of label IDs
      */
-    public static List<String> getLabelsForArtifact(String artifactId, ArtifactType artifactType) {
+    public static List<String> getLabelsForArtifact(String artifactId, ArtifactType artifactType)
+            throws GovernanceException {
         List<String> labels = new ArrayList<>();
         if (ArtifactType.isArtifactAPI(artifactType)) {
             labels = APIMUtil.getLabelIDsForAPI(artifactId);
         }
         return labels;
+    }
+
+    /**
+     * Get artifacts for a label
+     *
+     * @param labelId Label ID
+     * @return Map of Artifact Type, List of Artifact IDs
+     */
+    public static Map<ArtifactType, List<String>> getArtifactsForLabel(String labelId) throws GovernanceException {
+        Map<ArtifactType, List<String>> artifacts = new HashMap<>();
+        List<String> apiIds = APIMUtil.getAPIsByLabel(labelId);
+        if (apiIds != null && !apiIds.isEmpty()) {
+            artifacts.put(ArtifactType.API, apiIds);
+        }
+        return artifacts;
     }
 
     /**

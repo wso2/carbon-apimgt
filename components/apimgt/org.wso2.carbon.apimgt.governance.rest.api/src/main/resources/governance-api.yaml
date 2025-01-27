@@ -1221,7 +1221,7 @@ components:
           items:
             type: string
           example:
-            - "healthcare"
+            - "54d5833a-ca86-44bb-bcda-5b9fcdacd79d"
         createdBy:
           type: string
           description: Identifier of the user who created the governance policy.
