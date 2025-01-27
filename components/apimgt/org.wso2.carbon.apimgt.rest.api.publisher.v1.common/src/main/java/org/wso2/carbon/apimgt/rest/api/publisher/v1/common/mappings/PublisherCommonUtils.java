@@ -2014,10 +2014,12 @@ public class PublisherCommonUtils {
     /**
      * Validate GraphQL Schema.
      *
-     * @param filename file name of the schema
-     * @param schema  GraphQL schema
-     * @param url    URL of the schema
+     * @param filename          File name of the schema
+     * @param schema           GraphQL schema
+     * @param url              URL of the schema
      * @param useIntrospection use introspection to obtain schema
+     * @return GraphQLValidationResponseDTO
+     * @throws APIManagementException when error occurred while validating GraphQL schema
      */
     public static GraphQLValidationResponseDTO validateGraphQLSchema(String filename, String schema, String url,
             Boolean useIntrospection) throws APIManagementException {
@@ -2107,8 +2109,7 @@ public class PublisherCommonUtils {
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 String schemaResponse = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                Type type = new TypeToken<Map<String, Object>>() {
-                }.getType();
+                Type type = new TypeToken<Map<String, Object>>() { }.getType();
                 Map<String, Object> schemaMap = gson.fromJson(schemaResponse, type);
                 Document schemaDocument = new IntrospectionResultToSchema().createSchemaDefinition(
                         (Map<String, Object>) schemaMap.get("data"));
@@ -2124,11 +2125,8 @@ public class PublisherCommonUtils {
                         ExceptionCodes.GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR);
             }
         } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug(
-                        "Exception occurred while generating GraphQL schema from endpoint. Exception: "
-                                + e.getMessage(), e);
-            }
+            log.error("Exception occurred while generating GraphQL schema from endpoint. Exception: " + e.getMessage(),
+                    e);
             throw new APIManagementException("Error occurred while generating GraphQL schema from introspection",
                     ExceptionCodes.GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR);
         }
@@ -2165,9 +2163,9 @@ public class PublisherCommonUtils {
             if (log.isDebugEnabled()) {
                 log.debug("Exception occurred while generating GraphQL schema from url. Exception: " + e.getMessage(),
                         e);
-                throw new APIManagementException("Error occurred while retrieving GraphQL schema from schema URL",
-                        ExceptionCodes.RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR);
             }
+            throw new APIManagementException("Error occurred while retrieving GraphQL schema from schema URL",
+                    ExceptionCodes.RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR);
         }
         return schema;
     }
