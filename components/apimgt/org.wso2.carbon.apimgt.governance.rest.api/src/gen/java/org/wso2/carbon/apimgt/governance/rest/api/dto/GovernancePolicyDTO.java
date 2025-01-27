@@ -193,7 +193,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"healthcare\"]", required = true, value = "List of labels IDs associated with the governance policy.")
+  @ApiModelProperty(example = "[\"54d5833a-ca86-44bb-bcda-5b9fcdacd79d\"]", required = true, value = "List of labels IDs associated with the governance policy.")
   @JsonProperty("labels")
   @NotNull
   public List<String> getLabels() {

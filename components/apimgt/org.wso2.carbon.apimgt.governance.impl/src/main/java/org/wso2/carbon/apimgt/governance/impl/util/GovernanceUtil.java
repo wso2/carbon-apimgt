@@ -200,7 +200,7 @@ public class GovernanceUtil {
         try {
             rulesetMap = yamlReader.readValue(content, Map.class);
         } catch (JsonProcessingException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONETENT, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
         }
         return rulesetMap;
     }
