@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.RequestLabelListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,25 +29,6 @@ import java.util.List;
  * This class used for mapping utility to Label related operations
  */
 public class LabelMappingUtil {
-
-    /**
-     * Converts a RequestLabelListDTO to a Label List
-     *
-     * @param requestLabelListDTO RequestLabelListDTO object
-     * @return Label label object
-     */
-    public static List<Label> fromRequestLabelListDTOToLabelList(
-            RequestLabelListDTO requestLabelListDTO) {
-        List<Label> labels = new ArrayList<>();
-        for (LabelDTO labelDTO : requestLabelListDTO.getLabels()) {
-            Label label = new Label();
-            label.setLabelId(labelDTO.getId());
-            label.setName(labelDTO.getName());
-            label.setDescription(labelDTO.getDescription());
-            labels.add(label);
-        }
-        return labels;
-    }
 
     /**
      * Convert list of labels to LabelListDTO.

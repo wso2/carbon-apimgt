@@ -165,6 +165,31 @@ public class LabelsDAO {
     }
 
     /**
+     * Get all available Labels of the Tenant Domain
+     *
+     * @param tenantDomain tenant domain
+     * @return List<String> list of label IDs
+     * @throws APIManagementException if failed to get labels
+     */
+    public List<String> getAllLabelIDs(String tenantDomain) throws APIManagementException {
+
+        List<String> labelsList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.GET_LABEL_IDS_BY_TENANT_DOMAIN_SQL)) {
+            statement.setString(1, tenantDomain);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    labelsList.add(rs.getString("UUID"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Label IDs for Tenant Domain " + tenantDomain, e);
+        }
+        return labelsList;
+    }
+
+    /**
      * Checks whether the given label name is already available under given tenant domain
      *
      * @param labelName label name

@@ -13938,14 +13938,15 @@ components:
           type: string
           example: Health related APIs
     RequestLabelList:
-      title: Label List for Request
+      title: Label ID List for Request
       type: object
       properties:
         labels:
           type: array
-          description: List of labels.
+          description: List of label IDs.
           items:
-            $ref: '#/components/schemas/Label'
+            type: string
+            example: d7cf8523-9180-4255-84fa-6cb171c1f779
     LabelList:
       title: Label List
       type: object

@@ -1557,10 +1557,10 @@ public interface APIProvider extends APIManager {
      * @param apiID        API UUID
      * @param labelList    List of Labels
      * @param tenantDomain Tenant domain
-     * @return List<Label> list of Label objects
+     * @return List<String> list of Label IDs
      * @throws APIManagementException if failed to get labels
      */
-    List<Label> attachApiLabels(String apiID, List<Label> labelList, String tenantDomain) throws APIManagementException;
+    List<Label> attachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException;
 
     /**
      * Detach labels from an API
@@ -1568,10 +1568,10 @@ public interface APIProvider extends APIManager {
      * @param apiID        API UUID
      * @param labelList    List of Labels
      * @param tenantDomain Tenant domain
-     * @return List<Label> list of Label objects
+     * @return List<String> list of Label IDs
      * @throws APIManagementException if failed to get labels
      */
-    List<Label> detachApiLabels(String apiID, List<Label> labelList, String tenantDomain) throws APIManagementException;
+    List<Label> detachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException;
 
     /**
      * Set existing operation policy mapping to the URI Templates

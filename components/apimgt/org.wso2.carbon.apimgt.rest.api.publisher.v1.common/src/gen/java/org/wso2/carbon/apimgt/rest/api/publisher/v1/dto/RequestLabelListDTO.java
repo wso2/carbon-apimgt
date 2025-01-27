@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import javax.validation.constraints.*;
 
 
@@ -23,24 +22,23 @@ import javax.validation.Valid;
 
 public class RequestLabelListDTO   {
   
-    private List<LabelDTO> labels = new ArrayList<LabelDTO>();
+    private List<String> labels = new ArrayList<String>();
 
   /**
-   * List of labels.
+   * List of label IDs.
    **/
-  public RequestLabelListDTO labels(List<LabelDTO> labels) {
+  public RequestLabelListDTO labels(List<String> labels) {
     this.labels = labels;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of labels.")
-      @Valid
+  @ApiModelProperty(value = "List of label IDs.")
   @JsonProperty("labels")
-  public List<LabelDTO> getLabels() {
+  public List<String> getLabels() {
     return labels;
   }
-  public void setLabels(List<LabelDTO> labels) {
+  public void setLabels(List<String> labels) {
     this.labels = labels;
   }
 
