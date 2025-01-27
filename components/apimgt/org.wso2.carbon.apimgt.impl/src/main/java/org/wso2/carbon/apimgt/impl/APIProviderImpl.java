@@ -5309,18 +5309,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public String getPolicyType(OperationPolicy policy, Map<String, String> apiOperationPolicyIdToClonedPolicyIdMap)
             throws APIManagementException {
-        String policyType = null;
         if (policy.getPolicyId() == null) {
-            policyType = ImportExportConstants.POLICY_TYPE_API;
+            return ImportExportConstants.POLICY_TYPE_API;
         } else {
             // check if cloned policy id is null
             if (apiOperationPolicyIdToClonedPolicyIdMap.get(policy.getPolicyId()) == null) {
-                policyType = ImportExportConstants.POLICY_TYPE_API;
+                return ImportExportConstants.POLICY_TYPE_API;
             } else {
-                policyType = ImportExportConstants.POLICY_TYPE_COMMON;
+                return ImportExportConstants.POLICY_TYPE_COMMON;
             }
         }
-        return policyType;
     }
 
     public String getProductPolicyType(OperationPolicy policy, String apiUUID,
