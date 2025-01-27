@@ -34,6 +34,7 @@
         <init-param>
             <param-name>jaxrs.serviceClasses</param-name>
             <param-value>
+                org.wso2.carbon.apimgt.governance.rest.api.SwaggerYamlApi,
                 org.wso2.carbon.apimgt.governance.rest.api.HealthzApi,
                 org.wso2.carbon.apimgt.governance.rest.api.RulesetsApi,
                 org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApi,

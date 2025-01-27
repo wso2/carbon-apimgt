@@ -80,6 +80,16 @@ public interface ComplianceManager {
             throws GovernanceException;
 
     /**
+     * Get Rule Violations
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return List of Rule Violations
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    List<RuleViolation> getRuleViolations(String artifactId, String rulesetId) throws GovernanceException;
+
+    /**
      * Get the rule violations by artifact ID based on severity
      *
      * @param artifactId Artifact ID
@@ -153,4 +163,15 @@ public interface ComplianceManager {
     Map<ArtifactComplianceState, List<ArtifactInfo>> getComplianceStateOfEvaluatedArtifactsByPolicy(String policyId,
                                                                                                     boolean resolveArtifactName)
             throws GovernanceException;
+
+
+    /**
+     * Is Ruleset Evaluated for Artifact
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return Whether the ruleset is evaluated for the artifact
+     * @throws GovernanceException If an error occurs while checking whether the ruleset is evaluated for the artifact
+     */
+    boolean isRulesetEvaluatedForArtifact(String artifactId, String rulesetId) throws GovernanceException;
 }

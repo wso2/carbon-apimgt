@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultWithoutRulesDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -61,7 +61,7 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private List<RulesetValidationResultDTO> rulesetValidationResults = new ArrayList<RulesetValidationResultDTO>();
+    private List<RulesetValidationResultWithoutRulesDTO> rulesetValidationResults = new ArrayList<RulesetValidationResultWithoutRulesDTO>();
 
   /**
    * UUID of the policy.
@@ -120,7 +120,7 @@ return null;
   /**
    * List of ruleset validation information.
    **/
-  public PolicyAdherenceWithRulesetsDTO rulesetValidationResults(List<RulesetValidationResultDTO> rulesetValidationResults) {
+  public PolicyAdherenceWithRulesetsDTO rulesetValidationResults(List<RulesetValidationResultWithoutRulesDTO> rulesetValidationResults) {
     this.rulesetValidationResults = rulesetValidationResults;
     return this;
   }
@@ -129,10 +129,10 @@ return null;
   @ApiModelProperty(value = "List of ruleset validation information.")
       @Valid
   @JsonProperty("rulesetValidationResults")
-  public List<RulesetValidationResultDTO> getRulesetValidationResults() {
+  public List<RulesetValidationResultWithoutRulesDTO> getRulesetValidationResults() {
     return rulesetValidationResults;
   }
-  public void setRulesetValidationResults(List<RulesetValidationResultDTO> rulesetValidationResults) {
+  public void setRulesetValidationResults(List<RulesetValidationResultWithoutRulesDTO> rulesetValidationResults) {
     this.rulesetValidationResults = rulesetValidationResults;
   }
 

@@ -788,6 +788,50 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_result_read
+  /artifact-compliance/{artifactId}/ruleset-validation-results/{rulesetId}:
+    get:
+      summary: Retrieve ruleset validation results for a specific artifact
+      description: Retrieve ruleset validation results associated with a specific artifact including APIs within the organization using its unique UUID.
+      operationId: getRulesetValidationResultsByArtifactId
+      tags:
+        - Artifact Compliance
+      parameters:
+        - $ref: '#/components/parameters/artifactId'
+        - $ref: '#/components/parameters/rulesetId'
+      responses:
+        "200":
+          description: Successful response with ruleset validation results for the specified artifact.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesetValidationResult'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_result_read
   /policy-adherence:
     get:
       summary: Retrieve adherence status for all policies
@@ -1510,7 +1554,7 @@ components:
           type: array
           description: List of ruleset validation information.
           items:
-            $ref: '#/components/schemas/RulesetValidationResult'
+            $ref: '#/components/schemas/RulesetValidationResultWithoutRules'
     ArtifactComplianceForPolicy:
       type: object
       description: Compliance status of an artifact for a specific policy.
@@ -1567,6 +1611,26 @@ components:
           description: List of followed rules.
           items:
             $ref: '#/components/schemas/RuleValidationResult'
+    RulesetValidationResultWithoutRules:
+      type: object
+      description: Result of the ruleset validation.
+      properties:
+        id:
+          type: string
+          description: UUID of the ruleset.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Name of the ruleset.
+          example: "API Security Ruleset"
+        status:
+          type: string
+          description: Status of the ruleset validation.
+          enum:
+            - PASSED
+            - FAILED
+            - UNAPPLIED
+          example: "PASSED"
     RuleValidationResult:
       type: object
       description: Result of the rule validation.

@@ -165,6 +165,19 @@ public class ComplianceManagerImpl implements ComplianceManager {
     }
 
     /**
+     * Get Rule Violations
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return List of Rule Violations
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    @Override
+    public List<RuleViolation> getRuleViolations(String artifactId, String rulesetId) throws GovernanceException {
+        return complianceMgtDAO.getRuleViolations(artifactId, rulesetId);
+    }
+
+    /**
      * Get the rule violations by artifact ID based on severity
      *
      * @param artifactId Artifact ID
@@ -352,5 +365,27 @@ public class ComplianceManagerImpl implements ComplianceManager {
         }
 
         return complianceStateOfEvaluatedArtifacts;
+    }
+
+    /**
+     * Is Ruleset Evaluated for Artifact
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return Whether the ruleset is evaluated for the artifact
+     * @throws GovernanceException If an error occurs while checking whether the ruleset is evaluated for the artifact
+     */
+    @Override
+    public boolean isRulesetEvaluatedForArtifact(String artifactId, String rulesetId) throws GovernanceException {
+        List<ComplianceEvaluationResult> complianceEvaluationResults =
+                complianceMgtDAO.getComplianceEvaluationResultsByArtifactIdAndRulesetId(artifactId, rulesetId);
+        boolean isRulesetEvaluated = false;
+        for (ComplianceEvaluationResult complianceEvaluationResult : complianceEvaluationResults) {
+            if (rulesetId.equals(complianceEvaluationResult.getRulesetId())) {
+                isRulesetEvaluated = true;
+                break;
+            }
+        }
+        return isRulesetEvaluated;
     }
 }
