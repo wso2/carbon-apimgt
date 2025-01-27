@@ -101,14 +101,31 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return Map of artifact ID and artifact type
      */
     private List<ArtifactInfo> getArtifactsByLabelsAndGovernableState(List<String> labels,
-                                                                      List<GovernableState> governableStates) {
+                                                                      List<GovernableState> governableStates)
+            throws GovernanceException {
         List<ArtifactInfo> artifactInfoList = new ArrayList<>();
-        List<String> correspondingAPIStates =
-                APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
 
-        // Get API Artifacts
+        // Get Artifacts
         for (String label : labels) {
-            // TODO: Get artifacts by label, Filter APIs from state, Get artifact type from APIM
+            Map<ArtifactType, List<String>> artifactsMap = GovernanceUtil.getArtifactsForLabel(label);
+            for (ArtifactType artifactType : artifactsMap.keySet()) {
+                List<String> artifactIds = artifactsMap.get(artifactType);
+
+                if (artifactType.equals(ArtifactType.API)) {
+                    // Get all the API lifecycle states that correspond to the governable state
+                    List<String> correspondingAPIStates =
+                            APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
+                    for (String artifactId : artifactIds) {
+                        // If the API is in one of the corresponding states, add it to the list
+                        if (correspondingAPIStates.contains(APIMUtil.getAPIStatus(artifactId))) {
+                            ArtifactInfo artifactInfo = new ArtifactInfo();
+                            artifactInfo.setArtifactId(artifactId);
+                            artifactInfo.setArtifactType(artifactType);
+                            artifactInfoList.add(artifactInfo);
+                        }
+                    }
+                }
+            }
         }
         return artifactInfoList;
     }
