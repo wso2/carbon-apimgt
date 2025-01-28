@@ -84,13 +84,21 @@ public class ComplianceManagerImpl implements ComplianceManager {
         // Get the policy and its labels and associated governable states
 
         GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
-        List<String> labels = policy.getLabels();
 
+        List<String> labels = policy.getLabels();
         List<GovernableState> governableStates = policy.getGovernableStates();
 
         // Get artifacts that should be governed by the policy
         List<ArtifactInfo> artifacts = new ArrayList<>();
-        artifacts.addAll(getArtifactsByLabelsAndGovernableState(labels, governableStates));
+
+        // TODO: Need to get specific type of artifacts from APIM
+        if (labels != null && !labels.isEmpty()) {
+            artifacts.addAll(getArtifactsByLabelsAndGovernableStates(labels, governableStates));
+        } else {
+            // If labels are not defined, the policy is an organization level policy
+            artifacts.addAll(getArtifactsByGovernableStates(governableStates, organization));
+        }
+        artifacts.addAll(getArtifactsByLabelsAndGovernableStates(labels, governableStates));
 
         for (ArtifactInfo artifact : artifacts) {
             String artifactId = artifact.getArtifactId();
@@ -101,39 +109,80 @@ public class ComplianceManagerImpl implements ComplianceManager {
     }
 
     /**
+     * Get Artifacts by Governable States
+     *
+     * @param governableStates List of governable states
+     * @param organization     Organization
+     * @return List of unique artifact information
+     */
+    private List<ArtifactInfo> getArtifactsByGovernableStates(List<GovernableState> governableStates,
+                                                              String organization) throws GovernanceException {
+        Map<ArtifactType, List<String>> artifactsMap = GovernanceUtil.getAllArtifactsMap(organization);
+        return filterAndCollectArtifacts(artifactsMap, governableStates);
+    }
+
+    /**
      * Get Artifacts by Labels and Governable State
      *
      * @param labels           List of labels
      * @param governableStates List of governable states
-     * @return Map of artifact ID and artifact type
+     * @return List of unique artifact information
      */
-    private List<ArtifactInfo> getArtifactsByLabelsAndGovernableState(List<String> labels,
-                                                                      List<GovernableState> governableStates)
+    private List<ArtifactInfo> getArtifactsByLabelsAndGovernableStates(List<String> labels,
+                                                                       List<GovernableState> governableStates)
+            throws GovernanceException {
+        List<ArtifactInfo> artifactInfoList = new ArrayList<>();
+        Set<String> artifactIds = new HashSet<>(); // Track unique artifact IDs
+
+        // Get Artifacts for each label and merge results
+        for (String label : labels) {
+            Map<ArtifactType, List<String>> artifactsMap = GovernanceUtil.getArtifactsForLabel(label);
+
+            // Collect artifacts by filtering based on governable states
+            List<ArtifactInfo> filteredArtifacts = filterAndCollectArtifacts(artifactsMap, governableStates);
+
+            // Add only unique artifacts based on artifactId
+            for (ArtifactInfo artifactInfo : filteredArtifacts) {
+                if (artifactIds.add(artifactInfo.getArtifactId())) {
+                    artifactInfoList.add(artifactInfo);
+                }
+            }
+        }
+
+        return artifactInfoList;
+    }
+
+    /**
+     * Filter and collect artifacts based on governable states
+     *
+     * @param artifactsMap     Map of artifact type to list of artifact IDs
+     * @param governableStates List of governable states
+     * @return List of unique artifact information
+     */
+    private List<ArtifactInfo> filterAndCollectArtifacts(Map<ArtifactType, List<String>> artifactsMap,
+                                                         List<GovernableState> governableStates)
             throws GovernanceException {
         List<ArtifactInfo> artifactInfoList = new ArrayList<>();
 
-        // Get Artifacts
-        for (String label : labels) {
-            Map<ArtifactType, List<String>> artifactsMap = GovernanceUtil.getArtifactsForLabel(label);
-            for (ArtifactType artifactType : artifactsMap.keySet()) {
-                List<String> artifactIds = artifactsMap.get(artifactType);
+        for (ArtifactType artifactType : artifactsMap.keySet()) {
+            List<String> artifactIds = artifactsMap.get(artifactType);
 
-                if (artifactType.equals(ArtifactType.API)) {
-                    // Get all the API lifecycle states that correspond to the governable state
-                    List<String> correspondingAPIStates =
-                            APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
-                    for (String artifactId : artifactIds) {
-                        // If the API is in one of the corresponding states, add it to the list
-                        if (correspondingAPIStates.contains(APIMUtil.getAPIStatus(artifactId))) {
-                            ArtifactInfo artifactInfo = new ArtifactInfo();
-                            artifactInfo.setArtifactId(artifactId);
-                            artifactInfo.setArtifactType(artifactType);
-                            artifactInfoList.add(artifactInfo);
-                        }
+            if (artifactType.equals(ArtifactType.API)) {
+                // Get all the API lifecycle states that correspond to the governable state
+                List<String> correspondingAPIStates =
+                        APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
+                for (String artifactId : artifactIds) {
+                    // If the API is in one of the corresponding states and not already added, add it to the list
+                    if (correspondingAPIStates.contains(APIMUtil.getAPIStatus(artifactId))) {
+                        ArtifactInfo artifactInfo = new ArtifactInfo();
+                        artifactInfo.setArtifactId(artifactId);
+                        artifactInfo.setArtifactType(artifactType);
+                        artifactInfoList.add(artifactInfo);
                     }
                 }
             }
         }
+
         return artifactInfoList;
     }
 

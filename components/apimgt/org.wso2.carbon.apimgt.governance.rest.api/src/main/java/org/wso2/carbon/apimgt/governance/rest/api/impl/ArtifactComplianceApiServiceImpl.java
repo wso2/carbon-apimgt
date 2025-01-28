@@ -340,36 +340,37 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
     /**
      * Get organizational artifact compliance summary
      *
-     * @param artifactType   artifact type
-     * @param messageContext message context
+     * @param artifactTypeString artifact type
+     * @param messageContext     message context
      * @return Response
      * @throws GovernanceException if an error occurs while getting the artifact compliance summary
      */
-    public Response getArtifactComplianceSummary(String artifactType,
+    public Response getArtifactComplianceSummary(String artifactTypeString,
                                                  MessageContext messageContext) throws GovernanceException {
+
         ComplianceManager complianceManager = new ComplianceManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        artifactType = artifactType != null ? artifactType : String.valueOf(ArtifactType.API);
-
-        if (ArtifactType.isArtifactAPI(artifactType)) {
-            // Get total number of APIs in the organization
-            int totalAPIsCount = APIMUtil.getAllAPIs(organization).size();
-
-            // Get total number of APIs that are compliant and non-compliant
-            Map<ArtifactComplianceState, List<String>> compliancyMap =
-                    complianceManager.getComplianceStateOfEvaluatedArtifacts(
-                            ArtifactType.API, organization);
-
-            int compliantAPIsCount = compliancyMap.get(ArtifactComplianceState.COMPLIANT).size();
-            int nonCompliantAPIsCount = compliancyMap.get(ArtifactComplianceState.NON_COMPLIANT).size();
-
-            ArtifactComplianceSummaryDTO summaryDTO = ResultsMappingUtil.getArtifactComplianceSummary(
-                    totalAPIsCount, compliantAPIsCount, nonCompliantAPIsCount);
-            return Response.ok().entity(summaryDTO).build();
-        } else {
+        // If the artifact type is not valid, return a bad request response
+        if (!ArtifactType.isArtifactAPI(artifactTypeString)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
+
+        // Get total number of artifacts in the organization
+        ArtifactType artifactType = ArtifactType.fromString(artifactTypeString);
+        int totalArtifactsCount = GovernanceUtil.getAllArtifacts(artifactType, organization).size();
+
+        // Get total number of APIs that are compliant and non-compliant
+        Map<ArtifactComplianceState, List<String>> compliancyMap =
+                complianceManager.getComplianceStateOfEvaluatedArtifacts(
+                        artifactType, organization);
+
+        int compliantArtifactCount = compliancyMap.get(ArtifactComplianceState.COMPLIANT).size();
+        int nonCompliantArtifactCount = compliancyMap.get(ArtifactComplianceState.NON_COMPLIANT).size();
+
+        ArtifactComplianceSummaryDTO summaryDTO = ResultsMappingUtil.getArtifactComplianceSummary(
+                totalArtifactsCount, compliantArtifactCount, nonCompliantArtifactCount);
+        return Response.ok().entity(summaryDTO).build();
     }
 
     /**

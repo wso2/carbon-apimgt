@@ -112,6 +112,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     ERROR_WHILE_RETRIEVING_LABELS_BY_POLICY_ID(401011, "Retrieving labels by policy id failed", 500, "Error while " +
             "retrieving labels by policy id: %s", true),
+    INVALID_POLICY_ACTION(501008, "Invalid policy action.", 400, "Invalid action provided for the policy: %s"),
+
 
     // Artifact related codes
     ERROR_WHILE_SAVING_ARTIFACT_INFO(501000, "Error while saving artifact info.", 500, "Error while saving " +
@@ -142,6 +144,10 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     ERROR_WHILE_DELETING_GOVERNANCE_DATA(501007, "Error while deleting governance data.", 500, "Error while deleting " +
             "governance data for artifact: %s", true),
+
+    ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING(501008, "Error while changing processing requests" +
+            " to pending.", 500, "Error while changing processing requests to pending",
+            true),
 
     // Governance Results related codes
 

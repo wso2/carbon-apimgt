@@ -42,7 +42,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     private static final Log log = LogFactory.getLog(APIMGovernanceServiceImpl.class);
     private ComplianceManagerImpl complianceManager;
 
-    APIMGovernanceServiceImpl() {
+    public APIMGovernanceServiceImpl() {
         complianceManager = new ComplianceManagerImpl();
     }
 
