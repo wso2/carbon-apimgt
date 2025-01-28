@@ -4554,7 +4554,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
         log.info("******* Gov Check: importAPIDefinition *******");
-        checkGovernanceCompliance(apiToAdd.getUuid(), validationArtifact(apiToAdd), GovernableState.API_CREATE, organization);
+//        checkGovernanceCompliance(apiToAdd.getUuid(), validationArtifact(apiToAdd), GovernableState.API_CREATE, organization);
         API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
                 service, validationResponse, isServiceAPI, syncOperations);
         return APIMappingUtil.fromAPItoDTO(addedAPI);

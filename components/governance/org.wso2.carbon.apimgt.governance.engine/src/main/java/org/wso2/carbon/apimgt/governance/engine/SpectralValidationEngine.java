@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.governance.engine;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -30,6 +32,8 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
+import org.wso2.rule.validator.InvalidRulesetException;
+import org.wso2.rule.validator.validator.Validator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +49,7 @@ import java.util.Map;
         service = ValidationEngine.class
 )
 public class SpectralValidationEngine implements ValidationEngine {
+    public static final Log log = LogFactory.getLog(SpectralValidationEngine.class);
 
     /**
      * Check if a ruleset is valid
@@ -128,9 +133,7 @@ public class SpectralValidationEngine implements ValidationEngine {
 
         try {
 
-//            String validationResultJsonString = Validator
-//                    .validateDocument(target, ruleset.getRulesetContent());
-            String validationResultJsonString = "";
+            String validationResultJsonString = Validator.validateDocument(target, ruleset.getRulesetContent());
 
             // Parse JSON string to JsonNode
             JsonNode jsonNode = objectMapper.readTree(validationResultJsonString);
@@ -149,7 +152,11 @@ public class SpectralValidationEngine implements ValidationEngine {
             return violations;
 
         } catch (JsonProcessingException e) {
+            log.error("Error while parsing validation result JSON string", e);
             throw new GovernanceException("Error while parsing validation result JSON string", e);
+        } catch (Exception e) {
+            log.error("Error occurred while verifying governance compliance ", e);
+            throw new GovernanceException("Error occurred while verifying governance compliance ", e);
         }
     }
 

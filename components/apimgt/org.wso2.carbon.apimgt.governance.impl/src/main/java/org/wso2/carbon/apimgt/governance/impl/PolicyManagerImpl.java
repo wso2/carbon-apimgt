@@ -207,6 +207,4 @@ public class PolicyManagerImpl implements PolicyManager {
         }
         return false;
     }
-
-
 }

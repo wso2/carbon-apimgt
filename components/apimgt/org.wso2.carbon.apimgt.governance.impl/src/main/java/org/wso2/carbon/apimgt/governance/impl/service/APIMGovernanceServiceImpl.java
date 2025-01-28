@@ -80,7 +80,5 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             new ComplianceManagerImpl().handleComplianceEvaluationAsync
                     (artifactId, artifactType, applicablePolicyIds, organization);
         }
-
-
     }
 }
