@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
@@ -34,6 +35,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -51,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -163,6 +166,7 @@ public class APIMUtil {
 
     /**
      * Get the corresponding API statuses for governable states
+     * That is the states on APIM side can be mapped to the states on the governance side
      *
      * @param governableStates List of governable states
      * @return List of corresponding API statuses
@@ -278,12 +282,32 @@ public class APIMUtil {
      *
      * @param apiId API ID
      * @return List of labels IDs
+     * @throws GovernanceException If an error occurs while getting the labels for the API
      */
-    public static List<String> getLabelIDsForAPI(String apiId) {
-        List<String> labelIDs = new ArrayList<>();
-        labelIDs.add("1234");
-        labelIDs.add("5678");
-        return labelIDs; // TODO: Connect to  the database and get the labels for the API
+    public static List<String> getLabelIDsForAPI(String apiId) throws GovernanceException {
+        try {
+            return LabelsDAO.getInstance().getMappedLabelIDsForApi(apiId);
+        } catch (APIManagementException e) {
+            throw new GovernanceException("Error while getting the labels for the API with ID: " + apiId, e);
+        }
+    }
+
+    /**
+     * Get the APIs for the label
+     *
+     * @param labelId Label ID
+     * @return List of API IDs
+     * @throws GovernanceException If an error occurs while getting the APIs for the label
+     */
+    public static List<String> getAPIsByLabel(String labelId) throws GovernanceException {
+        try {
+            List<ApiResult> apiResults = LabelsDAO.getInstance().getMappedApisForLabel(labelId);
+            return apiResults.stream()
+                    .map(ApiResult::getId)
+                    .collect(Collectors.toList());
+        } catch (APIManagementException e) {
+            throw new GovernanceException("Error while getting the APIs for the label with ID: " + labelId, e);
+        }
     }
 
     /**

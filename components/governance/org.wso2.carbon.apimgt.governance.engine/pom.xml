@@ -49,7 +49,7 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>rule.validator</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

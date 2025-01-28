@@ -5,11 +5,13 @@ import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
@@ -24,6 +26,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryD
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceWithRulesetsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultWithoutRulesDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.ResultsMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
@@ -146,22 +149,21 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
                 complianceManager.getEvaluatedRulesetsByArtifactIdAndPolicyId(artifactId, policyId);
 
         // Store the ruleset validation results
-        List<RulesetValidationResultDTO> rulesetValidationResults = new ArrayList<>();
+        List<RulesetValidationResultWithoutRulesDTO> rulesetValidationResults = new ArrayList<>();
 
         // Get ruleset validation results for each ruleset
         for (Ruleset ruleset : applicableRulesets) {
             boolean isRulesetEvaluated = evaluatedRulesets.contains(ruleset.getId());
 
-            RulesetValidationResultDTO rulesetValidationResultDTO = getRulesetValidationResults(ruleset, artifactId,
+            RulesetValidationResultWithoutRulesDTO resultDTO = getRulesetValidationResults(ruleset, artifactId,
                     policyId, isRulesetEvaluated);
-
-            rulesetValidationResults.add(rulesetValidationResultDTO);
+            rulesetValidationResults.add(resultDTO);
         }
 
         // If all rulesets are passed, set the policy adherence status to passed
         if (rulesetValidationResults.stream().allMatch(
                 rulesetValidationResultDTO -> rulesetValidationResultDTO.getStatus() ==
-                        RulesetValidationResultDTO.StatusEnum.PASSED)) {
+                        RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED)) {
             policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.FOLLOWED);
         } else {
             policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED);
@@ -182,60 +184,32 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
      * @return RulesetValidationResultDTO
      * @throws GovernanceException if an error occurs while updating the ruleset validation results
      */
-    private RulesetValidationResultDTO getRulesetValidationResults(Ruleset ruleset,
-                                                                   String artifactId, String policyId,
-                                                                   boolean isRulesetEvaluated)
+    private RulesetValidationResultWithoutRulesDTO getRulesetValidationResults(Ruleset ruleset,
+                                                                               String artifactId, String policyId,
+                                                                               boolean isRulesetEvaluated)
             throws GovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManagerImpl();
-        RulesetManager rulesetManager = new RulesetManagerImpl();
 
-        String rulesetId = ruleset.getId();
-
-        RulesetValidationResultDTO rulesetValidationResultDTO = new RulesetValidationResultDTO();
-        rulesetValidationResultDTO.setId(ruleset.getId());
-        rulesetValidationResultDTO.setName(ruleset.getName());
-
-
-        Set<String> violatedRuleCodes = new HashSet<>();
-        List<RuleValidationResultDTO> violatedRules = new ArrayList<>();
-        List<RuleValidationResultDTO> followedRules = new ArrayList<>();
-
-        // Fetch all rules within the current ruleset
-        List<Rule> allRules = rulesetManager.getRules(rulesetId);
-        Map<String, Rule> rulesMap = allRules.stream()
-                .collect(Collectors.toMap(Rule::getCode, rule -> rule));
+        RulesetValidationResultWithoutRulesDTO rulesetDTO = new RulesetValidationResultWithoutRulesDTO();
+        rulesetDTO.setId(ruleset.getId());
+        rulesetDTO.setName(ruleset.getName());
 
         // Fetch violations for the current ruleset
-        List<RuleViolation> ruleViolations = complianceManager.getRuleViolations(
-                artifactId, policyId, rulesetId);
+        List<RuleViolation> ruleViolations = complianceManager
+                .getRuleViolations(artifactId, policyId, ruleset.getId());
 
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
         if (!isRulesetEvaluated) {
-            rulesetValidationResultDTO.setStatus(RulesetValidationResultDTO.StatusEnum.UNAPPLIED);
-            return rulesetValidationResultDTO;
+            rulesetDTO.setStatus(RulesetValidationResultWithoutRulesDTO.StatusEnum.UNAPPLIED);
+            return rulesetDTO;
         }
 
-        // IMPORTANT: NOTE THAT THERE CAN BE MULTIPLE VIOLATIONS WITH SAME CODE BUT DIFFERENT PATH
-        for (RuleViolation ruleViolation : ruleViolations) {
-            Rule rule = rulesMap.get(ruleViolation.getRuleCode());
-            violatedRules.add(ResultsMappingUtil.getRuleValidationResultDTO(rule, ruleViolation));
-            violatedRuleCodes.add(rule.getCode());
-        }
+        rulesetDTO.setStatus(ruleViolations.isEmpty() ?
+                RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED :
+                RulesetValidationResultWithoutRulesDTO.StatusEnum.FAILED);
 
-        for (Rule rule : allRules) {
-            if (!violatedRuleCodes.contains(rule.getCode())) {
-                followedRules.add(ResultsMappingUtil.getRuleValidationResultDTO(rule, null));
-            }
-        }
-
-        rulesetValidationResultDTO.setViolatedRules(violatedRules);
-        rulesetValidationResultDTO.setFollowedRules(followedRules);
-        rulesetValidationResultDTO.setStatus(violatedRules.isEmpty() ?
-                RulesetValidationResultDTO.StatusEnum.PASSED :
-                RulesetValidationResultDTO.StatusEnum.FAILED);
-
-        return rulesetValidationResultDTO;
+        return rulesetDTO;
     }
 
     /**
@@ -396,5 +370,74 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         } else {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
+    }
+
+    /**
+     * Get ruleset validation results by artifact ID
+     *
+     * @param artifactId     artifact ID
+     * @param rulesetId      ruleset ID
+     * @param messageContext message context
+     * @return Response
+     * @throws GovernanceException if an error occurs while getting the ruleset validation results
+     */
+    @Override
+    public Response getRulesetValidationResultsByArtifactId(String artifactId, String rulesetId,
+                                                            MessageContext messageContext) throws GovernanceException {
+
+        ComplianceManager complianceManager = new ComplianceManagerImpl();
+        RulesetManager rulesetManager = new RulesetManagerImpl();
+
+        RulesetInfo rulesetInfo = rulesetManager.getRulesetById(rulesetId);
+
+        // If the ruleset is not found, throw an exception
+        if (rulesetInfo == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        }
+
+        RulesetValidationResultDTO rulesetValidationResultDTO = new RulesetValidationResultDTO();
+        rulesetValidationResultDTO.setId(rulesetId);
+        rulesetValidationResultDTO.setName(rulesetInfo.getName());
+
+        // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
+        boolean isRulesetEvaluatedForArtifact = complianceManager
+                .isRulesetEvaluatedForArtifact(artifactId, rulesetId);
+        if (!isRulesetEvaluatedForArtifact) {
+            rulesetValidationResultDTO.setStatus(RulesetValidationResultDTO.StatusEnum.UNAPPLIED);
+            return Response.ok().entity(rulesetValidationResultDTO).build();
+        }
+
+        Set<String> violatedRuleCodes = new HashSet<>();
+        List<RuleValidationResultDTO> violatedRules = new ArrayList<>();
+        List<RuleValidationResultDTO> followedRules = new ArrayList<>();
+
+        // Fetch all rules within the current ruleset
+        List<Rule> allRules = rulesetManager.getRules(rulesetId);
+        Map<String, Rule> rulesMap = allRules.stream()
+                .collect(Collectors.toMap(Rule::getCode, rule -> rule));
+
+        // Fetch violations for the current ruleset
+        List<RuleViolation> ruleViolations = complianceManager.getRuleViolations(artifactId, rulesetId);
+
+        // IMPORTANT: NOTE THAT THERE CAN BE MULTIPLE VIOLATIONS WITH SAME CODE BUT DIFFERENT PATH
+        for (RuleViolation ruleViolation : ruleViolations) {
+            Rule rule = rulesMap.get(ruleViolation.getRuleCode());
+            violatedRules.add(ResultsMappingUtil.getRuleValidationResultDTO(rule, ruleViolation));
+            violatedRuleCodes.add(rule.getCode());
+        }
+
+        for (Rule rule : allRules) {
+            if (!violatedRuleCodes.contains(rule.getCode())) {
+                followedRules.add(ResultsMappingUtil.getRuleValidationResultDTO(rule, null));
+            }
+        }
+
+        rulesetValidationResultDTO.setViolatedRules(violatedRules);
+        rulesetValidationResultDTO.setFollowedRules(followedRules);
+        rulesetValidationResultDTO.setStatus(violatedRules.isEmpty() ?
+                RulesetValidationResultDTO.StatusEnum.PASSED :
+                RulesetValidationResultDTO.StatusEnum.FAILED);
+
+        return Response.ok().entity(rulesetValidationResultDTO).build();
     }
 }

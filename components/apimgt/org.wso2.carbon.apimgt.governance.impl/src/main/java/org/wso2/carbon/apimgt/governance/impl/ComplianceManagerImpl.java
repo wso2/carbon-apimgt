@@ -101,14 +101,31 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return Map of artifact ID and artifact type
      */
     private List<ArtifactInfo> getArtifactsByLabelsAndGovernableState(List<String> labels,
-                                                                      List<GovernableState> governableStates) {
+                                                                      List<GovernableState> governableStates)
+            throws GovernanceException {
         List<ArtifactInfo> artifactInfoList = new ArrayList<>();
-        List<String> correspondingAPIStates =
-                APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
 
-        // Get API Artifacts
+        // Get Artifacts
         for (String label : labels) {
-            // TODO: Get artifacts by label, Filter APIs from state, Get artifact type from APIM
+            Map<ArtifactType, List<String>> artifactsMap = GovernanceUtil.getArtifactsForLabel(label);
+            for (ArtifactType artifactType : artifactsMap.keySet()) {
+                List<String> artifactIds = artifactsMap.get(artifactType);
+
+                if (artifactType.equals(ArtifactType.API)) {
+                    // Get all the API lifecycle states that correspond to the governable state
+                    List<String> correspondingAPIStates =
+                            APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
+                    for (String artifactId : artifactIds) {
+                        // If the API is in one of the corresponding states, add it to the list
+                        if (correspondingAPIStates.contains(APIMUtil.getAPIStatus(artifactId))) {
+                            ArtifactInfo artifactInfo = new ArtifactInfo();
+                            artifactInfo.setArtifactId(artifactId);
+                            artifactInfo.setArtifactType(artifactType);
+                            artifactInfoList.add(artifactInfo);
+                        }
+                    }
+                }
+            }
         }
         return artifactInfoList;
     }
@@ -162,6 +179,19 @@ public class ComplianceManagerImpl implements ComplianceManager {
     public List<RuleViolation> getRuleViolations(String artifactId, String policyId, String rulesetId)
             throws GovernanceException {
         return complianceMgtDAO.getRuleViolations(artifactId, policyId, rulesetId);
+    }
+
+    /**
+     * Get Rule Violations
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return List of Rule Violations
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    @Override
+    public List<RuleViolation> getRuleViolations(String artifactId, String rulesetId) throws GovernanceException {
+        return complianceMgtDAO.getRuleViolations(artifactId, rulesetId);
     }
 
     /**
@@ -352,5 +382,27 @@ public class ComplianceManagerImpl implements ComplianceManager {
         }
 
         return complianceStateOfEvaluatedArtifacts;
+    }
+
+    /**
+     * Is Ruleset Evaluated for Artifact
+     *
+     * @param artifactId Artifact ID
+     * @param rulesetId  Ruleset ID
+     * @return Whether the ruleset is evaluated for the artifact
+     * @throws GovernanceException If an error occurs while checking whether the ruleset is evaluated for the artifact
+     */
+    @Override
+    public boolean isRulesetEvaluatedForArtifact(String artifactId, String rulesetId) throws GovernanceException {
+        List<ComplianceEvaluationResult> complianceEvaluationResults =
+                complianceMgtDAO.getComplianceEvaluationResultsByArtifactIdAndRulesetId(artifactId, rulesetId);
+        boolean isRulesetEvaluated = false;
+        for (ComplianceEvaluationResult complianceEvaluationResult : complianceEvaluationResults) {
+            if (rulesetId.equals(complianceEvaluationResult.getRulesetId())) {
+                isRulesetEvaluated = true;
+                break;
+            }
+        }
+        return isRulesetEvaluated;
     }
 }

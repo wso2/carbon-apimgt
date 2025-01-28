@@ -363,6 +363,18 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 List<String> rulesetsToRemove = new ArrayList<>(existingRulesets);
                 rulesetsToAdd.removeAll(existingRulesets);
                 rulesetsToRemove.removeAll(rulesetsToBeUpdatedList);
+                // Remove old rulesets
+                if (!rulesetsToRemove.isEmpty()) {
+                    try (PreparedStatement deleteStatement =
+                                 connection.prepareStatement(SQLConstants.DELETE_POLICY_RULESET_MAPPING)) {
+                        for (String rulesetId : rulesetsToRemove) {
+                            deleteStatement.setString(1, policyId);
+                            deleteStatement.setString(2, rulesetId);
+                            deleteStatement.addBatch();
+                        }
+                        deleteStatement.executeBatch();
+                    }
+                }
                 // Add new rulesets
                 if (!rulesetsToAdd.isEmpty()) {
                     try (PreparedStatement insertStatement =
@@ -376,19 +388,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                         insertStatement.executeBatch();
                     }
                 }
-                // Remove old rulesets
-                if (!rulesetsToRemove.isEmpty()) {
-                    try (PreparedStatement deleteStatement =
-                                 connection.prepareStatement(SQLConstants.DELETE_POLICY_RULESET_MAPPING)) {
-                        for (String rulesetId : rulesetsToRemove) {
-                            deleteStatement.setString(1, policyId);
-                            deleteStatement.setString(2, rulesetId);
-                            deleteStatement.addBatch();
-                        }
-                        deleteStatement.executeBatch();
-                    }
-                }
-
                 updateLabelsForPolicy(policyId, governancePolicy, connection);
                 updateGovernableStatesForPolicy(policyId, governancePolicy, connection);
                 updateActionsForPolicy(policyId, governancePolicy, connection);
@@ -434,6 +433,18 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         List<GovernableState> statesToRemove = new ArrayList<>(existingStates);
         statesToAdd.removeAll(existingStates);
         statesToRemove.removeAll(statesToBeUpdated);
+        // Remove old states
+        if (!statesToRemove.isEmpty()) {
+            try (PreparedStatement deleteStatement =
+                         connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_STATE_MAPPING)) {
+                for (GovernableState state : statesToRemove) {
+                    deleteStatement.setString(1, policyId);
+                    deleteStatement.setString(2, String.valueOf(state));
+                    deleteStatement.addBatch();
+                }
+                deleteStatement.executeBatch();
+            }
+        }
         // Add new states
         if (!statesToAdd.isEmpty()) {
             try (PreparedStatement insertStatement =
@@ -447,18 +458,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 insertStatement.executeBatch();
             }
         }
-        // Remove old states
-        if (!statesToRemove.isEmpty()) {
-            try (PreparedStatement deleteStatement =
-                         connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_STATE_MAPPING)) {
-                for (GovernableState state : statesToRemove) {
-                    deleteStatement.setString(1, policyId);
-                    deleteStatement.setString(2, String.valueOf(state));
-                    deleteStatement.addBatch();
-                }
-                deleteStatement.executeBatch();
-            }
-        }
+
     }
 
     /**
@@ -488,6 +488,18 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         List<String> labelsToRemove = new ArrayList<>(existingLabels);
         labelsToAdd.removeAll(existingLabels);
         labelsToRemove.removeAll(labelsToBeUpdated);
+        // Remove old labels
+        if (!labelsToRemove.isEmpty()) {
+            try (PreparedStatement deleteStatement =
+                         connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_LABEL_MAPPING)) {
+                for (String label : labelsToRemove) {
+                    deleteStatement.setString(1, policyId);
+                    deleteStatement.setString(2, label);
+                    deleteStatement.addBatch();
+                }
+                deleteStatement.executeBatch();
+            }
+        }
         // Add new labels
         if (!labelsToAdd.isEmpty()) {
             try (PreparedStatement insertStatement =
@@ -499,18 +511,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     insertStatement.addBatch();
                 }
                 insertStatement.executeBatch();
-            }
-        }
-        // Remove old labels
-        if (!labelsToRemove.isEmpty()) {
-            try (PreparedStatement deleteStatement =
-                         connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_LABEL_MAPPING)) {
-                for (String label : labelsToRemove) {
-                    deleteStatement.setString(1, policyId);
-                    deleteStatement.setString(2, label);
-                    deleteStatement.addBatch();
-                }
-                deleteStatement.executeBatch();
             }
         }
     }
@@ -546,6 +546,20 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         List<GovernanceAction> actionsToRemove = new ArrayList<>(existingActions);
         actionsToAdd.removeAll(existingActions);
         actionsToRemove.removeAll(actionsToBeUpdated);
+        // Remove old actions
+        if (!actionsToRemove.isEmpty()) {
+            try (PreparedStatement deleteStatement =
+                         connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_ACTION_MAPPING)) {
+                for (GovernanceAction action : actionsToRemove) {
+                    deleteStatement.setString(1, policyId);
+                    deleteStatement.setString(2, String.valueOf(action.getGovernableState()));
+                    deleteStatement.setString(3, String.valueOf(action.getRuleSeverity()));
+                    deleteStatement.setString(4, String.valueOf(action.getType()));
+                    deleteStatement.addBatch();
+                }
+                deleteStatement.executeBatch();
+            }
+        }
         // Add new actions
         if (!actionsToAdd.isEmpty()) {
             try (PreparedStatement insertStatement =
@@ -561,20 +575,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 insertStatement.executeBatch();
             }
         }
-        // Remove old actions
-        if (!actionsToRemove.isEmpty()) {
-            try (PreparedStatement deleteStatement =
-                         connection.prepareStatement(SQLConstants.DELETE_GOVERNANCE_POLICY_ACTION_MAPPING)) {
-                for (GovernanceAction action : actionsToRemove) {
-                    deleteStatement.setString(1, policyId);
-                    deleteStatement.setString(2, String.valueOf(action.getGovernableState()));
-                    deleteStatement.setString(3, String.valueOf(action.getRuleSeverity()));
-                    deleteStatement.setString(4, String.valueOf(action.getType()));
-                    deleteStatement.addBatch();
-                }
-                deleteStatement.executeBatch();
-            }
-        }
+
     }
 
     /**

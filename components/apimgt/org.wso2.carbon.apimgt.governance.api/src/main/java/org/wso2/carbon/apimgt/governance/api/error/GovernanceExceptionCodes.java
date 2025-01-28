@@ -20,75 +20,77 @@ package org.wso2.carbon.apimgt.governance.api.error;
 
 public enum GovernanceExceptionCodes implements ErrorHandler {
 
-    // TODO: Clean up unused codes after implementation
+    // TODO: Clean up
+
     // General exceptions
-    INTERNAL_SERVER_ERROR(100000, "Internal server error.", 500, "Internal server error occurred while processing the request.", true),
-    ORGANIZATION_NOT_FOUND(900357, "Organization Not Found", 400, "Organization is not found in the request"),
-
-    // Unauthorized
-    JWT_ASSERTION_NOT_FOUND(100001, "Unauthorized request", 401, "X-JWT-Assertion not found in the request header."),
-    INVALID_JWT_ASSERTION(100002, "Invalid JWT assertion", 401, "Invalid JWT assertion found in the request header."),
-    ORGANIZATION_ID_HEADER_NOT_FOUND(100003, "Required header not found", 400, "Organization ID header not found."),
-
-    // Configuration related codes
-    ERROR_READING_CONFIG_FILE(100011, "Error reading configuration file.", 500, "Error reading configuration file.", true),
-
-    // Database connection related codes
-    DATASOURCE_CONNECTION_CREATION_FAILED(101000, "Internal server error.", 500, "Internal server error occurred while processing the request.", true),
-    DATASOURCE_CONNECTION_VALIDATION_FAILED(101001, "Internal server error.", 500, "Internal server error occurred while processing the request.", true),
-
-    // Database query execution related codes
-    INVALID_RESULT_FROM_DATABASE(102001, "Internal server error.", 500, "Internal server error occurred while processing the request.", true),
+    INTERNAL_SERVER_ERROR(100000, "Internal server error.",
+            500, "Internal server error occurred while processing the request.", true),
+    ORGANIZATION_NOT_FOUND(100001, "Organization Not Found",
+            400, "Organization is not found in the request"),
 
     // Ruleset related codes
-    RULESET_ALREADY_EXIST(301001, "Ruleset already exists", 409, "Ruleset with name: '%s' in the organization: '%s' already exists."),
-    RULESET_CREATION_FAILED(301002, "Ruleset creation failed", 500, "Ruleset creation failed with name: '%s' in the " +
+    RULESET_ALREADY_EXIST(200001, "Ruleset already exists",
+            409, "Ruleset with name: '%s' in the organization: '%s' already exists."),
+    RULESET_CREATION_FAILED(200002, "Ruleset creation failed",
+            500, "Ruleset creation failed with name: '%s' in the " +
             "organization: '%s'.", true),
-    ERROR_WHILE_RETRIEVING_RULESETS(301003, "Retrieving rulesets failed", 500, "Error while retrieving rulesets for " +
+    ERROR_WHILE_RETRIEVING_RULESETS(200003, "Retrieving rulesets failed",
+            500, "Error while retrieving rulesets for " +
             "the organization: %s", true),
-    ERROR_WHILE_RETRIEVING_RULESET_BY_ID(301004, "Retrieving ruleset by id failed", 500, "Error while retrieving ruleset for the organization: %s"),
-    ERROR_WHILE_UPDATING_RULESET(301005, "Updating ruleset failed", 500, "Error while updating ruleset: %s in the " +
+    ERROR_WHILE_RETRIEVING_RULESET_BY_ID(200004, "Retrieving ruleset by id failed",
+            500, "Error while retrieving ruleset with the provided ID", true),
+    ERROR_WHILE_UPDATING_RULESET(200005, "Updating ruleset failed",
+            500, "Error while updating ruleset: %s in the " +
             "organization: %s", true),
-    ERROR_WHILE_DELETING_RULESET(301006, "Deleting ruleset failed", 500, "Error while deleting ruleset with ID: %s in" +
+    ERROR_WHILE_DELETING_RULESET(200006, "Deleting ruleset failed",
+            500, "Error while deleting ruleset with ID: %s in" +
             " the organization: %s", true),
-    ERROR_WHILE_DELETING_RULES(301007, "Deleting rules failed", 500, "Error while deleting rules for the ruleset with ID: %s", true),
-    RULESET_NOT_FOUND(301007, "Ruleset not found", 404, "Ruleset with ID: %s not found"),
-    RULESET_CONTENT_CONVERSION_ERROR(301008, "Ruleset content conversion failed", 500, "Error while converting input " +
-            "stream to a string for the ruleset with id: %s in the organization: %s", true),
-    ERROR_WHILE_RETRIEVING_RULESET_CONTENT(301009, "Retrieving ruleset content failed", 500, "Error while retrieving " +
+    ERROR_WHILE_DELETING_RULES(200007, "Deleting rules failed",
+            500, "Error while deleting rules for the ruleset with ID: %s", true),
+    RULESET_NOT_FOUND(200008, "Ruleset not found",
+            404, "Ruleset with ID: %s not found"),
+    ERROR_WHILE_RETRIEVING_RULESET_CONTENT(200009, "Retrieving ruleset content failed",
+            500, "Error while retrieving " +
             "the content of the ruleset with id: %s in the organization: %s", true),
-    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY(301010, "Error while retrieving rulesets associated with " +
-            "policy", 500, "Error while retrieving " +
+    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY(200010,
+            "Error while retrieving rulesets associated with " +
+                    "policy", 500, "Error while retrieving " +
             "rulesets associated with policy with id: %s", true),
-    ERROR_WHILE_INSERTING_RULES(301011, "Rule insertion failed", 500, "Rule insertion failed for the ruleset with id:" +
+    ERROR_WHILE_INSERTING_RULES(200011, "Rule insertion failed",
+            500, "Rule insertion failed for the ruleset with id:" +
             " '%s'", true),
-    INVALID_RULESET_CONTENT(301012, "Ruleset content is invalid", 400, "Content of ruleset '%s' is invalid"),
-    INVALID_RULESET_CONTENT_WITH_INFO(301013, "Invalid Ruleset content", 400, "Invalid Ruleset content, message: '%s'"),
-    ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(301014, "Error while loading default ruleset content", 500, "Error while loading " +
+    INVALID_RULESET_CONTENT(200012, "Ruleset content is invalid",
+            400, "Content of ruleset '%s' is invalid"),
+    INVALID_RULESET_CONTENT_WITH_INFO(200013, "Invalid Ruleset content",
+            400, "Invalid Ruleset content, message: '%s'"),
+    ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(200014, "Error while loading default ruleset content",
+            500, "Error while loading " +
             "default ruleset provided by WSO2.", true),
-    ERROR_WHILE_RETRIEVING_POLICY_IDS_BY_RULESET_ID(301015, "Error while retrieving policy ids for the ruleset.", 500, "Error while retrieving " +
-            "policy ids for ruleset id: %s", true),
-    INVALID_RULE_SEVERITY(301012, "Rule severity is invalid", 400, "Rule severity '%s' is invalid"),
-    ERROR_WHILE_RETRIEVING_RULESET_BY_NAME(301013, "Retrieving ruleset by name failed", 500, "Error while retrieving " +
+    ERROR_WHILE_RETRIEVING_RULESET_BY_NAME(200015, "Retrieving ruleset by name failed",
+            500, "Error while retrieving " +
             "ruleset for the organization: %s", true),
-    ERROR_FAILED_TO_PARSE_RULESET_CONETENT(301014, "Failed to parse ruleset content", 500, "Failed to parse ruleset " +
+    ERROR_FAILED_TO_PARSE_RULESET_CONTENT(200016, "Failed to parse ruleset content",
+            500, "Failed to parse ruleset " +
             "content for the ruleset.", true),
-    ERROR_CANNOT_MODIFY_DEFAULT_RULESET(301015, "Can not modify default ruleset", 403, "Can not modify default " +
-            "ruleset %s in the organization: %s"),
-
-    ERROR_RULESET_ASSOCIATED_WITH_POLICIES(301016, "Ruleset is currently in use by some governance policies", 409,
-            "The ruleset with ID: %s cannot be deleted because it is associated with some governance policies in the " +
+    ERROR_RULESET_ASSOCIATED_WITH_POLICIES(200017, "Ruleset is currently " +
+            "in use by some governance policies", 409,
+            "The ruleset with ID: %s cannot be deleted because it " +
+                    "is associated with some governance policies in the " +
                     "organization: %s. Please update the associated governance policies before attempting to delete the ruleset."),
-
-    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES(301017, "Error while retrieving associated policies for the ruleset.", 500,
+    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES(200018, "Error while retrieving " +
+            "associated policies for the ruleset.", 500,
             "Error while retrieving associated policies for the ruleset with ID: %s", true),
-    ERROR_WHILE_EXTRACTING_RULE_CONTENT(301018, "Error while extracting rule content", 500, "Error while extracting " +
+    ERROR_WHILE_EXTRACTING_RULE_CONTENT(200019, "Error while extracting rule content",
+            500, "Error while extracting " +
             "rule content from the ruleset", true),
-    ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID(301019, "Error while retrieving rules by ruleset id", 500, "Error while " +
+    ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID(200020, "Error while retrieving rules by ruleset id",
+            500, "Error while " +
             "retrieving rules by ruleset id: %s", true),
 
     // Policy related codes
-    ERROR_WHILE_CREATING_POLICY(401001, "Policy creation failed.", 500, "Error while creating governance policy in the organization %s", true),
+    ERROR_WHILE_CREATING_POLICY(401001, "Policy creation failed.",
+            500, "Error while creating governance policy " +
+            "in the organization %s", true),
     POLICY_NOT_FOUND(401002, "Policy not found", 404, "Policy with ID: %s not found"),
     ERROR_WHILE_RETRIEVING_POLICIES(401003, "Retrieving policies failed", 500, "Error while retrieving policies for the organization: %s", true),
     ERROR_WHILE_RETRIEVING_POLICY_BY_ID(401004, "Retrieving policy by id failed", 500, "Error while retrieving policy" +
