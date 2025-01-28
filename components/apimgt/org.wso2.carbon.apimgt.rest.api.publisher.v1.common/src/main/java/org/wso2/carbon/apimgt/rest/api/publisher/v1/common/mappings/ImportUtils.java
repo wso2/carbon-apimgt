@@ -365,7 +365,7 @@ public class ImportUtils {
                 if (!PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
                     importedApi = PublisherCommonUtils
                             .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
-                                    importedApiDTO.getProvider(), organization);
+                                    importedApiDTO.getProvider(), organization, null);
                     // Add/update swagger content except for streaming APIs and GraphQL APIs
                     if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                             && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
