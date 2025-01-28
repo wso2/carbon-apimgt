@@ -98,7 +98,6 @@ public class ComplianceManagerImpl implements ComplianceManager {
             // If labels are not defined, the policy is an organization level policy
             artifacts.addAll(getArtifactsByGovernableStates(governableStates, organization));
         }
-        artifacts.addAll(getArtifactsByLabelsAndGovernableStates(labels, governableStates));
 
         for (ArtifactInfo artifact : artifacts) {
             String artifactId = artifact.getArtifactId();
@@ -167,7 +166,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
         for (ArtifactType artifactType : artifactsMap.keySet()) {
             List<String> artifactIds = artifactsMap.get(artifactType);
 
-            if (artifactType.equals(ArtifactType.API)) {
+            if (ArtifactType.isArtifactAPI(artifactType)) {
                 // Get all the API lifecycle states that correspond to the governable state
                 List<String> correspondingAPIStates =
                         APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
@@ -484,6 +483,17 @@ public class ComplianceManagerImpl implements ComplianceManager {
                 .getValidationEngineService().getValidationEngine();
         ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
 
+        if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
+            log.warn("No content found in the artifact project for artifact ID: " + artifactId);
+            return artifactComplianceInfo;
+        }
+
+        // Check if artifact is SOAP or GRAPHQL TODO: Support SOAP and GraphQL
+        if (ArtifactType.SOAP_API.equals(artifactType) || ArtifactType.GRAPHQL_API.equals(artifactType)) {
+            log.warn("Artifact type " + artifactType + " not supported for artifact ID: " + artifactId + " " +
+                    ". Skipping governance evaluation");
+            return artifactComplianceInfo;
+        }
         for (String policyId : govPolicies) {
             GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
             List<Ruleset> rulesets = policyMgtDAO.getRulesetsByPolicyId(policyId);
@@ -500,6 +510,12 @@ public class ComplianceManagerImpl implements ComplianceManager {
                     // Get target file content from artifact project based on ruleType
                     RuleType ruleType = ruleset.getRuleType();
                     String contentToValidate = artifactProjectContent.get(ruleType);
+
+                    if (contentToValidate == null) {
+                        log.warn(ruleType + " content not found in artifact project for artifact ID: " +
+                                artifactId + ". Skipping governance evaluation for ruleset ID: " + ruleset.getId());
+                        continue;
+                    }
 
                     // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(

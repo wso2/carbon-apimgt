@@ -30,13 +30,13 @@ import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
-import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -202,15 +201,16 @@ public class APIMUtil {
      *
      * @param apiProjectZip Byte array representing the API project ZIP file.
      * @param apiId         The ID of the API.
+     * @param apiType       The type of the API.
      * @return A map of API project contents.
      * @throws GovernanceException if errors occur while extracting content.
      */
-    public static Map<RuleType, String> extractAPIProjectContent(byte[] apiProjectZip, String apiId)
+    public static Map<RuleType, String> extractAPIProjectContent(byte[] apiProjectZip, String apiId, ArtifactType apiType)
             throws GovernanceException {
         Map<RuleType, String> apiProjectContentMap = new HashMap<>();
 
         apiProjectContentMap.put(RuleType.API_METADATA, extractAPIMetadata(apiProjectZip, apiId));
-        apiProjectContentMap.put(RuleType.API_DEFINITION, extractAPIDefinition(apiProjectZip, apiId));
+        apiProjectContentMap.put(RuleType.API_DEFINITION, extractAPIDefinition(apiProjectZip, apiId, apiType));
 
         return apiProjectContentMap;
     }
@@ -251,24 +251,40 @@ public class APIMUtil {
      *
      * @param apiProjectZip Byte array representing the API project ZIP file.
      * @param apiId         The ID of the API.
+     * @param apiType       The type of the API.
      * @return The extracted API definition as a string.
      * @throws GovernanceException if an error occurs while extracting swagger content.
      */
-    public static String extractAPIDefinition(byte[] apiProjectZip, String apiId) throws GovernanceException {
-        String swaggerContent;
+    public static String extractAPIDefinition(byte[] apiProjectZip, String apiId, ArtifactType apiType)
+            throws GovernanceException {
+        String defContent;
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER +
-                        GovernanceConstants.SWAGGER_FILE_NAME)) {
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    int length;
-                    while ((length = zipInputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
+                if (ArtifactType.REST_API.equals(apiType)) {
+                    if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER +
+                            GovernanceConstants.SWAGGER_FILE_NAME)) {
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = zipInputStream.read(buffer)) != -1) {
+                            outputStream.write(buffer, 0, length);
+                        }
+                        defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                        return defContent;
                     }
-                    swaggerContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-                    return swaggerContent;
+                } else if (ArtifactType.ASYNC_API.equals(apiType)) {
+                    if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER +
+                            GovernanceConstants.ASYNC_API_FILE_NAME)) {
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = zipInputStream.read(buffer)) != -1) {
+                            outputStream.write(buffer, 0, length);
+                        }
+                        defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                        return defContent;
+                    }
                 }
             }
         } catch (IOException e) {
@@ -293,19 +309,28 @@ public class APIMUtil {
     }
 
     /**
-     * Get the APIs for the label
+     * Get the APIs for the label as a map of API Type (HTTP,ASYNC, etc ) against API ID
      *
      * @param labelId Label ID
-     * @return List of API IDs
+     * @return Map of API types against API IDs
      * @throws GovernanceException If an error occurs while getting the APIs for the label
      */
-    public static List<String> getAPIsByLabel(String labelId) throws GovernanceException {
+    public static Map<String, List<String>> getAPIsByLabel(String labelId) throws GovernanceException {
+        Map<String, List<String>> apisMap = new HashMap<>();
         try {
             List<ApiResult> apiResults = LabelsDAO.getInstance().getMappedApisForLabel(labelId);
 
-            return apiResults.stream()
-                    .map(ApiResult::getId)
-                    .collect(Collectors.toList());
+            for (ApiResult apiResult : apiResults) {
+                String apiType = apiResult.getType();
+                if (apisMap.containsKey(apiType)) {
+                    apisMap.get(apiType).add(apiResult.getId());
+                } else {
+                    List<String> apiIds = new ArrayList<>();
+                    apiIds.add(apiResult.getId());
+                    apisMap.put(apiType, apiIds);
+                }
+            }
+            return apisMap;
         } catch (APIManagementException e) {
             throw new GovernanceException("Error while getting the APIs for the label with ID: " + labelId, e);
         }
@@ -316,16 +341,22 @@ public class APIMUtil {
      *
      * @param organization Organization
      * @return List of API IDs
+     * @throws GovernanceException If an error occurs while getting the APIs for the organization
      */
-    public static List<String> getAllAPIs(String organization) {
+    public static List<String> getAllAPIs(String organization) throws GovernanceException {
 
         List<String> apiIds = new ArrayList<>();
-        List<org.wso2.carbon.apimgt.api.model.subscription.API> apis =
-                new SubscriptionValidationDAO().getAllApis(organization, false);
-        for (org.wso2.carbon.apimgt.api.model.subscription.API api : apis) {
-            apiIds.add(api.getApiUUID());
+        List<ApiResult> apis = null;
+        try {
+            apis = ApiMgtDAO.getInstance().getAllAPIs(organization);
+            for (ApiResult api : apis) {
+                apiIds.add(api.getId());
+            }
+            return apiIds;
+        } catch (APIManagementException e) {
+            throw new GovernanceException("Error while getting the APIs for the organization: " + organization, e);
         }
-        return apiIds;
+
     }
 
     /**
@@ -335,10 +366,41 @@ public class APIMUtil {
      * @param limit        Limit
      * @param offset       Offset
      * @return List of API IDs
+     * @throws GovernanceException If an error occurs while getting the APIs for the organization
      */
-    public static List<String> getPaginatedAPIs(String organization, int limit, int offset) {
+    public static List<String> getPaginatedAPIs(String organization, int limit, int offset)
+            throws GovernanceException {
         List<String> apiIds = getAllAPIs(organization);
         return apiIds.subList(offset, Math.min(offset + limit, apiIds.size()));
+    }
+
+    /**
+     * Get all APIs for the organization in a map divided to different API types (ex: HTTP, ASYNC, etc)
+     *
+     * @param organization Organization
+     * @return Map of api types against api Ids
+     * @throws GovernanceException If an error occurs while getting the APIs for the organization
+     */
+    public static Map<String, List<String>> getAllAPIsByAPIType(String organization) throws GovernanceException {
+
+        Map<String, List<String>> apisMap = new HashMap<>();
+        List<ApiResult> apis = null;
+        try {
+            apis = ApiMgtDAO.getInstance().getAllAPIs(organization);
+            for (ApiResult api : apis) {
+                String apiType = api.getType();
+                if (apisMap.containsKey(apiType)) {
+                    apisMap.get(apiType).add(api.getId());
+                } else {
+                    List<String> apiIds = new ArrayList<>();
+                    apiIds.add(api.getId());
+                    apisMap.put(apiType, apiIds);
+                }
+            }
+            return apisMap;
+        } catch (APIManagementException e) {
+            throw new GovernanceException("Error while getting the APIs for the organization: " + organization, e);
+        }
     }
 
     /**

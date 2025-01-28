@@ -70,7 +70,8 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * Evaluate compliance of the artifact asynchronously
      *
      * @param artifactId   Artifact ID
-     * @param artifactType Artifact type (ArtifactType.API)
+     * @param artifactType Artifact type (ArtifactType.REST_API) , Needs to be specific
+     *                     , DO NOT USE ArtifactType.API
      * @param state        State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param organization Organization
      * @throws GovernanceException If an error occurs while evaluating compliance
@@ -95,7 +96,8 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * Evaluate compliance of the artifact synchronously
      *
      * @param artifactId             Artifact ID
-     * @param artifactType           Artifact type (ArtifactType.API)
+     * @param artifactType           Artifact type (ArtifactType.REST_API) , Needs to be specific ,
+     *                               DO NOT USE  use ArtifactType.API
      * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
      *                               project. This is used to evaluate the compliance of the artifact.
