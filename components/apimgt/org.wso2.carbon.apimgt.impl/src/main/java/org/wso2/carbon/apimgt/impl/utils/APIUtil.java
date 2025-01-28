@@ -1405,6 +1405,11 @@ public final class APIUtil {
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
+    /**
+     * Utility method to get the introspection query for GraphQL
+     * @return introspection query
+     * @throws APIManagementException
+     */
     public static String getIntrospectionQuery() throws APIManagementException {
         String introspectionQueryFilePath = "graphql/introspection_query.graphql";
         try (InputStream fileStream = APIUtil.class.getClassLoader().getResourceAsStream(introspectionQueryFilePath)) {
