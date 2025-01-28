@@ -91,6 +91,7 @@ import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -11119,5 +11120,28 @@ public final class APIUtil {
 
         return Boolean.getBoolean(
                 APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
+    }
+    
+    public static String getOrganizationIdFromExternalReference(String referenceId, String organizationName,
+            String rootOrganization) throws APIManagementException {
+        String organizationId = null;
+        OrganizationDetailsDTO orgDetails = ApiMgtDAO.getInstance().getOrganizationDetalsByExternalOrgId(referenceId,
+                rootOrganization);
+        if (orgDetails != null) {
+            organizationId = orgDetails.getOrganizationId();
+        } else {
+            // No organization entry in the db. add entry without parent info.
+
+            OrganizationDetailsDTO info = new OrganizationDetailsDTO();
+            info.setExternalOrganizationReference(referenceId);
+            info.setTenantDomain(rootOrganization);
+            info.setName(organizationName);
+            OrganizationDetailsDTO addedInfo = ApiMgtDAO.getInstance().addOrganization(info);
+            if (addedInfo != null) {
+                organizationId = addedInfo.getOrganizationId();
+            }
+
+        }
+        return organizationId;
     }
 }

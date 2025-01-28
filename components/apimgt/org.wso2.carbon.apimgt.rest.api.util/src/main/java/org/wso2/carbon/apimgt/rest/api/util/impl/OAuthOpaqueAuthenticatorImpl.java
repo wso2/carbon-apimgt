@@ -107,7 +107,9 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
         try {
             if (tokenInfo == null) {
                 tokenInfo = getTokenMetaData(accessToken);
-                tokenInfo.setUserOrganizationInfo(getOrganizationInfo(tokenInfo.getEndUserName()));
+                if (tokenInfo.getEndUserName() != null) {
+                    tokenInfo.setUserOrganizationInfo(getOrganizationInfo(tokenInfo.getEndUserName()));
+                }
             }
         } catch (APIManagementException e) {
             log.error("Error while retrieving token information for token: " + accessToken, e);
@@ -251,7 +253,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 .getFirstProperty(property);
     }
     
-    public OrganizationInfo getOrganizationInfo(String username) {
+    public OrganizationInfo getOrganizationInfo(String username) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Retrieving organization information for user: " + username);
         }
@@ -272,8 +274,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
         if (StringUtils.isBlank(orgIdClaim)) {
             orgIdClaim = "http://wso2.org/claims/organizationId";
         }
-        
-        
+
         String organization = null;
         String organizationId = null;
         try {
@@ -307,6 +308,8 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
             if (realm.getClaimManager().getClaim(orgIdClaim) != null) {
                 organizationId =
                         manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgIdClaim, null);
+                // Get the internal organization id using externa id
+                //organizationId = APIUtil.getOrganizationIdFromExternalReference(organizationId, organization, tenantDomain); // TODO enable this after org add UI
             }
             orgInfo.setName(organization);
             orgInfo.setOrganizationId(organizationId);
@@ -314,11 +317,11 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
             if (log.isDebugEnabled()) {
                 log.debug("organization = " + organization + " ,organizationId = " + organizationId);
             }
-        } catch (JSONException e) {
-            log.error("Exception occured while trying to get group Identifier from login response", e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("Error while checking user existence for " + username, e);
-        }
+            String error = "Error while checking user existence for " + username;
+            log.error(error, e);
+            throw new APIManagementException(error, e);
+        } 
         
         return orgInfo;
     }
