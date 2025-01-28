@@ -19,6 +19,6 @@
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
 public class DevPortalProcessingConstants {
-    public static final String NEXT_GEN_DEV_PORTAL_API_URI= "/devportal/action/api";
-    public static final String NEXT_GEN_DEV_PORTAL_ORG_URI= "/devportal/action/org";
+    public static final String API_URI= "/devportal/apis";
+    public static final String GET_ORG_ID_URI= "/devportal/action/org";
 }
