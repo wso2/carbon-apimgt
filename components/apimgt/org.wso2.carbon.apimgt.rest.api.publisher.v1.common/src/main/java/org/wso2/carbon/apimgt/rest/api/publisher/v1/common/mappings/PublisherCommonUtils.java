@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -190,10 +191,19 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the API
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
-    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
+    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes,
+            OrganizationInfo orginfo)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
-
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
+        if (orginfo != null && orginfo.getOrganizationId() != null) {
+            String visibleOrgs = apiToUpdate.getVisibleOrganizations();
+            if (!StringUtils.isEmpty(visibleOrgs)
+                    && !APIConstants.DEFAULT_VISIBLE_ORG.equals(apiToUpdate.getVisibleOrganizations())) {
+                // set the current user organizatin as visible organization.
+                visibleOrgs = visibleOrgs + "," + orginfo.getOrganizationId();
+                apiToUpdate.setVisibleOrganizations(visibleOrgs);
+            }
+        }
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
@@ -1092,7 +1102,7 @@ public class PublisherCommonUtils {
      * @throws CryptoException        Error while encrypting
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
-                                                           String organization)
+                                                           String organization, OrganizationInfo orgInfo)
             throws APIManagementException, CryptoException {
         String name = apiDto.getName();
         apiDto.setName(name.trim().replaceAll("\\s{2,}", " "));
@@ -1204,6 +1214,15 @@ public class PublisherCommonUtils {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
             apiToAdd.setAsyncApiDefinition(apiDefinition);
+        }
+        if (orgInfo != null && orgInfo.getOrganizationId() != null) {
+            String visibleOrgs = apiToAdd.getVisibleOrganizations();
+            if (!StringUtils.isEmpty(visibleOrgs)
+                    && !APIConstants.DEFAULT_VISIBLE_ORG.equals(apiToAdd.getVisibleOrganizations())) {
+                // set the current user organizatin as visible organization.
+                visibleOrgs = visibleOrgs + "," + orgInfo.getOrganizationId();
+                apiToAdd.setVisibleOrganizations(visibleOrgs);
+            }
         }
 
         //adding the api
