@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
@@ -354,6 +355,14 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String id) throws APIManagementException;
+
+    /**
+     * This method used to get gateway visibility permissions with gateway environment id and role
+     * @param id uuid of gateway environment
+     * @return gateway visibility permissions
+     * @throws APIManagementException
+     */
+    GatewayVisibilityPermissionConfigurationDTO getGatewayVisibilityPermissions(String id) throws APIManagementException;
 
     /**
      * hTis method used to delete IDP mapped with key manager

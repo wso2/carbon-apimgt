@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
@@ -924,6 +925,18 @@ public class APIAdminImpl implements APIAdmin {
             throw new APIManagementException("Key Manager Permissions retrieval failed for Key Manager id " + id, e);
         }
         return keyManagerPermissionConfigurationDTO;
+    }
+
+    @Override
+    public GatewayVisibilityPermissionConfigurationDTO getGatewayVisibilityPermissions(String id) throws APIManagementException {
+
+        GatewayVisibilityPermissionConfigurationDTO gatewayVisibilityPermissionConfigurationDTO;
+        try {
+            gatewayVisibilityPermissionConfigurationDTO = apiMgtDAO.getGatewayVisibilityPermissions(id);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Gateway Visibility Permissions retrieval failed for gateway environment id " + id, e);
+        }
+        return gatewayVisibilityPermissionConfigurationDTO;
     }
 
     private IdentityProvider updatedIDP(IdentityProvider retrievedIDP,

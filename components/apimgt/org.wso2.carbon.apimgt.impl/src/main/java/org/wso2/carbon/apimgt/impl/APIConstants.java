@@ -760,6 +760,7 @@ public final class APIConstants {
     public static final String API_GATEWAY = "APIGateway.";
     public static final String API_GATEWAY_NAME = "Name";
     public static final String API_GATEWAY_DISPLAY_NAME = "DisplayName";
+    public static final String API_GATEWAY_VISIBILITY = "Visibility";
     public static final String API_GATEWAY_SERVER_URL = "ServerURL";
     public static final String API_GATEWAY_USERNAME = "Username";
     public static final String API_GATEWAY_PASSWORD = "Password";
@@ -3206,6 +3207,10 @@ public final class APIConstants {
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
+
+    public static final String PERMISSION_ALLOW = "ALLOW";
+    public static final String PERMISSION_DENY = "DENY";
+    public static final String PERMISSION_NOT_RESTRICTED = "PUBLIC";
 
     // Protocol variables
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";

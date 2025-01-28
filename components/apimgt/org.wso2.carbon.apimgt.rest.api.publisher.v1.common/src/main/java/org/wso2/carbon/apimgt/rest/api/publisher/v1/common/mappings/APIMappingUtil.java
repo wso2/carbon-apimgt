@@ -1091,7 +1091,8 @@ public class APIMappingUtil {
     }
 
     public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials,
-                                      APIProvider apiProviderParam) throws APIManagementException {
+                                      APIProvider apiProviderParam)
+            throws APIManagementException {
 
         APIProvider apiProvider;
         if (apiProviderParam != null) {

@@ -1337,6 +1337,10 @@
           "type" : "string",
           "description" : "Context of the API."
         },
+        "contextTemplate" : {
+          "type" : "string",
+          "description" : "Context template of the API."
+        },
         "policy" : {
           "type" : "string",
           "description" : "API level throttling policy."
