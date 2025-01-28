@@ -118,6 +118,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -318,6 +319,7 @@ public class ImportUtils {
                     importedApiDTO.setVisibility(convertedOldAPI.getVisibility());
                     importedApiDTO.setVisibleRoles(convertedOldAPI.getVisibleRoles());
                     importedApiDTO.setVisibleTenants(convertedOldAPI.getVisibleTenants());
+                    importedApiDTO.setVisibleOrganizations(Collections.EMPTY_LIST); // ignore org visibility
                     importedApiDTO.setSubscriptionAvailability(convertedOldAPI.getSubscriptionAvailability());
                     importedApiDTO.setSubscriptionAvailableTenants(convertedOldAPI.getSubscriptionAvailableTenants());
                     importedApiDTO.monetization(convertedOldAPI.getMonetization());
@@ -344,6 +346,7 @@ public class ImportUtils {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
                             + ". Creating it.");
                 }
+                importedApiDTO.setVisibleOrganizations(Collections.EMPTY_LIST); // ignore org visibility when importing
                 // Initialize to CREATED when import
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
