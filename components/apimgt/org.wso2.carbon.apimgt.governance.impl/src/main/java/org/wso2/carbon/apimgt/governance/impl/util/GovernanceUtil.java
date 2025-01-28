@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -222,22 +221,6 @@ public class GovernanceUtil {
     }
 
     /**
-     * Get artifacts for a label
-     *
-     * @param labelId Label ID
-     * @return Map of Artifact Type, List of Artifact IDs
-     */
-    public static Map<ArtifactType, List<String>> getArtifactsForLabel(String labelId) throws GovernanceException {
-        Map<ArtifactType, List<String>> artifacts = new HashMap<>();
-        List<String> apiIds = APIMUtil.getAPIsByLabel(labelId);
-        if (apiIds != null && !apiIds.isEmpty()) {
-            artifacts.put(ArtifactType.API, apiIds);
-        }
-        return artifacts;
-    }
-
-
-    /**
      * Get all artifacts for a given artifact type
      *
      * @param artifactType Artifact Type
@@ -254,16 +237,43 @@ public class GovernanceUtil {
     }
 
     /**
+     * Get artifacts for a label as a map of Artifact Type, List of Artifact IDs
+     *
+     * @param labelId Label ID
+     * @return Map of Artifact Type, List of Artifact IDs
+     */
+    public static Map<ArtifactType, List<String>> getArtifactsForLabel(String labelId) throws GovernanceException {
+        Map<ArtifactType, List<String>> artifacts = new HashMap<>();
+        Map<String, List<String>> apiIds = APIMUtil.getAPIsByLabel(labelId);
+        for (Map.Entry<String, List<String>> entry : apiIds.entrySet()) {
+            ArtifactType artifactType = ArtifactType.fromAPIMArtifactType(entry.getKey());
+            if (artifactType != null) {
+                artifacts.put(artifactType, entry.getValue());
+            }
+        }
+        return artifacts;
+    }
+
+
+    /**
      * Get all artifacts for a given artifact type
      *
      * @param organization Organization
      * @return Map of Artifact Type, List of Artifact IDs
      * @throws GovernanceException If an error occurs while getting the list of artifacts
      */
-    public static Map<ArtifactType, List<String>> getAllArtifactsMap(String organization)
-            throws GovernanceException {
+    public static Map<ArtifactType, List<String>> getAllArtifactsMap(String organization) throws GovernanceException {
         Map<ArtifactType, List<String>> artifacts = new HashMap<>();
-        artifacts.put(ArtifactType.API, getAllArtifacts(ArtifactType.API, organization));
+
+        // Get all API Artifacts
+        Map<String, List<String>> artifactsMap = APIMUtil.getAllAPIsByAPIType(organization);
+        for (Map.Entry<String, List<String>> entry : artifactsMap.entrySet()) {
+            ArtifactType artifactType = ArtifactType.fromAPIMArtifactType(entry.getKey());
+            if (artifactType != null) {
+                artifacts.put(artifactType, entry.getValue());
+            }
+        }
+
         return artifacts;
     }
 
@@ -343,7 +353,6 @@ public class GovernanceUtil {
      */
     public static boolean isBlockingActionsPresent(List<String> policyIds, GovernableState governableState)
             throws GovernanceException {
-        log.info("Checking for blocking actions in policies for state: " + governableState);
         PolicyManager policyManager = new PolicyManagerImpl();
         boolean isBlocking = false;
         for (String policyId : policyIds) {
@@ -421,45 +430,6 @@ public class GovernanceUtil {
                     APIMUtil.getAPIProject(artifactId, organization);
         }
         return artifactProject;
-    }
-
-
-    /**
-     * Get governable states for artifact
-     *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @return List of Governable States
-     * @throws GovernanceException If an exception occurs
-     */
-    public List<GovernableState> getGovernableStatesForArtifact(String artifactId,
-                                                                ArtifactType artifactType)
-            throws GovernanceException {
-        List<GovernableState> governableStates = new ArrayList<>();
-        String artifactTypeStr = String.valueOf(artifactType);
-
-        if (ArtifactType.isArtifactAPI(artifactType)) {
-
-            // Every created api should be governed with create and update policies
-            governableStates.add(GovernableState.API_CREATE);
-            governableStates.add(GovernableState.API_UPDATE);
-
-            if (APIMUtil.isAPIDeployed(artifactId)) {
-                // If the API is deployed, it should be governed with the deploy policy
-                governableStates.add(GovernableState.API_DEPLOY);
-            }
-
-            String status = APIMUtil.getAPIStatus(artifactId);
-            if (APIStatus.PUBLISHED.getStatus().equals(status)
-                    || APIStatus.DEPRECATED.getStatus().equals(status)
-                    || APIStatus.BLOCKED.getStatus().equals(status)) {
-                // If the API is published, deprecated or blocked, it should be governed with the publish policy
-                // as API has already been published
-                governableStates.add(GovernableState.API_PUBLISH);
-            }
-        }
-
-        return governableStates;
     }
 
 }

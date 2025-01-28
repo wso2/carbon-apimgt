@@ -26,7 +26,7 @@ public enum ArtifactType {
     SOAP_API,
     GRAPHQL_API,
     ASYNC_API,
-    API;
+    API; // Represent all types of APIs
 
     public static ArtifactType fromString(String text) {
         if ("rest_api".equalsIgnoreCase(text)) {
@@ -73,6 +73,7 @@ public enum ArtifactType {
      *
      * @param artifactType Artifact type
      * @return API Manager Governance artifact type
+     * TODO: Complete and verify the below logic
      */
     public static ArtifactType fromAPIMArtifactType(String artifactType) {
         if ("rest".equalsIgnoreCase(artifactType) || "http".equalsIgnoreCase(artifactType)) {
@@ -81,7 +82,7 @@ public enum ArtifactType {
             return SOAP_API;
         } else if ("graphql".equalsIgnoreCase(artifactType)) {
             return GRAPHQL_API;
-        } else if ("async".equalsIgnoreCase(artifactType)) {
+        } else if ("async".equalsIgnoreCase(artifactType) || "ws".equalsIgnoreCase(artifactType)) {
             return ASYNC_API;
         }
         return null;

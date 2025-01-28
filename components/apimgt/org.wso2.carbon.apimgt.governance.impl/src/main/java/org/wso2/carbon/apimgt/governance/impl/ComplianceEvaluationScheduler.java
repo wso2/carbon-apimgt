@@ -185,6 +185,14 @@ public class ComplianceEvaluationScheduler {
                 return;
             }
 
+            // Check if artifact is SOAP or GRAPHQL TODO: Support SOAP and GraphQL
+            if (ArtifactType.SOAP_API.equals(artifactType) || ArtifactType.GRAPHQL_API.equals(artifactType)) {
+                log.warn("Artifact type " + artifactType + " not supported for artifact ID: " + artifactId + " " +
+                        ". Skipping governance evaluation");
+                complianceMgtDAO.deleteComplianceEvaluationRequestByArtifactId(artifactId);
+                return;
+            }
+
             // Get artifact project
             byte[] artifactProject = GovernanceUtil.getArtifactProject(artifactId, artifactType, organization);
 
@@ -199,7 +207,7 @@ public class ComplianceEvaluationScheduler {
             // Extract artifact project content to map
             Map<RuleType, String> artifactProjectContentMap = new HashMap<>();
             if (ArtifactType.isArtifactAPI(artifactType)) {
-                artifactProjectContentMap = APIMUtil.extractAPIProjectContent(artifactProject, artifactId);
+                artifactProjectContentMap = APIMUtil.extractAPIProjectContent(artifactProject, artifactId, artifactType);
             }
 
             for (ComplianceEvaluationRequest request : requests) {
@@ -234,7 +242,8 @@ public class ComplianceEvaluationScheduler {
         // Check if there are processing requests for the same artifact, policy pair. If so, skip evaluation
         if (complianceMgtDAO.getProcessingComplianceEvaluationRequest(artifactId, policyId) != null) {
             if (log.isDebugEnabled()) {
-                log.debug("Skipping governance evaluation for artifact ID: " + artifactId + " and policy ID: " + policyId +
+                log.debug("Skipping governance evaluation for artifact ID: " + artifactId + " " +
+                        "and policy ID: " + policyId +
                         " as there are processing requests for the same pair.");
             }
             return;
@@ -261,6 +270,11 @@ public class ComplianceEvaluationScheduler {
                 RuleType ruleType = ruleset.getRuleType();
                 String contentToValidate = artifactProjectContentMap.get(ruleType);
 
+                if (contentToValidate == null) {
+                    log.warn(ruleType + " content not found in artifact project for artifact ID: " +
+                            artifactId + ". Skipping governance evaluation for ruleset ID: " + ruleset.getId());
+                    continue;
+                }
                 // Send target content and ruleset for validation
                 List<RuleViolation> ruleViolations = validationEngine.validate(
                         contentToValidate, ruleset);

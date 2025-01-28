@@ -28,6 +28,7 @@ public class GovernanceConstants {
 
     public static final String DEFINITIONS_FOLDER = "Definitions/";
     public static final String SWAGGER_FILE_NAME = "swagger.yaml";
+    public static final String ASYNC_API_FILE_NAME = "asyncapi.yaml";
     public static final String API_FILE_NAME = "api.yaml";
 
     public static final String DEFAULT_RULESET_LOCATION = "repository" + File.separator

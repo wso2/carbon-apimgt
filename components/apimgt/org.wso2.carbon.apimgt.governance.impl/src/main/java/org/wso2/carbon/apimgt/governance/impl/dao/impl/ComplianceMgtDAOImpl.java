@@ -634,7 +634,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<ComplianceEvaluationResult> getComplianceEvaluationResultsByArtifactIdAndRulesetId
     (String artifactId, String rulesetId) throws GovernanceException {
-        String SQLQuery = SQLConstants.GET_GOV_COMPLIANCE_EVALUATION_RESULTS_BY_ARTIFACT_AND_POLICY;
+        String SQLQuery = SQLConstants.GET_GOV_COMPLIANCE_EVALUATION_RESULTS_ARTIFACT_AND_RULESET;
         List<ComplianceEvaluationResult> complianceEvaluationResults = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
