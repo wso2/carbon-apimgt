@@ -53,7 +53,7 @@ public class RulesetManagerImpl implements RulesetManager {
      */
     @Override
     public RulesetInfo createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException {
-        ruleset.setId(GovernanceUtil.generateUUID());
+        ruleset.setId(ruleset.getId() == null ? GovernanceUtil.generateUUID() : ruleset.getId());
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
         boolean isRulesetContentValid = validationEngine.isRulesetValid(ruleset);

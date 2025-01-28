@@ -236,6 +236,37 @@ public class GovernanceUtil {
         return artifacts;
     }
 
+
+    /**
+     * Get all artifacts for a given artifact type
+     *
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of artifact IDs
+     * @throws GovernanceException If an error occurs while getting the list of artifacts
+     */
+    public static List<String> getAllArtifacts(ArtifactType artifactType, String organization)
+            throws GovernanceException {
+        if (ArtifactType.isArtifactAPI(artifactType)) {
+            return APIMUtil.getAllAPIs(organization);
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Get all artifacts for a given artifact type
+     *
+     * @param organization Organization
+     * @return Map of Artifact Type, List of Artifact IDs
+     * @throws GovernanceException If an error occurs while getting the list of artifacts
+     */
+    public static Map<ArtifactType, List<String>> getAllArtifactsMap(String organization)
+            throws GovernanceException {
+        Map<ArtifactType, List<String>> artifacts = new HashMap<>();
+        artifacts.put(ArtifactType.API, getAllArtifacts(ArtifactType.API, organization));
+        return artifacts;
+    }
+
     /**
      * Get applicable policies for an artifact
      *

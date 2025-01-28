@@ -19,8 +19,12 @@
 package org.wso2.carbon.apimgt.governance.api.service;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+
+import java.util.Map;
 
 /**
  * This class represents the Governance Service, which is responsible for managing governance related operations
@@ -51,6 +55,35 @@ public interface APIMGovernanceService {
     void evaluateComplianceAsync(String artifactId, ArtifactType artifactType,
                                  GovernableState state,
                                  String organization) throws GovernanceException;
+
+
+    /**
+     * Evaluate compliance of the artifact synchronously
+     *
+     * @param artifactId             Artifact ID
+     * @param artifactType           Artifact type (ArtifactType.API)
+     * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
+     * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
+     *                               project. This is used to evaluate the compliance of the artifact.
+     *                               API_METADATA --> api.yaml content
+     *                               API_DEFINITION --> api definition content
+     *                               API_DOCUMENTATION --> api documentation content
+     * @param organization           Organization
+     * @return ArtifactComplianceInfo object
+     * @throws GovernanceException If an error occurs while evaluating compliance
+     */
+    ArtifactComplianceInfo evaluateComplianceSync(String artifactId, ArtifactType artifactType,
+                                                  GovernableState state, Map<RuleType, String> artifactProjectContent,
+                                                  String organization) throws GovernanceException;
+
+
+    /**
+     * Delete all governance data related to the artifact
+     *
+     * @param artifactId Artifact ID
+     * @throws GovernanceException If an error occurs while clearing the compliance information
+     */
+    void clearArtifactComplianceInfo(String artifactId) throws GovernanceException;
 
 
 }

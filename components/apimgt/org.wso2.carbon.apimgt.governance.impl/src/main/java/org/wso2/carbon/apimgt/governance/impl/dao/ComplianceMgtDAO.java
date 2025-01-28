@@ -57,6 +57,17 @@ public interface ComplianceMgtDAO {
     List<ComplianceEvaluationRequest> getPendingComplianceEvaluationRequests() throws GovernanceException;
 
     /**
+     * Get the processing compliance evaluation request by artifact ID and policy ID, if any
+     *
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @return ComplianceEvaluationRequest
+     * @throws GovernanceException If an error occurs while getting the processing compliance evaluation request
+     */
+    ComplianceEvaluationRequest getProcessingComplianceEvaluationRequest(String artifactId, String policyId)
+            throws GovernanceException;
+
+    /**
      * Update the evaluation status of a request
      *
      * @param requestId Evaluation request ID
@@ -64,6 +75,13 @@ public interface ComplianceMgtDAO {
      * @throws GovernanceException If an error occurs while updating the evaluation status
      */
     void updateComplianceEvaluationStatus(String requestId, ComplianceEvaluationStatus status) throws GovernanceException;
+
+    /**
+     * Update the evaluation status of all processing requests to pending
+     *
+     * @throws GovernanceException If an error occurs while updating the evaluation status
+     */
+    void updateProcessingRequestToPending() throws GovernanceException;
 
     /**
      * Delete an evaluation request
@@ -227,5 +245,13 @@ public interface ComplianceMgtDAO {
      */
     Map<ArtifactType, List<ComplianceEvaluationResult>> getEvaluationResultsForPolicy(String policyId)
             throws GovernanceException;
+
+    /**
+     * Delete all governance data related to the artifact
+     *
+     * @param artifactId Artifact ID
+     * @throws GovernanceException If an error occurs while deleting the governance data
+     */
+    void deleteArtifact(String artifactId) throws GovernanceException;
 
 }

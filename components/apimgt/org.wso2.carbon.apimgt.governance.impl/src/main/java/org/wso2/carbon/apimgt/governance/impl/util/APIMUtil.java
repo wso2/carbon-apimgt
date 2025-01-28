@@ -302,6 +302,7 @@ public class APIMUtil {
     public static List<String> getAPIsByLabel(String labelId) throws GovernanceException {
         try {
             List<ApiResult> apiResults = LabelsDAO.getInstance().getMappedApisForLabel(labelId);
+
             return apiResults.stream()
                     .map(ApiResult::getId)
                     .collect(Collectors.toList());

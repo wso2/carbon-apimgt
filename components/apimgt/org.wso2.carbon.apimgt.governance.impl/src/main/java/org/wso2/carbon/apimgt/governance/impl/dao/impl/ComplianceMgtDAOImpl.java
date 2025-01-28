@@ -179,6 +179,42 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
 
     }
 
+
+    /**
+     * Get the processing compliance evaluation request by artifact ID and policy ID, if any
+     *
+     * @param artifactId Artifact ID
+     * @param policyId   Policy ID
+     * @return ComplianceEvaluationRequest
+     * @throws GovernanceException If an error occurs while getting the processing compliance evaluation request
+     */
+    @Override
+    public ComplianceEvaluationRequest getProcessingComplianceEvaluationRequest(String artifactId, String policyId)
+            throws GovernanceException {
+        String SQLQuery = SQLConstants.GET_PROCESSING_EVALUATION_REQUEST_BY_ARTIFACT_AND_POLICY;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            prepStmnt.setString(2, policyId);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                if (resultSet.next()) {
+                    ComplianceEvaluationRequest evaluationRequest = new ComplianceEvaluationRequest();
+                    evaluationRequest.setId(resultSet.getString("REQUEST_ID"));
+                    evaluationRequest.setArtifactId(artifactId);
+                    evaluationRequest.setArtifactType(ArtifactType.fromString(
+                            resultSet.getString("ARTIFACT_TYPE")));
+                    evaluationRequest.setPolicyId(policyId);
+                    evaluationRequest.setEvaluationStatus(ComplianceEvaluationStatus.PROCESSING);
+                    return evaluationRequest;
+                }
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_GETTING_GOVERNANCE_EVALUATION_REQUESTS, e);
+        }
+        return null;
+    }
+
     /**
      * Update the evaluation status of a request
      *
@@ -199,6 +235,23 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes
                     .ERROR_WHILE_UPDATING_GOVERNANCE_EVALUATION_REQUEST,
                     e, requestId);
+        }
+    }
+
+    /**
+     * Update the evaluation status of all processing requests to pending
+     *
+     * @throws GovernanceException If an error occurs while updating the evaluation status
+     */
+    @Override
+    public void updateProcessingRequestToPending() throws GovernanceException {
+        String SQLQuery = SQLConstants.UPDATE_GOV_REQUEST_STATUS_FROM_PROCESSING_TO_PENDING;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING, e);
         }
     }
 
@@ -753,5 +806,24 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     e);
         }
 
+    }
+
+    /**
+     * Delete all governance data related to the artifact
+     *
+     * @param artifactId Artifact ID
+     * @throws GovernanceException If an error occurs while deleting the governance data
+     */
+    @Override
+    public void deleteArtifact(String artifactId) throws GovernanceException {
+        String SQLQuery = SQLConstants.DELETE_GOV_ARTIFACT_INFO;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            prepStmnt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_GOVERNANCE_DATA,
+                    e, artifactId);
+        }
     }
 }
