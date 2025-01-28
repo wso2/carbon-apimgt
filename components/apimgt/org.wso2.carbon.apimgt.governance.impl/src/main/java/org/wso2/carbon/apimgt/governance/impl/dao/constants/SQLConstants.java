@@ -190,6 +190,8 @@ public class SQLConstants {
             "(ARTIFACT_ID, ARTIFACT_TYPE, ORGANIZATION) " +
             "VALUES (?, ?, ?)";
 
+    public static final String DELETE_GOV_ARTIFACT_INFO = "DELETE FROM GOV_ARTIFACT_INFO WHERE ARTIFACT_ID = ?";
+
     public static final String ADD_GOV_EVALUATION_REQUEST = "INSERT INTO GOV_EVALUATION_REQUEST " +
             "(REQUEST_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID) " +
             "VALUES (?, ?, ?, ?)";

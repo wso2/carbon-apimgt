@@ -754,4 +754,23 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         }
 
     }
+
+    /**
+     * Delete all governance data related to the artifact
+     *
+     * @param artifactId Artifact ID
+     * @throws GovernanceException If an error occurs while deleting the governance data
+     */
+    @Override
+    public void deleteArtifact(String artifactId) throws GovernanceException {
+        String SQLQuery = SQLConstants.DELETE_GOV_ARTIFACT_INFO;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
+            prepStmnt.setString(1, artifactId);
+            prepStmnt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_GOVERNANCE_DATA,
+                    e, artifactId);
+        }
+    }
 }

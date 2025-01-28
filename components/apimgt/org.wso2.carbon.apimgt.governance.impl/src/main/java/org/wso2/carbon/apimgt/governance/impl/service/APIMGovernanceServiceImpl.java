@@ -22,13 +22,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.util.List;
+import java.util.Map;
 
 @Component(
         name = "org.wso2.carbon.apimgt.governance.service",
@@ -37,6 +40,11 @@ import java.util.List;
 )
 public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     private static final Log log = LogFactory.getLog(APIMGovernanceServiceImpl.class);
+    private ComplianceManagerImpl complianceManager;
+
+    APIMGovernanceServiceImpl() {
+        complianceManager = new ComplianceManagerImpl();
+    }
 
     /**
      * Check if there are any policies with blocking actions for the artifact
@@ -77,8 +85,52 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         for (GovernableState dependentState : dependentGovernableStates) {
             List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
                     artifactType, dependentState, organization);
-            new ComplianceManagerImpl().handleComplianceEvaluationAsync
+            complianceManager.handleComplianceEvaluationAsync
                     (artifactId, artifactType, applicablePolicyIds, organization);
         }
+    }
+
+
+    /**
+     * Evaluate compliance of the artifact synchronously
+     *
+     * @param artifactId             Artifact ID
+     * @param artifactType           Artifact type (ArtifactType.API)
+     * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
+     * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
+     *                               project. This is used to evaluate the compliance of the artifact.
+     *                               API_METADATA --> api.yaml content
+     *                               API_DEFINITION --> api definition content
+     *                               API_DOCUMENTATION --> api documentation content
+     * @param organization           Organization
+     * @return ArtifactComplianceInfo object
+     * @throws GovernanceException If an error occurs while evaluating compliance
+     */
+    @Override
+    public ArtifactComplianceInfo evaluateComplianceSync(String artifactId, ArtifactType artifactType,
+                                                         GovernableState state, Map<RuleType, String>
+                                                                 artifactProjectContent, String organization)
+            throws GovernanceException {
+
+        List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
+                artifactType, state, organization);
+        ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvaluationSync
+                (artifactId, artifactType, applicablePolicyIds, artifactProjectContent, organization);
+
+        // Though compliance is evaluated sync , we need to evaluate the compliance for all dependent states async to
+        // update results in the database. Hence, calling the async method here and this won't take time as it is async
+        evaluateComplianceAsync(artifactId, artifactType, state, organization);
+        return artifactComplianceInfo;
+    }
+
+    /**
+     * Delete all governance data related to the artifact
+     *
+     * @param artifactId Artifact ID
+     * @throws GovernanceException If an error occurs while clearing the compliance information
+     */
+    @Override
+    public void clearArtifactComplianceInfo(String artifactId) throws GovernanceException {
+        complianceManager.deleteArtifact(artifactId);
     }
 }

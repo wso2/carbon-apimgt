@@ -140,6 +140,9 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     ARTIFACT_INFO_NOT_FOUND(501006, "Artifact info not found.", 404, "Artifact info not found for artifact: %s in the "),
 
+    ERROR_WHILE_DELETING_GOVERNANCE_DATA(501007, "Error while deleting governance data.", 500, "Error while deleting " +
+            "governance data for artifact: %s", true),
+
     // Governance Results related codes
 
     ERROR_WHILE_SAVING_GOVERNANCE_RESULT(601001, "Error while saving governance result.", 500, "Error while saving " +

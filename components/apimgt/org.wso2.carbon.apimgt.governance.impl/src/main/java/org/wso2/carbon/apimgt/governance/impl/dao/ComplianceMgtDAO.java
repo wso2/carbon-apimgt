@@ -228,4 +228,12 @@ public interface ComplianceMgtDAO {
     Map<ArtifactType, List<ComplianceEvaluationResult>> getEvaluationResultsForPolicy(String policyId)
             throws GovernanceException;
 
+    /**
+     * Delete all governance data related to the artifact
+     *
+     * @param artifactId Artifact ID
+     * @throws GovernanceException If an error occurs while deleting the governance data
+     */
+    void deleteArtifact(String artifactId) throws GovernanceException;
+
 }
