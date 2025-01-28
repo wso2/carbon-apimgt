@@ -34,8 +34,6 @@ tags:
     description: for managing rulesets.
   - name: Governance Policies
     description: for managing governance policies.
-  - name: Governance Evaluation
-    description: for evaluating governance compliance.
   - name: Artifact Compliance
     description: for accessing artifact compliance.
   - name: Policy Adherence
@@ -607,56 +605,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
-  /evaluate-compliance:
-    post:
-      summary: Evaluate governance compliance
-      description: Evaluates the compliance of an artifact with the governance policies of the organization.
-      operationId: evaluateCompliance
-      tags:
-        - Governance Evaluation
-      requestBody:
-        required: true
-        description: JSON object containing the details of the artifact to be checked.
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ComplianceEvaluationRequest'
-      responses:
-        "200":
-          description: OK. Governance check successful.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ArtifactComplianceDetails'
-        "204":
-          description: No Content. No governance check triggered in the background.
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-      security:
-        - OAuth2Security:
-            - apim:gov_evaluate_compliance
   /artifact-compliance:
     get:
       summary: Retrieves compliance of all artifacts of a certain type
@@ -1281,43 +1229,6 @@ components:
             - BLOCK
             - NOTIFY
           example: "BLOCK"
-    ComplianceEvaluationRequest:
-      type: object
-      description: Request object for governance compliance validation.
-      properties:
-        artifactId:
-          type: string
-          description: UUID of the artifact.
-          example: "123e4567-e89b-12d3-a456-426614174000"
-        artifactType:
-          type: string
-          description: Type of the artifact.
-          enum:
-            - REST_API
-            - ASYNC_API
-          example: REST_API
-        governableState:
-          type: string
-          description: The state of the artifact at which the evaluation should run
-          enum:
-            - API_CREATE
-            - API_UPDATE
-            - API_DEPLOY
-            - API_PUBLISH
-          example: API_DEPLOY
-          x-enum-varnames:
-            - API_CREATE
-            - API_UPDATE
-            - API_DEPLOY
-            - API_PUBLISH
-        targetFile:
-          type: string
-          description: The artifact zip file to be evaluated against. If not provided, the artifact will be fetched from the DB.
-          format: binary
-      required:
-        - artifactId
-        - artifactType
-        - governableState
     GovernancePolicyList:
       type: object
       description: A list of governance policies.

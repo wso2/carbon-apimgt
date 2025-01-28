@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
-import org.wso2.rule.validator.InvalidRulesetException;
 import org.wso2.rule.validator.validator.Validator;
 
 import java.util.ArrayList;
@@ -128,16 +127,35 @@ public class SpectralValidationEngine implements ValidationEngine {
     @Override
     public List<RuleViolation> validate(String target, Ruleset ruleset) throws GovernanceException {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<RuleViolation> violations = new ArrayList<>();
-
         try {
 
-            String validationResultJsonString = Validator.validateDocument(target, ruleset.getRulesetContent());
+            String resultJson = Validator.validateDocument(target, ruleset.getRulesetContent());
+            return getRuleViolationsFromJsonResponse(resultJson, ruleset);
 
-            // Parse JSON string to JsonNode
-            JsonNode jsonNode = objectMapper.readTree(validationResultJsonString);
+        } catch (Exception e) {
+            log.error("Error occurred while verifying governance compliance ", e);
+            throw new GovernanceException("Error occurred while verifying governance compliance ", e);
+        }
+    }
 
+
+    /**
+     * Get Rule Violations from a JSON response
+     *
+     * @param resultJson JSON response
+     * @param ruleset    Ruleset
+     * @return List of Rule Violations
+     * @throws GovernanceException If an error occurs while getting the rule violations
+     */
+    private List<RuleViolation> getRuleViolationsFromJsonResponse(String resultJson, Ruleset ruleset)
+            throws GovernanceException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<RuleViolation> violations = new ArrayList<>();
+        JsonNode jsonNode;
+
+        // Parse JSON string to JsonNode
+        try {
+            jsonNode = objectMapper.readTree(resultJson);
             // Convert JsonNode to list of Result objects
             for (JsonNode node : jsonNode) {
                 boolean isViolation = !node.get("passed").asBoolean();
@@ -145,19 +163,17 @@ public class SpectralValidationEngine implements ValidationEngine {
                     RuleViolation violation = new RuleViolation();
                     violation.setRuleCode(node.get("ruleName").asText());
                     violation.setViolatedPath(node.get("path").asText());
+                    violation.setRuleMessage(node.get("message").asText());
                     violation.setRulesetId(ruleset.getId());
                     violations.add(violation);
                 }
             }
             return violations;
-
         } catch (JsonProcessingException e) {
             log.error("Error while parsing validation result JSON string", e);
             throw new GovernanceException("Error while parsing validation result JSON string", e);
-        } catch (Exception e) {
-            log.error("Error occurred while verifying governance compliance ", e);
-            throw new GovernanceException("Error occurred while verifying governance compliance ", e);
         }
+
     }
 
 

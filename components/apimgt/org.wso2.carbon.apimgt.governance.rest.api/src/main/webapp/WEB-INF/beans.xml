@@ -36,7 +36,6 @@
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi"/>
-            <bean class="org.wso2.carbon.apimgt.governance.rest.api.EvaluateComplianceApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

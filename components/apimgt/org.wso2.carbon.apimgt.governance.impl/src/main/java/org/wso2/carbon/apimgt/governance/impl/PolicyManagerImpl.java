@@ -57,7 +57,32 @@ public class PolicyManagerImpl implements PolicyManager {
     public GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
             governancePolicy) throws GovernanceException {
         governancePolicy.setId(GovernanceUtil.generateUUID());
+
+        List<GovernanceAction> actions = governancePolicy.getActions();
+        checkForRestrictedBlockingPolicies(actions);
+
         return policyMgtDAO.createGovernancePolicy(organization, governancePolicy);
+    }
+
+    /**
+     * This checks whether BLOCK actions are present for API_CREATE and API_UPDATE states
+     *
+     * @param actions List of governance actions
+     * @throws GovernanceException If an error occurs while checking for restricted blocking policies
+     */
+    private void checkForRestrictedBlockingPolicies(List<GovernanceAction> actions)
+            throws GovernanceException {
+
+        for (GovernanceAction action : actions) {
+            if (GovernanceActionType.BLOCK.equals(action.getType()) &&
+                    (GovernableState.API_CREATE.equals(action.getGovernableState()) ||
+                            GovernableState.API_UPDATE.equals(action.getGovernableState()))) {
+                throw new GovernanceException(GovernanceExceptionCodes.INVALID_POLICY_ACTION,
+                        "Creating policies with blocking actions for API" +
+                                " create/update is not allowed. Please update the policy");
+            }
+        }
+
     }
 
     /**
@@ -114,6 +139,9 @@ public class PolicyManagerImpl implements PolicyManager {
     public GovernancePolicy updateGovernancePolicy(String policyId, String organization,
                                                    GovernancePolicy governancePolicy)
             throws GovernanceException {
+        List<GovernanceAction> actions = governancePolicy.getActions();
+        checkForRestrictedBlockingPolicies(actions);
+
         return policyMgtDAO.updateGovernancePolicy(policyId, organization, governancePolicy);
     }
 

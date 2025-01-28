@@ -65,11 +65,13 @@ public class ComplianceEvaluationScheduler {
     /**
      * Initialize the evaluation request scheduler.
      */
-    public static void initialize() {
+    public static void initialize() throws GovernanceException {
         log.info("Initializing Evaluation Request Scheduler...");
 
         scheduler = Executors.newSingleThreadScheduledExecutor();
         processorPool = createProcessorPool();
+
+        complianceMgtDAO.updateProcessingRequestToPending();
 
         scheduler.scheduleAtFixedRate(
                 ComplianceEvaluationScheduler::processPendingRequests,
@@ -99,8 +101,6 @@ public class ComplianceEvaluationScheduler {
         if (log.isDebugEnabled()) {
             log.debug("Checking for pending evaluation requests...");
         }
-
-        // TODO: Reset any stuck requests to PENDING status after a certain time period
 
         List<ComplianceEvaluationRequest> pendingRequests = fetchPendingRequests();
 
@@ -230,6 +230,17 @@ public class ComplianceEvaluationScheduler {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
+
+        // Check if there are processing requests for the same artifact, policy pair. If so, skip evaluation
+        if (complianceMgtDAO.getProcessingComplianceEvaluationRequest(artifactId, policyId) != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping governance evaluation for artifact ID: " + artifactId + " and policy ID: " + policyId +
+                        " as there are processing requests for the same pair.");
+            }
+            return;
+        }
+
+        // Update evaluation status to PROCESSING
         complianceMgtDAO.updateComplianceEvaluationStatus(requestId, ComplianceEvaluationStatus.PROCESSING);
 
         // Get Rulesets related to the policy

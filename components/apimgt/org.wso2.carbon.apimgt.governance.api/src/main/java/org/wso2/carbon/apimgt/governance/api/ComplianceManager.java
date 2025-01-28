@@ -19,11 +19,13 @@
 package org.wso2.carbon.apimgt.governance.api;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
 
@@ -64,6 +66,24 @@ public interface ComplianceManager {
      */
     void handleComplianceEvaluationAsync(String artifactId, ArtifactType artifactType,
                                          List<String> govPolicies, String organization)
+            throws GovernanceException;
+
+
+    /**
+     * Handle API Compliance Evaluation Request Sync
+     *
+     * @param artifactId             Artifact ID
+     * @param artifactType           Artifact Type
+     * @param govPolicies            List of governance policies to be evaluated
+     * @param organization           Organization
+     * @param artifactProjectContent Map of artifact content
+     * @return ArtifactComplianceInfo object
+     * @throws GovernanceException If an error occurs while handling the API compliance evaluation
+     */
+    ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId, ArtifactType artifactType,
+                                                          List<String> govPolicies,
+                                                          Map<RuleType, String> artifactProjectContent,
+                                                          String organization)
             throws GovernanceException;
 
 
@@ -174,4 +194,12 @@ public interface ComplianceManager {
      * @throws GovernanceException If an error occurs while checking whether the ruleset is evaluated for the artifact
      */
     boolean isRulesetEvaluatedForArtifact(String artifactId, String rulesetId) throws GovernanceException;
+
+    /**
+     * Delete all governance data related to the artifact
+     *
+     * @param artifactId Artifact ID
+     * @throws GovernanceException If an error occurs while deleting the governance data
+     */
+    void deleteArtifact(String artifactId) throws GovernanceException;
 }
