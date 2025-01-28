@@ -25,7 +25,6 @@ import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -83,12 +82,7 @@ public class APIPublisherForNewPortal {
         try {
             String baseUrl = APIUtil.getNewPortalURL();
             SSLConnectionSocketFactory sslsf = generateSSLSF();
-            String orgId = getOrgId(tenantName, baseUrl, sslsf);
-            if (orgId == null) {
-                log.error("Unable to find the organization for the tenant.");
-                return;
-            }
-            publishAPI(orgId, baseUrl, apiTypeWrapper,  tenantName, sslsf);
+            publishAPI(baseUrl, apiTypeWrapper,  tenantName, sslsf);
         } catch (APIManagementException e) {
             log.error("Error while publishing API for new developer portal. Error: " + e.getMessage());
         }
@@ -114,19 +108,24 @@ public class APIPublisherForNewPortal {
         }
     }
 
-    private static void publishAPI(String orgId, String baseUrl, ApiTypeWrapper apiTypeWrapper, String tenantName,
+    private static void publishAPI(String baseUrl, ApiTypeWrapper apiTypeWrapper, String tenantName,
                                    SSLConnectionSocketFactory sslsf) throws APIManagementException {
-        API api = apiTypeWrapper.getApi();
-        String apiDefinition = ApisApiServiceImplUtils.getApiDefinition(api);
-        String apiMetaData = getApiMetaData(apiTypeWrapper);
+        String orgId = getOrgId(tenantName, baseUrl, sslsf);
+        if (orgId != null) {
+            API api = apiTypeWrapper.getApi();
+            String apiDefinition = ApisApiServiceImplUtils.getApiDefinition(api);
+            String apiMetaData = getApiMetaData(apiTypeWrapper);
 
-        HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition, sslsf);
+            HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition, sslsf);
 
-        if (responseData.getStatusCode() == 201) {
-            log.info("API " + apiTypeWrapper.getName() + " successfully published to " + baseUrl);
+            if (responseData.getStatusCode() == 201) {
+                log.info("API " + apiTypeWrapper.getName() + " successfully published to " + baseUrl);
+            } else {
+                log.error("Failed to publish API " + apiTypeWrapper.getName() + " to the new portal. Status code: "
+                        + responseData.getStatusCode());
+            }
         } else {
-            log.error("Failed to publish API " + apiTypeWrapper.getName() + " to the new portal. Status code: "
-                    + responseData.getStatusCode());
+            log.error("Unable to find the organization for the tenant.");
         }
     }
 
@@ -143,7 +142,7 @@ public class APIPublisherForNewPortal {
                 if (apiPutResponseData.getStatusCode() == 200) {
                     log.info("API " + apiTypeWrapper.getName() + " successfully updated in " + baseUrl);
                 } else {
-                    log.error("Failed to update API " + apiTypeWrapper.getName() + " in the new portal. Status code: "
+                    log.error("Failed to update API " + apiTypeWrapper.getName() + " in new portal. Status code: "
                             + apiPutResponseData.getStatusCode());
                 }
             } else {
@@ -182,8 +181,7 @@ public class APIPublisherForNewPortal {
             // OrgID cache hit
             return orgIdCache.get(tenantName);
         }
-        HttpResponseData responseData = orgGetAction(baseUrl +
-                DevPortalProcessingConstants.GET_ORG_ID_URI, tenantName, sslsf);
+        HttpResponseData responseData = orgGetAction(tenantName, sslsf);
         String orgId;
         try {
             if (responseData.getStatusCode() == 200) {
@@ -214,10 +212,10 @@ public class APIPublisherForNewPortal {
                     Map<String, Object> apiDetails = apiList.get(0);
                     return (String) apiDetails.get("apiID");
                 } else if (apiList.size() > 1) {
-                    log.error("There are multiple APIs for the API name: " + apiName + " and version: " + apiVersion);
+                    log.error("There are multiple APIs for the API name: " + apiName + " & version: " + apiVersion);
                     return null;
                 } else {
-                    log.error("No API found for the API name: " + apiName + " and version: " + apiVersion);
+                    log.error("No API found for the API name: " + apiName + " & version: " + apiVersion);
                     return null;
                 }
             } catch (JsonProcessingException e) {
@@ -304,11 +302,22 @@ public class APIPublisherForNewPortal {
 
     // HTTPS Request Related Methods
 
-    private static HttpResponseData orgGetAction(String apiUrl, String orgRef, SSLConnectionSocketFactory sslsf)
+    private static HttpResponseData orgGetAction(String orgRef, SSLConnectionSocketFactory sslsf)
             throws APIManagementException {
-        Map<String, String> params = new HashMap<>();
-        params.put("orgRef", orgRef);
-        return httpAction(apiUrl, "GET", params, sslsf);
+        String baseUrl = APIUtil.getNewPortalURL();
+        String apiUrl = baseUrl + DevPortalProcessingConstants.ORG_URI + "/" + orgRef;
+        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+            URIBuilder uriBuilder = new URIBuilder(apiUrl);
+            HttpGet httpGet = new HttpGet(uriBuilder.build());
+
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                int statusCode = response.getStatusLine().getStatusCode();
+                String responseBody = EntityUtils.toString(response.getEntity());
+                return new HttpResponseData(statusCode, responseBody);
+            }
+        } catch (IOException | URISyntaxException e) {
+            throw new APIManagementException("Error while communicating with DevPortal: " + e.getMessage(), e);
+        }
     }
 
     private static HttpResponseData apiGetAction(String orgId, String name, String version, SSLConnectionSocketFactory sslsf)
@@ -392,29 +401,6 @@ public class APIPublisherForNewPortal {
             }
         } catch (IOException e) {
             throw new APIManagementException("Error sending API metadata and definition: " + e.getMessage(), e);
-        }
-    }
-
-    private static HttpResponseData httpAction(String apiUrl, String action, Map<String, String> params,
-                                               SSLConnectionSocketFactory sslsf)
-            throws APIManagementException {
-        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
-            HttpPost httpPost = new HttpPost(apiUrl);
-            StringBuilder jsonPayload = new StringBuilder("{\"action\":\"" + action + "\"");
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                jsonPayload.append(",\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\"");
-            }
-            jsonPayload.append("}");
-            StringEntity entity = new StringEntity(jsonPayload.toString(), ContentType.APPLICATION_JSON);
-            httpPost.setEntity(entity);
-            httpPost.setHeader("Content-Type", "application/json");
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                int statusCode = response.getStatusLine().getStatusCode();
-                String responseBody = EntityUtils.toString(response.getEntity());
-                return new HttpResponseData(statusCode, responseBody);
-            }
-        } catch (IOException e) {
-            throw new APIManagementException("Error while communicating with DevPortal: " + e.getMessage(), e);
         }
     }
 
