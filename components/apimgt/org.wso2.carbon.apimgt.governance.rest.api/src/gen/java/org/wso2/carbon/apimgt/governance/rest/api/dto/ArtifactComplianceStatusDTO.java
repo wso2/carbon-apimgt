@@ -64,8 +64,8 @@ return null;
           @XmlType(name="StatusEnum")
     @XmlEnum(String.class)
     public enum StatusEnum {
-        COMPLAINT("COMPLAINT"),
-        NON_COMPLAINT("NON-COMPLAINT"),
+        COMPLIANT("COMPLIANT"),
+        NON_COMPLIANT("NON-COMPLIANT"),
         NOT_APPLICABLE("NOT-APPLICABLE");
         private String value;
 
@@ -159,7 +159,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "COMPLAINT", value = "Status of the artifact's governance compliance.")
+  @ApiModelProperty(example = "COMPLIANT", value = "Status of the artifact's governance compliance.")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;

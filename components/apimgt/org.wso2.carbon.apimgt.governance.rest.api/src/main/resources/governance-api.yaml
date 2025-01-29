@@ -1340,10 +1340,10 @@ components:
           type: string
           description: Status of the artifact's governance compliance.
           enum:
-            - COMPLAINT
-            - NON-COMPLAINT
+            - COMPLIANT
+            - NON-COMPLIANT
             - NOT-APPLICABLE
-          example: "COMPLAINT"
+          example: "COMPLIANT"
         policyAdherenceSummary:
           $ref: '#/components/schemas/PolicyAdherenceSummary'
         severityBasedRuleViolationSummary:
@@ -1407,10 +1407,10 @@ components:
           type: string
           description: Status of the artifact's governance compliance.
           enum:
-            - COMPLAINT
-            - NON-COMPLAINT
+            - COMPLIANT
+            - NON-COMPLIANT
             - NOT-APPLICABLE
-          example: "COMPLAINT"
+          example: "COMPLIANT"
         governedPolicies:
           type: array
           description: List of policies under which the artifact was governed.
@@ -1488,10 +1488,10 @@ components:
           type: string
           description: Status of the artifact's compliance to the policy.
           enum:
-            - COMPLAINT
-            - NON-COMPLAINT
+            - COMPLIANT
+            - NON-COMPLIANT
             - NOT-APPLICABLE
-          example: "COMPLAINT"
+          example: "COMPLIANT"
     RulesetValidationResult:
       type: object
       description: Result of the ruleset validation.
@@ -1569,12 +1569,9 @@ components:
             - WARN
             - INFO
           example: WARN
-        violatedPaths:
-          type: array
-          description: List of paths that violate the rule.
-          items:
-            type: string
-            example: "$.info.title"
+        violatedPath:
+          type: string
+          description: Path in the artifact where the rule is violated.
         message:
           type: string
           description: Message to be displayed when the rule is violated.

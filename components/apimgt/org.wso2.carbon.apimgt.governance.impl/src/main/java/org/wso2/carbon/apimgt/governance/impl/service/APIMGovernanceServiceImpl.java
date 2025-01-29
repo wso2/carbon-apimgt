@@ -117,7 +117,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
                 artifactType, state, organization);
         ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvaluationSync
-                (artifactId, artifactType, applicablePolicyIds, artifactProjectContent, organization);
+                (artifactId, artifactType, applicablePolicyIds, artifactProjectContent, state, organization);
 
         // Though compliance is evaluated sync , we need to evaluate the compliance for all dependent states async to
         // update results in the database. Hence, calling the async method here and this won't take time as it is async

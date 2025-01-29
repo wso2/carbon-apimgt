@@ -97,8 +97,10 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
 
 
         // Get the list of policies
-        List<GovernancePolicy> policies = new PolicyManagerImpl().getGovernancePolicies(organization)
-                .getGovernancePolicyList().subList(offset, offset + limit);
+        List<GovernancePolicy> allPolicies = new PolicyManagerImpl().getGovernancePolicies(organization)
+                .getGovernancePolicyList();
+
+        List<GovernancePolicy> policies = allPolicies.subList(offset, Math.min(offset + limit, allPolicies.size()));
 
         List<PolicyAdherenceStatusDTO> policyAdherenceStatusDTOs = new ArrayList<>();
 
@@ -121,7 +123,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
         listDTO.setList(policyAdherenceStatusDTOs);
 
         // Set pagination details for the artifact compliance list
-        ResultsMappingUtil.setPaginationDetailsForPolicyAdherence(listDTO, limit, offset, policies.size());
+        ResultsMappingUtil.setPaginationDetailsForPolicyAdherence(listDTO, limit, offset, allPolicies.size());
 
         return Response.ok().entity(listDTO).build();
     }

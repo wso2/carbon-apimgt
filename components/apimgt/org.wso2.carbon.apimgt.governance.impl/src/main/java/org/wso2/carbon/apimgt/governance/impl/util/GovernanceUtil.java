@@ -246,7 +246,7 @@ public class GovernanceUtil {
         Map<ArtifactType, List<String>> artifacts = new HashMap<>();
         Map<String, List<String>> apiIds = APIMUtil.getAPIsByLabel(labelId);
         for (Map.Entry<String, List<String>> entry : apiIds.entrySet()) {
-            ArtifactType artifactType = ArtifactType.fromAPIMArtifactType(entry.getKey());
+            ArtifactType artifactType = APIMUtil.getArtifactTypeForAPIType(entry.getKey());
             if (artifactType != null) {
                 artifacts.put(artifactType, entry.getValue());
             }
@@ -268,7 +268,7 @@ public class GovernanceUtil {
         // Get all API Artifacts
         Map<String, List<String>> artifactsMap = APIMUtil.getAllAPIsByAPIType(organization);
         for (Map.Entry<String, List<String>> entry : artifactsMap.entrySet()) {
-            ArtifactType artifactType = ArtifactType.fromAPIMArtifactType(entry.getKey());
+            ArtifactType artifactType = APIMUtil.getArtifactTypeForAPIType(entry.getKey());
             if (artifactType != null) {
                 artifacts.put(artifactType, entry.getValue());
             }
@@ -391,6 +391,20 @@ public class GovernanceUtil {
     public static ArtifactType getArtifactType(String artifactId) throws GovernanceException {
         ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
         return complianceMgtDAO.getArtifactInfo(artifactId).getArtifactType();
+    }
+
+    /**
+     * Get parent artifact type from a given artifact ID (API or not)
+     *
+     * @param artifactId Artifact ID
+     * @return ArtifactType
+     */
+    public static ArtifactType getParentArtifactType(String artifactId) throws GovernanceException {
+        ArtifactType artifactType = getArtifactType(artifactId);
+        if (ArtifactType.isArtifactAPI(artifactType)) {
+            return ArtifactType.API;
+        }
+        return null;
     }
 
     /**

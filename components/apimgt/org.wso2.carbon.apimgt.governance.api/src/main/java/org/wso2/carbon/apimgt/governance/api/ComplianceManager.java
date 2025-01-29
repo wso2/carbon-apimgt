@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
+import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -75,6 +76,7 @@ public interface ComplianceManager {
      * @param artifactId             Artifact ID
      * @param artifactType           Artifact Type
      * @param govPolicies            List of governance policies to be evaluated
+     * @param state                  State at which artifact should be governed
      * @param organization           Organization
      * @param artifactProjectContent Map of artifact content
      * @return ArtifactComplianceInfo object
@@ -83,6 +85,7 @@ public interface ComplianceManager {
     ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId, ArtifactType artifactType,
                                                           List<String> govPolicies,
                                                           Map<RuleType, String> artifactProjectContent,
+                                                          GovernableState state,
                                                           String organization)
             throws GovernanceException;
 

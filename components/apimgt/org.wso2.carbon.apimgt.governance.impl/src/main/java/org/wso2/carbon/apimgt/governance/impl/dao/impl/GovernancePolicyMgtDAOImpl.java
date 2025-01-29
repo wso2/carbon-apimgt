@@ -708,6 +708,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 while (rs.next()) {
                     Ruleset ruleset = new Ruleset();
                     ruleset.setId(rs.getString("RULESET_ID"));
+                    ruleset.setName(rs.getString("NAME"));
                     byte[] rulesetContent = rs.getBytes("RULESET_CONTENT");
                     ruleset.setRulesetContent(new String(rulesetContent));
                     ruleset.setRuleCategory(RuleCategory.fromString(
@@ -819,7 +820,8 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @return List of Policy IDs
      */
     @Override
-    public List<String> getPoliciesWithoutLabelsByState(GovernableState state, String organization) throws GovernanceException {
+    public List<String> getPoliciesWithoutLabelsByState(GovernableState state, String organization)
+            throws GovernanceException {
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_WITHOUT_LABELS_BY_STATE)) {
