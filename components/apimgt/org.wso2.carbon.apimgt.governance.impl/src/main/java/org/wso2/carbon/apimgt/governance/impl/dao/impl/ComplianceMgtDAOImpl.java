@@ -672,7 +672,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         List<String> artifactIds = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
-            prepStmnt.setString(1, String.valueOf(artifactType));
+            String artifactTypeStr = "%" + artifactType + "%"; // Need to search for ALL APIs
+            prepStmnt.setString(1, artifactTypeStr);
             prepStmnt.setString(2, organization);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {
@@ -701,7 +702,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         List<String> artifactIds = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
-            prepStmnt.setString(1, String.valueOf(artifactType));
+            String artifactTypeStr = "%" + artifactType + "%"; // Need to search for ALL APIs
+            prepStmnt.setString(1, artifactTypeStr);
             prepStmnt.setString(2, organization);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {

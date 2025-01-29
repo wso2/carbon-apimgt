@@ -162,38 +162,33 @@ public class APIMUtil {
         }
     }
 
-
     /**
-     * Get the corresponding API statuses for governable states
-     * That is the states on APIM side can be mapped to the states on the governance side
+     * Check if the API is governable based on the status, deployment status and governable states
      *
+     * @param status           API status
+     * @param isDeployed       API deployment status
      * @param governableStates List of governable states
-     * @return List of corresponding API statuses
+     * @return True if the API is governable
      */
-    public static List<String> getCorrespondingAPIStatusesForGovernableStates(List<GovernableState> governableStates) {
-        List<String> apiStatuses = new ArrayList<>();
-        for (GovernableState governableState : governableStates) {
-            switch (governableState) {
-                case API_CREATE:
-                    apiStatuses.add(String.valueOf(APIStatus.CREATED));
-                    break;
-                case API_UPDATE:
-                case API_DEPLOY:
-                    apiStatuses.add(String.valueOf(APIStatus.CREATED));
-                    apiStatuses.add(String.valueOf(APIStatus.PROTOTYPED));
-                    break;
-                case API_PUBLISH:
-                    apiStatuses.add(String.valueOf(APIStatus.CREATED));
-                    apiStatuses.add(String.valueOf(APIStatus.PUBLISHED));
-                    apiStatuses.add(String.valueOf(APIStatus.PROTOTYPED));
-                    apiStatuses.add(String.valueOf(APIStatus.DEPRECATED));
-                    apiStatuses.add(String.valueOf(APIStatus.BLOCKED));
-                    break;
-                default:
-                    break;
-            }
+    public static boolean isAPIGovernable(String status, boolean isDeployed, List<GovernableState> governableStates) {
+
+        // If API is in any state we need to run created and update policies
+        boolean isGovernable = governableStates.contains(GovernableState.API_CREATE)
+                || governableStates.contains(GovernableState.API_UPDATE);
+
+        // If the API is deployed, we need to run deploy policies
+        if (isDeployed) {
+            isGovernable |= governableStates.contains(GovernableState.API_DEPLOY);
         }
-        return apiStatuses;
+
+        // If the API is in published, deprecated or blocked state, we need to run publish policies
+        if (APIStatus.PUBLISHED.equals(APIStatus.valueOf(status)) ||
+                APIStatus.DEPRECATED.equals(APIStatus.valueOf(status)) ||
+                APIStatus.BLOCKED.equals(APIStatus.valueOf(status))) {
+            isGovernable |= governableStates.contains(GovernableState.API_PUBLISH);
+        }
+
+        return isGovernable;
     }
 
     /**
@@ -416,6 +411,26 @@ public class APIMUtil {
         } catch (APIManagementException e) {
             throw new GovernanceException("Error while getting the API type for the API with ID: " + apiId, e);
         }
+    }
+
+    /**
+     * Convert from API Manager api type to API Manager Governance artifact type
+     *
+     * @param apiType API type
+     * @return API Manager Governance artifact type
+     * TODO: Complete and verify the below logic
+     */
+    public static ArtifactType getArtifactTypeForAPIType(String apiType) {
+        if ("rest".equalsIgnoreCase(apiType) || "http".equalsIgnoreCase(apiType)) {
+            return ArtifactType.REST_API;
+        } else if ("soap".equalsIgnoreCase(apiType)) {
+            return ArtifactType.SOAP_API;
+        } else if ("graphql".equalsIgnoreCase(apiType)) {
+            return ArtifactType.GRAPHQL_API;
+        } else if ("async".equalsIgnoreCase(apiType) || "ws".equalsIgnoreCase(apiType)) {
+            return ArtifactType.ASYNC_API;
+        }
+        return null;
     }
 
 }

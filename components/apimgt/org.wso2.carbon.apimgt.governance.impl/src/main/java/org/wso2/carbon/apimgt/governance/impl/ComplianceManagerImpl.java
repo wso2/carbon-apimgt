@@ -91,7 +91,6 @@ public class ComplianceManagerImpl implements ComplianceManager {
         // Get artifacts that should be governed by the policy
         List<ArtifactInfo> artifacts = new ArrayList<>();
 
-        // TODO: Need to get specific type of artifacts from APIM
         if (labels != null && !labels.isEmpty()) {
             artifacts.addAll(getArtifactsByLabelsAndGovernableStates(labels, governableStates));
         } else {
@@ -167,12 +166,12 @@ public class ComplianceManagerImpl implements ComplianceManager {
             List<String> artifactIds = artifactsMap.get(artifactType);
 
             if (ArtifactType.isArtifactAPI(artifactType)) {
-                // Get all the API lifecycle states that correspond to the governable state
-                List<String> correspondingAPIStates =
-                        APIMUtil.getCorrespondingAPIStatusesForGovernableStates(governableStates);
                 for (String artifactId : artifactIds) {
-                    // If the API is in one of the corresponding states and not already added, add it to the list
-                    if (correspondingAPIStates.contains(APIMUtil.getAPIStatus(artifactId))) {
+                    String apiStatus = APIMUtil.getAPIStatus(artifactId);
+                    boolean isDeployed = APIMUtil.isAPIDeployed(artifactId);
+                    boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, governableStates);
+                    // If the API should be governed by the policy
+                    if (isAPIGovernable) {
                         ArtifactInfo artifactInfo = new ArtifactInfo();
                         artifactInfo.setArtifactId(artifactId);
                         artifactInfo.setArtifactType(artifactType);
@@ -469,6 +468,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @param artifactType           Artifact Type
      * @param govPolicies            List of governance policies to be evaluated
      * @param artifactProjectContent Map of artifact content
+     * @param state                  State at which artifact should be governed
      * @param organization           Organization
      * @return ArtifactComplianceInfo object
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
@@ -476,7 +476,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
     @Override
     public ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId, ArtifactType artifactType,
                                                                  List<String> govPolicies, Map<RuleType, String>
-                                                                         artifactProjectContent,
+                                                                             artifactProjectContent, GovernableState state,
                                                                  String organization) throws GovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
@@ -522,7 +522,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
                             contentToValidate, ruleset);
 
                     Map<GovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations =
-                            filterBlockableAndNonBlockableRuleViolations(artifactId, policy, ruleViolations);
+                            filterBlockableAndNonBlockableRuleViolations(artifactId, policy, ruleViolations, state);
 
                     // Add the rule violations to the compliance info
                     artifactComplianceInfo.addBlockingViolations(blockableAndNonBlockableViolations
@@ -553,17 +553,20 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @param artifactId     Artifact ID
      * @param policy         Governance Policy
      * @param ruleViolations List of Rule Violations
+     * @param state          State at which artifact should be governed
      * @return Map of blockable and non-blockable rule violations
-     * @throws GovernanceException If an error occurs while filtering blockable and non-blockable rule violations
      */
     private Map<GovernanceActionType, List<RuleViolation>>
     filterBlockableAndNonBlockableRuleViolations(String artifactId, GovernancePolicy policy,
-                                                 List<RuleViolation> ruleViolations) throws GovernanceException {
+                                                 List<RuleViolation> ruleViolations, GovernableState state) {
 
         // Identify blockable severities from the policy
         List<Severity> blockableSeverities = new ArrayList<>();
         for (GovernanceAction governanceAction : policy.getActions()) {
-            if (GovernanceActionType.BLOCK.equals(governanceAction.getType())) {
+
+            // If the state matches and action is block the violation is blockable
+            if (state.equals(governanceAction.getGovernableState()) &&
+                    GovernanceActionType.BLOCK.equals(governanceAction.getType())) {
                 blockableSeverities.add(governanceAction.getRuleSeverity());
             }
         }

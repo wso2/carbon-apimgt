@@ -68,25 +68,4 @@ public enum ArtifactType {
                 || type == API;
     }
 
-    /**
-     * Convert from API Manager artifact type to API Manager Governance artifact type
-     *
-     * @param artifactType Artifact type
-     * @return API Manager Governance artifact type
-     * TODO: Complete and verify the below logic
-     */
-    public static ArtifactType fromAPIMArtifactType(String artifactType) {
-        if ("rest".equalsIgnoreCase(artifactType) || "http".equalsIgnoreCase(artifactType)) {
-            return REST_API;
-        } else if ("soap".equalsIgnoreCase(artifactType)) {
-            return SOAP_API;
-        } else if ("graphql".equalsIgnoreCase(artifactType)) {
-            return GRAPHQL_API;
-        } else if ("async".equalsIgnoreCase(artifactType) || "ws".equalsIgnoreCase(artifactType)) {
-            return ASYNC_API;
-        }
-        return null;
-    }
-
-
 }

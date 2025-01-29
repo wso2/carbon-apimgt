@@ -59,8 +59,8 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         ComplianceManager complianceManager = new ComplianceManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        // Get artifact type
-        ArtifactType artifactType = GovernanceUtil.getArtifactType(artifactId);
+        // Get artifact type (API or other)
+        ArtifactType artifactType = GovernanceUtil.getParentArtifactType(artifactId);
 
         // Initialize the response DTO
         ArtifactComplianceDetailsDTO artifactComplianceDetailsDTO = new ArtifactComplianceDetailsDTO();
@@ -98,6 +98,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
             boolean isPolicyEvaluated = evaluatedPolicies.contains(policyId);
             PolicyAdherenceWithRulesetsDTO policyAdherence = getPolicyAdherenceResults(policyId, policyName,
                     artifactId, isPolicyEvaluated);
+            policyAdherenceDetails.add(policyAdherence);
 
             // If the policy is violated, set the artifact compliance status to non-compliant
             if (policyAdherence.getStatus() == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED) {
