@@ -2201,7 +2201,7 @@
 
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 
-        <rule.validator.version>1.0.0</rule.validator.version>
+        <rule.validator.version>1.0.0-SNAPSHOT</rule.validator.version>
 
         <!-- apache cxf version -->
         <cxf.version>3.6.4</cxf.version>
