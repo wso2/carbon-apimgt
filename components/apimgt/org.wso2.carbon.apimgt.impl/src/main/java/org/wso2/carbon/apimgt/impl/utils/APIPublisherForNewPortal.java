@@ -84,7 +84,7 @@ public class APIPublisherForNewPortal {
             SSLConnectionSocketFactory sslsf = generateSSLSF();
             publishAPI(baseUrl, apiTypeWrapper,  tenantName, sslsf);
         } catch (APIManagementException e) {
-            log.error("Error while publishing API for new developer portal. Error: " + e.getMessage());
+            log.error("Error while publishing API for new Dev Portal. Error: " + e.getMessage());
         }
     }
 
@@ -94,7 +94,7 @@ public class APIPublisherForNewPortal {
             SSLConnectionSocketFactory sslsf = generateSSLSF();
             updateAPI(baseUrl, apiTypeWrapper,  tenantName, sslsf);
         } catch (APIManagementException e) {
-            log.error("Error while updating API for new developer portal. Error: " + e.getMessage());
+            log.error("Error while updating API for new Dev Portal. Error: " + e.getMessage());
         }
     }
 
@@ -121,11 +121,12 @@ public class APIPublisherForNewPortal {
             if (responseData.getStatusCode() == 201) {
                 log.info("API " + apiTypeWrapper.getName() + " successfully published to " + baseUrl);
             } else {
-                log.error("Failed to publish API " + apiTypeWrapper.getName() + " to the new portal. Status code: "
-                        + responseData.getStatusCode());
+                log.error("Failed to publish API " + apiTypeWrapper.getName() + " to the new Dev Portal. " +
+                        "Status code: " + responseData.getStatusCode());
             }
         } else {
-            log.error("Unable to find the organization for the tenant.");
+            log.error("Unable to find an organization in the new Dev Portal that matches the tenant." +
+                    "Hence fails to publish in new Dev Portal");
         }
     }
 
@@ -146,10 +147,11 @@ public class APIPublisherForNewPortal {
                             + apiPutResponseData.getStatusCode());
                 }
             } else {
-                log.error("API is not available in Dev Portal, hence fails to update");
+                log.error("API is not available in Dev Portal. Hence fails to update in new Dev Portal");
             }
         } else {
-            log.error("org is not available in Dev Portal, hence fails to update");
+            log.error("Unable to find an organization in the new Dev Portal that matches the tenant." +
+                    "Hence fails to update in new Dev Portal");
         }
     }
 
@@ -171,7 +173,8 @@ public class APIPublisherForNewPortal {
                 }
             }
         } else {
-            log.error("org is not available in Dev Portal, hence fails to un-publish");
+            log.error("Unable to find an organization in the new Dev Portal that matches the tenant." +
+                    "Hence fails to un-publish from new Dev Portal");
         }
     }
 
@@ -222,7 +225,8 @@ public class APIPublisherForNewPortal {
                 throw new APIManagementException("Error reading API response: " + e.getMessage(), e);
             }
         } else if (responseData.getStatusCode() == 404) {
-            log.error("API is not available in the Dev Portal for the name: " + apiName + " and version: " + apiVersion);
+            log.error("API is not available in the Dev Portal for the name: " + apiName +
+                    " and version: " + apiVersion);
             return null;
         } else {
             log.error("Failed to retrieve API ID. Status code: " + responseData.getStatusCode());
@@ -320,7 +324,8 @@ public class APIPublisherForNewPortal {
         }
     }
 
-    private static HttpResponseData apiGetAction(String orgId, String name, String version, SSLConnectionSocketFactory sslsf)
+    private static HttpResponseData apiGetAction(String orgId, String name, String version,
+                                                 SSLConnectionSocketFactory sslsf)
             throws APIManagementException {
         String baseUrl = APIUtil.getNewPortalURL();
         String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI;
@@ -337,7 +342,7 @@ public class APIPublisherForNewPortal {
                 return new HttpResponseData(statusCode, responseBody);
             }
         } catch (IOException | URISyntaxException e) {
-            throw new APIManagementException("Error while communicating with DevPortal: " + e.getMessage(), e);
+            throw new APIManagementException("Error while API search in new Dev Portal: " + e.getMessage(), e);
         }
     }
 
@@ -356,12 +361,13 @@ public class APIPublisherForNewPortal {
                 return new HttpResponseData(statusCode, responseBody);
             }
         } catch (IOException e) {
-            throw new APIManagementException("Error while communicating with DevPortal: " + e.getMessage(), e);
+            throw new APIManagementException("Error while API delete in new Dev Portal: " + e.getMessage(), e);
         }
     }
 
 
-    private static HttpResponseData apiPostAction(String orgId, String apiMetadata, String apiDefinition, SSLConnectionSocketFactory sslsf)
+    private static HttpResponseData apiPostAction(String orgId, String apiMetadata, String apiDefinition,
+                                                  SSLConnectionSocketFactory sslsf)
             throws APIManagementException {
         String baseUrl = APIUtil.getNewPortalURL();
         String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI;
@@ -370,7 +376,8 @@ public class APIPublisherForNewPortal {
             httpPost.setHeader("organization", orgId);
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addTextBody("apiMetadata", apiMetadata, ContentType.APPLICATION_JSON);
-            builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON, "apiDefinition.json");
+            builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON,
+                    "apiDefinition.json");
             httpPost.setEntity(builder.build());
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 int statusCode = response.getStatusLine().getStatusCode();
@@ -378,7 +385,7 @@ public class APIPublisherForNewPortal {
                 return new HttpResponseData(statusCode, responseBody);
             }
         } catch (IOException e) {
-            throw new APIManagementException("Error sending API metadata and definition: " + e.getMessage(), e);
+            throw new APIManagementException("Error while API publish in new Dev Portal: " + e.getMessage(), e);
         }
     }
 
@@ -392,7 +399,8 @@ public class APIPublisherForNewPortal {
             httpPut.setHeader("organization", orgId);
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addTextBody("apiMetadata", apiMetadata, ContentType.APPLICATION_JSON);
-            builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON, "apiDefinition.json");
+            builder.addBinaryBody("apiDefinition", apiDefinition.getBytes(), ContentType.APPLICATION_JSON,
+                    "apiDefinition.json");
             httpPut.setEntity(builder.build());
             try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
                 int statusCode = response.getStatusLine().getStatusCode();
@@ -400,7 +408,7 @@ public class APIPublisherForNewPortal {
                 return new HttpResponseData(statusCode, responseBody);
             }
         } catch (IOException e) {
-            throw new APIManagementException("Error sending API metadata and definition: " + e.getMessage(), e);
+            throw new APIManagementException("Error while API update in new Dev Portal: " + e.getMessage(), e);
         }
     }
 
