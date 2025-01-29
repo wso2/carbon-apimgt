@@ -488,7 +488,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rule.setCode(rs.getString("RULE_CODE"));
                     rule.setDescription(rs.getString("RULE_DESCRIPTION"));
                     rule.setMessageOnFailure(rs.getString("RULE_MESSAGE"));
-                    rule.setSeverity(Severity.fromString(rs.getString("RULE_SEVERITY")));
+                    rule.setSeverity(Severity.fromString(rs.getString("SEVERITY")));
                     rules.add(rule);
                 }
             }

@@ -103,7 +103,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
             // If the policy is violated, set the artifact compliance status to non-compliant
             if (policyAdherence.getStatus() == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED) {
                 artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO
-                        .StatusEnum.NON_COMPLAINT);
+                        .StatusEnum.NON_COMPLIANT);
             }
 
         }
@@ -230,6 +230,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         artifactType = artifactType != null ? artifactType : String.valueOf(ArtifactType.API);
+        int totalArtifactCount = 0;
 
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
@@ -238,9 +239,11 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         // Check if the artifact type is API and proceed accordingly
         if (ArtifactType.isArtifactAPI(artifactType)) {
             // Retrieve APIs the given organization
-            List<String> apiIds = APIMUtil.getPaginatedAPIs(organization, limit, offset);
+            List<String> allAPIs = APIMUtil.getAllAPIs(organization);
+            totalArtifactCount = allAPIs.size();
+            List<String> paginatedAPIIds = allAPIs.subList(offset, Math.min(offset + limit, allAPIs.size()));
 
-            for (String apiId : apiIds) {
+            for (String apiId : paginatedAPIIds) {
                 ArtifactComplianceStatusDTO complianceStatus = getArtifactComplianceStatus(apiId,
                         ArtifactType.API, organization);
                 complianceStatusList.add(complianceStatus);
@@ -253,7 +256,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
 
         // Set pagination details for the artifact compliance list
         ResultsMappingUtil.setPaginationDetailsForArtifactCompliance(complianceListDTO, limit, offset,
-                complianceStatusList.size(), artifactType);
+                totalArtifactCount, artifactType);
 
         return Response.ok().entity(complianceListDTO).build();
 
@@ -330,10 +333,13 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
                 violatedPolicies.add(ruleViolation.getPolicyId());
             }
         }
-        
+
         complianceStatus.setPolicyAdherenceSummary(ResultsMappingUtil.getPolicyAdherenceSummary(
                 applicablePolicies.size(), evaluatedPolicies.size(), violatedPolicies.size()));
         complianceStatus.setSeverityBasedRuleViolationSummary(ruleViolationCounts);
+        complianceStatus.setStatus(violatedPolicies.isEmpty() ?
+                ArtifactComplianceStatusDTO.StatusEnum.COMPLIANT :
+                ArtifactComplianceStatusDTO.StatusEnum.NON_COMPLIANT);
 
         return complianceStatus;
     }
@@ -371,6 +377,8 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
 
         ArtifactComplianceSummaryDTO summaryDTO = ResultsMappingUtil.getArtifactComplianceSummary(
                 totalArtifactsCount, compliantArtifactCount, nonCompliantArtifactCount);
+        summaryDTO.setArtifactType(ArtifactComplianceSummaryDTO.ArtifactTypeEnum.fromValue(artifactTypeString));
+        
         return Response.ok().entity(summaryDTO).build();
     }
 

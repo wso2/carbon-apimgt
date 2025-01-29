@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -64,6 +65,7 @@ public class ResultsMappingUtil {
             ruleValidationResultDTO.setStatus(RuleValidationResultDTO.StatusEnum.FAILED);
             ruleValidationResultDTO.setSeverity(RuleValidationResultDTO.SeverityEnum.valueOf(
                     String.valueOf(rule.getSeverity())));
+            ruleValidationResultDTO.setViolatedPath(ruleViolation.getViolatedPath());
         } else {
             ruleValidationResultDTO.setStatus(RuleValidationResultDTO.StatusEnum.PASSED);
         }
@@ -152,19 +154,19 @@ public class ResultsMappingUtil {
     /**
      * Get the policy adherence summary
      *
-     * @param totalPoliciesCount     total number of policies
-     * @param evaluatedPoliciesCount total number of evaluated policies
-     * @param violatedPoliciesCount  total number of violated policies
+     * @param totalPoliciesCount    total number of policies
+     * @param followedPoliciesCount total number of followed policies
+     * @param violatedPoliciesCount total number of violated policies
      * @return PolicyAdherenceSummaryDTO object
      */
     public static PolicyAdherenceSummaryDTO getPolicyAdherenceSummary(int totalPoliciesCount,
-                                                                      int evaluatedPoliciesCount,
+                                                                      int followedPoliciesCount,
                                                                       int violatedPoliciesCount) {
         PolicyAdherenceSummaryDTO policyAdherenceSummaryDTO = new PolicyAdherenceSummaryDTO();
         policyAdherenceSummaryDTO.setTotalPolicies(totalPoliciesCount);
         policyAdherenceSummaryDTO.setViolatedPolicies(violatedPoliciesCount);
-        policyAdherenceSummaryDTO.setFollowedPolicies(evaluatedPoliciesCount - violatedPoliciesCount);
-        policyAdherenceSummaryDTO.setUnAppliedPolicies(totalPoliciesCount - evaluatedPoliciesCount);
+        policyAdherenceSummaryDTO.setFollowedPolicies(followedPoliciesCount);
+        policyAdherenceSummaryDTO.setUnAppliedPolicies(totalPoliciesCount - followedPoliciesCount - violatedPoliciesCount);
         return policyAdherenceSummaryDTO;
     }
 
@@ -231,9 +233,9 @@ public class ResultsMappingUtil {
                 artifactComplianceForPolicyDTO.setArtifactId(artifactInfo.getArtifactId());
                 artifactComplianceForPolicyDTO.setArtifactName(artifactInfo.getDisplayName());
 
-                String artifactType = String.valueOf(artifactInfo.getArtifactType());
-                artifactComplianceForPolicyDTO.setArtifactType(ArtifactComplianceForPolicyDTO
-                        .ArtifactTypeEnum.valueOf(artifactType));
+                ArtifactType artifactType = artifactInfo.getArtifactType();
+                artifactComplianceForPolicyDTO.setArtifactType(ArtifactType.isArtifactAPI(artifactType) ?
+                        ArtifactComplianceForPolicyDTO.ArtifactTypeEnum.API : null);
 
                 artifactComplianceForPolicyDTO.setStatus(ArtifactComplianceForPolicyDTO
                         .StatusEnum.valueOf(String.valueOf(complianceState)));

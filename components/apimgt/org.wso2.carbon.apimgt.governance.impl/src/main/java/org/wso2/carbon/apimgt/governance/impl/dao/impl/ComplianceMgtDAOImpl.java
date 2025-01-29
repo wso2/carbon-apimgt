@@ -469,7 +469,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(SQLQuery)) {
             prepStmnt.setString(1, artifactId);
-            prepStmnt.setString(3, rulesetId);
+            prepStmnt.setString(2, rulesetId);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {
                     RuleViolation ruleViolation = new RuleViolation();
@@ -789,7 +789,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ComplianceEvaluationResult result = new ComplianceEvaluationResult();
                     ArtifactType artifactType = ArtifactType.fromString(resultSet.getString("ARTIFACT_TYPE"));
                     result.setPolicyId(policyId);
-                    result.setArtifactId("ARTIFACT_ID");
+                    result.setArtifactId(resultSet.getString("ARTIFACT_ID"));
                     result.setRulesetId(resultSet.getString("RULESET_ID"));
                     result.setEvaluationSuccess(resultSet.getInt("EVALUATION_RESULT") == 1);
 

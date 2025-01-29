@@ -341,7 +341,7 @@ public class APIMUtil {
     public static List<String> getAllAPIs(String organization) throws GovernanceException {
 
         List<String> apiIds = new ArrayList<>();
-        List<ApiResult> apis = null;
+        List<ApiResult> apis;
         try {
             apis = ApiMgtDAO.getInstance().getAllAPIs(organization);
             for (ApiResult api : apis) {
@@ -352,21 +352,6 @@ public class APIMUtil {
             throw new GovernanceException("Error while getting the APIs for the organization: " + organization, e);
         }
 
-    }
-
-    /**
-     * Get all APIs for the organization with pagination
-     *
-     * @param organization Organization
-     * @param limit        Limit
-     * @param offset       Offset
-     * @return List of API IDs
-     * @throws GovernanceException If an error occurs while getting the APIs for the organization
-     */
-    public static List<String> getPaginatedAPIs(String organization, int limit, int offset)
-            throws GovernanceException {
-        List<String> apiIds = getAllAPIs(organization);
-        return apiIds.subList(offset, Math.min(offset + limit, apiIds.size()));
     }
 
     /**

@@ -413,9 +413,8 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
             for (ComplianceEvaluationResult evaluationResult : evaluationResults) {
                 String artifactId = evaluationResult.getArtifactId();
-                boolean isEvaluationFailed = evaluationResult.isEvaluationSuccess();
                 allEvaluatedArtifacts.add(artifactId);
-                if (isEvaluationFailed) {
+                if (!evaluationResult.isEvaluationSuccess()) {
                     nonCompliantArtifacts.add(artifactId);
                 }
             }
