@@ -120,6 +120,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -7032,7 +7033,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<Label> attachApiLabels(String apiID, List<Label> labelList, String tenantDomain) throws APIManagementException {
+    public List<Label> attachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException {
         API api = getAPIbyUUID(apiID, tenantDomain);
         if (api == null || api.isRevision()) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
@@ -7048,9 +7049,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         List<String> mappedLabelIDs = labelsDAO.getMappedLabelIDsForApi(apiID);
         List<String> labelIDs = new ArrayList<>();
-        for (Label label : labelList) {
-            if (!mappedLabelIDs.contains(label.getLabelId())) {
-                labelIDs.add(label.getLabelId());
+        for (String labelID : labelList) {
+            if (!mappedLabelIDs.contains(labelID)) {
+                labelIDs.add(labelID);
             }
         }
         labelsDAO.addApiLabelMappings(apiID, labelIDs);
@@ -7058,7 +7059,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<Label> detachApiLabels(String apiID, List<Label> labelList, String tenantDomain) throws APIManagementException {
+    public List<Label> detachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException {
         API api = getAPIbyUUID(apiID, tenantDomain);
         if (api == null || api.isRevision()) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
@@ -7074,9 +7075,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         List<String> mappedLabelIDs = labelsDAO.getMappedLabelIDsForApi(apiID);
         List<String> labelIDs = new ArrayList<>();
-        for (Label label : labelList) {
-            if (mappedLabelIDs.contains(label.getLabelId())) {
-                labelIDs.add(label.getLabelId());
+        for (String labelID : labelList) {
+            if (mappedLabelIDs.contains(labelID)) {
+                labelIDs.add(labelID);
             }
         }
         labelsDAO.deleteApiLabelMappings(apiID, labelIDs);
@@ -7861,11 +7862,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private boolean allLabelsValid(List<Label> labels, String tenantDomain)
+    private boolean allLabelsValid(List<String> labelIDs, String tenantDomain)
             throws APIManagementException {
         try {
-            List<Label> availableLabels = getAllLabels(tenantDomain);
-            for (Label label : labels) {
+            List<String> availableLabels = labelsDAO.getAllLabelIDs(tenantDomain);
+            for (String label : labelIDs) {
                 if (!availableLabels.contains(label)) {
                     return false;
                 }

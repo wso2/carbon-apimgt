@@ -4674,8 +4674,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response attachLabelsToAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
-        List<Label> labelList = LabelMappingUtil.fromRequestLabelListDTOToLabelList(requestLabelListDTO);
-        List<Label> updatedLabelList = apiProvider.attachApiLabels(apiId, labelList, tenantDomain);
+        List<Label> updatedLabelList = apiProvider.attachApiLabels(apiId, requestLabelListDTO.getLabels(), tenantDomain);
         LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
         return Response.ok().entity(updatedLabelListDTO).build();
     }
@@ -4683,8 +4682,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response detachLabelsFromAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
-        List<Label> labelList = LabelMappingUtil.fromRequestLabelListDTOToLabelList(requestLabelListDTO);
-        List<Label> updatedLabelList = apiProvider.detachApiLabels(apiId, labelList, tenantDomain);
+        List<Label> updatedLabelList = apiProvider.detachApiLabels(apiId, requestLabelListDTO.getLabels(), tenantDomain);
         LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
         return Response.ok().entity(updatedLabelListDTO).build();
     }
