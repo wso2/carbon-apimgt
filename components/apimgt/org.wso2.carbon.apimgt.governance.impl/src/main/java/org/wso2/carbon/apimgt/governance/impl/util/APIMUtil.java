@@ -136,16 +136,21 @@ public class APIMUtil {
      * Get the API project
      *
      * @param apiId        API ID
+     * @param revisionNo   Revision number, if empty latest revision will be exported
      * @param organization Organization
      * @return API project zip as a byte array
      * @throws GovernanceException If an error occurs while getting the API project
      */
-    public static byte[] getAPIProject(String apiId, String organization) throws GovernanceException {
+    public static byte[] getAPIProject(String apiId, String revisionNo, String organization)
+            throws GovernanceException {
         synchronized (apiId.intern()) {
             try {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
                 String userName = apiIdentifier.getProviderName();
                 APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
+                if (revisionNo != null) {
+                    apiId = apiProvider.getAPIRevisionUUID(revisionNo, apiId);
+                }
 
                 API api = apiProvider.getAPIbyUUID(apiId, organization);
                 api.setUuid(apiId);

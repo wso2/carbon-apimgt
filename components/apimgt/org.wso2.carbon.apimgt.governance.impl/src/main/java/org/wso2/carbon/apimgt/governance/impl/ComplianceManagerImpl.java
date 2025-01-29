@@ -464,6 +464,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * Handle API Compliance Evaluation Request Sync
      *
      * @param artifactId             Artifact ID
+     * @param revisionNo             Revision number
      * @param artifactType           Artifact Type
      * @param govPolicies            List of governance policies to be evaluated
      * @param artifactProjectContent Map of artifact content
@@ -473,10 +474,12 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
     @Override
-    public ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId, ArtifactType artifactType,
-                                                                 List<String> govPolicies, Map<RuleType, String>
-                                                                             artifactProjectContent, GovernableState state,
-                                                                 String organization) throws GovernanceException {
+    public ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId,
+                                                                 String revisionNo, ArtifactType artifactType,
+                                                                 List<String> govPolicies,
+                                                                 Map<RuleType, String> artifactProjectContent,
+                                                                 GovernableState state, String organization)
+            throws GovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
@@ -495,7 +498,8 @@ public class ComplianceManagerImpl implements ComplianceManager {
                         ". Loading content from DB.");
             }
 
-            byte[] project = GovernanceUtil.getArtifactProject(artifactId, artifactType, organization);
+            byte[] project = GovernanceUtil.getArtifactProjectWithRevision(artifactId, revisionNo, artifactType,
+                    organization);
 
             if (project == null) {
                 log.warn("No content found in the artifact project for artifact ID: " + artifactId);

@@ -62,6 +62,7 @@ public interface APIMGovernanceService {
      * Evaluate compliance of the artifact synchronously
      *
      * @param artifactId             Artifact ID
+     * @param revisionNo             Revision number
      * @param artifactType           Artifact type (ArtifactType.REST_API)
      * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
@@ -75,9 +76,25 @@ public interface APIMGovernanceService {
      * @return ArtifactComplianceInfo object
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
-    ArtifactComplianceInfo evaluateComplianceSync(String artifactId, ArtifactType artifactType,
+    ArtifactComplianceInfo evaluateComplianceSync(String artifactId, String revisionNo, ArtifactType artifactType,
                                                   GovernableState state, Map<RuleType, String> artifactProjectContent,
                                                   String organization) throws GovernanceException;
+
+
+    /**
+     * Evaluate compliance of the artifact synchronously
+     *
+     * @param artifactId   Artifact ID
+     * @param revisionNo   Revision number
+     * @param artifactType Artifact type (ArtifactType.REST_API)
+     * @param state        State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
+     * @param organization Organization
+     * @return ArtifactComplianceInfo object
+     * @throws GovernanceException If an error occurs while evaluating compliance
+     */
+    ArtifactComplianceInfo evaluateComplianceSync(String artifactId, String revisionNo, ArtifactType artifactType,
+                                                  GovernableState state, String organization)
+            throws GovernanceException;
 
 
     /**
