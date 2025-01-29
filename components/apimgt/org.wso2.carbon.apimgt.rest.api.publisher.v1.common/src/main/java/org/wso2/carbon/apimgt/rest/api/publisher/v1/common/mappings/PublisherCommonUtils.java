@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -193,7 +194,8 @@ public class PublisherCommonUtils {
         }
 
         log.info("******* Gov Check: UpdateAPIDefinition *******");
-        checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE, artifactType, organization);
+        checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE, artifactType, organization,
+                null, null);
 
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
@@ -217,7 +219,7 @@ public class PublisherCommonUtils {
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
         log.info("******* Gov Check: PublisherCommonUtils updateApi *******");
         checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE,
-                ArtifactType.fromString(originalAPI.getType()), originalAPI.getOrganization());
+                ArtifactType.fromString(originalAPI.getType()), originalAPI.getOrganization(), null, null);
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
@@ -1235,7 +1237,8 @@ public class PublisherCommonUtils {
 
         //adding the api
         log.info("******* Gov Check: addAPIWithGeneratedSwaggerDefinition *******");
-        checkGovernanceCompliance(apiDto.getId(),  GovernableState.API_CREATE, artifactType, organization);
+        checkGovernanceCompliance(apiDto.getId(),  GovernableState.API_CREATE, artifactType, organization,
+                null, null);
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;
     }
@@ -1771,7 +1774,7 @@ public class PublisherCommonUtils {
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         log.info("******* Gov Check: PublisherCommonUtils updateAsyncAPIDefinition *******");
         checkGovernanceCompliance(existingAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.ASYNC_API,
-                organization);
+                organization, null, null);
         apiProvider.updateAPI(existingAPI, oldapi);
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId().getUUID(), organization);
@@ -1820,7 +1823,8 @@ public class PublisherCommonUtils {
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
         log.info("******* Gov Check: PublisherCommonUtils updateSwagger *******");
-        checkGovernanceCompliance(apiId, GovernableState.API_UPDATE, ArtifactType.REST_API, organization);
+        checkGovernanceCompliance(apiId, GovernableState.API_UPDATE, ArtifactType.REST_API, organization,
+                null, null);
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
 
         //retrieves the updated swagger definition
@@ -2027,7 +2031,7 @@ public class PublisherCommonUtils {
         apiProvider.saveGraphqlSchemaDefinition(originalAPI.getUuid(), schemaDefinition, originalAPI.getOrganization());
         log.info("******* Gov Check: PublisherCommonUtils addGraphQLSchema *******");
         checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.GRAPHQL_API,
-                originalAPI.getOrganization());
+                originalAPI.getOrganization(), null, null);
 
         apiProvider.updateAPI(originalAPI, oldApi);
 
@@ -2563,7 +2567,8 @@ public class PublisherCommonUtils {
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), organization);
         updatedAPI.setSoapToRestSequences(list);
         log.info("******* Gov Check: PublisherCommonUtils updateAPIBySettingGenerateSequencesFromSwagger *******");
-        checkGovernanceCompliance(updatedAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.API, organization);
+        checkGovernanceCompliance(updatedAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.API, organization,
+                null, null);
         return apiProvider.updateAPI(updatedAPI, api);
     }
 
@@ -2705,7 +2710,8 @@ public class PublisherCommonUtils {
         apiToAdd.setOrganization(organization);
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
         log.info("******* Gov Check: importAsyncAPIWithDefinition *******");
-        checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.ASYNC_API, organization);
+        checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.ASYNC_API, organization,
+                null, null);
         apiProvider.addAPI(apiToAdd);
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
     }
@@ -2764,13 +2770,16 @@ public class PublisherCommonUtils {
         return "";
     }
 
-    public static void checkGovernanceCompliance(String artifactID, GovernableState state, ArtifactType type,
-                                                 String organization) {
+    public static void checkGovernanceCompliance(String artifactID, GovernableState state,
+                                                 ArtifactType type, String organization, String revisionId,
+                                                 Map<RuleType, String> artifactProjectContent) {
         try {
             if (apimGovernanceService.isPoliciesWithBlockingActionExist(artifactID, type, state, organization)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Blocking policies exist for the API. Evaluating compliance synchronously.");
                 }
+                apimGovernanceService.evaluateComplianceSync(artifactID, revisionId, type, state,
+                        artifactProjectContent, organization);
                 log.info(artifactID);
             } else {
                 if (log.isDebugEnabled()) {
