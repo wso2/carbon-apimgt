@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.30.101-SNAPSHOT</version>
+        <version>9.31.3-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -68,7 +68,7 @@
         <module>org.wso2.carbon.apimgt.rest.api.devops</module>
         <module>org.wso2.carbon.apimgt.devops.impl</module>
         <module>org.wso2.carbon.apimgt.governance.api</module>
-        <module>org.wso2.carbon.apimgt.governance.rest.api</module>
         <module>org.wso2.carbon.apimgt.governance.impl</module>
+        <module>org.wso2.carbon.apimgt.governance.rest.api</module>
     </modules>
 </project>

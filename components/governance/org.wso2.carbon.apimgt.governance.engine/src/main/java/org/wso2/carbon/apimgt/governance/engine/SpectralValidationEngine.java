@@ -130,9 +130,11 @@ public class SpectralValidationEngine implements ValidationEngine {
         try {
 
             String resultJson = Validator.validateDocument(target, ruleset.getRulesetContent());
+            if (log.isDebugEnabled()) {
+                log.debug("Validation success for target: " + target);
+            }
             return getRuleViolationsFromJsonResponse(resultJson, ruleset);
-
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Error occurred while verifying governance compliance ", e);
             throw new GovernanceException("Error occurred while verifying governance compliance ", e);
         }

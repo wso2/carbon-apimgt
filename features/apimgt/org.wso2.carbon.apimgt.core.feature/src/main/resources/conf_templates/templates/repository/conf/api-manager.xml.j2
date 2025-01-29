@@ -133,6 +133,10 @@
                 <Name>{{environment_name.name}}</Name>
                 <DisplayName>{{environment_name.display_name}}</DisplayName>
                 <GatewayType>{{environment_name.gateway_type}}</GatewayType>
+                <!-- Configure Visibility -->
+                {% if environment_name.visibility is defined %}
+                <Visibility>{% for role in environment_name.visibility %}{{role}}{{ "," if not loop.last }}{% endfor %}</Visibility>
+                {% endif %}
                 <Description>{{environment_name.description}}</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>{{environment_name.service_url}}</ServerURL>

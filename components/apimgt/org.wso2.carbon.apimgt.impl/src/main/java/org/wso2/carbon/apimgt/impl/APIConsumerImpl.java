@@ -193,9 +193,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_NAME = "apiName";
     public static final String API_VERSION = "apiVersion";
     public static final String API_PROVIDER = "apiProvider";
-    private static final String PERMISSION_ALLOW = "ALLOW";
-    private static final String PERMISSION_DENY = "DENY";
-    private static final String PERMISSION_NOT_RESTRICTED = "PUBLIC";
     private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
 
     private static final String GET_SUB_WORKFLOW_REF_FAILED = "Failed to get external workflow reference for " +
@@ -4067,13 +4064,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         devPortalApi.getPublisherAccessControlRoles());
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
 
-                /// populate relavant external info
-                // environment
-                String environmentString = null;
-                if (api.getEnvironments() != null) {
-                    environmentString = String.join(",", api.getEnvironments());
-                }
-                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
+                // populate relevant external info environment
+                Map<String, Environment> environments = getGatewayEnvironmentsByOrganization(organization, username);
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments.toString(), organization));
                 //CORS . if null is returned, set default config from the configuration
                 if (api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
@@ -4623,14 +4616,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         APIAdmin apiAdmin = new APIAdminImpl();
         KeyManagerPermissionConfigurationDTO permissions = apiAdmin.getKeyManagerPermissions(keyManagerId);
         String permissionType = permissions.getPermissionType();
-        if (permissions != null && !permissionType.equals(PERMISSION_NOT_RESTRICTED)) {
+        if (permissions != null && !permissionType.equals(APIConstants.PERMISSION_NOT_RESTRICTED)) {
             String[] permissionRoles = permissions.getRoles()
                     .stream()
                     .toArray(String[]::new);
             String[] userRoles = APIUtil.getListOfRoles(username);
             boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
-            if ((PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
-                    || (PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
+            if ((APIConstants.PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
+                    || (APIConstants.PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
                 return false;
             }
         }
@@ -4656,7 +4649,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         KeyManagerPermissionConfigurationDTO permissions = keyManagerConfiguration.getPermissions();
         String permissionType = permissions.getPermissionType();
         //Checks if the keymanager is permission restricted and if the user is in the restricted list
-        if (permissions != null && !permissionType.equals(PERMISSION_NOT_RESTRICTED)) {
+        if (permissions != null && !permissionType.equals(APIConstants.PERMISSION_NOT_RESTRICTED)) {
             String[] permissionRoles = permissions.getRoles()
                     .stream()
                     .toArray(String[]::new);
@@ -4664,12 +4657,30 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             //list of common roles the user has and the restricted list
             boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
             //Checks if the user is allowed to access the key manager
-            if ((PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
-                    || (PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
+            if ((APIConstants.PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
+                    || (APIConstants.PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * This method is used to retrieve gateway environments for tenant
+     *
+     * @param organization organization of the gateway environment
+     * @param username     username of the logged-in user
+     * @return Environment list
+     * @throws APIManagementException if error occurred
+     */
+    @Override
+    public Map<String, Environment> getGatewayEnvironmentsByOrganization(String organization, String username) throws APIManagementException {
+
+        Map<String, Environment> environmentsMap = APIUtil.getEnvironments(organization);
+        Map<String, Environment> permittedGatewayEnvironments;
+        List<Environment> environmentList = new ArrayList<Environment>(environmentsMap.values());
+        permittedGatewayEnvironments = APIUtil.extractVisibleEnvironmentsForUser(environmentList, username);
+        return permittedGatewayEnvironments;
     }
 
     public static boolean hasIntersection(String[] arr1, String[] arr2) {
