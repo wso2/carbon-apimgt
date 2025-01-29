@@ -372,6 +372,8 @@ public class GovernanceUtil {
      * @return boolean
      */
     public static boolean isArtifactAvailable(String artifactId, ArtifactType artifactType) {
+        artifactType = artifactType != null ? artifactType : ArtifactType.API;
+        
         boolean isArtifactAPI = ArtifactType.isArtifactAPI(artifactType);
 
         // Check if artifact exists in APIM

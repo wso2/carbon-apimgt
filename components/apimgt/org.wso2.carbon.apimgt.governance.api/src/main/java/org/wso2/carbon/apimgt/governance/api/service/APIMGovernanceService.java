@@ -46,8 +46,9 @@ public interface APIMGovernanceService {
 
     /**
      * Evaluate compliance of the artifact asynchronously
-     * @param artifactId Artifact ID
-     * @param artifactType Artifact type (ArtifactType.API)
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact type (ArtifactType.REST_API)
      * @param state        State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param organization Organization
      * @throws GovernanceException If an error occurs while evaluating compliance
@@ -61,13 +62,15 @@ public interface APIMGovernanceService {
      * Evaluate compliance of the artifact synchronously
      *
      * @param artifactId             Artifact ID
-     * @param artifactType           Artifact type (ArtifactType.API)
+     * @param artifactType           Artifact type (ArtifactType.REST_API)
      * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
      *                               project. This is used to evaluate the compliance of the artifact.
      *                               API_METADATA --> api.yaml content
      *                               API_DEFINITION --> api definition content
      *                               API_DOCUMENTATION --> api documentation content
+     *                               <p>
+     *                               If no content is specified content fetched from DB
      * @param organization           Organization
      * @return ArtifactComplianceInfo object
      * @throws GovernanceException If an error occurs while evaluating compliance
@@ -78,12 +81,36 @@ public interface APIMGovernanceService {
 
 
     /**
+     * Evaluate compliance of the artifact synchronously
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact type (ArtifactType.REST_API)
+     * @param state        State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
+     * @param organization Organization
+     * @return ArtifactComplianceInfo object
+     * @throws GovernanceException If an error occurs while evaluating compliance
+     */
+    ArtifactComplianceInfo evaluateComplianceSync(String artifactId, ArtifactType artifactType,
+                                                  GovernableState state, String organization) throws GovernanceException;
+
+    /**
+     * Handle artifact label attach
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact type (ArtifactType.REST_API, etc)
+     * @param label        ID of the label to be attached
+     * @param organization Organization
+     * @throws GovernanceException If an error occurs while attaching the label
+     */
+    void evaluateComplianceOnLabelAttach(String artifactId, ArtifactType artifactType, String label,
+                                         String organization)
+            throws GovernanceException;
+
+    /**
      * Delete all governance data related to the artifact
      *
      * @param artifactId Artifact ID
      * @throws GovernanceException If an error occurs while clearing the compliance information
      */
     void clearArtifactComplianceInfo(String artifactId) throws GovernanceException;
-
-
 }

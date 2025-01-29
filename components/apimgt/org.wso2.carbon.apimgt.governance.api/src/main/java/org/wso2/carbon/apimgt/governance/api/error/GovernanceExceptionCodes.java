@@ -149,6 +149,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             " to pending.", 500, "Error while changing processing requests to pending",
             true),
 
+    ARTIFACT_NOT_FOUND(501009, "Artifact not found.", 404, "Artifact not found for artifact: %s in the organization: %s"),
+
     // Governance Results related codes
 
     ERROR_WHILE_SAVING_GOVERNANCE_RESULT(601001, "Error while saving governance result.", 500, "Error while saving " +
