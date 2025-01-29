@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import graphql.introspection.IntrospectionResultToSchema;
 import graphql.language.AstPrinter;
@@ -117,6 +118,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -2121,12 +2123,19 @@ public class PublisherCommonUtils {
                                     + " Endpoint returned response code: "
                                     + response.getStatusLine().getStatusCode());
                 }
-                throw new APIManagementException("Error occurred while generating GraphQL schema from introspection",
-                        ExceptionCodes.GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR);
             }
+        } catch (MalformedURLException e) {
+            log.error("Invalid GraphQL Endpoint URL. Error: ", e);
+            throw new APIManagementException("Invalid GraphQL Endpoint URL: ");
+        } catch (IOException e) {
+            log.error("I/O error occurred while executing GraphQL Introspection request. Error: ", e);
+            throw new APIManagementException("I/O error occurred while executing HTTP request " +
+                    "for GraphQL introspection.");
+        } catch (JsonSyntaxException e) {
+            log.error("Error parsing JSON response. Error: ", e);
+            throw new APIManagementException("Error parsing GraphQL Introspection JSON response.", e);
         } catch (Exception e) {
-            log.error("Exception occurred while generating GraphQL schema from endpoint. Exception: " + e.getMessage(),
-                    e);
+            log.error("Exception occurred while generating GraphQL schema from endpoint. Exception: ", e);
             throw new APIManagementException("Error occurred while generating GraphQL schema from introspection",
                     ExceptionCodes.GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR);
         }
