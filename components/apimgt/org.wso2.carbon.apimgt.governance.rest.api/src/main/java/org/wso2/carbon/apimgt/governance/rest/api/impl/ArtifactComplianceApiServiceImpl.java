@@ -210,6 +210,9 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
             return rulesetDTO;
         }
 
+        rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
+                .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
+
         rulesetDTO.setStatus(ruleViolations.isEmpty() ?
                 RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED :
                 RulesetValidationResultWithoutRulesDTO.StatusEnum.FAILED);
@@ -339,7 +342,8 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         }
 
         complianceStatus.setPolicyAdherenceSummary(ResultsMappingUtil.getPolicyAdherenceSummary(
-                applicablePolicies.size(), evaluatedPolicies.size(), violatedPolicies.size()));
+                applicablePolicies.size(), evaluatedPolicies.size()
+                        - violatedPolicies.size(), violatedPolicies.size()));
         complianceStatus.setSeverityBasedRuleViolationSummary(ruleViolationCounts);
         complianceStatus.setStatus(violatedPolicies.isEmpty() ?
                 ArtifactComplianceStatusDTO.StatusEnum.COMPLIANT :

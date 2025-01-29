@@ -110,6 +110,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 if (rules.size() > 0) {
                     addRules(ruleset.getId(), rules, connection);
                 } else {
+                    connection.rollback();
                     throw new GovernanceException(
                             GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
                 }
@@ -400,6 +401,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 if (rules.size() > 0) {
                     addRules(ruleset.getId(), rules, connection);
                 } else {
+                    connection.rollback();
                     throw new GovernanceException(
                             GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
                 }

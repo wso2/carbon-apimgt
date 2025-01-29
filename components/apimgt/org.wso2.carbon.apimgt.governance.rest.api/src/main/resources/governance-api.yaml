@@ -1534,6 +1534,18 @@ components:
           type: string
           description: Name of the ruleset.
           example: "API Security Ruleset"
+        ruleType:
+          type: string
+          description: Context or area to which the ruleset applies.
+          enum:
+            - API_METADATA
+            - API_DEFINITION
+            - API_DOCUMENTATION
+          example: API_DEFINITION
+          x-enum-varnames:
+            - API_METADATA
+            - API_DEFINITION
+            - API_DOCUMENTATION
         status:
           type: string
           description: Status of the ruleset validation.
