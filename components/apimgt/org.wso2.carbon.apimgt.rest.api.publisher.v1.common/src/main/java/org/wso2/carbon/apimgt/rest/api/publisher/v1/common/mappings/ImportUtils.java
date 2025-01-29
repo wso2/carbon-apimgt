@@ -1599,7 +1599,7 @@ public class ImportUtils {
         }
     }
 
-    private static String loadAsyncApiDefinitionFromFile(String pathToArchive) throws IOException {
+    public static String loadAsyncApiDefinitionFromFile(String pathToArchive) throws IOException {
 
         if (CommonUtil.checkFileExistence(pathToArchive + ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION)) {
             if (log.isDebugEnabled()) {
@@ -1745,7 +1745,7 @@ public class ImportUtils {
      * @return Schema definition content
      * @throws IOException When SDL file not found
      */
-    private static String loadGraphqlSDLFile(String pathToArchive) throws IOException {
+    public static String loadGraphqlSDLFile(String pathToArchive) throws IOException {
 
         if (CommonUtil.checkFileExistence(pathToArchive + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION)) {
             if (log.isDebugEnabled()) {
