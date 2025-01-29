@@ -402,7 +402,8 @@ public class ImportUtils {
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
             log.info("******* Gov Check: importApi *******");
             checkGovernanceCompliance(importedApi.getUuid(), GovernableState.API_CREATE,
-                    ArtifactType.fromString(apiType), importedApi.getOrganization());
+                    ArtifactType.fromString(apiType), importedApi.getOrganization(), null,
+                    null);
             apiProvider.updateAPI(importedApi, oldAPI);
 
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2773,7 +2774,7 @@ public class ImportUtils {
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
                 checkGovernanceCompliance(importedApiProduct.getUuid(), GovernableState.API_CREATE,
-                        ArtifactType.REST_API, organization);
+                        ArtifactType.REST_API, organization, revisionId, null);
                 apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
             } else {
                 log.info("Valid deployment environments were not found for the imported artifact. Hence not deployed" +
