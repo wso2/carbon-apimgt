@@ -4005,7 +4005,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         log.info("******* Gov Check: deployAPIRevision *******");
-        //todo: no APIDTO, has to take from the DB
+        checkGovernanceCompliance(apiId, GovernableState.API_DEPLOY, ArtifactType.API, organization);
         apiProvider.deployAPIRevision(apiId, revisionId, apiRevisionDeployments, organization);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionsDeploymentList(apiId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
