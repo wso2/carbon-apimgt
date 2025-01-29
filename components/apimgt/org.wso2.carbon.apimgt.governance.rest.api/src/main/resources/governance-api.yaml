@@ -1614,7 +1614,6 @@ components:
             apim:gov_rule_manage: Manage governance rulesets
             apim:gov_policy_read: Read governance policies
             apim:gov_policy_manage: Manage governance policies
-            apim:gov_evaluate_compliance: Evaluate governance compliance
             apim:gov_result_read: Read governance results
   parameters:
     artifactId:

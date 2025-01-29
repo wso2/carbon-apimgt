@@ -74,6 +74,7 @@ public interface ComplianceManager {
      * Handle API Compliance Evaluation Request Sync
      *
      * @param artifactId             Artifact ID
+     * @param revisionNo             Revision number
      * @param artifactType           Artifact Type
      * @param govPolicies            List of governance policies to be evaluated
      * @param state                  State at which artifact should be governed
@@ -82,7 +83,9 @@ public interface ComplianceManager {
      * @return ArtifactComplianceInfo object
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId, ArtifactType artifactType,
+    ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId,
+                                                          String revisionNo,
+                                                          ArtifactType artifactType,
                                                           List<String> govPolicies,
                                                           Map<RuleType, String> artifactProjectContent,
                                                           GovernableState state,

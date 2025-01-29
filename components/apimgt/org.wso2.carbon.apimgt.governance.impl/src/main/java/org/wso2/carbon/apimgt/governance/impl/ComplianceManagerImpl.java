@@ -464,6 +464,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * Handle API Compliance Evaluation Request Sync
      *
      * @param artifactId             Artifact ID
+     * @param revisionNo             Revision number
      * @param artifactType           Artifact Type
      * @param govPolicies            List of governance policies to be evaluated
      * @param artifactProjectContent Map of artifact content
@@ -473,19 +474,16 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
     @Override
-    public ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId, ArtifactType artifactType,
-                                                                 List<String> govPolicies, Map<RuleType, String>
-                                                                             artifactProjectContent, GovernableState state,
-                                                                 String organization) throws GovernanceException {
+    public ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId,
+                                                                 String revisionNo, ArtifactType artifactType,
+                                                                 List<String> govPolicies,
+                                                                 Map<RuleType, String> artifactProjectContent,
+                                                                 GovernableState state, String organization)
+            throws GovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
         ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
-
-        if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
-            log.warn("No content found in the artifact project for artifact ID: " + artifactId);
-            return artifactComplianceInfo;
-        }
 
         // Check if artifact is SOAP or GRAPHQL TODO: Support SOAP and GraphQL
         if (ArtifactType.SOAP_API.equals(artifactType) || ArtifactType.GRAPHQL_API.equals(artifactType)) {
@@ -493,6 +491,32 @@ public class ComplianceManagerImpl implements ComplianceManager {
                     ". Skipping governance evaluation");
             return artifactComplianceInfo;
         }
+
+        if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("No content found in the artifact project for artifact ID: " + artifactId +
+                        ". Loading content from DB.");
+            }
+
+            byte[] project = GovernanceUtil.getArtifactProjectWithRevision(artifactId, revisionNo, artifactType,
+                    organization);
+
+            if (project == null) {
+                log.warn("No content found in the artifact project for artifact ID: " + artifactId);
+                return artifactComplianceInfo;
+            }
+
+            // Only extract content if the artifact type requires it.
+            if (ArtifactType.isArtifactAPI(artifactType)) {
+                artifactProjectContent = APIMUtil.extractAPIProjectContent(project, artifactId, artifactType);
+            }
+
+            if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
+                log.warn("No content found in the artifact project for artifact ID: " + artifactId);
+                return artifactComplianceInfo;
+            }
+        }
+
         for (String policyId : govPolicies) {
             GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
             List<Ruleset> rulesets = policyMgtDAO.getRulesetsByPolicyId(policyId);
