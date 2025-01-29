@@ -286,16 +286,16 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_SORT_CRITERIA(900707, "Invalid sort criteria", 400, "Sort criteria contain a non-allowable value"),
 
     //GraphQL API related codes
-    API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
-    GRAPHQL_SCHEMA_CANNOT_BE_NULL(900801, "GraphQL Schema cannot be empty or nul", 400,
+    API_NOT_GRAPHQL(900870, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
+    GRAPHQL_SCHEMA_CANNOT_BE_NULL(900871, "GraphQL Schema cannot be empty or nul", 400,
             "GraphQL Schema cannot be empty or null"),
-    UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900802, "Unsupported GraphQL Schema File Extension", 400,
+    UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900872, "Unsupported GraphQL Schema File Extension", 400,
             "Unsupported extension. Only supported extensions are .graphql, .txt and .sdl"),
-    INVALID_GRAPHQL_FILE(900803, "GraphQL filename cannot be null or invalid", 400,
+    INVALID_GRAPHQL_FILE(900873, "GraphQL filename cannot be null or invalid", 400,
             "GraphQL filename cannot be null or invalid"),
-    GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR(900804, "Error while generating GraphQL schema from introspection",
+    GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR(900874, "Error while generating GraphQL schema from introspection",
             400, "Error while generating GraphQL schema from introspection"),
-    RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR(900805, "Error while retrieving GraphQL schema from URL", 400,
+    RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR(900875, "Error while retrieving GraphQL schema from URL", 400,
             "Error while retrieving GraphQL schema from URL"),
 
     // Oauth related codes
