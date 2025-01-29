@@ -26,6 +26,39 @@ public class RulesetValidationResultWithoutRulesDTO   {
     private String id = null;
     private String name = null;
 
+          @XmlType(name="RuleTypeEnum")
+    @XmlEnum(String.class)
+    public enum RuleTypeEnum {
+        API_METADATA("API_METADATA"),
+        API_DEFINITION("API_DEFINITION"),
+        API_DOCUMENTATION("API_DOCUMENTATION");
+        private String value;
+
+        RuleTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static RuleTypeEnum fromValue(String v) {
+            for (RuleTypeEnum b : RuleTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    } 
+    private RuleTypeEnum ruleType = null;
+
           @XmlType(name="StatusEnum")
     @XmlEnum(String.class)
     public enum StatusEnum {
@@ -96,6 +129,24 @@ return null;
   }
 
   /**
+   * Context or area to which the ruleset applies.
+   **/
+  public RulesetValidationResultWithoutRulesDTO ruleType(RuleTypeEnum ruleType) {
+    this.ruleType = ruleType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "API_DEFINITION", value = "Context or area to which the ruleset applies.")
+  @JsonProperty("ruleType")
+  public RuleTypeEnum getRuleType() {
+    return ruleType;
+  }
+  public void setRuleType(RuleTypeEnum ruleType) {
+    this.ruleType = ruleType;
+  }
+
+  /**
    * Status of the ruleset validation.
    **/
   public RulesetValidationResultWithoutRulesDTO status(StatusEnum status) {
@@ -125,12 +176,13 @@ return null;
     RulesetValidationResultWithoutRulesDTO rulesetValidationResultWithoutRules = (RulesetValidationResultWithoutRulesDTO) o;
     return Objects.equals(id, rulesetValidationResultWithoutRules.id) &&
         Objects.equals(name, rulesetValidationResultWithoutRules.name) &&
+        Objects.equals(ruleType, rulesetValidationResultWithoutRules.ruleType) &&
         Objects.equals(status, rulesetValidationResultWithoutRules.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, status);
+    return Objects.hash(id, name, ruleType, status);
   }
 
   @Override
@@ -140,6 +192,7 @@ return null;
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    ruleType: ").append(toIndentedString(ruleType)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");
     return sb.toString();
