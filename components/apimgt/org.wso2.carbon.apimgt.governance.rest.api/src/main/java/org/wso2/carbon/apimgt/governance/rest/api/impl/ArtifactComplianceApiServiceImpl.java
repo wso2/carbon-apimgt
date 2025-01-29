@@ -59,6 +59,10 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         ComplianceManager complianceManager = new ComplianceManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
+        if (!GovernanceUtil.isArtifactAvailable(artifactId, null)) {
+            throw new GovernanceException(GovernanceExceptionCodes.ARTIFACT_NOT_FOUND, artifactId, organization);
+        }
+
         // Get artifact type (API or other)
         ArtifactType artifactType = GovernanceUtil.getParentArtifactType(artifactId);
 
@@ -378,7 +382,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         ArtifactComplianceSummaryDTO summaryDTO = ResultsMappingUtil.getArtifactComplianceSummary(
                 totalArtifactsCount, compliantArtifactCount, nonCompliantArtifactCount);
         summaryDTO.setArtifactType(ArtifactComplianceSummaryDTO.ArtifactTypeEnum.fromValue(artifactTypeString));
-        
+
         return Response.ok().entity(summaryDTO).build();
     }
 

@@ -372,6 +372,8 @@ public class GovernanceUtil {
      * @return boolean
      */
     public static boolean isArtifactAvailable(String artifactId, ArtifactType artifactType) {
+        artifactType = artifactType != null ? artifactType : ArtifactType.API;
+        
         boolean isArtifactAPI = ArtifactType.isArtifactAPI(artifactType);
 
         // Check if artifact exists in APIM
@@ -428,6 +430,30 @@ public class GovernanceUtil {
      * Get artifact project
      *
      * @param artifactId   Artifact ID
+     * @param revisionNo   Revision Number
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return byte[]
+     * @throws GovernanceException If an error occurs while getting the artifact project
+     */
+    public static byte[] getArtifactProjectWithRevision(String artifactId, String revisionNo,
+                                                        ArtifactType artifactType,
+                                                        String organization) throws GovernanceException {
+        boolean isArtifactAPI = ArtifactType.isArtifactAPI(artifactType);
+
+        // Get artifact project from APIM
+        byte[] artifactProject = null;
+        if (isArtifactAPI) {
+            artifactProject =
+                    APIMUtil.getAPIProject(artifactId, revisionNo, organization);
+        }
+        return artifactProject;
+    }
+
+    /**
+     * Get artifact project
+     *
+     * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
      * @param organization Organization
      * @return byte[]
@@ -435,16 +461,9 @@ public class GovernanceUtil {
      */
     public static byte[] getArtifactProject(String artifactId, ArtifactType artifactType,
                                             String organization) throws GovernanceException {
-        boolean isArtifactAPI = ArtifactType.isArtifactAPI(artifactType);
-
-        // Get artifact project from APIM
-        byte[] artifactProject = null;
-        if (isArtifactAPI) {
-            artifactProject =
-                    APIMUtil.getAPIProject(artifactId, organization);
-        }
-        return artifactProject;
+        return getArtifactProjectWithRevision(artifactId, null, artifactType, organization);
     }
+
 
 }
 
