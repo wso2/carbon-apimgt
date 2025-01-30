@@ -4757,9 +4757,6 @@ components:
           format: binary
         modelList:
           type: string
-#          type: array
-#          items:
-#            type: string
           description: |
             List of models supported by the LLM Provider
     LLMProviderResponse:

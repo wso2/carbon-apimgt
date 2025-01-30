@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -85,6 +86,8 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrottlingConfigurationDTO;
@@ -778,6 +781,72 @@ public class PublisherCommonUtils {
                     endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
                     apidto.setEndpointConfig(endpointConfig);
                 }
+            }
+        }
+    }
+
+    /**
+     * This method will encrypt the OAuth 2.0 API Key and API Secret.
+     *
+     * @param cryptoUtil             cryptography util
+     * @param oldApiSecret           existing API secret
+     * @param apiEndpointDTO          APIendpointDto
+     * @param endpointConfig          endpointDTO config
+     * @throws CryptoException        if an error occurs while encrypting and base64 encode
+     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
+     */
+    public static void encryptEndpointSecurityOAuthCredentials(APIEndpointDTO apiEndpointDTO, CryptoUtil cryptoUtil,
+            String oldApiSecret, Map endpointConfig)
+            throws CryptoException, APIManagementException {
+        // OAuth 2.0 backend protection: API Key and API Secret encryption
+        String customParametersString;
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                String endpointSecurityType = (String) endpointSecurity
+                        .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                // Change default value of customParameters JSONObject to String
+                if (!(endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
+                    LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>)
+                            endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                    customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                } else if (endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
+                    customParametersString = (String) endpointSecurity
+                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                } else {
+                    customParametersString = "{}";
+                }
+
+                endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
+                if (APIConstants.OAuthConstants.OAUTH.equals(endpointSecurityType)) {
+                    if (endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null
+                            && StringUtils.isNotBlank(
+                            endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString())) {
+                        String apiSecret = endpointSecurity
+                                .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                        String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
+                        endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                    } else if (StringUtils.isNotBlank(oldApiSecret)) {
+                        endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldApiSecret);
+                    } else {
+                        String errorMessage = "Client secret is not provided for production endpoint security";
+                        throw new APIManagementException(
+                                ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                    }
+                }
+
+                //encrypt password
+                if (endpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD)) {
+                    String passWordSecret = endpointSecurity.get(
+                            APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD).toString();
+                    if (StringUtils.isNotBlank(passWordSecret)) {
+                        endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD,
+                                cryptoUtil.encryptAndBase64Encode(passWordSecret.getBytes()));
+                    }
+                }
+                endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                apiEndpointDTO.setEndpointConfig(endpointConfig);
             }
         }
     }
@@ -2622,6 +2691,146 @@ public class PublisherCommonUtils {
             }
             return APIMappingUtil.fromLifecycleModelToDTO(apiLCData, apiOlderVersionExist, apiType);
         }
+    }
+
+    /**
+     * Get All endpoints of an API.
+     *
+     * @param uuid   Unique identifier of API
+     * @param apiProvider
+     * @return APIEndpointListDTO object
+     * @throws APIManagementException if there is en error while getting the API Endpoints' information
+     */
+    public static APIEndpointListDTO getApiEndpoints(String uuid, APIProvider apiProvider)
+            throws APIManagementException {
+        List<APIEndpointInfo> apiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid);
+        if (apiEndpointsList == null) {
+            throw new APIManagementException("Error occurred while getting endpoints of API with UUID " + uuid,
+                    ExceptionCodes.API_ENDPOINT_NOT_FOUND);
+        } else {
+            return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList);
+        }
+
+    }
+
+    /**
+     * Get Endpoint of an API By operation UUID.
+     *
+     * @param apiUUID   Unique identifier of API
+     * @param endpointUUID   Unique identifier of endpoint
+     * @param apiProvider
+     * @return APIEndpointDTO object
+     * @throws APIManagementException if there is en error while getting the API Endpoint information
+     */
+    public static APIEndpointDTO getAPIEndpoint(String apiUUID, String endpointUUID, APIProvider apiProvider)
+            throws APIManagementException, JsonProcessingException {
+        APIEndpointInfo apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID);
+        if (apiEndpoint == null) {
+            throw new APIManagementException("Error occurred while getting Endpoint of API " + apiUUID +
+                    " endpoint UUID " + endpointUUID,
+                    ExceptionCodes.API_ENDPOINT_NOT_FOUND);
+        }
+        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpoint);
+    }
+
+    /**
+     * Update Endpoint of an API By operation UUID.
+     *
+     * @param apiId   Unique identifier of API
+     * @param endpointId   Unique identifier of API
+     * @param apiEndpointDTO
+     * @param organization
+     * @return APIEndpointDTO object
+     * @throws APIManagementException if there is en error while updating an API endpoint
+     */
+    public static APIEndpointDTO updateAPIEndpoint(String apiId, String endpointId, APIEndpointDTO apiEndpointDTO,
+            String organization, APIProvider apiProvider)
+            throws APIManagementException, CryptoException, JsonProcessingException {
+        String oldApiEndpointSecret = null;
+        APIEndpointDTO oldEndpointDto = getAPIEndpoint(apiId, endpointId, apiProvider);
+        Map oldEndpointConfig = (Map) oldEndpointDto.getEndpointConfig();
+        if (oldEndpointConfig != null) {
+            if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
+                Map oldEndpointSecurity = (Map) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null
+                        && oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null) {
+                    oldApiEndpointSecret = oldEndpointSecurity
+                            .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                }
+            }
+        }
+
+        Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+
+        // OAuth 2.0 backend protection: API Key and API Secret encryption
+        encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
+
+        // AWS Lambda: secret key encryption while updating the API
+        if (apiEndpointDTO.getEndpointConfig() != null) {
+            if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                if (!StringUtils.isEmpty(secretKey)) {
+                    if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
+                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                        apiEndpointDTO.setEndpointConfig(endpointConfig);
+                    } else {
+                        String encryptedSecretKey = (String) oldEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                        apiEndpointDTO.setEndpointConfig(endpointConfig);
+                    }
+                }
+            }
+        }
+
+        APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
+        if (apiEndpoint.getEndpointUuid() == null) {
+            apiEndpoint.setEndpointUuid(endpointId);
+        }
+        APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiEndpoint);
+        if (apiEndpointUpdated == null) {
+            throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
+                    "endpoint UUID" + endpointId, ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
+        }
+        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpointUpdated);
+    }
+
+    /**
+     * Insert new endpoint for an API.
+     *
+     * @param apiId Unique identifier of API.
+     * @param apiEndpointDTO payload of Endpoint
+     * @param organization
+     * @param apiProvider
+     * @return
+     * @throws APIManagementException if there is en error while inserting an API Endpoint information
+     * @throws CryptoException if there is en error while Crypto
+     */
+    public static String addAPIEndpoint(String apiId, APIEndpointDTO apiEndpointDTO, String organization,
+            APIProvider apiProvider) throws APIManagementException, CryptoException {
+        Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        // OAuth 2.0 backend protection: API Key and API Secret encryption
+        encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
+        // AWS Lambda: secret key encryption while creating the API
+        if (apiEndpointDTO.getEndpointConfig() != null) {
+            if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                if (!StringUtils.isEmpty(secretKey)) {
+                    String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                    endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                    apiEndpointDTO.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
+        APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
+        String apiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint);
+        if (apiEndpointId == null) {
+            throw new APIManagementException("Error occurred while getting Endpoint of API " + apiId,
+                    ExceptionCodes.ERROR_INSERTING_API_ENDPOINT_API);
+        }
+        return apiEndpointId;
     }
 
     /**

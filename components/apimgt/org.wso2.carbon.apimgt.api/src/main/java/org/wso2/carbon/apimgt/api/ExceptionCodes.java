@@ -522,6 +522,16 @@ public enum ExceptionCodes implements ErrorHandler {
             "Invalid Endpoint Security credentials. %s", false),
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
 
+    //API Endpoints Error codes
+    API_ENDPOINT_NOT_FOUND(900921, "Cannot find the required API Endpoint details.", 404,
+            "Requested API endpoint with id '%s' not found."),
+    ERROR_UPDATING_API_ENDPOINT_API(902032, "Error has occurred. Cannot update an API endpoint.", 500,
+            "Error when updating the API Endpoint."),
+    ERROR_INSERTING_API_ENDPOINT_API(902033, "Error has occurred. Fail to add an API endpoint to API.", 500,
+            "Error has occurred while inserting an API endpoint."),
+    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902036, "Missing mandatory API endpoint's endpoint config", 500,
+            "Required attributes %s for an API endpoint config specification %s are either missing or empty"),
+
     //Operation Policies related error codes
     INVALID_OPERATION_POLICY(902005, "Cannot find the selected api policy", 400,
             "Selected api policy is not found"),
