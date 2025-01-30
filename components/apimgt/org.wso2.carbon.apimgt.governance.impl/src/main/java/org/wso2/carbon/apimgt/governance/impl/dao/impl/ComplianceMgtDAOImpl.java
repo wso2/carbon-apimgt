@@ -50,25 +50,28 @@ import java.util.Map;
 public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
 
     private static final Log log = LogFactory.getLog(ComplianceMgtDAOImpl.class);
-    private static ComplianceMgtDAO instance = null;
 
     private ComplianceMgtDAOImpl() {
+
     }
 
+    /**
+     * Bill Pugh Singleton Design to initialize the instance lazily and thread-safely
+     */
+    private static class SingletonHelper {
+
+        private static final ComplianceMgtDAO INSTANCE = new ComplianceMgtDAOImpl();
+    }
 
     /**
-     * Get an instance of the ComplianceMgtDAOImpl class
+     * Get the instance of ComplianceMgtDAOImpl
      *
-     * @return Instance of the ComplianceMgtDAOImpl class
+     * @return ComplianceMgtDAOImpl instance
      */
     public static ComplianceMgtDAO getInstance() {
 
-        if (instance == null) {
-            instance = new ComplianceMgtDAOImpl();
-        }
-        return instance;
+        return SingletonHelper.INSTANCE;
     }
-
 
     /**
      * Add an artifact compliance evaluation request event

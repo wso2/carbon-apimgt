@@ -101,7 +101,6 @@ public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiSe
      */
     public Response getGovernancePolicyById(String policyId, MessageContext messageContext) throws GovernanceException {
         PolicyManager policyManager = new PolicyManagerImpl();
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         GovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId);
         GovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);

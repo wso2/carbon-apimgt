@@ -55,22 +55,27 @@ import java.util.List;
 public class RulesetMgtDAOImpl implements RulesetMgtDAO {
 
     private static final Log log = LogFactory.getLog(RulesetMgtDAOImpl.class);
-    private static RulesetMgtDAO instance = null;
 
     private RulesetMgtDAOImpl() {
+
     }
 
     /**
-     * Get an instance of the RulesetMgtDAO
+     * Bill Pugh Singleton Implementation
+     */
+    private static class SingletonHelper {
+
+        private static final RulesetMgtDAO INSTANCE = new RulesetMgtDAOImpl();
+    }
+
+    /**
+     * Get the instance of the RulesetMgtDAOImpl
      *
-     * @return RulesetMgtDAO instance
+     * @return RulesetMgtDAOImpl instance
      */
     public static RulesetMgtDAO getInstance() {
 
-        if (instance == null) {
-            instance = new RulesetMgtDAOImpl();
-        }
-        return instance;
+        return SingletonHelper.INSTANCE;
     }
 
     /**

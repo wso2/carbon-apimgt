@@ -55,7 +55,13 @@ public class StartupServiceComponent {
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
 
-        log.debug("Startup Service Component deactivated");
-        registration.unregister();
+        if (registration != null) {
+            registration.unregister();
+            if (log.isDebugEnabled()) {
+                log.debug("Startup Service Component deactivated");
+            }
+        } else {
+            log.warn("Service registration is not initialized, skipping unregister");
+        }
     }
 }

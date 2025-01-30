@@ -89,11 +89,14 @@ public class GovernanceComponent {
     protected void deactivate(ComponentContext componentContext) {
 
         ComplianceEvaluationScheduler.shutdown();
-        if (log.isDebugEnabled()) {
-            log.debug("Deactivating Governance component");
+        if (registration != null) {
+            registration.unregister();
+            if (log.isDebugEnabled()) {
+                log.debug("Deactivating Governance component");
+            }
+        } else {
+            log.warn("Service registration is not initialized, skipping unregister");
         }
-
-        registration.unregister();
     }
 
     @Reference(

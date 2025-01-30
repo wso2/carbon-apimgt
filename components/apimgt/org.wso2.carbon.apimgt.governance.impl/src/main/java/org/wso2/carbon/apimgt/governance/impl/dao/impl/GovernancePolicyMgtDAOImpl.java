@@ -31,13 +31,13 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,22 +56,26 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
 
     private static final Log log = LogFactory.getLog(GovernancePolicyMgtDAOImpl.class);
 
-    private static GovernancePolicyMgtDAO instance = null;
-
     private GovernancePolicyMgtDAOImpl() {
+
     }
 
     /**
-     * Get an instance of GovernancePolicyMgtDAO
+     * Bill Pugh Singleton Implementation
+     */
+    private static class SingletonHelper {
+
+        private static final GovernancePolicyMgtDAO INSTANCE = new GovernancePolicyMgtDAOImpl();
+    }
+
+    /**
+     * Get instance of GovernancePolicyMgtDAOImpl
      *
-     * @return GovernancePolicyMgtDAO instance
+     * @return GovernancePolicyMgtDAOImpl instance
      */
     public static GovernancePolicyMgtDAO getInstance() {
 
-        if (instance == null) {
-            instance = new GovernancePolicyMgtDAOImpl();
-        }
-        return instance;
+        return SingletonHelper.INSTANCE;
     }
 
     /**
@@ -84,7 +88,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     @Override
     public GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
             governancePolicy) throws GovernanceException {
-        List<RulesetInfo> rulesetInfoList = new ArrayList<>();
         List<String> rulesetIds;
         Timestamp timestamp;
         List<String> labels;
@@ -712,7 +715,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     ruleset.setId(rs.getString("RULESET_ID"));
                     ruleset.setName(rs.getString("NAME"));
                     byte[] rulesetContent = rs.getBytes("RULESET_CONTENT");
-                    ruleset.setRulesetContent(new String(rulesetContent));
+                    ruleset.setRulesetContent(new String(rulesetContent, StandardCharsets.UTF_8));
                     ruleset.setRuleCategory(RuleCategory.fromString(
                             rs.getString("RULE_CATEGORY")));
                     ruleset.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));

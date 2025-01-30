@@ -48,12 +48,29 @@ import javax.xml.stream.XMLStreamException;
  * properties.
  */
 public class GovernanceConfiguration {
+
     private static final Log log = LogFactory.getLog(GovernanceConfiguration.class);
 
-    private final Map<String, List<String>> configuration = new ConcurrentHashMap<>();
+    private Map<String, List<String>> configuration = new ConcurrentHashMap<>();
     private SecretResolver secretResolver;
     private boolean initialized;
 
+    public GovernanceConfiguration() {
+
+    }
+
+    /**
+     * Create a new GovernanceConfiguration instance by copying the configuration from the given
+     * instance.
+     *
+     * @param other GovernanceConfiguration instance
+     */
+    public GovernanceConfiguration(GovernanceConfiguration other) {
+
+        this.configuration = new ConcurrentHashMap<>(other.configuration);
+        this.secretResolver = other.secretResolver;
+        this.initialized = other.initialized;
+    }
 
     /**
      * Populate this configuration by reading an XML file at the given location. This method

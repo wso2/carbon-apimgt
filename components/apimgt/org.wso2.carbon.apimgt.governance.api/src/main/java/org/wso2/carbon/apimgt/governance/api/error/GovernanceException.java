@@ -31,6 +31,7 @@ public class GovernanceException extends Exception {
      * @return ErrorHandler
      */
     public ErrorHandler getErrorHandler() {
+
         return errorHandler;
     }
 

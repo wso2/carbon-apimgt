@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -45,7 +46,7 @@ import javax.ws.rs.core.Response;
 public class SwaggerYamlApi {
 
     private static final Log log = LogFactory.getLog(SwaggerYamlApi.class);
-    private static final String LOCK_GOV_OPENAPI_DEF = "LOCK_GOV_OPENAPI_DEF";
+    private static final Object LOCK_GOV_OPENAPI_DEF = new Object();
     private String openAPIDef = null;
 
     /**
@@ -74,7 +75,8 @@ public class SwaggerYamlApi {
                 synchronized (LOCK_GOV_OPENAPI_DEF) {
                     if (openAPIDef == null) {
                         String definition = IOUtils
-                                .toString(this.getClass().getResourceAsStream("/governance-api.yaml"), "UTF-8");
+                                .toString(this.getClass().getClassLoader().getResourceAsStream("governance-api.yaml"),
+                                        StandardCharsets.UTF_8);
                         openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
                     }
                 }
@@ -92,8 +94,8 @@ public class SwaggerYamlApi {
         } catch (IOException e) {
             String errorMessage = "Error while retrieving the OAS of the Governance API";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            return Response.serverError().entity("Internal Server Error").build(); // Return proper error response
         }
-        return null;
     }
 }
 
