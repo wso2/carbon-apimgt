@@ -3867,7 +3867,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
-            checkGovernanceCompliance(apiId, GovernableState.API_DEPLOY, ArtifactType.API, organization, null,
+            checkGovernanceCompliance(apiId, GovernableState.API_DEPLOY, ArtifactType.REST_API, organization, null,
                     null);
             //adding the api revision
             String revisionId = apiProvider.addAPIRevision(apiRevision, organization);
