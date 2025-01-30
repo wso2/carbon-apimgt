@@ -182,6 +182,8 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -3594,6 +3596,22 @@ public final class APIUtil {
     public static float getAverageRating(int apiId) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getAverageRating(apiId);
+    }
+
+    public static void updateAvailableTiersByOrganization(DevPortalAPIInfo devPortalAPIInfo, String organization) {
+
+        Set<String> availableTiers = devPortalAPIInfo.getAvailableTierNames();
+        Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
+        if (organization != null) {
+            for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                String orgName = organizationTiers.getOrganizationID();
+                if (organization.equals(orgName)) {
+                    availableTiers = organizationTiers.getTiers();
+                    break;
+                }
+            }
+        }
+        devPortalAPIInfo.setAvailableTierNames(availableTiers);
     }
 
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {

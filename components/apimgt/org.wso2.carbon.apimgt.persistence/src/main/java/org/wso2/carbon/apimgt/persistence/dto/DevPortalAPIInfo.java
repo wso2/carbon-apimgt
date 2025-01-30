@@ -15,6 +15,14 @@
  */
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.Tier;
+
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +32,7 @@ import java.util.Set;
  * APIs in DevPortal which are stored in the persistence layer are included in this.
  */
 public class DevPortalAPIInfo {
+    private static final Log log = LogFactory.getLog(DevPortalAPIInfo.class);
     private String id;
     private String apiName;
     private String version;
@@ -34,6 +43,7 @@ public class DevPortalAPIInfo {
     private String businessOwner;
     private String status;
     private Set<String> availableTierNames;
+    private Set<OrganizationTiers> availableTiersForOrganizations = new LinkedHashSet<>();;
     private String subscriptionAvailability; 
     private String subscriptionAvailableOrgs;
     private String createdTime;
@@ -131,6 +141,49 @@ public class DevPortalAPIInfo {
     public void setAvailableTierNames(Set<String> availableTierNames) {
         this.availableTierNames = availableTierNames;
     }
+
+    public Set<OrganizationTiers> getAvailableTiersForOrganizations() {
+        return availableTiersForOrganizations;
+    }
+
+    public void setAvailableTiersForOrganizations(Set<OrganizationTiers> availableTiersForOrganizations) {
+        this.availableTiersForOrganizations = availableTiersForOrganizations;
+    }
+
+    public void setAvailableTiersForOrganizationsFromString(String tiersString) {
+
+        if (tiersString == null || tiersString.isEmpty()) {
+            return;
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,
+                    org.wso2.carbon.apimgt.api.model.OrganizationTiers[].class);
+            for (org.wso2.carbon.apimgt.api.model.OrganizationTiers organizationTiersToMap : tiersArray) {
+                OrganizationTiers organizationTiers = getOrganizationTiers(organizationTiersToMap);
+                availableTiersForOrganizations.add(organizationTiers);
+            }
+        } catch (Exception e) {
+            log.error("Error while converting string to availableTiersForOrganizations object for API : " + getId(),
+                    e);
+        }
+    }
+
+    private static OrganizationTiers getOrganizationTiers(
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers organizationTiersToMap) {
+
+        OrganizationTiers organizationTiers = new OrganizationTiers();
+        organizationTiers.setOrganizationID(organizationTiersToMap.getOrganizationID());
+        organizationTiers.setOrganizationName(organizationTiersToMap.getOrganizationName());
+        Set<Tier> tiersToMap = organizationTiersToMap.getTiers();
+        Set<String> tiers = new LinkedHashSet<>();
+        for (Tier tierToMap : tiersToMap) {
+            tiers.add(tierToMap.getName());
+        }
+        organizationTiers.setTiers(tiers);
+        return organizationTiers;
+    }
+
     public String getSubscriptionAvailableOrgs() {
         return subscriptionAvailableOrgs;
     }
