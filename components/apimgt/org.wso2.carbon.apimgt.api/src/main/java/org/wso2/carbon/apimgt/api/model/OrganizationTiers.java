@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.Set;
 
 /**
- * This class represent the Tier
+ * This class represent Organization Tiers
  */
 public class OrganizationTiers {
 
