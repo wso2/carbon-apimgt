@@ -1544,8 +1544,10 @@ public interface APIProvider extends APIManager {
     void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
 
     /**
-     * Import an operation policy from the API CTL project. This will either create a new API specific policy,
-     * update existing API specific policy or return the policyID of existing policy if policy content is not changed.
+     * Import an operation policy from the API CTL project which is exported from a product version prior to the update
+     * level which introduced to have an API and a Common policy with identical names and versions.
+     * This will either create a new API specific policy, update existing API specific policy or return the
+     * policyID of existing policy if policy content is not changed.
      *
      * @param operationPolicyData Operation Policy Data
      * @param organization        Organization name
@@ -1554,6 +1556,21 @@ public interface APIProvider extends APIManager {
      */
     String importOperationPolicy(OperationPolicyData operationPolicyData, String organization)
             throws APIManagementException;
+
+    /**
+     * Import an operation policy of a given policy type, from the API CTL project.
+     * This will either create a new API specific policy, update existing API specific policy or return the
+     * policyID of existing policy if policy content is not changed.
+     *
+     * @param operationPolicyData Operation Policy Data
+     * @param organization        Organization name
+     * @param policyType Policy Type
+     * @return UUID of the imported operation policy
+     * @throws APIManagementException
+     */
+    String importOperationPolicyOfGivenType(OperationPolicyData operationPolicyData, String policyType,
+                                            String organization) throws APIManagementException;
+
 
     /**
      * Add an API specific operation policy
