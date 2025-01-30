@@ -125,8 +125,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                 artifactType, state, organization);
 
         ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvaluationSync
-                (artifactId, revisionNo,
-                        artifactType, applicablePolicyIds, artifactProjectContent, state,
+                (artifactId, revisionNo, artifactType, applicablePolicyIds, artifactProjectContent, state,
                         organization);
 
         // Though compliance is evaluated sync , we need to evaluate the compliance for all dependent states async to

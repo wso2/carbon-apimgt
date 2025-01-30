@@ -233,6 +233,6 @@ public class PolicyManagerImpl implements PolicyManager {
                 break;
             }
         }
-        return false;
+        return isBlockingActionPresent;
     }
 }

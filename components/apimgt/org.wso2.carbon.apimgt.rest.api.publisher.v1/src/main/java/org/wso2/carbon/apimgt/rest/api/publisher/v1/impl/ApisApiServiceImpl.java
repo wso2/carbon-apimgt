@@ -606,7 +606,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         // TODO: Add scopes
         updatedAPI.setOrganization(organization);
         try {
-            log.info("******* Gov Check: updateTopics *******");
             checkGovernanceCompliance(updatedAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.ASYNC_API,
                     organization, null, null);
             apiProvider.updateAPI(updatedAPI, existingAPI);
@@ -2518,7 +2517,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                         }
                     }
                     API originalAPI = provider.getAPIbyUUID(apiId, organization);
-                    log.info("******* Gov Check: updateAPIResourcePoliciesByPolicyId *******");
                     checkGovernanceCompliance(api.getUuid(), GovernableState.API_UPDATE, ArtifactType.REST_API,
                             organization, null, null);
                     provider.updateAPI(api, originalAPI);
@@ -3138,7 +3136,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
             if (isSoapAPI) {
-                log.info("******* Gov Check: importWSDLDefinition *******");
                 checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.REST_API,
                         organization, null, null);
                 createdApi = importSOAPAPI(validationResponse.getWsdlProcessor().getWSDL(), fileDetail, url,
@@ -3202,7 +3199,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             //adding the api
-            log.info("******* Gov Check: importSOAPAPI *******");
             checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.SOAP_API,
                     organization, null, null);
             apiProvider.addAPI(apiToAdd);
@@ -3249,7 +3245,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //adding the api
-            log.info("******* Gov Check: importSOAPToRESTAPI *******");
             checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.REST_API,
                     organization, null, null);
             API createdApi = apiProvider.addAPI(apiToAdd);
@@ -3417,7 +3412,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                             null, service, organization);
                 }
             } else {
-                log.info("******* Gov Check: createNewAPIVersion *******");
                 //todo : need to verify
                 API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, organization);
                 if (APIConstants.API_TYPE_SOAPTOREST.equals(versionedAPI.getType())) {
@@ -3574,7 +3568,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setSwaggerDefinition(apiDefinition);
 
             //adding the api
-            log.info("******* Gov Check:  importGraphQLSchema *******");
             checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.GRAPHQL_API,
                     organization, null, null);
 
@@ -3874,6 +3867,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
+            checkGovernanceCompliance(apiId, GovernableState.API_DEPLOY, ArtifactType.API, organization, null,
+                    null);
             //adding the api revision
             String revisionId = apiProvider.addAPIRevision(apiRevision, organization);
 
@@ -4005,8 +4000,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     environments, environment, displayOnDevportal, vhost, true);
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        log.info("******* Gov Check: deployAPIRevision *******");
-        checkGovernanceCompliance(apiId, GovernableState.API_DEPLOY, ArtifactType.API, organization, null,
+        checkGovernanceCompliance(apiId, GovernableState.API_DEPLOY, ArtifactType.REST_API, organization, null,
                 null);
         apiProvider.deployAPIRevision(apiId, revisionId, apiRevisionDeployments, organization);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionsDeploymentList(apiId);
@@ -4400,7 +4394,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiToAdd.setServiceInfo("md5", service.getMd5());
                 apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
                         .getServiceUrl(), null));
-                log.info("******* Gov Check: importServiceFromCatalog *******");
                 checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.REST_API,
                         organization, null, null);
                 API api = importSOAPAPI(service.getEndpointDef(), null, null,
@@ -4489,7 +4482,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                         protocol));
                 artifactType = ArtifactType.ASYNC_API;
             }
-            log.info("******* Gov Check: reimportServiceFromCatalog *******");
             checkGovernanceCompliance(apiId, GovernableState.API_UPDATE, artifactType, organization, null,
                     null);
             API updatedApi = apiProvider.updateAPI(api, originalAPI);
@@ -4561,7 +4553,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
-        log.info("******* Gov Check: importOpenAPIDefinition *******");
         checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.REST_API, organization,
                 null, null);
         API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
@@ -4596,7 +4587,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         //Import the API and Definition
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            log.info("******* Gov Check: importOpenAPIDefinition *******");
             checkGovernanceCompliance(apiDTOFromProperties.getId(), GovernableState.API_CREATE,
                     ArtifactType.REST_API, organization, null, null);
             API api = PublisherCommonUtils.importAsyncAPIWithDefinition(validationResponse, isServiceAPI,
