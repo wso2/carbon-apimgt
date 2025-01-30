@@ -56,7 +56,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
 
     private static final Log log = LogFactory.getLog(GovernancePolicyMgtDAOImpl.class);
 
-    private static GovernancePolicyMgtDAO INSTANCE = null;
+    private static GovernancePolicyMgtDAO instance = null;
 
     private GovernancePolicyMgtDAOImpl() {
     }
@@ -67,10 +67,11 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @return GovernancePolicyMgtDAO instance
      */
     public static GovernancePolicyMgtDAO getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new GovernancePolicyMgtDAOImpl();
+
+        if (instance == null) {
+            instance = new GovernancePolicyMgtDAOImpl();
         }
-        return INSTANCE;
+        return instance;
     }
 
     /**
@@ -174,7 +175,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         }
     }
 
-
     /**
      * Get Governance Policy by Name
      *
@@ -184,7 +184,9 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     @Override
-    public GovernancePolicy getGovernancePolicyByName(String organization, String policyName) throws GovernanceException {
+    public GovernancePolicy getGovernancePolicyByName(String organization, String policyName)
+            throws GovernanceException {
+
         GovernancePolicy policy = null;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_BY_NAME)) {
@@ -824,7 +826,8 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             throws GovernanceException {
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_WITHOUT_LABELS_BY_STATE)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .GET_POLICIES_WITHOUT_LABELS_BY_STATE)) {
             prepStmt.setString(1, String.valueOf(state));
             prepStmt.setString(2, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {

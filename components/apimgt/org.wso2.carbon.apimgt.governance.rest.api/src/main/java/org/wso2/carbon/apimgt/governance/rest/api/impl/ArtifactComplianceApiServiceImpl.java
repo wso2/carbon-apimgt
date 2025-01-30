@@ -32,13 +32,13 @@ import org.wso2.carbon.apimgt.governance.rest.api.mappings.ResultsMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.ws.rs.core.Response;
 
 /**
  * API implementation class for Artifact Compliance API

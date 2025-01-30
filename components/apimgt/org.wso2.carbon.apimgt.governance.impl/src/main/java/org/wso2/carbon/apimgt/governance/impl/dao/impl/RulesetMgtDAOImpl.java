@@ -55,7 +55,7 @@ import java.util.List;
 public class RulesetMgtDAOImpl implements RulesetMgtDAO {
 
     private static final Log log = LogFactory.getLog(RulesetMgtDAOImpl.class);
-    private static RulesetMgtDAO INSTANCE = null;
+    private static RulesetMgtDAO instance = null;
 
     private RulesetMgtDAOImpl() {
     }
@@ -66,10 +66,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @return RulesetMgtDAO instance
      */
     public static RulesetMgtDAO getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new RulesetMgtDAOImpl();
+
+        if (instance == null) {
+            instance = new RulesetMgtDAOImpl();
         }
-        return INSTANCE;
+        return instance;
     }
 
     /**
@@ -88,7 +89,8 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         String sqlQuery = SQLConstants.CREATE_RULESET;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
-             InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getBytes(StandardCharsets.UTF_8))) {
+             InputStream rulesetContentStream = new ByteArrayInputStream
+                     (rulesetContent.getBytes(StandardCharsets.UTF_8))) {
             try {
                 connection.setAutoCommit(false);
                 prepStmt.setString(1, ruleset.getId());
@@ -368,12 +370,15 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
     @Override
-    public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
+    public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset)
+            throws GovernanceException {
+
         String rulesetContent = ruleset.getRulesetContent();
 
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_RULESET);
-             InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getBytes(StandardCharsets.UTF_8))) {
+             InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent
+                     .getBytes(StandardCharsets.UTF_8))) {
             try {
                 connection.setAutoCommit(false);
                 prepStmt.setString(1, ruleset.getName());
@@ -506,7 +511,8 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      *
      * @param rulesetId  Ruleset ID
      * @param connection Database connection
-     * @throws SQLException If an error occurs while deleting the compliance evaluation results (Captured at a higher level)
+     * @throws SQLException If an error occurs while deleting the compliance
+     *                      evaluation results (Captured at a higher level)
      */
     private void deleteComplianceEvaluationResultsForRuleset(String rulesetId, Connection connection)
             throws SQLException {

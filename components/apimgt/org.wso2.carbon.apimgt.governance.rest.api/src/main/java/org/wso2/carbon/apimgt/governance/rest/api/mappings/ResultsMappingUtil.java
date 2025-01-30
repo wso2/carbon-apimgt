@@ -102,7 +102,8 @@ public class ResultsMappingUtil {
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), artifactType);
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getArtifactCompliancePageURL(GovernanceAPIConstants.ARTIFACT_COMPLIANCE_GET_URL,
+            paginatedNext = GovernanceAPIUtil.getArtifactCompliancePageURL(GovernanceAPIConstants
+                            .ARTIFACT_COMPLIANCE_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), artifactType);
         }
@@ -162,11 +163,13 @@ public class ResultsMappingUtil {
     public static PolicyAdherenceSummaryDTO getPolicyAdherenceSummary(int totalPoliciesCount,
                                                                       int followedPoliciesCount,
                                                                       int violatedPoliciesCount) {
+
         PolicyAdherenceSummaryDTO policyAdherenceSummaryDTO = new PolicyAdherenceSummaryDTO();
         policyAdherenceSummaryDTO.setTotalPolicies(totalPoliciesCount);
         policyAdherenceSummaryDTO.setViolatedPolicies(violatedPoliciesCount);
         policyAdherenceSummaryDTO.setFollowedPolicies(followedPoliciesCount);
-        policyAdherenceSummaryDTO.setUnAppliedPolicies(totalPoliciesCount - followedPoliciesCount - violatedPoliciesCount);
+        policyAdherenceSummaryDTO.setUnAppliedPolicies(totalPoliciesCount - followedPoliciesCount
+                - violatedPoliciesCount);
         return policyAdherenceSummaryDTO;
     }
 

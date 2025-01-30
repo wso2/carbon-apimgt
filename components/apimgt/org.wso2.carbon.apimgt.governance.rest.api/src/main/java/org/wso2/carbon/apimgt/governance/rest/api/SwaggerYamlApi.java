@@ -27,14 +27,17 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.io.IOException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 
+/**
+ * This class is used to retrieve the swagger definition of Governance REST API
+ */
 @Path("/swagger.yaml")
 @Consumes({"text/yaml"})
 @Produces({"text/yaml"})
@@ -58,11 +61,14 @@ public class SwaggerYamlApi {
     @io.swagger.annotations.ApiResponses(value = {
             @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\n OAS is returned."),
 
-            @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource."),
+            @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty " +
+                    "body because the client has already the latest version of the requested resource."),
 
-            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported")})
+            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe " +
+                    "requested media type is not supported")})
 
     public Response swaggerYamlGet() throws APIManagementException {
+
         try {
             if (openAPIDef == null) {
                 synchronized (LOCK_GOV_OPENAPI_DEF) {

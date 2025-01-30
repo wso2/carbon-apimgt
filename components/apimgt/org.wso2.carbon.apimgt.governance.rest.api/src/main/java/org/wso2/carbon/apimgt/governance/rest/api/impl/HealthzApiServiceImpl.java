@@ -18,9 +18,9 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.rest.api.HealthzApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.HealthzResponseDTO;
-import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import javax.ws.rs.core.Response;
 

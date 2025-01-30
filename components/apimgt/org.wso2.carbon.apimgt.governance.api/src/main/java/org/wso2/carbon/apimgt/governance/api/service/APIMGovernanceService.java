@@ -108,7 +108,8 @@ public interface APIMGovernanceService {
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
     ArtifactComplianceInfo evaluateComplianceSync(String artifactId, ArtifactType artifactType,
-                                                  GovernableState state, String organization) throws GovernanceException;
+                                                  GovernableState state, String organization)
+            throws GovernanceException;
 
     /**
      * Handle artifact label attach

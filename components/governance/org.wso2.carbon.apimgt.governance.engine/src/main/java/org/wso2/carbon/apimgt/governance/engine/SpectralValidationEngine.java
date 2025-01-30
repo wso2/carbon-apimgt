@@ -48,7 +48,7 @@ import java.util.Map;
         service = ValidationEngine.class
 )
 public class SpectralValidationEngine implements ValidationEngine {
-    public static final Log log = LogFactory.getLog(SpectralValidationEngine.class);
+    private static final Log log = LogFactory.getLog(SpectralValidationEngine.class);
 
     /**
      * Check if a ruleset is valid

@@ -38,7 +38,8 @@ public class ServerStartupListener implements ServerStartupObserver {
         String migrationEnabled = System.getProperty(GovernanceConstants.MIGRATE);
         if (migrationEnabled == null) {
             GovernanceConfiguration governanceConfiguration =
-                    ServiceReferenceHolder.getInstance().getGovernanceConfigurationService().getGovernanceConfiguration();
+                    ServiceReferenceHolder.getInstance().getGovernanceConfigurationService()
+                            .getGovernanceConfiguration();
             if (governanceConfiguration != null) {
                 GovernanceUtil.loadDefaultRulesets(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             }

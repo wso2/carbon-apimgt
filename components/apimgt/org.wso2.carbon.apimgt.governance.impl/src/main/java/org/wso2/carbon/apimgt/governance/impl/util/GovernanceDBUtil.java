@@ -25,14 +25,14 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 /**
  * Utility class for Governance database operations
@@ -83,7 +83,7 @@ public class GovernanceDBUtil {
      * Utility method to get a new database connection
      *
      * @return Connection
-     * @throws java.sql.SQLException if failed to get Connection
+     * @throws SQLException if failed to get Connection
      */
     public static Connection getConnection() throws SQLException {
         if (dataSource != null) {

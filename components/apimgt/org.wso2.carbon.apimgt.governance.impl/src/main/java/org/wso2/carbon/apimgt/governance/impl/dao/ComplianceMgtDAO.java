@@ -74,7 +74,8 @@ public interface ComplianceMgtDAO {
      * @param status    Evaluation status
      * @throws GovernanceException If an error occurs while updating the evaluation status
      */
-    void updateComplianceEvaluationStatus(String requestId, ComplianceEvaluationStatus status) throws GovernanceException;
+    void updateComplianceEvaluationStatus(String requestId, ComplianceEvaluationStatus status) throws
+            GovernanceException;
 
     /**
      * Update the evaluation status of all processing requests to pending
@@ -237,7 +238,8 @@ public interface ComplianceMgtDAO {
     List<String> getViolatedPolicies(String organization) throws GovernanceException;
 
     /**
-     * Get compliance evaluation results for a given policy as a map of artifact type to list of compliance evaluation results
+     * Get compliance evaluation results for a given policy as a map of artifact type to list of
+     * compliance evaluation results
      *
      * @param policyId Policy ID
      * @return Map of compliance evaluation results

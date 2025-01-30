@@ -207,7 +207,8 @@ public class ComplianceEvaluationScheduler {
             // Extract artifact project content to map
             Map<RuleType, String> artifactProjectContentMap = new HashMap<>();
             if (ArtifactType.isArtifactAPI(artifactType)) {
-                artifactProjectContentMap = APIMUtil.extractAPIProjectContent(artifactProject, artifactId, artifactType);
+                artifactProjectContentMap = APIMUtil.extractAPIProjectContent(artifactProject,
+                        artifactId, artifactType);
             }
 
             for (ComplianceEvaluationRequest request : requests) {

@@ -31,7 +31,6 @@ import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This class represents the Governance Configuration. It is responsible for reading the

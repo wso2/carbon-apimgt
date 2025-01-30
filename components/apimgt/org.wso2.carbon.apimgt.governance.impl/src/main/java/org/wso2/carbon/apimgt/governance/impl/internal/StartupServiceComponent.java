@@ -26,13 +26,12 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
 import org.wso2.carbon.apimgt.governance.impl.listener.ServerStartupListener;
 import org.wso2.carbon.core.ServerStartupObserver;
 
+/**
+ * This class represents the Startup Service Component
+ */
 @Component(name = "org.wso2.carbon.apimgt.governance.internal.StartupServiceComponent", immediate = true)
 public class StartupServiceComponent {
 
@@ -42,6 +41,7 @@ public class StartupServiceComponent {
 
     @Activate
     protected void activate(ComponentContext componentContext) {
+
         try {
             log.debug("Startup Service Component activated");
             BundleContext bundleContext = componentContext.getBundleContext();
@@ -54,6 +54,7 @@ public class StartupServiceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
+
         log.debug("Startup Service Component deactivated");
         registration.unregister();
     }

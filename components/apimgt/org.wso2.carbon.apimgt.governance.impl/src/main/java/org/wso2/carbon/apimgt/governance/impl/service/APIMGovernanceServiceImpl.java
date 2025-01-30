@@ -37,17 +37,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class represents the API Governance Service Implementation
+ */
 @Component(
         name = "org.wso2.carbon.apimgt.governance.service",
         service = APIMGovernanceService.class,
         immediate = true
 )
 public class APIMGovernanceServiceImpl implements APIMGovernanceService {
+
     private static final Log log = LogFactory.getLog(APIMGovernanceServiceImpl.class);
     private final ComplianceManager complianceManager;
     private final PolicyManager policyManager;
 
     public APIMGovernanceServiceImpl() {
+
         complianceManager = new ComplianceManagerImpl();
         policyManager = new PolicyManagerImpl();
     }
@@ -67,6 +72,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                      ArtifactType artifactType, GovernableState state,
                                                      String organization)
             throws GovernanceException {
+
         List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
                 artifactType, state, organization);
         return GovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state);
@@ -121,6 +127,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                          ArtifactType artifactType, GovernableState state,
                                                          Map<RuleType, String> artifactProjectContent,
                                                          String organization) throws GovernanceException {
+
         List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
                 artifactType, state, organization);
 
@@ -171,6 +178,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     public ArtifactComplianceInfo evaluateComplianceSync(String artifactId, ArtifactType artifactType,
                                                          GovernableState state, String organization)
             throws GovernanceException {
+
         return evaluateComplianceSync(artifactId, null, artifactType, state,
                 null, organization);
     }
@@ -204,6 +212,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      */
     @Override
     public void clearArtifactComplianceInfo(String artifactId) throws GovernanceException {
+
         complianceManager.deleteArtifact(artifactId);
     }
 }

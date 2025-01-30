@@ -37,12 +37,12 @@ import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.Response;
 
 /**
  * This is the implementation class for the Governance Policies API.

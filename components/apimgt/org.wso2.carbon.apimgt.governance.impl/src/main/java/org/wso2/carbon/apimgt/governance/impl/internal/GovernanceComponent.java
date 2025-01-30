@@ -30,11 +30,11 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceEvaluationScheduler;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.governance.impl.ComplianceEvaluationScheduler;
 import org.wso2.carbon.apimgt.governance.impl.observer.GovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
@@ -44,6 +44,9 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 
+/**
+ * This class represents the Governance Component
+ */
 @Component(
         name = "org.wso2.apimgt.governance.impl.services",
         immediate = true)
@@ -56,6 +59,7 @@ public class GovernanceComponent {
 
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
+
         if (log.isDebugEnabled()) {
             log.debug("Governance component activated");
         }
@@ -83,6 +87,7 @@ public class GovernanceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
+
         ComplianceEvaluationScheduler.shutdown();
         if (log.isDebugEnabled()) {
             log.debug("Deactivating Governance component");
@@ -99,11 +104,13 @@ public class GovernanceComponent {
             unbind = "unsetValidationEngineService"
     )
     protected void setValidationEngineService(ValidationEngine validationEngine) {
+
         ValidationEngineService validationEngineService = new ValidationEngineServiceImpl(validationEngine);
         ServiceReferenceHolder.getInstance().setValidationEngineService(validationEngineService);
     }
 
     protected void unsetValidationEngineService(ValidationEngine validationEngine) {
+
         ServiceReferenceHolder.getInstance().setValidationEngineService(null);
     }
 

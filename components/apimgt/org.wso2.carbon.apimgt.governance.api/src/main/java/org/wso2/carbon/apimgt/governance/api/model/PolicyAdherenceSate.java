@@ -18,12 +18,16 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+/**
+ * This class represents a list of governance Policies.
+ */
 public enum PolicyAdherenceSate {
     FOLLOWED,
     VIOLATED,
     UNAPPPLIED;
 
     public static PolicyAdherenceSate fromString(String text) {
+
         if ("followed".equalsIgnoreCase(text)) {
             return FOLLOWED;
         } else if ("violated".equalsIgnoreCase(text)) {

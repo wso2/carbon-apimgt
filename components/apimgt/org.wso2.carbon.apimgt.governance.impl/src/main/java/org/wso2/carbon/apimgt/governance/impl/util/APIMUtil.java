@@ -205,8 +205,10 @@ public class APIMUtil {
      * @return A map of API project contents.
      * @throws GovernanceException if errors occur while extracting content.
      */
-    public static Map<RuleType, String> extractAPIProjectContent(byte[] apiProjectZip, String apiId, ArtifactType apiType)
+    public static Map<RuleType, String> extractAPIProjectContent(byte[] apiProjectZip, String apiId,
+                                                                 ArtifactType apiType)
             throws GovernanceException {
+
         Map<RuleType, String> apiProjectContentMap = new HashMap<>();
 
         apiProjectContentMap.put(RuleType.API_METADATA, extractAPIMetadata(apiProjectZip, apiId));
