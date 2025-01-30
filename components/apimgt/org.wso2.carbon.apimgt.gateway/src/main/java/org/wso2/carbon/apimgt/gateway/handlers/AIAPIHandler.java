@@ -93,22 +93,14 @@ public class AIAPIHandler extends AbstractHandler {
      */
     private boolean processMessage(MessageContext messageContext, boolean isRequest) {
 
+        if (isRequest) {
+            return true;
+        }
         try {
-            if (this.llmProviderId == null) {
-                log.error("No LLM provider ID provided by TemplateBuilderUtil");
-                return true;
-            }
             LLMProviderInfo provider = DataHolder.getInstance().getLLMProviderConfigurations(this.llmProviderId);
             if (provider == null) {
                 log.error("No LLM provider found for provider ID: " + llmProviderId);
                 return false;
-            }
-            if (isRequest) {
-                Map<String, String> transportHeaders =
-                        (Map<String, String>) ((Axis2MessageContext) messageContext)
-                                .getAxis2MessageContext()
-                                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                transportHeaders.remove(HttpHeaders.ACCEPT_ENCODING);
             }
             LLMProviderConfiguration providerConfiguration = provider.getConfigurations();
             LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
@@ -124,17 +116,11 @@ public class AIAPIHandler extends AbstractHandler {
 
             metadataMap.put(APIConstants.AIAPIConstants.NAME, provider.getName());
             metadataMap.put(APIConstants.AIAPIConstants.API_VERSION, provider.getApiVersion());
-            if (isRequest) {
-                llmProviderService.getRequestMetadata(payload, headers, queryParams,
-                        providerConfiguration.getMetadata(), metadataMap);
-            } else {
-                llmProviderService.getResponseMetadata(payload, headers, queryParams,
-                        providerConfiguration.getMetadata(), metadataMap);
-            }
-            String metadataProperty = isRequest
-                    ? APIConstants.AIAPIConstants.AI_API_REQUEST_METADATA
-                    : APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA;
-            ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(metadataProperty,
+
+            llmProviderService.getResponseMetadata(payload, headers, queryParams,
+                    providerConfiguration.getMetadata(), metadataMap);
+            ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                    .setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA,
                     metadataMap);
             return true;
         } catch (Exception e) {
@@ -262,6 +248,7 @@ public class AIAPIHandler extends AbstractHandler {
      * @param llmProviderId the LLM provider ID
      */
     public void setLlmProviderId(String llmProviderId) {
+
         this.llmProviderId = llmProviderId;
     }
 }
