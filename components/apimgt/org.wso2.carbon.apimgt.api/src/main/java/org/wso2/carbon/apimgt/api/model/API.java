@@ -769,7 +769,7 @@ public class API implements Serializable {
     }
 
     public Set<OrganizationTiers> getAvailableTiersForOrganizations() {
-        return Collections.unmodifiableSet(availableTiersForOrganizations);
+        return availableTiersForOrganizations;
     }
 
     public void setAvailableTiersForOrganizations(Set<OrganizationTiers> availableTiersForOrganizations) {
