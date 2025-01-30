@@ -11160,11 +11160,11 @@ public final class APIUtil {
 
         String nowhitespace = WHITESPACE.matcher(name).replaceAll("-"); // Replace spaces with hyphens
         String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD); // Decompose Unicode characters
-        String slug = NONLATIN.matcher(normalized).replaceAll(""); // Remove non-alphanumeric characters
+        sanatizedName = NONLATIN.matcher(normalized).replaceAll(""); // Remove non-alphanumeric characters
 
         // Convert to lowercase and trim hyphens from the beginning/end
-        slug = slug.toLowerCase(Locale.ENGLISH).replaceAll("^-+|-+$", "");
+        sanatizedName = sanatizedName.toLowerCase(Locale.ENGLISH).replaceAll("^-+|-+$", "");
 
-        return slug;
+        return sanatizedName;
     }
 }
