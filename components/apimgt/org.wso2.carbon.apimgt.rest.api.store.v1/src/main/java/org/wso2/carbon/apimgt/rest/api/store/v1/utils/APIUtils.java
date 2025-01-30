@@ -221,20 +221,25 @@ public class APIUtils {
         return allowedList;
     }
 
-public static void updateAvailableTiersByOrganization(API api, String organization) {
+    /**
+     * Update available tiers in the API according to the organization.
+     * @param api           API object
+     * @param organization  Organization name
+     */
+    public static void updateAvailableTiersByOrganization(API api, String organization) {
 
-    Set<Tier> availableTiers = api.getAvailableTiers();
-    Set<OrganizationTiers> availableTiersForOrganizations = api.getAvailableTiersForOrganizations();
-    if (organization != null) {
-        for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
-            String orgName = organizationTiers.getOrganizationID();
-            if (organization.equals(orgName)) {
-                availableTiers = organizationTiers.getTiers();
-                break;
+        Set<Tier> availableTiers = api.getAvailableTiers();
+        Set<OrganizationTiers> availableTiersForOrganizations = api.getAvailableTiersForOrganizations();
+        if (organization != null) {
+            for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                String orgName = organizationTiers.getOrganizationID();
+                if (organization.equals(orgName)) {
+                    availableTiers = organizationTiers.getTiers();
+                    break;
+                }
             }
         }
+        api.removeAllTiers();
+        api.setAvailableTiers(availableTiers);
     }
-    api.removeAllTiers();
-    api.setAvailableTiers(availableTiers);
-}
 }

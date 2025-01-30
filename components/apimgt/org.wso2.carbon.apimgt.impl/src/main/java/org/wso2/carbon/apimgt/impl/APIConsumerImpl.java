@@ -4049,7 +4049,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             Set<OrganizationTiers> organizationTiersSet = api.getAvailableTiersForOrganizations();
             for (OrganizationTiers organizationTiers : organizationTiersSet) {
                 Set<Tier> tierNamesForOrganization = organizationTiers.getTiers();
-                Set<Tier> availableTiersForOrganization = getAvailableTiers(tierNamesForOrganization, deniedTiers, definedTiers);
+                Set<Tier> availableTiersForOrganization = getAvailableTiers(tierNamesForOrganization, deniedTiers,
+                        definedTiers);
                 organizationTiers.removeAllTiers();
                 organizationTiers.setTiers(availableTiersForOrganization);
             }
