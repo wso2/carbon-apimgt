@@ -11142,7 +11142,6 @@ public final class APIUtil {
             organizationId = orgDetails.getOrganizationId();
         } else {
             // No organization entry in the db. add entry without parent info.
-
             OrganizationDetailsDTO info = new OrganizationDetailsDTO();
             info.setExternalOrganizationReference(referenceId);
             info.setTenantDomain(rootOrganization);
@@ -11152,7 +11151,6 @@ public final class APIUtil {
             if (addedInfo != null) {
                 organizationId = addedInfo.getOrganizationId();
             }
-
         }
         return organizationId;
     }
@@ -11160,16 +11158,13 @@ public final class APIUtil {
     public static String getOrganizationHandle(String name) {
         String sanatizedName = null;
         if (name == null) {
-            return sanatizedName; 
+            return sanatizedName;
         }
-
         String nowhitespace = WHITESPACE.matcher(name).replaceAll("-"); // Replace spaces with hyphens
         String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD); // Decompose Unicode characters
         sanatizedName = NONLATIN.matcher(normalized).replaceAll(""); // Remove non-alphanumeric characters
-
         // Convert to lowercase and trim hyphens from the beginning/end
         sanatizedName = sanatizedName.toLowerCase(Locale.ENGLISH).replaceAll("^-+|-+$", "");
-
         return sanatizedName;
     }
 }

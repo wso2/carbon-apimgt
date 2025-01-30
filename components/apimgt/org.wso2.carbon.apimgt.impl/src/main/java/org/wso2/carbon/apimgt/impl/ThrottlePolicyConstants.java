@@ -131,5 +131,4 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_MAX_DEPTH = "MAX_DEPTH";
 
     public static final String COLUMN_MAX_COMPLEXITY = "MAX_COMPLEXITY";
-
 }

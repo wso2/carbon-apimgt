@@ -1183,9 +1183,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         query = query.replace("PUBLISHED", "published").replace("PROTOTYPED", "prototyped").replace("DEPRECATED",
                 "deprecated");// convert to lowercase
         Map<String, String> fields = RegistryPersistenceUtil.getFields(query);
-        //since store_view_roles and overview_visible_organizations are passed as property search value, remove this.
-        fields.remove("overview_store_view_roles"); 
-        fields.remove("overview_visible_organizations");
         String filterQuery = RegistryPersistenceUtil.buildFQStringForProperties(query);
         String modifiedQuery = "q=* TO *&" + filterQuery;
 
@@ -1243,9 +1240,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
             log.debug("Dev portal list apis query " + searchQuery);
-            //List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
-            //        .findGovernanceArtifacts(searchQuery, userRegistry, APIConstants.API_RXT_MEDIA_TYPE,
-            //                true);
             List<GovernanceArtifact> governanceArtifacts = searchDevportalAPIs(searchQuery, tenantIDLocal, userRegistry, start, offset);
             totalLength = PaginationContext.getInstance().getLength();
             boolean isFound = true;
@@ -3458,10 +3452,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
             String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
-            // if (StringUtils.isEmpty(apiProduct.getVisibleOrganizations())) {
-                //visibleOrgs = apiProduct.getVisibleOrganizations();
-            // TODO fix for products and do needful for unified search
-            // }
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
                     apiProduct.getAdditionalProperties(), visibleOrgs);
             RegistryPersistenceUtil.setResourcePermissions(apiProduct.getId().getProviderName(),
@@ -3689,10 +3679,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
 
             String visibleOrgs = APIConstants.DEFAULT_VISIBLE_ORG;
-            // if (APIConstants.API_RESTRICTED_BY_ORG.equals(apiProduct.getVisibility())){
-                //visibleOrgs = apiProduct.getVisibleOrganizations();
-            // TODO fix for products and do needful for unified search
-            // }
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
                     apiProduct.getAdditionalProperties(), visibleOrgs);
             RegistryPersistenceUtil.setResourcePermissions(apiProduct.getId().getProviderName(),
@@ -4339,7 +4325,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     private String getOrganizationVisibilityForApiArtifact(Registry registry, String apiId) throws RegistryException {
-        /*Get org visibility value*/
+        // Get org visibility value*
         String artifactPath = GovernanceUtils.getArtifactPath(registry, apiId);
         //get API
         Resource apiResource = registry.get(artifactPath);

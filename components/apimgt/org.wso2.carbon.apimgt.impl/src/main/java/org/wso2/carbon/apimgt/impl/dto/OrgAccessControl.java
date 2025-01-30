@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, WSO2 LLc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2025, WSO2 LLc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 LLc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -22,29 +22,28 @@ public class OrgAccessControl {
     private boolean isEnabled;
     private String orgNameLocalClaim;
     private String orgIdLocalClaim;
-    private String orgselectorClaim;
+
     public boolean isEnabled() {
         return isEnabled;
     }
+
     public void setEnabled(boolean isEnabled) {
         this.isEnabled = isEnabled;
     }
+
     public String getOrgNameLocalClaim() {
         return orgNameLocalClaim;
     }
+
     public void setOrgNameLocalClaim(String orgNameLocalClaim) {
         this.orgNameLocalClaim = orgNameLocalClaim;
     }
+
     public String getOrgIdLocalClaim() {
         return orgIdLocalClaim;
     }
+
     public void setOrgIdLocalClaim(String orgIdLocalClaim) {
         this.orgIdLocalClaim = orgIdLocalClaim;
-    }
-    public String getOrgSelectorClaim() {
-        return orgselectorClaim;
-    }
-    public void setOrgSelectorClaim(String orgselectorClaim) {
-        this.orgselectorClaim = orgselectorClaim;
     }
 }

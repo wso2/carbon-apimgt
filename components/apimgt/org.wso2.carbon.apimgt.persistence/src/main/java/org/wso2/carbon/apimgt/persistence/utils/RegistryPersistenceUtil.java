@@ -187,7 +187,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE, Boolean.toString(api.isEnableStore()));
             artifact.setAttribute(APIConstants.API_OVERVIEW_TESTKEY, api.getTestKey());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, api.getVersionTimestamp());
-            
+
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
@@ -1919,7 +1919,6 @@ public class RegistryPersistenceUtil {
         for (String parameter : parameters) {
             // Split each parameter by '=' to get key and value
             String[] keyValue = parameter.split("=");
-
             // Extract the key and value
             String key = keyValue[0];
             String value = keyValue.length > 1 ? keyValue[1] : "";
@@ -1950,9 +1949,10 @@ public class RegistryPersistenceUtil {
                     break;
             }
         }
-
         outputMap.put("mediaType", "application/vnd.wso2-api+xml");
-
+        //since store_view_roles and overview_visible_organizations are passed as property search value, remove this.
+        outputMap.remove("overview_store_view_roles"); 
+        outputMap.remove("overview_visible_organizations");
         return outputMap;
     }
 

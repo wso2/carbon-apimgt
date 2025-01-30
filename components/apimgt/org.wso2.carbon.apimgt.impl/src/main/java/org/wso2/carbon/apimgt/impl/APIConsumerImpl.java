@@ -3922,7 +3922,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throw new APIManagementException("Error while searching the api ", e);
         }
         return result;
-	}
+}
 
     @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
@@ -4221,7 +4221,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Organization org = new Organization(organization);
         Map<String, Object> properties = APIUtil.getUserProperties(userame);
         String[] roles = APIUtil.getFilteredUserRoles(userame);
-        ;
         UserContext ctx = new UserContext(userame, org, properties, roles);
         return  searchPaginatedContent(org, searchQuery, start, end, ctx);
     }

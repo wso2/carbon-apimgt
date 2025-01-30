@@ -104,8 +104,7 @@ public class API implements Serializable {
     private String visibleTenants;
     private String visibleOrganizations;
 
-
-	private boolean endpointSecured = false;
+    private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
     private String endpointUTUsername;
     private String endpointUTPassword;
@@ -1565,12 +1564,12 @@ public class API implements Serializable {
     }
     
     public String getVisibleOrganizations() {
-		return visibleOrganizations;
-	}
+        return visibleOrganizations;
+    }
 
-	public void setVisibleOrganizations(String visibleOrganizations) {
-		this.visibleOrganizations = visibleOrganizations;
-	}
+    public void setVisibleOrganizations(String visibleOrganizations) {
+        this.visibleOrganizations = visibleOrganizations;
+    }
 
     /**
      * Property to hold whether the API isEGRESS (1)
