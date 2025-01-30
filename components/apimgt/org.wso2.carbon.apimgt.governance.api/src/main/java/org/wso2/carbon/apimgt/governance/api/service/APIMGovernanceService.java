@@ -57,6 +57,19 @@ public interface APIMGovernanceService {
                                  GovernableState state,
                                  String organization) throws GovernanceException;
 
+    /**
+     * Evaluate compliance of the artifact asynchronously
+     *
+     * @param artifactName    Artifact name
+     * @param artifactVersion Artifact version
+     * @param artifactType    Artifact type (ArtifactType.REST_API)
+     * @param state           State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
+     * @param organization    Organization
+     * @throws GovernanceException If an error occurs while evaluating compliance
+     */
+    void evaluateComplianceAsync(String artifactName, String artifactVersion, ArtifactType artifactType,
+                                 GovernableState state,
+                                 String organization) throws GovernanceException;
 
     /**
      * Evaluate compliance of the artifact synchronously
@@ -79,37 +92,6 @@ public interface APIMGovernanceService {
     ArtifactComplianceInfo evaluateComplianceSync(String artifactId, String revisionNo, ArtifactType artifactType,
                                                   GovernableState state, Map<RuleType, String> artifactProjectContent,
                                                   String organization) throws GovernanceException;
-
-
-    /**
-     * Evaluate compliance of the artifact synchronously
-     *
-     * @param artifactId   Artifact ID
-     * @param revisionNo   Revision number
-     * @param artifactType Artifact type (ArtifactType.REST_API)
-     * @param state        State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
-     * @param organization Organization
-     * @return ArtifactComplianceInfo object
-     * @throws GovernanceException If an error occurs while evaluating compliance
-     */
-    ArtifactComplianceInfo evaluateComplianceSync(String artifactId, String revisionNo, ArtifactType artifactType,
-                                                  GovernableState state, String organization)
-            throws GovernanceException;
-
-
-    /**
-     * Evaluate compliance of the artifact synchronously
-     *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact type (ArtifactType.REST_API)
-     * @param state        State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
-     * @param organization Organization
-     * @return ArtifactComplianceInfo object
-     * @throws GovernanceException If an error occurs while evaluating compliance
-     */
-    ArtifactComplianceInfo evaluateComplianceSync(String artifactId, ArtifactType artifactType,
-                                                  GovernableState state, String organization)
-            throws GovernanceException;
 
     /**
      * Handle artifact label attach

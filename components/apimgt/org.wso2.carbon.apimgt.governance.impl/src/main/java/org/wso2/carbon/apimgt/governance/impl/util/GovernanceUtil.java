@@ -461,9 +461,28 @@ public class GovernanceUtil {
      */
     public static byte[] getArtifactProject(String artifactId, ArtifactType artifactType,
                                             String organization) throws GovernanceException {
+
         return getArtifactProjectWithRevision(artifactId, null, artifactType, organization);
     }
 
+    /**
+     * Get artifact id from artifact name, version, type and organization
+     *
+     * @param artifactName    Artifact name
+     * @param artifactVersion Artifact version
+     * @param artifactType    Artifact type
+     * @param organization    Organization
+     * @return Artifact ID
+     * @throws GovernanceException If an error occurs while getting the artifact ID
+     */
+    public static String getArtifactId(String artifactName, String artifactVersion, ArtifactType artifactType,
+                                       String organization) throws GovernanceException {
+
+        if (ArtifactType.isArtifactAPI(artifactType)) {
+            return APIMUtil.getApiUUID(artifactName, artifactVersion, organization);
+        }
+        return null;
+    }
 
 }
 

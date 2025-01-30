@@ -163,9 +163,11 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ARTIFACT_INFO_NOT_FOUND(600003, "Artifact info not found.",
             404, "Artifact info not found for artifact: %s in the organization: %s"),
     ARTIFACT_NOT_FOUND(600004, "Artifact not found.", 404,
-            "Artifact not found for artifact: %s in the organization: %s"),
+            "Artifact with id: %s not found in the organization: %s"),
     ERROR_WHILE_DELETING_GOVERNANCE_DATA(600005, "Error while deleting governance data.",
             500, "Error while deleting governance data for artifact: %s", true),
+    ARTIFACT_NOT_FOUND_WITH_NAME_AND_VERSION(600006, "Artifact not found with name and version.",
+            404, "Artifact not found with name: %s and version: %s in the organization: %s"),
 
     // APIM related codes
 
@@ -191,7 +193,12 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             500, "Error while getting labels for API with ID: %s", true),
 
     ERROR_WHILE_GETTING_APIS_FOR_LABEL(700010, "Error while getting APIs for label.",
-            500, "Error while getting APIs for label with ID: %s", true);
+            500, "Error while getting APIs for label with ID: %s", true),
+
+    ERROR_WHILE_GETTING_API_UUID_WITH_NAME_VERSION(700011, "Error while getting API UUID " +
+            "with name and version.",
+            500, "Error while getting API UUID with name: %s and version: %s", true),
+    ;
 
     private final long errorCode;
     private final String errorMessage;

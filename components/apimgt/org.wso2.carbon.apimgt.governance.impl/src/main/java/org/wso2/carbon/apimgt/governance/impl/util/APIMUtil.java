@@ -424,4 +424,27 @@ public class APIMUtil {
         return null;
     }
 
+    /**
+     * Get the API UUID
+     *
+     * @param apiName      API name
+     * @param apiVersion   API version
+     * @param organization Organization
+     * @return API UUID
+     * @throws GovernanceException
+     */
+    public static String getApiUUID(String apiName, String apiVersion, String organization)
+            throws GovernanceException {
+
+        try {
+            ApiMgtDAO apimgtDAO = ApiMgtDAO.getInstance();
+            String apiProvider = apimgtDAO.getAPIProviderByNameAndOrganization(apiName, organization);
+            APIIdentifier apiIdentifier = new APIIdentifier(apiProvider, apiName, apiVersion);
+            return apimgtDAO.getUUIDFromIdentifier(apiIdentifier);
+        } catch (APIManagementException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_UUID_WITH_NAME_VERSION,
+                    apiName, apiVersion, e);
+        }
+    }
+
 }
