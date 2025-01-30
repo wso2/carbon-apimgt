@@ -1294,6 +1294,7 @@ paths:
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/isAiApi'
+        - $ref: '#/components/parameters/organizationID'
       responses:
         200:
           description: |
@@ -14311,6 +14312,13 @@ components:
       schema:
         type: boolean
         default: false
+    organizationID:
+      name: organizationID
+      in: query
+      description: |
+        Indicates the organization ID
+      schema:
+        type: string
     offset:
       name: offset
       in: query
