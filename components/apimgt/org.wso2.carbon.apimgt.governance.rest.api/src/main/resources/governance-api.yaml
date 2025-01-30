@@ -1154,7 +1154,7 @@ components:
               - API_PUBLISH
         actions:
           type: array
-          description: List of actions taken when the governance policy is violated.
+          description: List of actions taken when the governance policy is violated. An action is defined by the state and rule severity. If an action is not specified to each state and rule severity, the default action is `NOTIFY`.
           items:
             $ref: '#/components/schemas/Action'
         rulesets:
