@@ -32,12 +32,13 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalProcessingConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -112,7 +113,7 @@ public class APIPublisherForNewPortal {
         String orgId = getOrgId(tenantName, sslsf);
         if (orgId != null) {
             API api = apiTypeWrapper.getApi();
-            String apiDefinition = ApisApiServiceImplUtils.getApiDefinition(api);
+            String apiDefinition = getDefinitionForDevPortal(api);
             String apiMetaData = getApiMetaData(apiTypeWrapper);
 
             HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition, sslsf);
@@ -132,7 +133,7 @@ public class APIPublisherForNewPortal {
     private static void updateAPI(ApiTypeWrapper apiTypeWrapper, String tenantName,
                                   SSLConnectionSocketFactory sslsf) throws APIManagementException {
         API api = apiTypeWrapper.getApi();
-        String apiDefinition = ApisApiServiceImplUtils.getApiDefinition(api);
+        String apiDefinition = getDefinitionForDevPortal(api);
         String apiMetaData = getApiMetaData(apiTypeWrapper);
         String orgId = getOrgId(tenantName, sslsf);
         if (orgId != null) {
@@ -175,6 +176,11 @@ public class APIPublisherForNewPortal {
             log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
                     "Hence fails to un-publish from " + baseUrl);
         }
+    }
+
+    private static String getDefinitionForDevPortal (API api) throws APIManagementException {
+        APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(api.getId().getProviderName());
+        return apiConsumer.getOpenAPIDefinitionForEnvironment(api, "Default");
     }
 
     private static String getOrgId(String tenantName, SSLConnectionSocketFactory sslsf)
