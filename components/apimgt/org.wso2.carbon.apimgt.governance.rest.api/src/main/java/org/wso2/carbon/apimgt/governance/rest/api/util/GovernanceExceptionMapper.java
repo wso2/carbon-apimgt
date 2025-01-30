@@ -25,10 +25,10 @@ import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 
+import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-import java.util.List;
 
 /**
  * This is the custom exception mapper for Governance.

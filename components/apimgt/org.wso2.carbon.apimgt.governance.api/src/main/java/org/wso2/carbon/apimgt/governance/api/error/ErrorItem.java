@@ -18,10 +18,14 @@
 
 package org.wso2.carbon.apimgt.governance.api.error;
 
+import java.io.Serializable;
+
 /**
  * This class represents a governance error handler
  */
-public class ErrorItem implements ErrorHandler {
+public class ErrorItem implements ErrorHandler, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String message;
     private String description;
@@ -29,8 +33,8 @@ public class ErrorItem implements ErrorHandler {
     private int statusCode;
     private boolean stackTrace = false;
 
-
     public ErrorItem(String message, String description, long errorCode, int statusCode, boolean stackTrace) {
+
         this.message = message;
         this.errorCode = errorCode;
         this.statusCode = statusCode;

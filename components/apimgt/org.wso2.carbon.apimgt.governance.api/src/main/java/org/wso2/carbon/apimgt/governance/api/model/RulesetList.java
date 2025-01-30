@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,10 +39,12 @@ public class RulesetList {
     }
 
     public List<RulesetInfo> getRulesetList() {
-        return rulesetList;
+
+        return new ArrayList<>(rulesetList);
     }
 
     public void setRulesetList(List<RulesetInfo> rulesetList) {
-        this.rulesetList = rulesetList;
+
+        this.rulesetList = Collections.unmodifiableList(new ArrayList<>(rulesetList));
     }
 }

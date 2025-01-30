@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.governance.impl;
 
 import java.io.File;
 
+/**
+ * This class represents the Governance Constants
+ */
 public class GovernanceConstants {
 
     public static final String YAML_FILE_TYPE = ".yaml";
@@ -33,6 +36,5 @@ public class GovernanceConstants {
 
     public static final String DEFAULT_RULESET_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "governance" + File.separator + "default-rulesets";
-
 
 }

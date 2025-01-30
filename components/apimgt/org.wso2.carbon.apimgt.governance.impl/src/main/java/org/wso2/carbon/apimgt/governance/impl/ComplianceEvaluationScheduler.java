@@ -42,8 +42,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -124,9 +126,11 @@ public class ComplianceEvaluationScheduler {
             }
         }
 
+        List<Future<?>> futures = new ArrayList<>();
+
         // Process requests for each artifact in parallel
         for (String artifactId : groupedRequests.keySet()) {
-            processorPool.submit(() -> {
+            Future<?> future = processorPool.submit(() -> {
                 List<ComplianceEvaluationRequest> requests = groupedRequests.get(artifactId);
 
                 String organization = requests.get(0).getOrganization(); // Can get organization from any request
@@ -146,6 +150,17 @@ public class ComplianceEvaluationScheduler {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
             });
+            futures.add(future);
+        }
+
+        // Wait for all tasks to complete
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                // Handle exceptions thrown during task execution
+                log.error("Error occurred while processing compliance evaluation request", e);
+            }
         }
 
     }
@@ -207,7 +222,8 @@ public class ComplianceEvaluationScheduler {
             // Extract artifact project content to map
             Map<RuleType, String> artifactProjectContentMap = new HashMap<>();
             if (ArtifactType.isArtifactAPI(artifactType)) {
-                artifactProjectContentMap = APIMUtil.extractAPIProjectContent(artifactProject, artifactId, artifactType);
+                artifactProjectContentMap = APIMUtil.extractAPIProjectContent(artifactProject,
+                        artifactId, artifactType);
             }
 
             for (ComplianceEvaluationRequest request : requests) {

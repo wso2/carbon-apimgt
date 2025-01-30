@@ -186,8 +186,9 @@ public interface ComplianceManager {
      * @return Map of artifacts evaluated by policy
      * @throws GovernanceException If an error occurs while getting the artifacts evaluated by policy
      */
-    Map<ArtifactComplianceState, List<ArtifactInfo>> getComplianceStateOfEvaluatedArtifactsByPolicy(String policyId,
-                                                                                                    boolean resolveArtifactName)
+    Map<ArtifactComplianceState, List<ArtifactInfo>>
+    getComplianceStateOfEvaluatedArtifactsByPolicy(String policyId,
+                                                   boolean resolveArtifactName)
             throws GovernanceException;
 
 

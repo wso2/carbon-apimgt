@@ -160,9 +160,11 @@ public class ComplianceManagerImpl implements ComplianceManager {
     private List<ArtifactInfo> filterAndCollectArtifacts(Map<ArtifactType, List<String>> artifactsMap,
                                                          List<GovernableState> governableStates)
             throws GovernanceException {
+
         List<ArtifactInfo> artifactInfoList = new ArrayList<>();
 
-        for (ArtifactType artifactType : artifactsMap.keySet()) {
+        for (Map.Entry<ArtifactType, List<String>> entry : artifactsMap.entrySet()) {
+            ArtifactType artifactType = entry.getKey();
             List<String> artifactIds = artifactsMap.get(artifactType);
 
             if (ArtifactType.isArtifactAPI(artifactType)) {
@@ -406,7 +408,8 @@ public class ComplianceManagerImpl implements ComplianceManager {
         complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.COMPLIANT, new ArrayList<>());
         complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.NON_COMPLIANT, new ArrayList<>());
 
-        for (ArtifactType artifactType : complianceEvaluationResults.keySet()) {
+        for (Map.Entry<ArtifactType, List<ComplianceEvaluationResult>> entry : complianceEvaluationResults.entrySet()) {
+            ArtifactType artifactType = entry.getKey();
             List<ComplianceEvaluationResult> evaluationResults = complianceEvaluationResults.get(artifactType);
             Set<String> allEvaluatedArtifacts = new HashSet<>();
             Set<String> nonCompliantArtifacts = new HashSet<>();

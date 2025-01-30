@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -52,6 +51,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.Response;
 
 
 /**
@@ -193,7 +193,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @return Response object
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    public Response getRulesets(Integer limit, Integer offset, MessageContext messageContext) throws GovernanceException {
+    public Response getRulesets(Integer limit, Integer offset, MessageContext messageContext)
+            throws GovernanceException {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -285,7 +286,9 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     public Response updateRulesetById(String rulesetId, String name, InputStream rulesetContentInputStream,
                                       Attachment rulesetContentDetail, String ruleType, String artifactType,
                                       String provider, String description, String ruleCategory,
-                                      String documentationLink, MessageContext messageContext) throws GovernanceException {
+                                      String documentationLink, MessageContext messageContext)
+            throws GovernanceException {
+
         try {
             Ruleset ruleset = new Ruleset();
             ruleset.setName(name);

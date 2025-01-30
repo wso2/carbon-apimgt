@@ -26,11 +26,14 @@ public class GovernanceConfigurationServiceImpl implements GovernanceConfigurati
     private final GovernanceConfiguration configuration;
 
     public GovernanceConfigurationServiceImpl(GovernanceConfiguration configuration) {
-        this.configuration = configuration;
+
+        this.configuration = new GovernanceConfiguration(configuration);
+        
     }
 
     @Override
     public GovernanceConfiguration getGovernanceConfiguration() {
-        return configuration;
+
+        return new GovernanceConfiguration(configuration);
     }
 }

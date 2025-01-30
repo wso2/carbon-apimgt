@@ -27,14 +27,18 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 
+/**
+ * This class is used to retrieve the swagger definition of Governance REST API
+ */
 @Path("/swagger.yaml")
 @Consumes({"text/yaml"})
 @Produces({"text/yaml"})
@@ -42,7 +46,7 @@ import java.io.IOException;
 public class SwaggerYamlApi {
 
     private static final Log log = LogFactory.getLog(SwaggerYamlApi.class);
-    private static final String LOCK_GOV_OPENAPI_DEF = "LOCK_GOV_OPENAPI_DEF";
+    private static final Object LOCK_GOV_OPENAPI_DEF = new Object();
     private String openAPIDef = null;
 
     /**
@@ -58,17 +62,21 @@ public class SwaggerYamlApi {
     @io.swagger.annotations.ApiResponses(value = {
             @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\n OAS is returned."),
 
-            @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource."),
+            @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty " +
+                    "body because the client has already the latest version of the requested resource."),
 
-            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported")})
+            @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe " +
+                    "requested media type is not supported")})
 
     public Response swaggerYamlGet() throws APIManagementException {
+
         try {
             if (openAPIDef == null) {
                 synchronized (LOCK_GOV_OPENAPI_DEF) {
                     if (openAPIDef == null) {
                         String definition = IOUtils
-                                .toString(this.getClass().getResourceAsStream("/governance-api.yaml"), "UTF-8");
+                                .toString(this.getClass().getClassLoader().getResourceAsStream("governance-api.yaml"),
+                                        StandardCharsets.UTF_8);
                         openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
                     }
                 }
@@ -86,8 +94,8 @@ public class SwaggerYamlApi {
         } catch (IOException e) {
             String errorMessage = "Error while retrieving the OAS of the Governance API";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            return Response.serverError().entity("Internal Server Error").build(); // Return proper error response
         }
-        return null;
     }
 }
 
