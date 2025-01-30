@@ -1229,10 +1229,7 @@ public class PublisherCommonUtils {
             String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
             apiToAdd.setAsyncApiDefinition(apiDefinition);
         }
-        
-        if (apiToAdd.getUuid() == null) {
-            apiToAdd.setUuid(UUID.randomUUID().toString());
-        }
+
         //adding the api
         checkGovernanceCompliance(apiToAdd.getUuid(),  GovernableState.API_CREATE, artifactType, organization,
                 null, null);
@@ -2422,9 +2419,6 @@ public class PublisherCommonUtils {
             validateApiLifeCycleForApiProducts(api);
         }
 
-        if (productToBeAdded.getUuid() == null) {
-            productToBeAdded.setUuid(UUID.randomUUID().toString());
-        }
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
