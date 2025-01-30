@@ -263,6 +263,7 @@ public class ResultsMappingUtil {
     public static PolicyAdherenceStatusDTO getPolicyAdherenceStatusDTO(GovernancePolicy policy,
                                                                        int compliantArtifactCount,
                                                                        int nonCompliantArtifactCount) {
+
         ArtifactComplianceSummaryForPolicyDTO summaryDTO = new ArtifactComplianceSummaryForPolicyDTO();
         summaryDTO.setCompliantArtifacts(compliantArtifactCount);
         summaryDTO.setNonCompliantArtifacts(nonCompliantArtifactCount);
@@ -271,8 +272,12 @@ public class ResultsMappingUtil {
         statusDTO.setPolicyId(policy.getId());
         statusDTO.setPolicyName(policy.getName());
         statusDTO.setArtifactComplianceSummary(summaryDTO);
-        statusDTO.setStatus(nonCompliantArtifactCount > 0 ? PolicyAdherenceStatusDTO.StatusEnum.VIOLATED :
-                PolicyAdherenceStatusDTO.StatusEnum.FOLLOWED);
+        if (compliantArtifactCount == 0 && nonCompliantArtifactCount == 0) {
+            statusDTO.setStatus(PolicyAdherenceStatusDTO.StatusEnum.UNAPPLIED);
+        } else {
+            statusDTO.setStatus(nonCompliantArtifactCount > 0 ? PolicyAdherenceStatusDTO.StatusEnum.VIOLATED :
+                    PolicyAdherenceStatusDTO.StatusEnum.FOLLOWED);
+        }
 
         return statusDTO;
     }
