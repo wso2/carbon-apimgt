@@ -3598,6 +3598,11 @@ public final class APIUtil {
         return ApiMgtDAO.getInstance().getAverageRating(apiId);
     }
 
+    /**
+     * Update available tiers in the DevPortalAPIInfo according to the organization.
+     * @param devPortalAPIInfo  DevPortalAPIInfo object
+     * @param organization      Organization ID
+     */
     public static void updateAvailableTiersByOrganization(DevPortalAPIInfo devPortalAPIInfo, String organization) {
 
         Set<String> availableTiers = devPortalAPIInfo.getAvailableTierNames();
