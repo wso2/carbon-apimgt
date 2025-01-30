@@ -3689,7 +3689,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean isAiApi,
-            MessageContext messageContext) throws APIManagementException {
+            String organizationID, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiInfo = getAPIByID(apiId, apiProvider, organization);
@@ -3697,7 +3697,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true, isAiApi);
 
         if (apiInfo != null) {
-            List<String> apiPolicies = apiInfo.getPolicies();
+            List<String> apiPolicies = RestApiPublisherUtils.getSubscriptionPoliciesForOrganization(apiInfo, organizationID);
             List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
                     availableThrottlingPolicyList);
             return Response.ok().entity(apiThrottlingPolicies).build();
