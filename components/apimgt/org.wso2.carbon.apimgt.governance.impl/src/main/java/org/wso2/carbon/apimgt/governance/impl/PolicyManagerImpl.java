@@ -77,7 +77,7 @@ public class PolicyManagerImpl implements PolicyManager {
             if (GovernanceActionType.BLOCK.equals(action.getType()) &&
                     (GovernableState.API_CREATE.equals(action.getGovernableState()) ||
                             GovernableState.API_UPDATE.equals(action.getGovernableState()))) {
-                throw new GovernanceException(GovernanceExceptionCodes.INVALID_POLICY_ACTION,
+                throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY,
                         "Creating policies with blocking actions for API" +
                                 " create/update is not allowed. Please update the policy");
             }

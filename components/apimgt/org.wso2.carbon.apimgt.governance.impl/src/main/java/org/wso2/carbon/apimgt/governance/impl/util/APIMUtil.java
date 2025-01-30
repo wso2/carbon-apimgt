@@ -93,7 +93,8 @@ public class APIMUtil {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             return apiIdentifier.getApiName() + " " + apiIdentifier.getVersion();
         } catch (APIManagementException e) {
-            throw new GovernanceException("Error while getting the API name and version with ID: " + apiId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_NAME_VERSION_WITH_ID,
+                    apiId, e);
         }
     }
 
@@ -108,7 +109,8 @@ public class APIMUtil {
         try {
             return ApiMgtDAO.getInstance().getAPIStatusFromAPIUUID(apiId);
         } catch (APIManagementException e) {
-            throw new GovernanceException("Error while getting the status of the API with ID: " + apiId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_LC_STATUS_OF_API,
+                    apiId, e);
         }
     }
 
@@ -162,7 +164,8 @@ public class APIMUtil {
                 ); // returns zip file
                 return Files.readAllBytes(apiProject.toPath());
             } catch (APIManagementException | APIImportExportException | IOException e) {
-                throw new GovernanceException("Error while getting the API project with ID: " + apiId, e);
+                throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT,
+                        apiId, e);
             }
         }
     }
@@ -211,8 +214,19 @@ public class APIMUtil {
 
         Map<RuleType, String> apiProjectContentMap = new HashMap<>();
 
-        apiProjectContentMap.put(RuleType.API_METADATA, extractAPIMetadata(apiProjectZip, apiId));
-        apiProjectContentMap.put(RuleType.API_DEFINITION, extractAPIDefinition(apiProjectZip, apiId, apiType));
+        String apiMetadata = extractAPIMetadata(apiProjectZip, apiId);
+        String apiDefinition = extractAPIDefinition(apiProjectZip, apiId, apiType);
+
+        if (apiMetadata == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.API_DETAILS_NOT_FOUND, apiId);
+        } else {
+            apiProjectContentMap.put(RuleType.API_METADATA, apiMetadata);
+        }
+        if (apiDefinition == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.API_DEFINITION_NOT_FOUND, apiId);
+        } else {
+            apiProjectContentMap.put(RuleType.API_DEFINITION, apiDefinition);
+        }
 
         return apiProjectContentMap;
     }
@@ -306,7 +320,7 @@ public class APIMUtil {
         try {
             return LabelsDAO.getInstance().getMappedLabelIDsForApi(apiId);
         } catch (APIManagementException e) {
-            throw new GovernanceException("Error while getting the labels for the API with ID: " + apiId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_LABELS_FOR_API, apiId, e);
         }
     }
 
@@ -334,7 +348,7 @@ public class APIMUtil {
             }
             return apisMap;
         } catch (APIManagementException e) {
-            throw new GovernanceException("Error while getting the APIs for the label with ID: " + labelId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, labelId, e);
         }
     }
 
@@ -356,7 +370,7 @@ public class APIMUtil {
             }
             return apiIds;
         } catch (APIManagementException e) {
-            throw new GovernanceException("Error while getting the APIs for the organization: " + organization, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_LIST, organization, e);
         }
 
     }
@@ -386,22 +400,7 @@ public class APIMUtil {
             }
             return apisMap;
         } catch (APIManagementException e) {
-            throw new GovernanceException("Error while getting the APIs for the organization: " + organization, e);
-        }
-    }
-
-    /**
-     * Get the API type
-     *
-     * @param apiId API ID
-     * @return API type
-     * @throws GovernanceException If an error occurs while getting the API type
-     */
-    public static String getAPIType(String apiId) throws GovernanceException {
-        try {
-            return ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
-        } catch (APIManagementException e) {
-            throw new GovernanceException("Error while getting the API type for the API with ID: " + apiId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_LIST, organization, e);
         }
     }
 

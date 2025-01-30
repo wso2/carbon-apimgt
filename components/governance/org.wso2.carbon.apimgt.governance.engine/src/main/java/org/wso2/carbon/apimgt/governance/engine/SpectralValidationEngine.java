@@ -160,15 +160,12 @@ public class SpectralValidationEngine implements ValidationEngine {
             jsonNode = objectMapper.readTree(resultJson);
             // Convert JsonNode to list of Result objects
             for (JsonNode node : jsonNode) {
-                boolean isViolation = !node.get("passed").asBoolean();
-                if (isViolation) {
-                    RuleViolation violation = new RuleViolation();
-                    violation.setRuleCode(node.get("ruleName").asText());
-                    violation.setViolatedPath(node.get("path").asText());
-                    violation.setRuleMessage(node.get("message").asText());
-                    violation.setRulesetId(ruleset.getId());
-                    violations.add(violation);
-                }
+                RuleViolation violation = new RuleViolation();
+                violation.setRuleCode(node.get("ruleName").asText());
+                violation.setViolatedPath(node.get("path").asText());
+                violation.setRuleMessage(node.get("message").asText());
+                violation.setRulesetId(ruleset.getId());
+                violations.add(violation);
             }
             return violations;
         } catch (JsonProcessingException e) {
