@@ -22,6 +22,8 @@ public interface APITemplateBuilder {
 
     String getConfigStringForTemplate(Environment environment) throws APITemplateException;
 
+    String getConfigStringForAIAPITemplate(Environment environment) throws APITemplateException;
+
     String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException;
 
     String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException;

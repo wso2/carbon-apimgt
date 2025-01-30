@@ -55,6 +55,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public static final String TEMPLATE_TYPE_VELOCITY = "velocity_template";
     public static final String TEMPLATE_WEBSUB_API = "websub_api_template";
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
+    public static final String TEMPLATE_AI_API = "ai_api_template";
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
     public static final String TEMPLATE_DEFAULT_WS_API = "default_ws_api_template";
     private static final Log log = LogFactory.getLog(APITemplateBuilderImpl.class);
@@ -90,6 +91,73 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         this.api = api;
         this.apiProduct = apiProduct;
+    }
+
+    @Override
+    public String getConfigStringForAIAPITemplate(Environment environment) throws APITemplateException {
+
+        StringWriter writer = new StringWriter();
+
+        try {
+            ConfigContext configcontext = null;
+
+            if (api != null) {
+                configcontext = createConfigContext(api, environment);
+            } else {
+                configcontext = createConfigContext(apiProduct, environment);
+            }
+
+            configcontext.validate();
+
+            VelocityContext context = configcontext.getContext();
+            context.internalGetKeys();
+            VelocityEngine velocityengine = new VelocityEngine();
+            APIUtil.initializeVelocityContext(velocityengine);
+
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
+            initVelocityEngine(velocityengine);
+
+            Template t = null;
+
+            if (api != null) {
+                t = velocityengine.getTemplate(getAIAPITemplatePath());
+
+                if (APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+                    context.put("topicMappings", this.api.getWebSocketTopicMappingConfiguration().getMappings());
+                } else if (APIConstants.APITransportType.WEBSUB.toString().equals(api.getType())) {
+                    String signingAlgorithm = api.getWebsubSubscriptionConfiguration().getSigningAlgorithm();
+                    context.put("signingAlgorithm", signingAlgorithm.toLowerCase() + "=");
+                    context.put("secret", api.getWebsubSubscriptionConfiguration().getSecret());
+                    context.put("hmacSignatureGenerationAlgorithm", "Hmac" + signingAlgorithm);
+                    context.put("signatureHeader", api.getWebsubSubscriptionConfiguration().getSignatureHeader());
+                    context.put("isSecurityEnabled", !StringUtils.isEmpty(api.getWebsubSubscriptionConfiguration().
+                            getSecret()));
+                    if (api != null) {
+                        context.put(WEBSUB_ENABLE_SUBSCRIBER_VERIFICATION, api.isEnableSubscriberVerification());
+                    } else {
+                        context.put(WEBSUB_ENABLE_SUBSCRIBER_VERIFICATION, false);
+                    }
+                } else if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                    boolean isSubscriptionAvailable = false;
+                    if (api.getWebSocketTopicMappingConfiguration() != null) {
+                        isSubscriptionAvailable = true;
+                        context.put(APIConstants.VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS,
+                                this.api.getWebSocketTopicMappingConfiguration().getMappings());
+                    }
+                    context.put(APIConstants.VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE, isSubscriptionAvailable);
+                }
+            } else {
+                t = velocityengine.getTemplate(getApiProductTemplatePath());
+            }
+            context.put("llmProviderId", api.getAiConfiguration().getLlmProviderId());
+
+            t.merge(context, writer);
+
+        } catch (Exception e) {
+            log.error("Velocity Error", e);
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
     }
 
     @Override
@@ -382,6 +450,12 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         return "repository" + File.separator + "resources" + File.separator + "api_templates" +
                 File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_API_PRODUCT + ".xml";
+    }
+
+    public String getAIAPITemplatePath() {
+
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" +
+                File.separator + APITemplateBuilderImpl.TEMPLATE_AI_API + ".xml";
     }
 
     public String getVelocityLogger() {
