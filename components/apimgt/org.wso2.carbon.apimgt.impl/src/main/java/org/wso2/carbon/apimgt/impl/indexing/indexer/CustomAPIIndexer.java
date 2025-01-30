@@ -24,6 +24,7 @@ import org.apache.solr.common.SolrException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.IndexerUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -32,7 +33,9 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.AsyncIndexer;
+import org.wso2.carbon.registry.indexing.IndexingConstants;
 import org.wso2.carbon.registry.indexing.IndexingManager;
 import org.wso2.carbon.registry.indexing.solr.IndexDocument;
 
@@ -44,6 +47,8 @@ import java.util.ArrayList;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.CUSTOM_API_INDEXER_PROPERTY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.OVERVIEW_PREFIX;
+import static org.wso2.carbon.apimgt.impl.APIConstants.VISIBLE_ORGANIZATION_PROPERTY;
+
 
 /**
  * This is the custom indexer to add the API properties, to existing APIs.
@@ -68,17 +73,21 @@ public class CustomAPIIndexer extends RXTIndexer {
         if (log.isDebugEnabled()) {
             log.debug("CustomAPIIndexer is currently indexing the api at path " + resourcePath);
         }
-
+        
         // Here we are adding properties as fields, so that we can search the properties as we do for attributes.
         IndexDocument indexDocument = super.getIndexedDocument(fileData);
         Map<String, List<String>> fields = indexDocument.getFields();
         if (resource != null) {
             Properties properties = resource.getProperties();
             Enumeration propertyNames = properties.propertyNames();
+            boolean hasOrganizationProperty = false;
             while (propertyNames.hasMoreElements()) {
                 String property = (String) propertyNames.nextElement();
                 if (log.isDebugEnabled()) {
                     log.debug("API at " + resourcePath + " has " + property + " property");
+                }
+                if (VISIBLE_ORGANIZATION_PROPERTY.equals(property)) {
+                    hasOrganizationProperty = true;
                 }
                 if (property.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
                     fields.put((OVERVIEW_PREFIX + property), getLowerCaseList(resource.getPropertyValues(property)));
@@ -86,6 +95,11 @@ public class CustomAPIIndexer extends RXTIndexer {
                         log.debug(property + " is added as " + (OVERVIEW_PREFIX + property) + " field for indexing");
                     }
                 }
+            }
+            if (!hasOrganizationProperty) {
+                List<String> orgProperties = new ArrayList<>();
+                orgProperties.add(VISIBLE_ORGANIZATION_PROPERTY + ",all" );
+                fields.put(IndexingConstants.FIELD_PROPERTY_VALUES, orgProperties);
             }
             indexDocument.setFields(fields);
         }

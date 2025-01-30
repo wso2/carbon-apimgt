@@ -309,7 +309,11 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                 organizationId =
                         manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgIdClaim, null);
                 // Get the internal organization id using externa id
-                //organizationId = APIUtil.getOrganizationIdFromExternalReference(organizationId, organization, tenantDomain); // TODO enable this after org add UI
+                /*
+                if (!StringUtils.isEmpty(organizationId)) {
+                    organizationId = APIUtil.getOrganizationIdFromExternalReference(organizationId, organization,
+                            tenantDomain); // TODO enable this after org add UI
+                }*/
             }
             orgInfo.setName(organization);
             orgInfo.setOrganizationId(organizationId);
