@@ -31,6 +31,7 @@ public class GovernanceException extends Exception {
      * @return ErrorHandler
      */
     public ErrorHandler getErrorHandler() {
+
         return errorHandler;
     }
 
@@ -93,7 +94,7 @@ public class GovernanceException extends Exception {
                 + String.format(code.getErrorDescription(), args), cause);
         this.errorHandler = new ErrorItem(code.getErrorMessage(),
                 String.format(code.getErrorDescription(), args),
-                code.getErrorCode(), code.getHttpStatusCode(), code.printStackTrace());
+                code.getErrorCode(), code.getHttpStatusCode());
     }
 
     /**
@@ -103,10 +104,11 @@ public class GovernanceException extends Exception {
      * @param args arguments
      */
     public GovernanceException(ErrorHandler code, Object... args) {
+
         super(code.getErrorCode() + ":" + code.getErrorMessage() + "::"
                 + String.format(code.getErrorDescription(), args));
         this.errorHandler = new ErrorItem(code.getErrorMessage(),
                 String.format(code.getErrorDescription(), args),
-                code.getErrorCode(), code.getHttpStatusCode(), code.printStackTrace());
+                code.getErrorCode(), code.getHttpStatusCode());
     }
 }

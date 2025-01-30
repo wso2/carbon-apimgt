@@ -1154,7 +1154,7 @@ components:
               - API_PUBLISH
         actions:
           type: array
-          description: List of actions taken when the governance policy is violated.
+          description: List of actions taken when the governance policy is violated. An action is defined by the state and rule severity. If an action is not specified to each state and rule severity, the default action is `NOTIFY`.
           items:
             $ref: '#/components/schemas/Action'
         rulesets:
@@ -1534,6 +1534,18 @@ components:
           type: string
           description: Name of the ruleset.
           example: "API Security Ruleset"
+        ruleType:
+          type: string
+          description: Context or area to which the ruleset applies.
+          enum:
+            - API_METADATA
+            - API_DEFINITION
+            - API_DOCUMENTATION
+          example: API_DEFINITION
+          x-enum-varnames:
+            - API_METADATA
+            - API_DEFINITION
+            - API_DOCUMENTATION
         status:
           type: string
           description: Status of the ruleset validation.

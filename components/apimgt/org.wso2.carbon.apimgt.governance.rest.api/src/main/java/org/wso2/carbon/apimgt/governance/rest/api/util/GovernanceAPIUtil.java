@@ -26,6 +26,9 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.context.CarbonContext;
 
+/**
+ * This class contains utility methods for Governance API
+ */
 public class GovernanceAPIUtil {
 
     /**
@@ -35,6 +38,7 @@ public class GovernanceAPIUtil {
      * @return organization
      */
     public static String getValidatedOrganization(MessageContext ctx) throws GovernanceException {
+
         String organization = (String) ctx.get(GovernanceAPIConstants.ORGANIZATION);
         if (organization == null) {
             throw new GovernanceException(
@@ -43,7 +47,6 @@ public class GovernanceAPIUtil {
         }
         return organization;
     }
-
 
     /**
      * Get logged in User
@@ -62,6 +65,7 @@ public class GovernanceAPIUtil {
      * @return A generic errorDTO with the specified details
      */
     public static ErrorDTO getErrorDTO(ErrorHandler errorHandler) {
+
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(errorHandler.getErrorCode());
         errorDTO.setMessage(errorHandler.getErrorMessage());
@@ -79,6 +83,7 @@ public class GovernanceAPIUtil {
      */
     public static String getPaginatedURL(String templatedURL, Integer offset,
                                          Integer limit) {
+
         templatedURL = templatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
         templatedURL = templatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
         return templatedURL;
@@ -95,6 +100,7 @@ public class GovernanceAPIUtil {
      */
     public static String getArtifactCompliancePageURL(String templatedURL, Integer offset, Integer limit,
                                                       String artifactType) {
+
         templatedURL = templatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
         templatedURL = templatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
         templatedURL = templatedURL.replace(GovernanceAPIConstants.ARTIFACT_TYPE_PARAM, artifactType);

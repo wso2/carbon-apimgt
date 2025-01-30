@@ -32,13 +32,13 @@ import org.wso2.carbon.apimgt.governance.rest.api.mappings.ResultsMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.ws.rs.core.Response;
 
 /**
  * API implementation class for Artifact Compliance API
@@ -210,6 +210,9 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
             return rulesetDTO;
         }
 
+        rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
+                .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
+
         rulesetDTO.setStatus(ruleViolations.isEmpty() ?
                 RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED :
                 RulesetValidationResultWithoutRulesDTO.StatusEnum.FAILED);
@@ -339,7 +342,8 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         }
 
         complianceStatus.setPolicyAdherenceSummary(ResultsMappingUtil.getPolicyAdherenceSummary(
-                applicablePolicies.size(), evaluatedPolicies.size(), violatedPolicies.size()));
+                applicablePolicies.size(), evaluatedPolicies.size()
+                        - violatedPolicies.size(), violatedPolicies.size()));
         complianceStatus.setSeverityBasedRuleViolationSummary(ruleViolationCounts);
         complianceStatus.setStatus(violatedPolicies.isEmpty() ?
                 ArtifactComplianceStatusDTO.StatusEnum.COMPLIANT :

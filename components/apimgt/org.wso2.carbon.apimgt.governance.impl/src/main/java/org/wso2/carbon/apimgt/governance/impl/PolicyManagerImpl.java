@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
@@ -56,10 +57,10 @@ public class PolicyManagerImpl implements PolicyManager {
     @Override
     public GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
             governancePolicy) throws GovernanceException {
-        governancePolicy.setId(GovernanceUtil.generateUUID());
 
-        List<GovernanceAction> actions = governancePolicy.getActions();
-        checkForRestrictedBlockingPolicies(actions);
+        governancePolicy.setId(GovernanceUtil.generateUUID());
+        checkForRestrictedBlockingPolicies(governancePolicy);
+        addMissingNotifyActions(governancePolicy);
 
         return policyMgtDAO.createGovernancePolicy(organization, governancePolicy);
     }
@@ -67,22 +68,55 @@ public class PolicyManagerImpl implements PolicyManager {
     /**
      * This checks whether BLOCK actions are present for API_CREATE and API_UPDATE states
      *
-     * @param actions List of governance actions
+     * @param policy Governance Policy
      * @throws GovernanceException If an error occurs while checking for restricted blocking policies
      */
-    private void checkForRestrictedBlockingPolicies(List<GovernanceAction> actions)
+    private void checkForRestrictedBlockingPolicies(GovernancePolicy policy)
             throws GovernanceException {
 
+        List<GovernanceAction> actions = policy.getActions();
         for (GovernanceAction action : actions) {
             if (GovernanceActionType.BLOCK.equals(action.getType()) &&
                     (GovernableState.API_CREATE.equals(action.getGovernableState()) ||
                             GovernableState.API_UPDATE.equals(action.getGovernableState()))) {
-                throw new GovernanceException(GovernanceExceptionCodes.INVALID_POLICY_ACTION,
+                throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY,
                         "Creating policies with blocking actions for API" +
                                 " create/update is not allowed. Please update the policy");
             }
         }
 
+    }
+
+    /**
+     * This method adds missing notify actions for each governable state
+     *
+     * @param policy Governance Policy
+     */
+    private void addMissingNotifyActions(GovernancePolicy policy) {
+
+        List<GovernableState> governableStates = policy.getGovernableStates();
+        List<GovernanceAction> actions = policy.getActions();
+        for (GovernableState state : governableStates) {
+            for (Severity severity : Severity.values()) {
+                boolean isActionPresent = false;
+                for (GovernanceAction action : actions) {
+                    if (state.equals(action.getGovernableState()) &&
+                            severity.equals(action.getRuleSeverity())) {
+                        isActionPresent = true;
+                        break;
+                    }
+                }
+                if (!isActionPresent) {
+                    GovernanceAction notifyAction = new GovernanceAction();
+                    notifyAction.setType(GovernanceActionType.NOTIFY);
+                    notifyAction.setGovernableState(state);
+                    notifyAction.setRuleSeverity(severity);
+                    actions.add(notifyAction);
+                }
+
+            }
+        }
+        policy.setActions(actions);
     }
 
     /**
@@ -139,8 +173,9 @@ public class PolicyManagerImpl implements PolicyManager {
     public GovernancePolicy updateGovernancePolicy(String policyId, String organization,
                                                    GovernancePolicy governancePolicy)
             throws GovernanceException {
-        List<GovernanceAction> actions = governancePolicy.getActions();
-        checkForRestrictedBlockingPolicies(actions);
+
+        checkForRestrictedBlockingPolicies(governancePolicy);
+        addMissingNotifyActions(governancePolicy);
 
         return policyMgtDAO.updateGovernancePolicy(policyId, organization, governancePolicy);
     }

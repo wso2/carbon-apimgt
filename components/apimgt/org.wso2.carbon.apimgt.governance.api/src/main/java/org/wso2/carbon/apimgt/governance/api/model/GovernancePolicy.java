@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -61,35 +63,43 @@ public class GovernancePolicy {
     }
 
     public List<String> getRulesetIds() {
-        return rulesetIds;
+
+        return new ArrayList<>(rulesetIds);
     }
 
     public void setRulesetIds(List<String> rulesetIds) {
-        this.rulesetIds = rulesetIds;
+
+        this.rulesetIds = Collections.unmodifiableList(new ArrayList<>(rulesetIds));
     }
 
     public List<String> getLabels() {
-        return labels;
+
+        return new ArrayList<>(labels);
     }
 
     public void setLabels(List<String> labels) {
-        this.labels = labels;
+
+        this.labels = Collections.unmodifiableList(new ArrayList<>(labels));
     }
 
     public List<GovernableState> getGovernableStates() {
-        return governableStates;
+
+        return new ArrayList<>(governableStates);
     }
 
     public void setGovernableStates(List<GovernableState> governableStates) {
-        this.governableStates = governableStates;
+
+        this.governableStates = Collections.unmodifiableList(new ArrayList<>(governableStates));
     }
 
     public List<GovernanceAction> getActions() {
-        return actions;
+
+        return new ArrayList<>(actions);
     }
 
     public void setActions(List<GovernanceAction> actions) {
-        this.actions = actions;
+
+        this.actions = Collections.unmodifiableList(new ArrayList<>(actions));
     }
 
     public String getCreatedBy() {

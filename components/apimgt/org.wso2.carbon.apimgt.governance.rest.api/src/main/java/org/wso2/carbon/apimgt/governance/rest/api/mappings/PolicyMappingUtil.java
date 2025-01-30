@@ -97,7 +97,9 @@ public class PolicyMappingUtil {
      * @param policyList GovernancePolicyList object
      * @return GovernancePolicyListDTO object
      */
-    public static GovernancePolicyListDTO fromGovernancePolicyListToGovernancePolicyListDTO(GovernancePolicyList policyList) {
+    public static GovernancePolicyListDTO fromGovernancePolicyListToGovernancePolicyListDTO
+    (GovernancePolicyList policyList) {
+
         GovernancePolicyListDTO policyListDTO = new GovernancePolicyListDTO();
         policyListDTO.setCount(policyList.getCount());
         List<GovernancePolicyDTO> policyDTOList = new ArrayList<>();

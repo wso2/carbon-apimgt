@@ -31,7 +31,6 @@ import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This class represents the Governance Configuration. It is responsible for reading the
@@ -48,12 +48,29 @@ import java.util.concurrent.ConcurrentHashMap;
  * properties.
  */
 public class GovernanceConfiguration {
+
     private static final Log log = LogFactory.getLog(GovernanceConfiguration.class);
 
-    private final Map<String, List<String>> configuration = new ConcurrentHashMap<>();
+    private Map<String, List<String>> configuration = new ConcurrentHashMap<>();
     private SecretResolver secretResolver;
     private boolean initialized;
 
+    public GovernanceConfiguration() {
+
+    }
+
+    /**
+     * Create a new GovernanceConfiguration instance by copying the configuration from the given
+     * instance.
+     *
+     * @param other GovernanceConfiguration instance
+     */
+    public GovernanceConfiguration(GovernanceConfiguration other) {
+
+        this.configuration = new ConcurrentHashMap<>(other.configuration);
+        this.secretResolver = other.secretResolver;
+        this.initialized = other.initialized;
+    }
 
     /**
      * Populate this configuration by reading an XML file at the given location. This method

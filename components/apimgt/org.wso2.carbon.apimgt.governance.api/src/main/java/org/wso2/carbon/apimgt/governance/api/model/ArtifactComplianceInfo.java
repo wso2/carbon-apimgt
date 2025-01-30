@@ -39,7 +39,8 @@ public class ArtifactComplianceInfo {
     }
 
     public List<RuleViolation> getBlockingRuleViolations() {
-        return blockingRuleViolations;
+
+        return new ArrayList<>(blockingRuleViolations);
     }
 
     public void addBlockingViolations(List<RuleViolation> blockingRuleViolations) {
@@ -47,7 +48,8 @@ public class ArtifactComplianceInfo {
     }
 
     public List<RuleViolation> getNonBlockingViolations() {
-        return nonBlockingViolations;
+
+        return new ArrayList<>(nonBlockingViolations);
     }
 
     public void addNonBlockingViolations(List<RuleViolation> nonBlockingViolations) {

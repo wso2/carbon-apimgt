@@ -23,9 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 /**
  * This class represents the default ruleset model.
  */

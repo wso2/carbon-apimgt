@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,10 +38,12 @@ public class GovernancePolicyList {
     }
 
     public List<GovernancePolicy> getGovernancePolicyList() {
-        return governancePolicyList;
+
+        return new ArrayList<>(governancePolicyList);
     }
 
     public void setGovernancePolicyList(List<GovernancePolicy> governancePolicyList) {
-        this.governancePolicyList = governancePolicyList;
+
+        this.governancePolicyList = Collections.unmodifiableList(new ArrayList<>(governancePolicyList));
     }
 }

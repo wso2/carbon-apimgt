@@ -111,7 +111,6 @@ public class RulesetManagerImpl implements RulesetManager {
      *
      * @param organization Organization
      * @param rulesetId    Ruleset ID
-     * @return String Ruleset ID of the deleted ruleset
      * @throws GovernanceException If an error occurs while deleting the ruleset
      */
     @Override
@@ -145,7 +144,9 @@ public class RulesetManagerImpl implements RulesetManager {
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
     @Override
-    public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset) throws GovernanceException {
+    public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset)
+            throws GovernanceException {
+
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
         boolean isRulesetContentValid = validationEngine.isRulesetValid(ruleset);
