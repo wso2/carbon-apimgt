@@ -47,4 +47,8 @@ public class OrganizationTiers {
     public void setTiers(Set<String> tiers) {
         this.tiers = tiers;
     }
+
+    public void removeAllTiers() {
+        tiers.clear();
+    }
 }

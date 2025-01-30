@@ -1187,6 +1187,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
+            if (!api.isAPIProduct()) {
+                org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils
+                .updateAvailableTiersByOrganization(api.getApi(), userOrg);
+            }
+
             // Extracting clicked API name by the user, for the recommendation system
             apiConsumer.publishClickedAPI(api, userName, organization);
 
