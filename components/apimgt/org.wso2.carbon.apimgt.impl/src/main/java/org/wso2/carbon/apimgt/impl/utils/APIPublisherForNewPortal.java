@@ -240,18 +240,21 @@ public class APIPublisherForNewPortal {
 
         JSONObject apiInfo = new JSONObject();
         apiInfo.put("referenceID", defaultString(apiTypeWrapper.getUuid()));
-        apiInfo.put("provider", defaultString(api.getId().getProviderName()));
+        apiInfo.put("provider", "WSO2"); // DEV PORTAL expects WSO2 as Provider when API coming from WSO2 API Manager
+        apiInfo.put("tags", new ArrayList<>(api.getTags()));
         apiInfo.put("apiName", defaultString(apiTypeWrapper.getName()));
         apiInfo.put("apiDescription", defaultString(api.getDescription()));
         if (defaultString(api.getVisibility()).equals("public")){
             apiInfo.put("visibility", "PUBLIC");
         } else {
+            // If visibility is not PUBLIC, DEV PORTAL expects visibility Groups as well
             apiInfo.put("visibility", defaultString(api.getVisibility()));
             apiInfo.put("visibleGroups", generateVisibleGroupsArray(api));
         }
         apiInfo.put("owners", generateOwnersObject(api));
         apiInfo.put("apiVersion", defaultString(api.getId().getVersion()));
-        apiInfo.put("apiType", defaultString(apiTypeWrapper.getType()));
+        apiInfo.put("apiType", "HTTP".equals(apiTypeWrapper.getType()) ? "REST" :
+                defaultString(apiTypeWrapper.getType())); // IF type is HTTP, DEV PORTAL expects REST As Type
 
         JSONObject endPoints = new JSONObject();
         endPoints.put("sandboxURL", defaultString(api.getApiExternalSandboxEndpoint()));
