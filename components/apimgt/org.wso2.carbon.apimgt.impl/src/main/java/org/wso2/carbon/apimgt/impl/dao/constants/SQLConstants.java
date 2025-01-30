@@ -3841,11 +3841,13 @@ public class SQLConstants {
     
     public static class OrganizationSqlConstants {
         public static final String ADD_ORGANIZATION =
-                " INSERT INTO AM_ORGANIZATION_MAPPING (ORG_UUID,EXT_ORG_ID,DISPLAY_NAME,PARENT_ORG_UUID,DESCRIPTION,ROOT_ORGANIZATION) " +
-                "VALUES (?,?,?,?,?,?)";
+                " INSERT INTO AM_ORGANIZATION_MAPPING" +
+                " (ORG_UUID,EXT_ORG_ID,DISPLAY_NAME,PARENT_ORG_UUID,DESCRIPTION,ROOT_ORGANIZATION,ORG_HANDLE) " +
+                "VALUES (?,?,?,?,?,?,?)";
 
         public static final String UPDATE_ORGANIZATION =
-                "UPDATE AM_ORGANIZATION_MAPPING SET DISPLAY_NAME = ?, DESCRIPTION = ?, EXT_ORG_ID=? WHERE ORG_UUID = ?";
+                "UPDATE AM_ORGANIZATION_MAPPING " +
+                "   SET DISPLAY_NAME = ?, DESCRIPTION = ?, EXT_ORG_ID=?, ORG_HANDLE=? WHERE ORG_UUID = ?";
 
         public static final String DELETE_ORGANIZATION =
                 "DELETE FROM AM_ORGANIZATION_MAPPING WHERE ORG_UUID = ? AND ROOT_ORGANIZATION=?";

@@ -1854,9 +1854,11 @@ public class APIAdminImpl implements APIAdmin {
         OrganizationDetailsDTO savedOrgInfo = apiMgtDAO.getOrganizationDetalsByExternalOrgId(
                 orgDto.getExternalOrganizationReference(), orgDto.getTenantDomain());
         if (savedOrgInfo != null) {
+            orgDto.setOrganizationHandle(APIUtil.getOrganizationHandle(orgDto.getName()));
             orgDto.setOrganizationId(savedOrgInfo.getOrganizationId());
             apiMgtDAO.updateOrganizationDetails(orgDto);
         } else {
+            orgDto.setOrganizationHandle(APIUtil.getOrganizationHandle(orgDto.getName()));
             savedOrgInfo = apiMgtDAO.addOrganization(orgDto);
             orgDto.setOrganizationId(savedOrgInfo.getOrganizationId());
         }

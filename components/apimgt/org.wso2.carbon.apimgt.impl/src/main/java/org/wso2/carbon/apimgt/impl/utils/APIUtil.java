@@ -275,6 +275,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -292,6 +293,8 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import java.security.cert.X509Certificate;
+import java.text.Normalizer;
+
 import javax.validation.constraints.NotNull;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -353,6 +356,9 @@ public final class APIUtil {
     private static Schema operationPolicySpecSchema;
     private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
     private static String hashingAlgorithm = SHA_256;
+    
+    private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
+    private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 
     private APIUtil() {
 
@@ -11136,6 +11142,7 @@ public final class APIUtil {
             info.setExternalOrganizationReference(referenceId);
             info.setTenantDomain(rootOrganization);
             info.setName(organizationName);
+            info.setOrganizationHandle(getOrganizationHandle(organizationName));
             OrganizationDetailsDTO addedInfo = ApiMgtDAO.getInstance().addOrganization(info);
             if (addedInfo != null) {
                 organizationId = addedInfo.getOrganizationId();
@@ -11143,5 +11150,21 @@ public final class APIUtil {
 
         }
         return organizationId;
+    }
+    
+    public static String getOrganizationHandle(String name) {
+        String sanatizedName = null;
+        if (name == null) {
+            return sanatizedName; 
+        }
+
+        String nowhitespace = WHITESPACE.matcher(name).replaceAll("-"); // Replace spaces with hyphens
+        String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD); // Decompose Unicode characters
+        String slug = NONLATIN.matcher(normalized).replaceAll(""); // Remove non-alphanumeric characters
+
+        // Convert to lowercase and trim hyphens from the beginning/end
+        slug = slug.toLowerCase(Locale.ENGLISH).replaceAll("^-+|-+$", "");
+
+        return slug;
     }
 }

@@ -10342,6 +10342,7 @@ public class ApiMgtDAO {
                 preparedStatement.setString(4, organizationDTO.getParentOrganizationId());
                 preparedStatement.setString(5, organizationDTO.getDescription());
                 preparedStatement.setString(6, organizationDTO.getTenantDomain());
+                preparedStatement.setString(7, organizationDTO.getOrganizationHandle());
                 preparedStatement.executeUpdate();
                 conn.commit();
             }
@@ -10430,12 +10431,13 @@ public class ApiMgtDAO {
                 preparedStatement.setString(1, organizationDetailsDTO.getName());
                 preparedStatement.setString(2, organizationDetailsDTO.getDescription());
                 preparedStatement.setString(3, organizationDetailsDTO.getExternalOrganizationReference());
-                preparedStatement.setString(4, organizationDetailsDTO.getOrganizationId());
+                preparedStatement.setString(4, organizationDetailsDTO.getOrganizationHandle());
+                preparedStatement.setString(5, organizationDetailsDTO.getOrganizationId());
                 preparedStatement.executeUpdate();
                 conn.commit();
             }
         } catch (SQLException e) {
-            handleException("Failed to delete organization Id : " + "Error while Updating organization details for "
+            handleException("Failed to update organization Id : " + "Error while Updating organization details for "
                     + organizationDetailsDTO.getOrganizationId(), e);
         }
     }

@@ -16,58 +16,81 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.apimgt.api.dto;
 
 public class OrganizationDetailsDTO {
-    
+
     private String organizationId;
     private String parentOrganizationId;
     private String externalOrganizationReference;
     private String Name;
     private String tenantDomain;
     private String description;
+    private String organizationHandle;
+
     public String getOrganizationId() {
         return organizationId;
     }
+
     public void setOrganizationId(String organizationId) {
         this.organizationId = organizationId;
     }
+
     public String getParentOrganizationId() {
         return parentOrganizationId;
     }
+
     public void setParentOrganizationId(String parentOrganizationId) {
         this.parentOrganizationId = parentOrganizationId;
     }
+
     public String getName() {
         return Name;
     }
+
     public void setName(String name) {
         Name = name;
     }
+
     public String getTenantDomain() {
         return tenantDomain;
     }
+
     public void setTenantDomain(String tenantDomain) {
         this.tenantDomain = tenantDomain;
     }
+
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
+
     public String getExternalOrganizationReference() {
         return externalOrganizationReference;
     }
+
     public void setExternalOrganizationReference(String externalOrganizationReference) {
         this.externalOrganizationReference = externalOrganizationReference;
     }
+
+    public String getOrganizationHandle() {
+        return organizationHandle;
+    }
+
+    public void setOrganizationHandle(String organizationHandle) {
+        this.organizationHandle = organizationHandle;
+    }
+
     @Override
     public String toString() {
         return "OrganizationDetailsDTO [organizationId=" + organizationId + ", parentOrganizationId="
                 + parentOrganizationId + ", externalOrganizationReference=" + externalOrganizationReference + ", Name="
-                + Name + ", tenantDomain=" + tenantDomain + ", description=" + description + "]";
+                + Name + ", tenantDomain=" + tenantDomain + ", description=" + description + ", organizationHandle="
+                + organizationHandle + "]";
     }
 
+    
 }
