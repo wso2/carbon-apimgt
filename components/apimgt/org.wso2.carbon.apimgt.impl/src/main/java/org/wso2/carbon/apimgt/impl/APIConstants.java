@@ -3271,7 +3271,6 @@ public final class APIConstants {
     public static final String ORG_BASED_ACCESS_CONTROL_ENABLE = "Enable";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM = "OrganizationNameLocalClaim";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM = "OrganizationIDLocalClaim";
-    public static final String ORG_BASED_ACCESS_CONTROL_SELECTOR_CLAIM = "OrgaizationSelectorLocalClaim";
 
     public static class TransactionCounter {
 

@@ -108,8 +108,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            //Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, superOrganization, offset,
-            //        limit, null, null);
             Map allMatchedApisMap;
             if (APIUtil.isOrganizationAccessControlEnabled()) {
                 allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, orgInfo, offset,

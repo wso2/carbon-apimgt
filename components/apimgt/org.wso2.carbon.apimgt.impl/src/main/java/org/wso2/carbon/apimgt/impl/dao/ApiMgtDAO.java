@@ -11984,7 +11984,6 @@ public class ApiMgtDAO {
                         policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                 policyStatement.setInt(26, policy.getSubscriberCount());
             }
-            
             policyStatement.executeUpdate();
             conn.commit();
         } catch (SQLIntegrityConstraintViolationException e) {
@@ -13177,7 +13176,6 @@ public class ApiMgtDAO {
                 policy.setGraphQLMaxDepth(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
                 policy.setGraphQLMaxComplexity(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
                 policy.setSubscriberCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONNECTION_COUNT));
-                
                 InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -13207,7 +13205,7 @@ public class ApiMgtDAO {
         }
         return policy;
     }
-    
+
     /**
      * Retrieves list of pipelines for the policy with policy Id: <code>policyId</code>
      *
@@ -13692,7 +13690,6 @@ public class ApiMgtDAO {
                 }
             }
             updateStatement.executeUpdate();
-            
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {

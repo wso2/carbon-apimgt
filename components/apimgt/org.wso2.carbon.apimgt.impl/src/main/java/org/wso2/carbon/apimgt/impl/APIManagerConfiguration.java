@@ -701,11 +701,6 @@ public class APIManagerConfiguration {
             orgAccessControl.setEnabled(Boolean.parseBoolean(orgEnableElement.getText()));
         }
         
-        OMElement orgSelectorElement =
-                element.getFirstChildWithName(new QName(APIConstants.ORG_BASED_ACCESS_CONTROL_SELECTOR_CLAIM));
-        if (orgSelectorElement != null) {
-            orgAccessControl.setOrgSelectorClaim(orgSelectorElement.getText());
-        }
         OMElement orgNameElement =
                 element.getFirstChildWithName(new QName(APIConstants.ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM));
         if (orgNameElement != null) {

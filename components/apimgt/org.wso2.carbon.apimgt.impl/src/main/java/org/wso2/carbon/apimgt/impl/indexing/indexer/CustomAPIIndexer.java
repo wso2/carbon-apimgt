@@ -49,7 +49,6 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.CUSTOM_API_INDEXER_PROPER
 import static org.wso2.carbon.apimgt.impl.APIConstants.OVERVIEW_PREFIX;
 import static org.wso2.carbon.apimgt.impl.APIConstants.VISIBLE_ORGANIZATION_PROPERTY;
 
-
 /**
  * This is the custom indexer to add the API properties, to existing APIs.
  */
@@ -73,7 +72,6 @@ public class CustomAPIIndexer extends RXTIndexer {
         if (log.isDebugEnabled()) {
             log.debug("CustomAPIIndexer is currently indexing the api at path " + resourcePath);
         }
-        
         // Here we are adding properties as fields, so that we can search the properties as we do for attributes.
         IndexDocument indexDocument = super.getIndexedDocument(fileData);
         Map<String, List<String>> fields = indexDocument.getFields();
