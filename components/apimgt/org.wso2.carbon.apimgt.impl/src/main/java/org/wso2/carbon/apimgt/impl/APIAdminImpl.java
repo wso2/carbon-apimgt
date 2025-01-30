@@ -1875,6 +1875,7 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public OrganizationDetailsDTO updateOrganization(OrganizationDetailsDTO organizationInfoDTO)
             throws APIManagementException {
+        organizationInfoDTO.setOrganizationHandle(APIUtil.getOrganizationHandle(organizationInfoDTO.getName()));
         apiMgtDAO.updateOrganizationDetails(organizationInfoDTO);
         return apiMgtDAO.getOrganizationDetails(organizationInfoDTO.getOrganizationId(),
                 organizationInfoDTO.getTenantDomain());
