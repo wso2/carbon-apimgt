@@ -638,8 +638,9 @@ public class ImportUtils {
 
         String policyDirectory = extractedFolderPath + File.separator + ImportExportConstants.POLICIES_DIRECTORY;
         appliedPolicy.setPolicyId(null);
+        String policyType = appliedPolicy.getPolicyType();
         String policyFileName = APIUtil.getOperationPolicyFileName(appliedPolicy.getPolicyName(),
-                appliedPolicy.getPolicyVersion());
+                appliedPolicy.getPolicyVersion(), policyType);
         OperationPolicySpecification policySpec = null;
 
         if (visitedPoliciesMap.containsKey(policyFileName)) {
@@ -653,22 +654,28 @@ public class ImportUtils {
 
         if (policySpec == null && apiUUID != null) {
             // if policy is not found in the project, policy can be referenced from an existing policy.
-            OperationPolicyData policyData =
-                    provider.getAPISpecificOperationPolicyByPolicyName(appliedPolicy.getPolicyName(),
-                            appliedPolicy.getPolicyVersion(), apiUUID, null, tenantDomain, false);
-            if (policyData != null) {
-                policySpec = policyData.getSpecification();
-                appliedPolicy.setPolicyId(policyData.getPolicyId());
+            if (policyType == null || ImportExportConstants.POLICY_TYPE_API.equalsIgnoreCase(policyType)) {
+                // if policy type is 'api' or not specified, then search API specific operation policies
+                OperationPolicyData policyData =
+                        provider.getAPISpecificOperationPolicyByPolicyName(appliedPolicy.getPolicyName(),
+                                appliedPolicy.getPolicyVersion(), apiUUID, null, tenantDomain, false);
+                if (policyData != null) {
+                    policySpec = policyData.getSpecification();
+                    appliedPolicy.setPolicyId(policyData.getPolicyId());
+                }
             }
         }
 
         if (policySpec == null) {
-            OperationPolicyData policyData =
-                    provider.getCommonOperationPolicyByPolicyName(appliedPolicy.getPolicyName(),
-                            appliedPolicy.getPolicyVersion(), tenantDomain, false);
-            if (policyData != null) {
-                policySpec = policyData.getSpecification();
-                appliedPolicy.setPolicyId(policyData.getPolicyId());
+            if (policyType == null || ImportExportConstants.POLICY_TYPE_COMMON.equalsIgnoreCase(policyType)) {
+                // if policy type is 'common' or not specified, then search common operation policies
+                OperationPolicyData policyData =
+                        provider.getCommonOperationPolicyByPolicyName(appliedPolicy.getPolicyName(),
+                                appliedPolicy.getPolicyVersion(), tenantDomain, false);
+                if (policyData != null) {
+                    policySpec = policyData.getSpecification();
+                    appliedPolicy.setPolicyId(policyData.getPolicyId());
+                }
             }
         }
 
@@ -792,9 +799,10 @@ public class ImportUtils {
         List<OperationPolicy> validatedOperationPolicies = new ArrayList<>();
         for (OperationPolicy policy : policiesList) {
             boolean policyImported = false;
+            String policyType = policy.getPolicyType();
             try {
                 String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
-                        policy.getPolicyVersion());
+                        policy.getPolicyVersion(), policyType);
                 String policyID = null;
                 if (!importedPolicies.containsKey(policyFileName)) {
                     OperationPolicySpecification policySpec =
@@ -827,15 +835,19 @@ public class ImportUtils {
                         }
                         operationPolicyData.setMd5Hash(
                                 APIUtil.getHashOfOperationPolicy(operationPolicyData));
-                        policyID = provider.importOperationPolicy(operationPolicyData, tenantDomain);
+                        policyID = provider.importOperationPolicyOfGivenType(operationPolicyData,
+                                policyType, tenantDomain);
                         importedPolicies.put(policyFileName, policyID);
                         policyImported = true;
                     } else {
                         // Check whether the policy has been referenced
-                        OperationPolicyData policyData =
-                                provider.getAPISpecificOperationPolicyByPolicyName(policy.getPolicyName(),
-                                        policy.getPolicyVersion(), api.getUuid(), null,
-                                        tenantDomain, false);
+                        OperationPolicyData policyData = null;
+                        if (policyType == null
+                                || ImportExportConstants.POLICY_TYPE_API.equalsIgnoreCase(policyType)) {
+                            policyData = provider.getAPISpecificOperationPolicyByPolicyName(policy.getPolicyName(),
+                                    policy.getPolicyVersion(), api.getUuid(), null,
+                                    tenantDomain, false);
+                        }
                         if (policyData != null) {
                             OperationPolicySpecification policySpecification = policyData.
                                     getSpecification();
@@ -850,10 +862,13 @@ public class ImportUtils {
                                 }
                             }
                         } else {
-                            OperationPolicyData commonPolicyData =
-                                    provider.getCommonOperationPolicyByPolicyName(policy.getPolicyName(),
-                                            policy.getPolicyVersion(), tenantDomain,
-                                            false);
+                            OperationPolicyData commonPolicyData = null;
+                            if (policyType == null ||
+                                    ImportExportConstants.POLICY_TYPE_COMMON.equalsIgnoreCase(policyType)) {
+                                commonPolicyData = provider.getCommonOperationPolicyByPolicyName(policy.getPolicyName(),
+                                        policy.getPolicyVersion(), tenantDomain,
+                                        false);
+                            }
                             if (commonPolicyData != null) {
                                 log.info(commonPolicyData.getPolicyId());
                                 // A common policy is found for specified policy. This will be validated

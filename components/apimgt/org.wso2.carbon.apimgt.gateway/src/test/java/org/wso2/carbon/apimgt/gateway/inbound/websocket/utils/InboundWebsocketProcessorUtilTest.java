@@ -32,6 +32,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.testng.Assert;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.dto.WebSocketThrottleResponseDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketWSClient;
@@ -154,8 +155,8 @@ public class InboundWebsocketProcessorUtilTest {
                 + inboundMessageContext.getApiContext() + ":" + inboundMessageContext.getVersion();
         String applicationLevelThrottleKey = apiKeyValidationInfoDTO.getApplicationId() + ":"
                 + apiKeyValidationInfoDTO.getSubscriber() + "@" + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
-        PowerMockito.when(WebsocketUtil.isThrottled(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
-                applicationLevelThrottleKey)).thenReturn(false);
+        PowerMockito.when(WebsocketUtil.getThrottleStatus(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
+                applicationLevelThrottleKey)).thenReturn(null);
         Mockito.when(dataPublisher.tryPublish(Mockito.anyObject())).thenReturn(true);
         InboundProcessorResponseDTO inboundProcessorResponseDTO =
                 InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO, inboundMessageContext,
@@ -185,18 +186,22 @@ public class InboundWebsocketProcessorUtilTest {
         inboundMessageContext.setVersion("1.0.0");
         inboundMessageContext.setUserIP("198.162.10.2");
         inboundMessageContext.setInfoDTO(apiKeyValidationInfoDTO);
+        WebSocketThrottleResponseDTO throttleResponseDTO =  new WebSocketThrottleResponseDTO();
+        throttleResponseDTO.setThrottled(true);
+        throttleResponseDTO.setThrottledOutReason("Throttled due to application-level constraints");
 
-        String subscriptionLevelThrottleKey = apiKeyValidationInfoDTO.getApplicationId() + ":"
-                + inboundMessageContext.getApiContext() + ":" + inboundMessageContext.getVersion();
-        String applicationLevelThrottleKey = apiKeyValidationInfoDTO.getApplicationId() + ":"
-                + apiKeyValidationInfoDTO.getSubscriber() + "@" + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
+        String subscriptionLevelThrottleKey =
+                apiKeyValidationInfoDTO.getApplicationId() + ":" + inboundMessageContext.getApiContext() + ":"
+                        + inboundMessageContext.getVersion();
+        String applicationLevelThrottleKey =
+                apiKeyValidationInfoDTO.getApplicationId() + ":" + apiKeyValidationInfoDTO.getSubscriber() + "@"
+                        + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
         Mockito.when(dataPublisher.tryPublish(Mockito.anyObject())).thenReturn(true);
 
-        PowerMockito.when(WebsocketUtil.isThrottled(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
-                applicationLevelThrottleKey)).thenReturn(true);
-        InboundProcessorResponseDTO inboundProcessorResponseDTO =
-                InboundWebsocketProcessorUtil.doThrottleForGraphQL(msgSize, verbInfoDTO, inboundMessageContext,
-                        operationId);
+        PowerMockito.when(WebsocketUtil.getThrottleStatus(verbInfoDTO.getRequestKey(), subscriptionLevelThrottleKey,
+                                                          applicationLevelThrottleKey)).thenReturn(throttleResponseDTO);
+        InboundProcessorResponseDTO inboundProcessorResponseDTO = InboundWebsocketProcessorUtil.doThrottleForGraphQL(
+                msgSize, verbInfoDTO, inboundMessageContext, operationId);
         Assert.assertTrue(inboundProcessorResponseDTO.isError());
         Assert.assertEquals(inboundProcessorResponseDTO.getErrorMessage(),
                 WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR_MESSAGE);
