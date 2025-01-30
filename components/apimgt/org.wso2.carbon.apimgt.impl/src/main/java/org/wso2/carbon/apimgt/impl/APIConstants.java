@@ -2359,6 +2359,7 @@ public final class APIConstants {
      * CustomIndexer property to indicate whether it is gone through API Custom Indexer.
      */
     public static final String CUSTOM_API_INDEXER_PROPERTY = "registry.customIndexer";
+    public static final String VISIBLE_ORGANIZATION_PROPERTY = "visible_organizations";
 
     /**
      * Parameter related with accessControl support.
