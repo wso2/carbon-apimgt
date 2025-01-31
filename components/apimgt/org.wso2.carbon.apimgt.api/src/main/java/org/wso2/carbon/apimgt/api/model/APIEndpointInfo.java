@@ -29,6 +29,7 @@ public class APIEndpointInfo {
     private Map<String, Object> endpointConfig;
     private String organization;
     private String endpointType;
+    private String environment;
 
     public String getEndpointName() { return endpointName; }
 
@@ -66,5 +67,13 @@ public class APIEndpointInfo {
 
     public void setEndpointUuid(String endpointUuid) {
         this.endpointUuid = endpointUuid;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

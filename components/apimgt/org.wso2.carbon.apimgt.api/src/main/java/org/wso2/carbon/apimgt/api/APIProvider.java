@@ -1574,11 +1574,12 @@ public interface APIProvider extends APIManager {
     /**
      * Update an API endpoint.
      *
+     * @param apiId       API UUID
      * @param apiEndpoint Endpoint with updated details
      * @return Updated APIEndpointInfo object
      * @throws APIManagementException if an error occurs while updating the endpoint.
      */
-    APIEndpointInfo updateAPIEndpoint(APIEndpointInfo apiEndpoint) throws APIManagementException;
+    APIEndpointInfo updateAPIEndpoint(String apiId, APIEndpointInfo apiEndpoint) throws APIManagementException;
 
     /**
      * Set existing operation policy mapping to the URI Templates

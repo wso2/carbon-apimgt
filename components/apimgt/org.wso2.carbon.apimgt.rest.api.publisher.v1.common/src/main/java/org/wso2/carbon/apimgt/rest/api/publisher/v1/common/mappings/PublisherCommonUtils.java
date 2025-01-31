@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -108,6 +109,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,6 +119,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -2696,7 +2699,7 @@ public class PublisherCommonUtils {
     /**
      * Get All endpoints of an API.
      *
-     * @param uuid   Unique identifier of API
+     * @param uuid        Unique identifier of API
      * @param apiProvider
      * @return APIEndpointListDTO object
      * @throws APIManagementException if there is en error while getting the API Endpoints' information
@@ -2704,6 +2707,27 @@ public class PublisherCommonUtils {
     public static APIEndpointListDTO getApiEndpoints(String uuid, APIProvider apiProvider)
             throws APIManagementException {
         List<APIEndpointInfo> apiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid);
+
+        // Check if default production and/or sandbox endpoints are inclusive in the apiEndpointsList. If not, add them.
+        Map<String, APIEndpointInfo> defaultEndpointsFromEndpointConfig = getAPIEndpointsFromEndpointConfig(uuid,
+                apiProvider);
+        APIEndpointInfo defaultProductionEndpoint = defaultEndpointsFromEndpointConfig.get(
+                APIConstants.APIEndpoint.PRODUCTION);
+        APIEndpointInfo defaultSandboxEndpoint = defaultEndpointsFromEndpointConfig.get(
+                APIConstants.APIEndpoint.SANDBOX);
+
+        for (APIEndpointInfo apiEndpointInfo : apiEndpointsList) {
+            if (apiEndpointInfo.getEndpointUuid().equals(defaultProductionEndpoint.getEndpointUuid())) {
+                defaultEndpointsFromEndpointConfig.remove(APIConstants.APIEndpoint.PRODUCTION);
+            }
+            if (apiEndpointInfo.getEndpointUuid().equals(defaultSandboxEndpoint.getEndpointUuid())) {
+                defaultEndpointsFromEndpointConfig.remove(APIConstants.APIEndpoint.SANDBOX);
+            }
+        }
+        if (!defaultEndpointsFromEndpointConfig.isEmpty()) {
+            apiEndpointsList.addAll(defaultEndpointsFromEndpointConfig.values());
+        }
+
         if (apiEndpointsList == null) {
             throw new APIManagementException("Error occurred while getting endpoints of API with UUID " + uuid,
                     ExceptionCodes.API_ENDPOINT_NOT_FOUND);
@@ -2711,6 +2735,64 @@ public class PublisherCommonUtils {
             return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList);
         }
 
+    }
+
+    public static Map<String, APIEndpointInfo> getAPIEndpointsFromEndpointConfig(String apiUUID,
+            APIProvider apiProvider) {
+        Map<String, APIEndpointInfo> defaultAPIEndpoints = new HashMap<>();
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        try {
+            API api = apiProvider.getAPIbyUUID(apiUUID, organization);
+            if (api == null) {
+                throw new APIManagementException("Error occurred while getting API with UUID " + apiUUID,
+                        ExceptionCodes.API_NOT_FOUND);
+            }
+            String endpointConfig = api.getEndpointConfig();
+            if (StringUtils.isNotEmpty(endpointConfig)) {
+                Gson gson = new Gson();
+                Type type = new TypeToken<Map<String, Object>>() {
+                }.getType();
+                Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
+
+                // Add primary production endpoint from endpoint config
+                if (endpointConfigMap.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+                    APIEndpointInfo primaryProductionEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
+                            endpointConfigMap, APIConstants.APIEndpoint.PRODUCTION, organization);
+                    defaultAPIEndpoints.put(APIConstants.APIEndpoint.PRODUCTION, primaryProductionEndpoint);
+                }
+
+                // Add primary sandbox endpoint from endpoint config
+                if (endpointConfigMap.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+                    APIEndpointInfo primarySandboxEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
+                            endpointConfigMap, APIConstants.APIEndpoint.SANDBOX, organization);
+                    defaultAPIEndpoints.put(APIConstants.APIEndpoint.SANDBOX, primarySandboxEndpoint);
+                }
+            }
+            return defaultAPIEndpoints;
+        } catch (APIManagementException e) {
+            log.error("Error occurred while getting API with UUID " + apiUUID, e);
+        }
+        return null;
+    }
+
+    public static APIEndpointInfo getAPIEndpointFromEndpointConfig(String apiUUID, Map<String, Object> endpointConfig,
+            String environment, String organization) {
+        APIEndpointInfo apiEndpointInfo = new APIEndpointInfo();
+        apiEndpointInfo.setEndpointUuid(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + environment);
+
+        String endpointName;
+        if (Objects.equals(environment, APIConstants.APIEndpoint.PRODUCTION)) {
+            endpointName = APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT;
+        } else {
+            endpointName = APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT;
+        }
+        apiEndpointInfo.setEndpointName(endpointName);
+
+        apiEndpointInfo.setEndpointType("REST");
+        apiEndpointInfo.setEnvironment(environment);
+        apiEndpointInfo.setOrganization(organization);
+        apiEndpointInfo.setEndpointConfig(endpointConfig);
+        return apiEndpointInfo;
     }
 
     /**
@@ -2724,11 +2806,29 @@ public class PublisherCommonUtils {
      */
     public static APIEndpointDTO getAPIEndpoint(String apiUUID, String endpointUUID, APIProvider apiProvider)
             throws APIManagementException, JsonProcessingException {
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        API api = apiProvider.getAPIbyUUID(apiUUID, organization);
         APIEndpointInfo apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID);
         if (apiEndpoint == null) {
-            throw new APIManagementException("Error occurred while getting Endpoint of API " + apiUUID +
-                    " endpoint UUID " + endpointUUID,
-                    ExceptionCodes.API_ENDPOINT_NOT_FOUND);
+            String endpointConfig = api.getEndpointConfig();
+            Gson gson = new Gson();
+            Type type = new TypeToken<Map<String, Object>>() {
+            }.getType();
+            Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
+
+            if (endpointUUID.equals(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR
+                    + APIConstants.APIEndpoint.PRODUCTION)) {
+                apiEndpoint = getAPIEndpointFromEndpointConfig(apiUUID, endpointConfigMap,
+                        APIConstants.APIEndpoint.PRODUCTION, organization);
+            } else if (endpointUUID.equals(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR
+                    + APIConstants.APIEndpoint.SANDBOX)) {
+                apiEndpoint = getAPIEndpointFromEndpointConfig(apiUUID, endpointConfigMap,
+                        APIConstants.APIEndpoint.SANDBOX, organization);
+            } else {
+                throw new APIManagementException(
+                        "Error occurred while getting Endpoint of API " + apiUUID + " endpoint UUID " + endpointUUID,
+                        ExceptionCodes.API_ENDPOINT_NOT_FOUND);
+            }
         }
         return APIMappingUtil.fromAPIEndpointToDTO(apiEndpoint);
     }
@@ -2788,7 +2888,7 @@ public class PublisherCommonUtils {
         if (apiEndpoint.getEndpointUuid() == null) {
             apiEndpoint.setEndpointUuid(endpointId);
         }
-        APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiEndpoint);
+        APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint);
         if (apiEndpointUpdated == null) {
             throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
                     "endpoint UUID" + endpointId, ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);

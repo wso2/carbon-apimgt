@@ -10505,6 +10505,9 @@ components:
         endpointType:
           type : string
           example: "REST"
+        environment:
+          type: string
+          example: "PRODUCTION or SANDBOX"
         endpointConfig:
           type: object
           properties: {}

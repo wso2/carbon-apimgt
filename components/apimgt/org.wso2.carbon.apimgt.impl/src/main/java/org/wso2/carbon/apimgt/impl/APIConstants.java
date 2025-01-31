@@ -3200,10 +3200,6 @@ public final class APIConstants {
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
 
-    public static final String PERMISSION_ALLOW = "ALLOW";
-    public static final String PERMISSION_DENY = "DENY";
-    public static final String PERMISSION_NOT_RESTRICTED = "PUBLIC";
-
     // Protocol variables
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
     public static final String HTTPS_TRANSPORT_PROTOCOL_NAME = "https";
@@ -3269,7 +3265,10 @@ public final class APIConstants {
     public static class APIEndpoint {
         public static final String PRODUCTION = "PRODUCTION";
         public static final String SANDBOX = "SANDBOX";
-        //        public static final String ENDPOINT_NONE = "none";
-        //        public static final String ENDPOINT_NONE_NAME = "NoneEndpoint";
+        public static final String PRIMARY_ENDPOINT_ID_SEPARATOR = "--";
+        public static final String DEFAULT_PROD_ENDPOINT = "Default Production Endpoint";
+        public static final String DEFAULT_SANDBOX_ENDPOINT = "Default Sandbox Endpoint";
+//        public static final String ENDPOINT_NONE = "none";
+//        public static final String ENDPOINT_NONE_NAME = "NoneEndpoint";
     }
 }

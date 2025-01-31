@@ -23,6 +23,7 @@ public class APIEndpointDTO   {
     private String id = null;
     private String name = null;
     private String endpointType = null;
+    private String environment = null;
     private Object endpointConfig = null;
 
   /**
@@ -78,6 +79,23 @@ public class APIEndpointDTO   {
   }
 
   /**
+   **/
+  public APIEndpointDTO environment(String environment) {
+    this.environment = environment;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PRODUCTION or SANDBOX", value = "")
+  @JsonProperty("environment")
+  public String getEnvironment() {
+    return environment;
+  }
+  public void setEnvironment(String environment) {
+    this.environment = environment;
+  }
+
+  /**
    * Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover. 
    **/
   public APIEndpointDTO endpointConfig(Object endpointConfig) {
@@ -109,12 +127,13 @@ public class APIEndpointDTO   {
     return Objects.equals(id, apIEndpoint.id) &&
         Objects.equals(name, apIEndpoint.name) &&
         Objects.equals(endpointType, apIEndpoint.endpointType) &&
+        Objects.equals(environment, apIEndpoint.environment) &&
         Objects.equals(endpointConfig, apIEndpoint.endpointConfig);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, endpointType, endpointConfig);
+    return Objects.hash(id, name, endpointType, environment, endpointConfig);
   }
 
   @Override
@@ -125,6 +144,7 @@ public class APIEndpointDTO   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    endpointType: ").append(toIndentedString(endpointType)).append("\n");
+    sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("}");
     return sb.toString();
