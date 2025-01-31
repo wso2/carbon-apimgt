@@ -627,12 +627,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "Key Manager " + keyManagerName + "Couldn't initialized in tenant " + tenantDomain + ".",
                     ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
-
-        //Get application ID
-        int applicationId = apiMgtDAO.getApplicationId(applicationName, userName);
-
         // Checking if clientId is mapped with another application.
-        if (apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(applicationId, keyManagerName, keyManagerId,
+        if (apiMgtDAO.isKeyMappingExistsForConsumerKeyOrApplication(application.getId(), keyManagerName, keyManagerId,
                 keyType, clientId)) {
             throw new APIManagementException("Key Mappings already exists for application " + applicationName
                     + " or consumer key " + clientId, ExceptionCodes.KEY_MAPPING_ALREADY_EXIST);
@@ -647,7 +643,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         //Do application mapping with consumerKey.
         String keyMappingId = UUID.randomUUID().toString();
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationId, clientId, keyManagerId,
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, application.getId(), clientId, keyManagerId,
                 keyMappingId);
         Object enableTokenGeneration =
                 keyManager.getKeyManagerConfiguration().getParameter(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
