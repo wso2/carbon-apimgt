@@ -17,8 +17,11 @@
 package org.wso2.carbon.apimgt.impl.deployer;
 
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+
+import java.util.List;
 
 /**
  * This class controls the API artifact deployments on the External gateways
@@ -61,4 +64,11 @@ public interface ExternalGatewayDeployer {
      * @return String vendor name
      */
     public String getType();
+
+    /**
+     * This method returns the Configurations related to external gateway
+     *
+     * @return  List<ConfigurationDto> connectionConfigurations
+     */
+    public List<ConfigurationDto> getConnectionConfigurations();
 }

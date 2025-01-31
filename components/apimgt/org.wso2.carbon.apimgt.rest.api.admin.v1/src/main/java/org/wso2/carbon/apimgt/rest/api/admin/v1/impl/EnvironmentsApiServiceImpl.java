@@ -111,9 +111,12 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             String gatewayType = body.getGatewayType();
-            if (!(APIConstants.API_GATEWAY_TYPE_REGULAR.equals(gatewayType) || APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType))) {
+
+            List<String> gatewayTypes = APIUtil.getGatewayTypes();
+            if (!gatewayTypes.contains(gatewayType)) {
                 throw new APIManagementException("Invalid gateway type: " + gatewayType);
             }
+            
             if (APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType) && hasUnsupportedVhostConfiguration(body.getVhosts())) {
                 throw new APIManagementException("Unsupported Vhost Configuration for gateway type: " + gatewayType);
             }
