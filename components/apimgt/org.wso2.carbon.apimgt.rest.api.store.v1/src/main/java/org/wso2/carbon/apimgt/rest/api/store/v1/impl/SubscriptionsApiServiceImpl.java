@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -234,8 +235,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             userOrgInfo.setSuperOrganization(organization);
             if (!apiTypeWrapper.isAPIProduct()) {
+                String organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
+                        userOrgInfo.getName(), organization);
                 org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils
-                        .updateAvailableTiersByOrganization(apiTypeWrapper.getApi(), userOrgInfo.getOrganizationId());
+                        .updateAvailableTiersByOrganization(apiTypeWrapper.getApi(), organizationID);
             }
 
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
@@ -352,8 +355,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             userOrgInfo.setSuperOrganization(organization);
             if (!apiTypeWrapper.isAPIProduct()) {
+                String organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
+                        userOrgInfo.getName(), organization);
                 org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils
-                        .updateAvailableTiersByOrganization(apiTypeWrapper.getApi(), userOrgInfo.getOrganizationId());
+                        .updateAvailableTiersByOrganization(apiTypeWrapper.getApi(), organizationID);
             }
 
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
@@ -443,8 +448,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
                 userOrgInfo.setSuperOrganization(organization);
                 if (!apiTypeWrapper.isAPIProduct()) {
+                    String organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
+                            userOrgInfo.getName(), organization);
                     org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils.updateAvailableTiersByOrganization(
-                            apiTypeWrapper.getApi(), userOrgInfo.getOrganizationId());
+                            apiTypeWrapper.getApi(), organizationID);
                 }
                 apiTypeWrapper.setTier(subscriptionDTO.getThrottlingPolicy());
                 SubscriptionResponse subscriptionResponse = apiConsumer
