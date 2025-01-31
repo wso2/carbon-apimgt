@@ -22,7 +22,14 @@ public interface APITemplateBuilder {
 
     String getConfigStringForTemplate(Environment environment) throws APITemplateException;
 
-    String getConfigStringForAIAPITemplate(Environment environment) throws APITemplateException;
+    /**
+     * Generates a configuration string for AI API based on the given environment.
+     *
+     * @param environment The deployment environment for which the configuration string is generated.
+     * @return A string representing the AI API configuration.
+     * @throws APITemplateException If an error occurs while processing the Velocity template.
+     */
+    String getConfigStringForAIAPI(Environment environment) throws APITemplateException;
 
     String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException;
 
