@@ -3609,8 +3609,8 @@ public final class APIUtil {
         Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
         if (organization != null) {
             for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
-                String orgName = organizationTiers.getOrganizationID();
-                if (organization.equals(orgName)) {
+                String orgID = organizationTiers.getOrganizationID();
+                if (organization.equals(orgID)) {
                     availableTiers = organizationTiers.getTiers();
                     break;
                 }

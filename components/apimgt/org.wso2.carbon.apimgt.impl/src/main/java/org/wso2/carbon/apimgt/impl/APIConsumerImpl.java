@@ -3879,7 +3879,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         String organizationID = null;
         if (orgInfo != null) {
-            organizationID = orgInfo.getOrganizationId();
+            organizationID = APIUtil.getOrganizationIdFromExternalReference(orgInfo.getOrganizationId(),
+                    orgInfo.getName(), tenantDomain);
         }
 
         try {
