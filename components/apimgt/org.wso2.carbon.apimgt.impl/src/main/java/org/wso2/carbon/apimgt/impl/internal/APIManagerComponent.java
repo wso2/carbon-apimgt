@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
-import org.wso2.carbon.apimgt.api.model.FederatedGatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
@@ -1111,38 +1110,5 @@ public class APIManagerComponent {
 
     protected void unsetWorkflowTaskService(WorkflowTaskService workflowTaskService) {
         ServiceReferenceHolder.getInstance().setWorkflowTaskService(null);
-    }
-
-    /**
-     * Initialize the Gateway Connector configuration Service  dependency
-     *
-     * @param gatewayAgentConfiguration {@link FederatedGatewayAgentConfiguration} service reference.
-     */
-    @Reference(
-            name = "gateway.connector.service",
-            service = FederatedGatewayAgentConfiguration.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "removeFederatedGatewayAgentConfiguration")
-    protected void addFederatedGatewayAgentConfiguration(
-            FederatedGatewayAgentConfiguration gatewayAgentConfiguration) {
-
-        ServiceReferenceHolder.getInstance()
-                .addFederatedGatewayAgentConfiguration(gatewayAgentConfiguration.getType(),
-                        gatewayAgentConfiguration);
-    }
-
-    /**
-     * Remove the Gateway Connector configuration Service  dependency
-     *
-     * @param gatewayAgentConfiguration
-     * @param properties    properties
-     */
-    protected void removeFederatedGatewayAgentConfiguration(
-            FederatedGatewayAgentConfiguration gatewayAgentConfiguration, Map<String, Object> properties) {
-        if (properties.containsKey(APIConstants.FederatedGatewayConstants.FEDERATED_GATEWAY_TYPE)){
-            String type = (String) properties.get(APIConstants.FederatedGatewayConstants.FEDERATED_GATEWAY_TYPE);
-            ServiceReferenceHolder.getInstance().removeFederatedGatewayAgentConfiguration(type);
-        }
     }
 }
