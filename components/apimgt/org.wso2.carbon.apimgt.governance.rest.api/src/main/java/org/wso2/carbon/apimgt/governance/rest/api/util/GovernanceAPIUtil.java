@@ -103,6 +103,9 @@ public class GovernanceAPIUtil {
 
         templatedURL = templatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
         templatedURL = templatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
+        if (artifactType == null) {
+            artifactType = "api";
+        }
         templatedURL = templatedURL.replace(GovernanceAPIConstants.ARTIFACT_TYPE_PARAM, artifactType);
         return templatedURL;
     }

@@ -39,7 +39,7 @@ HealthzApiService delegate = new HealthzApiServiceImpl();
     @Path("/liveness")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Liveness Check", notes = "Checks if the application is alive and able to respond to requests.", response = HealthzResponseDTO.class, tags={ "Health Check", "Internal",  })
+    @ApiOperation(value = "Liveness Check", notes = "Checks if the application is alive and able to respond to requests.", response = HealthzResponseDTO.class, tags={ "Health Check",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Application is alive", response = HealthzResponseDTO.class) })
     public Response getHealthzLiveness() throws GovernanceException{
@@ -50,7 +50,7 @@ HealthzApiService delegate = new HealthzApiServiceImpl();
     @Path("/readiness")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Readiness Check", notes = "Checks if the application is ready to handle requests.", response = HealthzResponseDTO.class, tags={ "Health Check", "Internal" })
+    @ApiOperation(value = "Readiness Check", notes = "Checks if the application is ready to handle requests.", response = HealthzResponseDTO.class, tags={ "Health Check" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Application is ready", response = HealthzResponseDTO.class) })
     public Response getHealthzReadiness() throws GovernanceException{

@@ -22,10 +22,12 @@ package org.wso2.carbon.apimgt.governance.api.model;
  * This class represents information about an artifact.
  */
 public class ArtifactInfo {
+
     private String artifactId;
     private ArtifactType artifactType;
     private String organization;
-    private String displayName;
+    private String name;
+    private String version;
 
     public String getArtifactId() {
         return artifactId;
@@ -51,11 +53,19 @@ public class ArtifactInfo {
         this.organization = organization;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getName() {
+        return name;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

@@ -3,8 +3,8 @@ package org.wso2.carbon.apimgt.governance.rest.api;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApiService;
-import org.wso2.carbon.apimgt.governance.rest.api.impl.GovernancePoliciesApiServiceImpl;
+import org.wso2.carbon.apimgt.governance.rest.api.PoliciesApiService;
+import org.wso2.carbon.apimgt.governance.rest.api.impl.PoliciesApiServiceImpl;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 
 import javax.ws.rs.*;
@@ -23,18 +23,18 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import java.util.Map;
 import java.util.List;
 import javax.validation.constraints.*;
-@Path("/governance-policies")
+@Path("/policies")
 
-@Api(description = "the governance-policies API")
-
-
+@Api(description = "the policies API")
 
 
-public class GovernancePoliciesApi  {
+
+
+public class PoliciesApi  {
 
   @Context MessageContext securityContext;
 
-GovernancePoliciesApiService delegate = new GovernancePoliciesApiServiceImpl();
+PoliciesApiService delegate = new PoliciesApiServiceImpl();
 
 
     @POST

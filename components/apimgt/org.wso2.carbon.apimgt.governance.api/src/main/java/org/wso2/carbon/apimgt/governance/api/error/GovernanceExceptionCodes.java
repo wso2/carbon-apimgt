@@ -171,8 +171,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     // APIM related codes
 
-    ERROR_WHILE_GETTING_API_NAME_VERSION_WITH_ID(700001, "Error while getting API name and version with ID.",
-            500, "Error while getting API name and version with ID: %s", true),
+    ERROR_WHILE_GETTING_API_INFO(700001, "Error while getting API name/version with ID.",
+            500, "Error while getting API name/version with ID: %s", true),
     ERROR_WHILE_GETTING_APIM_PROJECT(700002, "Error while getting APIM project.",
             500, "Error while getting APIM project for artifact: %s in the organization: %s",
             true),

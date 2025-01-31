@@ -40,10 +40,10 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
 
 
     @GET
-    @Path("/{artifactId}")
+    @Path("/api/{apiId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve compliance details for a specific artifact", notes = "Retrieve compliance details associated with a specific artifact including APIs within the organization using its unique UUID.", response = ArtifactComplianceDetailsDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve compliance details for a specific API", notes = "Retrieve compliance details associated with a specific API using its unique UUID.", response = ArtifactComplianceDetailsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
@@ -54,34 +54,34 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getArtifactComplianceByArtifactId(@ApiParam(value = "**UUID** of the Artifact. ",required=true) @PathParam("artifactId") String artifactId) throws GovernanceException{
-        return delegate.getArtifactComplianceByArtifactId(artifactId, securityContext);
+    public Response getComplianceByAPIId(@ApiParam(value = "**UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws GovernanceException{
+        return delegate.getComplianceByAPIId(apiId, securityContext);
     }
 
     @GET
-    
+    @Path("/api")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves compliance of all artifacts of a certain type", notes = "Retrieves compliance of all artifacts of a certain type within the organization.", response = ArtifactComplianceListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieves compliance of all API artifacts", notes = "Retrieves compliance of all API artifacts within the organization.", response = ArtifactComplianceListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
     }, tags={ "Artifact Compliance",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with artifact compliance results.", response = ArtifactComplianceListDTO.class),
+        @ApiResponse(code = 200, message = "OK. Successful response with API compliance results.", response = ArtifactComplianceListDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getArtifactComplianceForAllArtifacts( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Type of the artifact. ", allowableValues="API", defaultValue="API") @DefaultValue("API") @QueryParam("artifactType") String artifactType) throws GovernanceException{
-        return delegate.getArtifactComplianceForAllArtifacts(limit, offset, artifactType, securityContext);
+    public Response getComplianceStatusListOfAPIs( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
+        return delegate.getComplianceStatusListOfAPIs(limit, offset, securityContext);
     }
 
     @GET
-    @Path("/summary")
+    @Path("/api/summary")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves the summary of compliance of all artifacts of a certain type", notes = "Retrieves the summary of compliance of all artifacts of a certain type within the organization.", response = ArtifactComplianceSummaryDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieves the summary of compliance of all API artifacts", notes = "Retrieves the summary of compliance of all API artifacts within the organization.", response = ArtifactComplianceSummaryDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
@@ -92,26 +92,26 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getArtifactComplianceSummary( @ApiParam(value = "Type of the artifact. ", allowableValues="API", defaultValue="API") @DefaultValue("API") @QueryParam("artifactType") String artifactType) throws GovernanceException{
-        return delegate.getArtifactComplianceSummary(artifactType, securityContext);
+    public Response getComplianceSummaryForAPIs() throws GovernanceException{
+        return delegate.getComplianceSummaryForAPIs(securityContext);
     }
 
     @GET
-    @Path("/{artifactId}/ruleset-validation-results/{rulesetId}")
+    @Path("/api/{apiId}/ruleset-validation-results/{rulesetId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve ruleset validation results for a specific artifact", notes = "Retrieve ruleset validation results associated with a specific artifact including APIs within the organization using its unique UUID.", response = RulesetValidationResultDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve ruleset validation results for a specific API", notes = "Retrieve ruleset validation results associated with a specific API using its unique UUID.", response = RulesetValidationResultDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
     }, tags={ "Artifact Compliance" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Successful response with ruleset validation results for the specified artifact.", response = RulesetValidationResultDTO.class),
+        @ApiResponse(code = 200, message = "Successful response with ruleset validation results for the specified API.", response = RulesetValidationResultDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesetValidationResultsByArtifactId(@ApiParam(value = "**UUID** of the Artifact. ",required=true) @PathParam("artifactId") String artifactId, @ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
-        return delegate.getRulesetValidationResultsByArtifactId(artifactId, rulesetId, securityContext);
+    public Response getRulesetValidationResultsByAPIId(@ApiParam(value = "**UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+        return delegate.getRulesetValidationResultsByAPIId(apiId, rulesetId, securityContext);
     }
 }
