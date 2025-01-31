@@ -56,6 +56,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public static final String TEMPLATE_WEBSUB_API = "websub_api_template";
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
     public static final String TEMPLATE_AI_API = "ai_api_template";
+    public static final String TEMPLATE_AI_API_PRODUCT = "ai_api_product_template";
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
     public static final String TEMPLATE_DEFAULT_WS_API = "default_ws_api_template";
     private static final Log log = LogFactory.getLog(APITemplateBuilderImpl.class);
@@ -94,7 +95,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     @Override
-    public String getConfigStringForAIAPITemplate(Environment environment) throws APITemplateException {
+    public String getConfigStringForAIAPI(Environment environment) throws APITemplateException {
 
         StringWriter writer = new StringWriter();
 
@@ -102,9 +103,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             ConfigContext configcontext = null;
 
             if (api != null) {
-                configcontext = createConfigContext(api, environment);
+                configcontext = createAIAPIConfigContext(api, environment);
             } else {
-                configcontext = createConfigContext(apiProduct, environment);
+                configcontext = createAIAPIConfigContext(apiProduct, environment);
             }
 
             configcontext.validate();
@@ -121,38 +122,11 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             if (api != null) {
                 t = velocityengine.getTemplate(getAIAPITemplatePath());
-
-                if (APIConstants.APITransportType.WS.toString().equals(api.getType())) {
-                    context.put("topicMappings", this.api.getWebSocketTopicMappingConfiguration().getMappings());
-                } else if (APIConstants.APITransportType.WEBSUB.toString().equals(api.getType())) {
-                    String signingAlgorithm = api.getWebsubSubscriptionConfiguration().getSigningAlgorithm();
-                    context.put("signingAlgorithm", signingAlgorithm.toLowerCase() + "=");
-                    context.put("secret", api.getWebsubSubscriptionConfiguration().getSecret());
-                    context.put("hmacSignatureGenerationAlgorithm", "Hmac" + signingAlgorithm);
-                    context.put("signatureHeader", api.getWebsubSubscriptionConfiguration().getSignatureHeader());
-                    context.put("isSecurityEnabled", !StringUtils.isEmpty(api.getWebsubSubscriptionConfiguration().
-                            getSecret()));
-                    if (api != null) {
-                        context.put(WEBSUB_ENABLE_SUBSCRIBER_VERIFICATION, api.isEnableSubscriberVerification());
-                    } else {
-                        context.put(WEBSUB_ENABLE_SUBSCRIBER_VERIFICATION, false);
-                    }
-                } else if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                    boolean isSubscriptionAvailable = false;
-                    if (api.getWebSocketTopicMappingConfiguration() != null) {
-                        isSubscriptionAvailable = true;
-                        context.put(APIConstants.VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS,
-                                this.api.getWebSocketTopicMappingConfiguration().getMappings());
-                    }
-                    context.put(APIConstants.VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE, isSubscriptionAvailable);
-                }
             } else {
-                t = velocityengine.getTemplate(getApiProductTemplatePath());
+                t = velocityengine.getTemplate(getAIAPIProductTemplatePath());
             }
             context.put("llmProviderId", api.getAiConfiguration().getLlmProviderId());
-
             t.merge(context, writer);
-
         } catch (Exception e) {
             log.error("Velocity Error", e);
             throw new APITemplateException("Velocity Error", e);
@@ -403,6 +377,49 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return configcontext;
     }
 
+    /**
+     * Creates a configuration context for the AI API using the given API and environment.
+     *
+     * @param api The API instance for which the configuration context is created.
+     * @param environment The deployment environment associated with the API.
+     * @return A fully initialized {@code ConfigContext} for the AI API.
+     */
+    private ConfigContext createAIAPIConfigContext(API api, Environment environment) {
+
+        ConfigContext configcontext = new APIConfigContext(api);
+        configcontext = new TransportConfigContext(configcontext, api);
+        configcontext = new ResourceConfigContext(configcontext, api);
+        configcontext = new EndpointBckConfigContext(configcontext, api);
+        configcontext = new EndpointConfigContext(configcontext, api);
+        configcontext = new SecurityConfigContext(configcontext, api);
+        configcontext = new JwtConfigContext(configcontext);
+        configcontext = new HandlerConfigContex(configcontext, handlers);
+        configcontext = new EnvironmentConfigContext(configcontext, environment);
+        configcontext = new TemplateUtilContext(configcontext);
+
+        return configcontext;
+    }
+
+    /**
+     * Creates a configuration context for the AI API using the given API and environment.
+     *
+     * @param apiProduct The API Product instance for which the configuration context is created.
+     * @param environment The deployment environment associated with the API.
+     * @return A fully initialized {@code ConfigContext} for the AI API Product.
+     */
+    public ConfigContext createAIAPIConfigContext(APIProduct apiProduct, Environment environment) {
+
+        ConfigContext configcontext = new APIConfigContext(apiProduct);
+        configcontext = new TransportConfigContext(configcontext, apiProduct);
+        configcontext = new ResourceConfigContext(configcontext, apiProduct);
+        configcontext = new HandlerConfigContex(configcontext, handlers);
+        configcontext = new EnvironmentConfigContext(configcontext, environment);
+        configcontext = new TemplateUtilContext(configcontext);
+        configcontext = new SecurityConfigContext(configcontext, apiProduct, associatedAPIMap);
+
+        return configcontext;
+    }
+
     public void addHandler(String handlerName, Map<String, String> properties) {
 
         addHandlerPriority(handlerName, properties, handlers.size());
@@ -456,6 +473,12 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         return "repository" + File.separator + "resources" + File.separator + "api_templates" +
                 File.separator + APITemplateBuilderImpl.TEMPLATE_AI_API + ".xml";
+    }
+
+    public String getAIAPIProductTemplatePath() {
+
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" +
+                File.separator + APITemplateBuilderImpl.TEMPLATE_AI_API_PRODUCT + ".xml";
     }
 
     public String getVelocityLogger() {
