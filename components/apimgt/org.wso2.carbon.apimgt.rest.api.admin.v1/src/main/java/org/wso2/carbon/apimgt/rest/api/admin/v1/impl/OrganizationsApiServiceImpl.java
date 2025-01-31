@@ -130,6 +130,10 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
                 orgId = orgInfo.getOrganizationId();
                 organizationDTO.setParentOrganizationId(orgId); // set current users organization as parent id if available.
             }
+            if (organizationDTO.getParentOrganizationId() == null) {
+                throw new APIManagementException("Parent Organization not found",
+                        ExceptionCodes.MISSING_ORGANINATION);
+            }
             OrganizationDetailsDTO orgDto = OrganizationsMappingUtil.toOrganizationDetailsDTO(organizationDTO);
             orgDto.setTenantDomain(superOrganization);
             orgDto = apiAdmin.addOrganization(orgDto);
