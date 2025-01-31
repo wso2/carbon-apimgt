@@ -33,6 +33,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalProcessingConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -241,7 +242,7 @@ public class APIPublisherForNewPortal {
 
     // Data Structuring Related Methods
 
-    private static String getApiMetaData(ApiTypeWrapper apiTypeWrapper) {
+    private static String getApiMetaData(ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
         API api = apiTypeWrapper.getApi();
 
         JSONObject apiInfo = new JSONObject();
@@ -259,12 +260,11 @@ public class APIPublisherForNewPortal {
         }
         apiInfo.put("owners", generateOwnersObject(api));
         apiInfo.put("apiVersion", defaultString(api.getId().getVersion()));
-        apiInfo.put("apiType", "HTTP".equals(apiTypeWrapper.getType()) ? "REST" :
-                defaultString(apiTypeWrapper.getType())); // IF type is HTTP, DEV PORTAL expects REST As Type
+        apiInfo.put("apiType", getType(api.getType())); // IF type is HTTP, DEV PORTAL expects REST As Type
 
         JSONObject endPoints = new JSONObject();
-        endPoints.put("sandboxURL", defaultString(api.getApiExternalSandboxEndpoint()));
-        endPoints.put("productionURL", defaultString(api.getApiExternalProductionEndpoint()));
+        endPoints.put("sandboxURL", getSandboxEndpoint(api.getEndpointConfig()));
+        endPoints.put("productionURL", getProductionEndpoint(api.getEndpointConfig()));
 
         JSONObject response = new JSONObject();
         response.put("apiInfo", apiInfo);
@@ -272,6 +272,44 @@ public class APIPublisherForNewPortal {
         response.put("endPoints", endPoints);
 
         return response.toJSONString();
+    }
+
+    private static String getSandboxEndpoint(String jsonString) throws APIManagementException {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> jsonMap = objectMapper.readValue(jsonString, Map.class);
+
+            Map<?, ?> sandboxEndpoints = (Map<?, ?>) jsonMap.get("sandbox_endpoints");
+            return (String) sandboxEndpoints.get("url");
+        } catch (Exception e){
+            throw new APIManagementException("Error reading Endpoints: " + e.getMessage(), e);
+        }
+    }
+
+    private static String getProductionEndpoint(String jsonString) throws APIManagementException {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> jsonMap = objectMapper.readValue(jsonString, Map.class);
+
+            Map<?, ?> productionEndpoints = (Map<?, ?>) jsonMap.get("production_endpoints");
+            return (String) productionEndpoints.get("url");
+        } catch (Exception e){
+            throw new APIManagementException("Error reading Endpoints: " + e.getMessage(), e);
+        }
+    }
+
+    private static String getType(String type) {
+        if (APIConstants.API_TYPE_WS.equals(type) || APIConstants.API_TYPE_WEBSUB.equals(type) ||
+                APIConstants.API_TYPE_SSE.equals(type) || APIConstants.API_TYPE_ASYNC.equals(type) ||
+                APIConstants.API_TYPE_WEBHOOK.equals(type)) {
+            return "AsyncAPI";
+        } else if (APIConstants.API_TYPE_GRAPHQL.equals(type)) {
+            return "GraphQL";
+        } else if (APIConstants.API_TYPE_SOAP.equals(type)) {
+            return "SOAP";
+        } else {
+            return "REST";
+        }
     }
 
     private static List<Map<String, String>> convertToSubscriptionPolicies(Object[] tiers) {
