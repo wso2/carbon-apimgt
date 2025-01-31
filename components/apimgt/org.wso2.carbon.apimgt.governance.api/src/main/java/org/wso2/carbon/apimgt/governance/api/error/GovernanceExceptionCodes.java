@@ -169,6 +169,12 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ARTIFACT_NOT_FOUND_WITH_NAME_AND_VERSION(600006, "Artifact not found with name and version.",
             404, "Artifact not found with name: %s and version: %s in the organization: %s"),
 
+    ERROR_FAILED_TO_READ_ARTIFACT_PROJECT(600007, "Error while reading artifact project.",
+            500, "Error while reading artifact project from given file path. ", true),
+
+    INVALID_ARTIFACT_TYPE(600008, "Invalid artifact type.",
+            400, "Invalid artifact type: %s"),
+
     // APIM related codes
 
     ERROR_WHILE_GETTING_API_INFO(700001, "Error while getting API name/version with ID.",
@@ -198,6 +204,9 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_GETTING_API_UUID_WITH_NAME_VERSION(700011, "Error while getting API UUID " +
             "with name and version.",
             500, "Error while getting API UUID with name: %s and version: %s", true),
+
+    ERROR_WHILE_GETTING_API_TYPE(700012, "Error while getting API type.",
+            500, "Error while getting API type for API with ID: %s", true),
     ;
 
     private final long errorCode;

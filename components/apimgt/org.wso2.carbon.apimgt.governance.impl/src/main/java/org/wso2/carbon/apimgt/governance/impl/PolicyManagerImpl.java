@@ -222,7 +222,7 @@ public class PolicyManagerImpl implements PolicyManager {
      */
     @Override
     public Map<String, String> getOrganizationWidePolicies(String organization) throws GovernanceException {
-        return policyMgtDAO.getPoliciesWithoutLabels(organization);
+        return policyMgtDAO.getPoliciesWithGlobalLabel(organization);
     }
 
     /**
@@ -251,7 +251,7 @@ public class PolicyManagerImpl implements PolicyManager {
     @Override
     public List<String> getOrganizationWidePoliciesByState(GovernableState state, String organization)
             throws GovernanceException {
-        return policyMgtDAO.getPoliciesWithoutLabelsByState(state, organization);
+        return policyMgtDAO.getPoliciesWithGlobalLabelByState(state, organization);
     }
 
     /**

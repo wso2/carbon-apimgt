@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.util.ArrayList;
@@ -83,7 +85,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * Evaluate compliance of the artifact asynchronously
      *
      * @param artifactId   Artifact ID
-     * @param artifactType Artifact type (ArtifactType.REST_API) , Needs to be specific
+     * @param artifactType Artifact type ArtifactType.API
      *                     , DO NOT USE ArtifactType.API
      * @param state        State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param organization Organization
@@ -105,37 +107,11 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     }
 
     /**
-     * Evaluate compliance of the artifact asynchronously
-     *
-     * @param artifactName    Artifact name
-     * @param artifactVersion Artifact version
-     * @param artifactType    Artifact type (ArtifactType.REST_API)
-     * @param state           State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
-     * @param organization    Organization
-     * @throws GovernanceException If an error occurs while evaluating compliance
-     */
-    @Override
-    public void evaluateComplianceAsync(String artifactName, String artifactVersion, ArtifactType artifactType,
-                                        GovernableState state, String organization) throws GovernanceException {
-
-        String artifactId = GovernanceUtil.getArtifactId(artifactName, artifactVersion, artifactType, organization);
-
-        if (artifactId == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.ARTIFACT_NOT_FOUND_WITH_NAME_AND_VERSION,
-                    artifactName, artifactVersion);
-        }
-
-        evaluateComplianceAsync(artifactId, artifactType, state, organization);
-
-    }
-
-    /**
      * Evaluate compliance of the artifact synchronously
      *
      * @param artifactId             Artifact ID
      * @param revisionNo             Revision number
-     * @param artifactType           Artifact type (ArtifactType.REST_API) , Needs to be specific ,
-     *                               DO NOT USE ArtifactType.API
+     * @param artifactType           Artifact type ArtifactType.API
      * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
      *                               project. This is used to evaluate the compliance of the artifact.
@@ -168,12 +144,51 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         return artifactComplianceInfo;
     }
 
+
+    /**
+     * This method can be caled to evaluate the compliance of the artifact without persisting the compliance data (A
+     * dry run) using the provided artifact content file path and the artifact type.
+     * <p>
+     * The artifact will be evaluated agianst all the global policies configured in the system.
+     *
+     * @param artifactType Artifact type (ArtifactType.REST_API, etc) Needs tp specific to read the definition from
+     *                     project
+     * @param filePath     File path of the artifact content (ZIP Path)
+     * @param organization Organization
+     * @return ArtifactComplianceDryRunInfo object
+     * @throws GovernanceException If an error occurs while evaluating compliance
+     */
+    @Override
+    public ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ArtifactType artifactType, String filePath,
+                                                                     String organization) throws GovernanceException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Evaluating compliance for the artifact with the file path: " + filePath);
+        }
+
+        byte[] projectContent = GovernanceUtil.getArtifactProjectContent(filePath);
+        Map<String, String> policies = policyManager.getOrganizationWidePolicies(organization);
+
+        List<String> applicablePolicyIds = new ArrayList<>(policies.keySet());
+
+        // Only extract content if the artifact type requires it.
+        if (ArtifactType.isArtifactAPI(artifactType)) {
+            Map<RuleType, String> contentMap = APIMUtil
+                    .extractAPIProjectContent(projectContent, null, artifactType);
+            return complianceManager.handleComplianceEvaluationDryRun(artifactType, applicablePolicyIds,
+                    contentMap, organization);
+        } else {
+            throw new GovernanceException(GovernanceExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType.toString());
+        }
+
+
+    }
+
     /**
      * Handle artifact label attach
      *
      * @param artifactId   Artifact ID
-     * @param artifactType Artifact type (ArtifactType.REST_API) , Needs to be specific ,
-     *                     DO NOT USE ArtifactType.API
+     * @param artifactType Artifact type ArtifactType.API
      * @param label        ID of the label to be attached
      * @param organization Organization
      * @throws GovernanceException If an error occurs while attaching the label

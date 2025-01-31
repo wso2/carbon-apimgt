@@ -467,4 +467,19 @@ public class APIMUtil {
         }
     }
 
+    /**
+     * Get the API type
+     *
+     * @param apiId API ID
+     * @return API type
+     * @throws GovernanceException If an error occurs while getting the API type
+     */
+    public static String getAPIType(String apiId) throws GovernanceException {
+        try {
+            return ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
+        } catch (APIManagementException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_TYPE, apiId, e);
+        }
+    }
+
 }

@@ -793,16 +793,16 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     }
 
     /**
-     * Get Policies without labels
+     * Get Policies with Global Label
      *
      * @param organization Organization
      * @return Map of Policy IDs, Policy Names
      */
-    public Map<String, String> getPoliciesWithoutLabels(String organization)
+    public Map<String, String> getPoliciesWithGlobalLabel(String organization)
             throws GovernanceException {
         Map<String, String> policyIds = new HashMap<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_WITHOUT_LABELS)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_WITH_GLOBAL_LABEL)) {
             prepStmt.setString(1, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -818,19 +818,19 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     }
 
     /**
-     * Get Policies without labels by state
+     * Get Policies with Global Label by State
      *
      * @param state        Governable State for the policy
      * @param organization Organization
      * @return List of Policy IDs
      */
     @Override
-    public List<String> getPoliciesWithoutLabelsByState(GovernableState state, String organization)
+    public List<String> getPoliciesWithGlobalLabelByState(GovernableState state, String organization)
             throws GovernanceException {
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                     .GET_POLICIES_WITHOUT_LABELS_BY_STATE)) {
+                     .GET_POLICIES_WITH_GLOBAL_LABEL_BY_STATE)) {
             prepStmt.setString(1, String.valueOf(state));
             prepStmt.setString(2, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {

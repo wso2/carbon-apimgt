@@ -158,11 +158,11 @@ public class SQLConstants {
                     "WHERE GOV_POLICY_LABEL.LABEL = ? " +
                     "AND GOV_POLICY.ORGANIZATION = ?";
 
-    public static final String GET_POLICIES_WITHOUT_LABELS =
+    public static final String GET_POLICIES_WITH_GLOBAL_LABEL =
             "SELECT DISTINCT GOV_POLICY.POLICY_ID, GOV_POLICY.NAME " +
                     "FROM GOV_POLICY " +
                     "LEFT JOIN GOV_POLICY_LABEL ON GOV_POLICY.POLICY_ID = GOV_POLICY_LABEL.POLICY_ID " +
-                    "WHERE GOV_POLICY_LABEL.POLICY_ID IS NULL " +
+                    "WHERE GOV_POLICY_LABEL.LABEL = 'GLOBAL' " +
                     "AND GOV_POLICY.ORGANIZATION = ?";
 
     public static final String GET_POLICIES_BY_LABEL_AND_STATE =
@@ -175,13 +175,13 @@ public class SQLConstants {
                     "AND GOV_POLICY_GOVERNABLE_STATE.STATE = ? " +
                     "AND GOV_POLICY.ORGANIZATION = ?";
 
-    public static final String GET_POLICIES_WITHOUT_LABELS_BY_STATE =
+    public static final String GET_POLICIES_WITH_GLOBAL_LABEL_BY_STATE =
             "SELECT DISTINCT GOV_POLICY.POLICY_ID " +
                     "FROM GOV_POLICY " +
                     "LEFT JOIN GOV_POLICY_LABEL ON GOV_POLICY.POLICY_ID = GOV_POLICY_LABEL.POLICY_ID " +
                     "LEFT JOIN GOV_POLICY_GOVERNABLE_STATE ON GOV_POLICY.POLICY_ID = " +
                     "GOV_POLICY_GOVERNABLE_STATE.POLICY_ID " +
-                    "WHERE GOV_POLICY_LABEL.POLICY_ID IS NULL " +
+                    "WHERE GOV_POLICY_LABEL.LABEL = 'GLOBAL' " +
                     "AND GOV_POLICY_GOVERNABLE_STATE.STATE = ? " +
                     "AND GOV_POLICY.ORGANIZATION = ?";
 
