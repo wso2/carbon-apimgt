@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.api;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
@@ -90,6 +91,22 @@ public interface ComplianceManager {
                                                           Map<RuleType, String> artifactProjectContent,
                                                           GovernableState state,
                                                           String organization)
+            throws GovernanceException;
+
+    /**
+     * Handle API Compliance Evaluation Request Dry Run
+     *
+     * @param artifactType           Artifact Type
+     * @param govPolicies            List of governance policies to be evaluated
+     * @param artifactProjectContent Map of artifact content
+     * @param organization           Organization
+     * @return ArtifactComplianceDryRunInfo object
+     * @throws GovernanceException If an error occurs while handling the API compliance evaluation
+     */
+    ArtifactComplianceDryRunInfo handleComplianceEvaluationDryRun(ArtifactType artifactType,
+                                                                  List<String> govPolicies,
+                                                                  Map<RuleType, String> artifactProjectContent,
+                                                                  String organization)
             throws GovernanceException;
 
 

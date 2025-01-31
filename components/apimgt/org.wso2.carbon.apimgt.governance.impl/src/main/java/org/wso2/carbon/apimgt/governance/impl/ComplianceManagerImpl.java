@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
@@ -36,6 +37,7 @@ import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
@@ -214,6 +216,11 @@ public class ComplianceManagerImpl implements ComplianceManager {
     public void handleComplianceEvaluationAsync(String artifactId, ArtifactType artifactType,
                                                 List<String> govPolicies,
                                                 String organization) throws GovernanceException {
+
+        // If Artifact Type is API get the specific artifact Type
+        if (ArtifactType.API.equals(artifactType)) {
+            artifactType = APIMUtil.getArtifactTypeForAPIType(APIMUtil.getAPIType(artifactId));
+        }
 
         for (String policyId : govPolicies) {
             complianceMgtDAO.addComplianceEvaluationRequest(artifactId, artifactType,
@@ -487,7 +494,13 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
+
         ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
+
+        // If Artifact Type is API get the specific artifact Type
+        if (ArtifactType.API.equals(artifactType)) {
+            artifactType = APIMUtil.getArtifactTypeForAPIType(APIMUtil.getAPIType(artifactId));
+        }
 
         // Check if artifact is SOAP or GRAPHQL TODO: Support SOAP and GraphQL
         if (ArtifactType.SOAP_API.equals(artifactType) || ArtifactType.GRAPHQL_API.equals(artifactType)) {
@@ -573,6 +586,79 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
     }
 
+    /**
+     * Handle API Compliance Evaluation Request Dry Run
+     *
+     * @param artifactType           Artifact Type
+     * @param govPolicies            List of governance policies to be evaluated
+     * @param artifactProjectContent Map of artifact content
+     * @param organization           Organization
+     * @return ArtifactComplianceDryRunInfo object
+     * @throws GovernanceException If an error occurs while handling the API compliance evaluation
+     */
+    @Override
+    public ArtifactComplianceDryRunInfo handleComplianceEvaluationDryRun(ArtifactType artifactType,
+                                                                         List<String> govPolicies, Map<RuleType, String>
+                                                                                 artifactProjectContent,
+                                                                         String organization) throws
+            GovernanceException {
+
+        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
+                .getValidationEngineService().getValidationEngine();
+        ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = new ArtifactComplianceDryRunInfo();
+
+        // Check if artifact is SOAP or GRAPHQL TODO: Support SOAP and GraphQL
+        if (ArtifactType.SOAP_API.equals(artifactType) || ArtifactType.GRAPHQL_API.equals(artifactType)) {
+            log.error("Artifact type " + artifactType + " not supported. Skipping governance evaluation");
+            return null;
+        }
+
+        // If artifact content is not provided dry run is not possible
+        if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
+            log.error("No content found in the artifact project.");
+            return null;
+        }
+
+        for (String policyId : govPolicies) {
+            GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
+            List<Ruleset> rulesets = policyMgtDAO.getRulesetsByPolicyId(policyId);
+
+            // Validate the artifact against each ruleset
+            for (Ruleset ruleset : rulesets) {
+                RulesetInfo rulesetInfo = rulesetMgtDAO.getRulesetById(ruleset.getId());
+                ArtifactType rulesetArtifactType = ruleset.getArtifactType();
+
+                // Check if ruleset's artifact type matches with the artifact's type
+                if ((ArtifactType.isArtifactAPI(artifactType) &&
+                        ArtifactType.API.equals(rulesetArtifactType)) ||
+                        (rulesetArtifactType.equals(artifactType))) {
+
+                    // Get target file content from artifact project based on ruleType
+                    RuleType ruleType = ruleset.getRuleType();
+                    String contentToValidate = artifactProjectContent.get(ruleType);
+
+                    if (contentToValidate == null) {
+                        log.warn(ruleType + " content not found in artifact project . Skipping governance evaluation " +
+                                "for ruleset ID: " + ruleset.getId());
+                        continue;
+                    }
+
+                    // Send target content and ruleset for validation
+                    List<RuleViolation> ruleViolations = validationEngine.validate(
+                            contentToValidate, ruleset);
+
+                    artifactComplianceDryRunInfo.addRuleViolationsForRuleset(policy, rulesetInfo, ruleViolations);
+
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Ruleset artifact type does not match with the artifact's type. Skipping " +
+                                "governance evaluation for ruleset ID: " + ruleset.getId());
+                    }
+                }
+            }
+        }
+        return artifactComplianceDryRunInfo;
+    }
 
     /**
      * Filter Blockable and Non-Blockable Rule Violations Based on Policy and Rule Violations

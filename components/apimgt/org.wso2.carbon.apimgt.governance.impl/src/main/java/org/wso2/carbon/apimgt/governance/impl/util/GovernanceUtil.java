@@ -503,7 +503,23 @@ public class GovernanceUtil {
         return null;
     }
 
+    /**
+     * Get artifact content
+     *
+     * @param filePath File path
+     * @return byte[]
+     * @throws GovernanceException If an error occurs while reading the file
+     */
+    public static byte[] getArtifactProjectContent(String filePath) throws GovernanceException {
+        Path path = Paths.get(filePath);
+        try {
+            return Files.readAllBytes(path);
+        } catch (IOException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_READ_ARTIFACT_PROJECT, e);
+        }
+    }
 }
+
 
 
 
