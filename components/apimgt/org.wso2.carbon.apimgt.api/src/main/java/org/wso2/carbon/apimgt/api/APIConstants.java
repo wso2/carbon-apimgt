@@ -49,7 +49,6 @@ public class APIConstants {
 
     public static class AIAPIConstants {
         public static final String LLM_PROVIDERS = "llmProviders";
-        public static final String LLM_PROVIDER_ID = "llmProviderId";
         public static final String API_KEY_IDENTIFIER_TYPE_HEADER = "HEADER";
         public static final String API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER = "QUERY_PARAMETER";
         public static final String AI_API_REQUEST_METADATA = "AI_API_REQUEST_METADATA";
@@ -59,11 +58,8 @@ public class APIConstants {
         public static final String ID = "id";
         public static final String NAME = "name";
         public static final String API_VERSION = "apiVersion";
-        public static final String LLM_PROVIDER_CONFIGURATIONS = "configurations";
         public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
         public static final String CONFIGURATIONS = "configurations";
-        public static final String AI_API_DEFINITION_FILE_PATH = File.separator + "repository" + File.separator +
-                "resources" + File.separator + "api_definitions" + File.separator;
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME = "AzureOpenAI";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION = "1.0.0";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_CONNECTOR = "azureOpenAi_1.0.0";
@@ -96,5 +92,8 @@ public class APIConstants {
         public static final String NULL = "null";
         public static final String LLM_PROVIDER = "LLM_PROVIDER";
         public static final String LLM_PROVIDER_TENANT_ALL = "ALL";
+
+        public static final String TRAFFIC_FLOW_DIRECTION_IN = "IN";
+        public static final String TRAFFIC_FLOW_DIRECTION_OUT = "OUT";
     }
 }

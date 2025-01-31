@@ -275,18 +275,6 @@ public class TemplateBuilderUtil {
                     Collections.emptyMap());
         }
 
-        if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
-            Map<String, String> aiProperties = new HashMap<>();
-            try {
-                aiProperties.put(AIAPIConstants.LLM_PROVIDER_ID, api.getAiConfiguration().getLlmProviderId());
-                vtb.addHandler(
-                        "org.wso2.carbon.apimgt.gateway.handlers.AIAPIHandler"
-                        , aiProperties);
-            } catch (Exception e) {
-                throw new APIManagementException(e);
-            }
-        }
-
         if (!APIUtil.isStreamingApi(api)) {
             Map<String, String> properties = new HashMap<String, String>();
 
