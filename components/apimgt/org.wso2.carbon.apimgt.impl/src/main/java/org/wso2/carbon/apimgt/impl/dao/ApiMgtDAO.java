@@ -15066,6 +15066,15 @@ public class ApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
+                    Map<String, String> additionalProperties = new HashMap();
+                    try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
+                        if (configuration != null) {
+                            String configurationContent = IOUtils.toString(configuration);
+                            additionalProperties = new Gson().fromJson(configurationContent, Map.class);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while converting configurations in " + uuid, e);
+                    }
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -15078,6 +15087,7 @@ public class ApiMgtDAO {
                     env.setGatewayType(gatewayType);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
+                    env.setAdditionalProperties(additionalProperties);
                     envList.add(env);
                 }
             }
@@ -15109,6 +15119,15 @@ public class ApiMgtDAO {
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
+                    Map<String, String> additionalProperties = new HashMap();
+                    try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
+                        if (configuration != null) {
+                            String configurationContent = IOUtils.toString(configuration);
+                            additionalProperties = new Gson().fromJson(configurationContent, Map.class);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while converting configurations in " + uuid, e);
+                    }
 
                     env = new Environment();
                     env.setId(id);
@@ -15119,6 +15138,7 @@ public class ApiMgtDAO {
                     env.setProvider(provider);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
+                    env.setAdditionalProperties(additionalProperties);
                 }
             }
         } catch (SQLException e) {
@@ -15152,7 +15172,9 @@ public class ApiMgtDAO {
                 prepStmt.setString(5, environment.getDescription());
                 prepStmt.setString(6, environment.getProvider());
                 prepStmt.setString(7, environment.getGatewayType());
-                prepStmt.setString(8, tenantDomain);
+                String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
+                prepStmt.setBinaryStream(8, new ByteArrayInputStream(configurationJson.getBytes()));
+                prepStmt.setString(9, tenantDomain);
                 prepStmt.executeUpdate();
 
                 GatewayVisibilityPermissionConfigurationDTO permissionDTO = environment.getPermissions();
@@ -15330,7 +15352,9 @@ public class ApiMgtDAO {
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_ENVIRONMENT_SQL)) {
                 prepStmt.setString(1, environment.getDisplayName());
                 prepStmt.setString(2, environment.getDescription());
-                prepStmt.setString(3, environment.getUuid());
+                String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
+                prepStmt.setBinaryStream(3, new ByteArrayInputStream(configurationJson.getBytes()));
+                prepStmt.setString(4, environment.getUuid());
                 prepStmt.executeUpdate();
                 deleteGatewayVhosts(connection, environment.getId());
                 addGatewayVhosts(connection, environment.getId(), environment.getVhosts());
