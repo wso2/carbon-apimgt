@@ -121,9 +121,10 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String gatewayType = body.getGatewayType();
-            if (!(APIConstants.API_GATEWAY_TYPE_REGULAR.equals(gatewayType) || APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType))) {
-                throw new APIManagementException("Invalid gateway type: " + gatewayType);
-            }
+            //todo: temporarily disabling the gateway type validation
+//            if (!(APIConstants.API_GATEWAY_TYPE_REGULAR.equals(gatewayType) || APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType))) {
+//                throw new APIManagementException("Invalid gateway type: " + gatewayType);
+//            }
             if (APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType) && hasUnsupportedVhostConfiguration(body.getVhosts())) {
                 throw new APIManagementException("Unsupported Vhost Configuration for gateway type: " + gatewayType);
             }
