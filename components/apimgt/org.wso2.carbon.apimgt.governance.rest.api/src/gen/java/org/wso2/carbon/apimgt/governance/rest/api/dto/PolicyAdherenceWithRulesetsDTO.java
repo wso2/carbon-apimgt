@@ -26,8 +26,8 @@ import javax.validation.Valid;
 
 public class PolicyAdherenceWithRulesetsDTO   {
   
-    private String policyId = null;
-    private String policyName = null;
+    private String id = null;
+    private String name = null;
 
           @XmlType(name="StatusEnum")
     @XmlEnum(String.class)
@@ -66,37 +66,37 @@ return null;
   /**
    * UUID of the policy.
    **/
-  public PolicyAdherenceWithRulesetsDTO policyId(String policyId) {
-    this.policyId = policyId;
+  public PolicyAdherenceWithRulesetsDTO id(String id) {
+    this.id = id;
     return this;
   }
 
   
   @ApiModelProperty(example = "123e4567-e89b-12d3-a456-426614174000", value = "UUID of the policy.")
-  @JsonProperty("policyId")
-  public String getPolicyId() {
-    return policyId;
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
-  public void setPolicyId(String policyId) {
-    this.policyId = policyId;
+  public void setId(String id) {
+    this.id = id;
   }
 
   /**
    * Name of the policy.
    **/
-  public PolicyAdherenceWithRulesetsDTO policyName(String policyName) {
-    this.policyName = policyName;
+  public PolicyAdherenceWithRulesetsDTO name(String name) {
+    this.name = name;
     return this;
   }
 
   
   @ApiModelProperty(example = "Policy1", value = "Name of the policy.")
-  @JsonProperty("policyName")
-  public String getPolicyName() {
-    return policyName;
+  @JsonProperty("name")
+  public String getName() {
+    return name;
   }
-  public void setPolicyName(String policyName) {
-    this.policyName = policyName;
+  public void setName(String name) {
+    this.name = name;
   }
 
   /**
@@ -146,15 +146,15 @@ return null;
       return false;
     }
     PolicyAdherenceWithRulesetsDTO policyAdherenceWithRulesets = (PolicyAdherenceWithRulesetsDTO) o;
-    return Objects.equals(policyId, policyAdherenceWithRulesets.policyId) &&
-        Objects.equals(policyName, policyAdherenceWithRulesets.policyName) &&
+    return Objects.equals(id, policyAdherenceWithRulesets.id) &&
+        Objects.equals(name, policyAdherenceWithRulesets.name) &&
         Objects.equals(status, policyAdherenceWithRulesets.status) &&
         Objects.equals(rulesetValidationResults, policyAdherenceWithRulesets.rulesetValidationResults);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyId, policyName, status, rulesetValidationResults);
+    return Objects.hash(id, name, status, rulesetValidationResults);
   }
 
   @Override
@@ -162,8 +162,8 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class PolicyAdherenceWithRulesetsDTO {\n");
     
-    sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
-    sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    rulesetValidationResults: ").append(toIndentedString(rulesetValidationResults)).append("\n");
     sb.append("}");

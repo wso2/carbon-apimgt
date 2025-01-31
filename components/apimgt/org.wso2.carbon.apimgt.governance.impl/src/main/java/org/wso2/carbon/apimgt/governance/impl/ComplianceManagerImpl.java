@@ -391,14 +391,14 @@ public class ComplianceManagerImpl implements ComplianceManager {
     /**
      * Get a map of artifacts evaluated by policy
      *
-     * @param policyId            Policy ID
-     * @param resolveArtifactName Whether the artifact name should be resolved
+     * @param policyId                      Policy ID
+     * @param resolveArtifactNameAndVersion Whether the artifact name,version should be resolved
      * @return Map of artifacts evaluated by policy
      * @throws GovernanceException If an error occurs while getting the artifacts evaluated by policy
      */
     @Override
     public Map<ArtifactComplianceState, List<ArtifactInfo>> getComplianceStateOfEvaluatedArtifactsByPolicy
-    (String policyId, boolean resolveArtifactName) throws GovernanceException {
+    (String policyId, boolean resolveArtifactNameAndVersion) throws GovernanceException {
 
         Map<ArtifactType, List<ComplianceEvaluationResult>> complianceEvaluationResults =
                 complianceMgtDAO.getEvaluationResultsForPolicy(policyId);
@@ -426,8 +426,9 @@ public class ComplianceManagerImpl implements ComplianceManager {
                 ArtifactInfo artifactInfo = new ArtifactInfo();
                 artifactInfo.setArtifactId(artifactId);
                 artifactInfo.setArtifactType(artifactType);
-                if (resolveArtifactName) {
-                    artifactInfo.setDisplayName(GovernanceUtil.getArtifactName(artifactId, artifactType));
+                if (resolveArtifactNameAndVersion) {
+                    artifactInfo.setName(GovernanceUtil.getArtifactName(artifactId, artifactType));
+                    artifactInfo.setVersion(GovernanceUtil.getArtifactVersion(artifactId, artifactType));
                 }
                 if (nonCompliantArtifacts.contains(artifactId)) {
                     complianceStateOfEvaluatedArtifacts.get(ArtifactComplianceState.NON_COMPLIANT).add(artifactInfo);

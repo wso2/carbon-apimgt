@@ -2,21 +2,28 @@ package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
+import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApiService;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceForPolicyDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryForPolicyDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactInfoDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceDetailsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceStatusDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceSummaryDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.mappings.ResultsMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +59,13 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
         int followedCount = adherenceMap.get(PolicyAdherenceSate.FOLLOWED).size();
         int violatedCount = adherenceMap.get(PolicyAdherenceSate.VIOLATED).size();
 
-        PolicyAdherenceSummaryDTO summaryDTO = ResultsMappingUtil.getPolicyAdherenceSummary(policyIds.size(),
-                followedCount, violatedCount);
+        PolicyAdherenceSummaryDTO policyAdherenceSummaryDTO = new PolicyAdherenceSummaryDTO();
+        policyAdherenceSummaryDTO.setTotal(policyIds.size());
+        policyAdherenceSummaryDTO.setViolated(violatedCount);
+        policyAdherenceSummaryDTO.setFollowed(followedCount);
+        policyAdherenceSummaryDTO.setUnApplied(policyIds.size() - followedCount - violatedCount);
 
-        return Response.ok().entity(summaryDTO).build();
+        return Response.ok().entity(policyAdherenceSummaryDTO).build();
     }
 
     /**
@@ -71,13 +81,57 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
 
         GovernancePolicy policy = new PolicyManagerImpl().getGovernancePolicyByID(policyId);
 
-        Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifactsByPolicy =
-                new ComplianceManagerImpl().getComplianceStateOfEvaluatedArtifactsByPolicy(policyId, true);
+        Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifacts =
+                new ComplianceManagerImpl().getComplianceStateOfEvaluatedArtifactsByPolicy(policyId,
+                        true);
 
-        PolicyAdherenceDetailsDTO detailsDTO = ResultsMappingUtil.getPolicyAdherenceDetailsDTO(policy,
-                evaluatedArtifactsByPolicy);
+        PolicyAdherenceDetailsDTO policyAdherenceDetailsDTO = new PolicyAdherenceDetailsDTO();
+        policyAdherenceDetailsDTO.setName(policy.getName());
+        policyAdherenceDetailsDTO.setId(policy.getId());
+        List<ArtifactComplianceForPolicyDTO> artifactComplianceForPolicyDTOList = new ArrayList<>();
 
-        return Response.ok().entity(detailsDTO).build();
+        // Set the status of the policy adherence
+        boolean isCompliantArtifactsExist = evaluatedArtifacts.containsKey(ArtifactComplianceState.COMPLIANT) &&
+                !evaluatedArtifacts.get(ArtifactComplianceState.COMPLIANT).isEmpty();
+
+        boolean isNonCompliantArtifactsExist = evaluatedArtifacts.containsKey(ArtifactComplianceState.NON_COMPLIANT) &&
+                !evaluatedArtifacts.get(ArtifactComplianceState.NON_COMPLIANT).isEmpty();
+
+        if (!isNonCompliantArtifactsExist && !isCompliantArtifactsExist) {
+            policyAdherenceDetailsDTO.setStatus(PolicyAdherenceDetailsDTO.StatusEnum.UNAPPLIED);
+        } else if (isNonCompliantArtifactsExist) {
+            policyAdherenceDetailsDTO.setStatus(PolicyAdherenceDetailsDTO.StatusEnum.VIOLATED);
+        } else {
+            policyAdherenceDetailsDTO.setStatus(PolicyAdherenceDetailsDTO.StatusEnum.FOLLOWED);
+        }
+
+        // Set the compliance status of the artifacts attached to the policy
+        for (Map.Entry<ArtifactComplianceState, List<ArtifactInfo>> entry : evaluatedArtifacts.entrySet()) {
+            ArtifactComplianceState complianceState = entry.getKey();
+            List<ArtifactInfo> artifactInfoList = entry.getValue();
+
+            for (ArtifactInfo artifactInfo : artifactInfoList) {
+                ArtifactComplianceForPolicyDTO artifactComplianceForPolicyDTO = new ArtifactComplianceForPolicyDTO();
+                artifactComplianceForPolicyDTO.setId(artifactInfo.getArtifactId());
+
+                ArtifactType artifactType = artifactInfo.getArtifactType();
+                ArtifactInfoDTO infoDTO = new ArtifactInfoDTO();
+                infoDTO.setName(artifactInfo.getName());
+                infoDTO.setVersion(artifactInfo.getVersion());
+                infoDTO.setType(ArtifactType.isArtifactAPI(artifactType) ?
+                        ArtifactInfoDTO.TypeEnum.API : null);
+
+                artifactComplianceForPolicyDTO.setInfo(infoDTO);
+
+                artifactComplianceForPolicyDTO.setStatus(ArtifactComplianceForPolicyDTO
+                        .StatusEnum.valueOf(String.valueOf(complianceState)));
+
+                artifactComplianceForPolicyDTOList.add(artifactComplianceForPolicyDTO);
+            }
+        }
+
+        policyAdherenceDetailsDTO.setEvaluatedArtifacts(artifactComplianceForPolicyDTOList);
+        return Response.ok().entity(policyAdherenceDetailsDTO).build();
 
     }
 
@@ -112,7 +166,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
             int compliantCount = evaluatedArtifactsByPolicy.get(ArtifactComplianceState.COMPLIANT).size();
             int nonCompliantCount = evaluatedArtifactsByPolicy.get(ArtifactComplianceState.NON_COMPLIANT).size();
 
-            PolicyAdherenceStatusDTO policyAdherenceStatusDTO = ResultsMappingUtil.getPolicyAdherenceStatusDTO(
+            PolicyAdherenceStatusDTO policyAdherenceStatusDTO = getPolicyAdherenceStatusDTO(
                     policy, compliantCount, nonCompliantCount);
 
             policyAdherenceStatusDTOs.add(policyAdherenceStatusDTO);
@@ -123,8 +177,76 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
         listDTO.setList(policyAdherenceStatusDTOs);
 
         // Set pagination details for the artifact compliance list
-        ResultsMappingUtil.setPaginationDetailsForPolicyAdherence(listDTO, limit, offset, allPolicies.size());
+        setPaginationDetailsForPolicyAdherence(listDTO, limit, offset, allPolicies.size());
 
         return Response.ok().entity(listDTO).build();
+    }
+
+    /**
+     * Get the policy adherence status
+     *
+     * @param policy                    GovernancePolicy object
+     * @param compliantArtifactCount    total number of compliant artifacts
+     * @param nonCompliantArtifactCount total number of non-compliant artifacts
+     * @return PolicyAdherenceStatusDTO object
+     */
+    private PolicyAdherenceStatusDTO getPolicyAdherenceStatusDTO(GovernancePolicy policy,
+                                                                 int compliantArtifactCount,
+                                                                 int nonCompliantArtifactCount) {
+
+        ArtifactComplianceSummaryForPolicyDTO summaryDTO = new ArtifactComplianceSummaryForPolicyDTO();
+        summaryDTO.setCompliant(compliantArtifactCount);
+        summaryDTO.setNonCompliant(nonCompliantArtifactCount);
+
+        PolicyAdherenceStatusDTO statusDTO = new PolicyAdherenceStatusDTO();
+        statusDTO.setId(policy.getId());
+        statusDTO.setName(policy.getName());
+        statusDTO.setArtifactComplianceSummary(summaryDTO);
+        if (compliantArtifactCount == 0 && nonCompliantArtifactCount == 0) {
+            statusDTO.setStatus(PolicyAdherenceStatusDTO.StatusEnum.UNAPPLIED);
+        } else {
+            statusDTO.setStatus(nonCompliantArtifactCount > 0 ? PolicyAdherenceStatusDTO.StatusEnum.VIOLATED :
+                    PolicyAdherenceStatusDTO.StatusEnum.FOLLOWED);
+        }
+
+        return statusDTO;
+    }
+
+    /**
+     * Set pagination details for the policy adherence list
+     *
+     * @param listDTO PolicyAdherenceListDTO object
+     * @param limit   max number of objects returned
+     * @param offset  starting index
+     * @param size    total number of objects
+     */
+    private void setPaginationDetailsForPolicyAdherence(PolicyAdherenceListDTO listDTO, int limit,
+                                                        int offset, int size) {
+
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setTotal(size);
+
+        // Set previous and next URLs for pagination
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(
+                    GovernanceAPIConstants.POLICY_ADHERENCE_GET_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+        }
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICY_ADHERENCE_GET_URL,
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+        }
+        paginationDTO.setNext(paginatedNext);
+        paginationDTO.setPrevious(paginatedPrevious);
+
+        listDTO.setPagination(paginationDTO);
     }
 }

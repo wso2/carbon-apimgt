@@ -39,8 +39,7 @@ public class GovernanceAPIConstants {
             POLICY_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String ARTIFACT_COMPLIANCE_GET_URL =
-            ARTIFACT_COMPLIANCE_PATH + "?artifactType="
-                    + ARTIFACT_TYPE_PARAM + "&limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+            ARTIFACT_COMPLIANCE_PATH + "/" + ARTIFACT_TYPE_PARAM + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String POLICY_ADHERENCE_GET_URL = POLICY_ADHERENCE_PATH +
             "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;

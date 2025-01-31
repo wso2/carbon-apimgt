@@ -82,18 +82,37 @@ public class APIMUtil {
     }
 
     /**
-     * Get the API name combined with the version
+     * Get the API name
      *
      * @param apiId API ID
-     * @return API name combined with the version
+     * @return API name
      * @throws GovernanceException If an error occurs while getting the API name and version
      */
-    public static String getAPINameCombinedWithVersion(String apiId) throws GovernanceException {
+    public static String getAPIName(String apiId) throws GovernanceException {
+
         try {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            return apiIdentifier.getApiName() + " " + apiIdentifier.getVersion();
+            return apiIdentifier.getApiName();
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_NAME_VERSION_WITH_ID,
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO,
+                    apiId, e);
+        }
+    }
+
+    /**
+     * Get the API version
+     *
+     * @param apiId API ID
+     * @return API version
+     * @throws GovernanceException If an error occurs while getting the API name and version
+     */
+    public static String getAPIVersion(String apiId) throws GovernanceException {
+
+        try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            return apiIdentifier.getVersion();
+        } catch (APIManagementException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO,
                     apiId, e);
         }
     }
@@ -106,6 +125,7 @@ public class APIMUtil {
      * @throws GovernanceException If an error occurs while getting the status of the API
      */
     public static String getAPIStatus(String apiId) throws GovernanceException {
+
         try {
             return ApiMgtDAO.getInstance().getAPIStatusFromAPIUUID(apiId);
         } catch (APIManagementException e) {

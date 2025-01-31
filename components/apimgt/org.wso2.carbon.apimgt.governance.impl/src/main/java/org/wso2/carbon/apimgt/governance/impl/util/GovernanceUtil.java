@@ -419,11 +419,30 @@ public class GovernanceUtil {
      */
     public static String getArtifactName(String artifactId, ArtifactType artifactType)
             throws GovernanceException {
+
         String artifactName = null;
         if (ArtifactType.isArtifactAPI(artifactType)) {
-            artifactName = APIMUtil.getAPINameCombinedWithVersion(artifactId);
+            artifactName = APIMUtil.getAPIName(artifactId);
         }
         return artifactName;
+    }
+
+    /**
+     * Get artifact version
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @return String
+     * @throws GovernanceException If an error occurs while getting the artifact version
+     */
+    public static String getArtifactVersion(String artifactId, ArtifactType artifactType)
+            throws GovernanceException {
+
+        String artifactVersion = null;
+        if (ArtifactType.isArtifactAPI(artifactType)) {
+            artifactVersion = APIMUtil.getAPIVersion(artifactId);
+        }
+        return artifactVersion;
     }
 
     /**

@@ -24,8 +24,8 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ArtifactComplianceApiService {
-      public Response getArtifactComplianceByArtifactId(String artifactId, MessageContext messageContext) throws GovernanceException;
-      public Response getArtifactComplianceForAllArtifacts(Integer limit, Integer offset, String artifactType, MessageContext messageContext) throws GovernanceException;
-      public Response getArtifactComplianceSummary(String artifactType, MessageContext messageContext) throws GovernanceException;
-      public Response getRulesetValidationResultsByArtifactId(String artifactId, String rulesetId, MessageContext messageContext) throws GovernanceException;
+      public Response getComplianceByAPIId(String apiId, MessageContext messageContext) throws GovernanceException;
+      public Response getComplianceStatusListOfAPIs(Integer limit, Integer offset, MessageContext messageContext) throws GovernanceException;
+      public Response getComplianceSummaryForAPIs(MessageContext messageContext) throws GovernanceException;
+      public Response getRulesetValidationResultsByAPIId(String apiId, String rulesetId, MessageContext messageContext) throws GovernanceException;
 }

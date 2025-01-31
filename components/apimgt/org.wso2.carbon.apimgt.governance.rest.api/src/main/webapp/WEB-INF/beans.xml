@@ -54,8 +54,8 @@
 
     <bean id="URLValidationInterceptor"
           class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor">
-        <property name="majorVersion" value="v0"/>
-        <property name="latestVersion" value="v0.1"/>
+        <property name="majorVersion" value="v1"/>
+        <property name="latestVersion" value="v1.1"/>
     </bean>
     <bean id="PreAuthenticationInterceptor"
           class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor"/>
