@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -39,6 +40,7 @@ import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -324,6 +326,16 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                     "broker");
         }
         return true;
+    }
+
+    /**
+     * Get the connection configurations for Solace broker
+     *
+     * @return List<ConfigurationDto> connectionConfigurations
+     */
+    @Override
+    public List<ConfigurationDto> getConnectionConfigurations() {
+        return new ArrayList<>();
     }
 
 }

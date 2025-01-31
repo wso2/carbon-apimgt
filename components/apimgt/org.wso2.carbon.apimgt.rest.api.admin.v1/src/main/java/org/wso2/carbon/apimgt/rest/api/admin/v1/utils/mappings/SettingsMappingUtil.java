@@ -23,11 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
-import org.wso2.carbon.apimgt.api.model.FederatedGatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
@@ -129,13 +129,13 @@ public class SettingsMappingUtil {
 
     private static List<SettingsFederatedGatewayConfigurationDTO> getSettingsFederatedGatewayConfigurationDTOList() {
         List<SettingsFederatedGatewayConfigurationDTO> list = new ArrayList<>();
-        Map<String, FederatedGatewayAgentConfiguration> federatedGatewayConnectorConfigurationMap =
-                APIUtil.getFederatedGatewayConfigurations();
-        federatedGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
+        Map<String, ExternalGatewayDeployer> externalGatewayConnectorConfigurationMap =
+                APIUtil.getExternalGatewayDeployers();
+        externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
             SettingsFederatedGatewayConfigurationDTO settingsFederatedGatewayConfigurationDTO =
                     new SettingsFederatedGatewayConfigurationDTO();
             settingsFederatedGatewayConfigurationDTO.setType(gatewayConfiguration.getType());
-            settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getDisplayName());
+            settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getType());
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
             if (connectionConfigurations != null) {
                 for (ConfigurationDto dto : connectionConfigurations) {
@@ -145,6 +145,16 @@ public class SettingsMappingUtil {
             list.add(settingsFederatedGatewayConfigurationDTO);
 
         });
+
+        //Add APK and Synapse Gateways configured through toml to the list
+        List<String> gatewayTypesFromConfig = APIUtil.getGatewayTypes();
+        for (String type : gatewayTypesFromConfig) {
+            SettingsFederatedGatewayConfigurationDTO gateway = new SettingsFederatedGatewayConfigurationDTO();
+            gateway.setType(type);
+            gateway.setDisplayName(type);
+            list.add(gateway);
+        }
+
         return list;
     }
 
