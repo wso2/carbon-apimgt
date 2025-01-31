@@ -24,7 +24,7 @@ package org.wso2.carbon.apimgt.governance.api;
 public class GovernanceAPIConstants {
     public static final String ORGANIZATION = "organization";
     public static final String RULESET_PATH = "/rulesets";
-    public static final String POLICY_PATH = "/governance-policies";
+    public static final String POLICY_PATH = "/policies";
     public static final String ARTIFACT_COMPLIANCE_PATH = "/artifact-compliance";
     public static final String POLICY_ADHERENCE_PATH = "/policy-adherence";
 

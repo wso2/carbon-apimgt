@@ -37,7 +37,7 @@
                 org.wso2.carbon.apimgt.governance.rest.api.SwaggerYamlApi,
                 org.wso2.carbon.apimgt.governance.rest.api.HealthzApi,
                 org.wso2.carbon.apimgt.governance.rest.api.RulesetsApi,
-                org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApi,
+                org.wso2.carbon.apimgt.governance.rest.api.PoliciesApi,
                 org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi,
                 org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi,
             </param-value>

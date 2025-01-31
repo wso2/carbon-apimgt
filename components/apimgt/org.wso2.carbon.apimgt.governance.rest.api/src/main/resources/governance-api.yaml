@@ -384,7 +384,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthzResponse"
-  /governance-policies:
+  /policies:
     get:
       summary: Retrieves a list of all governance policies.
       description: Retrieves a list of governance policies for the user's organization.
@@ -475,7 +475,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
-  /governance-policies/{policyId}:
+  /policies/{policyId}:
     get:
       summary: Get a specific governance policy
       description: Retrieves details of a specific governance policy identified by the policyId.
