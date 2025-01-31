@@ -35,9 +35,8 @@ public class OrganizationDTO   {
   }
 
   
-  @ApiModelProperty(example = "ece92bdc-e1e6-325c-b6f4-656208a041e9", required = true, value = "UUID of the organization. ")
+  @ApiModelProperty(example = "ece92bdc-e1e6-325c-b6f4-656208a041e9", value = "UUID of the organization. ")
   @JsonProperty("organizationId")
-  @NotNull
   public String getOrganizationId() {
     return organizationId;
   }
@@ -54,8 +53,9 @@ public class OrganizationDTO   {
   }
 
   
-  @ApiModelProperty(example = "ece92bdc-e1e6-325c-b6f4-656208a041e9", value = "External id of the organization. ")
+  @ApiModelProperty(example = "ece92bdc-e1e6-325c-b6f4-656208a041e9", required = true, value = "External id of the organization. ")
   @JsonProperty("externalOrganizationId")
+  @NotNull
   public String getExternalOrganizationId() {
     return externalOrganizationId;
   }

@@ -4889,7 +4889,7 @@ components:
     Organization:
       title: Organization
       required:
-        - organizationId
+        - externalOrganizationId
       type: object
       properties:
         organizationId:
