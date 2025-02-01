@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
@@ -126,6 +127,9 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                              connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_LABEL_MAPPING)) {
                     labels = governancePolicy.getLabels();
                     for (String label : labels) {
+                        if (label.equals(GovernanceConstants.GLOBAL_LABEL)) {
+                            label = GovernanceConstants.GLOBAL_LABEL; // To handle case-sensitive Dbs
+                        }
                         prepStmt.setString(1, GovernanceUtil.generateUUID());
                         prepStmt.setString(2, governancePolicy.getId());
                         prepStmt.setString(3, label);
@@ -510,6 +514,9 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             try (PreparedStatement insertStatement =
                          connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_LABEL_MAPPING)) {
                 for (String label : labelsToAdd) {
+                    if (label.equals(GovernanceConstants.GLOBAL_LABEL)) {
+                        label = GovernanceConstants.GLOBAL_LABEL; // To handle case-sensitive Dbs
+                    }
                     insertStatement.setString(1, GovernanceUtil.generateUUID());
                     insertStatement.setString(2, policyId);
                     insertStatement.setString(3, label);
@@ -719,7 +726,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     ruleset.setRuleCategory(RuleCategory.fromString(
                             rs.getString("RULE_CATEGORY")));
                     ruleset.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    ruleset.setArtifactType(ArtifactType.fromString(
+                    ruleset.setArtifactType(ExtendedArtifactType.fromString(
                             rs.getString("ARTIFACT_TYPE")));
                     rulesetList.add(ruleset);
                 }
@@ -802,8 +809,9 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             throws GovernanceException {
         Map<String, String> policyIds = new HashMap<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_WITH_GLOBAL_LABEL)) {
-            prepStmt.setString(1, organization);
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_BY_LABEL)) {
+            prepStmt.setString(1, GovernanceConstants.GLOBAL_LABEL);
+            prepStmt.setString(2, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     policyIds.put(resultSet.getString("POLICY_ID"),
@@ -830,9 +838,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                     .GET_POLICIES_WITH_GLOBAL_LABEL_BY_STATE)) {
-            prepStmt.setString(1, String.valueOf(state));
-            prepStmt.setString(2, organization);
+                     .GET_POLICIES_BY_LABEL_AND_STATE)) {
+            prepStmt.setString(1, GovernanceConstants.GLOBAL_LABEL);
+            prepStmt.setString(2, String.valueOf(state));
+            prepStmt.setString(3, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     policyIds.add(resultSet.getString("POLICY_ID"));

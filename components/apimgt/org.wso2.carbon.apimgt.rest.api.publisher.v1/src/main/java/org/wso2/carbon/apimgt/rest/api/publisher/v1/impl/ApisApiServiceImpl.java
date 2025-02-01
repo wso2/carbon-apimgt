@@ -607,7 +607,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         updatedAPI.setOrganization(organization);
         try {
             log.info("******* Gov Check: updateTopics *******");
-            checkGovernanceCompliance(updatedAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.ASYNC_API,
+            checkGovernanceCompliance(updatedAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.API,
                     organization, null, null);
             apiProvider.updateAPI(updatedAPI, existingAPI);
         } catch (FaultGatewaysException e) {
@@ -2519,7 +2519,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     API originalAPI = provider.getAPIbyUUID(apiId, organization);
                     log.info("******* Gov Check: updateAPIResourcePoliciesByPolicyId *******");
-                    checkGovernanceCompliance(api.getUuid(), GovernableState.API_UPDATE, ArtifactType.REST_API,
+                    checkGovernanceCompliance(api.getUuid(), GovernableState.API_UPDATE, ArtifactType.API,
                             organization, null, null);
                     provider.updateAPI(api, originalAPI);
                     SequenceUtils.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
@@ -3139,7 +3139,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API createdApi = null;
             if (isSoapAPI) {
                 log.info("******* Gov Check: importWSDLDefinition *******");
-                checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.REST_API,
+                checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.API,
                         organization, null, null);
                 createdApi = importSOAPAPI(validationResponse.getWsdlProcessor().getWSDL(), fileDetail, url,
                         apiToAdd, organization, null);
@@ -3203,7 +3203,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //adding the api
             log.info("******* Gov Check: importSOAPAPI *******");
-            checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.SOAP_API,
+            checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.API,
                     organization, null, null);
             apiProvider.addAPI(apiToAdd);
 
@@ -3250,7 +3250,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //adding the api
             log.info("******* Gov Check: importSOAPToRESTAPI *******");
-            checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.REST_API,
+            checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.API,
                     organization, null, null);
             API createdApi = apiProvider.addAPI(apiToAdd);
             String filename = null;
@@ -3575,7 +3575,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //adding the api
             log.info("******* Gov Check:  importGraphQLSchema *******");
-            checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.GRAPHQL_API,
+            checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.API,
                     organization, null, null);
 
             API createdApi = apiProvider.addAPI(apiToAdd);
@@ -4401,7 +4401,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
                         .getServiceUrl(), null));
                 log.info("******* Gov Check: importServiceFromCatalog *******");
-                checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.REST_API,
+                checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.API,
                         organization, null, null);
                 API api = importSOAPAPI(service.getEndpointDef(), null, null,
                         apiToAdd, organization, service);
@@ -4441,7 +4441,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         int tenantId = APIUtil.getTenantId(username);
-        ArtifactType artifactType = ArtifactType.REST_API;
+        ArtifactType artifactType = ArtifactType.API;
         try {
 
             //validate if api exists
@@ -4462,11 +4462,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
                 validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, null,
                         true, true);
-                artifactType = ArtifactType.REST_API;
+                artifactType = ArtifactType.API;
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                 validationResponseMap = validateAsyncAPISpecification(null, service.getEndpointDef(),
                         null, true, true);
-                artifactType = ArtifactType.ASYNC_API;
+                artifactType = ArtifactType.API;
             } else if (!ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())) {
                 RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to " +
                         "API using the service type " + service.getDefinitionType(), log);
@@ -4487,7 +4487,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (!APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(protocol)) {
                 api.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(),
                         protocol));
-                artifactType = ArtifactType.ASYNC_API;
+                artifactType = ArtifactType.API;
             }
             log.info("******* Gov Check: reimportServiceFromCatalog *******");
             checkGovernanceCompliance(apiId, GovernableState.API_UPDATE, artifactType, organization, null,
@@ -4562,7 +4562,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
         log.info("******* Gov Check: importOpenAPIDefinition *******");
-        checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.REST_API, organization,
+        checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.API, organization,
                 null, null);
         API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
                 service, validationResponse, isServiceAPI, syncOperations);
@@ -4598,7 +4598,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             log.info("******* Gov Check: importOpenAPIDefinition *******");
             checkGovernanceCompliance(apiDTOFromProperties.getId(), GovernableState.API_CREATE,
-                    ArtifactType.REST_API, organization, null, null);
+                    ArtifactType.API, organization, null, null);
             API api = PublisherCommonUtils.importAsyncAPIWithDefinition(validationResponse, isServiceAPI,
                     apiDTOFromProperties, service, organization, apiProvider);
             return APIMappingUtil.fromAPItoDTO(api);

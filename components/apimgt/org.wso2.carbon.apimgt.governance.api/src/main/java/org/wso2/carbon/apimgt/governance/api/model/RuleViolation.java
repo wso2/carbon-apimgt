@@ -23,12 +23,14 @@ package org.wso2.carbon.apimgt.governance.api.model;
  */
 public class RuleViolation {
     private String artifactId; // Artifact which contains the violation
+    private ArtifactType artifactType; // Type of the artifact (API)
     private String policyId; // Policy which was violated
     private String rulesetId; // Ruleset which contains the violated rule
     private String ruleCode;  // Code of the violated rule
     private String violatedPath; // Path in which the violation occurred
     private Severity severity; // Severity of the violation
     private String ruleMessage; // Message of the violated rule
+    private String organization; // Organization of the artifact
 
     public String getArtifactId() {
         return artifactId;
@@ -36,6 +38,14 @@ public class RuleViolation {
 
     public void setArtifactId(String artifactId) {
         this.artifactId = artifactId;
+    }
+
+    public ArtifactType getArtifactType() {
+        return artifactType;
+    }
+
+    public void setArtifactType(ArtifactType artifactType) {
+        this.artifactType = artifactType;
     }
 
     public String getPolicyId() {
@@ -84,5 +94,13 @@ public class RuleViolation {
 
     public void setRuleMessage(String ruleMessage) {
         this.ruleMessage = ruleMessage;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }

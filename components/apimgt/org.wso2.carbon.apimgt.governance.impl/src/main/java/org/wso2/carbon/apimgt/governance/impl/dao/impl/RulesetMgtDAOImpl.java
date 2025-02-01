@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
@@ -194,7 +194,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setRuleCategory(RuleCategory.fromString(
                             rs.getString("RULE_CATEGORY")));
                     rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(ArtifactType.fromString(
+                    rulesetInfo.setArtifactType(ExtendedArtifactType.fromString(
                             rs.getString("ARTIFACT_TYPE")));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
@@ -238,7 +238,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setRuleCategory(RuleCategory.fromString(
                             rs.getString("RULE_CATEGORY")));
                     rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(ArtifactType.fromString(
+                    rulesetInfo.setArtifactType(ExtendedArtifactType.fromString(
                             rs.getString("ARTIFACT_TYPE")));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
@@ -278,7 +278,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rulesetInfo.setRuleCategory(RuleCategory.fromString(
                             rs.getString("RULE_CATEGORY")));
                     rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(ArtifactType.fromString(
+                    rulesetInfo.setArtifactType(ExtendedArtifactType.fromString(
                             rs.getString("ARTIFACT_TYPE")));
                     rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
                     rulesetInfo.setProvider(rs.getString("PROVIDER"));
