@@ -109,7 +109,6 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.FederatedGatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;

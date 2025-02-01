@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
@@ -130,7 +131,7 @@ public class SettingsMappingUtil {
     private static List<SettingsFederatedGatewayConfigurationDTO> getSettingsFederatedGatewayConfigurationDTOList() {
         List<SettingsFederatedGatewayConfigurationDTO> list = new ArrayList<>();
         Map<String, ExternalGatewayDeployer> externalGatewayConnectorConfigurationMap =
-                APIUtil.getExternalGatewayDeployers();
+                ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
         externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
             SettingsFederatedGatewayConfigurationDTO settingsFederatedGatewayConfigurationDTO =
                     new SettingsFederatedGatewayConfigurationDTO();
