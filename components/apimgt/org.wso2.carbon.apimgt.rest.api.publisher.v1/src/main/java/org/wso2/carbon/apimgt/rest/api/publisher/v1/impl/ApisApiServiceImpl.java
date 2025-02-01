@@ -3546,31 +3546,54 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param type APIType
      * @param fileInputStream input file
      * @param fileDetail file Detail
+     * @param url URL of the schema or endpoint
+     * @param schema graphQL schema definition
      * @param additionalProperties api object as string format
      * @param ifMatch If--Match header value
      * @param messageContext messageContext
      * @return Response with GraphQL API
      */
     @Override
-    public Response importGraphQLSchema(String ifMatch, String type, InputStream fileInputStream,
-                                Attachment fileDetail, String additionalProperties, MessageContext messageContext) {
-        APIDTO additionalPropertiesAPI = null;
-        String schema = "";
+    public Response importGraphQLSchema(String ifMatch, String type, InputStream fileInputStream, Attachment fileDetail,
+            String url, String schema, String additionalProperties, MessageContext messageContext) {
 
+        APIDTO additionalPropertiesAPI = null;
+        String graphQLSchema = null;
         try {
-            if (fileInputStream == null || StringUtils.isBlank(additionalProperties)) {
-                String errorMessage = "GraphQL schema and api details cannot be empty.";
+            if (StringUtils.isBlank(additionalProperties)) {
+                String errorMessage = "Api details cannot be empty.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             } else {
-                schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+                additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             }
 
-            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(schema) && log.isDebugEnabled()) {
+            if (schema != null && !schema.isEmpty()) {
+                graphQLSchema = schema;
+            } else if (fileInputStream != null && !StringUtils.isBlank(additionalProperties)) {
+                graphQLSchema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+            } else if (url != null) {
+                graphQLSchema = PublisherCommonUtils.retrieveGraphQLSchemaFromURL(url);
+            } else {
+                Map<String, Object> endpointConfigurationMap = (Map<String, Object>) additionalPropertiesAPI.getEndpointConfig();
+                String endpointURL = "";
+                if (endpointConfigurationMap.containsKey("production_endpoints")) {
+                    Map<String, String> productionEndpoints = (Map<String, String>) endpointConfigurationMap.get(
+                            "production_endpoints");
+                    endpointURL = productionEndpoints.get("url");
+                }
+                graphQLSchema = PublisherCommonUtils.generateGraphQLSchemaFromIntrospection(endpointURL);
+            }
+
+            if (graphQLSchema == null || graphQLSchema.isEmpty()) {
+                throw new APIManagementException("GraphQL Schema cannot be empty or null to validate it",
+                        ExceptionCodes.GRAPHQL_SCHEMA_CANNOT_BE_NULL);
+            }
+
+            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(graphQLSchema) && log.isDebugEnabled()) {
                 log.debug("Deseriallizing additionalProperties: " + additionalProperties + "/n"
-                        + "importing schema: " + schema);
+                        + "importing schema: " + graphQLSchema);
             }
 
-            additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             APIUtil.validateCharacterLengthOfAPIParams(additionalPropertiesAPI.getName(),
                     additionalPropertiesAPI.getVersion(), additionalPropertiesAPI.getContext(),
                     RestApiCommonUtil.getLoggedInUsername());
@@ -3595,7 +3618,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             API createdApi = apiProvider.addAPI(apiToAdd);
 
-            apiProvider.saveGraphqlSchemaDefinition(createdApi.getUuid(), schema, organization);
+            apiProvider.saveGraphqlSchemaDefinition(createdApi.getUuid(), graphQLSchema, organization);
 
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
 
@@ -3664,21 +3687,26 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Validate graphQL Schema
+     *
+     * @param useIntrospection use introspection or not
      * @param fileInputStream  input file
-     * @param fileDetail file Detail
-     * @param messageContext messageContext
+     * @param fileDetail       file Detail
+     * @param url              URL of the schema or endpoint
+     * @param messageContext   messageContext
      * @return Validation response
      */
     @Override
-    public Response validateGraphQLSchema(InputStream fileInputStream, Attachment fileDetail,
-                                          MessageContext messageContext) {
-
+    public Response validateGraphQLSchema(Boolean useIntrospection, InputStream fileInputStream, Attachment fileDetail,
+            String url, MessageContext messageContext) {
+        String schema = null;
+        String filename = null;
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
-        String filename = fileDetail.getContentDisposition().getFilename();
-
         try {
-            String schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
-            validationResponse = PublisherCommonUtils.validateGraphQLSchema(filename, schema);
+            if (fileDetail != null) {
+                filename = fileDetail.getContentDisposition().getFilename();
+                schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+            }
+            validationResponse = PublisherCommonUtils.validateGraphQLSchema(filename, schema, url, useIntrospection);
         } catch (IOException | APIManagementException e) {
             validationResponse.setIsValid(false);
             validationResponse.setErrorMessage(e.getMessage());

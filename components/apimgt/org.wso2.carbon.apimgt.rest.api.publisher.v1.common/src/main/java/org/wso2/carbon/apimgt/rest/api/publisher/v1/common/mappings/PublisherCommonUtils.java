@@ -24,6 +24,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import graphql.introspection.IntrospectionResultToSchema;
+import graphql.language.AstPrinter;
+import graphql.language.Document;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -38,6 +43,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -117,7 +129,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -142,6 +158,8 @@ public class PublisherCommonUtils {
     public static final String SESSION_TIMEOUT_CONFIG_KEY = "sessionTimeOut";
     static APIMGovernanceService apimGovernanceService = ServiceReferenceHolder.getInstance()
             .getAPIMGovernanceService();
+    private static String graphQLIntrospectionQuery = null;
+
 
 
     /**
@@ -2059,47 +2077,60 @@ public class PublisherCommonUtils {
     /**
      * Validate GraphQL Schema.
      *
-     * @param filename file name of the schema
-     * @param schema   GraphQL schema
+     * @param filename          File name of the schema
+     * @param schema           GraphQL schema
+     * @param url              URL of the schema
+     * @param useIntrospection use introspection to obtain schema
+     * @return GraphQLValidationResponseDTO
+     * @throws APIManagementException when error occurred while validating GraphQL schema
      */
-    public static GraphQLValidationResponseDTO validateGraphQLSchema(String filename, String schema)
-            throws APIManagementException {
+    public static GraphQLValidationResponseDTO validateGraphQLSchema(String filename, String schema, String url,
+            Boolean useIntrospection) throws APIManagementException {
 
         String errorMessage;
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
         boolean isValid = false;
         try {
-            if (filename.endsWith(".graphql") || filename.endsWith(".txt") || filename.endsWith(".sdl")) {
-                if (schema.isEmpty()) {
-                    throw new APIManagementException("GraphQL Schema cannot be empty or null to validate it",
-                            ExceptionCodes.GRAPHQL_SCHEMA_CANNOT_BE_NULL);
-                }
-                SchemaParser schemaParser = new SchemaParser();
-                TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
-                GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
-                SchemaValidator schemaValidation = new SchemaValidator();
-                Set<SchemaValidationError> validationErrors = schemaValidation.validateSchema(graphQLSchema);
-
-                if (validationErrors.toArray().length > 0) {
-                    errorMessage = "InValid Schema";
-                    validationResponse.isValid(Boolean.FALSE);
-                    validationResponse.errorMessage(errorMessage);
+            if (url != null && !url.isEmpty()) {
+                if (useIntrospection) {
+                    schema = generateGraphQLSchemaFromIntrospection(url);
                 } else {
-                    validationResponse.setIsValid(Boolean.TRUE);
-                    GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
-                    GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
-                    List<URITemplate> operationList = graphql.extractGraphQLOperationList(typeRegistry, null);
-                    List<APIOperationsDTO> operationArray = APIMappingUtil
-                            .fromURITemplateListToOprationList(operationList);
-                    graphQLInfo.setOperations(operationArray);
-                    GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
-                    schemaObj.setSchemaDefinition(schema);
-                    graphQLInfo.setGraphQLSchema(schemaObj);
-                    validationResponse.setGraphQLInfo(graphQLInfo);
+                    schema = retrieveGraphQLSchemaFromURL(url);
                 }
-            } else {
+            } else if (filename == null) {
+                throw new APIManagementException("GraphQL filename cannot be null",
+                        ExceptionCodes.INVALID_GRAPHQL_FILE);
+            } else if (!filename.endsWith(".graphql") && !filename.endsWith(".txt") && !filename.endsWith(".sdl")) {
                 throw new APIManagementException("Unsupported extension type of file: " + filename,
                         ExceptionCodes.UNSUPPORTED_GRAPHQL_FILE_EXTENSION);
+            }
+
+            if (schema == null || schema.isEmpty()) {
+                throw new APIManagementException("GraphQL Schema cannot be empty or null to validate it",
+                        ExceptionCodes.GRAPHQL_SCHEMA_CANNOT_BE_NULL);
+            }
+
+            SchemaParser schemaParser = new SchemaParser();
+            TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
+            GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
+            SchemaValidator schemaValidation = new SchemaValidator();
+            Set<SchemaValidationError> validationErrors = schemaValidation.validateSchema(graphQLSchema);
+
+            if (validationErrors.toArray().length > 0) {
+                errorMessage = "InValid Schema";
+                validationResponse.isValid(Boolean.FALSE);
+                validationResponse.errorMessage(errorMessage);
+            } else {
+                validationResponse.setIsValid(Boolean.TRUE);
+                GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
+                GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
+                List<URITemplate> operationList = graphql.extractGraphQLOperationList(typeRegistry, null);
+                List<APIOperationsDTO> operationArray = APIMappingUtil.fromURITemplateListToOprationList(operationList);
+                graphQLInfo.setOperations(operationArray);
+                GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
+                schemaObj.setSchemaDefinition(schema);
+                graphQLInfo.setGraphQLSchema(schemaObj);
+                validationResponse.setGraphQLInfo(graphQLInfo);
             }
             isValid = validationResponse.isIsValid();
             errorMessage = validationResponse.getErrorMessage();
@@ -2112,6 +2143,101 @@ public class PublisherCommonUtils {
             validationResponse.setErrorMessage(errorMessage);
         }
         return validationResponse;
+    }
+
+    /**
+     * Generate the GraphQL schema by performing an introspection query on the provided endpoint.
+     *
+     * @param url The URL of the GraphQL endpoint to perform the introspection query on.
+     * @return The GraphQL schema as a string.
+     * @throws APIManagementException If an error occurs during the schema generation process
+     */
+    public static String generateGraphQLSchemaFromIntrospection(String url) throws APIManagementException {
+        String schema = null;
+        try {
+            URL urlObj = new URL(url);
+            HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+            Gson gson = new Gson();
+
+            if (graphQLIntrospectionQuery == null || graphQLIntrospectionQuery.isEmpty()) {
+                graphQLIntrospectionQuery = APIUtil.getIntrospectionQuery();
+            }
+            String requestBody = gson.toJson(
+                    JsonParser.parseString("{\"query\": \"" + graphQLIntrospectionQuery + "\"}"));
+
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.setHeader("Content-Type", "application/json");
+            httpPost.setEntity(new StringEntity(requestBody));
+            HttpResponse response = httpClient.execute(httpPost);
+
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
+                String schemaResponse = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                Type type = new TypeToken<Map<String, Object>>() { }.getType();
+                Map<String, Object> schemaMap = gson.fromJson(schemaResponse, type);
+                Document schemaDocument = new IntrospectionResultToSchema().createSchemaDefinition(
+                        (Map<String, Object>) schemaMap.get("data"));
+                schema = AstPrinter.printAst(schemaDocument);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Unable to generate GraphQL schema from introspection."
+                                    + " Endpoint returned response code: "
+                                    + response.getStatusLine().getStatusCode());
+                }
+            }
+        } catch (MalformedURLException e) {
+            log.error("Invalid GraphQL Endpoint URL. Error: ", e);
+            throw new APIManagementException("Invalid GraphQL Endpoint URL: ");
+        } catch (IOException e) {
+            log.error("I/O error occurred while executing GraphQL Introspection request. Error: ", e);
+            throw new APIManagementException("I/O error occurred while executing HTTP request " +
+                    "for GraphQL introspection.");
+        } catch (JsonSyntaxException e) {
+            log.error("Error parsing JSON response. Error: ", e);
+            throw new APIManagementException("Error parsing GraphQL Introspection JSON response.", e);
+        } catch (Exception e) {
+            log.error("Exception occurred while generating GraphQL schema from endpoint. Exception: ", e);
+            throw new APIManagementException("Error occurred while generating GraphQL schema from introspection",
+                    ExceptionCodes.GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR);
+        }
+        return schema;
+    }
+
+    /**
+     * Retrieve the GraphQL schema from the specified URL.
+     *
+     * @param url The URL of the GraphQL schema to retrieve.
+     * @return The GraphQL schema as a string.
+     * @throws APIManagementException If an error occurs while retrieving the schema
+     */
+    public static String retrieveGraphQLSchemaFromURL(String url) throws APIManagementException {
+        String schema = null;
+        try {
+            URL urlObj = new URL(url);
+            HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+            HttpGet httpGet = new HttpGet(url);
+            HttpResponse response = httpClient.execute(httpGet);
+
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
+                schema = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Unable to generate GraphQL schema from url." + " URL returned response code: "
+                                    + response.getStatusLine().getStatusCode());
+                    throw new APIManagementException("Error occurred while retrieving GraphQL schema from schema URL",
+                            ExceptionCodes.RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR);
+                }
+            }
+        } catch (IOException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Exception occurred while generating GraphQL schema from url. Exception: " + e.getMessage(),
+                        e);
+            }
+            throw new APIManagementException("Error occurred while retrieving GraphQL schema from schema URL",
+                    ExceptionCodes.RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR);
+        }
+        return schema;
     }
 
     /**

@@ -27,11 +27,11 @@ import org.apache.synapse.api.API;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
+import org.wso2.carbon.apimgt.gateway.dto.WebSocketThrottleResponseDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
@@ -56,7 +56,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -247,12 +246,17 @@ public class InboundWebsocketProcessorUtil {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
-            boolean isThrottled = WebsocketUtil.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
-                    applicationLevelThrottleKey);
-            if (isThrottled) {
+            WebSocketThrottleResponseDTO throttleResponseDTO = WebsocketUtil.getThrottleStatus(resourceLevelThrottleKey,
+                                                                                               subscriptionLevelThrottleKey,
+                                                                                               applicationLevelThrottleKey);
+            if (throttleResponseDTO != null) {
                 responseDTO.setError(true);
                 responseDTO.setErrorCode(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR);
                 responseDTO.setErrorMessage(WebSocketApiConstants.FrameErrorConstants.THROTTLED_OUT_ERROR_MESSAGE);
+
+                throttleResponseDTO.setUser(authorizedUser);
+                throttleResponseDTO.setApiContext(inboundMessageContext.getApiContext());
+                responseDTO.setInboundProcessorResponseError(throttleResponseDTO);
             }
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
