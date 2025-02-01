@@ -621,7 +621,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         updatedAPI.setOrganization(organization);
         try {
             Map<String, String> complianceResult = checkGovernanceCompliance(updatedAPI.getUuid(),
-                    GovernableState.API_UPDATE, ArtifactType.ASYNC_API, organization, null, null);
+                    GovernableState.API_UPDATE, ArtifactType.API, organization, null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                     && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -2540,7 +2540,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     API originalAPI = provider.getAPIbyUUID(apiId, organization);
                     Map<String, String> complianceResult = checkGovernanceCompliance(api.getUuid(),
-                            GovernableState.API_UPDATE, ArtifactType.REST_API, organization, null, null);
+                            GovernableState.API_UPDATE, ArtifactType.API, organization, null, null);
                     if (!complianceResult.isEmpty()
                             && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                             && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -3166,7 +3166,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API createdApi = null;
             if (isSoapAPI) {
                 Map<String, String> complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(),
-                        GovernableState.API_CREATE, ArtifactType.REST_API, organization, null, null);
+                        GovernableState.API_CREATE, ArtifactType.API, organization, null, null);
                 if (!complianceResult.isEmpty()
                         && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                         && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -3235,7 +3235,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //adding the api
             Map<String, String> complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(),
-                    GovernableState.API_CREATE, ArtifactType.SOAP_API,
+                    GovernableState.API_CREATE, ArtifactType.API,
                     organization, null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -3287,7 +3287,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //adding the api
             Map<String, String> complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(),
-                    GovernableState.API_CREATE, ArtifactType.REST_API,
+                    GovernableState.API_CREATE, ArtifactType.API,
                     organization, null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -3641,7 +3641,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //adding the api
             Map<String, String> complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(),
-                    GovernableState.API_CREATE, ArtifactType.GRAPHQL_API, organization, null, null);
+                    GovernableState.API_CREATE, ArtifactType.API, organization, null, null);
 
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -3950,7 +3950,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevision.setApiUUID(apiId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
             Map<String, String> complianceResult = checkGovernanceCompliance(apiId, GovernableState.API_DEPLOY,
-                    ArtifactType.REST_API, organization, null, null);
+                    ArtifactType.API, organization, null, null);
 
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -4089,7 +4089,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         Map<String, String> complianceResult = checkGovernanceCompliance(apiId, GovernableState.API_DEPLOY,
-                ArtifactType.REST_API, organization, null,
+                ArtifactType.API, organization, null,
                 null);
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -4490,7 +4490,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
                         .getServiceUrl(), null));
                 Map<String, String> complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(),
-                        GovernableState.API_CREATE, ArtifactType.REST_API, organization, null, null);
+                        GovernableState.API_CREATE, ArtifactType.API, organization, null, null);
                 if (!complianceResult.isEmpty()
                         && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                         && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -4659,7 +4659,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
         Map<String, String> complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE,
-                ArtifactType.REST_API, organization, null, null);
+                ArtifactType.API, organization, null, null);
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -4698,7 +4698,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Map<String, String> complianceResult = checkGovernanceCompliance(apiDTOFromProperties.getId(),
-                    GovernableState.API_CREATE, ArtifactType.REST_API, organization, null, null);
+                    GovernableState.API_CREATE, ArtifactType.API, organization, null, null);
 
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
