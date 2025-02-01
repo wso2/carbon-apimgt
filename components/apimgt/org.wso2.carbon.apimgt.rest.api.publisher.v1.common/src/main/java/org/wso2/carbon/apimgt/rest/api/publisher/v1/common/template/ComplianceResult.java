@@ -20,6 +20,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
 
+/**
+ * Compliance result class
+ * This class is used to store the compliance result of a artifact
+ */
 public class ComplianceResult {
 
         private boolean isCompliant;

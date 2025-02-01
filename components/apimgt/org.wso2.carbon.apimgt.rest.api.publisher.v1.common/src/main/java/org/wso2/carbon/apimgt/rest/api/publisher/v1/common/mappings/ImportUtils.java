@@ -85,7 +85,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ComplianceResult;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -96,6 +95,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -401,11 +401,13 @@ public class ImportUtils {
             }
 
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
-            ComplianceResult complianceResult = checkGovernanceCompliance(importedApi.getUuid(), GovernableState.API_CREATE,
-                    ArtifactType.fromString(apiType), importedApi.getOrganization(), null, null);
-            if (!complianceResult.isCompliant()) {
-                log.warn("API " + importedApi.getId().getApiName() + " is not compliant with the governance " +
-                        "workflow. Compliance result: " + complianceResult.getMessage());
+            Map<String, String> complianceResult = checkGovernanceCompliance(importedApi.getUuid(),
+                    GovernableState.API_CREATE, ArtifactType.fromString(apiType),
+                    importedApi.getOrganization(), null, null);
+            if (!complianceResult.isEmpty()
+                    && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                    && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
 
             apiProvider.updateAPI(importedApi, oldAPI);
@@ -2792,11 +2794,13 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                ComplianceResult complianceResult = checkGovernanceCompliance(importedApiProduct.getUuid(), GovernableState.API_CREATE,
-                        ArtifactType.REST_API, organization, revisionId, null);
-                if (!complianceResult.isCompliant()) {
-                    throw new APIManagementException("API Product is not compliant with the governance " +
-                            "workflow. " + complianceResult.getMessage());
+                Map<String, String> complianceResult = checkGovernanceCompliance(importedApiProduct.getUuid(),
+                        GovernableState.API_CREATE, ArtifactType.REST_API, organization, revisionId, null);
+                if (!complianceResult.isEmpty()
+                        && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                        && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                    RestApiUtil.handleBadRequest(complianceResult
+                            .get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
                 }
                 apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
             } else {

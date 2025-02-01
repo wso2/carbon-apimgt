@@ -59,7 +59,6 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
-import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
@@ -104,9 +103,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ComplianceResult;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
@@ -120,7 +117,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -147,8 +144,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil.getErrorDTO;
-
 /**
  * This is a publisher rest api utility class.
  */
@@ -161,20 +156,19 @@ public class PublisherCommonUtils {
     private static String graphQLIntrospectionQuery = null;
 
 
-
     /**
      * Update API and API definition.
      *
-     * @param originalAPI       existing API
-     * @param apiDtoToUpdate    DTO object with updated API data
-     * @param apiProvider       API Provider
-     * @param tokenScopes       token scopes
-     * @param response          response of the API definition validation
-     * @return                  updated API
-     * @throws APIManagementException   If an error occurs while updating the API and API definition
-     * @throws ParseException           If an error occurs while parsing the endpoint configuration
-     * @throws CryptoException          If an error occurs while encrypting the secret key of API
-     * @throws FaultGatewaysException   If an error occurs while updating manage of an existing API
+     * @param originalAPI    existing API
+     * @param apiDtoToUpdate DTO object with updated API data
+     * @param apiProvider    API Provider
+     * @param tokenScopes    token scopes
+     * @param response       response of the API definition validation
+     * @return updated API
+     * @throws APIManagementException If an error occurs while updating the API and API definition
+     * @throws ParseException         If an error occurs while parsing the endpoint configuration
+     * @throws CryptoException        If an error occurs while encrypting the secret key of API
+     * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
     public static API updateApiAndDefinition(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider,
                                              String[] tokenScopes, APIDefinitionValidationResponse response)
@@ -182,24 +176,25 @@ public class PublisherCommonUtils {
 
         return updateApiAndDefinition(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes, response, true);
     }
-    
+
     /**
      * Update API and API definition. Soap to rest sequence is updated on demand.
      *
-     * @param originalAPI       existing API
-     * @param apiDtoToUpdate    DTO object with updated API data
-     * @param apiProvider       API Provider
-     * @param tokenScopes       token scopes
+     * @param originalAPI                 existing API
+     * @param apiDtoToUpdate              DTO object with updated API data
+     * @param apiProvider                 API Provider
+     * @param tokenScopes                 token scopes
      * @param generateSoapToRestSequences Option to generate soap to rest sequences.
-     * @param response          response of the API definition validation
-     * @return                  updated API
-     * @throws APIManagementException   If an error occurs while updating the API and API definition
-     * @throws ParseException           If an error occurs while parsing the endpoint configuration
-     * @throws CryptoException          If an error occurs while encrypting the secret key of API
-     * @throws FaultGatewaysException   If an error occurs while updating manage of an existing API
+     * @param response                    response of the API definition validation
+     * @return updated API
+     * @throws APIManagementException If an error occurs while updating the API and API definition
+     * @throws ParseException         If an error occurs while parsing the endpoint configuration
+     * @throws CryptoException        If an error occurs while encrypting the secret key of API
+     * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
     public static API updateApiAndDefinition(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider,
-            String[] tokenScopes, APIDefinitionValidationResponse response, boolean generateSoapToRestSequences)
+                                             String[] tokenScopes, APIDefinitionValidationResponse response,
+                                             boolean generateSoapToRestSequences)
             throws APIManagementException, ParseException, CryptoException, FaultGatewaysException {
 
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
@@ -215,11 +210,12 @@ public class PublisherCommonUtils {
             artifactType = ArtifactType.GRAPHQL_API;
         }
 
-        ComplianceResult complianceResult = checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE, artifactType, organization,
-                null, null);
-        if (!complianceResult.isCompliant()) {
-            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
-                    "Governance Compliance Error", 400L, 400));
+        Map<String, String> complianceResult = checkGovernanceCompliance(originalAPI.getUuid(),
+                GovernableState.API_UPDATE, artifactType, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
 
         apiProvider.updateAPI(apiToUpdate, originalAPI);
@@ -242,11 +238,13 @@ public class PublisherCommonUtils {
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
 
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
-        ComplianceResult complianceResult = checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE,
-                ArtifactType.fromString(originalAPI.getType()), originalAPI.getOrganization(), null, null);
-        if (!complianceResult.isCompliant()) {
-            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
-                    "Governance Compliance Error", 400L, 400));
+        Map<String, String> complianceResult = checkGovernanceCompliance(originalAPI.getUuid(),
+                GovernableState.API_UPDATE, ArtifactType.fromString(originalAPI.getType()),
+                originalAPI.getOrganization(), null, null);
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
@@ -271,7 +269,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the API and API definition
      */
     public static void updateCustomBackend(API api, APIProvider apiProvider, String endpointType,
-            InputStream customBackend, String contentDecomp) throws APIManagementException {
+                                           InputStream customBackend, String contentDecomp)
+            throws APIManagementException {
         String fileName = getFileNameFromContentDisposition(contentDecomp);
         if (fileName == null) {
             throw new APIManagementException(
@@ -297,7 +296,6 @@ public class PublisherCommonUtils {
         }
         return null;
     }
-
 
 
     /**
@@ -732,7 +730,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
      */
     public static void encryptEndpointSecurityOAuthCredentials(Map endpointConfig, CryptoUtil cryptoUtil,
-            String oldProductionApiSecret, String oldSandboxApiSecret, APIDTO apidto)
+                                                               String oldProductionApiSecret,
+                                                               String oldSandboxApiSecret, APIDTO apidto)
             throws CryptoException, APIManagementException {
         // OAuth 2.0 backend protection: API Key and API Secret encryption
         String customParametersString;
@@ -1137,10 +1136,10 @@ public class PublisherCommonUtils {
     /**
      * Add API with the generated swagger from the DTO.
      *
-     * @param apiDto     API DTO of the API
-     * @param oasVersion Open API Definition version
-     * @param username   Username
-     * @param organization  Organization Identifier
+     * @param apiDto       API DTO of the API
+     * @param oasVersion   Open API Definition version
+     * @param username     Username
+     * @param organization Organization Identifier
      * @return Created API object
      * @throws APIManagementException Error while creating the API
      * @throws CryptoException        Error while encrypting
@@ -1264,8 +1263,13 @@ public class PublisherCommonUtils {
         }
 
         //adding the api
-        ComplianceResult complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(),  GovernableState.API_CREATE, artifactType, organization,
-                null, null);
+        Map<String, String> complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(),
+                GovernableState.API_CREATE, artifactType, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+        }
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;
     }
@@ -1382,7 +1386,7 @@ public class PublisherCommonUtils {
      * @param endpoints         List of URLs. Extracted URL(s), if any, are added to this list.
      */
     private static void extractURLsFromEndpointConfig(org.json.JSONObject endpointConfigObj, String endpointType,
-            ArrayList<String> endpoints) throws APIManagementException {
+                                                      ArrayList<String> endpoints) throws APIManagementException {
         if (!endpointConfigObj.isNull(endpointType)) {
             org.json.JSONObject endpointObj = endpointConfigObj.optJSONObject(endpointType);
             if (endpointObj != null) {
@@ -1408,8 +1412,8 @@ public class PublisherCommonUtils {
     /**
      * Extract sandbox and production external endpoint URLs and external dev portal URL.
      *
-     * @param apiDto        API DTO of the API
-     * @param endpoints     List of URLs. Extracted URL(s), if any, are added to this list.
+     * @param apiDto    API DTO of the API
+     * @param endpoints List of URLs. Extracted URL(s), if any, are added to this list.
      */
     private static void extractExternalEndpoints(APIDTO apiDto, ArrayList<String> endpoints) {
 
@@ -1480,10 +1484,10 @@ public class PublisherCommonUtils {
     /**
      * Prepares the API Model object to be created using the DTO object.
      *
-     * @param body        APIDTO of the API
-     * @param apiProvider API Provider
-     * @param username    Username
-     * @param organization  Organization Identifier
+     * @param body         APIDTO of the API
+     * @param apiProvider  API Provider
+     * @param username     Username
+     * @param organization Organization Identifier
      * @return API object to be created
      * @throws APIManagementException Error while creating the API
      */
@@ -1673,7 +1677,7 @@ public class PublisherCommonUtils {
      * @param throttlingConfigDTO The APIMaxTpsTokenBasedThrottlingConfigurationDTO to extract data from.
      * @return The TokenBasedThrottlingCountHolder object.
      */
-    public static TokenBasedThrottlingCountHolder buildThrottlingConfiguration (
+    public static TokenBasedThrottlingCountHolder buildThrottlingConfiguration(
             APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigDTO) {
 
         TokenBasedThrottlingCountHolder throttlingConfig = new TokenBasedThrottlingCountHolder();
@@ -1752,7 +1756,8 @@ public class PublisherCommonUtils {
     }
 
     public static String updateAPIDefinition(String apiId, APIDefinitionValidationResponse response,
-                ServiceEntry service, String organization) throws APIManagementException, FaultGatewaysException {
+                                             ServiceEntry service, String organization)
+            throws APIManagementException, FaultGatewaysException {
 
         if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                 ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
@@ -1766,15 +1771,16 @@ public class PublisherCommonUtils {
     /**
      * update AsyncPI definition of the given api.
      *
-     * @param apiId    API Id
-     * @param response response of the AsyncAPI definition validation call
+     * @param apiId        API Id
+     * @param response     response of the AsyncAPI definition validation call
      * @param organization identifier of the organization
      * @return updated AsyncAPI definition
      * @throws APIManagementException when error occurred updating AsyncAPI definition
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response,
-            String organization) throws APIManagementException, FaultGatewaysException {
+                                                  String organization)
+            throws APIManagementException, FaultGatewaysException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         //this will fall if user does not have access to the API or the API does not exist
@@ -1799,11 +1805,12 @@ public class PublisherCommonUtils {
         //updating APi with the new AsyncAPI definition
         existingAPI.setAsyncApiDefinition(apiDefinition);
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
-        ComplianceResult complianceResult = checkGovernanceCompliance(existingAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.ASYNC_API,
-                organization, null, null);
-        if (!complianceResult.isCompliant()) {
-            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
-                    "Governance Compliance Error", 400L, 400));
+        Map<String, String> complianceResult = checkGovernanceCompliance(existingAPI.getUuid(),
+                GovernableState.API_UPDATE, ArtifactType.ASYNC_API, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.updateAPI(existingAPI, oldapi);
         //retrieves the updated AsyncAPI definition
@@ -1813,9 +1820,9 @@ public class PublisherCommonUtils {
     /**
      * update swagger definition of the given api.
      *
-     * @param apiId    API Id
-     * @param response response of a swagger definition validation call
-     * @param organization  Organization Identifier
+     * @param apiId        API Id
+     * @param response     response of a swagger definition validation call
+     * @param organization Organization Identifier
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
@@ -1826,20 +1833,20 @@ public class PublisherCommonUtils {
 
         return updateSwagger(apiId, response, isServiceAPI, organization, true);
     }
-    
+
     /**
      * update swagger definition of the given api. For Soap To Rest APIs, sequences are generated on demand.
-     * 
-     * @param apiId    API Id
-     * @param response response of a swagger definition validation call
-     * @param organization  Organization Identifier
+     *
+     * @param apiId                       API Id
+     * @param response                    response of a swagger definition validation call
+     * @param organization                Organization Identifier
      * @param generateSoapToRestSequences Option to generate soap to rest sequences.
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
     public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI,
-            String organization, boolean generateSoapToRestSequences)
+                                       String organization, boolean generateSoapToRestSequences)
             throws APIManagementException, FaultGatewaysException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1852,11 +1859,12 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        ComplianceResult complianceResult = checkGovernanceCompliance(apiId, GovernableState.API_UPDATE, ArtifactType.REST_API, organization,
-                null, null);
-        if (!complianceResult.isCompliant()) {
-            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
-                    "Governance Compliance Error", 400L, 400));
+        Map<String, String> complianceResult = checkGovernanceCompliance(apiId, GovernableState.API_UPDATE,
+                ArtifactType.REST_API, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
 
@@ -1869,13 +1877,13 @@ public class PublisherCommonUtils {
     /**
      * Prepare the API object before updating swagger.
      *
-     * @param apiId         API Id
-     * @param response      response of a swagger definition validation call
-     * @param isServiceAPI  whether the API is a service API or not
-     * @param apiProvider   API Provider
-     * @param organization  tenant domain
-     * @param oasParser     OASParser for the API definition
-     * @param existingAPI   existing API
+     * @param apiId        API Id
+     * @param response     response of a swagger definition validation call
+     * @param isServiceAPI whether the API is a service API or not
+     * @param apiProvider  API Provider
+     * @param organization tenant domain
+     * @param oasParser    OASParser for the API definition
+     * @param existingAPI  existing API
      * @throws APIManagementException when error occurred updating swagger
      */
     private static void prepareForUpdateSwagger(String apiId, APIDefinitionValidationResponse response,
@@ -2062,12 +2070,12 @@ public class PublisherCommonUtils {
         originalAPI.setUriTemplates(uriTemplates);
 
         apiProvider.saveGraphqlSchemaDefinition(originalAPI.getUuid(), schemaDefinition, originalAPI.getOrganization());
-        ComplianceResult complianceResult = checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.GRAPHQL_API,
-                originalAPI.getOrganization(), null, null);
-
-        if (!complianceResult.isCompliant()) {
-            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
-                    "Governance Compliance Error", 400L, 400));
+        Map<String, String> complianceResult = checkGovernanceCompliance(originalAPI.getUuid(),
+                GovernableState.API_UPDATE, ArtifactType.GRAPHQL_API, originalAPI.getOrganization(), null, null);
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.updateAPI(originalAPI, oldApi);
 
@@ -2077,7 +2085,7 @@ public class PublisherCommonUtils {
     /**
      * Validate GraphQL Schema.
      *
-     * @param filename          File name of the schema
+     * @param filename         File name of the schema
      * @param schema           GraphQL schema
      * @param url              URL of the schema
      * @param useIntrospection use introspection to obtain schema
@@ -2085,7 +2093,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException when error occurred while validating GraphQL schema
      */
     public static GraphQLValidationResponseDTO validateGraphQLSchema(String filename, String schema, String url,
-            Boolean useIntrospection) throws APIManagementException {
+                                                                     Boolean useIntrospection)
+            throws APIManagementException {
 
         String errorMessage;
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
@@ -2172,7 +2181,8 @@ public class PublisherCommonUtils {
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 String schemaResponse = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                Type type = new TypeToken<Map<String, Object>>() { }.getType();
+                Type type = new TypeToken<Map<String, Object>>() {
+                }.getType();
                 Map<String, Object> schemaMap = gson.fromJson(schemaResponse, type);
                 Document schemaDocument = new IntrospectionResultToSchema().createSchemaDefinition(
                         (Map<String, Object>) schemaMap.get("data"));
@@ -2259,10 +2269,10 @@ public class PublisherCommonUtils {
     /**
      * Add document DTO.
      *
-     * @param documentDto Document DTO
-     * @param apiId       API UUID
+     * @param documentDto  Document DTO
+     * @param apiId        API UUID
+     * @param organization Identifier of an Organization
      * @return Added documentation
-     * @param organization  Identifier of an Organization
      * @throws APIManagementException If an error occurs when retrieving API Identifier,
      *                                when checking whether the documentation exists and when adding the documentation
      */
@@ -2465,13 +2475,14 @@ public class PublisherCommonUtils {
      *
      * @param apiProductDTO API Product DTO
      * @param username      Username
-     * @param organization Identifier of the organization
+     * @param organization  Identifier of the organization
      * @return Created API Product object
      * @throws APIManagementException Error while creating the API Product
      * @throws FaultGatewaysException Error while adding the API Product to gateway
      */
     public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String username,
-            String organization) throws APIManagementException, FaultGatewaysException {
+                                                                         String organization)
+            throws APIManagementException, FaultGatewaysException {
 
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2595,7 +2606,7 @@ public class PublisherCommonUtils {
     }
 
     private static void checkDuplicateContext(APIProvider apiProvider, APIProductDTO apiProductDTO, String username,
-            String organization)
+                                              String organization)
             throws APIManagementException {
 
         String context = apiProductDTO.getContext();
@@ -2699,7 +2710,7 @@ public class PublisherCommonUtils {
      * @param swaggerContent Swagger content
      * @param api            API to update
      * @param apiProvider    API Provider
-     * @param organization  Organization Identifier
+     * @param organization   Organization Identifier
      * @return Updated API Object
      * @throws APIManagementException If an error occurs while generating the sequences or updating the API
      * @throws FaultGatewaysException If an error occurs while updating the API
@@ -2710,11 +2721,12 @@ public class PublisherCommonUtils {
         List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent);
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), organization);
         updatedAPI.setSoapToRestSequences(list);
-        ComplianceResult complianceResult = checkGovernanceCompliance(updatedAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.API, organization,
-                null, null);
-        if (!complianceResult.isCompliant()) {
-            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
-                    "Governance Compliance Error", 400L, 400));
+        Map<String, String> complianceResult = checkGovernanceCompliance(updatedAPI.getUuid(),
+                GovernableState.API_UPDATE, ArtifactType.API, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         return apiProvider.updateAPI(updatedAPI, api);
     }
@@ -2722,10 +2734,10 @@ public class PublisherCommonUtils {
     /**
      * Change the lifecycle state of an API or API Product identified by UUID
      *
-     * @param action       LC state change action
+     * @param action         LC state change action
      * @param apiTypeWrapper API Type Wrapper (API or API Product)
-     * @param lcChecklist  LC state change check list
-     * @param organization Organization of logged-in user
+     * @param lcChecklist    LC state change check list
+     * @param organization   Organization of logged-in user
      * @return APIStateChangeResponse
      * @throws APIManagementException Exception if there is an error when changing the LC state of API or API Product
      */
@@ -2763,7 +2775,7 @@ public class PublisherCommonUtils {
     /**
      * Retrieve lifecycle history of API or API Product by Identifier
      *
-     * @param uuid    Unique UUID of API or API Product
+     * @param uuid Unique UUID of API or API Product
      * @return LifecycleHistoryDTO object
      * @throws APIManagementException exception if there is an error when retrieving the LC history
      */
@@ -2827,7 +2839,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while importing the Async API definition
      */
     public static API importAsyncAPIWithDefinition(APIDefinitionValidationResponse validationResponse,
-            Boolean isServiceAPI, APIDTO apiDto, ServiceEntry service, String organization, APIProvider apiProvider)
+                                                   Boolean isServiceAPI, APIDTO apiDto, ServiceEntry service,
+                                                   String organization, APIProvider apiProvider)
             throws APIManagementException {
         String definitionToAdd = validationResponse.getJsonContent();
         String protocol = validationResponse.getProtocol();
@@ -2856,12 +2869,13 @@ public class PublisherCommonUtils {
                         apiToAdd.getGatewayVendor())));
         apiToAdd.setOrganization(organization);
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
-        ComplianceResult complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.ASYNC_API, organization,
-                null, null);
+        Map<String, String> complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE,
+                ArtifactType.ASYNC_API, organization, null, null);
 
-        if (!complianceResult.isCompliant()) {
-            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
-                    "Governance Compliance Error", 400L, 400));
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.addAPI(apiToAdd);
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
@@ -2871,7 +2885,7 @@ public class PublisherCommonUtils {
      * This method is used to validate the mandatory custom properties of an API
      *
      * @param customProperties custom properties of the API
-     * @param apiDto API DTO to validate
+     * @param apiDto           API DTO to validate
      * @return list of erroneous property names. returns an empty array if there are no errors.
      */
     public static List<String> validateMandatoryProperties(org.json.simple.JSONArray customProperties, APIDTO apiDto) {
@@ -2909,10 +2923,12 @@ public class PublisherCommonUtils {
         return errorPropertyNames;
     }
 
-    public static ComplianceResult checkGovernanceCompliance(String artifactID, GovernableState state,
-                                                 ArtifactType type, String organization, String revisionId,
-                                                 Map<RuleType, String> artifactProjectContent) {
-        log.info("Artifact ID " + artifactID);
+    public static Map<String, String> checkGovernanceCompliance(String artifactID, GovernableState state,
+                                                                ArtifactType type, String organization,
+                                                                String revisionId, Map<RuleType,
+            String> artifactProjectContent) {
+        Map<String, String> responseMap = new HashMap<>(2);
+
         try {
             if (apimGovernanceService.isPoliciesWithBlockingActionExist(artifactID, type, state, organization)) {
                 if (log.isDebugEnabled()) {
@@ -2921,7 +2937,9 @@ public class PublisherCommonUtils {
                 ArtifactComplianceInfo artifactComplianceInfo = apimGovernanceService.evaluateComplianceSync(artifactID,
                         revisionId, type, state, artifactProjectContent, organization);
                 if (artifactComplianceInfo.isBlockingNecessary()) {
-                    return new ComplianceResult(false, buildBadRequestResponse(artifactComplianceInfo));
+                    responseMap.put("isCompliant", "false");
+                    responseMap.put("message", buildBadRequestResponse(artifactComplianceInfo));
+                    return responseMap;
                 }
             } else {
                 if (log.isDebugEnabled()) {
@@ -2932,9 +2950,9 @@ public class PublisherCommonUtils {
                         state, organization);
             }
         } catch (GovernanceException e) {
-           throw new RuntimeException("Error occurred while executing governance ", e);
+            throw new RuntimeException("Error occurred while executing governance ", e);
         }
-        return new ComplianceResult(true, null);
+        return responseMap;
     }
 
     public static String buildBadRequestResponse(ArtifactComplianceInfo artifactComplianceInfo) {
@@ -2968,4 +2986,5 @@ public class PublisherCommonUtils {
             throw new RuntimeException("Error generating JSON response for governance compliance ", e);
         }
         return jsonViolations;
-    }}
+    }
+}
