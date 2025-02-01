@@ -318,6 +318,5 @@ public final class ImportExportConstants {
     public static final String POLICY_NAME = "name";
 
     // API Endpoints related constants
-    public static final String API_ENDPOINTS_DIRECTORY = "Endpoints";
-    public static final String TYPE_API_ENDPOINT = "endpoints";
+    public static final String API_ENDPOINTS = "endpoints";
 }
