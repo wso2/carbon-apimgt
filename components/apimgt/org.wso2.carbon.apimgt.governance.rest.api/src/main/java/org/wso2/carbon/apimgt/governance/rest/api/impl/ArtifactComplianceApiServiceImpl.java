@@ -90,8 +90,11 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
     public Response getRulesetValidationResultsByAPIId(String apiId, String rulesetId, MessageContext messageContext)
             throws GovernanceException {
 
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        ArtifactType artifactType = ArtifactType.API;
+
         RulesetValidationResultDTO rulesetValidationResultDTO = ComplianceAPIUtil
-                .getRulesetValidationResultDTO(apiId, rulesetId);
+                .getRulesetValidationResultDTO(apiId, artifactType, rulesetId, organization);
 
         return Response.ok().entity(rulesetValidationResultDTO).build();
     }

@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -52,7 +52,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
-
 
 /**
  * This is the implementation class for the Rulesets API.
@@ -87,7 +86,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             ruleset.setName(name);
             ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
             ruleset.setRuleType(RuleType.fromString(ruleType));
-            ruleset.setArtifactType(ArtifactType.fromString(artifactType));
+            ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
             ruleset.setProvider(provider);
             ruleset.setDescription(description);
             ruleset.setDocumentationLink(documentationLink);
@@ -294,7 +293,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             ruleset.setName(name);
             ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
             ruleset.setRuleType(RuleType.fromString(ruleType));
-            ruleset.setArtifactType(ArtifactType.fromString(artifactType));
+            ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
             ruleset.setProvider(provider);
             ruleset.setId(rulesetId);
             ruleset.setDescription(description);

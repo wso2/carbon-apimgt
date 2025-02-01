@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
@@ -38,8 +39,6 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
-import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
-import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -74,6 +73,24 @@ public class GovernanceUtil {
         return uuid.toString();
     }
 
+    /**
+     * Get map from YAML string content
+     *
+     * @param content String content
+     * @return Map
+     * @throws GovernanceException if an error occurs while parsing YAML content
+     */
+    public static Map<String, Object> getMapFromYAMLStringContent(String content) throws GovernanceException {
+        // Parse YAML content
+        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+        Map<String, Object> rulesetMap;
+        try {
+            rulesetMap = yamlReader.readValue(content, Map.class);
+        } catch (JsonProcessingException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
+        }
+        return rulesetMap;
+    }
 
     /**
      * Resolves system properties and replaces in given in text
@@ -178,46 +195,11 @@ public class GovernanceUtil {
         ruleset.setDescription(defaultRuleset.getDescription());
         ruleset.setRuleCategory(RuleCategory.fromString(defaultRuleset.getRuleCategory()));
         ruleset.setRuleType(RuleType.fromString(defaultRuleset.getRuleType()));
-        ruleset.setArtifactType(ArtifactType.fromString(defaultRuleset.getArtifactType()));
+        ruleset.setArtifactType(ExtendedArtifactType.fromString(defaultRuleset.getArtifactType()));
         ruleset.setProvider(defaultRuleset.getProvider());
         ruleset.setRulesetContent(defaultRuleset.getRulesetContentString());
         ruleset.setDocumentationLink(defaultRuleset.getDocumentationLink());
         return ruleset;
-    }
-
-    /**
-     * Get map from YAML string content
-     *
-     * @param content String content
-     * @return Map
-     * @throws GovernanceException if an error occurs while parsing YAML content
-     */
-    public static Map<String, Object> getMapFromYAMLStringContent(String content) throws GovernanceException {
-        // Parse YAML content
-        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-        Map<String, Object> rulesetMap;
-        try {
-            rulesetMap = yamlReader.readValue(content, Map.class);
-        } catch (JsonProcessingException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
-        }
-        return rulesetMap;
-    }
-
-    /**
-     * Get labels for an artifact
-     *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @return List of label IDs
-     */
-    public static List<String> getLabelsForArtifact(String artifactId, ArtifactType artifactType)
-            throws GovernanceException {
-        List<String> labels = new ArrayList<>();
-        if (ArtifactType.isArtifactAPI(artifactType)) {
-            labels = APIMUtil.getLabelIDsForAPI(artifactId);
-        }
-        return labels;
     }
 
     /**
@@ -230,10 +212,30 @@ public class GovernanceUtil {
      */
     public static List<String> getAllArtifacts(ArtifactType artifactType, String organization)
             throws GovernanceException {
-        if (ArtifactType.isArtifactAPI(artifactType)) {
+        if (ArtifactType.API.equals(artifactType)) {
             return APIMUtil.getAllAPIs(organization);
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Get all artifacts as a map of Artifact Type, List of Artifact IDs
+     *
+     * @param organization Organization
+     * @return Map of Artifact Type, List of Artifact IDs
+     * @throws GovernanceException If an error occurs while getting the list of artifacts
+     */
+    public static Map<ArtifactType, List<String>> getAllArtifacts(String organization) throws GovernanceException {
+        Map<ArtifactType, List<String>> artifacts = new HashMap<>();
+
+        for (ArtifactType artifactType : ArtifactType.values()) {
+            if (ArtifactType.API.equals(artifactType)) {
+                List<String> artifactIds = APIMUtil.getAllAPIs(organization);
+                artifacts.put(artifactType, artifactIds);
+            }
+        }
+
+        return artifacts;
     }
 
     /**
@@ -244,37 +246,29 @@ public class GovernanceUtil {
      */
     public static Map<ArtifactType, List<String>> getArtifactsForLabel(String labelId) throws GovernanceException {
         Map<ArtifactType, List<String>> artifacts = new HashMap<>();
-        Map<String, List<String>> apiIds = APIMUtil.getAPIsByLabel(labelId);
-        for (Map.Entry<String, List<String>> entry : apiIds.entrySet()) {
-            ArtifactType artifactType = APIMUtil.getArtifactTypeForAPIType(entry.getKey());
-            if (artifactType != null) {
-                artifacts.put(artifactType, entry.getValue());
+        for (ArtifactType artifactType : ArtifactType.values()) {
+            if (ArtifactType.API.equals(artifactType)) {
+                List<String> artifactIds = APIMUtil.getAPIsByLabel(labelId);
+                artifacts.put(artifactType, artifactIds);
             }
         }
         return artifacts;
     }
 
-
     /**
-     * Get all artifacts for a given artifact type
+     * Get labels for an artifact
      *
-     * @param organization Organization
-     * @return Map of Artifact Type, List of Artifact IDs
-     * @throws GovernanceException If an error occurs while getting the list of artifacts
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @return List of label IDs
      */
-    public static Map<ArtifactType, List<String>> getAllArtifactsMap(String organization) throws GovernanceException {
-        Map<ArtifactType, List<String>> artifacts = new HashMap<>();
-
-        // Get all API Artifacts
-        Map<String, List<String>> artifactsMap = APIMUtil.getAllAPIsByAPIType(organization);
-        for (Map.Entry<String, List<String>> entry : artifactsMap.entrySet()) {
-            ArtifactType artifactType = APIMUtil.getArtifactTypeForAPIType(entry.getKey());
-            if (artifactType != null) {
-                artifacts.put(artifactType, entry.getValue());
-            }
+    public static List<String> getLabelsForArtifact(String artifactId, ArtifactType artifactType)
+            throws GovernanceException {
+        List<String> labels = new ArrayList<>();
+        if (ArtifactType.API.equals(artifactType)) {
+            labels = APIMUtil.getLabelsForAPI(artifactId);
         }
-
-        return artifacts;
+        return labels;
     }
 
     /**
@@ -330,8 +324,8 @@ public class GovernanceUtil {
         Set<String> policies = new HashSet<>();
         for (String label : labels) {
             // Get policies for the label and state
-            List<String> policiesForLabel = policyManager.getPoliciesByLabelAndState(label,
-                    governableState, organization);
+            List<String> policiesForLabel = policyManager
+                    .getPoliciesByLabelAndState(label, governableState, organization);
             if (policiesForLabel != null) {
                 policies.addAll(policiesForLabel);
             }
@@ -373,40 +367,13 @@ public class GovernanceUtil {
      */
     public static boolean isArtifactAvailable(String artifactId, ArtifactType artifactType) {
         artifactType = artifactType != null ? artifactType : ArtifactType.API;
-        
-        boolean isArtifactAPI = ArtifactType.isArtifactAPI(artifactType);
 
         // Check if artifact exists in APIM
         boolean artifactExists = false;
-        if (isArtifactAPI) {
+        if (ArtifactType.API.equals(artifactType)) {
             artifactExists = APIMUtil.isAPIExist(artifactId);
         }
         return artifactExists;
-    }
-
-    /**
-     * Get artifact type
-     *
-     * @param artifactId Artifact ID
-     * @return ArtifactType
-     */
-    public static ArtifactType getArtifactType(String artifactId) throws GovernanceException {
-        ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
-        return complianceMgtDAO.getArtifactInfo(artifactId).getArtifactType();
-    }
-
-    /**
-     * Get parent artifact type from a given artifact ID (API or not)
-     *
-     * @param artifactId Artifact ID
-     * @return ArtifactType
-     */
-    public static ArtifactType getParentArtifactType(String artifactId) throws GovernanceException {
-        ArtifactType artifactType = getArtifactType(artifactId);
-        if (ArtifactType.isArtifactAPI(artifactType)) {
-            return ArtifactType.API;
-        }
-        return null;
     }
 
     /**
@@ -421,7 +388,7 @@ public class GovernanceUtil {
             throws GovernanceException {
 
         String artifactName = null;
-        if (ArtifactType.isArtifactAPI(artifactType)) {
+        if (ArtifactType.API.equals(artifactType)) {
             artifactName = APIMUtil.getAPIName(artifactId);
         }
         return artifactName;
@@ -439,10 +406,46 @@ public class GovernanceUtil {
             throws GovernanceException {
 
         String artifactVersion = null;
-        if (ArtifactType.isArtifactAPI(artifactType)) {
+        if (ArtifactType.API.equals(artifactType)) {
             artifactVersion = APIMUtil.getAPIVersion(artifactId);
         }
         return artifactVersion;
+    }
+
+    /**
+     * Get artifact id from artifact name, version, type and organization
+     *
+     * @param artifactName    Artifact name
+     * @param artifactVersion Artifact version
+     * @param artifactType    Artifact type
+     * @param organization    Organization
+     * @return Artifact ID
+     * @throws GovernanceException If an error occurs while getting the artifact ID
+     */
+    public static String getArtifactId(String artifactName, String artifactVersion, ArtifactType artifactType,
+                                       String organization) throws GovernanceException {
+
+        if (ArtifactType.API.equals(artifactType)) {
+            return APIMUtil.getApiUUID(artifactName, artifactVersion, organization);
+        }
+        return null;
+    }
+
+    /**
+     * Get extended artifact type for an artifact
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @return ExtendedArtifactType
+     * @throws GovernanceException If an error occurs while getting the extended artifact type
+     */
+    public static ExtendedArtifactType getExtendedArtifactTypeForArtifact
+    (String artifactId, ArtifactType artifactType)
+            throws GovernanceException {
+        if (ArtifactType.API.equals(artifactType)) {
+            return APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactId));
+        }
+        return null;
     }
 
     /**
@@ -458,11 +461,10 @@ public class GovernanceUtil {
     public static byte[] getArtifactProjectWithRevision(String artifactId, String revisionNo,
                                                         ArtifactType artifactType,
                                                         String organization) throws GovernanceException {
-        boolean isArtifactAPI = ArtifactType.isArtifactAPI(artifactType);
 
         // Get artifact project from APIM
         byte[] artifactProject = null;
-        if (isArtifactAPI) {
+        if (ArtifactType.API.equals(artifactType)) {
             artifactProject =
                     APIMUtil.getAPIProject(artifactId, revisionNo, organization);
         }
@@ -484,33 +486,30 @@ public class GovernanceUtil {
         return getArtifactProjectWithRevision(artifactId, null, artifactType, organization);
     }
 
-    /**
-     * Get artifact id from artifact name, version, type and organization
-     *
-     * @param artifactName    Artifact name
-     * @param artifactVersion Artifact version
-     * @param artifactType    Artifact type
-     * @param organization    Organization
-     * @return Artifact ID
-     * @throws GovernanceException If an error occurs while getting the artifact ID
-     */
-    public static String getArtifactId(String artifactName, String artifactVersion, ArtifactType artifactType,
-                                       String organization) throws GovernanceException {
 
-        if (ArtifactType.isArtifactAPI(artifactType)) {
-            return APIMUtil.getApiUUID(artifactName, artifactVersion, organization);
+    /**
+     * Extract project content into a map of RuleType and String
+     *
+     * @param project      Project
+     * @param artifactType Artifact Type
+     * @return Map of RuleType and String
+     */
+    public static Map<RuleType, String> extractArtifactProjectContent(byte[] project, ArtifactType artifactType)
+            throws GovernanceException {
+        if (ArtifactType.API.equals(artifactType)) {
+            return APIMUtil.extractAPIProjectContent(project);
         }
         return null;
     }
 
     /**
-     * Get artifact content
+     * Read artifact project content from a file path
      *
      * @param filePath File path
      * @return byte[]
      * @throws GovernanceException If an error occurs while reading the file
      */
-    public static byte[] getArtifactProjectContent(String filePath) throws GovernanceException {
+    public static byte[] readArtifactProjectContent(String filePath) throws GovernanceException {
         Path path = Paths.get(filePath);
         try {
             return Files.readAllBytes(path);
@@ -518,6 +517,7 @@ public class GovernanceUtil {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_READ_ARTIFACT_PROJECT, e);
         }
     }
+
 }
 
 

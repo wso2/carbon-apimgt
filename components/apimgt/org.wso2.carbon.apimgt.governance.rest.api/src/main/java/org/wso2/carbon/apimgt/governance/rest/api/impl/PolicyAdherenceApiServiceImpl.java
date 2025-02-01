@@ -82,7 +82,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
         GovernancePolicy policy = new PolicyManagerImpl().getGovernancePolicyByID(policyId);
 
         Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifacts =
-                new ComplianceManagerImpl().getComplianceStateOfEvaluatedArtifactsByPolicy(policyId,
+                new ComplianceManagerImpl().getArtifactsComplianceForPolicy(policyId,
                         true);
 
         PolicyAdherenceDetailsDTO policyAdherenceDetailsDTO = new PolicyAdherenceDetailsDTO();
@@ -118,8 +118,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
                 ArtifactInfoDTO infoDTO = new ArtifactInfoDTO();
                 infoDTO.setName(artifactInfo.getName());
                 infoDTO.setVersion(artifactInfo.getVersion());
-                infoDTO.setType(ArtifactType.isArtifactAPI(artifactType) ?
-                        ArtifactInfoDTO.TypeEnum.API : null);
+                infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
 
                 artifactComplianceForPolicyDTO.setInfo(infoDTO);
 
@@ -160,7 +159,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
 
         for (GovernancePolicy policy : policies) {
             Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifactsByPolicy =
-                    new ComplianceManagerImpl().getComplianceStateOfEvaluatedArtifactsByPolicy(policy.getId(),
+                    new ComplianceManagerImpl().getArtifactsComplianceForPolicy(policy.getId(),
                             false);
 
             int compliantCount = evaluatedArtifactsByPolicy.get(ArtifactComplianceState.COMPLIANT).size();

@@ -26,7 +26,6 @@ import java.io.File;
 public class GovernanceConstants {
 
     public static final String YAML_FILE_TYPE = ".yaml";
-    public static final String YAML = "YAML";
     public static final String MIGRATE = "migrate";
 
     public static final String DEFINITIONS_FOLDER = "Definitions/";
@@ -36,5 +35,6 @@ public class GovernanceConstants {
 
     public static final String DEFAULT_RULESET_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "governance" + File.separator + "default-rulesets";
+    public static final String GLOBAL_LABEL = "GLOBAL";
 
 }
