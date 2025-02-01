@@ -23,81 +23,81 @@ import javax.validation.Valid;
 
 public class PolicyAdherenceSummaryDTO   {
   
-    private Integer totalPolicies = null;
-    private Integer followedPolicies = null;
-    private Integer violatedPolicies = null;
-    private Integer unAppliedPolicies = null;
+    private Integer total = null;
+    private Integer followed = null;
+    private Integer violated = null;
+    private Integer unApplied = null;
 
   /**
    * Total number of policies.
    **/
-  public PolicyAdherenceSummaryDTO totalPolicies(Integer totalPolicies) {
-    this.totalPolicies = totalPolicies;
+  public PolicyAdherenceSummaryDTO total(Integer total) {
+    this.total = total;
     return this;
   }
 
   
   @ApiModelProperty(example = "10", value = "Total number of policies.")
-  @JsonProperty("totalPolicies")
-  public Integer getTotalPolicies() {
-    return totalPolicies;
+  @JsonProperty("total")
+  public Integer getTotal() {
+    return total;
   }
-  public void setTotalPolicies(Integer totalPolicies) {
-    this.totalPolicies = totalPolicies;
+  public void setTotal(Integer total) {
+    this.total = total;
   }
 
   /**
    * Number of policies followed to.
    **/
-  public PolicyAdherenceSummaryDTO followedPolicies(Integer followedPolicies) {
-    this.followedPolicies = followedPolicies;
+  public PolicyAdherenceSummaryDTO followed(Integer followed) {
+    this.followed = followed;
     return this;
   }
 
   
   @ApiModelProperty(example = "6", value = "Number of policies followed to.")
-  @JsonProperty("followedPolicies")
-  public Integer getFollowedPolicies() {
-    return followedPolicies;
+  @JsonProperty("followed")
+  public Integer getFollowed() {
+    return followed;
   }
-  public void setFollowedPolicies(Integer followedPolicies) {
-    this.followedPolicies = followedPolicies;
+  public void setFollowed(Integer followed) {
+    this.followed = followed;
   }
 
   /**
    * Number of policies violated.
    **/
-  public PolicyAdherenceSummaryDTO violatedPolicies(Integer violatedPolicies) {
-    this.violatedPolicies = violatedPolicies;
+  public PolicyAdherenceSummaryDTO violated(Integer violated) {
+    this.violated = violated;
     return this;
   }
 
   
   @ApiModelProperty(example = "4", value = "Number of policies violated.")
-  @JsonProperty("violatedPolicies")
-  public Integer getViolatedPolicies() {
-    return violatedPolicies;
+  @JsonProperty("violated")
+  public Integer getViolated() {
+    return violated;
   }
-  public void setViolatedPolicies(Integer violatedPolicies) {
-    this.violatedPolicies = violatedPolicies;
+  public void setViolated(Integer violated) {
+    this.violated = violated;
   }
 
   /**
    * Number of policies unApplied.
    **/
-  public PolicyAdherenceSummaryDTO unAppliedPolicies(Integer unAppliedPolicies) {
-    this.unAppliedPolicies = unAppliedPolicies;
+  public PolicyAdherenceSummaryDTO unApplied(Integer unApplied) {
+    this.unApplied = unApplied;
     return this;
   }
 
   
   @ApiModelProperty(example = "0", value = "Number of policies unApplied.")
-  @JsonProperty("unAppliedPolicies")
-  public Integer getUnAppliedPolicies() {
-    return unAppliedPolicies;
+  @JsonProperty("unApplied")
+  public Integer getUnApplied() {
+    return unApplied;
   }
-  public void setUnAppliedPolicies(Integer unAppliedPolicies) {
-    this.unAppliedPolicies = unAppliedPolicies;
+  public void setUnApplied(Integer unApplied) {
+    this.unApplied = unApplied;
   }
 
 
@@ -110,15 +110,15 @@ public class PolicyAdherenceSummaryDTO   {
       return false;
     }
     PolicyAdherenceSummaryDTO policyAdherenceSummary = (PolicyAdherenceSummaryDTO) o;
-    return Objects.equals(totalPolicies, policyAdherenceSummary.totalPolicies) &&
-        Objects.equals(followedPolicies, policyAdherenceSummary.followedPolicies) &&
-        Objects.equals(violatedPolicies, policyAdherenceSummary.violatedPolicies) &&
-        Objects.equals(unAppliedPolicies, policyAdherenceSummary.unAppliedPolicies);
+    return Objects.equals(total, policyAdherenceSummary.total) &&
+        Objects.equals(followed, policyAdherenceSummary.followed) &&
+        Objects.equals(violated, policyAdherenceSummary.violated) &&
+        Objects.equals(unApplied, policyAdherenceSummary.unApplied);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(totalPolicies, followedPolicies, violatedPolicies, unAppliedPolicies);
+    return Objects.hash(total, followed, violated, unApplied);
   }
 
   @Override
@@ -126,10 +126,10 @@ public class PolicyAdherenceSummaryDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class PolicyAdherenceSummaryDTO {\n");
     
-    sb.append("    totalPolicies: ").append(toIndentedString(totalPolicies)).append("\n");
-    sb.append("    followedPolicies: ").append(toIndentedString(followedPolicies)).append("\n");
-    sb.append("    violatedPolicies: ").append(toIndentedString(violatedPolicies)).append("\n");
-    sb.append("    unAppliedPolicies: ").append(toIndentedString(unAppliedPolicies)).append("\n");
+    sb.append("    total: ").append(toIndentedString(total)).append("\n");
+    sb.append("    followed: ").append(toIndentedString(followed)).append("\n");
+    sb.append("    violated: ").append(toIndentedString(violated)).append("\n");
+    sb.append("    unApplied: ").append(toIndentedString(unApplied)).append("\n");
     sb.append("}");
     return sb.toString();
   }

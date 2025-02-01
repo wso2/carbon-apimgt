@@ -23,16 +23,20 @@ package org.wso2.carbon.apimgt.governance.api.model;
  */
 public class ComplianceEvaluationResult {
     private String artifactId;
+    private ArtifactType artifactType;
     private String policyId;
     private String rulesetId;
     private boolean isEvaluationSuccess;
+    private String organization;
 
-    public ComplianceEvaluationResult(String artifactId, String policyId,
-                                      String rulesetId, boolean inEvaluationSuccess) {
+    public ComplianceEvaluationResult(String artifactId, ArtifactType artifactType, String policyId,
+                                      String rulesetId, boolean inEvaluationSuccess, String organization) {
         this.artifactId = artifactId;
+        this.artifactType = artifactType;
         this.policyId = policyId;
         this.rulesetId = rulesetId;
         this.isEvaluationSuccess = inEvaluationSuccess;
+        this.organization = organization;
     }
 
     public ComplianceEvaluationResult() {
@@ -44,6 +48,14 @@ public class ComplianceEvaluationResult {
 
     public void setArtifactId(String artifactId) {
         this.artifactId = artifactId;
+    }
+
+    public ArtifactType getArtifactType() {
+        return artifactType;
+    }
+
+    public void setArtifactType(ArtifactType artifactType) {
+        this.artifactType = artifactType;
     }
 
     public String getPolicyId() {
@@ -68,5 +80,13 @@ public class ComplianceEvaluationResult {
 
     public void setEvaluationSuccess(boolean evaluationSuccess) {
         this.isEvaluationSuccess = evaluationSuccess;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }

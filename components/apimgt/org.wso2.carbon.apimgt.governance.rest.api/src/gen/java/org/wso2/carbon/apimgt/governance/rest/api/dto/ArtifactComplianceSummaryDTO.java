@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * Summary of compliance of artifacts in the organization.
+ * Summary of compliance of certain artifact in the organization.
  **/
 
 import io.swagger.annotations.*;
@@ -19,134 +19,104 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Summary of compliance of artifacts in the organization.")
+@ApiModel(description = "Summary of compliance of certain artifact in the organization.")
 
 public class ArtifactComplianceSummaryDTO   {
   
-
-          @XmlType(name="ArtifactTypeEnum")
-    @XmlEnum(String.class)
-    public enum ArtifactTypeEnum {
-        API("API");
-        private String value;
-
-        ArtifactTypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static ArtifactTypeEnum fromValue(String v) {
-            for (ArtifactTypeEnum b : ArtifactTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    } 
-    private ArtifactTypeEnum artifactType = null;
-    private Integer totalArtifacts = null;
-    private Integer compliantArtifacts = null;
-    private Integer nonCompliantArtifacts = null;
-    private Integer notApplicableArtifacts = null;
-
-  /**
-   * Type of the artifact.
-   **/
-  public ArtifactComplianceSummaryDTO artifactType(ArtifactTypeEnum artifactType) {
-    this.artifactType = artifactType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "API", value = "Type of the artifact.")
-  @JsonProperty("artifactType")
-  public ArtifactTypeEnum getArtifactType() {
-    return artifactType;
-  }
-  public void setArtifactType(ArtifactTypeEnum artifactType) {
-    this.artifactType = artifactType;
-  }
+    private Integer total = null;
+    private Integer compliant = null;
+    private Integer nonCompliant = null;
+    private Integer pending = null;
+    private Integer notApplicable = null;
 
   /**
    * Total number of artifacts.
    **/
-  public ArtifactComplianceSummaryDTO totalArtifacts(Integer totalArtifacts) {
-    this.totalArtifacts = totalArtifacts;
+  public ArtifactComplianceSummaryDTO total(Integer total) {
+    this.total = total;
     return this;
   }
 
   
   @ApiModelProperty(example = "10", value = "Total number of artifacts.")
-  @JsonProperty("totalArtifacts")
-  public Integer getTotalArtifacts() {
-    return totalArtifacts;
+  @JsonProperty("total")
+  public Integer getTotal() {
+    return total;
   }
-  public void setTotalArtifacts(Integer totalArtifacts) {
-    this.totalArtifacts = totalArtifacts;
+  public void setTotal(Integer total) {
+    this.total = total;
   }
 
   /**
    * Number of compliant artifacts.
    **/
-  public ArtifactComplianceSummaryDTO compliantArtifacts(Integer compliantArtifacts) {
-    this.compliantArtifacts = compliantArtifacts;
+  public ArtifactComplianceSummaryDTO compliant(Integer compliant) {
+    this.compliant = compliant;
     return this;
   }
 
   
   @ApiModelProperty(example = "6", value = "Number of compliant artifacts.")
-  @JsonProperty("compliantArtifacts")
-  public Integer getCompliantArtifacts() {
-    return compliantArtifacts;
+  @JsonProperty("compliant")
+  public Integer getCompliant() {
+    return compliant;
   }
-  public void setCompliantArtifacts(Integer compliantArtifacts) {
-    this.compliantArtifacts = compliantArtifacts;
+  public void setCompliant(Integer compliant) {
+    this.compliant = compliant;
   }
 
   /**
    * Number of non-compliant artifacts.
    **/
-  public ArtifactComplianceSummaryDTO nonCompliantArtifacts(Integer nonCompliantArtifacts) {
-    this.nonCompliantArtifacts = nonCompliantArtifacts;
+  public ArtifactComplianceSummaryDTO nonCompliant(Integer nonCompliant) {
+    this.nonCompliant = nonCompliant;
     return this;
   }
 
   
   @ApiModelProperty(example = "4", value = "Number of non-compliant artifacts.")
-  @JsonProperty("nonCompliantArtifacts")
-  public Integer getNonCompliantArtifacts() {
-    return nonCompliantArtifacts;
+  @JsonProperty("nonCompliant")
+  public Integer getNonCompliant() {
+    return nonCompliant;
   }
-  public void setNonCompliantArtifacts(Integer nonCompliantArtifacts) {
-    this.nonCompliantArtifacts = nonCompliantArtifacts;
+  public void setNonCompliant(Integer nonCompliant) {
+    this.nonCompliant = nonCompliant;
+  }
+
+  /**
+   * Number of artifacts pending for compliance.
+   **/
+  public ArtifactComplianceSummaryDTO pending(Integer pending) {
+    this.pending = pending;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "0", value = "Number of artifacts pending for compliance.")
+  @JsonProperty("pending")
+  public Integer getPending() {
+    return pending;
+  }
+  public void setPending(Integer pending) {
+    this.pending = pending;
   }
 
   /**
    * Number of artifacts not applicable for compliance yet.
    **/
-  public ArtifactComplianceSummaryDTO notApplicableArtifacts(Integer notApplicableArtifacts) {
-    this.notApplicableArtifacts = notApplicableArtifacts;
+  public ArtifactComplianceSummaryDTO notApplicable(Integer notApplicable) {
+    this.notApplicable = notApplicable;
     return this;
   }
 
   
   @ApiModelProperty(example = "0", value = "Number of artifacts not applicable for compliance yet.")
-  @JsonProperty("notApplicableArtifacts")
-  public Integer getNotApplicableArtifacts() {
-    return notApplicableArtifacts;
+  @JsonProperty("notApplicable")
+  public Integer getNotApplicable() {
+    return notApplicable;
   }
-  public void setNotApplicableArtifacts(Integer notApplicableArtifacts) {
-    this.notApplicableArtifacts = notApplicableArtifacts;
+  public void setNotApplicable(Integer notApplicable) {
+    this.notApplicable = notApplicable;
   }
 
 
@@ -159,16 +129,16 @@ return null;
       return false;
     }
     ArtifactComplianceSummaryDTO artifactComplianceSummary = (ArtifactComplianceSummaryDTO) o;
-    return Objects.equals(artifactType, artifactComplianceSummary.artifactType) &&
-        Objects.equals(totalArtifacts, artifactComplianceSummary.totalArtifacts) &&
-        Objects.equals(compliantArtifacts, artifactComplianceSummary.compliantArtifacts) &&
-        Objects.equals(nonCompliantArtifacts, artifactComplianceSummary.nonCompliantArtifacts) &&
-        Objects.equals(notApplicableArtifacts, artifactComplianceSummary.notApplicableArtifacts);
+    return Objects.equals(total, artifactComplianceSummary.total) &&
+        Objects.equals(compliant, artifactComplianceSummary.compliant) &&
+        Objects.equals(nonCompliant, artifactComplianceSummary.nonCompliant) &&
+        Objects.equals(pending, artifactComplianceSummary.pending) &&
+        Objects.equals(notApplicable, artifactComplianceSummary.notApplicable);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(artifactType, totalArtifacts, compliantArtifacts, nonCompliantArtifacts, notApplicableArtifacts);
+    return Objects.hash(total, compliant, nonCompliant, pending, notApplicable);
   }
 
   @Override
@@ -176,11 +146,11 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class ArtifactComplianceSummaryDTO {\n");
     
-    sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
-    sb.append("    totalArtifacts: ").append(toIndentedString(totalArtifacts)).append("\n");
-    sb.append("    compliantArtifacts: ").append(toIndentedString(compliantArtifacts)).append("\n");
-    sb.append("    nonCompliantArtifacts: ").append(toIndentedString(nonCompliantArtifacts)).append("\n");
-    sb.append("    notApplicableArtifacts: ").append(toIndentedString(notApplicableArtifacts)).append("\n");
+    sb.append("    total: ").append(toIndentedString(total)).append("\n");
+    sb.append("    compliant: ").append(toIndentedString(compliant)).append("\n");
+    sb.append("    nonCompliant: ").append(toIndentedString(nonCompliant)).append("\n");
+    sb.append("    pending: ").append(toIndentedString(pending)).append("\n");
+    sb.append("    notApplicable: ").append(toIndentedString(notApplicable)).append("\n");
     sb.append("}");
     return sb.toString();
   }

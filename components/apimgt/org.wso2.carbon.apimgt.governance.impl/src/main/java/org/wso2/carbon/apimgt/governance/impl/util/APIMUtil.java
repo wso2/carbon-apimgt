@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
@@ -82,18 +82,37 @@ public class APIMUtil {
     }
 
     /**
-     * Get the API name combined with the version
+     * Get the API name
      *
      * @param apiId API ID
-     * @return API name combined with the version
+     * @return API name
      * @throws GovernanceException If an error occurs while getting the API name and version
      */
-    public static String getAPINameCombinedWithVersion(String apiId) throws GovernanceException {
+    public static String getAPIName(String apiId) throws GovernanceException {
+
         try {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            return apiIdentifier.getApiName() + " " + apiIdentifier.getVersion();
+            return apiIdentifier.getApiName();
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_NAME_VERSION_WITH_ID,
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO,
+                    apiId, e);
+        }
+    }
+
+    /**
+     * Get the API version
+     *
+     * @param apiId API ID
+     * @return API version
+     * @throws GovernanceException If an error occurs while getting the API name and version
+     */
+    public static String getAPIVersion(String apiId) throws GovernanceException {
+
+        try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            return apiIdentifier.getVersion();
+        } catch (APIManagementException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO,
                     apiId, e);
         }
     }
@@ -106,6 +125,7 @@ public class APIMUtil {
      * @throws GovernanceException If an error occurs while getting the status of the API
      */
     public static String getAPIStatus(String apiId) throws GovernanceException {
+
         try {
             return ApiMgtDAO.getInstance().getAPIStatusFromAPIUUID(apiId);
         } catch (APIManagementException e) {
@@ -203,27 +223,24 @@ public class APIMUtil {
      * Extracts and maps API project content from a ZIP file.
      *
      * @param apiProjectZip Byte array representing the API project ZIP file.
-     * @param apiId         The ID of the API.
-     * @param apiType       The type of the API.
      * @return A map of API project contents.
      * @throws GovernanceException if errors occur while extracting content.
      */
-    public static Map<RuleType, String> extractAPIProjectContent(byte[] apiProjectZip, String apiId,
-                                                                 ArtifactType apiType)
+    public static Map<RuleType, String> extractAPIProjectContent(byte[] apiProjectZip)
             throws GovernanceException {
 
         Map<RuleType, String> apiProjectContentMap = new HashMap<>();
 
-        String apiMetadata = extractAPIMetadata(apiProjectZip, apiId);
-        String apiDefinition = extractAPIDefinition(apiProjectZip, apiId, apiType);
+        String apiMetadata = extractAPIMetadata(apiProjectZip);
+        String apiDefinition = extractAPIDefinition(apiProjectZip);
 
         if (apiMetadata == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.API_DETAILS_NOT_FOUND, apiId);
+            throw new GovernanceException(GovernanceExceptionCodes.API_DETAILS_NOT_FOUND);
         } else {
             apiProjectContentMap.put(RuleType.API_METADATA, apiMetadata);
         }
         if (apiDefinition == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.API_DEFINITION_NOT_FOUND, apiId);
+            throw new GovernanceException(GovernanceExceptionCodes.API_DEFINITION_NOT_FOUND);
         } else {
             apiProjectContentMap.put(RuleType.API_DEFINITION, apiDefinition);
         }
@@ -235,11 +252,10 @@ public class APIMUtil {
      * Extracts API metadata from the project ZIP file.
      *
      * @param apiProjectZip Byte array representing the API project ZIP file.
-     * @param apiId         The ID of the API.
      * @return The extracted API metadata as a string.
      * @throws GovernanceException if an error occurs while extracting metadata content.
      */
-    public static String extractAPIMetadata(byte[] apiProjectZip, String apiId) throws GovernanceException {
+    public static String extractAPIMetadata(byte[] apiProjectZip) throws GovernanceException {
         String apiMetadata;
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
             ZipEntry entry;
@@ -256,7 +272,7 @@ public class APIMUtil {
                 }
             }
         } catch (IOException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_METADATA, apiId);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_METADATA);
         }
         return null; // Return null if no matching metadata is found
     }
@@ -266,45 +282,39 @@ public class APIMUtil {
      * Extracts API definition from the project ZIP file.
      *
      * @param apiProjectZip Byte array representing the API project ZIP file.
-     * @param apiId         The ID of the API.
-     * @param apiType       The type of the API.
      * @return The extracted API definition as a string.
      * @throws GovernanceException if an error occurs while extracting swagger content.
      */
-    public static String extractAPIDefinition(byte[] apiProjectZip, String apiId, ArtifactType apiType)
+    public static String extractAPIDefinition(byte[] apiProjectZip)
             throws GovernanceException {
         String defContent;
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (ArtifactType.REST_API.equals(apiType)) {
-                    if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER +
-                            GovernanceConstants.SWAGGER_FILE_NAME)) {
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                        byte[] buffer = new byte[1024];
-                        int length;
-                        while ((length = zipInputStream.read(buffer)) != -1) {
-                            outputStream.write(buffer, 0, length);
-                        }
-                        defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-                        return defContent;
+                if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER +
+                        GovernanceConstants.SWAGGER_FILE_NAME)) {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = zipInputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
                     }
-                } else if (ArtifactType.ASYNC_API.equals(apiType)) {
-                    if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER +
-                            GovernanceConstants.ASYNC_API_FILE_NAME)) {
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                        byte[] buffer = new byte[1024];
-                        int length;
-                        while ((length = zipInputStream.read(buffer)) != -1) {
-                            outputStream.write(buffer, 0, length);
-                        }
-                        defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-                        return defContent;
+                    defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                    return defContent;
+                } else if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER +
+                        GovernanceConstants.ASYNC_API_FILE_NAME)) {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = zipInputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
                     }
+                    defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                    return defContent;
                 }
             }
         } catch (IOException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_DEFINITION, apiId);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_DEFINITION);
         }
         return null; // Return null if no matching swagger content is found
     }
@@ -316,7 +326,7 @@ public class APIMUtil {
      * @return List of labels IDs
      * @throws GovernanceException If an error occurs while getting the labels for the API
      */
-    public static List<String> getLabelIDsForAPI(String apiId) throws GovernanceException {
+    public static List<String> getLabelsForAPI(String apiId) throws GovernanceException {
         try {
             return LabelsDAO.getInstance().getMappedLabelIDsForApi(apiId);
         } catch (APIManagementException e) {
@@ -325,28 +335,22 @@ public class APIMUtil {
     }
 
     /**
-     * Get the APIs for the label as a map of API Type (HTTP,ASYNC, etc ) against API ID
+     * Get the APIs for the label
      *
      * @param labelId Label ID
-     * @return Map of API types against API IDs
+     * @return List of API IDs
      * @throws GovernanceException If an error occurs while getting the APIs for the label
      */
-    public static Map<String, List<String>> getAPIsByLabel(String labelId) throws GovernanceException {
-        Map<String, List<String>> apisMap = new HashMap<>();
+    public static List<String> getAPIsByLabel(String labelId) throws GovernanceException {
+        List<String> apiIds = new ArrayList<>();
         try {
-            List<ApiResult> apiResults = LabelsDAO.getInstance().getMappedApisForLabel(labelId);
+            List<ApiResult> apis = LabelsDAO.getInstance().getMappedApisForLabel(labelId);
 
-            for (ApiResult apiResult : apiResults) {
-                String apiType = apiResult.getType();
-                if (apisMap.containsKey(apiType)) {
-                    apisMap.get(apiType).add(apiResult.getId());
-                } else {
-                    List<String> apiIds = new ArrayList<>();
-                    apiIds.add(apiResult.getId());
-                    apisMap.put(apiType, apiIds);
-                }
+            for (ApiResult api : apis) {
+                apiIds.add(api.getId());
             }
-            return apisMap;
+            return apiIds;
+
         } catch (APIManagementException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, labelId, e);
         }
@@ -376,55 +380,6 @@ public class APIMUtil {
     }
 
     /**
-     * Get all APIs for the organization in a map divided to different API types (ex: HTTP, ASYNC, etc)
-     *
-     * @param organization Organization
-     * @return Map of api types against api Ids
-     * @throws GovernanceException If an error occurs while getting the APIs for the organization
-     */
-    public static Map<String, List<String>> getAllAPIsByAPIType(String organization) throws GovernanceException {
-
-        Map<String, List<String>> apisMap = new HashMap<>();
-        List<ApiResult> apis = null;
-        try {
-            apis = ApiMgtDAO.getInstance().getAllAPIs(organization);
-            for (ApiResult api : apis) {
-                String apiType = api.getType();
-                if (apisMap.containsKey(apiType)) {
-                    apisMap.get(apiType).add(api.getId());
-                } else {
-                    List<String> apiIds = new ArrayList<>();
-                    apiIds.add(api.getId());
-                    apisMap.put(apiType, apiIds);
-                }
-            }
-            return apisMap;
-        } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_LIST, organization, e);
-        }
-    }
-
-    /**
-     * Convert from API Manager api type to API Manager Governance artifact type
-     *
-     * @param apiType API type
-     * @return API Manager Governance artifact type
-     * TODO: Complete and verify the below logic
-     */
-    public static ArtifactType getArtifactTypeForAPIType(String apiType) {
-        if ("rest".equalsIgnoreCase(apiType) || "http".equalsIgnoreCase(apiType)) {
-            return ArtifactType.REST_API;
-        } else if ("soap".equalsIgnoreCase(apiType)) {
-            return ArtifactType.SOAP_API;
-        } else if ("graphql".equalsIgnoreCase(apiType)) {
-            return ArtifactType.GRAPHQL_API;
-        } else if ("async".equalsIgnoreCase(apiType) || "ws".equalsIgnoreCase(apiType)) {
-            return ArtifactType.ASYNC_API;
-        }
-        return null;
-    }
-
-    /**
      * Get the API UUID
      *
      * @param apiName      API name
@@ -445,6 +400,42 @@ public class APIMUtil {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_UUID_WITH_NAME_VERSION,
                     apiName, apiVersion, e);
         }
+    }
+
+    /**
+     * Get the API type
+     *
+     * @param apiId API ID
+     * @return API type
+     * @throws GovernanceException If an error occurs while getting the API type
+     */
+    public static String getAPIType(String apiId) throws GovernanceException {
+        try {
+            return ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
+        } catch (APIManagementException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_TYPE, apiId, e);
+        }
+    }
+
+
+    /**
+     * Convert from API Manager api type to governance api type
+     * TODO: We need to complete this list to match API Type to ExtendedArtifactType
+     *
+     * @param apiType API type
+     * @return ExtendedArtifactType API type
+     */
+    public static ExtendedArtifactType getExtendedArtifactTypeForAPI(String apiType) {
+        if ("rest".equalsIgnoreCase(apiType) || "http".equalsIgnoreCase(apiType)) {
+            return ExtendedArtifactType.REST_API;
+        } else if ("soap".equalsIgnoreCase(apiType)) {
+            return ExtendedArtifactType.SOAP_API;
+        } else if ("graphql".equalsIgnoreCase(apiType)) {
+            return ExtendedArtifactType.GRAPHQL_API;
+        } else if ("async".equalsIgnoreCase(apiType) || "ws".equalsIgnoreCase(apiType)) {
+            return ExtendedArtifactType.ASYNC_API;
+        }
+        return null;
     }
 
 }

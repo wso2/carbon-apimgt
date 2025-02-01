@@ -59,23 +59,30 @@ public class PolicyManagerImpl implements PolicyManager {
             governancePolicy) throws GovernanceException {
 
         governancePolicy.setId(GovernanceUtil.generateUUID());
-        checkForRestrictedBlockingPolicies(governancePolicy);
+        checkForInvalidActions(governancePolicy);
         addMissingNotifyActions(governancePolicy);
 
         return policyMgtDAO.createGovernancePolicy(organization, governancePolicy);
     }
 
     /**
-     * This checks whether BLOCK actions are present for API_CREATE and API_UPDATE states
+     * This checks whether any invalid action such as,
+     * - Actions assigned to invalid governable states
+     * - BLOCK actions are present for API_CREATE and API_UPDATE states
      *
      * @param policy Governance Policy
-     * @throws GovernanceException If an error occurs while checking for restricted blocking policies
+     * @throws GovernanceException If an error occurs while checking the actions
      */
-    private void checkForRestrictedBlockingPolicies(GovernancePolicy policy)
+    private void checkForInvalidActions(GovernancePolicy policy)
             throws GovernanceException {
 
+        List<GovernableState> governableStates = policy.getGovernableStates();
         List<GovernanceAction> actions = policy.getActions();
         for (GovernanceAction action : actions) {
+            if (!governableStates.contains(action.getGovernableState())) {
+                throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY,
+                        "Invalid governable state found in the policy. Please update the policy");
+            }
             if (GovernanceActionType.BLOCK.equals(action.getType()) &&
                     (GovernableState.API_CREATE.equals(action.getGovernableState()) ||
                             GovernableState.API_UPDATE.equals(action.getGovernableState()))) {
@@ -174,7 +181,7 @@ public class PolicyManagerImpl implements PolicyManager {
                                                    GovernancePolicy governancePolicy)
             throws GovernanceException {
 
-        checkForRestrictedBlockingPolicies(governancePolicy);
+        checkForInvalidActions(governancePolicy);
         addMissingNotifyActions(governancePolicy);
 
         return policyMgtDAO.updateGovernancePolicy(policyId, organization, governancePolicy);
@@ -215,7 +222,7 @@ public class PolicyManagerImpl implements PolicyManager {
      */
     @Override
     public Map<String, String> getOrganizationWidePolicies(String organization) throws GovernanceException {
-        return policyMgtDAO.getPoliciesWithoutLabels(organization);
+        return policyMgtDAO.getPoliciesWithGlobalLabel(organization);
     }
 
     /**
@@ -244,7 +251,7 @@ public class PolicyManagerImpl implements PolicyManager {
     @Override
     public List<String> getOrganizationWidePoliciesByState(GovernableState state, String organization)
             throws GovernanceException {
-        return policyMgtDAO.getPoliciesWithoutLabelsByState(state, organization);
+        return policyMgtDAO.getPoliciesWithGlobalLabelByState(state, organization);
     }
 
     /**

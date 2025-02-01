@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
-import org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApiService;
+import org.wso2.carbon.apimgt.governance.rest.api.PoliciesApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
@@ -47,7 +47,7 @@ import javax.ws.rs.core.Response;
 /**
  * This is the implementation class for the Governance Policies API.
  */
-public class GovernancePoliciesApiServiceImpl implements GovernancePoliciesApiService {
+public class PoliciesApiServiceImpl implements PoliciesApiService {
 
     /**
      * Create a new Governance Policy

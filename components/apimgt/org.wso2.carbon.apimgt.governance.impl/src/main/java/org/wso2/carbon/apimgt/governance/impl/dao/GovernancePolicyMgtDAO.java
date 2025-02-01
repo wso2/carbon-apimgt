@@ -133,7 +133,7 @@ public interface GovernancePolicyMgtDAO {
      * @param organization Organization
      * @return Map of Policy IDs, Policy Names
      */
-    Map<String, String> getPoliciesWithoutLabels(String organization)
+    Map<String, String> getPoliciesWithGlobalLabel(String organization)
             throws GovernanceException;
 
     /**
@@ -143,7 +143,7 @@ public interface GovernancePolicyMgtDAO {
      * @param organization Organization
      * @return List of Policy IDs
      */
-    List<String> getPoliciesWithoutLabelsByState(GovernableState state, String organization)
+    List<String> getPoliciesWithGlobalLabelByState(GovernableState state, String organization)
             throws GovernanceException;
 
     /**

@@ -33,7 +33,7 @@
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.gateway.SwaggerYamlApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.HealthzApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.RulesetsApi"/>
-            <bean class="org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.governance.rest.api.PoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi"/>
         </jaxrs:serviceBeans>
@@ -54,8 +54,8 @@
 
     <bean id="URLValidationInterceptor"
           class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor">
-        <property name="majorVersion" value="v0"/>
-        <property name="latestVersion" value="v0.1"/>
+        <property name="majorVersion" value="v1"/>
+        <property name="latestVersion" value="v1.1"/>
     </bean>
     <bean id="PreAuthenticationInterceptor"
           class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor"/>

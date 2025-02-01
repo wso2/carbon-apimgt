@@ -2795,7 +2795,7 @@ public class ImportUtils {
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
                 Map<String, String> complianceResult = checkGovernanceCompliance(importedApiProduct.getUuid(),
-                        GovernableState.API_CREATE, ArtifactType.REST_API, organization, revisionId, null);
+                        GovernableState.API_CREATE, ArtifactType.API, organization, revisionId, null);
                 if (!complianceResult.isEmpty()
                         && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                         && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {

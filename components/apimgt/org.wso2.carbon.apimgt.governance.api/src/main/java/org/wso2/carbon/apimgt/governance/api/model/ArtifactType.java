@@ -22,50 +22,13 @@ package org.wso2.carbon.apimgt.governance.api.model;
  * This class represents different types of artifacts available for Governing
  */
 public enum ArtifactType {
-    REST_API,
-    SOAP_API,
-    GRAPHQL_API,
-    ASYNC_API,
     API; // Represent all types of APIs
 
     public static ArtifactType fromString(String text) {
-        if ("rest_api".equalsIgnoreCase(text)) {
-            return REST_API;
-        } else if ("soap_api".equalsIgnoreCase(text)) {
-            return SOAP_API;
-        } else if ("graphql_api".equalsIgnoreCase(text)) {
-            return GRAPHQL_API;
-        } else if ("async_api".equalsIgnoreCase(text)) {
-            return ASYNC_API;
-        } else if ("api".equalsIgnoreCase(text)) {
+        if ("api".equalsIgnoreCase(text)) {
             return API;
         }
-        return API;
+        return null;
     }
-
-    /**
-     * Check whether the artifact type is an API
-     *
-     * @param artifactType Artifact type
-     * @return True if the artifact type is an API
-     */
-    public static boolean isArtifactAPI(ArtifactType artifactType) {
-        return artifactType == REST_API || artifactType == SOAP_API ||
-                artifactType == GRAPHQL_API || artifactType == ASYNC_API
-                || artifactType == API;
-    }
-
-    /**
-     * Check whether the artifact type is an API
-     *
-     * @param artifactType Artifact type
-     * @return True if the artifact type is an API
-     */
-    public static boolean isArtifactAPI(String artifactType) {
-        ArtifactType type = fromString(artifactType);
-        return type == REST_API || type == SOAP_API ||
-                type == GRAPHQL_API || type == ASYNC_API
-                || type == API;
-    }
-
 }
+

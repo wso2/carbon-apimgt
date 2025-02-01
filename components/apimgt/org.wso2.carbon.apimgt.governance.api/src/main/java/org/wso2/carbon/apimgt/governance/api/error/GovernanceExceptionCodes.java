@@ -169,21 +169,27 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ARTIFACT_NOT_FOUND_WITH_NAME_AND_VERSION(600006, "Artifact not found with name and version.",
             404, "Artifact not found with name: %s and version: %s in the organization: %s"),
 
+    ERROR_FAILED_TO_READ_ARTIFACT_PROJECT(600007, "Error while reading artifact project.",
+            500, "Error while reading artifact project from given file path. ", true),
+
+    INVALID_ARTIFACT_TYPE(600008, "Invalid artifact type.",
+            400, "Invalid artifact type: %s"),
+
     // APIM related codes
 
-    ERROR_WHILE_GETTING_API_NAME_VERSION_WITH_ID(700001, "Error while getting API name and version with ID.",
-            500, "Error while getting API name and version with ID: %s", true),
+    ERROR_WHILE_GETTING_API_INFO(700001, "Error while getting API name/version with ID.",
+            500, "Error while getting API name/version with ID: %s", true),
     ERROR_WHILE_GETTING_APIM_PROJECT(700002, "Error while getting APIM project.",
             500, "Error while getting APIM project for artifact: %s in the organization: %s",
             true),
     API_DEFINITION_NOT_FOUND(700003, "API definition not found.",
-            404, "API definition not found for api: %s in the organization: %s"),
+            404, "API definition not found in API project"),
     API_DETAILS_NOT_FOUND(700004, "API details not found.",
-            404, "API details not found for endpoint: %s in the organization: %s"),
+            404, "API details not found in API project"),
     ERROR_WHILE_EXTRACTING_API_DEFINITION(700005, "Error while extracting API Definition content.",
-            500, "Error while extracting API definition content from zip for the api : %s", true),
+            500, "Error while extracting API definition content from zip", true),
     ERROR_WHILE_EXTRACTING_API_METADATA(700006, "Error while extracting API details.",
-            500, "Error while extracting API details from zip for the api: %s", true),
+            500, "Error while extracting API details from zip", true),
     ERROR_WHILE_GETTING_API_LIST(700007, "Error while getting API list.",
             500, "Error while getting API list in the organization: %s", true),
     ERROR_WHILE_GETTING_LC_STATUS_OF_API(700008, "Error while getting LC status of API.",
@@ -198,6 +204,9 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_GETTING_API_UUID_WITH_NAME_VERSION(700011, "Error while getting API UUID " +
             "with name and version.",
             500, "Error while getting API UUID with name: %s and version: %s", true),
+
+    ERROR_WHILE_GETTING_API_TYPE(700012, "Error while getting API type.",
+            500, "Error while getting API type for API with ID: %s", true),
     ;
 
     private final long errorCode;

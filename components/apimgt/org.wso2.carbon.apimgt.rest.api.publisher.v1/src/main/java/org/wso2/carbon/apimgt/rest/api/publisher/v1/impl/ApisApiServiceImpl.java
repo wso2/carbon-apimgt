@@ -4534,7 +4534,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         int tenantId = APIUtil.getTenantId(username);
-        ArtifactType artifactType = ArtifactType.REST_API;
+        ArtifactType artifactType = ArtifactType.API;
         try {
 
             //validate if api exists
@@ -4555,11 +4555,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
                 validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, null,
                         true, true);
-                artifactType = ArtifactType.REST_API;
+                artifactType = ArtifactType.API;
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                 validationResponseMap = validateAsyncAPISpecification(null, service.getEndpointDef(),
                         null, true, true);
-                artifactType = ArtifactType.ASYNC_API;
+                artifactType = ArtifactType.API;
             } else if (!ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())) {
                 RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to " +
                         "API using the service type " + service.getDefinitionType(), log);
@@ -4580,7 +4580,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (!APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(protocol)) {
                 api.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(),
                         protocol));
-                artifactType = ArtifactType.ASYNC_API;
+                artifactType = ArtifactType.API;
             }
             Map<String, String> complianceResult = checkGovernanceCompliance(apiId, GovernableState.API_UPDATE,
                     artifactType, organization, null, null);

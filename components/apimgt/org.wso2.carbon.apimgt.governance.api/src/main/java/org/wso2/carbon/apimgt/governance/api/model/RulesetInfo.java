@@ -27,7 +27,7 @@ public class RulesetInfo {
     private String description;
     private RuleCategory ruleCategory;
     private RuleType ruleType;
-    private ArtifactType artifactType;
+    private ExtendedArtifactType artifactType;
     private String documentationLink;
     private String provider;
     private String createdBy;
@@ -67,11 +67,11 @@ public class RulesetInfo {
         this.ruleType = ruleType;
     }
 
-    public ArtifactType getArtifactType() {
+    public ExtendedArtifactType getArtifactType() {
         return artifactType;
     }
 
-    public void setArtifactType(ArtifactType artifactType) {
+    public void setArtifactType(ExtendedArtifactType artifactType) {
         this.artifactType = artifactType;
     }
 

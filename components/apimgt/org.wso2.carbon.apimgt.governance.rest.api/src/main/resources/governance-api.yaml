@@ -16,7 +16,7 @@
 ################################################################################
 openapi: 3.0.1
 info:
-  version: v0.1
+  version: v1.1
   title: WSO2 API Manager - Governance
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Governance.
@@ -28,7 +28,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 servers:
-  - url: https://apis.wso2.com/api/am/governance/v0
+  - url: https://apis.wso2.com/api/am/governance/v1
 tags:
   - name: Rulesets
     description: for managing rulesets.
@@ -361,7 +361,6 @@ paths:
       operationId: getHealthzLiveness
       tags:
         - Health Check
-        - Internal
       responses:
         "200":
           description: Application is alive
@@ -376,7 +375,6 @@ paths:
       operationId: getHealthzReadiness
       tags:
         - Health Check
-        - Internal
       responses:
         "200":
           description: Application is ready
@@ -384,7 +382,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthzResponse"
-  /governance-policies:
+  /policies:
     get:
       summary: Retrieves a list of all governance policies.
       description: Retrieves a list of governance policies for the user's organization.
@@ -475,7 +473,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
-  /governance-policies/{policyId}:
+  /policies/{policyId}:
     get:
       summary: Get a specific governance policy
       description: Retrieves details of a specific governance policy identified by the policyId.
@@ -605,20 +603,19 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
-  /artifact-compliance:
+  /artifact-compliance/api:
     get:
-      summary: Retrieves compliance of all artifacts of a certain type
-      description: Retrieves compliance of all artifacts of a certain type within the organization.
-      operationId: getArtifactComplianceForAllArtifacts
+      summary: Retrieves compliance of all API artifacts
+      description: Retrieves compliance of all API artifacts within the organization.
+      operationId: getComplianceStatusListOfAPIs
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/artifactType'
       tags:
         - Artifact Compliance
       responses:
         "200":
-          description: OK. Successful response with artifact compliance results.
+          description: OK. Successful response with API compliance results.
           content:
             application/json:
               schema:
@@ -650,13 +647,11 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_result_read
-  /artifact-compliance/summary:
+  /artifact-compliance/api/summary:
     get:
-      summary: Retrieves the summary of compliance of all artifacts of a certain type
-      description: Retrieves the summary of compliance of all artifacts of a certain type within the organization.
-      operationId: getArtifactComplianceSummary
-      parameters:
-        - $ref: '#/components/parameters/artifactType'
+      summary: Retrieves the summary of compliance of all API artifacts
+      description: Retrieves the summary of compliance of all API artifacts within the organization.
+      operationId: getComplianceSummaryForAPIs
       tags:
         - Artifact Compliance
       responses:
@@ -693,15 +688,15 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_result_read
-  /artifact-compliance/{artifactId}:
+  /artifact-compliance/api/{apiId}:
     get:
-      summary: Retrieve compliance details for a specific artifact
-      description: Retrieve compliance details associated with a specific artifact including APIs within the organization using its unique UUID.
-      operationId: getArtifactComplianceByArtifactId
+      summary: Retrieve compliance details for a specific API
+      description: Retrieve compliance details associated with a specific API using its unique UUID.
+      operationId: getComplianceByAPIId
       tags:
         - Artifact Compliance
       parameters:
-        - $ref: '#/components/parameters/artifactId'
+        - $ref: '#/components/parameters/apiId'
       responses:
         "200":
           description: Successful response with compliance details for the specified artifact.
@@ -736,19 +731,19 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_result_read
-  /artifact-compliance/{artifactId}/ruleset-validation-results/{rulesetId}:
+  /artifact-compliance/api/{apiId}/ruleset-validation-results/{rulesetId}:
     get:
-      summary: Retrieve ruleset validation results for a specific artifact
-      description: Retrieve ruleset validation results associated with a specific artifact including APIs within the organization using its unique UUID.
-      operationId: getRulesetValidationResultsByArtifactId
+      summary: Retrieve ruleset validation results for a specific API
+      description: Retrieve ruleset validation results associated with a specific API using its unique UUID.
+      operationId: getRulesetValidationResultsByAPIId
       tags:
         - Artifact Compliance
       parameters:
-        - $ref: '#/components/parameters/artifactId'
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/rulesetId'
       responses:
         "200":
-          description: Successful response with ruleset validation results for the specified artifact.
+          description: Successful response with ruleset validation results for the specified API.
           content:
             application/json:
               schema:
@@ -1246,27 +1241,25 @@ components:
           $ref: '#/components/schemas/Pagination'
     ArtifactComplianceSummary:
       type: object
-      description: Summary of compliance of artifacts in the organization.
+      description: Summary of compliance of certain artifact in the organization.
       properties:
-        artifactType:
-          type: string
-          description: Type of the artifact.
-          enum:
-            - API
-          example: API
-        totalArtifacts:
+        total:
           type: integer
           description: Total number of artifacts.
           example: 10
-        compliantArtifacts:
+        compliant:
           type: integer
           description: Number of compliant artifacts.
           example: 6
-        nonCompliantArtifacts:
+        nonCompliant:
           type: integer
           description: Number of non-compliant artifacts.
           example: 4
-        notApplicableArtifacts:
+        pending:
+          type: integer
+          description: Number of artifacts pending for compliance.
+          example: 0
+        notApplicable:
           type: integer
           description: Number of artifacts not applicable for compliance yet.
           example: 0
@@ -1274,19 +1267,19 @@ components:
       type: object
       description: Summary of governance policy adherence in the organization.
       properties:
-        totalPolicies:
+        total:
           type: integer
           description: Total number of policies.
           example: 10
-        followedPolicies:
+        followed:
           type: integer
           description: Number of policies followed to.
           example: 6
-        violatedPolicies:
+        violated:
           type: integer
           description: Number of policies violated.
           example: 4
-        unAppliedPolicies:
+        unApplied:
           type: integer
           description: Number of policies unApplied.
           example: 0
@@ -1322,28 +1315,20 @@ components:
       type: object
       description: Provides compliance status of an artifact.
       properties:
-        artifactId:
+        id:
           type: string
-          description: UUID of the artifact.
+          description: UUID of the API.
           example: "123e4567-e89b-12d3-a456-426614174000"
-        artifactType:
-          type: string
-          description: Type of the artifact.
-          enum:
-            - API
-          example: "API"
-        artifactName:
-          type: string
-          description: Display name of the artifact.
-          example: "Test API v1"
         status:
           type: string
-          description: Status of the artifact's governance compliance.
+          description: Status of the API's governance compliance.
           enum:
             - COMPLIANT
             - NON-COMPLIANT
             - NOT-APPLICABLE
           example: "COMPLIANT"
+        info:
+          $ref: '#/components/schemas/ArtifactInfo'
         policyAdherenceSummary:
           $ref: '#/components/schemas/PolicyAdherenceSummary'
         severityBasedRuleViolationSummary:
@@ -1355,11 +1340,11 @@ components:
       type: object
       description: Provides adherence status of a policy.
       properties:
-        policyId:
+        id:
           type: string
           description: UUID of the policy.
           example: "123e4567-e89b-12d3-a456-426614174000"
-        policyName:
+        name:
           type: string
           description: Name of the policy.
           example: "Policy1"
@@ -1377,11 +1362,11 @@ components:
       type: object
       description: Summary of compliance of artifacts evaluated against a specific policy.
       properties:
-        compliantArtifacts:
+        compliant:
           type: integer
           description: Number of compliant artifacts.
           example: 6
-        nonCompliantArtifacts:
+        nonCompliant:
           type: integer
           description: Number of non-compliant artifacts.
           example: 4
@@ -1389,20 +1374,10 @@ components:
       type: object
       description: Provides compliance details of an artifact.
       properties:
-        artifactId:
+        id:
           type: string
           description: UUID of the artifact.
           example: "123e4567-e89b-12d3-a456-426614174000"
-        artifactType:
-          type: string
-          description: Type of the artifact.
-          enum:
-            - API
-          example: "API"
-        artifactName:
-          type: string
-          description: Display name of the artifact.
-          example: "Test API v1"
         status:
           type: string
           description: Status of the artifact's governance compliance.
@@ -1411,6 +1386,8 @@ components:
             - NON-COMPLIANT
             - NOT-APPLICABLE
           example: "COMPLIANT"
+        info:
+          $ref: '#/components/schemas/ArtifactInfo'
         governedPolicies:
           type: array
           description: List of policies under which the artifact was governed.
@@ -1420,11 +1397,11 @@ components:
       type: object
       description: Provides adherence details of a policy.
       properties:
-        policyId:
+        id:
           type: string
           description: UUID of the policy.
           example: "123e4567-e89b-12d3-a456-426614174000"
-        policyName:
+        name:
           type: string
           description: Name of the policy.
           example: "Policy1"
@@ -1445,11 +1422,11 @@ components:
       type: object
       description: Adherence status of a policy with ruleset details.
       properties:
-        policyId:
+        id:
           type: string
           description: UUID of the policy.
           example: "123e4567-e89b-12d3-a456-426614174000"
-        policyName:
+        name:
           type: string
           description: Name of the policy.
           example: "Policy1"
@@ -1470,20 +1447,10 @@ components:
       type: object
       description: Compliance status of an artifact for a specific policy.
       properties:
-        artifactId:
+        id:
           type: string
           description: UUID of the artifact.
           example: "123e4567-e89b-12d3-a456-426614174000"
-        artifactType:
-          type: string
-          description: Type of the artifact.
-          enum:
-            - API
-          example: "API"
-        artifactName:
-          type: string
-          description: Name of the artifact.
-          example: "API1"
         status:
           type: string
           description: Status of the artifact's compliance to the policy.
@@ -1492,6 +1459,8 @@ components:
             - NON-COMPLIANT
             - NOT-APPLICABLE
           example: "COMPLIANT"
+        info:
+          $ref: '#/components/schemas/ArtifactInfo'
     RulesetValidationResult:
       type: object
       description: Result of the ruleset validation.
@@ -1608,6 +1577,25 @@ components:
           type: integer
           description: Number of rules violated by the artifact under each severity.
           example: 1
+    ArtifactInfo:
+      type: object
+      description: Detailed information about an artifact.
+      properties:
+        name:
+          type: string
+          description: Name of the artifact.
+          example: "API1"
+        type:
+          type: string
+          description: Type of the artifact.
+          enum:
+            - API
+          example: "API"
+        version:
+          type: string
+          description: Version of the artifact.
+          example: "1.0.0"
+
 
 
 
@@ -1633,6 +1621,14 @@ components:
       in: path
       description: |
         **UUID** of the Artifact.
+      required: true
+      schema:
+        type: string
+    apiId:
+      name: apiId
+      in: path
+      description: |
+        **UUID** of the API.
       required: true
       schema:
         type: string

@@ -37,7 +37,7 @@
                 org.wso2.carbon.apimgt.governance.rest.api.SwaggerYamlApi,
                 org.wso2.carbon.apimgt.governance.rest.api.HealthzApi,
                 org.wso2.carbon.apimgt.governance.rest.api.RulesetsApi,
-                org.wso2.carbon.apimgt.governance.rest.api.GovernancePoliciesApi,
+                org.wso2.carbon.apimgt.governance.rest.api.PoliciesApi,
                 org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi,
                 org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi,
             </param-value>
@@ -61,8 +61,8 @@
         <init-param>
             <param-name>jaxrs.inInterceptors</param-name>
             <param-value>
-                org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v0
-                latestVersion=v0.1),
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor(majorVersion=v1
+                latestVersion=v1.1),
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor,

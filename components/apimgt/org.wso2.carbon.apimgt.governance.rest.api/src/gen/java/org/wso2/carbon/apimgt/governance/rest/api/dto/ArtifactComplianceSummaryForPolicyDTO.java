@@ -23,43 +23,43 @@ import javax.validation.Valid;
 
 public class ArtifactComplianceSummaryForPolicyDTO   {
   
-    private Integer compliantArtifacts = null;
-    private Integer nonCompliantArtifacts = null;
+    private Integer compliant = null;
+    private Integer nonCompliant = null;
 
   /**
    * Number of compliant artifacts.
    **/
-  public ArtifactComplianceSummaryForPolicyDTO compliantArtifacts(Integer compliantArtifacts) {
-    this.compliantArtifacts = compliantArtifacts;
+  public ArtifactComplianceSummaryForPolicyDTO compliant(Integer compliant) {
+    this.compliant = compliant;
     return this;
   }
 
   
   @ApiModelProperty(example = "6", value = "Number of compliant artifacts.")
-  @JsonProperty("compliantArtifacts")
-  public Integer getCompliantArtifacts() {
-    return compliantArtifacts;
+  @JsonProperty("compliant")
+  public Integer getCompliant() {
+    return compliant;
   }
-  public void setCompliantArtifacts(Integer compliantArtifacts) {
-    this.compliantArtifacts = compliantArtifacts;
+  public void setCompliant(Integer compliant) {
+    this.compliant = compliant;
   }
 
   /**
    * Number of non-compliant artifacts.
    **/
-  public ArtifactComplianceSummaryForPolicyDTO nonCompliantArtifacts(Integer nonCompliantArtifacts) {
-    this.nonCompliantArtifacts = nonCompliantArtifacts;
+  public ArtifactComplianceSummaryForPolicyDTO nonCompliant(Integer nonCompliant) {
+    this.nonCompliant = nonCompliant;
     return this;
   }
 
   
   @ApiModelProperty(example = "4", value = "Number of non-compliant artifacts.")
-  @JsonProperty("nonCompliantArtifacts")
-  public Integer getNonCompliantArtifacts() {
-    return nonCompliantArtifacts;
+  @JsonProperty("nonCompliant")
+  public Integer getNonCompliant() {
+    return nonCompliant;
   }
-  public void setNonCompliantArtifacts(Integer nonCompliantArtifacts) {
-    this.nonCompliantArtifacts = nonCompliantArtifacts;
+  public void setNonCompliant(Integer nonCompliant) {
+    this.nonCompliant = nonCompliant;
   }
 
 
@@ -72,13 +72,13 @@ public class ArtifactComplianceSummaryForPolicyDTO   {
       return false;
     }
     ArtifactComplianceSummaryForPolicyDTO artifactComplianceSummaryForPolicy = (ArtifactComplianceSummaryForPolicyDTO) o;
-    return Objects.equals(compliantArtifacts, artifactComplianceSummaryForPolicy.compliantArtifacts) &&
-        Objects.equals(nonCompliantArtifacts, artifactComplianceSummaryForPolicy.nonCompliantArtifacts);
+    return Objects.equals(compliant, artifactComplianceSummaryForPolicy.compliant) &&
+        Objects.equals(nonCompliant, artifactComplianceSummaryForPolicy.nonCompliant);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(compliantArtifacts, nonCompliantArtifacts);
+    return Objects.hash(compliant, nonCompliant);
   }
 
   @Override
@@ -86,8 +86,8 @@ public class ArtifactComplianceSummaryForPolicyDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ArtifactComplianceSummaryForPolicyDTO {\n");
     
-    sb.append("    compliantArtifacts: ").append(toIndentedString(compliantArtifacts)).append("\n");
-    sb.append("    nonCompliantArtifacts: ").append(toIndentedString(nonCompliantArtifacts)).append("\n");
+    sb.append("    compliant: ").append(toIndentedString(compliant)).append("\n");
+    sb.append("    nonCompliant: ").append(toIndentedString(nonCompliant)).append("\n");
     sb.append("}");
     return sb.toString();
   }
