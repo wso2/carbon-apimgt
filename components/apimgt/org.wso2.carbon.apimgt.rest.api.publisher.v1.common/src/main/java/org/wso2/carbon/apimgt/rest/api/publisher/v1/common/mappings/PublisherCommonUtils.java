@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
@@ -77,6 +78,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
@@ -90,7 +92,9 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ComplianceResult;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
@@ -104,6 +108,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -125,6 +130,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil.getErrorDTO;
 
 /**
  * This is a publisher rest api utility class.
@@ -190,8 +197,12 @@ public class PublisherCommonUtils {
             artifactType = ArtifactType.GRAPHQL_API;
         }
 
-        checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE, artifactType, organization,
+        ComplianceResult complianceResult = checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE, artifactType, organization,
                 null, null);
+        if (!complianceResult.isCompliant()) {
+            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
+                    "Governance Compliance Error", 400L, 400));
+        }
 
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
@@ -213,8 +224,12 @@ public class PublisherCommonUtils {
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
 
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
-        checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE,
+        ComplianceResult complianceResult = checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE,
                 ArtifactType.fromString(originalAPI.getType()), originalAPI.getOrganization(), null, null);
+        if (!complianceResult.isCompliant()) {
+            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
+                    "Governance Compliance Error", 400L, 400));
+        }
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
@@ -1231,7 +1246,7 @@ public class PublisherCommonUtils {
         }
 
         //adding the api
-        checkGovernanceCompliance(apiToAdd.getUuid(),  GovernableState.API_CREATE, artifactType, organization,
+        ComplianceResult complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(),  GovernableState.API_CREATE, artifactType, organization,
                 null, null);
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;
@@ -1766,8 +1781,12 @@ public class PublisherCommonUtils {
         //updating APi with the new AsyncAPI definition
         existingAPI.setAsyncApiDefinition(apiDefinition);
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
-        checkGovernanceCompliance(existingAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.ASYNC_API,
+        ComplianceResult complianceResult = checkGovernanceCompliance(existingAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.ASYNC_API,
                 organization, null, null);
+        if (!complianceResult.isCompliant()) {
+            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
+                    "Governance Compliance Error", 400L, 400));
+        }
         apiProvider.updateAPI(existingAPI, oldapi);
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId().getUUID(), organization);
@@ -1815,8 +1834,12 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        checkGovernanceCompliance(apiId, GovernableState.API_UPDATE, ArtifactType.REST_API, organization,
+        ComplianceResult complianceResult = checkGovernanceCompliance(apiId, GovernableState.API_UPDATE, ArtifactType.REST_API, organization,
                 null, null);
+        if (!complianceResult.isCompliant()) {
+            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
+                    "Governance Compliance Error", 400L, 400));
+        }
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
 
         //retrieves the updated swagger definition
@@ -2021,9 +2044,13 @@ public class PublisherCommonUtils {
         originalAPI.setUriTemplates(uriTemplates);
 
         apiProvider.saveGraphqlSchemaDefinition(originalAPI.getUuid(), schemaDefinition, originalAPI.getOrganization());
-        checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.GRAPHQL_API,
+        ComplianceResult complianceResult = checkGovernanceCompliance(originalAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.GRAPHQL_API,
                 originalAPI.getOrganization(), null, null);
 
+        if (!complianceResult.isCompliant()) {
+            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
+                    "Governance Compliance Error", 400L, 400));
+        }
         apiProvider.updateAPI(originalAPI, oldApi);
 
         return originalAPI;
@@ -2557,8 +2584,12 @@ public class PublisherCommonUtils {
         List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent);
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), organization);
         updatedAPI.setSoapToRestSequences(list);
-        checkGovernanceCompliance(updatedAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.API, organization,
+        ComplianceResult complianceResult = checkGovernanceCompliance(updatedAPI.getUuid(), GovernableState.API_UPDATE, ArtifactType.API, organization,
                 null, null);
+        if (!complianceResult.isCompliant()) {
+            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
+                    "Governance Compliance Error", 400L, 400));
+        }
         return apiProvider.updateAPI(updatedAPI, api);
     }
 
@@ -2699,8 +2730,13 @@ public class PublisherCommonUtils {
                         apiToAdd.getGatewayVendor())));
         apiToAdd.setOrganization(organization);
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
-        checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.ASYNC_API, organization,
+        ComplianceResult complianceResult = checkGovernanceCompliance(apiToAdd.getUuid(), GovernableState.API_CREATE, ArtifactType.ASYNC_API, organization,
                 null, null);
+
+        if (!complianceResult.isCompliant()) {
+            throw new APIManagementException(complianceResult.getMessage(), new ErrorItem(complianceResult.getMessage(),
+                    "Governance Compliance Error", 400L, 400));
+        }
         apiProvider.addAPI(apiToAdd);
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
     }
@@ -2747,19 +2783,7 @@ public class PublisherCommonUtils {
         return errorPropertyNames;
     }
 
-    public static String validationArtifact(API api) {
-        try {
-            APIDTO dto = APIMappingUtil.fromAPItoDTO(api);
-            return new ObjectMapper().writeValueAsString(dto);
-        } catch (APIManagementException e) {
-            log.error("Error occurred while validating the API artifact", e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return "";
-    }
-
-    public static void checkGovernanceCompliance(String artifactID, GovernableState state,
+    public static ComplianceResult checkGovernanceCompliance(String artifactID, GovernableState state,
                                                  ArtifactType type, String organization, String revisionId,
                                                  Map<RuleType, String> artifactProjectContent) {
         log.info("Artifact ID " + artifactID);
@@ -2771,7 +2795,7 @@ public class PublisherCommonUtils {
                 ArtifactComplianceInfo artifactComplianceInfo = apimGovernanceService.evaluateComplianceSync(artifactID,
                         revisionId, type, state, artifactProjectContent, organization);
                 if (artifactComplianceInfo.isBlockingNecessary()) {
-                    log.info(artifactID);
+                    return new ComplianceResult(false, buildBadRequestResponse(artifactComplianceInfo));
                 }
             } else {
                 if (log.isDebugEnabled()) {
@@ -2782,7 +2806,40 @@ public class PublisherCommonUtils {
                         state, organization);
             }
         } catch (GovernanceException e) {
-            log.error("Error occurred while executing governance ", e);
+           throw new RuntimeException("Error occurred while executing governance ", e);
         }
+        return new ComplianceResult(true, null);
     }
-}
+
+    public static String buildBadRequestResponse(ArtifactComplianceInfo artifactComplianceInfo) {
+        List<RuleViolation> blockingViolations = artifactComplianceInfo.getBlockingRuleViolations();
+        List<RuleViolation> nonBlockingViolations = artifactComplianceInfo.getNonBlockingViolations();
+
+        List<Map<String, String>> violations = new ArrayList<>();
+
+        for (RuleViolation violation : blockingViolations) {
+            Map<String, String> violationDetails = new HashMap<>();
+            violationDetails.put("ruleCode", violation.getRuleCode());
+            violationDetails.put("violatedPath", violation.getViolatedPath());
+            violationDetails.put("severity", violation.getSeverity().name());
+            violations.add(violationDetails);
+        }
+
+        for (RuleViolation violation : nonBlockingViolations) {
+            Map<String, String> violationDetails = new HashMap<>();
+            violationDetails.put("ruleCode", violation.getRuleCode());
+            violationDetails.put("violatedPath", violation.getViolatedPath());
+            violationDetails.put("severity", violation.getSeverity().name());
+            violations.add(violationDetails);
+        }
+
+        // Convert violations list to JSON object
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonViolations;
+        try {
+            jsonViolations = objectMapper.writeValueAsString(violations);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error generating JSON response for governance compliance ", e);
+        }
+        return jsonViolations;
+    }}

@@ -326,6 +326,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             connection.setAutoCommit(false);
 
             clearOldComplianceEvaluationResult(artifactId, policyId, rulesetId, connection);
+            clearOldRuleViolations(artifactId, policyId, rulesetId, connection);
 
             try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
                 prepStmnt.setString(1, GovernanceUtil.generateUUID());
@@ -360,6 +361,22 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             throws GovernanceException {
 
         String sqlQuery = SQLConstants.DELETE_GOV_COMPLIANCE_EVALUATION_RESULT;
+        try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+            prepStmnt.setString(1, artifactId);
+            prepStmnt.setString(2, policyId);
+            prepStmnt.setString(3, rulesetId);
+            prepStmnt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_GOVERNANCE_RESULT,
+                    e, artifactId);
+        }
+    }
+
+
+    private void clearOldRuleViolations(String artifactId, String policyId, String rulesetId, Connection connection)
+            throws GovernanceException {
+
+        String sqlQuery = SQLConstants.DELETE_RULE_VIOLATIONS;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, artifactId);
             prepStmnt.setString(2, policyId);

@@ -146,7 +146,7 @@ return null;
   }
 
   /**
-   * List of actions taken when the governance policy is violated.
+   * List of actions taken when the governance policy is violated. An action is defined by the state and rule severity. If an action is not specified to each state and rule severity, the default action is &#x60;NOTIFY&#x60;.
    **/
   public GovernancePolicyDTO actions(List<ActionDTO> actions) {
     this.actions = actions;
@@ -154,7 +154,7 @@ return null;
   }
 
   
-  @ApiModelProperty(required = true, value = "List of actions taken when the governance policy is violated.")
+  @ApiModelProperty(required = true, value = "List of actions taken when the governance policy is violated. An action is defined by the state and rule severity. If an action is not specified to each state and rule severity, the default action is `NOTIFY`.")
       @Valid
   @JsonProperty("actions")
   @NotNull

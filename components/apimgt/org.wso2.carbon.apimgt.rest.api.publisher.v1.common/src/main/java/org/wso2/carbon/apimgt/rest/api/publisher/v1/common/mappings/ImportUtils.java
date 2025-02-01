@@ -85,6 +85,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ComplianceResult;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -400,9 +401,13 @@ public class ImportUtils {
             }
 
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
-            checkGovernanceCompliance(importedApi.getUuid(), GovernableState.API_CREATE,
-                    ArtifactType.fromString(apiType), importedApi.getOrganization(), null,
-                    null);
+            ComplianceResult complianceResult = checkGovernanceCompliance(importedApi.getUuid(), GovernableState.API_CREATE,
+                    ArtifactType.fromString(apiType), importedApi.getOrganization(), null, null);
+            if (!complianceResult.isCompliant()) {
+                log.warn("API " + importedApi.getId().getApiName() + " is not compliant with the governance " +
+                        "workflow. Compliance result: " + complianceResult.getMessage());
+            }
+
             apiProvider.updateAPI(importedApi, oldAPI);
 
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2772,8 +2777,12 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                checkGovernanceCompliance(importedApiProduct.getUuid(), GovernableState.API_CREATE,
+                ComplianceResult complianceResult = checkGovernanceCompliance(importedApiProduct.getUuid(), GovernableState.API_CREATE,
                         ArtifactType.REST_API, organization, revisionId, null);
+                if (!complianceResult.isCompliant()) {
+                    throw new APIManagementException("API Product is not compliant with the governance " +
+                            "workflow. " + complianceResult.getMessage());
+                }
                 apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
             } else {
                 log.info("Valid deployment environments were not found for the imported artifact. Hence not deployed" +
