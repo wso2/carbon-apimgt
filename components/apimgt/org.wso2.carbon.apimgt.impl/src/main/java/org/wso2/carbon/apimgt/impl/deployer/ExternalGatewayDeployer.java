@@ -35,7 +35,7 @@ public interface ExternalGatewayDeployer {
      * @param environment Environment to be deployed
      * @throws DeployerException if error occurs when deploying APIs to in the external gateway
      */
-    public boolean deploy(API api, Environment environment) throws DeployerException;
+    public String deploy(API api, Environment environment) throws DeployerException;
 
     /**
      * Undeploy API artifact from provided environment
