@@ -47,12 +47,12 @@ public class RulesetManagerImpl implements RulesetManager {
     /**
      * Create a new Governance Ruleset
      *
-     * @param organization Organization
      * @param ruleset      Ruleset object
+     * @param organization Organization
      * @return Ruleset Created object
      */
     @Override
-    public RulesetInfo createNewRuleset(String organization, Ruleset ruleset) throws GovernanceException {
+    public RulesetInfo createNewRuleset(Ruleset ruleset, String organization) throws GovernanceException {
         ruleset.setId(ruleset.getId() == null ? GovernanceUtil.generateUUID() : ruleset.getId());
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
@@ -61,7 +61,7 @@ public class RulesetManagerImpl implements RulesetManager {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
                     ruleset.getName());
         }
-        return rulesetMgtDAO.createRuleset(organization, ruleset);
+        return rulesetMgtDAO.createRuleset(ruleset, organization);
     }
 
     /**
@@ -91,14 +91,13 @@ public class RulesetManagerImpl implements RulesetManager {
     /**
      * Get the content of a Governance Ruleset
      *
-     * @param organization Organization
-     * @param rulesetId    Ruleset ID
+     * @param rulesetId Ruleset ID
      * @return String Content of the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset content
      */
     @Override
-    public String getRulesetContent(String organization, String rulesetId) throws GovernanceException {
-        String content = rulesetMgtDAO.getRulesetContent(organization, rulesetId);
+    public String getRulesetContent(String rulesetId) throws GovernanceException {
+        String content = rulesetMgtDAO.getRulesetContent(rulesetId);
         if (content == null) {
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
         }
@@ -109,18 +108,17 @@ public class RulesetManagerImpl implements RulesetManager {
     /**
      * Delete a Governance Ruleset
      *
-     * @param organization Organization
      * @param rulesetId    Ruleset ID
      * @throws GovernanceException If an error occurs while deleting the ruleset
      */
     @Override
-    public void deleteRuleset(String organization, String rulesetId) throws GovernanceException {
+    public void deleteRuleset(String rulesetId) throws GovernanceException {
         RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId);
         if (isRulesetAssociatedWithPolicies(rulesetId)) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
-                    ruleset.getId(), organization);
+                    ruleset.getId());
         }
-        rulesetMgtDAO.deleteRuleset(organization, rulesetId);
+        rulesetMgtDAO.deleteRuleset(rulesetId);
     }
 
     /**
@@ -137,14 +135,13 @@ public class RulesetManagerImpl implements RulesetManager {
     /**
      * Update a Governance Ruleset
      *
-     * @param organization Organization
      * @param rulesetId    Ruleset ID
      * @param ruleset      Ruleset object
      * @return Ruleset Updated object
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
     @Override
-    public RulesetInfo updateRuleset(String organization, String rulesetId, Ruleset ruleset)
+    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
             throws GovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
@@ -154,7 +151,7 @@ public class RulesetManagerImpl implements RulesetManager {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
                     ruleset.getName());
         }
-        return rulesetMgtDAO.updateRuleset(organization, rulesetId, ruleset);
+        return rulesetMgtDAO.updateRuleset(rulesetId, ruleset);
     }
 
     /**

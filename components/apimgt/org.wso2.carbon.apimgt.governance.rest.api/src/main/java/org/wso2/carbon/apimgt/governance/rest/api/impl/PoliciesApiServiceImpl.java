@@ -198,8 +198,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      */
     public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException {
         PolicyManager policyManager = new PolicyManagerImpl();
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        policyManager.deletePolicy(policyId, organization);
+        policyManager.deletePolicy(policyId);
         return Response.status(Response.Status.OK).build();
     }
 
@@ -224,7 +223,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
 
         governancePolicy.setUpdatedBy(username);
         GovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
-                (policyId, organization, governancePolicy);
+                (policyId, governancePolicy);
 
         GovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
                 fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);

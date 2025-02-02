@@ -36,23 +36,22 @@ public interface GovernancePolicyMgtDAO {
     /**
      * Create a new Governance Policy
      *
-     * @param organization     Organization
      * @param governancePolicy Governance Policy
+     * @param organization     Organization
      * @return GovernancePolicy Created object
      */
-    GovernancePolicy createGovernancePolicy(String organization,
-                                            GovernancePolicy
-                                                    governancePolicy) throws GovernanceException;
+    GovernancePolicy createGovernancePolicy(GovernancePolicy
+                                                    governancePolicy, String organization) throws GovernanceException;
 
     /**
      * Get Governance Policy by Name
      *
-     * @param organization Organization
      * @param policyName   Policy Name
+     * @param organization Organization
      * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
-    GovernancePolicy getGovernancePolicyByName(String organization, String policyName) throws GovernanceException;
+    GovernancePolicy getGovernancePolicyByName(String policyName, String organization) throws GovernanceException;
 
     /**
      * Get Governance Policy by ID
@@ -75,24 +74,21 @@ public interface GovernancePolicyMgtDAO {
     /**
      * Delete a Governance Policy
      *
-     * @param policyId     Policy ID
-     * @param organization Organization
+     * @param policyId Policy ID
      * @throws GovernanceException If an error occurs while deleting the policy
      */
-    void deletePolicy(String policyId, String organization) throws GovernanceException;
+    void deletePolicy(String policyId) throws GovernanceException;
 
     /**
      * Update a Governance Policy
      *
      * @param policyId         Policy ID
-     * @param organization     Organization
      * @param governancePolicy Governance Policy
      * @return GovernancePolicy Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
-    GovernancePolicy updateGovernancePolicy(String policyId, String organization,
-                                            GovernancePolicy
-                                                    governancePolicy)
+    GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy
+            governancePolicy)
             throws GovernanceException;
 
 
