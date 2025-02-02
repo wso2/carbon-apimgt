@@ -10672,12 +10672,16 @@ components:
           type: string
           example:
             wso2
+            external
         gatewayType:
           title: Field to identify gateway type.
           type: string
           description: The gateway type selected for the API policies. Accepts one of the
             following. wso2/synapse, wso2/apk.
-          example: wso2/synapse
+          example:
+            wso2/synapse
+            wso2/apk
+            AWS
           default: wso2/synapse
         asyncTransportProtocols:
           type: array
@@ -13423,8 +13427,12 @@ components:
           example:
             - Regular
             - APK
+            - AWS
           items:
             type: string
+        gatewayFeatureCatalog:
+          type: string
+          example: "{\"REGULAR\": {\"runtime\": [\"cors\", \"schemaValidation\", \"responseCaching\", \"transportsHTTP\", \"transportsHTTPS\", \"transportsMutualSSL\", \"oauth2\", \"apikey\", \"basicAuth\", \"audienceValidation\"], \"resources\": [\"apiLevelRateLimiting\", \"operationLevelRateLimiting\", \"operationSecurity\"], \"localScopes\": [\"operationScopes\"], \"policies\": [\"operationLevelPolicies\"], \"monetization\": [\"monetization\"], \"subscriptions\": [\"subscriptions\"], \"endpoints\": [\"restEndpoints\", \"serviceEndpoints\", \"soapEndpoints\", \"dynamicEndpoints\", \"mockEndpoints\", \"lambdaEndpoints\", \"sequenceEndpoints\"]}}"
         scopes:
           type: array
           example:

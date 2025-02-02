@@ -2763,6 +2763,9 @@ public class SQLConstants {
             "SET DISPLAY_NAME = ?, DESCRIPTION = ?, CONFIGURATION = ?" +
             "WHERE UUID = ?";
 
+    public static final String ADD_API_AWS_API_MAPPING = "INSERT INTO AM_API_AWS_API_MAPPING " +
+            "(API_ID, AWS_API_ID, GATEWAY_ENV_ID) VALUES (?, ?, ?)";
+
     public static final String ADD_GATEWAY_VISIBILITY_PERMISSION_SQL =
             " INSERT INTO" +
                     " AM_GATEWAY_PERMISSIONS (GATEWAY_UUID, PERMISSIONS_TYPE, ROLE)" +

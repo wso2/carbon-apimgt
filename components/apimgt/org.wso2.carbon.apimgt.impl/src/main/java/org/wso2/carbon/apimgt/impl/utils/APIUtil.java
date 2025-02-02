@@ -365,6 +365,112 @@ public final class APIUtil {
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 
+    private static final String SYNAPSE_GATEWAY_FEATURES = "{\n" +
+            "            \"runtime\": [\n" +
+            "                \"cors\",\n" +
+            "                \"schemaValidation\",\n" +
+            "                \"queryAnalysis\",\n" +
+            "                \"responseCaching\",\n" +
+            "                \"transportsHTTP\",\n" +
+            "                \"transportsHTTPS\",\n" +
+            "                \"transportsMutualSSL\",\n" +
+            "                \"oauth2\",\n" +
+            "                \"apikey\",\n" +
+            "                \"basicAuth\",\n" +
+            "                \"audienceValidation\",\n" +
+            "                \"backendThroughput\",\n" +
+            "                \"keyManagerConfig\"\n" +
+            "            ],\n" +
+            "            \"resources\": [\n" +
+            "                \"apiLevelRateLimiting\",\n" +
+            "                \"operationLevelRateLimiting\",\n" +
+            "                \"operationSecurity\"\n" +
+            "            ],\n" +
+            "            \"localScopes\": [\n" +
+            "                \"operationScopes\"\n" +
+            "            ],\n" +
+            "            \"monetization\": [\n" +
+            "                \"monetization\"\n" +
+            "            ],\n" +
+            "            \"subscriptions\": [\n" +
+            "                \"subscriptions\"\n" +
+            "            ],\n" +
+            "            \"endpoints\": [\n" +
+            "                \"http\",\n" +
+            "                \"service\",\n" +
+            "                \"address\",\n" +
+            "                \"default\",\n" +
+            "                \"INLINE\",\n" +
+            "                \"dynamic\",\n" +
+            "                \"awslambda\",\n" +
+            "                \"sequence_backend\",\n" +
+            "                \"advancedConfigurations\",\n" +
+            "                \"loadBalanceAndFailoverConfigurations\",\n" +
+            "                \"endpointSecurity\"\n" +
+            "            ]\n" +
+            "        }";
+    private static final String APK_GATEWAY_FEATURES = "{\n" +
+            "            \"runtime\": [\n" +
+            "                \"cors\",\n" +
+            "                \"transportsHTTP\",\n" +
+            "                \"transportsHTTPS\",\n" +
+            "                \"transportsMutualSSL\",\n" +
+            "                \"oauth2\",\n" +
+            "                \"apikey\",\n" +
+            "                \"basicAuth\",\n" +
+            "                \"audienceValidation\"\n" +
+            "            ],\n" +
+            "            \"resources\": [\n" +
+            "                \"apiLevelRateLimiting\",\n" +
+            "                \"operationLevelRateLimiting\"\n" +
+            "            ],\n" +
+            "            \"localScopes\": [\n" +
+            "                \"operationScopes\"\n" +
+            "            ],\n" +
+            "            \"monetization\": [\n" +
+            "                \"monetization\"\n" +
+            "            ],\n" +
+            "            \"subscriptions\": [\n" +
+            "                \"subscriptions\"\n" +
+            "            ],\n" +
+            "            \"endpoints\": [\n" +
+            "                \"http\"\n" +
+            "            ]\n" +
+            "        }";
+    private static final String API_DATA = "{\n" +
+            "        \"rest\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\",\n" +
+            "            \"AWS\"\n" +
+            "        ],\n" +
+            "        \"soap\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ],\n" +
+            "        \"graphql\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ],\n" +
+            "        \"ws\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\",\n" +
+            "            \"AWS\"\n" +
+            "            ],\n" +
+            "        \"wh\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ],\n" +
+            "        \"sse\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ],\n" +
+            "        \"ai\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\",\n" +
+            "            \"AWS\"\n" +
+            "        ]\n" +
+            "    }";
+
     private APIUtil() {
 
     }
@@ -399,6 +505,7 @@ public final class APIUtil {
     private static double retryProgressionFactor;
     private static String gatewayTypes;
     private static int maxRetryCount;
+    private static Gson gatewayFeatureCatalog;
 
     //constants for getting masked token
     private static final int MAX_LEN = 36;
@@ -3363,9 +3470,82 @@ public final class APIUtil {
         // Get the gateway types from the deployment.toml
         List<String> gatewayTypesList = new ArrayList<>();
         if (gatewayTypes != null && !gatewayTypes.isEmpty()) {
-            gatewayTypesList = Arrays.asList(gatewayTypes.split(","));
+            gatewayTypesList = Arrays.asList(gatewayTypes.replace(" ", "").split(","));
         }
         return gatewayTypesList;
+    }
+
+    public static String getGatewayFeatureCatalog() {
+        Gson gson = new Gson();
+
+        JsonObject synapseJSON = gson.fromJson(SYNAPSE_GATEWAY_FEATURES, JsonObject.class);
+        JsonObject apkJSON = gson.fromJson(APK_GATEWAY_FEATURES, JsonObject.class);
+        JsonObject apiData = gson.fromJson(API_DATA, JsonObject.class);
+
+        JsonObject gatewayFeatures = new JsonObject();
+        gatewayFeatures.add(APIConstants.WSO2_SYNAPSE_GATEWAY, synapseJSON);
+        gatewayFeatures.add(APIConstants.WSO2_APK_GATEWAY, apkJSON);
+
+        // Loop this part for each federated gateway type
+        String awsConfigs = "{\n" +
+                "    \"AWS\":{\n" +
+                "        \"apiTypes\":[\n" +
+                "            \"rest\",\n" +
+                "            \"ws\",\n" +
+                "            \"ai\"\n" +
+                "        ],\n" +
+                "        \"gatewayFeatures\":{\n" +
+                "            \"runtime\":[\n" +
+                "                \"cors\",\n" +
+                "                \"transportsHTTP\",\n" +
+                "                \"transportsHTTPS\",\n" +
+                "                \"transportsMutualSSL\",\n" +
+                "                \"oauth2\",\n" +
+                "                \"apikey\",\n" +
+                "                \"basicAuth\",\n" +
+                "                \"audienceValidation\"\n" +
+                "            ],\n" +
+                "            \"resources\":[\n" +
+                "                \"apiLevelRateLimiting\"\n" +
+                "            ],\n" +
+                "            \"localScopes\":[\n" +
+                "                \"operationScopes\"\n" +
+                "            ],\n" +
+                "            \"monetization\":[\n" +
+                "                \"monetization\"\n" +
+                "            ],\n" +
+                "            \"subscriptions\":[\n" +
+                "                \"subscriptions\"\n" +
+                "            ],\n" +
+                "            \"endpoints\":[\n" +
+                "                \"http\"\n" +
+                "            ]\n" +
+                "        }\n" +
+                "    }\n" +
+                "}"; // comes from API call
+        JsonObject awsConfigsJSON = gson.fromJson(awsConfigs, JsonObject.class);
+        Set<String> keys = awsConfigsJSON.keySet();
+        String gatewayType = keys.iterator().next();
+
+        JsonObject awsConfigsJSONValue = awsConfigsJSON.getAsJsonObject(gatewayType);
+
+        JsonObject awsGatewayFeatures = awsConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        gatewayFeatures.add(gatewayType, awsGatewayFeatures);
+
+        JsonArray awsApiTypes = awsConfigsJSONValue.getAsJsonArray("apiTypes");
+        for (int i = 0; i < awsApiTypes.size(); i++) {
+            String apiType = awsApiTypes.get(i).getAsString();
+            if (apiData.has(apiType)) {
+                JsonArray existingGateways = apiData.getAsJsonArray(apiType);
+                existingGateways.add(gatewayType);
+            }
+        }
+
+        JsonObject result = new JsonObject();
+        result.add("gatewayFeatures", gatewayFeatures);
+        result.add("apiTypes", apiData);
+
+        return result.toString();
     }
 
     /**
@@ -8206,6 +8386,12 @@ public final class APIUtil {
         return allEnvironments;
     }
 
+    public static void addApiAWSApiMapping(String apiId, String aWSApiId, String environmentId)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().addApiAWSApiMapping(apiId, aWSApiId, environmentId);
+    }
+
     /**
      * Get gateway environments defined in the configuration: api-manager.xml
      * @return map of configured environments against environment name
@@ -10240,13 +10426,16 @@ public final class APIUtil {
     /**
      * Check whether there are external environments registered
      */
-    public static boolean isAnyExternalGateWayProviderExists() {
-
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        for (Environment environment : gatewayEnvironments.values()) {
-            if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
-                return true;
+    public static boolean isAnyExternalGateWayProviderExists(String tenantDomain) {
+        try {
+            Map<String, Environment> environments = getEnvironments(tenantDomain);
+            for (Environment environment : environments.values()) {
+                if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
+                    return true;
+                }
             }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
         }
         return false;
     }
@@ -10659,10 +10848,8 @@ public final class APIUtil {
      * @return gateway vendor for the API
      */
     public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
-        if (gatewayType != null && APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
-            gatewayVendorType =  APIConstants.WSO2_APK_GATEWAY;
-        }
-        return gatewayVendorType;
+
+        return !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(gatewayType) ? gatewayType: gatewayVendorType;
     }
 
     /**
@@ -10675,8 +10862,8 @@ public final class APIUtil {
         String gatewayType = null;
         if (APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
             gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
-        } else if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
-            gatewayType = APIConstants.WSO2_APK_GATEWAY;
+        } else {
+            return gatewayVendor;
         }
         return gatewayType;
     }
@@ -10688,10 +10875,12 @@ public final class APIUtil {
      * @return wso2 gateway vendor type
      */
     public static String handleGatewayVendorRetrieval(String gatewayVendor) {
-        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
-            gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor) ||
+                APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
+            return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        } else {
+            return APIConstants.EXTERNAL_GATEWAY_VENDOR;
         }
-        return  gatewayVendor;
     }
 
     /**

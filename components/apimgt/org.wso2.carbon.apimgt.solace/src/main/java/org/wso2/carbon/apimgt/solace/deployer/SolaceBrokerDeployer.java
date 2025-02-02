@@ -75,7 +75,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
      * @throws DeployerException if error occurs when deploying APIs to Solace broker
      */
     @Override
-    public boolean deploy(API api, Environment environment) throws DeployerException {
+    public String deploy(API api, Environment environment) throws DeployerException {
         String apiDefinition = api.getAsyncApiDefinition();
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
         String apiNameForRegistration = api.getId().getApiName() + "-" + api.getId().getVersion();
@@ -106,7 +106,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                     log.info("API product '" + apiNameWithContext + "' already found in Solace. No need to create "
                             + "again");
                 }
-                return true;
+                return "SUCCESS";
             } else if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 // api product not found in solace. check existence of registered API in solace
                 if (log.isDebugEnabled()) {
@@ -127,7 +127,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                             environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
                     if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                         log.info("API product " + apiNameWithContext + " has been created in Solace broker");
-                        return true;
+                        return "SUCCESS";
                     } else {
                         if (log.isDebugEnabled()) {
                             log.error("Error while creating API product" + apiNameWithContext + " in Solace." +
@@ -155,7 +155,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                                 environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
                         if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                             log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
-                            return true;
+                            return "SUCCESS";
                         } else {
                             if (log.isDebugEnabled()) {
                                 log.error("Error while creating API product in Solace. : " + response2.

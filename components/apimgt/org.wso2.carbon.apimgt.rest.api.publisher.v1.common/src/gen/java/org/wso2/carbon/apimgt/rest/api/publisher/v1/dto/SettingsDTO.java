@@ -29,6 +29,7 @@ public class SettingsDTO   {
     private String devportalUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
     private List<String> gatewayTypes = new ArrayList<String>();
+    private String gatewayFeatureCatalog = null;
     private List<String> scopes = new ArrayList<String>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
     private List<SubscriberContactAttributeDTO> subscriberContactAttributes = new ArrayList<SubscriberContactAttributeDTO>();
@@ -90,13 +91,30 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(example = "[\"Regular\",\"APK\"]", value = "")
+  @ApiModelProperty(example = "[\"Regular\",\"APK\",\"AWS\"]", value = "")
   @JsonProperty("gatewayTypes")
   public List<String> getGatewayTypes() {
     return gatewayTypes;
   }
   public void setGatewayTypes(List<String> gatewayTypes) {
     this.gatewayTypes = gatewayTypes;
+  }
+
+  /**
+   **/
+  public SettingsDTO gatewayFeatureCatalog(String gatewayFeatureCatalog) {
+    this.gatewayFeatureCatalog = gatewayFeatureCatalog;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "{\"REGULAR\": {\"runtime\": [\"cors\", \"schemaValidation\", \"responseCaching\", \"transportsHTTP\", \"transportsHTTPS\", \"transportsMutualSSL\", \"oauth2\", \"apikey\", \"basicAuth\", \"audienceValidation\"], \"resources\": [\"apiLevelRateLimiting\", \"operationLevelRateLimiting\", \"operationSecurity\"], \"localScopes\": [\"operationScopes\"], \"policies\": [\"operationLevelPolicies\"], \"monetization\": [\"monetization\"], \"subscriptions\": [\"subscriptions\"], \"endpoints\": [\"restEndpoints\", \"serviceEndpoints\", \"soapEndpoints\", \"dynamicEndpoints\", \"mockEndpoints\", \"lambdaEndpoints\", \"sequenceEndpoints\"]}}", value = "")
+  @JsonProperty("gatewayFeatureCatalog")
+  public String getGatewayFeatureCatalog() {
+    return gatewayFeatureCatalog;
+  }
+  public void setGatewayFeatureCatalog(String gatewayFeatureCatalog) {
+    this.gatewayFeatureCatalog = gatewayFeatureCatalog;
   }
 
   /**
@@ -332,14 +350,14 @@ public class SettingsDTO   {
   }
 
   /**
-   * Is Organization-based access control configuration enabled 
+   * Is Organization-based access control configuration enabled
    **/
   public SettingsDTO orgAccessControlEnabled(Boolean orgAccessControlEnabled) {
     this.orgAccessControlEnabled = orgAccessControlEnabled;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "true", value = "Is Organization-based access control configuration enabled ")
   @JsonProperty("orgAccessControlEnabled")
   public Boolean isOrgAccessControlEnabled() {
@@ -398,6 +416,7 @@ public class SettingsDTO   {
     return Objects.equals(devportalUrl, settings.devportalUrl) &&
         Objects.equals(environment, settings.environment) &&
         Objects.equals(gatewayTypes, settings.gatewayTypes) &&
+        Objects.equals(gatewayFeatureCatalog, settings.gatewayFeatureCatalog) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
         Objects.equals(subscriberContactAttributes, settings.subscriberContactAttributes) &&
@@ -418,7 +437,8 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes,
+            subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, customProperties);
   }
 
   @Override
@@ -429,6 +449,7 @@ public class SettingsDTO   {
     sb.append("    devportalUrl: ").append(toIndentedString(devportalUrl)).append("\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
+    sb.append("    gatewayFeatureCatalog: ").append(toIndentedString(gatewayFeatureCatalog)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("    subscriberContactAttributes: ").append(toIndentedString(subscriberContactAttributes)).append("\n");

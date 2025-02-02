@@ -15609,6 +15609,46 @@ public class ApiMgtDAO {
         return environment;
     }
 
+    /**
+     * Add API - AWS API mapping
+     *
+     * @param apiId API ID
+     * @param aWSApiId AWS API ID
+     * @param environmentId Gateway environment ID
+     * @throws APIManagementException if failed to add the mapping
+     */
+    public void addApiAWSApiMapping(String apiId, String aWSApiId, String environmentId)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String query = SQLConstants.ADD_API_AWS_API_MAPPING;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, aWSApiId);
+            prepStmt.setString(3, environmentId);
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the add API - AWS API Mapping: API ID: "
+                        + apiId + " AWS API ID: " + aWSApiId, ex);
+            }
+            handleException("Error while adding mapping between API ID: " + apiId + " and AWS API ID: " + aWSApiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
     private boolean isEmptyValuesInApplicationAttributesEnabled() {
         return Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.ApplicationAttributes.
