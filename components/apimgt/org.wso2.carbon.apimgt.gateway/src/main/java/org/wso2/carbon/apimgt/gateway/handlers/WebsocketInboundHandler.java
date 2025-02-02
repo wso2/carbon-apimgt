@@ -46,6 +46,7 @@ import org.apache.synapse.SynapseConstants;
 import org.wso2.carbon.apimgt.common.gateway.constants.HealthCheckConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.dto.WebSocketThrottleResponseDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -312,8 +313,12 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_COMPLEX
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.GRAPHQL_QUERY_TOO_DEEP) {
             if (log.isDebugEnabled()) {
-                log.debug(channelId + " -- Websocket API request [inbound] : Inbound WebSocket frame is throttled. " +
-                        ctx.channel().toString());
+                WebSocketThrottleResponseDTO throttleResponseDTO =
+                        ((WebSocketThrottleResponseDTO) responseDTO.getInboundProcessorResponseError());
+                log.debug(channelId + " -- Websocket API request [inbound] : Inbound WebSocket frame is throttled. "
+                                  + ctx.channel().toString() + " API Context: " + throttleResponseDTO.getApiContext()
+                                  + ", " + "User: " + throttleResponseDTO.getUser() + ", Reason: "
+                                  + throttleResponseDTO.getThrottledOutReason());
             }
         } else if (responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_GENERAL_ERROR
                 || responseDTO.getErrorCode() == WebSocketApiConstants.FrameErrorConstants.API_AUTH_INVALID_CREDENTIALS

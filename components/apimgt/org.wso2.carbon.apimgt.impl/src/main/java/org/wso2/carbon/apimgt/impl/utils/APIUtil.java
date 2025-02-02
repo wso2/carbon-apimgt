@@ -168,6 +168,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -256,6 +257,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -1405,6 +1407,23 @@ public final class APIUtil {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    /**
+     * Utility method to get the introspection query for GraphQL
+     * @return introspection query
+     * @throws APIManagementException
+     */
+    public static String getIntrospectionQuery() throws APIManagementException {
+        String introspectionQueryFilePath = APIConstants.GRAPHQL_INTROSPECTION_QUERY_FILE;
+        try (InputStream fileStream = APIUtil.class.getClassLoader().getResourceAsStream(introspectionQueryFilePath)) {
+            if (fileStream == null) {
+                throw new APIManagementException("Graphql introspection query file not found: " + introspectionQueryFilePath);
+            }
+            return IOUtils.toString(fileStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new APIManagementException("Error reading graphql introspection query file", e);
+        }
     }
 
     public static String getRevisionPath(String apiUUID, int revisionId) {
@@ -10211,8 +10230,9 @@ public final class APIUtil {
                                 OperationPolicyData policyData = new OperationPolicyData();
                                 policyData.setSpecification(policySpec);
                                 policyData.setOrganization(organization);
+                                //since the directory contains common policies only, files are not renamed with type
                                 String policyFileName = getOperationPolicyFileName(policySpec.getName(),
-                                        policySpec.getVersion());
+                                        policySpec.getVersion(), null);
                                 OperationPolicyDefinition synapsePolicyDefinition =
                                         getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
                                                 policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
@@ -10536,11 +10556,14 @@ public final class APIUtil {
     }
 
 
-    public static String getOperationPolicyFileName(String policyName, String policyVersion) {
+    public static String getOperationPolicyFileName(String policyName, String policyVersion, String policyType) {
         if (StringUtils.isEmpty(policyVersion)) {
             policyVersion = "v1";
         }
-        return policyName + "_" + policyVersion;
+        if (policyType == null) {
+            return policyName + "_" + policyVersion;
+        }
+        return policyName + "_" + policyVersion + "_" + policyType;
     }
 
     public static String getCustomBackendFileName(String apiUUID, String endpointType) {

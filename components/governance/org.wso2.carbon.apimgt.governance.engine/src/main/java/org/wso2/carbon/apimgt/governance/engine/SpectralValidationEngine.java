@@ -164,6 +164,7 @@ public class SpectralValidationEngine implements ValidationEngine {
                 violation.setRuleCode(node.get("ruleName").asText());
                 violation.setViolatedPath(node.get("path").asText());
                 violation.setRuleMessage(node.get("message").asText());
+                violation.setSeverity(Severity.fromString(node.get("severity").asText()));
                 violation.setRulesetId(ruleset.getId());
                 violations.add(violation);
             }

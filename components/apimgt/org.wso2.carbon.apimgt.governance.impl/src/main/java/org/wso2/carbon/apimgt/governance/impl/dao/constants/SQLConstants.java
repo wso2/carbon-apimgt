@@ -251,6 +251,9 @@ public class SQLConstants {
             "GOV_EVALUATION_RESULT " +
             "WHERE RULESET_ID = ?";
 
+    public static final String DELETE_RULE_VIOLATIONS = "DELETE FROM GOV_RULE_VIOLATION " +
+            "WHERE ARTIFACT_ID = ? AND POLICY_ID = ? AND RULESET_ID = ?";
+
     public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION " +
             "(VIOLATION_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, RULESET_ID, RULE_CODE, VIOLATED_PATH, " +
             "ORGANIZATION) " +

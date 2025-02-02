@@ -16,350 +16,136 @@ artifactType: REST_API
 documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-rulesets/wso2_api_design_guidelines_doc/"
 provider: WSO2
 rulesetContent:
-  aliases:
-    Request_Parameter_Path:
-      description: "All request path parameters"
-      targets:
-        - formats:
-            - oas2
-          given:
-            - "$..parameters[?(@ && @.in==\"path\")]"
-        - formats:
-            - oas3
-          given:
-            - "$..parameters[?(@ && @.in==\"path\")]"
-
-    Request_Parameter_Query:
-      description: ""
-      targets:
-        - formats:
-            - oas3
-          given:
-            - "$.paths[*].parameters[?(@.in == 'query')].name"
-            - "$.paths[*][*].parameters[?(@.in == 'query')].name"
-            - "$.components.parameters[?(@.in == 'query')].name"
   rules:
-    server-has-api:
+    required-id:
+      description: "API must have an id."
+      message: "Missing or empty `data.id` field."
+      severity: error
+      given: "$.data.id"
+      then:
+        function: truthy
+
+    required-name:
+      description: "API must have a name."
+      message: "Missing or empty `data.name` field."
+      severity: error
+      given: "$.data.name"
+      then:
+        function: truthy
+
+    required-description:
+      description: "API should have a meaningful description."
+      message: "Missing or empty `data.description` field."
+      severity: warn
+      given: "$.data.description"
+      then:
+        function: truthy
+
+    required-context:
+      description: "API must define a context."
+      message: "Missing or empty `data.context` field."
+      severity: error
+      given: "$.data.context"
+      then:
+        function: truthy
+
+    required-version:
+      description: "API should define a version."
+      message: "Missing or empty `data.version` field."
+      severity: error
+      given: "$.data.version"
+      then:
+        function: truthy
+
+    https-transport-recommended:
+      description: "Recommend using HTTPS transport whenever possible."
+      message: "Transport array should include 'https'."
+      severity: warn
+      given: "$.data.transport"
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            type: array
+            items:
+              type: string
+            # Basic validation to ensure at least one "https" is present
+            not:
+              items:
+                enum:
+                  - http  # This means purely "http" alone not recommended; or you can allow multiple items
+
+    no-plaintext-secret:
+      description: "Endpoint security credentials or secrets should not appear in plaintext."
+      message: "Avoid storing secrets in plain text in `endpointConfig`."
+      severity: error
       given:
-        - '$.servers[*].url'
+        - "$.data.endpointConfig.endpoint_security.production"
+        - "$.data.endpointConfig.endpoint_security.sandbox"
+      then:
+        function: pattern
+        field: "clientSecret"
+        functionOptions:
+          # Very naive pattern check for obvious secrets or placeholders.
+          # Adjust as needed.
+          match: "^(?!.*(secret|password|admin123|qwerty).*$).*$"
+
+    security-schemes-defined:
+      description: "APIs should define at least one strong security scheme."
+      message: "Security scheme array (`securityScheme`) is missing or empty."
+      severity: warn
+      given: "$.data.securityScheme"
+      then:
+        function: truthy
+
+    no-empty-operation-id:
+      description: "Operations must not contain empty IDs."
+      message: "Empty operation 'id' found."
+      severity: warn
+      given: "$.data.operations[*].id"
+      then:
+        function: truthy
+
+    operation-verb-check:
+      description: "Operation verb should be valid HTTP method."
+      message: "Invalid HTTP verb: {{value}}. Please use GET/POST/PUT/DELETE/PATCH/OPTIONS, etc."
+      severity: error
+      given: "$.data.operations[*].verb"
+      then:
+        function: pattern
+        functionOptions:
+          match: "^(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)$"
+
+    business-information-owner-email:
+      description: "API should specify business owner email."
+      message: "Missing or empty businessOwnerEmail field."
+      severity: warn
+      given: "$.data.businessInformation.businessOwnerEmail"
+      then:
+        function: truthy
+
+    technical-information-owner-email:
+      description: "API should specify technical owner email."
+      message: "Missing or empty technicalOwnerEmail field."
+      severity: warn
+      given: "$.data.businessInformation.technicalOwnerEmail"
+      then:
+        function: truthy
+
+    cors-best-practices:
+      description: "Check if CORS is properly configured (at least reviewed)."
+      message: "CORS is fully open (*). Please ensure you are aware of the security implications."
       severity: info
+      given: "$.data.corsConfiguration.accessControlAllowOrigins"
       then:
-        function: pattern
+        function: schema
         functionOptions:
-          match: ^.*\/api/?.*
-      description: Server must have /api
-      message: Server must have /api in it
-      formats:
-        - oas3
-    path-casing:
-      given:
-        - $.paths
-      severity: error
-      then:
-        function: pattern
-        functionOptions:
-          match: '^\/([a-z0-9]+(-[a-z0-9]+)*)?(\/[a-z0-9]+(-[a-z0-9]+)*|\/{.+})*$'
-        field: '@key'
-      description: |-
-        Paths must be `kebab-case`, with hyphens separating words.
-
-        **Invalid Example**
-
-        `userInfo` must be separated with a hyphen.
-
-        ```json
-        {
-            "/userInfo": {
-                "post: }
-               ....
-        }
-        ``` 
-
-        **Valid Example**
-
-        ```json
-        {
-            "/user-info": {
-               "post: }
-               ....
-        }
-        ```
-      message: Paths must be kebab-case
-    resource-names-plural:
-      given:
-        - $.paths
-      severity: warn
-      then:
-        function: pattern
-        functionOptions:
-          match: '^((\/v\d+)*((\/[\w+-]*s)(\/\{.*\})*)*)$'
-        field: '@key'
-      description: |-
-        Resource names should generally be plural. 
-
-        **Invalid Example**
-
-        ```json
-        {
-            "paths": {
-              "/user": 
-            }
-          }
-        ```
-
-        **Valid Example**
-
-        ```json
-        {
-            "paths": {
-              "/users": 
-            }
-        }
-        ```
-      message: Resource names should generally be plural
-    paths-no-file-extensions:
-      given:
-        - $.paths
-      severity: error
-      then:
-        function: pattern
-        functionOptions:
-          notMatch: \b(JSON|json|XML|xml)\b
-        field: '@key'
-      description: |-
-        Paths must not include `json` or `xml` file extensions.
-
-        **Invalid Example**
-
-        The path contains a `.json` extension. 
-
-        ```json
-        {
-            "/user.json": {
-               "post: }
-               ....
-        }
-        ``` 
-
-        **Valid Example**
-
-        ```json
-        {
-            "/user": {
-               "post: }
-               ....
-        }
-        ```
-      message: Paths must not have file extensions
-    paths-no-http-verbs:
-      given:
-        - $.paths
-      severity: error
-      then:
-        function: pattern
-        functionOptions:
-          notMatch: >-
-            \b(GET|PUT|POST|DELETE|LIST|CREATE|REMOVE|get|put|post|delete|list|create|remove|Get|Put|Post|Delete|List|Create|Remove)\b
-        field: '@key'
-      description: >-
-        Verbs such as `get`, `delete`, and `put` must not be included in paths
-        because this information is conveyed by the HTTP method.
-
-
-        **Invalid Example**
-
-
-        The path contains the verb `get`. 
-
-
-        ```json
-
-        {
-            "/getUsers": {
-               "post: }
-               ....
-        }
-
-        ``` 
-
-
-        **Valid Example**
-
-
-        ```json
-
-        {
-            "/user": {
-               "post: }
-               ....
-        }
-
-        ```
-      message: Paths must not have HTTP verbs in them
-    paths-avoid-special-characters:
-      given:
-        - $.paths
-      severity: warn
-      then:
-        function: pattern
-        functionOptions:
-          notMatch: '^(.*)([\$&+,;=?@%]+)(.*)$'
-          match: ''
-        field: '@key'
-      description: >-
-        Paths should not contain special characters, such as `$` `&` `+` `,` `;`
-        `=` `?` and `@%`.
-
-
-        **Invalid Example**
-
-
-        The path contains an ampersand. 
-
-
-        ```json
-
-        {
-            "/user&info": {
-               "post: }
-               ....
-        }
-
-        ``` 
-
-
-        **Valid Example**
-
-
-        ```json
-
-        {
-            "/user": {
-               "post: }
-               ....
-        }
-
-        ```
-      message: Avoid using special characters in paths
-    path-parameters-snake-case:
-      given:
-        - '#Request_Parameter_Path'
-      severity: error
-      then:
-        function: casing
-        functionOptions:
-          type: snake
-          disallowDigits: true
-        field: name
-      description: >-
-        Path parameters must be `snake_case`, with each word separated by an
-        underscore character and the first letter of each word lowercase. Also,
-        the path parameter must not contain digits.
-
-
-        **Invalid Example**
-
-
-        The `name` property on line 9 (`userId`) must be separated by an
-        underscore character and the `I` must be lowercase.
-
-
-        ```json
-
-        {
-            "paths": {
-              "/users/{userId}": {
-                "parameters": [
-                  {
-                    "schema": {
-                      "type": "integer"
-                    },
-                    "name": "userId",
-                    "in": "path"
-                  }
-                ]
-              }
-            }
-          }
-        ```
-
-
-        **Valid Example**
-
-
-        ```json
-
-        {
-            "paths": {
-              "/users/{userId}": {
-                "parameters": [
-                  {
-                    "schema": {
-                      "type": "integer"
-                    },
-                    "name": "user_id",
-                    "in": "path"
-                  }
-                ]
-              }
-            }
-          }
-        ```
-      message: Path parameters must be snake_case and must not contain digits
-    query-parameters-snake-case:
-      given:
-        - '#Request_Parameter_Query'
-      severity: error
-      then:
-        function: casing
-        functionOptions:
-          type: snake
-          disallowDigits: true
-      description: >-
-        Query parameters must be `snake_case`, with each word separated by an
-        underscore character and the first letter of each word lowercase. Also,
-        the query parameter must not contain digits.
-
-
-        **Invalid Example**
-
-
-        The `name` property on line 8 (`user-Id`) must be separated by an
-        underscore character and the `I` must be lowercase.
-
-
-        ```json
-
-        {
-           "parameters": [
-             {
-               "schema": {
-                 "type": "string"
-               },
-               "in": "query",
-               "name": "user-Id"
-             }
-           ]
-        }
-
-        ```
-
-
-        **Valid Example**
-
-
-        ```json
-
-        {
-            "parameters": [
-              {
-                "schema": {
-                  "type": "string"
-                },
-                "in": "query",
-                "name": "user_id"
-              }
-            ]
-         }
-        ```
-      message: Query parameters should be snake_case and not contain digits
+          schema:
+            type: array
+            items:
+              type: string
+            # This rule only warns if '*' is present.
+            # If you want to enforce removing '*', set severity to error and wrap in "not".
+            not:
+              contains:
+                const: "*"

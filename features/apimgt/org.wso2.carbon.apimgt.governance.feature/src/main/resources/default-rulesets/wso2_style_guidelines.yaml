@@ -235,9 +235,9 @@ rulesetContent:
         field: url
       description: |-
         The `contact` object should have a valid organization URL. 
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "contact": {
@@ -256,9 +256,9 @@ rulesetContent:
         field: email
       description: |-
         The `contact` object should have a valid email. 
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "contact": {
@@ -277,9 +277,9 @@ rulesetContent:
         field: info.contact
       description: |-
         The `info` object should include a `contact` object.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "info": {
@@ -303,9 +303,9 @@ rulesetContent:
         field: info.description
       description: |-
         The `info` object should have a `description` object.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "info": {
@@ -324,9 +324,9 @@ rulesetContent:
         field: info.license
       description: |-
         The `info` object should have a `license` object.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "info": {
@@ -349,9 +349,9 @@ rulesetContent:
         field: url
       description: |-
         The `license` object should include a valid url.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "license": {
@@ -373,9 +373,9 @@ rulesetContent:
       description: |-
         Markdown descriptions should not contain [`eval()` functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval),
         which pose a security risk.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "info": {
@@ -396,9 +396,9 @@ rulesetContent:
           notMatch: "<script"
       description: |-
         Markdown descriptions should not contain `script` tags, which pose a security risk.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "info": {
@@ -419,9 +419,9 @@ rulesetContent:
         field: tags
       description: |-
         Global tags specified at the root OpenAPI Document level should be in alphabetical order based on the `name` property.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "tags":[
@@ -434,9 +434,9 @@ rulesetContent:
           ]
         }
         ```
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "tags":[
@@ -464,9 +464,9 @@ rulesetContent:
         field: tags
       description: |-
         At least one global tag should be specified at the root OpenAPI Document level.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "tags":[
@@ -490,9 +490,9 @@ rulesetContent:
         field: description
       description: |-
         Each operation should have a description.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "get": {
@@ -511,9 +511,9 @@ rulesetContent:
         field: operationId
       description: |-
         All operations should have an `operationId`.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "get": {
@@ -535,11 +535,11 @@ rulesetContent:
         field: operationId
       description: |-
         Operation IDs must not contain characters that are invalid for URLs.
-        
+
         **Invalid Example**
-        
+
         The `operationId` in this example includes a pipe and space, which are invalid for URLs.
-        
+
         ```json
         {
           "/users": {
@@ -549,11 +549,11 @@ rulesetContent:
           }
         }
         ```
-        
+
         **Valid Example**
-        
+
         This `operationId` is valid for URLs.
-        
+
         ```json
         {
           "/users": {
@@ -587,9 +587,9 @@ rulesetContent:
         field: tags
       description: |-
         At least one tag should be defined for each operation.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "get": {
@@ -610,13 +610,13 @@ rulesetContent:
         field: "@key"
       description: |-
         Path parameter declarations must not be empty.
-        
+
         **Invalid Example**
-        
+
         `/users/{}`
-        
+
         **Valid Example**
-        
+
         `/users/{userId}`
       message: Path parameter declarations must not be empty, e.g., "/given/{}" is invalid.
 
@@ -631,13 +631,13 @@ rulesetContent:
         field: "@key"
       description: |-
         Paths must not end with a trailing slash.
-        
+
         `/users` and `/users/` are separate paths. It's considered bad practice for them to differ based only on a trailing slash. It's usually preferred to not have a trailing slash.
-        
+
         **Invalid Example**
-        
+
         The `users` path ends with a slash.
-        
+
         ```json
         {
           "/users/": {
@@ -645,9 +645,9 @@ rulesetContent:
           }
         }
         ```
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "/user": {
@@ -666,9 +666,9 @@ rulesetContent:
         field: name
       description: |-
         The `contact` object should have an organization name.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "contact": {
@@ -688,18 +688,18 @@ rulesetContent:
         field: "@key"
       description: |-
         Path keys should not end in forward slashes. This is a best practice for working with web tooling, such as mock servers, code generators, application frameworks, and more.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "/users/": {
           }
         }
         ```
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "/users": {
@@ -718,18 +718,18 @@ rulesetContent:
         field: "@key"
       description: |-
         Paths should not include `query` string items. Instead, add them as parameters with `in: query`.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "/users/{?id}": {
           }
         }
         ```
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "parameters": [
@@ -755,9 +755,9 @@ rulesetContent:
         field: description
       description: |-
         Tags defined at the global level should have a description.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "tags": [
@@ -784,9 +784,9 @@ rulesetContent:
           dialect: draft7
       description: |-
         A server should be defined at the root document level. This can be localhost, a development server, or a production server.
-        
+
         **Valid OpenAPI V3 Example**
-        
+
         ```json
         {
           "servers": [
@@ -801,9 +801,9 @@ rulesetContent:
           ]
         }
         ```
-        
+
         **Valid OpenAPI V2 Example**
-        
+
         ```json
         {
           "host": "myprodserver.com",
@@ -824,9 +824,9 @@ rulesetContent:
           notMatch: "/$"
       description: |-
         Server URLs should not end in forward slashes. This is a best practice for working with web tooling, such as mock servers, code generators, application frameworks, and more.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "servers": [
@@ -836,9 +836,9 @@ rulesetContent:
           ]
         }
         ```
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "servers": [
@@ -859,11 +859,11 @@ rulesetContent:
           match: "^[^A-Z]*$"
       description: |-
         Server URLs must be lowercase. This standard helps meet industry best practices.
-        
+
         **Invalid Example**
-        
+
         The `url` property uses uppercase letters.
-        
+
         ```json
         {
           "servers": [
@@ -873,11 +873,11 @@ rulesetContent:
           ]
         }
         ```
-        
+
         **Valid Example**
-        
+
         The `url` property is fully lowercase.
-        
+
         ```json
         {
           "servers": [
@@ -908,11 +908,11 @@ rulesetContent:
         OpenAPI 2 host `schemes` reflect the transfer protocol of the API. 
         Host schemes must be present and an array with one or more of these values: 
         `http`, `https`, `ws`, or `wss`.
-        
+
         **Valid Example**
-        
+
         This example shows that host schemes are `http` and `https`.
-        
+
         ```json
         {
           "schemes": [
@@ -935,9 +935,9 @@ rulesetContent:
       description: |
         Server URLs must not direct to example.com. This helps ensure URLs 
         are valid before you distribute your API document.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "servers": [
@@ -948,9 +948,9 @@ rulesetContent:
           ]
         }
         ```
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "servers": [
@@ -971,9 +971,9 @@ rulesetContent:
         field: description
       description: |
         All `parameter` objects should have a description.
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "parameters": [
@@ -998,9 +998,9 @@ rulesetContent:
         field: anyOf
       description: |
         The `anyOf` keyword is not supported in OAS2. Only `allOf` is supported.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "schema": {
@@ -1020,9 +1020,9 @@ rulesetContent:
           }
         }
         ```
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "schema": {
@@ -1050,9 +1050,9 @@ rulesetContent:
         field: oneOf
       description: |
         The `oneOf` keyword is not supported in OAS2. Only `allOf` is supported.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "schema": {
@@ -1072,9 +1072,9 @@ rulesetContent:
           }
         }
         ```
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "schema": {
@@ -1105,11 +1105,11 @@ rulesetContent:
             - value
       description: |
         The `examples` object should include a `value` or `externalValue` field, but cannot include both.
-        
+
         **Invalid Example**
-        
+
         This example includes both a `value` field and an `externalValue` field.
-        
+
         ```json
         {
           "examples": {
@@ -1126,11 +1126,11 @@ rulesetContent:
           }
         }
         ```
-        
+
         **Valid Example**
-        
+
         This example includes only a `value` field.
-        
+
         ```json
         {
           "examples": {
@@ -1155,11 +1155,11 @@ rulesetContent:
         field: items
       description: |-
         Schemas with `type: array`, require a sibling `items` field.
-        
+
         **Recommended:** Yes
-        
+
         **Good Example**
-        
+
         ```yaml
         TheGoodModel:
           type: object
@@ -1170,9 +1170,9 @@ rulesetContent:
                 type: array
                 items: {}
         ```
-        
+
         **Bad Example**
-        
+
         ```yaml
         TheBadModel:
           type: object
@@ -1191,11 +1191,11 @@ rulesetContent:
         function: falsy
       description: |-
         Path parameters should be defined on the path level instead of the operation level.
-        
+
         **Invalid Example**
-        
+
         The `user_id` path parameter on line 8 should not be included with the `patch` operation.
-        
+
         ```json
         {      
           "patch": {
@@ -1211,11 +1211,11 @@ rulesetContent:
           }
         }
         ```
-        
+
         **Valid Example**
-        
+
         The `user-id` path parameter is correctly located at the path level.
-        
+
         ```json
         {
           "paths": {
@@ -1245,16 +1245,16 @@ rulesetContent:
         field: "@key"
       description: |-
         Paths should not have query parameters in them. They should be defined separately in the OpenAPI.
-        
+
         **Invalid Example**
-        
+
         ```json
         {
           "/users/{?id}": {
         ```
-        
+
         **Valid Example**
-        
+
         ```json
         {
           "parameters": [
