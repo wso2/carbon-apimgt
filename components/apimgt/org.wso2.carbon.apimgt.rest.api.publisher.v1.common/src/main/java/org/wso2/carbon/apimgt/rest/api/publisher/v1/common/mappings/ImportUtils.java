@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -388,6 +389,10 @@ public class ImportUtils {
 
             populateAPIWithPolicies(importedApi, apiProvider, extractedFolderPath, extractedPoliciesMap,
                     extractedAPIPolicies, currentTenantDomain);
+
+            // Handle API Endpoints if endpoints file is defined
+            populateAPIWithEndpoints(importedApi, apiProvider, extractedFolderPath, organization);
+
             // Update Custom Backend Data if endpoint type is selected to "custom_backend"
             Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
             if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
@@ -681,6 +686,74 @@ public class ImportUtils {
             throw new APIManagementException("Invalid API policy added as " + policyFileName,
                     ExceptionCodes.INVALID_OPERATION_POLICY);
         }
+    }
+
+    public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
+            String organization) throws APIManagementException {
+        // Delete previously added endpoints
+
+        // Retrieve endpoints from artifact
+        try {
+            String jsonContent = getFileContentAsJson(
+                    extractedFolderPath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION);
+            if (jsonContent != null) {
+                // Retrieving the field "data"
+                JsonElement endpointsJson = new JsonParser().parse(jsonContent).getAsJsonObject()
+                        .get(APIConstants.DATA);
+                if (endpointsJson != null) {
+                    // Add API Endpoints if endpoints file is defined
+                    JsonArray endpoints = endpointsJson.getAsJsonArray();
+                    for (JsonElement endpointElement : endpoints) {
+                        JsonObject endpointObj = endpointElement.getAsJsonObject();
+                        APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
+                        String endpointUUID = apiEndpointInfo.getEndpointUuid();
+                        try {
+                            // Check if endpoint already exists. If not, add it.
+                            APIEndpointInfo retrievedAPIEndpoint = provider.getAPIEndpointByUUID(api.getUuid(),
+                                    endpointUUID);
+                            if (retrievedAPIEndpoint != null) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("API Endpoint with ID: " + endpointUUID + " already exists in the API");
+                                }
+                            } else {
+                                String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("API Endpoint with ID: " + createdEndpointUUID +
+                                            " has been added to the API");
+                                }
+                            }
+                        } catch (APIManagementException e) {
+                            throw new APIManagementException("Error while adding API Endpoint with ID: " + endpointUUID,
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINTS, endpointUUID));
+                        }
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No API endpoints found in the API endpoints file");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading API endpoints from path: " + extractedFolderPath, e,
+                    ExceptionCodes.ERROR_READING_API_ENDPOINTS_FILE);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while adding API endpoints to the API", e,
+                    ExceptionCodes.ERROR_ADDING_API_ENDPOINTS);
+        }
+
+        // Add primary endpoints if primaryProductionEndpointId and/or primarySandboxEndpointId is defined
+        //        if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
+        //            try {
+        //                provider.addPrimaryEndpoints(api.getUuid(), api.getPrimaryProductionEndpointId(),
+        //                        api.getPrimarySandboxEndpointId());
+        //                if (log.isDebugEnabled()) {
+        //                    log.debug("Primary endpoints have been added to the API");
+        //                }
+        //            } catch (APIManagementException e) {
+        //                throw new APIManagementException("Error while adding primary endpoints to the API", e,
+        //                        ExceptionCodes.ERROR_ADDING_PRIMARY_ENDPOINTS);
+        //            }
+        //        }
     }
 
     /**

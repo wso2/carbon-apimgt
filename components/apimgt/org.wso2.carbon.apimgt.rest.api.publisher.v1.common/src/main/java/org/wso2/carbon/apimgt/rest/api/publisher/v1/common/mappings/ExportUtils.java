@@ -817,8 +817,8 @@ public class ExportUtils {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 JsonElement apiEndpointsObj = gson.toJsonTree(apiEndpointList);
                 JsonArray apiEndpointsJson = (JsonArray) apiEndpointsObj;
-                CommonUtil.writeDtoToFile(archivePath + File.separator + ImportExportConstants.API_ENDPOINTS,
-                        exportFormat, ImportExportConstants.API_ENDPOINTS, apiEndpointsJson);
+                CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
+                        exportFormat, ImportExportConstants.API_ENDPOINTS_TYPE, apiEndpointsJson);
             }
         } catch (APIImportExportException e) {
             throw new APIManagementException("Error while adding operation endpoints details for API: " + apiID, e);
