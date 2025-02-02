@@ -161,8 +161,8 @@ public class GovernanceUtil {
                         // Add ruleset if it doesn't already exist
                         if (!existingRuleNames.contains(defaultRuleset.getName())) {
                             log.info("Adding default ruleset: " + defaultRuleset.getName());
-                            rulesetManager.createNewRuleset(organization,
-                                    getRulesetFromDefaultRuleset(defaultRuleset));
+                            rulesetManager.createNewRuleset(
+                                    getRulesetFromDefaultRuleset(defaultRuleset), organization);
                         } else {
                             log.info("Ruleset " + defaultRuleset.getName() + " already exists in organization: "
                                     + organization + "; skipping.");

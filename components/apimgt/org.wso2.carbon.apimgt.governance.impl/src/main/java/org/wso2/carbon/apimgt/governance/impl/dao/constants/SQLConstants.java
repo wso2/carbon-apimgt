@@ -53,17 +53,17 @@ public class SQLConstants {
                     "FROM GOV_RULESET WHERE RULESET_ID = ?";
 
     public static final String GET_RULESET_CONTENT =
-            "SELECT RULESET_CONTENT FROM GOV_RULESET WHERE RULESET_ID = ? AND ORGANIZATION = ?";
+            "SELECT RULESET_CONTENT FROM GOV_RULESET WHERE RULESET_ID = ?";
 
     public static final String UPDATE_RULESET =
             "UPDATE GOV_RULESET SET NAME = ?, DESCRIPTION = ?, RULESET_CONTENT = ?, " +
                     "RULE_CATEGORY = ?, RULE_TYPE = ?, ARTIFACT_TYPE = " +
                     "?, DOCUMENTATION_LINK = ?, PROVIDER = ?, UPDATED_BY = ?, " +
                     "LAST_UPDATED_TIME = CURRENT_TIMESTAMP " +
-                    "WHERE RULESET_ID = ? AND ORGANIZATION = ?";
+                    "WHERE RULESET_ID = ?";
 
     public static final String DELETE_RULESET =
-            "DELETE FROM GOV_RULESET WHERE RULESET_ID = ? AND ORGANIZATION = ?";
+            "DELETE FROM GOV_RULESET WHERE RULESET_ID = ?";
 
     public static final String DELETE_RULES =
             "DELETE FROM GOV_RULESET_RULE WHERE RULESET_ID = ?";
@@ -93,11 +93,26 @@ public class SQLConstants {
     public static final String DELETE_GOVERNANCE_POLICY_LABEL_MAPPING =
             "DELETE FROM GOV_POLICY_LABEL WHERE POLICY_ID = ? AND LABEL = ?";
 
+    public static final String DELETE_GOVERNANCE_POLICY_LABEL_MAPPING_BY_POLICY_ID =
+            "DELETE FROM GOV_POLICY_LABEL WHERE POLICY_ID = ?";
+
     public static final String DELETE_GOVERNANCE_POLICY_STATE_MAPPING =
             "DELETE FROM GOV_POLICY_GOVERNABLE_STATE WHERE POLICY_ID = ? AND STATE = ?";
 
+    public static final String DELETE_GOVERNANCE_POLICY_STATE_MAPPING_BY_POLICY_ID =
+            "DELETE FROM GOV_POLICY_GOVERNABLE_STATE WHERE POLICY_ID = ?";
+
+    public static final String DELETE_RULESET_POLICY_MAPPING_BY_RULESET_ID =
+            "DELETE FROM GOV_POLICY_RULESET_MAPPING WHERE RULESET_ID = ?";
+
+    public static final String DELETE_POLICY_RULESET_MAPPING_BY_POLICY_ID =
+            "DELETE FROM GOV_POLICY_RULESET_MAPPING WHERE POLICY_ID = ?";
+
     public static final String DELETE_GOVERNANCE_POLICY_ACTION_MAPPING =
             "DELETE FROM GOV_POLICY_ACTION WHERE POLICY_ID = ? AND STATE = ? AND SEVERITY = ? AND TYPE = ?";
+
+    public static final String DELETE_GOVERNANCE_POLICY_ACTION_MAPPING_BY_POLICY_ID =
+            "DELETE FROM GOV_POLICY_ACTION WHERE POLICY_ID = ?";
 
     public static final String GET_POLICY_BY_NAME =
             "SELECT POLICY_ID, NAME, DESCRIPTION, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME " +
@@ -119,11 +134,11 @@ public class SQLConstants {
             "SELECT LABEL FROM GOV_POLICY_LABEL WHERE POLICY_ID = ?";
 
     public static final String DELETE_GOVERNANCE_POLICY =
-            "DELETE FROM GOV_POLICY WHERE POLICY_ID = ? AND ORGANIZATION = ?";
+            "DELETE FROM GOV_POLICY WHERE POLICY_ID = ?";
 
     public static final String UPDATE_POLICY =
             "UPDATE GOV_POLICY SET NAME = ?, DESCRIPTION = ?, UPDATED_BY = ?, LAST_UPDATED_TIME = ? " +
-                    "WHERE POLICY_ID = ? AND ORGANIZATION = ?";
+                    "WHERE POLICY_ID = ?";
 
     public static final String GET_RULESET_IDS_BY_POLICY_ID =
             "SELECT RULESET_ID FROM GOV_POLICY_RULESET_MAPPING WHERE POLICY_ID = ?";
@@ -196,6 +211,9 @@ public class SQLConstants {
             "GOV_EVALUATION_REQUEST WHERE " +
             "ARTIFACT_ID = ? AND ARTIFACT_TYPE = ? AND ORGANIZATION = ?";
 
+    public static final String DELETE_GOV_EVALUATION_REQUEST_FOR_POLICY = "DELETE FROM " +
+            "GOV_EVALUATION_REQUEST WHERE POLICY_ID = ?";
+
     public static final String ADD_GOV_COMPLIANCE_EVALUATION_RESULT = "INSERT INTO GOV_EVALUATION_RESULT " +
             "(RESULT_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, RULESET_ID, EVALUATION_RESULT, ORGANIZATION) " +
             "VALUES (?, ?, ?, ?, ?,?,?)";
@@ -241,7 +259,7 @@ public class SQLConstants {
             "WHERE GOV_POLICY.ORGANIZATION = ? AND GOV_EVALUATION_RESULT.EVALUATION_RESULT = 0";
 
     public static final String DELETE_GOV_COMPLIANCE_EVALUATION_RESULT = "DELETE FROM GOV_EVALUATION_RESULT " +
-            "WHERE ARTIFACT_ID = ? AND ARTIFACT_TYPE = ? AND POLICY_ID = ? AND RULESET_ID = ?";
+            "WHERE ARTIFACT_ID = ? AND ARTIFACT_TYPE = ? AND POLICY_ID = ? AND RULESET_ID = ? AND ORGANIZATION = ?";
 
     public static final String DELETE_GOV_COMPLIANCE_EVALUATION_RESULT_BY_POLICY = "DELETE FROM " +
             "GOV_EVALUATION_RESULT " +
@@ -251,40 +269,72 @@ public class SQLConstants {
             "GOV_EVALUATION_RESULT " +
             "WHERE RULESET_ID = ?";
 
-    public static final String DELETE_RULE_VIOLATIONS = "DELETE FROM GOV_RULE_VIOLATION " +
-            "WHERE ARTIFACT_ID = ? AND POLICY_ID = ? AND RULESET_ID = ?";
+    public static final String DELETE_RULE_VIOLATIONS =
+            "DELETE FROM GOV_RULE_VIOLATION GV " +
+                    "WHERE EXISTS ( " +
+                    "    SELECT 1 FROM GOV_EVALUATION_RESULT GER " +
+                    "    WHERE GER.RESULT_ID = GV.RESULT_ID " +
+                    "    AND GER.ARTIFACT_ID = ? " +
+                    "    AND GER.ARTIFACT_TYPE = ? " +
+                    "    AND GER.POLICY_ID = ? " +
+                    "    AND GER.RULESET_ID = ? " +
+                    "    AND GER.ORGANIZATION = ? " +
+                    ")";
+
 
     public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION " +
-            "(VIOLATION_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, RULESET_ID, RULE_CODE, VIOLATED_PATH, " +
-            "ORGANIZATION) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?,?)";
+            "(VIOLATION_ID, RESULT_ID, RULESET_ID, RULE_CODE, VIOLATED_PATH) " +
+            "VALUES (?, ?, ?, ?, ?)";
 
-    public static final String GET_RULE_VIOLATIONS_WITH_POLICY = "SELECT GV.ARTIFACT_ID, GV.ARTIFACT_TYPE, GV" +
-            ".POLICY_ID, GV.RULESET_ID, GV.RULE_CODE, GV.VIOLATED_PATH, GRR.SEVERITY " +
-            "FROM GOV_RULE_VIOLATION GV " +
-            "LEFT JOIN GOV_RULESET_RULE GRR " +
-            "ON GV.RULESET_ID = GRR.RULESET_ID AND GV.RULE_CODE = GRR.RULE_CODE " +
-            "WHERE GV.ARTIFACT_ID = ? AND GV.ARTIFACT_TYPE = ? AND GV.POLICY_ID = ? AND GV.RULESET_ID = ? " +
-            "AND GV.ORGANIZATION = ?";
+    public static final String GET_RULE_VIOLATIONS_WITH_POLICY =
+            "SELECT GER.ARTIFACT_ID, GER.ARTIFACT_TYPE, GER.POLICY_ID, GER.RULESET_ID, " +
+                    "GV.RULE_CODE, GV.VIOLATED_PATH, GRR.SEVERITY " +
+                    "FROM GOV_RULE_VIOLATION GV " +
+                    "JOIN GOV_EVALUATION_RESULT GER ON GV.RESULT_ID = GER.RESULT_ID " +
+                    "JOIN GOV_RULESET_RULE GRR ON GRR.RULESET_ID = GV.RULESET_ID AND GRR.RULE_CODE = GV.RULE_CODE " +
+                    "WHERE GER.ARTIFACT_ID = ? AND GER.ARTIFACT_TYPE = ? AND GER.POLICY_ID = ? " +
+                    "AND GER.RULESET_ID = ? AND GER.ORGANIZATION = ?";
 
-    public static final String GET_RULE_VIOLATIONS = "SELECT DISTINCT GV.ARTIFACT_ID, GV.ARTIFACT_TYPE, " +
-            "GV.RULESET_ID, GV.RULE_CODE, GV.VIOLATED_PATH, GRR.SEVERITY " +
-            "FROM GOV_RULE_VIOLATION GV " +
-            "LEFT JOIN GOV_RULESET_RULE GRR " +
-            "ON GV.RULESET_ID = GRR.RULESET_ID AND GV.RULE_CODE = GRR.RULE_CODE " +
-            "WHERE GV.ARTIFACT_ID = ? AND GV.ARTIFACT_TYPE = ? AND GV.RULESET_ID = ? AND GV.ORGANIZATION = ?";
+    public static final String GET_RULE_VIOLATIONS =
+            "SELECT DISTINCT GER.ARTIFACT_ID, GER.ARTIFACT_TYPE, GER.RULESET_ID, " +
+                    "GV.RULE_CODE, GV.VIOLATED_PATH, GRR.SEVERITY " +
+                    "FROM GOV_RULE_VIOLATION GV " +
+                    "JOIN GOV_EVALUATION_RESULT GER ON GV.RESULT_ID = GER.RESULT_ID " +
+                    "JOIN GOV_RULESET_RULE GRR ON GRR.RULESET_ID = GV.RULESET_ID AND GRR.RULE_CODE = GV.RULE_CODE " +
+                    "WHERE GER.ARTIFACT_ID = ? AND GER.ARTIFACT_TYPE = ? AND GER.RULESET_ID = ? " +
+                    "AND GER.ORGANIZATION = ?";
 
-    public static final String GET_RULE_VIOLATIONS_FOR_ARTIFACT = "SELECT GV.ARTIFACT_ID, GV.POLICY_ID, " +
-            "GV.RULESET_ID, GV.RULE_CODE, GV.VIOLATED_PATH, GRR.SEVERITY " +
-            "FROM GOV_RULE_VIOLATION GV " +
-            "LEFT JOIN GOV_RULESET_RULE GRR " +
-            "ON GV.RULESET_ID = GRR.RULESET_ID AND GV.RULE_CODE = GRR.RULE_CODE " +
-            "WHERE GV.ARTIFACT_ID = ? AND GV.ARTIFACT_TYPE = ? AND GV.ORGANIZATION = ?";
+    public static final String GET_RULE_VIOLATIONS_FOR_ARTIFACT =
+            "SELECT GER.ARTIFACT_ID, GER.POLICY_ID, GER.RULESET_ID, " +
+                    "GV.RULE_CODE, GV.VIOLATED_PATH, GRR.SEVERITY " +
+                    "FROM GOV_RULE_VIOLATION GV " +
+                    "JOIN GOV_EVALUATION_RESULT GER ON GV.RESULT_ID = GER.RESULT_ID " +
+                    "JOIN GOV_RULESET_RULE GRR ON GRR.RULESET_ID = GV.RULESET_ID AND GRR.RULE_CODE = GV.RULE_CODE " +
+                    "WHERE GER.ARTIFACT_ID = ? AND GER.ARTIFACT_TYPE = ? AND GER.ORGANIZATION = ?";
+
 
     public static final String DELETE_EVALUATION_RESULT_FOR_ARTIFACT = "DELETE FROM GOV_EVALUATION_RESULT " +
             "WHERE ARTIFACT_ID = ? AND ARTIFACT_TYPE = ? AND ORGANIZATION = ?";
 
-    public static final String DELETE_RULE_VIOLATIONS_FOR_ARTIFACT = "DELETE FROM GOV_RULE_VIOLATION " +
-            "WHERE ARTIFACT_ID = ? AND ARTIFACT_TYPE = ? AND ORGANIZATION = ?";
+    public static final String DELETE_RULE_VIOLATIONS_FOR_ARTIFACT =
+            "DELETE FROM GOV_RULE_VIOLATION GV " +
+                    "WHERE EXISTS ( " +
+                    "    SELECT 1 FROM GOV_EVALUATION_RESULT GER " +
+                    "    WHERE GER.RESULT_ID = GV.RESULT_ID " +
+                    "    AND GER.ARTIFACT_ID = ? " +
+                    "    AND GER.ARTIFACT_TYPE = ? " +
+                    "    AND GER.ORGANIZATION = ? " +
+                    ")";
+
+    public static final String DELETE_RULE_VIOLATIONS_BY_RULESET = "DELETE FROM GOV_RULE_VIOLATION " +
+            "WHERE RULESET_ID = ?";
+
+    public static final String DELETE_RULE_VIOLATIONS_BY_POLICY = "DELETE FROM GOV_RULE_VIOLATION " +
+            "WHERE EXISTS ( " +
+            "    SELECT 1 FROM GOV_EVALUATION_RESULT GER " +
+            "    WHERE GER.RESULT_ID = GOV_RULE_VIOLATION.RESULT_ID " +
+            "    AND GER.POLICY_ID = ? " +
+            ")";
+
 
 }

@@ -97,7 +97,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             ruleset.setCreatedBy(username);
 
             RulesetManager rulesetManager = new RulesetManagerImpl();
-            RulesetInfo createdRuleset = rulesetManager.createNewRuleset(organization, ruleset);
+            RulesetInfo createdRuleset = rulesetManager.createNewRuleset(ruleset, organization);
 
             createdRulesetDTO = RulesetMappingUtil.fromRulesetInfoToRulesetInfoDTO(createdRuleset);
             createdRulesetURI = new URI(
@@ -126,9 +126,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     @Override
     public Response deleteRuleset(String rulesetId, MessageContext messageContext) throws GovernanceException {
         RulesetManager rulesetManager = new RulesetManagerImpl();
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        rulesetManager.deleteRuleset(organization, rulesetId);
+        rulesetManager.deleteRuleset(rulesetId);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
@@ -160,9 +159,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     @Override
     public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException {
         RulesetManager rulesetManager = new RulesetManagerImpl();
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        String content = rulesetManager.getRulesetContent(organization, rulesetId);
+        String content = rulesetManager.getRulesetContent(rulesetId);
 
         return Response.status(Response.Status.OK)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=ruleset.yaml")
@@ -305,7 +303,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             ruleset.setUpdatedBy(username);
 
             RulesetManager rulesetManager = new RulesetManagerImpl();
-            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(organization, rulesetId, ruleset);
+            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset);
 
             // Re-access policy compliance in the background
             new ComplianceManagerImpl().handleRulesetChangeEvent(rulesetId, organization);

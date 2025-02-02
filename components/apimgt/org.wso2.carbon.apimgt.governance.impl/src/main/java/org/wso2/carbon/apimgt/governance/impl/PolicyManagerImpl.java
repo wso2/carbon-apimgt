@@ -62,7 +62,7 @@ public class PolicyManagerImpl implements PolicyManager {
         checkForInvalidActions(governancePolicy);
         addMissingNotifyActions(governancePolicy);
 
-        return policyMgtDAO.createGovernancePolicy(organization, governancePolicy);
+        return policyMgtDAO.createGovernancePolicy(governancePolicy, organization);
     }
 
     /**
@@ -158,33 +158,30 @@ public class PolicyManagerImpl implements PolicyManager {
     /**
      * Delete a Governance Policy
      *
-     * @param policyId     Policy ID
-     * @param organization Organization
+     * @param policyId Policy ID
      * @throws GovernanceException If an error occurs while deleting the policy
      */
     @Override
-    public void deletePolicy(String policyId, String organization) throws GovernanceException {
-        policyMgtDAO.deletePolicy(policyId, organization);
+    public void deletePolicy(String policyId) throws GovernanceException {
+        policyMgtDAO.deletePolicy(policyId);
     }
 
     /**
      * Update a Governance Policy
      *
      * @param policyId                           Policy ID
-     * @param organization                       Organization
      * @param governancePolicy Governance Policy
      * @return GovernancePolicy Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
     @Override
-    public GovernancePolicy updateGovernancePolicy(String policyId, String organization,
-                                                   GovernancePolicy governancePolicy)
+    public GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy governancePolicy)
             throws GovernanceException {
 
         checkForInvalidActions(governancePolicy);
         addMissingNotifyActions(governancePolicy);
 
-        return policyMgtDAO.updateGovernancePolicy(policyId, organization, governancePolicy);
+        return policyMgtDAO.updateGovernancePolicy(policyId, governancePolicy);
     }
 
     /**

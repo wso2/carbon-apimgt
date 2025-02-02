@@ -63,22 +63,20 @@ public interface PolicyManager {
     /**
      * Delete a Governance Policy
      *
-     * @param policyId     Policy ID
-     * @param organization Organization
+     * @param policyId Policy ID
      * @throws GovernanceException If an error occurs while deleting the policy
      */
-    void deletePolicy(String policyId, String organization) throws GovernanceException;
+    void deletePolicy(String policyId) throws GovernanceException;
 
     /**
      * Update a Governance Policy
      *
      * @param policyId                           Policy ID
-     * @param organization                       Organization
      * @param governancePolicy Governance Policy Info
      * @return GovernancePolicyInfo Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
-    GovernancePolicy updateGovernancePolicy(String policyId, String organization,
+    GovernancePolicy updateGovernancePolicy(String policyId,
                                             GovernancePolicy
                                                     governancePolicy)
             throws GovernanceException;

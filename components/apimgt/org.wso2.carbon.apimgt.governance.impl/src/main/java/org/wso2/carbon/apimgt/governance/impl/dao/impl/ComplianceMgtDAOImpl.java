@@ -293,27 +293,35 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         String policyId = result.getPolicyId();
         String rulesetId = result.getRulesetId();
         String organization = result.getOrganization();
+
         try (Connection connection = GovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
-            clearOldComplianceEvaluationResult(artifactId, artifactType, policyId, rulesetId, connection);
-            clearOldRuleViolations(artifactId, policyId, rulesetId, connection);
+            try {
+                clearOldRuleViolations(artifactId, artifactType, policyId, rulesetId, organization, connection);
+                clearOldComplianceEvaluationResult(artifactId, artifactType, policyId, rulesetId,
+                        organization, connection);
 
-            try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-                prepStmnt.setString(1, GovernanceUtil.generateUUID());
-                prepStmnt.setString(2, artifactId);
-                prepStmnt.setString(3, String.valueOf(artifactType));
-                prepStmnt.setString(4, policyId);
-                prepStmnt.setString(5, rulesetId);
-                prepStmnt.setInt(6, result.isEvaluationSuccess() ? 1 : 0);
-                prepStmnt.setString(7, organization);
-                prepStmnt.execute();
+                String resultId = GovernanceUtil.generateUUID();
+                try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                    prepStmnt.setString(1, resultId);
+                    prepStmnt.setString(2, artifactId);
+                    prepStmnt.setString(3, String.valueOf(artifactType));
+                    prepStmnt.setString(4, policyId);
+                    prepStmnt.setString(5, rulesetId);
+                    prepStmnt.setInt(6, result.isEvaluationSuccess() ? 1 : 0);
+                    prepStmnt.setString(7, organization);
+                    prepStmnt.execute();
+                }
+                if (!ruleViolations.isEmpty()) {
+                    addRuleViolations(resultId, ruleViolations, connection);
+                }
+                connection.commit();
+            } catch (SQLException | GovernanceException e) {
+                connection.rollback();
+                throw e;
             }
 
-            if (!ruleViolations.isEmpty()) {
-                addRuleViolations(ruleViolations, connection);
-            }
-            connection.commit();
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SAVING_GOVERNANCE_RESULT,
                     e, artifactId);
@@ -321,17 +329,18 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Clear compliance evaluation result for the artifact, policy combination
+     * Clear compliance evaluation result for the artifact, policy, ruleset combination
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
      * @param policyId     Policy ID
      * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @param connection   Connection
      * @throws GovernanceException If an error occurs while clearing the compliance evaluation result
      */
     private void clearOldComplianceEvaluationResult(String artifactId, ArtifactType artifactType, String policyId,
-                                                    String rulesetId, Connection connection)
+                                                    String rulesetId, String organization, Connection connection)
             throws GovernanceException {
 
         String sqlQuery = SQLConstants.DELETE_GOV_COMPLIANCE_EVALUATION_RESULT;
@@ -340,6 +349,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             prepStmnt.setString(2, String.valueOf(artifactType));
             prepStmnt.setString(3, policyId);
             prepStmnt.setString(4, rulesetId);
+            prepStmnt.setString(5, organization);
             prepStmnt.executeUpdate();
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_GOVERNANCE_RESULT,
@@ -347,15 +357,28 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         }
     }
 
-
-    private void clearOldRuleViolations(String artifactId, String policyId, String rulesetId, Connection connection)
+    /**
+     * Clear rule violations for the artifact, policy, ruleset combination
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param policyId     Policy ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
+     * @param connection   Connection
+     * @throws GovernanceException If an error occurs while clearing the rule violations
+     */
+    private void clearOldRuleViolations(String artifactId, ArtifactType artifactType, String policyId, String rulesetId,
+                                        String organization, Connection connection)
             throws GovernanceException {
 
         String sqlQuery = SQLConstants.DELETE_RULE_VIOLATIONS;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, artifactId);
-            prepStmnt.setString(2, policyId);
-            prepStmnt.setString(3, rulesetId);
+            prepStmnt.setString(2, String.valueOf(artifactType));
+            prepStmnt.setString(3, policyId);
+            prepStmnt.setString(4, rulesetId);
+            prepStmnt.setString(5, organization);
             prepStmnt.executeUpdate();
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_GOVERNANCE_RESULT,
@@ -370,20 +393,17 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @param connection     Connection
      * @throws GovernanceException If an error occurs while adding the rule violations
      */
-    private void addRuleViolations(List<RuleViolation> ruleViolations, Connection connection)
+    private void addRuleViolations(String resultId, List<RuleViolation> ruleViolations, Connection connection)
             throws GovernanceException {
 
         String sqlQuery = SQLConstants.ADD_RULE_VIOLATION;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             for (RuleViolation ruleViolation : ruleViolations) {
                 prepStmnt.setString(1, GovernanceUtil.generateUUID());
-                prepStmnt.setString(2, ruleViolation.getArtifactId());
-                prepStmnt.setString(3, String.valueOf(ruleViolation.getArtifactType()));
-                prepStmnt.setString(4, ruleViolation.getPolicyId());
-                prepStmnt.setString(5, ruleViolation.getRulesetId());
-                prepStmnt.setString(6, ruleViolation.getRuleCode());
-                prepStmnt.setString(7, ruleViolation.getViolatedPath());
-                prepStmnt.setString(8, ruleViolation.getOrganization());
+                prepStmnt.setString(2, resultId);
+                prepStmnt.setString(3, ruleViolation.getRulesetId());
+                prepStmnt.setString(4, ruleViolation.getRuleCode());
+                prepStmnt.setString(5, ruleViolation.getViolatedPath());
                 prepStmnt.addBatch();
             }
 
@@ -869,8 +889,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             connection.setAutoCommit(false);
             try {
                 deleteEvaluationRequestsForArtifact(artifactId, artifactType, organization, connection);
-                deleteArtifactEvaluationResults(artifactId, artifactType, organization, connection);
                 deleteRuleViolationsForArtifact(artifactId, artifactType, organization, connection);
+                deleteArtifactEvaluationResults(artifactId, artifactType, organization, connection);
 
                 connection.commit();
             } catch (SQLException e) {
