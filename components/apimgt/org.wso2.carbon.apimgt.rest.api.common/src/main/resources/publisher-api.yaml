@@ -2605,6 +2605,12 @@ paths:
                   type: string
                   description: Definition to uploads a file
                   format: binary
+                url:
+                  type: string
+                  description: Definition url
+                schema:
+                  type: string
+                  description: Definition schema
                 additionalProperties:
                   type: string
                   description: Additional attributes specified as a stringified JSON
@@ -2866,17 +2872,26 @@ paths:
       summary: Validate a GraphQL SDL
       description: |
         This operation can be used to validate a graphQL definition and retrieve a summary.
+      parameters:
+        - name: useIntrospection
+          in: query
+          description: |
+            Specify whether to use Introspection to obtain the GraphQL Schema
+          schema:
+            type: boolean
+            default: false
       requestBody:
         content:
           multipart/form-data:
             schema:
-              required:
-                - file
               properties:
                 file:
                   type: string
                   description: Definition to upload as a file
                   format: binary
+                url:
+                  type: string
+                  description: Definition to upload using url
         required: true
       responses:
         200:
@@ -10460,12 +10475,16 @@ components:
           type: string
           example:
             wso2
+            external
         gatewayType:
           title: Field to identify gateway type.
           type: string
           description: The gateway type selected for the API policies. Accepts one of the
             following. wso2/synapse, wso2/apk.
-          example: wso2/synapse
+          example:
+            wso2/synapse
+            wso2/apk
+            AWS
           default: wso2/synapse
         asyncTransportProtocols:
           type: array
@@ -13149,8 +13168,12 @@ components:
           example:
             - Regular
             - APK
+            - AWS
           items:
             type: string
+        gatewayFeatureCatalog:
+          type: string
+          example: "{\"REGULAR\": {\"runtime\": [\"cors\", \"schemaValidation\", \"responseCaching\", \"transportsHTTP\", \"transportsHTTPS\", \"transportsMutualSSL\", \"oauth2\", \"apikey\", \"basicAuth\", \"audienceValidation\"], \"resources\": [\"apiLevelRateLimiting\", \"operationLevelRateLimiting\", \"operationSecurity\"], \"localScopes\": [\"operationScopes\"], \"policies\": [\"operationLevelPolicies\"], \"monetization\": [\"monetization\"], \"subscriptions\": [\"subscriptions\"], \"endpoints\": [\"restEndpoints\", \"serviceEndpoints\", \"soapEndpoints\", \"dynamicEndpoints\", \"mockEndpoints\", \"lambdaEndpoints\", \"sequenceEndpoints\"]}}"
         scopes:
           type: array
           example:
