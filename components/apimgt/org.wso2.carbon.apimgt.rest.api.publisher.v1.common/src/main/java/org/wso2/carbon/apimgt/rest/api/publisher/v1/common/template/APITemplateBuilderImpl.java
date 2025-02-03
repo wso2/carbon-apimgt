@@ -23,6 +23,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -45,6 +46,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_DEFAULT;
+import static org.wso2.carbon.apimgt.impl.APIConstants.PRODUCTION;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SANDBOX;
 
 /**
  * Constructs API and resource configurations for the ESB/Synapse using a Apache velocity
@@ -95,7 +101,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     @Override
-    public String getConfigStringForAIAPI(Environment environment) throws APITemplateException {
+    public String getConfigStringForAIAPI(Environment environment, List<EndpointDTO> endpointDTOList)
+            throws APITemplateException {
 
         StringWriter writer = new StringWriter();
 
@@ -103,7 +110,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             ConfigContext configcontext = null;
 
             if (api != null) {
-                configcontext = createAIAPIConfigContext(api, environment);
+                configcontext = createAIAPIConfigContext(api, environment, endpointDTOList);
             } else {
                 configcontext = createAIAPIConfigContext(apiProduct, environment);
             }
@@ -258,7 +265,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
      * @throws APITemplateException Thrown if an error occurred
      */
     @Override
-    public String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException {
+    public String getConfigStringForEndpointTemplate(String endpointType, EndpointDTO endpointDTO)
+            throws APITemplateException {
 
         StringWriter writer = new StringWriter();
 
@@ -266,7 +274,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             ConfigContext configcontext = new APIConfigContext(this.api);
             configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
             configcontext = new TemplateUtilContext(configcontext);
-            configcontext = new SecurityConfigContext(configcontext, api);
+            if (API_SUBTYPE_DEFAULT.equals(api.getSubtype())) {
+                configcontext = new SecurityConfigContext(configcontext, api);
+            }
 
             configcontext.validate();
 
@@ -281,6 +291,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             initVelocityEngine(velocityengine);
 
             context.put("type", endpointType);
+            if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                context.put("endpointUuid", endpointDTO.getEndpointUuid());
+                if (PRODUCTION.equals(endpointDTO.getEnvironment())) {
+                    context.put("url", endpointDTO.getEndpointConfig().getProductionEndpoints().getUrl());
+                } else if (SANDBOX.equals(endpointDTO.getEnvironment())) {
+                    context.put("url", endpointDTO.getEndpointConfig().getSandboxEndpoints().getUrl());
+                }
+            }
 
             Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
 
@@ -380,11 +398,13 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     /**
      * Creates a configuration context for the AI API using the given API and environment.
      *
-     * @param api The API instance for which the configuration context is created.
-     * @param environment The deployment environment associated with the API.
+     * @param api             The API instance for which the configuration context is created.
+     * @param environment     The deployment environment associated with the API.
+     * @param endpointDTOList
      * @return A fully initialized {@code ConfigContext} for the AI API.
      */
-    private ConfigContext createAIAPIConfigContext(API api, Environment environment) {
+    private ConfigContext createAIAPIConfigContext(API api, Environment environment,
+                                                   List<EndpointDTO> endpointDTOList) {
 
         ConfigContext configcontext = new APIConfigContext(api);
         configcontext = new TransportConfigContext(configcontext, api);
@@ -396,6 +416,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new HandlerConfigContex(configcontext, handlers);
         configcontext = new EnvironmentConfigContext(configcontext, environment);
         configcontext = new TemplateUtilContext(configcontext);
+        configcontext = new EndpointsContext(configcontext, api, endpointDTOList);
 
         return configcontext;
     }

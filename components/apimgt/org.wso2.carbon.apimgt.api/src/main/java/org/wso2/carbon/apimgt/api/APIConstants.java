@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import java.io.File;
-
 /**
  * This class contains common constants for APIs.
  */

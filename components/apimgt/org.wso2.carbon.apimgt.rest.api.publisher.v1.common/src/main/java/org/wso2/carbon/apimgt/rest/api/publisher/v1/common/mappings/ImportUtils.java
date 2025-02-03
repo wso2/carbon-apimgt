@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -2426,6 +2427,41 @@ public class ImportUtils {
             }.getType());
         } catch (IOException e) {
             throw new APIManagementException("Error in reading certificates file", e);
+        }
+    }
+
+    public static List<EndpointDTO> retrieveEndpointConfigs(String pathToArchive)
+            throws APIManagementException {
+
+        String jsonContent = null;
+
+        String pathToYamlFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
+                + ImportExportConstants.YAML_EXTENSION;
+        String pathToJsonFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
+                + ImportExportConstants.JSON_EXTENSION;
+        try {
+            // try loading file as YAML
+            if (CommonUtil.checkFileExistence(pathToYamlFile)) {
+                log.debug("Found endpoint file " + pathToYamlFile);
+                String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
+                jsonContent = CommonUtil.yamlToJson(yamlContent);
+            } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
+                // load as a json fallback
+                log.debug("Found endpoint file " + pathToJsonFile);
+                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+            }
+            if (jsonContent == null) {
+                log.debug("No endpoint file found to be added, skipping");
+                return new ArrayList<>();
+            }
+            JsonElement endpointsElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            JsonArray endpointsArray = endpointsElement.getAsJsonArray();
+
+            Gson gson = new Gson();
+            return gson.fromJson(endpointsArray, new TypeToken<ArrayList<EndpointDTO>>() {
+            }.getType());
+        } catch (IOException e) {
+            throw new APIManagementException("Error in reading endpoint file", e);
         }
     }
 
