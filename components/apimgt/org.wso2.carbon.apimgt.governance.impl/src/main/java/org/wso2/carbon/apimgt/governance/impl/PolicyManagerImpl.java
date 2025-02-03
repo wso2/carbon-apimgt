@@ -67,6 +67,24 @@ public class PolicyManagerImpl implements PolicyManager {
     }
 
     /**
+     * Update a Governance Policy
+     *
+     * @param policyId         Policy ID
+     * @param governancePolicy Governance Policy
+     * @return GovernancePolicy Updated object
+     * @throws GovernanceException If an error occurs while updating the policy
+     */
+    @Override
+    public GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy governancePolicy)
+            throws GovernanceException {
+
+        checkForInvalidActions(governancePolicy);
+        addMissingNotifyActions(governancePolicy);
+
+        return policyMgtDAO.updateGovernancePolicy(policyId, governancePolicy);
+    }
+
+    /**
      * This checks whether any invalid action such as,
      * - Actions assigned to invalid governable states
      * - BLOCK actions are present for API_CREATE and API_UPDATE states
@@ -128,6 +146,17 @@ public class PolicyManagerImpl implements PolicyManager {
     }
 
     /**
+     * Delete a Governance Policy
+     *
+     * @param policyId Policy ID
+     * @throws GovernanceException If an error occurs while deleting the policy
+     */
+    @Override
+    public void deletePolicy(String policyId) throws GovernanceException {
+        policyMgtDAO.deletePolicy(policyId);
+    }
+
+    /**
      * Get Governance Policy by Name
      *
      * @param policyID Policy ID
@@ -154,35 +183,6 @@ public class PolicyManagerImpl implements PolicyManager {
     @Override
     public GovernancePolicyList getGovernancePolicies(String organization) throws GovernanceException {
         return policyMgtDAO.getGovernancePolicies(organization);
-    }
-
-    /**
-     * Delete a Governance Policy
-     *
-     * @param policyId Policy ID
-     * @throws GovernanceException If an error occurs while deleting the policy
-     */
-    @Override
-    public void deletePolicy(String policyId) throws GovernanceException {
-        policyMgtDAO.deletePolicy(policyId);
-    }
-
-    /**
-     * Update a Governance Policy
-     *
-     * @param policyId                           Policy ID
-     * @param governancePolicy Governance Policy
-     * @return GovernancePolicy Updated object
-     * @throws GovernanceException If an error occurs while updating the policy
-     */
-    @Override
-    public GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy governancePolicy)
-            throws GovernanceException {
-
-        checkForInvalidActions(governancePolicy);
-        addMissingNotifyActions(governancePolicy);
-
-        return policyMgtDAO.updateGovernancePolicy(policyId, governancePolicy);
     }
 
     /**
@@ -220,7 +220,7 @@ public class PolicyManagerImpl implements PolicyManager {
      */
     @Override
     public Map<String, String> getOrganizationWidePolicies(String organization) throws GovernanceException {
-        return policyMgtDAO.getPoliciesWithGlobalLabel(organization);
+        return policyMgtDAO.getGlobalPolicies(organization);
     }
 
     /**
@@ -249,7 +249,7 @@ public class PolicyManagerImpl implements PolicyManager {
     @Override
     public List<String> getOrganizationWidePoliciesByState(GovernableState state, String organization)
             throws GovernanceException {
-        return policyMgtDAO.getPoliciesWithGlobalLabelByState(state, organization);
+        return policyMgtDAO.getGlobalPoliciesWithState(state, organization);
     }
 
     /**
@@ -285,7 +285,8 @@ public class PolicyManagerImpl implements PolicyManager {
      * @throws GovernanceException If an error occurs while searching for policies
      */
     @Override
-    public GovernancePolicyList searchGovernancePolicies(String query, String organization) throws GovernanceException {
+    public GovernancePolicyList searchGovernancePolicies(String query, String organization)
+            throws GovernanceException {
         Map<String, String> searchCriteria = getPolicySearchCriteria(query);
         return policyMgtDAO.searchPolicies(searchCriteria, organization);
     }
@@ -293,7 +294,7 @@ public class PolicyManagerImpl implements PolicyManager {
 
     /**
      * Get the search criteria for the polict search from a query such as
-     * `query={name} state={state} label:{label}`
+     * `query=name:{name} state={state}`
      *
      * @param query Search query
      * @return Map of search criteria
@@ -310,9 +311,7 @@ public class PolicyManagerImpl implements PolicyManager {
                 String searchValue = parts[1];
 
                 // Add valid prefixes to criteriaMap
-                if (searchPrefix.equalsIgnoreCase(GovernanceConstants.PolicySearchAttributes.LABEL)) {
-                    criteriaMap.put(GovernanceConstants.PolicySearchAttributes.LABEL, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(GovernanceConstants.PolicySearchAttributes.STATE)) {
+                if (searchPrefix.equalsIgnoreCase(GovernanceConstants.PolicySearchAttributes.STATE)) {
                     criteriaMap.put(GovernanceConstants.PolicySearchAttributes.STATE, searchValue);
                 } else if (searchPrefix.equalsIgnoreCase(GovernanceConstants.PolicySearchAttributes.NAME)) {
                     criteriaMap.put(GovernanceConstants.PolicySearchAttributes.NAME, searchValue);

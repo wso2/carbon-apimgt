@@ -72,14 +72,6 @@ public interface GovernancePolicyMgtDAO {
     GovernancePolicyList getGovernancePolicies(String organization) throws GovernanceException;
 
     /**
-     * Delete a Governance Policy
-     *
-     * @param policyId Policy ID
-     * @throws GovernanceException If an error occurs while deleting the policy
-     */
-    void deletePolicy(String policyId) throws GovernanceException;
-
-    /**
      * Update a Governance Policy
      *
      * @param policyId         Policy ID
@@ -127,7 +119,7 @@ public interface GovernancePolicyMgtDAO {
      * @param organization Organization
      * @return Map of Policy IDs, Policy Names
      */
-    Map<String, String> getPoliciesWithGlobalLabel(String organization)
+    Map<String, String> getGlobalPolicies(String organization)
             throws GovernanceException;
 
     /**
@@ -137,7 +129,7 @@ public interface GovernancePolicyMgtDAO {
      * @param organization Organization
      * @return List of Policy IDs
      */
-    List<String> getPoliciesWithGlobalLabelByState(GovernableState state, String organization)
+    List<String> getGlobalPoliciesWithState(GovernableState state, String organization)
             throws GovernanceException;
 
     /**
@@ -168,6 +160,14 @@ public interface GovernancePolicyMgtDAO {
      */
     GovernancePolicyList searchPolicies(Map<String, String> searchCriteria, String organization)
             throws GovernanceException;
+
+    /**
+     * Delete a Governance Policy
+     *
+     * @param policyId Policy ID
+     * @throws GovernanceException If an error occurs while deleting the policy
+     */
+    void deletePolicy(String policyId) throws GovernanceException;
 }
 
 

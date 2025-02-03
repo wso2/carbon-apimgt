@@ -461,7 +461,7 @@ public class ComplianceAPIUtil {
         // Fetch all rules within the current ruleset
         List<Rule> allRules = rulesetManager.getRules(rulesetId);
         Map<String, Rule> rulesMap = allRules.stream()
-                .collect(Collectors.toMap(Rule::getCode, rule -> rule));
+                .collect(Collectors.toMap(Rule::getName, rule -> rule));
 
         // Fetch violations for the current ruleset
         List<RuleViolation> ruleViolations = complianceManager.getRuleViolations(artifactId, artifactType,
@@ -471,11 +471,11 @@ public class ComplianceAPIUtil {
         for (RuleViolation ruleViolation : ruleViolations) {
             Rule rule = rulesMap.get(ruleViolation.getRuleCode());
             violatedRules.add(ComplianceAPIUtil.getRuleValidationResultDTO(rule, ruleViolation));
-            violatedRuleCodes.add(rule.getCode());
+            violatedRuleCodes.add(rule.getName());
         }
 
         for (Rule rule : allRules) {
-            if (!violatedRuleCodes.contains(rule.getCode())) {
+            if (!violatedRuleCodes.contains(rule.getName())) {
                 followedRules.add(ComplianceAPIUtil.getRuleValidationResultDTO(rule, null));
             }
         }
@@ -500,7 +500,7 @@ public class ComplianceAPIUtil {
 
         RuleValidationResultDTO ruleValidationResultDTO = new RuleValidationResultDTO();
         ruleValidationResultDTO.setId(rule.getId());
-        ruleValidationResultDTO.setName(rule.getCode());
+        ruleValidationResultDTO.setName(rule.getName());
         ruleValidationResultDTO.setDescription(rule.getDescription());
         if (ruleViolation != null) {
             ruleValidationResultDTO.setMessage(rule.getMessageOnFailure());

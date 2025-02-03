@@ -417,11 +417,10 @@ paths:
             You can search for governance policies using following format.
 
               - "query=name:{NAME}" searches policies by name.
-              - "query= state:{STATE} " searches policies by state.
-              - "query= label:{LABEL} " searches policies by label.
+              - "query=state:{STATE} " searches policies by state.
             
             You can also use multiple attributes to search for policies.
-              - "query=name:{NAME} state:{STATE} label:{LABEL}" searches policies by name, state, and label.
+              - "query=name:{NAME} state:{STATE}" searches policies by name, state, and label.
 
             Remember to use URL encoding if your client doesn't support it (e.g., curl).
       responses:
@@ -1069,7 +1068,6 @@ components:
         - rulesetContent
         - ruleType
         - artifactType
-        - provider
     RulesetInfo:
       type: object
       description: Detailed information about a ruleset.

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.governance.api.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 
@@ -94,7 +95,7 @@ public class DefaultRuleset {
     }
 
     public String getRulesetContentString() throws GovernanceException {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
         String rulesetContentString;
         try {
             rulesetContentString = objectMapper.writeValueAsString(rulesetContent);

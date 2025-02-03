@@ -60,37 +60,31 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             " '%s'", true),
     INVALID_RULESET_CONTENT(200012, "Ruleset content is invalid",
             400, "Content of ruleset '%s' is invalid"),
-    INVALID_RULESET_CONTENT_WITH_INFO(200013, "Invalid Ruleset content",
-            400, "Invalid Ruleset content, message: '%s'"),
-    ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(200014, "Error while loading default ruleset content",
+    ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(200013, "Error while loading default ruleset content",
             500, "Error while loading " +
             "default ruleset provided by WSO2.", true),
-    ERROR_WHILE_RETRIEVING_RULESET_BY_NAME(200015, "Retrieving ruleset by name failed",
+    ERROR_WHILE_RETRIEVING_RULESET_BY_NAME(200014, "Retrieving ruleset by name failed",
             500, "Error while retrieving " +
             "ruleset for the organization: %s", true),
-    ERROR_FAILED_TO_PARSE_RULESET_CONTENT(200016, "Failed to parse ruleset content",
+    ERROR_FAILED_TO_PARSE_RULESET_CONTENT(200015, "Failed to parse ruleset content",
             500, "Failed to parse ruleset " +
             "content for the ruleset.", true),
-    ERROR_RULESET_ASSOCIATED_WITH_POLICIES(200017, "Ruleset is currently " +
+    ERROR_RULESET_ASSOCIATED_WITH_POLICIES(200016, "Ruleset is currently " +
             "in use by some governance policies", 409,
             "The ruleset with ID: %s cannot be deleted because it " +
                     "is associated with some governance policies. " +
                     "Please update the associated governance policies before " +
                     "attempting to delete the ruleset."),
-    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES(200018, "Error while retrieving " +
+    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES(200017, "Error while retrieving " +
             "associated policies for the ruleset.", 500,
             "Error while retrieving associated policies for the ruleset with ID: %s", true),
-    ERROR_WHILE_EXTRACTING_RULE_CONTENT(200019, "Error while extracting rule content",
+    ERROR_WHILE_EXTRACTING_RULE_CONTENT(200018, "Error while extracting rule content",
             500, "Error while extracting " +
             "rule content from the ruleset", true),
-    ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID(200020, "Error while retrieving rules by ruleset id",
+    ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID(200019, "Error while retrieving rules by ruleset id",
             500, "Error while " +
             "retrieving rules by ruleset id: %s", true),
-
-    ERROR_WHILE_DELETING_RULESET_POLICY_MAPPING(200021, "Error while deleting ruleset policy mappings",
-            500, "Error while deleting ruleset policy mappings for ruleset with ID: %s",
-            true),
-    ERROR_WHILE_SEARCHING_RULESETS(200022, "Error while searching rulesets",
+    ERROR_WHILE_SEARCHING_RULESETS(200020, "Error while searching rulesets",
             500, "Error while searching rulesets for the organization: %s", true),
 
     // Policy related codes

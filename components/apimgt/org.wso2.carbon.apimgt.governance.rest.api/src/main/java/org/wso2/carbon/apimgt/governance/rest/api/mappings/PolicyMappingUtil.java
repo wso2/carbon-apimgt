@@ -22,13 +22,13 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ActionDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,12 +55,21 @@ public class PolicyMappingUtil {
         govPolicy.setUpdatedBy(dto.getUpdatedBy());
         govPolicy.setUpdatedTime(dto.getUpdatedTime());
         govPolicy.setRulesetIds(dto.getRulesets());
-        govPolicy.setLabels(dto.getLabels());
         govPolicy.setActions(fromActionDTOListtoActionList(dto.getActions()));
         govPolicy.setGovernableStates(dto.getGovernableStates().stream()
                 .map(Enum::name)
                 .map(GovernableState::fromString)
                 .collect(Collectors.toList()));
+
+        List<String> labels = dto.getLabels();
+        if (labels != null && labels.stream().anyMatch(label -> label
+                .equalsIgnoreCase(GovernanceConstants.GLOBAL_LABEL))) {
+            govPolicy.setGlobal(true);
+            govPolicy.setLabels(Collections.emptyList());
+        } else {
+            govPolicy.setLabels(labels);
+        }
+
         return govPolicy;
     }
 
@@ -88,26 +97,13 @@ public class PolicyMappingUtil {
                 .map(Enum::name)
                 .map(GovernancePolicyDTO.GovernableStatesEnum::valueOf)
                 .collect(Collectors.toList()));
-        return governancePolicyDTO;
-    }
-
-    /**
-     * Converts a GovernancePolicyList object to a GovernancePolicyListDTO object
-     *
-     * @param policyList GovernancePolicyList object
-     * @return GovernancePolicyListDTO object
-     */
-    public static GovernancePolicyListDTO fromGovernancePolicyListToGovernancePolicyListDTO
-    (GovernancePolicyList policyList) {
-
-        GovernancePolicyListDTO policyListDTO = new GovernancePolicyListDTO();
-        policyListDTO.setCount(policyList.getCount());
-        List<GovernancePolicyDTO> policyDTOList = new ArrayList<>();
-        for (GovernancePolicy policy : policyList.getGovernancePolicyList()) {
-            policyDTOList.add(fromGovernancePolicyToGovernancePolicyDTO(policy));
+        if (governancePolicy.isGlobal()) {
+            governancePolicyDTO.setLabels(new ArrayList<>(Collections
+                    .singleton(GovernanceConstants.GLOBAL_LABEL)));
+        } else {
+            governancePolicyDTO.setLabels(governancePolicy.getLabels());
         }
-        policyListDTO.setList(policyDTOList);
-        return policyListDTO;
+        return governancePolicyDTO;
     }
 
     /**

@@ -445,7 +445,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setArtifactType(artifactType);
                     ruleViolation.setPolicyId(policyId);
                     ruleViolation.setRulesetId(rulesetId);
-                    ruleViolation.setRuleCode(resultSet.getString("RULE_CODE"));
+                    ruleViolation.setRuleCode(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
                     ruleViolation.setSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolation.setOrganization(organization);
@@ -487,7 +487,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setArtifactId(artifactId);
                     ruleViolation.setArtifactType(artifactType);
                     ruleViolation.setRulesetId(rulesetId);
-                    ruleViolation.setRuleCode(resultSet.getString("RULE_CODE"));
+                    ruleViolation.setRuleCode(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
                     ruleViolation.setSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolation.setOrganization(organization);
@@ -528,7 +528,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setArtifactType(artifactType);
                     ruleViolation.setPolicyId(resultSet.getString("POLICY_ID"));
                     ruleViolation.setRulesetId(resultSet.getString("RULESET_ID"));
-                    ruleViolation.setRuleCode(resultSet.getString("RULE_CODE"));
+                    ruleViolation.setRuleCode(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
                     ruleViolation.setSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolation.setOrganization(organization);

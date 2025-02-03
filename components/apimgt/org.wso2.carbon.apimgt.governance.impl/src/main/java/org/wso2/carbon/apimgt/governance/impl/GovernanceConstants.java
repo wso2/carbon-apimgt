@@ -53,7 +53,6 @@ public class GovernanceConstants {
     public static class PolicySearchAttributes {
         public static final String NAME = "name";
         public static final String STATE = "state";
-        public static final String LABEL = "label";
     }
 
 }

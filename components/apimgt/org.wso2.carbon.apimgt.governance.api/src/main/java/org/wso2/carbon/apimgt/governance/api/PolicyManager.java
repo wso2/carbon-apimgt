@@ -39,8 +39,27 @@ public interface PolicyManager {
      * @return GovernancePolicyInfo Created object
      * @throws GovernanceException If an error occurs while creating the policy
      */
-    GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
-            governancePolicy) throws GovernanceException;
+    GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy governancePolicy)
+            throws GovernanceException;
+
+    /**
+     * Update a Governance Policy
+     *
+     * @param policyId         Policy ID
+     * @param governancePolicy Governance Policy Info
+     * @return GovernancePolicyInfo Updated object
+     * @throws GovernanceException If an error occurs while updating the policy
+     */
+    GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy governancePolicy)
+            throws GovernanceException;
+    
+    /**
+     * Delete a Governance Policy
+     *
+     * @param policyId Policy ID
+     * @throws GovernanceException If an error occurs while deleting the policy
+     */
+    void deletePolicy(String policyId) throws GovernanceException;
 
     /**
      * Get Governance Policy by ID
@@ -59,28 +78,6 @@ public interface PolicyManager {
      * @throws GovernanceException If an error occurs while retrieving the policies
      */
     GovernancePolicyList getGovernancePolicies(String organization) throws GovernanceException;
-
-    /**
-     * Delete a Governance Policy
-     *
-     * @param policyId Policy ID
-     * @throws GovernanceException If an error occurs while deleting the policy
-     */
-    void deletePolicy(String policyId) throws GovernanceException;
-
-    /**
-     * Update a Governance Policy
-     *
-     * @param policyId                           Policy ID
-     * @param governancePolicy Governance Policy Info
-     * @return GovernancePolicyInfo Updated object
-     * @throws GovernanceException If an error occurs while updating the policy
-     */
-    GovernancePolicy updateGovernancePolicy(String policyId,
-                                            GovernancePolicy
-                                                    governancePolicy)
-            throws GovernanceException;
-
 
     /**
      * Get the list of rulesets for a given policy

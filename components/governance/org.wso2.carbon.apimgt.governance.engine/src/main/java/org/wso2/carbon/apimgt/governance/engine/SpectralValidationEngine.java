@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.engine;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
@@ -93,11 +94,11 @@ public class SpectralValidationEngine implements ValidationEngine {
                 String severityString = (String) ruleDetails.get("severity");
                 Severity severity = Severity.fromString(severityString);
 
-                ObjectMapper objectMapper = new ObjectMapper();
+                ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
                 Rule rule = new Rule();
                 rule.setId(GovernanceUtil.generateUUID());
-                rule.setCode(name);
+                rule.setName(name);
                 rule.setDescription(description);
                 rule.setSeverity(severity);
                 rule.setMessageOnFailure(messageOnValidationFailure);

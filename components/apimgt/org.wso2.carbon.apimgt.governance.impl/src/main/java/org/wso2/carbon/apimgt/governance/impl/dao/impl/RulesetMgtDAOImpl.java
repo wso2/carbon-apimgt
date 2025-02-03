@@ -62,9 +62,6 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
 
     }
 
-    /**
-     * Bill Pugh Singleton Implementation
-     */
     private static class SingletonHelper {
 
         private static final RulesetMgtDAO INSTANCE = new RulesetMgtDAOImpl();
@@ -86,7 +83,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @param ruleset      Ruleset object
      * @param organization Organization
      * @return RulesetInfo Created object
-     * @throws GovernanceException
+     * @throws GovernanceException If an error occurs while creating the ruleset
      */
     @Override
     public RulesetInfo createRuleset(Ruleset ruleset, String organization) throws GovernanceException {
@@ -138,11 +135,73 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     ruleset.getName(), organization
             );
         }
-        return getRulesetById(ruleset.getId()); // to return all info of the created ruleset
+        return getRulesetById(ruleset.getId()); // to return RulesetInfo object
     }
 
     /**
-     * Add rules to a ruleset
+     * Update a Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @param ruleset   Ruleset object
+     * @return RulesetInfo Created object
+     * @throws GovernanceException If an error occurs while updating the ruleset
+     */
+    @Override
+    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
+            throws GovernanceException {
+
+        String rulesetContent = ruleset.getRulesetContent();
+
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_RULESET);
+             InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent
+                     .getBytes(StandardCharsets.UTF_8))) {
+            try {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, ruleset.getName());
+                prepStmt.setString(2, ruleset.getDescription());
+                prepStmt.setBlob(3, rulesetContentStream);
+                prepStmt.setString(4, String.valueOf(ruleset.getRuleCategory()));
+                prepStmt.setString(5, String.valueOf(ruleset.getRuleType()));
+                prepStmt.setString(6, String.valueOf(ruleset.getArtifactType()));
+                prepStmt.setString(7, ruleset.getDocumentationLink());
+                prepStmt.setString(8, ruleset.getProvider());
+                prepStmt.setString(9, ruleset.getUpdatedBy());
+                prepStmt.setString(10, rulesetId);
+                int rowsAffected = prepStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
+                            rulesetId);
+                }
+                // Delete existing rules and rule evaluation results related to this ruleset
+                deleteRules(rulesetId, connection);
+                deleteRuleViolationsForRuleset(rulesetId, connection);
+                deleteEvaluationResultsForRuleset(rulesetId, connection);
+
+                // Insert updated rules to the database
+                ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
+                        .getValidationEngineService().getValidationEngine();
+                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
+                if (rules.size() > 0) {
+                    addRules(ruleset.getId(), rules, connection);
+                } else {
+                    throw new GovernanceException(
+                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
+                }
+
+                connection.commit();
+            } catch (SQLException | GovernanceException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException | IOException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
+        }
+        return getRulesetById(rulesetId); // to return all info of the updated ruleset
+    }
+
+    /**
+     * Add rules in a ruleset to DB
      *
      * @param rulesetId  Ruleset ID
      * @param rules      List of rules
@@ -156,7 +215,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             for (Rule rule : rules) {
                 prepStmt.setString(1, rule.getId());
                 prepStmt.setString(2, rulesetId);
-                prepStmt.setString(3, rule.getCode());
+                prepStmt.setString(3, rule.getName());
                 prepStmt.setString(4, rule.getMessageOnFailure());
                 prepStmt.setString(5, rule.getDescription());
                 prepStmt.setString(6, String.valueOf(rule.getSeverity()));
@@ -169,6 +228,100 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_INSERTING_RULES, e, rulesetId);
         }
 
+    }
+
+    /**
+     * Delete a Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @throws GovernanceException If an error occurs while deleting the ruleset
+     */
+    @Override
+    public void deleteRuleset(String rulesetId) throws GovernanceException {
+
+        try (Connection connection = GovernanceDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+
+                // Delete rules associated with the ruleset, here we don't need to delete results as prior to
+                // deleting ruleset, we force the update of policies which will delete the results
+                deleteRules(rulesetId, connection);
+
+                try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULESET)) {
+                    prepStmt.setString(1, rulesetId);
+                    int rowsAffected = prepStmt.executeUpdate();
+                    if (rowsAffected == 0) {
+                        throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
+                                rulesetId);
+                    }
+                }
+
+                connection.commit();
+            } catch (SQLException | GovernanceException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULESET,
+                    e, rulesetId);
+        }
+    }
+
+    /**
+     * Delete rules related to a ruleset
+     *
+     * @param rulesetId  Ruleset ID
+     * @param connection Database connection
+     * @throws GovernanceException If an error occurs while deleting the rules
+     */
+    private void deleteRules(String rulesetId, Connection connection) throws GovernanceException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULES)) {
+            prepStmt.setString(1, rulesetId);
+            prepStmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULES, e, rulesetId);
+        }
+    }
+
+    /**
+     * Check whether a ruleset is associated with policies
+     *
+     * @param rulesetId  Ruleset ID
+     * @param connection Database connection
+     * @throws GovernanceException If an error occurs while checking the association
+     */
+    private void deleteRuleViolationsForRuleset(String rulesetId, Connection connection)
+            throws GovernanceException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                .DELETE_RULE_VIOLATIONS_BY_RULESET)) {
+            prepStmt.setString(1, rulesetId);
+            prepStmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_DELETING_RULE_VIOLATIONS_BY_RESULT_ID,
+                    e, rulesetId);
+        }
+    }
+
+    /**
+     * Delete compliance evaluation results related to a ruleset
+     *
+     * @param rulesetId  Ruleset ID
+     * @param connection Database connection
+     * @throws GovernanceException If an error occurs while deleting the compliance
+     *                             evaluation results
+     */
+    private void deleteEvaluationResultsForRuleset(String rulesetId, Connection connection)
+            throws GovernanceException {
+        try (PreparedStatement prepStmt = connection.
+                prepareStatement(SQLConstants.DELETE_GOV_COMPLIANCE_EVALUATION_RESULT_BY_RULESET)) {
+            prepStmt.setString(1, rulesetId);
+            prepStmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_DELETING_EVALUATION_RESULTS_FOR_RULESET,
+                    e, rulesetId);
+        }
     }
 
     /**
@@ -334,9 +487,10 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             prepStmt.setString(1, rulesetId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
-                    InputStream inputStream = rs.getBinaryStream("RULESET_CONTENT");
-                    if (inputStream != null) {
-                        rulesetContent = GovernanceDBUtil.getStringFromInputStream(inputStream);
+                    try (InputStream inputStream = rs.getBinaryStream("RULESET_CONTENT")) {
+                        if (inputStream != null) {
+                            rulesetContent = GovernanceDBUtil.getStringFromInputStream(inputStream);
+                        }
                     }
                     return rulesetContent;
                 } else {
@@ -350,71 +504,6 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_CONTENT, e,
                     rulesetId);
         }
-    }
-
-    /**
-     * Update a Governance Ruleset
-     *
-     * @param rulesetId Ruleset ID
-     * @param ruleset   Ruleset object
-     * @return RulesetInfo Created object
-     * @throws GovernanceException If an error occurs while updating the ruleset
-     */
-    @Override
-    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
-            throws GovernanceException {
-
-        String rulesetContent = ruleset.getRulesetContent();
-
-        try (Connection connection = GovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_RULESET);
-             InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent
-                     .getBytes(StandardCharsets.UTF_8))) {
-            try {
-                connection.setAutoCommit(false);
-                prepStmt.setString(1, ruleset.getName());
-                prepStmt.setString(2, ruleset.getDescription());
-                prepStmt.setBlob(3, rulesetContentStream);
-                prepStmt.setString(4, String.valueOf(ruleset.getRuleCategory()));
-                prepStmt.setString(5, String.valueOf(ruleset.getRuleType()));
-                prepStmt.setString(6, String.valueOf(ruleset.getArtifactType()));
-                prepStmt.setString(7, ruleset.getDocumentationLink());
-                prepStmt.setString(8, ruleset.getProvider());
-                prepStmt.setString(9, ruleset.getUpdatedBy());
-                prepStmt.setString(10, rulesetId);
-                int rowsAffected = prepStmt.executeUpdate();
-                if (rowsAffected == 0) {
-                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
-                            rulesetId);
-                }
-                // Delete existing rules related to this ruleset.
-                deleteRules(rulesetId, connection);
-
-                // Insert updated rules.
-                ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
-                        .getValidationEngineService().getValidationEngine();
-                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
-                if (rules.size() > 0) {
-                    addRules(ruleset.getId(), rules, connection);
-                } else {
-                    throw new GovernanceException(
-                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
-                }
-
-                // Delete existing rule violations and compliance evaluation results related to this ruleset.
-                deleteRuleViolationsForRuleset(rulesetId, connection);
-                deleteEvaluationResultsForRuleset(rulesetId, connection);
-
-                connection.commit();
-            } catch (SQLException | GovernanceException e) {
-                connection.rollback();
-                throw e;
-            }
-        } catch (SQLException | IOException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.
-                    ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
-        }
-        return getRulesetById(rulesetId); // to return all info of the updated ruleset
     }
 
     /**
@@ -459,7 +548,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 while (rs.next()) {
                     Rule rule = new Rule();
                     rule.setId(rs.getString("RULESET_RULE_ID"));
-                    rule.setCode(rs.getString("RULE_CODE"));
+                    rule.setName(rs.getString("RULE_NAME"));
                     rule.setDescription(rs.getString("RULE_DESCRIPTION"));
                     rule.setMessageOnFailure(rs.getString("RULE_MESSAGE"));
                     rule.setSeverity(Severity.fromString(rs.getString("SEVERITY")));
@@ -470,115 +559,6 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID
                     , e, rulesetId);
-        }
-    }
-
-    /**
-     * Delete a Governance Ruleset
-     *
-     * @param rulesetId Ruleset ID
-     * @throws GovernanceException If an error occurs while deleting the ruleset
-     */
-    @Override
-    public void deleteRuleset(String rulesetId) throws GovernanceException {
-
-        try (Connection connection = GovernanceDBUtil.getConnection()) {
-            try {
-                connection.setAutoCommit(false);
-
-                deleteRuleViolationsForRuleset(rulesetId, connection);
-                deleteEvaluationResultsForRuleset(rulesetId, connection);
-                deletePolicyMappingsForRuleset(rulesetId, connection);
-                deleteRules(rulesetId, connection);
-
-                try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULESET)) {
-                    prepStmt.setString(1, rulesetId);
-                    int rowsAffected = prepStmt.executeUpdate();
-                    if (rowsAffected == 0) {
-                        throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
-                                rulesetId);
-                    }
-                }
-
-                connection.commit();
-            } catch (SQLException | GovernanceException e) {
-                connection.rollback();
-                throw e;
-            }
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULESET,
-                    e, rulesetId);
-        }
-    }
-
-    /**
-     * Check whether a ruleset is associated with policies
-     *
-     * @param rulesetId  Ruleset ID
-     * @param connection Database connection
-     * @throws GovernanceException If an error occurs while checking the association
-     */
-    private void deleteRuleViolationsForRuleset(String rulesetId, Connection connection) throws GovernanceException {
-        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULE_VIOLATIONS_BY_RULESET)) {
-            prepStmt.setString(1, rulesetId);
-            prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULE_VIOLATIONS_BY_RESULT_ID,
-                    e, rulesetId);
-        }
-    }
-
-    /**
-     * Delete compliance evaluation results related to a ruleset
-     *
-     * @param rulesetId  Ruleset ID
-     * @param connection Database connection
-     * @throws GovernanceException If an error occurs while deleting the compliance
-     *                             evaluation results
-     */
-    private void deleteEvaluationResultsForRuleset(String rulesetId, Connection connection)
-            throws GovernanceException {
-        try (PreparedStatement prepStmt = connection.
-                prepareStatement(SQLConstants.DELETE_GOV_COMPLIANCE_EVALUATION_RESULT_BY_RULESET)) {
-            prepStmt.setString(1, rulesetId);
-            prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_EVALUATION_RESULTS_FOR_RULESET,
-                    e, rulesetId);
-        }
-    }
-
-    /**
-     * Delete policy mappings related to a ruleset
-     *
-     * @param rulesetId  Ruleset ID
-     * @param connection Database connection
-     * @throws GovernanceException If an error occurs while deleting the policy mappings
-     */
-    private void deletePolicyMappingsForRuleset(String rulesetId, Connection connection) throws GovernanceException {
-        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                .DELETE_RULESET_POLICY_MAPPING_BY_RULESET_ID)) {
-            prepStmt.setString(1, rulesetId);
-            prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULESET_POLICY_MAPPING,
-                    e, rulesetId);
-        }
-    }
-
-    /**
-     * Delete rules related to a ruleset
-     *
-     * @param rulesetId  Ruleset ID
-     * @param connection Database connection
-     * @throws GovernanceException If an error occurs while deleting the rules
-     */
-    private void deleteRules(String rulesetId, Connection connection) throws GovernanceException {
-        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULES)) {
-            prepStmt.setString(1, rulesetId);
-            prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULES, e, rulesetId);
         }
     }
 }

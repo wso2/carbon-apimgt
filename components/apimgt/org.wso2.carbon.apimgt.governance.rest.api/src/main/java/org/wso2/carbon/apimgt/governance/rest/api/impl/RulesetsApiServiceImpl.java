@@ -75,9 +75,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
     @Override
-    public Response createRuleset(String name, InputStream rulesetContentInputStream, Attachment rulesetContentDetail,
-                                  String ruleType, String artifactType, String provider,
-                                  String description, String ruleCategory, String documentationLink,
+    public Response createRuleset(String name, InputStream rulesetContentInputStream,
+                                  Attachment rulesetContentDetail, String ruleType,
+                                  String artifactType, String description, String ruleCategory,
+                                  String documentationLink, String provider,
                                   MessageContext messageContext) throws GovernanceException {
         RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
@@ -113,6 +114,63 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         } finally {
             IOUtils.closeQuietly(rulesetContentInputStream);
         }
+    }
+
+
+    /**
+     * Update a Governance Ruleset
+     *
+     * @param rulesetId                 Ruleset ID
+     * @param name                      Name
+     * @param rulesetContentInputStream Ruleset content input stream
+     * @param rulesetContentDetail      Ruleset content detail
+     * @param ruleCategory              Rule category
+     * @param ruleType                  Rule type
+     * @param artifactType              Artifact type
+     * @param provider                  Provider
+     * @param description               Description
+     * @param documentationLink         Documentation link
+     * @param messageContext            MessageContext
+     * @return Response object
+     * @throws GovernanceException If an error occurs while updating the ruleset
+     */
+    @Override
+    public Response updateRulesetById(String rulesetId, String name, InputStream rulesetContentInputStream,
+                                      Attachment rulesetContentDetail, String ruleType, String artifactType,
+                                      String description, String ruleCategory, String documentationLink,
+                                      String provider, MessageContext messageContext)
+            throws GovernanceException {
+
+        try {
+            Ruleset ruleset = new Ruleset();
+            ruleset.setName(name);
+            ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
+            ruleset.setRuleType(RuleType.fromString(ruleType));
+            ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
+            ruleset.setProvider(provider);
+            ruleset.setId(rulesetId);
+            ruleset.setDescription(description);
+            ruleset.setDocumentationLink(documentationLink);
+            ruleset.setRulesetContent(IOUtils.toString(rulesetContentInputStream, StandardCharsets.UTF_8));
+
+            String username = GovernanceAPIUtil.getLoggedInUsername();
+            String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+            ruleset.setUpdatedBy(username);
+
+            RulesetManager rulesetManager = new RulesetManagerImpl();
+            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset);
+
+            // Re-access policy compliance in the background
+            new ComplianceManagerImpl().handleRulesetChangeEvent(rulesetId, organization);
+
+            return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
+                    fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
+        } catch (IOException e) {
+            throw new GovernanceException("Error while converting ruleset content stream", e);
+        } finally {
+            IOUtils.closeQuietly(rulesetContentInputStream);
+        }
+
     }
 
     /**
@@ -159,7 +217,6 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     @Override
     public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException {
         RulesetManager rulesetManager = new RulesetManagerImpl();
-
         String content = rulesetManager.getRulesetContent(rulesetId);
 
         return Response.status(Response.Status.OK)
@@ -270,62 +327,5 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         paginationDTO.setNext(paginatedNext);
 
         return paginatedRulesetListDTO;
-    }
-
-    /**
-     * Update a Governance Ruleset
-     *
-     * @param rulesetId                 Ruleset ID
-     * @param name                      Name
-     * @param rulesetContentInputStream Ruleset content input stream
-     * @param rulesetContentDetail      Ruleset content detail
-     * @param ruleCategory              Rule category
-     * @param ruleType                  Rule type
-     * @param artifactType              Artifact type
-     * @param provider                  Provider
-     * @param description               Description
-     * @param documentationLink         Documentation link
-     * @param messageContext            MessageContext
-     * @return Response object
-     * @throws GovernanceException If an error occurs while updating the ruleset
-     */
-    @Override
-    public Response updateRulesetById(String rulesetId, String name, InputStream rulesetContentInputStream,
-                                      Attachment rulesetContentDetail, String ruleType, String artifactType,
-                                      String provider, String description, String ruleCategory,
-                                      String documentationLink, MessageContext messageContext)
-            throws GovernanceException {
-
-        try {
-            Ruleset ruleset = new Ruleset();
-            ruleset.setName(name);
-            ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
-            ruleset.setRuleType(RuleType.fromString(ruleType));
-            ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
-            ruleset.setProvider(provider);
-            ruleset.setId(rulesetId);
-            ruleset.setDescription(description);
-            ruleset.setDocumentationLink(documentationLink);
-            ruleset.setRulesetContent(IOUtils.toString(rulesetContentInputStream, StandardCharsets.UTF_8));
-
-            String username = GovernanceAPIUtil.getLoggedInUsername();
-            String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-            ruleset.setUpdatedBy(username);
-
-            RulesetManager rulesetManager = new RulesetManagerImpl();
-            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset);
-
-            // Re-access policy compliance in the background
-            new ComplianceManagerImpl().handleRulesetChangeEvent(rulesetId, organization);
-
-            return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
-                    fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
-        } catch (IOException e) {
-            throw new GovernanceException("Error while converting ruleset content stream", e);
-        } finally {
-            IOUtils.closeQuietly(rulesetContentInputStream);
-        }
-
-
     }
 }

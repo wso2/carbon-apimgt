@@ -67,6 +67,55 @@ public class RulesetManagerImpl implements RulesetManager {
     }
 
     /**
+     * Delete a Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @throws GovernanceException If an error occurs while deleting the ruleset
+     */
+    @Override
+    public void deleteRuleset(String rulesetId) throws GovernanceException {
+        RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId);
+        if (isRulesetAssociatedWithPolicies(rulesetId)) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
+                    ruleset.getId());
+        }
+        rulesetMgtDAO.deleteRuleset(rulesetId);
+    }
+
+    /**
+     * Check if a ruleset is associated with any policies
+     *
+     * @param rulesetId Ruleset ID
+     * @return boolean True if the ruleset is associated with policies
+     */
+    private boolean isRulesetAssociatedWithPolicies(String rulesetId) throws GovernanceException {
+        List<String> policyIds = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
+        return !policyIds.isEmpty();
+    }
+
+    /**
+     * Update a Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @param ruleset   Ruleset object
+     * @return Ruleset Updated object
+     * @throws GovernanceException If an error occurs while updating the ruleset
+     */
+    @Override
+    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
+            throws GovernanceException {
+
+        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
+                getValidationEngineService().getValidationEngine();
+        boolean isRulesetContentValid = validationEngine.isRulesetValid(ruleset);
+        if (!isRulesetContentValid) {
+            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
+                    ruleset.getName());
+        }
+        return rulesetMgtDAO.updateRuleset(rulesetId, ruleset);
+    }
+
+    /**
      * Get all the Governance Rulesets
      *
      * @param organization Organization
@@ -105,55 +154,6 @@ public class RulesetManagerImpl implements RulesetManager {
         }
         return content;
 
-    }
-
-    /**
-     * Delete a Governance Ruleset
-     *
-     * @param rulesetId    Ruleset ID
-     * @throws GovernanceException If an error occurs while deleting the ruleset
-     */
-    @Override
-    public void deleteRuleset(String rulesetId) throws GovernanceException {
-        RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId);
-        if (isRulesetAssociatedWithPolicies(rulesetId)) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
-                    ruleset.getId());
-        }
-        rulesetMgtDAO.deleteRuleset(rulesetId);
-    }
-
-    /**
-     * Check if a ruleset is associated with any policies
-     *
-     * @param rulesetId Ruleset ID
-     * @return boolean True if the ruleset is associated with policies
-     */
-    private boolean isRulesetAssociatedWithPolicies(String rulesetId) throws GovernanceException {
-        List<String> policyIds = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
-        return !policyIds.isEmpty();
-    }
-
-    /**
-     * Update a Governance Ruleset
-     *
-     * @param rulesetId    Ruleset ID
-     * @param ruleset      Ruleset object
-     * @return Ruleset Updated object
-     * @throws GovernanceException If an error occurs while updating the ruleset
-     */
-    @Override
-    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
-            throws GovernanceException {
-
-        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
-                getValidationEngineService().getValidationEngine();
-        boolean isRulesetContentValid = validationEngine.isRulesetValid(ruleset);
-        if (!isRulesetContentValid) {
-            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
-                    ruleset.getName());
-        }
-        return rulesetMgtDAO.updateRuleset(rulesetId, ruleset);
     }
 
     /**
@@ -197,7 +197,7 @@ public class RulesetManagerImpl implements RulesetManager {
 
     /**
      * Get the search criteria for the ruleset search from a query such as
-     * `query={name} ruleType:{type} artifactType:{type}`
+     * `query=name:{name} ruleType:{type} artifactType:{type}`
      *
      * @param query Search query
      * @return Map of search criteria

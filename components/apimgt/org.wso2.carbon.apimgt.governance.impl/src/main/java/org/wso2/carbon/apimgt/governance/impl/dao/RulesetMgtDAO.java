@@ -43,6 +43,25 @@ public interface RulesetMgtDAO {
     RulesetInfo createRuleset(Ruleset ruleset, String organization) throws GovernanceException;
 
     /**
+     * Update a Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @param ruleset   Ruleset object
+     * @return RulesetInfo Updated object
+     * @throws GovernanceException If an error occurs while updating the ruleset
+     */
+    RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
+            throws GovernanceException;
+
+    /**
+     * Delete a Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @throws GovernanceException If an error occurs while deleting the ruleset
+     */
+    void deleteRuleset(String rulesetId) throws GovernanceException;
+
+    /**
      * Get all the Governance Rulesets of the organization
      *
      * @param organization Organization
@@ -89,25 +108,6 @@ public interface RulesetMgtDAO {
      * @throws GovernanceException If an error occurs while getting the ruleset content
      */
     String getRulesetContent(String rulesetId) throws GovernanceException;
-
-    /**
-     * Delete a Governance Ruleset
-     *
-     * @param rulesetId    Ruleset ID
-     * @throws GovernanceException If an error occurs while deleting the ruleset
-     */
-    void deleteRuleset(String rulesetId) throws GovernanceException;
-
-    /**
-     * Update a Governance Ruleset
-     *
-     * @param rulesetId Ruleset ID
-     * @param ruleset   Ruleset object
-     * @return RulesetInfo Updated object
-     * @throws GovernanceException If an error occurs while updating the ruleset
-     */
-    RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
-            throws GovernanceException;
 
     /**
      * Get the associated policies for a Ruleset

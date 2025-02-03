@@ -92,6 +92,52 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
     }
 
     /**
+     * Update a Governance Policy
+     *
+     * @param policyId            Policy ID
+     * @param governancePolicyDTO Governance Policy  with Ruleset Ids
+     * @param messageContext      Message Context
+     * @return Response
+     * @throws GovernanceException If an error occurs while updating the policy
+     */
+    public Response updateGovernancePolicyById(String policyId, GovernancePolicyDTO
+            governancePolicyDTO, MessageContext messageContext) throws GovernanceException {
+        PolicyManager policyManager = new PolicyManagerImpl();
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = GovernanceAPIUtil.getLoggedInUsername();
+
+        GovernancePolicy governancePolicy =
+                PolicyMappingUtil.
+                        fromDTOtoGovernancePolicy(governancePolicyDTO);
+
+        governancePolicy.setUpdatedBy(username);
+        GovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
+                (policyId, governancePolicy);
+
+        GovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
+                fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
+
+        // Re-access policy compliance in the background
+        new ComplianceManagerImpl().handlePolicyChangeEvent(policyId, organization);
+
+        return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
+    }
+
+    /**
+     * Delete a Governance Policy
+     *
+     * @param policyId       Policy ID
+     * @param messageContext Message Context
+     * @return Response
+     * @throws GovernanceException If an error occurs while deleting the policy
+     */
+    public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException {
+        PolicyManager policyManager = new PolicyManagerImpl();
+        policyManager.deletePolicy(policyId);
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    /**
      * Get Governance Policy by ID
      *
      * @param policyId       Policy ID
@@ -195,52 +241,5 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         paginationDTO.setNext(paginatedNext);
 
         return paginatedPolicyListDTO;
-    }
-
-
-    /**
-     * Delete a Governance Policy
-     *
-     * @param policyId       Policy ID
-     * @param messageContext Message Context
-     * @return Response
-     * @throws GovernanceException If an error occurs while deleting the policy
-     */
-    public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException {
-        PolicyManager policyManager = new PolicyManagerImpl();
-        policyManager.deletePolicy(policyId);
-        return Response.status(Response.Status.OK).build();
-    }
-
-    /**
-     * Update a Governance Policy
-     *
-     * @param policyId            Policy ID
-     * @param governancePolicyDTO Governance Policy  with Ruleset Ids
-     * @param messageContext      Message Context
-     * @return Response
-     * @throws GovernanceException If an error occurs while updating the policy
-     */
-    public Response updateGovernancePolicyById(String policyId, GovernancePolicyDTO
-            governancePolicyDTO, MessageContext messageContext) throws GovernanceException {
-        PolicyManager policyManager = new PolicyManagerImpl();
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        String username = GovernanceAPIUtil.getLoggedInUsername();
-
-        GovernancePolicy governancePolicy =
-                PolicyMappingUtil.
-                        fromDTOtoGovernancePolicy(governancePolicyDTO);
-
-        governancePolicy.setUpdatedBy(username);
-        GovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
-                (policyId, governancePolicy);
-
-        GovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
-                fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
-
-        // Re-access policy compliance in the background
-        new ComplianceManagerImpl().handlePolicyChangeEvent(policyId, organization);
-
-        return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
     }
 }
