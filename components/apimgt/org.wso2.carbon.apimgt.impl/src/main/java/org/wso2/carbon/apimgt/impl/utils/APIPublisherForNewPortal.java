@@ -114,7 +114,7 @@ public class APIPublisherForNewPortal {
         String orgId = getOrgId(tenantName, sslsf);
         if (orgId != null) {
             API api = apiTypeWrapper.getApi();
-            String apiDefinition = getDefinitionForDevPortal(api);
+            String apiDefinition = getDefinitionForDevPortal(api, tenantName);
             String apiMetaData = getApiMetaData(apiTypeWrapper);
 
             HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition, sslsf);
@@ -134,7 +134,7 @@ public class APIPublisherForNewPortal {
     private static void updateAPI(ApiTypeWrapper apiTypeWrapper, String tenantName,
                                   SSLConnectionSocketFactory sslsf) throws APIManagementException {
         API api = apiTypeWrapper.getApi();
-        String apiDefinition = getDefinitionForDevPortal(api);
+        String apiDefinition = getDefinitionForDevPortal(api, tenantName);
         String apiMetaData = getApiMetaData(apiTypeWrapper);
         String orgId = getOrgId(tenantName, sslsf);
         if (orgId != null) {
@@ -179,9 +179,17 @@ public class APIPublisherForNewPortal {
         }
     }
 
-    private static String getDefinitionForDevPortal (API api) throws APIManagementException {
+    private static String getDefinitionForDevPortal (API api, String tenantName) throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(api.getId().getProviderName());
-        return apiConsumer.getOpenAPIDefinitionForEnvironment(api, "Default");
+        String type = getType(api.getType());
+        if (type.equals("REST")) {
+            return apiConsumer.getOpenAPIDefinitionForEnvironment(api, "Default");
+        } else if (type.equals("AsyncAPI")) {
+            return apiConsumer.getAsyncAPIDefinition(api.getUuid(), tenantName);
+        } else {
+            // TODD: Handle other types of definitions
+            return null;
+        }
     }
 
     private static String getOrgId(String tenantName, SSLConnectionSocketFactory sslsf)
