@@ -17,10 +17,15 @@
  */
 package org.wso2.carbon.apimgt.impl.config;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+
+import javax.cache.Cache;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,13 +47,11 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
-import javax.cache.Cache;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Config Service Implementation for retrieve configurations.
@@ -58,6 +61,10 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     private static final Log log = LogFactory.getLog(APIMConfigServiceImpl.class);
     private static final String SUBSCRIPTION_APPROVAL_VIEW_SCOPE = "apim:subscription_approval_view";
     private static final String SUBSCRIPTION_APPROVAL_MANAGE_SCOPE = "apim:subscription_approval_manage";
+    private static final String PUBLISHER_ORG_READ = "apim:publisher_organization_read";
+    private static final String ADMIN_ORG_READ = "apim:organization_read";
+    private static final String ADMIN_ORG_MANAGE = "apim:organization_manage";
+    
     protected SystemConfigurationsDAO systemConfigurationsDAO;
 
     public APIMConfigServiceImpl() {
@@ -199,7 +206,10 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                 "apim:keymanagers_manage",
                 "apim:api_category",
                 SUBSCRIPTION_APPROVAL_VIEW_SCOPE,
-                SUBSCRIPTION_APPROVAL_MANAGE_SCOPE
+                SUBSCRIPTION_APPROVAL_MANAGE_SCOPE,
+                PUBLISHER_ORG_READ,
+                ADMIN_ORG_MANAGE,
+                ADMIN_ORG_READ
             };
         
         ArrayList<String> missingScopesList = new ArrayList<>(Arrays.asList(scopesToCheck));
@@ -234,6 +244,8 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             if (missingScope.equals(SUBSCRIPTION_APPROVAL_VIEW_SCOPE) ||
                     missingScope.equals(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE)) {
                 newScope.addProperty("Roles", "admin,Internal/publisher");
+            } else if (missingScope.equals(PUBLISHER_ORG_READ)) {
+                newScope.addProperty("Roles", "admin,Internal/creator");
             } else {
                 newScope.addProperty("Roles", "admin");
             }

@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -2052,4 +2053,14 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     WorkflowDTO retrieveWorkflow(String workflowReferenceID) throws APIManagementException;
+
+    /**
+     * 
+     * Retrieves list of organizations available for the given parent organization.
+     * 
+     * @param parentOrgId parent organization id
+     * @param tenantDomain super domain
+     * @return organization list
+     */
+    List<OrganizationDetailsDTO> getOrganizations(String orgId, String superOrganization) throws APIManagementException;
 }

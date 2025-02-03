@@ -91,6 +91,7 @@ import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -181,6 +182,8 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -276,6 +279,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -293,6 +297,8 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import java.security.cert.X509Certificate;
+import java.text.Normalizer;
+
 import javax.validation.constraints.NotNull;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -354,6 +360,9 @@ public final class APIUtil {
     private static Schema operationPolicySpecSchema;
     private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
     private static String hashingAlgorithm = SHA_256;
+    
+    private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
+    private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 
     private APIUtil() {
 
@@ -685,6 +694,10 @@ public final class APIUtil {
                 }
             }
 
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
+
             api.addAvailableTiers(availablePolicy);
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
@@ -809,6 +822,11 @@ public final class APIUtil {
                 }
             }
             api.addAvailableTiers(availablePolicy);
+
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
+
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
 
@@ -988,6 +1006,11 @@ public final class APIUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
 
+            if (api.getAvailableTiersForOrganizationsAsString() != null) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS,
+                        api.getAvailableTiersForOrganizationsAsString());
+            }
+
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
             }
@@ -1044,6 +1067,7 @@ public final class APIUtil {
             if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
                     !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS, "");
             }
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -2716,6 +2740,10 @@ public final class APIUtil {
             Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
             api.addAvailableTiers(availableTier);
 
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
+
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
@@ -3586,6 +3614,27 @@ public final class APIUtil {
     public static float getAverageRating(int apiId) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getAverageRating(apiId);
+    }
+
+    /**
+     * Update available tiers in the DevPortalAPIInfo according to the organization.
+     * @param devPortalAPIInfo  DevPortalAPIInfo object
+     * @param organization      Organization ID
+     */
+    public static void updateAvailableTiersByOrganization(DevPortalAPIInfo devPortalAPIInfo, String organization) {
+
+        Set<String> availableTiers = devPortalAPIInfo.getAvailableTierNames();
+        Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
+        if (organization != null) {
+            for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                String orgID = organizationTiers.getOrganizationID();
+                if (organization.equals(orgID)) {
+                    availableTiers = organizationTiers.getTiers();
+                    break;
+                }
+            }
+        }
+        devPortalAPIInfo.setAvailableTierNames(availableTiers);
     }
 
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
@@ -10170,6 +10219,15 @@ public final class APIUtil {
     }
 
     /**
+     * Get org access control enabled status
+     * 
+     * @return true or false
+     */
+    public static boolean isOrganizationAccessControlEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getOrgAccessControl().isEnabled();
+    }
+    /**
      * Get registered API Definition Parsers as a Map
      *
      * @return Map of Registered API Definition Parsers
@@ -10975,7 +11033,7 @@ public final class APIUtil {
         }
         return applications.subList(offset, endIndex);
     }
-
+    
     public static String getAPIMVersion() {
         return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
     }
@@ -11133,5 +11191,40 @@ public final class APIUtil {
 
         return Boolean.getBoolean(
                 APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
+    }
+    
+    public static String getOrganizationIdFromExternalReference(String referenceId, String organizationName,
+            String rootOrganization) throws APIManagementException {
+        String organizationId = null;
+        OrganizationDetailsDTO orgDetails = ApiMgtDAO.getInstance().getOrganizationDetalsByExternalOrgId(referenceId,
+                rootOrganization);
+        if (orgDetails != null) {
+            organizationId = orgDetails.getOrganizationId();
+        } else {
+            // No organization entry in the db. add entry without parent info.
+            OrganizationDetailsDTO info = new OrganizationDetailsDTO();
+            info.setExternalOrganizationReference(referenceId);
+            info.setTenantDomain(rootOrganization);
+            info.setName(organizationName);
+            info.setOrganizationHandle(getOrganizationHandle(organizationName));
+            OrganizationDetailsDTO addedInfo = ApiMgtDAO.getInstance().addOrganization(info);
+            if (addedInfo != null) {
+                organizationId = addedInfo.getOrganizationId();
+            }
+        }
+        return organizationId;
+    }
+    
+    public static String getOrganizationHandle(String name) {
+        String sanatizedName = null;
+        if (name == null) {
+            return sanatizedName;
+        }
+        String nowhitespace = WHITESPACE.matcher(name).replaceAll("-"); // Replace spaces with hyphens
+        String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD); // Decompose Unicode characters
+        sanatizedName = NONLATIN.matcher(normalized).replaceAll(""); // Remove non-alphanumeric characters
+        // Convert to lowercase and trim hyphens from the beginning/end
+        sanatizedName = sanatizedName.toLowerCase(Locale.ENGLISH).replaceAll("^-+|-+$", "");
+        return sanatizedName;
     }
 }

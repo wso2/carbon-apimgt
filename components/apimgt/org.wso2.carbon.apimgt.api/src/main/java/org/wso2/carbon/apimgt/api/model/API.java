@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -74,6 +75,7 @@ public class API implements Serializable {
     private Date lastUpdated;
     private String updatedBy;
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
+    private Set<OrganizationTiers> availableTiersForOrganizations = new LinkedHashSet<>();
     private Set<Policy> availableSubscriptionLevelPolicies = new LinkedHashSet<Policy>();
     private String apiLevelPolicy;
     private AuthorizationPolicy authorizationPolicy;
@@ -102,6 +104,7 @@ public class API implements Serializable {
     private String visibility;
     private String visibleRoles;
     private String visibleTenants;
+    private String visibleOrganizations;
 
     private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
@@ -765,8 +768,47 @@ public class API implements Serializable {
         availableSubscriptionLevelPolicies.clear();
     }
 
-    public void removeAvailableTiers(Set<Tier> availableTiers) {
-        this.availableTiers.removeAll(availableTiers);
+    public Set<OrganizationTiers> getAvailableTiersForOrganizations() {
+        return availableTiersForOrganizations;
+    }
+
+    public void setAvailableTiersForOrganizations(Set<OrganizationTiers> availableTiersForOrganizations) {
+        this.availableTiersForOrganizations = availableTiersForOrganizations;
+    }
+
+    public void removeAllTiersForOrganizations() {
+        availableTiersForOrganizations.clear();
+    }
+
+    public void setAvailableTiersForOrganizationsFromString(String tiersString) {
+
+        if (tiersString == null || tiersString.isEmpty()) {
+            return;
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString, OrganizationTiers[].class);
+            availableTiersForOrganizations = new LinkedHashSet<>(Arrays.asList(tiersArray));
+        } catch (Exception e) {
+            log.error("Error while converting string to availableTiersForOrganizations object for API : " + getUUID(),
+                    e);
+        }
+    }
+
+    public String getAvailableTiersForOrganizationsAsString() {
+        if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
+            return null;
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(availableTiersForOrganizations);
+        } catch (JsonProcessingException e) {
+            log.error("Error while converting availableTiersForOrganizations to string for API : " + getUUID(), e);
+            return null;
+        } catch (Exception e) {
+            log.error("Unexpected error while processing availableTiersForOrganizations for API : " + getUUID(), e);
+            return null;
+        }
     }
 
     public Set<URITemplate> getUriTemplates() {
@@ -1560,6 +1602,14 @@ public class API implements Serializable {
 
     public void setApiPolicies(List<OperationPolicy> apiPolicies) {
         this.apiPolicies = apiPolicies;
+    }
+    
+    public String getVisibleOrganizations() {
+        return visibleOrganizations;
+    }
+
+    public void setVisibleOrganizations(String visibleOrganizations) {
+        this.visibleOrganizations = visibleOrganizations;
     }
 
     /**
