@@ -91,7 +91,6 @@ public interface GovernancePolicyMgtDAO {
             governancePolicy)
             throws GovernanceException;
 
-
     /**
      * Get the list of rulesets for a given policy
      *
@@ -121,7 +120,6 @@ public interface GovernancePolicyMgtDAO {
      */
     List<String> getPoliciesByLabelAndState(String label, GovernableState state, String organization)
             throws GovernanceException;
-
 
     /**
      * Get Policies without labels
@@ -159,6 +157,17 @@ public interface GovernancePolicyMgtDAO {
      * @throws GovernanceException If an error occurs while getting the labels
      */
     List<String> getLabelsByPolicyId(String policyId) throws GovernanceException;
+
+    /**
+     * Search for Governance Policies
+     *
+     * @param searchCriteria Search criteria
+     * @param organization   Organization
+     * @return GovernancePolicyList object
+     * @throws GovernanceException If an error occurs while searching for policies
+     */
+    GovernancePolicyList searchPolicies(Map<String, String> searchCriteria, String organization)
+            throws GovernanceException;
 }
 
 

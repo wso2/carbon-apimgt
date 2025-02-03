@@ -65,6 +65,14 @@ public class SQLConstants {
     public static final String DELETE_RULESET =
             "DELETE FROM GOV_RULESET WHERE RULESET_ID = ?";
 
+    public static final String SEARCH_RULESETS = "SELECT RULESET_ID, NAME, " +
+            "DESCRIPTION, RULESET_CONTENT, RULE_CATEGORY, " +
+            "RULE_TYPE, ARTIFACT_TYPE, DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, " +
+            "CREATED_BY, CREATED_TIME, " +
+            "UPDATED_BY, LAST_UPDATED_TIME FROM GOV_RULESET WHERE ORGANIZATION = ? " +
+            "AND NAME LIKE ? AND RULE_TYPE LIKE ? " +
+            "AND ARTIFACT_TYPE LIKE ?";
+
     public static final String DELETE_RULES =
             "DELETE FROM GOV_RULESET_RULE WHERE RULESET_ID = ?";
 
@@ -132,6 +140,17 @@ public class SQLConstants {
 
     public static final String GET_LABELS_FOR_POLICY =
             "SELECT LABEL FROM GOV_POLICY_LABEL WHERE POLICY_ID = ?";
+
+    public static final String SEARCH_POLICIES =
+            "SELECT DISTINCT GP.POLICY_ID, GP.NAME, GP.DESCRIPTION, GP.CREATED_BY, GP.CREATED_TIME, " +
+                    "GP.UPDATED_BY, GP.LAST_UPDATED_TIME " +
+                    "FROM GOV_POLICY GP " +
+                    "JOIN GOV_POLICY_LABEL GPL ON GP.POLICY_ID = GPL.POLICY_ID " +
+                    "JOIN GOV_POLICY_GOVERNABLE_STATE GPS ON GP.POLICY_ID = GPS.POLICY_ID " +
+                    "WHERE GP.ORGANIZATION = ? " +
+                    "AND GP.NAME LIKE ? " +
+                    "AND GPL.LABEL LIKE ? " +
+                    "AND GPS.STATE LIKE ?";
 
     public static final String DELETE_GOVERNANCE_POLICY =
             "DELETE FROM GOV_POLICY WHERE POLICY_ID = ?";

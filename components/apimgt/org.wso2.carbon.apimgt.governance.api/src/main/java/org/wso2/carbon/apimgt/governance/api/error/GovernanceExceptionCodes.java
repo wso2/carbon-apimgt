@@ -90,6 +90,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_RULESET_POLICY_MAPPING(200021, "Error while deleting ruleset policy mappings",
             500, "Error while deleting ruleset policy mappings for ruleset with ID: %s",
             true),
+    ERROR_WHILE_SEARCHING_RULESETS(200022, "Error while searching rulesets",
+            500, "Error while searching rulesets for the organization: %s", true),
 
     // Policy related codes
     ERROR_WHILE_CREATING_POLICY(300001, "Policy creation failed.",
@@ -130,6 +132,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_POLICY_STATE_MAPPINGS(300016, "Error while deleting policy state mappings",
             500, "Error while deleting policy state mappings for policy with ID: %s",
             true),
+    ERROR_WHILE_SEARCHING_POLICIES(300017, "Error while searching policies",
+            500, "Error while searching policies for the organization: %s", true),
 
     // Request related codes
     ERROR_WHILE_PROCESSING_GOVERNANCE_EVALUATION_REQUEST(400001,

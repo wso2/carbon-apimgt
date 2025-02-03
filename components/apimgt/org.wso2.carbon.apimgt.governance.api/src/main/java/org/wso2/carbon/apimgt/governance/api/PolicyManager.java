@@ -145,4 +145,14 @@ public interface PolicyManager {
     boolean isBlockingActionPresentForState(String policyId, GovernableState state)
             throws GovernanceException;
 
+    /**
+     * This method searches for governance policies
+     *
+     * @param query        query
+     * @param organization organization
+     * @return GovernancePolicyList
+     * @throws GovernanceException If an error occurs while searching for policies
+     */
+    GovernancePolicyList searchGovernancePolicies(String query, String organization) throws GovernanceException;
+
 }

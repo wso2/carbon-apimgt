@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
@@ -48,6 +49,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of the RulesetMgtDAO interface.
@@ -186,22 +188,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             prepStmt.setString(1, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
-                    RulesetInfo rulesetInfo = new RulesetInfo();
-                    rulesetInfo.setId(rs.getString("RULESET_ID"));
-                    rulesetInfo.setName(rs.getString("NAME"));
-                    rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setRuleCategory(RuleCategory.fromString(
-                            rs.getString("RULE_CATEGORY")));
-                    rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(ExtendedArtifactType.fromString(
-                            rs.getString("ARTIFACT_TYPE")));
-                    rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
-                    rulesetInfo.setProvider(rs.getString("PROVIDER"));
-                    rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
-                    rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
-                    rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
-                    rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
-                    rulesetInfoList.add(rulesetInfo);
+                    rulesetInfoList.add(getRulesetInfoFromResultSet(rs));
                 }
             }
         } catch (SQLException e) {
@@ -230,22 +217,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             prepStmt.setString(2, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
-                    RulesetInfo rulesetInfo = new RulesetInfo();
-                    rulesetInfo.setId(rs.getString("RULESET_ID"));
-                    rulesetInfo.setName(rs.getString("NAME"));
-                    rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setRuleCategory(RuleCategory.fromString(
-                            rs.getString("RULE_CATEGORY")));
-                    rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(ExtendedArtifactType.fromString(
-                            rs.getString("ARTIFACT_TYPE")));
-                    rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
-                    rulesetInfo.setProvider(rs.getString("PROVIDER"));
-                    rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
-                    rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
-                    rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
-                    rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
-                    return rulesetInfo;
+                    return getRulesetInfoFromResultSet(rs);
                 }
             }
         } catch (SQLException e) {
@@ -270,22 +242,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             prepStmt.setString(1, rulesetId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
-                    RulesetInfo rulesetInfo = new RulesetInfo();
-                    rulesetInfo.setId(rs.getString("RULESET_ID"));
-                    rulesetInfo.setName(rs.getString("NAME"));
-                    rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-                    rulesetInfo.setRuleCategory(RuleCategory.fromString(
-                            rs.getString("RULE_CATEGORY")));
-                    rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-                    rulesetInfo.setArtifactType(ExtendedArtifactType.fromString(
-                            rs.getString("ARTIFACT_TYPE")));
-                    rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
-                    rulesetInfo.setProvider(rs.getString("PROVIDER"));
-                    rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
-                    rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
-                    rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
-                    rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
-                    return rulesetInfo;
+                    return getRulesetInfoFromResultSet(rs);
                 } else {
                     throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
                             rulesetId);
@@ -295,6 +252,70 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
                     e);
         }
+    }
+
+    /**
+     * Search for Governance Rulesets based on the search criteria
+     *
+     * @param searchCriteria Search attributes
+     * @param organization   Organization
+     * @return List of RulesetInfo objects
+     * @throws GovernanceException If an error occurs while searching for rulesets
+     */
+    @Override
+    public RulesetList searchRulesets(Map<String, String> searchCriteria, String organization)
+            throws GovernanceException {
+        RulesetList rulesetList = new RulesetList();
+        List<RulesetInfo> rulesetInfoList = new ArrayList<>();
+
+        String sqlQuery = SQLConstants.SEARCH_RULESETS;
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, organization);
+            prepStmt.setString(2, "%" + searchCriteria
+                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.NAME, "") + "%");
+            prepStmt.setString(3, "%" + searchCriteria
+                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.RULE_TYPE, "") + "%");
+            prepStmt.setString(4, "%" + searchCriteria
+                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, "") + "%");
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    rulesetInfoList.add(getRulesetInfoFromResultSet(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SEARCHING_RULESETS,
+                    e, organization);
+        }
+        rulesetList.setCount(rulesetInfoList.size());
+        rulesetList.setRulesetList(rulesetInfoList);
+        return rulesetList;
+    }
+
+    /**
+     * Retrieves rulesetInfo object from the result set
+     *
+     * @param rs ResultSet
+     * @return RulesetInfo object
+     * @throws SQLException If an error occurs while retrieving the ruleset
+     */
+    private RulesetInfo getRulesetInfoFromResultSet(ResultSet rs) throws SQLException {
+        RulesetInfo rulesetInfo = new RulesetInfo();
+        rulesetInfo.setId(rs.getString("RULESET_ID"));
+        rulesetInfo.setName(rs.getString("NAME"));
+        rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
+        rulesetInfo.setRuleCategory(RuleCategory.fromString(
+                rs.getString("RULE_CATEGORY")));
+        rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
+        rulesetInfo.setArtifactType(ExtendedArtifactType.fromString(
+                rs.getString("ARTIFACT_TYPE")));
+        rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
+        rulesetInfo.setProvider(rs.getString("PROVIDER"));
+        rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
+        rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
+        rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
+        rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
+        return rulesetInfo;
     }
 
     /**
@@ -478,7 +499,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                                 rulesetId);
                     }
                 }
-                
+
                 connection.commit();
             } catch (SQLException | GovernanceException e) {
                 connection.rollback();

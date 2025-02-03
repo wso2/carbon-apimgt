@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -273,5 +274,52 @@ public class PolicyManagerImpl implements PolicyManager {
             }
         }
         return isBlockingActionPresent;
+    }
+
+    /**
+     * This method searches for governance policies
+     *
+     * @param query        query
+     * @param organization organization
+     * @return GovernancePolicyList
+     * @throws GovernanceException If an error occurs while searching for policies
+     */
+    @Override
+    public GovernancePolicyList searchGovernancePolicies(String query, String organization) throws GovernanceException {
+        Map<String, String> searchCriteria = getPolicySearchCriteria(query);
+        return policyMgtDAO.searchPolicies(searchCriteria, organization);
+    }
+
+
+    /**
+     * Get the search criteria for the polict search from a query such as
+     * `query={name} state={state} label:{label}`
+     *
+     * @param query Search query
+     * @return Map of search criteria
+     */
+    private Map<String, String> getPolicySearchCriteria(String query) {
+        Map<String, String> criteriaMap = new HashMap<>();
+        String[] criteria = query.split(" ");
+
+        for (String criterion : criteria) {
+            String[] parts = criterion.split(":");
+
+            if (parts.length == 2) {
+                String searchPrefix = parts[0];
+                String searchValue = parts[1];
+
+                // Add valid prefixes to criteriaMap
+                if (searchPrefix.equalsIgnoreCase(GovernanceConstants.PolicySearchAttributes.LABEL)) {
+                    criteriaMap.put(GovernanceConstants.PolicySearchAttributes.LABEL, searchValue);
+                } else if (searchPrefix.equalsIgnoreCase(GovernanceConstants.PolicySearchAttributes.STATE)) {
+                    criteriaMap.put(GovernanceConstants.PolicySearchAttributes.STATE, searchValue);
+                } else if (searchPrefix.equalsIgnoreCase(GovernanceConstants.PolicySearchAttributes.NAME)) {
+                    criteriaMap.put(GovernanceConstants.PolicySearchAttributes.NAME, searchValue);
+                }
+            }
+        }
+
+        return criteriaMap;
     }
 }

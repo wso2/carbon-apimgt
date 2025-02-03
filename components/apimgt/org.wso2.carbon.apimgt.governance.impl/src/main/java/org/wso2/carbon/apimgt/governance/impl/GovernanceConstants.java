@@ -37,4 +37,23 @@ public class GovernanceConstants {
             + "resources" + File.separator + "governance" + File.separator + "default-rulesets";
     public static final String GLOBAL_LABEL = "GLOBAL";
 
+
+    /**
+     * Represents search attributes for rulesets.
+     */
+    public static class RulesetSearchAttributes {
+        public static final String NAME = "name";
+        public static final String RULE_TYPE = "ruleType";
+        public static final String ARTIFACT_TYPE = "artifactType";
+    }
+
+    /**
+     * Represents search attributes for policies.
+     */
+    public static class PolicySearchAttributes {
+        public static final String NAME = "name";
+        public static final String STATE = "state";
+        public static final String LABEL = "label";
+    }
+
 }

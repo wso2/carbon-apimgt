@@ -186,21 +186,30 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     /**
      * Get all the Governance Rulesets
      *
+     * @param limit          Limit
+     * @param offset         Offset
+     * @param query          Query for filtering
      * @param messageContext MessageContext
      * @return Response object
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    public Response getRulesets(Integer limit, Integer offset, MessageContext messageContext)
+    public Response getRulesets(Integer limit, Integer offset, String query, MessageContext messageContext)
             throws GovernanceException {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        query = query != null ? query : "";
 
         RulesetManager rulesetManager = new RulesetManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        RulesetList rulesetList = rulesetManager.getRulesets(organization);
-        RulesetListDTO paginatedRuleList = getPaginatedRulesets(rulesetList, limit, offset);
+        RulesetList rulesetList;
+        if (!query.isEmpty()) {
+            rulesetList = rulesetManager.searchRulesets(query, organization);
+        } else {
+            rulesetList = rulesetManager.getRulesets(organization);
+        }
+        RulesetListDTO paginatedRuleList = getPaginatedRulesets(rulesetList, limit, offset, query);
 
         return Response.status(Response.Status.OK).entity(paginatedRuleList).build();
     }
@@ -211,9 +220,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param rulesetList RulesetList object
      * @param limit       Limit
      * @param offset      Offset
+     * @param query       Query for filtering
      * @return RulesetListDTO object
      */
-    private RulesetListDTO getPaginatedRulesets(RulesetList rulesetList, int limit, int offset) {
+    private RulesetListDTO getPaginatedRulesets(RulesetList rulesetList, int limit, int offset, String query) {
         int rulesetCount = rulesetList.getCount();
         List<RulesetInfoDTO> paginatedRulesets = new ArrayList<>();
         RulesetListDTO paginatedRulesetListDTO = new RulesetListDTO();
@@ -246,14 +256,14 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.RULESETS_GET_URL,
+            paginatedPrevious = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.RULESETS_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.RULESETS_GET_URL,
+            paginatedNext = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.RULESETS_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
         paginationDTO.setPrevious(paginatedPrevious);

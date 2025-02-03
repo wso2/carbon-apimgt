@@ -878,7 +878,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                         throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyId);
                     }
                 }
-                
+
                 connection.commit();
             } catch (SQLException | GovernanceException e) {
                 connection.rollback();
@@ -1020,6 +1020,54 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_POLICY_LABELS_MAPPINGS,
                     e, policyId);
+        }
+    }
+
+    /**
+     * Search for Governance Policies
+     *
+     * @param searchCriteria Search criteria
+     * @param organization   Organization
+     * @return GovernancePolicyList object
+     * @throws GovernanceException If an error occurs while searching for policies
+     */
+    @Override
+    public GovernancePolicyList searchPolicies(Map<String, String> searchCriteria,
+                                               String organization) throws GovernanceException {
+        GovernancePolicyList policyListObj = new GovernancePolicyList();
+        List<GovernancePolicy> policyList = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.SEARCH_POLICIES)) {
+            prepStmt.setString(1, organization);
+            prepStmt.setString(2, "%" + searchCriteria.getOrDefault(
+                    GovernanceConstants.PolicySearchAttributes.NAME, "") + "%");
+            prepStmt.setString(3, "%" + searchCriteria.getOrDefault(
+                    GovernanceConstants.PolicySearchAttributes.LABEL, "") + "%");
+            prepStmt.setString(4, "%" + searchCriteria.getOrDefault(
+                    GovernanceConstants.PolicySearchAttributes.STATE, "") + "%");
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    GovernancePolicy policy = new GovernancePolicy();
+                    policy.setId(resultSet.getString("POLICY_ID"));
+                    policy.setName(resultSet.getString("NAME"));
+                    policy.setDescription(resultSet.getString("DESCRIPTION"));
+                    policy.setCreatedBy(resultSet.getString("CREATED_BY"));
+                    policy.setCreatedTime(resultSet.getString("CREATED_TIME"));
+                    policy.setUpdatedBy(resultSet.getString("UPDATED_BY"));
+                    policy.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
+                    policy.setRulesetIds(getRulesetsByPolicyId(policy.getId(), connection));
+                    policy.setLabels(getLabelsByPolicyId(policy.getId(), connection));
+                    policy.setActions(getActionsByPolicyId(policy.getId(), connection));
+                    policy.setGovernableStates(getStatesByPolicyId(policy.getId(), connection));
+                    policyList.add(policy);
+                }
+            }
+            policyListObj.setCount(policyList.size());
+            policyListObj.setGovernancePolicyList(policyList);
+            return policyListObj;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SEARCHING_POLICIES,
+                    e, organization);
         }
     }
 }

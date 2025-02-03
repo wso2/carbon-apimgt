@@ -112,20 +112,28 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      *
      * @param limit          Limit for Pagination
      * @param offset         Offset for Pagination
+     * @param query          Query for filtering
      * @param messageContext Message Context
      * @return Response
      * @throws GovernanceException If an error occurs while retrieving the policies
      */
-    public Response getGovernancePolicies(Integer limit, Integer offset, MessageContext messageContext)
+    public Response getGovernancePolicies(Integer limit, Integer offset, String query, MessageContext messageContext)
             throws GovernanceException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        query = query != null ? query : "";
 
         PolicyManager policyManager = new PolicyManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        GovernancePolicyList policyList = policyManager.getGovernancePolicies(organization);
 
-        GovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset);
+        GovernancePolicyList policyList;
+        if (!query.isEmpty()) {
+            policyList = policyManager.searchGovernancePolicies(query, organization);
+        } else {
+            policyList = policyManager.getGovernancePolicies(organization);
+        }
+
+        GovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset, query);
 
         return Response.status(Response.Status.OK).entity(policyListDTO).build();
     }
@@ -136,9 +144,11 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param policyList List of Governance Policies
      * @param limit      Limit for Pagination
      * @param offset     Offset for Pagination
+     * @param query      Query for filtering
      * @return Paginated Governance Policy List
      */
-    private GovernancePolicyListDTO getPaginatedPolicyList(GovernancePolicyList policyList, int limit, int offset) {
+    private GovernancePolicyListDTO getPaginatedPolicyList(GovernancePolicyList policyList, int limit, int offset,
+                                                           String query) {
         int policyCount = policyList.getCount();
         List<GovernancePolicyDTO> policies = new ArrayList<>();
         GovernancePolicyListDTO paginatedPolicyListDTO = new GovernancePolicyListDTO();
@@ -171,14 +181,14 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICIES_GET_URL,
+            paginatedPrevious = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.POLICIES_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICIES_GET_URL,
+            paginatedNext = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.POLICIES_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
         paginationDTO.setPrevious(paginatedPrevious);

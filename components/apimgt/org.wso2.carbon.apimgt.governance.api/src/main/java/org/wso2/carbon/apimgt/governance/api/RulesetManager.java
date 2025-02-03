@@ -104,4 +104,14 @@ public interface RulesetManager {
      * @throws GovernanceException If an error occurs while getting the ruleset usage
      */
     List<Rule> getRules(String rulesetId) throws GovernanceException;
+
+    /**
+     * Search for Governance Rulesets
+     *
+     * @param query        Search query
+     * @param organization Organization
+     * @return List of RulesetInfo objects
+     * @throws GovernanceException If an error occurs while searching for rulesets
+     */
+    RulesetList searchRulesets(String query, String organization) throws GovernanceException;
 }

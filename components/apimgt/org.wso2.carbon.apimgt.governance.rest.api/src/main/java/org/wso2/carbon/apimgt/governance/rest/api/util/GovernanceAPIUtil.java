@@ -90,6 +90,24 @@ public class GovernanceAPIUtil {
     }
 
     /**
+     * Method to get the paginated URL
+     *
+     * @param templatedURL templated paginated URL
+     * @param offset       offset
+     * @param limit        limit
+     * @param query        query
+     * @return paginated URL with offset and limit
+     */
+    public static String getPaginatedURLWithQuery(String templatedURL, Integer offset,
+                                                  Integer limit, String query) {
+
+        templatedURL = templatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
+        templatedURL = templatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
+        templatedURL = templatedURL.replace(GovernanceAPIConstants.QUERY_PARAM, query);
+        return templatedURL;
+    }
+
+    /**
      * Method to get the paginated URL for artifact compliance
      *
      * @param templatedURL templated paginated URL

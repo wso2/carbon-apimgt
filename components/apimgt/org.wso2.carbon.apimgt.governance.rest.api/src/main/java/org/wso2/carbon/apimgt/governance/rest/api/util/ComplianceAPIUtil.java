@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceWithRulesetsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultViolatedPathDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultWithoutRulesDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
@@ -506,7 +507,9 @@ public class ComplianceAPIUtil {
             ruleValidationResultDTO.setStatus(RuleValidationResultDTO.StatusEnum.FAILED);
             ruleValidationResultDTO.setSeverity(RuleValidationResultDTO.SeverityEnum.valueOf(
                     String.valueOf(rule.getSeverity())));
-            ruleValidationResultDTO.setViolatedPath(ruleViolation.getViolatedPath());
+            RuleValidationResultViolatedPathDTO violatedPathDTO = new RuleValidationResultViolatedPathDTO();
+            violatedPathDTO.setPath(ruleViolation.getViolatedPath());
+            ruleValidationResultDTO.setViolatedPath(violatedPathDTO);
         } else {
             ruleValidationResultDTO.setStatus(RuleValidationResultDTO.StatusEnum.PASSED);
         }

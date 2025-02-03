@@ -148,8 +148,8 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesets( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
-        return delegate.getRulesets(limit, offset, securityContext);
+    public Response getRulesets( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "You can search for rulesets using the following format:    - \"query=name:{NAME}\" searches rulesets by name.   - \"query=artifactType:{ARTIFACT_TYPE}\" searches rulesets by artifact type.   - \"query=ruleType:{RULE_TYPE}\" searches rulesets by rule type.  You can combine multiple attributes to search for rulesets:   - \"query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{RULE_TYPE}\" searches rulesets by name, artifact type, and rule type.  Remember to use URL encoding if your client does not support it (e.g., curl). ")  @QueryParam("query") String query) throws GovernanceException{
+        return delegate.getRulesets(limit, offset, query, securityContext);
     }
 
     @PUT
