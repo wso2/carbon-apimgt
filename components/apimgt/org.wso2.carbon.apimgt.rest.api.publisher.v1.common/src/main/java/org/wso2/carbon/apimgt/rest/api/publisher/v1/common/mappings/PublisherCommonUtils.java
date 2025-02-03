@@ -153,7 +153,7 @@ public class PublisherCommonUtils {
 
         return updateApiAndDefinition(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes, response, true);
     }
-    
+
     /**
      * Update API and API definition. Soap to rest sequence is updated on demand.
      *
@@ -1833,10 +1833,10 @@ public class PublisherCommonUtils {
 
         return updateSwagger(apiId, response, isServiceAPI, organization, true);
     }
-    
+
     /**
      * update swagger definition of the given api. For Soap To Rest APIs, sequences are generated on demand.
-     * 
+     *
      * @param apiId    API Id
      * @param response response of a swagger definition validation call
      * @param organization  Organization Identifier
@@ -2753,18 +2753,43 @@ public class PublisherCommonUtils {
                 Type type = new TypeToken<Map<String, Object>>() {
                 }.getType();
                 Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
+                String endpointSecurity = gson.toJson(endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY));
 
                 // Add primary production endpoint from endpoint config
-                if (endpointConfigMap.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+                if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                    Map<String, Object> productionEndpointConfig = new HashMap<>();
+                    productionEndpointConfig.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                            endpointConfigMap.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS));
+                    if (endpointSecurity != null) {
+                        JsonObject endpointSecurityObj = (JsonObject) JsonParser.parseString(endpointSecurity);
+                        // Remove sandbox security (if defined)
+                        if (endpointSecurityObj.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                            endpointSecurityObj.remove(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                        }
+                        productionEndpointConfig.put(APIConstants.ENDPOINT_SECURITY,
+                                gson.fromJson(endpointSecurityObj, Object.class));
+                    }
                     APIEndpointInfo primaryProductionEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
-                            endpointConfigMap, APIConstants.APIEndpoint.PRODUCTION, organization);
+                            productionEndpointConfig, APIConstants.APIEndpoint.PRODUCTION, organization);
                     defaultAPIEndpoints.put(APIConstants.APIEndpoint.PRODUCTION, primaryProductionEndpoint);
                 }
 
                 // Add primary sandbox endpoint from endpoint config
-                if (endpointConfigMap.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+                if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                    Map<String, Object> sandboxEndpointConfig = new HashMap<>();
+                    sandboxEndpointConfig.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                            endpointConfigMap.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS));
+                    if (endpointSecurity != null) {
+                        JsonObject endpointSecurityObj = (JsonObject) JsonParser.parseString(endpointSecurity);
+                        // Remove production security (if defined)
+                        if (endpointSecurityObj.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                            endpointSecurityObj.remove(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                        }
+                        sandboxEndpointConfig.put(APIConstants.ENDPOINT_SECURITY,
+                                gson.fromJson(endpointSecurityObj, Object.class));
+                    }
                     APIEndpointInfo primarySandboxEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
-                            endpointConfigMap, APIConstants.APIEndpoint.SANDBOX, organization);
+                            sandboxEndpointConfig, APIConstants.APIEndpoint.SANDBOX, organization);
                     defaultAPIEndpoints.put(APIConstants.APIEndpoint.SANDBOX, primarySandboxEndpoint);
                 }
             }
