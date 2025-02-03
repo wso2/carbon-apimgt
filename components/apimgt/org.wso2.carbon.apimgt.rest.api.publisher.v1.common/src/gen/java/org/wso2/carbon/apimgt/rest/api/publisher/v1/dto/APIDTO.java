@@ -1360,7 +1360,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "wso2", value = "")
+  @ApiModelProperty(example = "wso2 external", value = "")
   @JsonProperty("gatewayVendor")
   public String getGatewayVendor() {
     return gatewayVendor;
@@ -1378,7 +1378,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "wso2/synapse", value = "The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/apk.")
+  @ApiModelProperty(example = "wso2/synapse wso2/apk AWS", value = "The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/apk.")
   @JsonProperty("gatewayType")
   public String getGatewayType() {
     return gatewayType;
