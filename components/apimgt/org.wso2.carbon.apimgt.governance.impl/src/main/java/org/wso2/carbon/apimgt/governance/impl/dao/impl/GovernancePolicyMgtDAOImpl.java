@@ -217,8 +217,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 updatePolicyRulesetMappings(policyId, governancePolicy, connection);
                 updatePolicyLabels(policyId, governancePolicy, connection);
                 updateStatesAndPolicyActions(policyId, governancePolicy, connection);
-                deleteRuleViolationsForPolicy(policyId, connection);
-                deleteRulesetResultsForPolicy(policyId, connection);
                 deletePolicyResultsForPolicy(policyId, connection);
 
                 // return updated GovernancePolicy object
@@ -819,8 +817,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             connection.setAutoCommit(false);
             try {
 
-                deleteRuleViolationsForPolicy(policyId, connection);
-                deleteRulesetResultsForPolicy(policyId, connection);
                 deletePolicyResultsForPolicy(policyId, connection);
                 deleteEvalRequestsForPolicy(policyId, connection);
                 deletePolicyRulesetMappingsForPolicy(policyId, connection);
@@ -845,36 +841,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_POLICY,
                     e, policyId);
-        }
-    }
-
-    /**
-     * Delete all rule violations for a Policy
-     *
-     * @param policyId   Policy ID
-     * @param connection DB Connection
-     * @throws SQLException If an error occurs while deleting the violations
-     */
-    private void deleteRuleViolationsForPolicy(String policyId, Connection connection) throws SQLException {
-        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                .DELETE_RULE_VIOLATIONS_FOR_POLICY)) {
-            prepStmt.setString(1, policyId);
-            prepStmt.executeUpdate();
-        }
-    }
-
-    /**
-     * Delete Ruleset Evaluation Results for a Policy
-     *
-     * @param policyId   Policy ID
-     * @param connection DB Connection
-     * @throws SQLException If an error occurs while deleting the results
-     */
-    private void deleteRulesetResultsForPolicy(String policyId, Connection connection) throws SQLException {
-        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                .DELETE_RULESET_RESULT_FOR_POLICY)) {
-            prepStmt.setString(1, policyId);
-            prepStmt.executeUpdate();
         }
     }
 

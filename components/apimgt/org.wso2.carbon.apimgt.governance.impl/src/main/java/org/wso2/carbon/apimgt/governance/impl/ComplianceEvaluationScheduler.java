@@ -260,7 +260,7 @@ public class ComplianceEvaluationScheduler {
         // Validate the artifact against each ruleset
         List<Ruleset> rulesets = GovernancePolicyMgtDAOImpl.getInstance().getRulesetsByPolicyId(policyId);
 
-        Map<String, List<RuleViolation>> ruleViolationsMap = new HashMap<>();
+        Map<String, List<RuleViolation>> rulesetViolationsMap = new HashMap<>();
         boolean isEvaluationSuccess = true;
 
         for (Ruleset ruleset : rulesets) {
@@ -294,28 +294,28 @@ public class ComplianceEvaluationScheduler {
                             "governance evaluation for ruleset ID: " + ruleset.getId());
                 }
             }
-            ruleViolationsMap.put(ruleset.getId(), ruleViolations);
+            rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
         }
-        savePolicyEvaluationResults(artifactId, artifactType, policyId, ruleViolationsMap,
+        savePolicyEvaluationResults(artifactId, artifactType, policyId, rulesetViolationsMap,
                 organization, isEvaluationSuccess);
     }
 
     /**
      * Save compliance evaluation results of the policy.
      *
-     * @param artifactId          ID of the artifact.
-     * @param artifactType        Type of the artifact.
-     * @param policyId            ID of the policy.
-     * @param ruleViolationsMap   Map of rule violations.
-     * @param organization        Organization of the artifact.
-     * @param isPolicyEvalSuccess Whether the evaluation was successful for the policy.
+     * @param artifactId           ID of the artifact.
+     * @param artifactType         Type of the artifact.
+     * @param policyId             ID of the policy.
+     * @param rulesetViolationsMap Map of rule violations for each ruleset.
+     * @param organization         Organization of the artifact.
+     * @param isPolicyEvalSuccess  Whether the evaluation was successful for the policy.
      */
     private static void savePolicyEvaluationResults(String artifactId, ArtifactType artifactType, String policyId,
-                                                    Map<String, List<RuleViolation>> ruleViolationsMap,
+                                                    Map<String, List<RuleViolation>> rulesetViolationsMap,
                                                     String organization, boolean isPolicyEvalSuccess) {
         try {
             complianceMgtDAO.addComplianceEvalResults(artifactId, artifactType, policyId,
-                    ruleViolationsMap, organization, isPolicyEvalSuccess);
+                    rulesetViolationsMap, organization, isPolicyEvalSuccess);
         } catch (GovernanceException e) {
             log.error("Error saving governance results for artifact ID: " + artifactId, e);
         }

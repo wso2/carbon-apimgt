@@ -93,16 +93,16 @@ public interface ComplianceMgtDAO {
     /**
      * Add compliance evaluation results for an artifact and policy
      *
-     * @param artifactId          Artifact ID
-     * @param artifactType        Artifact Type
-     * @param policyId            Policy ID
-     * @param ruleViolationsMap   Map of Rule Violations
-     * @param organization        Organization
-     * @param isPolicyEvalSuccess Whether the policy evaluation was successful
+     * @param artifactId           Artifact ID
+     * @param artifactType         Artifact Type
+     * @param policyId             Policy ID
+     * @param rulesetViolationsMap Map of Rulesets to Rule Violations
+     * @param organization         Organization
+     * @param isPolicyEvalSuccess  Whether the policy evaluation was successful
      * @throws GovernanceException If an error occurs while adding the compliance evaluation results
      */
     void addComplianceEvalResults(String artifactId, ArtifactType artifactType, String policyId,
-                                  Map<String, List<RuleViolation>> ruleViolationsMap,
+                                  Map<String, List<RuleViolation>> rulesetViolationsMap,
                                   String organization, boolean isPolicyEvalSuccess)
             throws GovernanceException;
 

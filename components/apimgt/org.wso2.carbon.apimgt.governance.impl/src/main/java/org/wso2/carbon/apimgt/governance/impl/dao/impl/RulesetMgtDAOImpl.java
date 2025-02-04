@@ -242,8 +242,8 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             try {
                 connection.setAutoCommit(false);
 
-                // Delete rules associated with the ruleset, here we don't need to delete results as prior to
-                // deleting ruleset, we force the update of policies which will delete the results
+                deleteRuleViolationsForRuleset(rulesetId, connection);
+                deleteRulesetResultsForRuleset(rulesetId, connection);
                 deleteRules(rulesetId, connection);
 
                 try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULESET)) {
