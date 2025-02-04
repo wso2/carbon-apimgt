@@ -62,9 +62,6 @@ public class SQLConstants {
                     "LAST_UPDATED_TIME = CURRENT_TIMESTAMP " +
                     "WHERE RULESET_ID = ?";
 
-    public static final String DELETE_RULESET =
-            "DELETE FROM GOV_RULESET WHERE RULESET_ID = ?";
-
     public static final String SEARCH_RULESETS = "SELECT RULESET_ID, NAME, " +
             "DESCRIPTION, RULESET_CONTENT, RULE_CATEGORY, " +
             "RULE_TYPE, ARTIFACT_TYPE, DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, " +
@@ -72,6 +69,9 @@ public class SQLConstants {
             "UPDATED_BY, LAST_UPDATED_TIME FROM GOV_RULESET WHERE ORGANIZATION = ? " +
             "AND NAME LIKE ? AND RULE_TYPE LIKE ? " +
             "AND ARTIFACT_TYPE LIKE ?";
+
+    public static final String DELETE_RULESET =
+            "DELETE FROM GOV_RULESET WHERE RULESET_ID = ?";
 
     public static final String DELETE_RULES =
             "DELETE FROM GOV_RULESET_RULE WHERE RULESET_ID = ?";
@@ -96,6 +96,9 @@ public class SQLConstants {
 
     public static final String CREATE_GOVERNANCE_POLICY_ACTION_MAPPING =
             "INSERT INTO GOV_POLICY_ACTION (POLICY_ID, STATE, SEVERITY, TYPE) VALUES (?, ?, ?, ?)";
+
+    public static final String DELETE_GOVERNANCE_POLICY =
+            "DELETE FROM GOV_POLICY WHERE POLICY_ID = ?";
 
     public static final String DELETE_GOVERNANCE_POLICY_LABEL_MAPPING_BY_POLICY_ID =
             "DELETE FROM GOV_POLICY_LABEL WHERE POLICY_ID = ?";
@@ -130,9 +133,6 @@ public class SQLConstants {
                     "WHERE GP.ORGANIZATION = ? " +
                     "AND GP.NAME LIKE ? " +
                     "AND GPS.STATE LIKE ?";
-
-    public static final String DELETE_GOVERNANCE_POLICY =
-            "DELETE FROM GOV_POLICY WHERE POLICY_ID = ?";
 
     public static final String UPDATE_POLICY =
             "UPDATE GOV_POLICY SET NAME = ?, DESCRIPTION = ?, UPDATED_BY = ?, IS_GLOBAL = ?, " +
@@ -194,40 +194,106 @@ public class SQLConstants {
                     "AND GOV_POLICY.ORGANIZATION = ? " +
                     "AND GOV_POLICY.IS_GLOBAL = 1";
 
-    public static final String ADD_GOV_EVALUATION_REQUEST = "INSERT INTO GOV_EVALUATION_REQUEST " +
-            "(REQUEST_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, ORGANIZATION) " +
-            "VALUES (?, ?, ?, ?, ?)";
+    public static final String ADD_GOV_ARTIFACT = "INSERT INTO GOV_ARTIFACT " +
+            "(ARTIFACT_KEY, ARTIFACT_ID, ARTIFACT_TYPE, ORGANIZATION) VALUES (?, ?, ?, ?)";
 
-    public static final String GET_PENDING_EVALUATION_REQUESTS =
-            "SELECT " +
-                    "REQUEST_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, ORGANIZATION " +
-                    "FROM GOV_EVALUATION_REQUEST " +
-                    "WHERE EVALUATION_STATUS = 'PENDING'";
+    public static final String GET_ARTIFACT_KEY = "SELECT ARTIFACT_KEY " +
+            "FROM GOV_ARTIFACT WHERE ARTIFACT_ID = ? AND ARTIFACT_TYPE = ? AND ORGANIZATION = ?";
 
-    public static final String GET_PROCESSING_EVALUATION_REQUEST_BY_ARTIFACT_AND_POLICY = "SELECT REQUEST_ID, " +
-            "ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID FROM GOV_EVALUATION_REQUEST WHERE ARTIFACT_ID = ? " +
-            "AND ARTIFACT_TYPE = ? AND POLICY_ID = ? AND ORGANIZATION = ?" +
-            "AND EVALUATION_STATUS = 'PROCESSING'";
+    public static final String GET_PENDING_REQ_FOR_ARTIFACT = "SELECT REQ_ID FROM GOV_REQUEST GR " +
+            "JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GR.STATUS = 'PENDING'";
+    public static final String ADD_GOV_EVAL_REQ = "INSERT INTO GOV_REQUEST " +
+            "(REQ_ID, ARTIFACT_KEY) VALUES (?, ?)";
 
-    public static final String UPDATE_GOV_EVALUATION_REQUEST_STATUS = "UPDATE GOV_EVALUATION_REQUEST " +
-            "SET EVALUATION_STATUS = ? WHERE REQUEST_ID = ?";
+    public static final String ADD_REQ_POLICY_MAPPING = "INSERT INTO GOV_REQUEST_POLICY " +
+            "(REQ_ID, POLICY_ID) VALUES (?, ?)";
 
-    public static final String UPDATE_GOV_REQUEST_STATUS_FROM_PROCESSING_TO_PENDING = "UPDATE GOV_EVALUATION_REQUEST " +
-            "SET EVALUATION_STATUS = 'PENDING' WHERE EVALUATION_STATUS = 'PROCESSING'";
+    public static final String GET_PENDING_REQ =
+            "SELECT REQ_ID, ARTIFACT_ID, ARTIFACT_TYPE, ORGANIZATION FROM GOV_REQUEST GR " +
+                    "JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+                    "WHERE GR.STATUS = 'PENDING'";
 
-    public static final String DELETE_GOV_EVALUATION_REQUEST = "DELETE FROM GOV_EVALUATION_REQUEST" +
-            " WHERE REQUEST_ID = ?";
+    public static final String GET_REQ_POLICY_MAPPING = "SELECT POLICY_ID FROM GOV_REQUEST_POLICY " +
+            "WHERE REQ_ID = ?";
 
-    public static final String DELETE_GOV_EVALUATION_REQUEST_FOR_ARTIFACT = "DELETE FROM " +
-            "GOV_EVALUATION_REQUEST WHERE " +
-            "ARTIFACT_ID = ? AND ARTIFACT_TYPE = ? AND ORGANIZATION = ?";
+    public static final String UPDATE_GOV_REQ_STATUS_TO_PROCESSING = "UPDATE GOV_REQUEST " +
+            "SET STATUS = 'PROCESSING', PROCESSING_TIMESTAMP = CURRENT_TIMESTAMP WHERE REQ_ID = ?" +
+            "AND STATUS = 'PENDING'";
 
-    public static final String DELETE_GOV_EVALUATION_REQUEST_FOR_POLICY = "DELETE FROM " +
-            "GOV_EVALUATION_REQUEST WHERE POLICY_ID = ?";
+    public static final String UPDATE_GOV_REQ_STATUS_FROM_PROCESSING_TO_PENDING = "UPDATE GOV_REQUEST " +
+            "SET STATUS = 'PENDING', PROCESSING_TIMESTAMP = NULL WHERE STATUS = 'PROCESSING'";
 
-    public static final String ADD_GOV_COMPLIANCE_EVALUATION_RESULT = "INSERT INTO GOV_EVALUATION_RESULT " +
-            "(RESULT_ID, ARTIFACT_ID, ARTIFACT_TYPE, POLICY_ID, RULESET_ID, EVALUATION_RESULT, ORGANIZATION) " +
-            "VALUES (?, ?, ?, ?, ?,?,?)";
+    public static final String DELETE_GOV_REQ = "DELETE FROM GOV_REQUEST" +
+            " WHERE REQ_ID = ?";
+
+    public static final String DELETE_REQ_POLICY_MAPPING = "DELETE FROM GOV_REQUEST_POLICY " +
+            "WHERE REQ_ID = ?";
+
+    public static final String DELETE_GOV_REQ_FOR_ARTIFACT = "DELETE FROM " +
+            "GOV_REQUEST GR JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ?";
+
+    public static final String DELETE_REQ_POLICY_MAPPING_FOR_ARTIFACT = "DELETE FROM " +
+            "GOV_REQUEST_POLICY GRP JOIN GOV_REQUEST GR ON GRP.REQ_ID = GR.REQ_ID " +
+            "JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ?";
+
+    public static final String DELETE_REQ_POLICY_MAPPING_FOR_POLICY = "DELETE FROM " +
+            "GOV_REQUEST_POLICY WHERE POLICY_ID = ?";
+
+    public static final String ADD_POLICY_RESULT = "INSERT INTO GOV_POLICY_RESULT (POLICY_RESULT_ID, " +
+            "ARTIFACT_KEY, POLICY_ID, RESULT) VALUES (?, ?, ?, ?)";
+
+    public static final String ADD_RULESET_RESULT = "INSERT INTO GOV_RULESET_RESULT (RULESET_RESULT_ID, " +
+            "POLICY_RESULT_ID, RULESET_ID, RESULT) VALUES (?, ?, ?, ?)";
+
+    public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION (RULESET_RESULT_ID, " +
+            "RULESET_ID, RULE_NAME, VIOLATED_PATH) VALUES (?, ?, ?, ?)";
+
+    public static final String DELETE_POLICY_RESULT_FOR_ARTIFACT_AND_POLICY = "DELETE GPR " +
+            "FROM GOV_POLICY_RESULT GPR " +
+            "JOIN GOV_ARTIFACT GA ON GPR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GPR.POLICY_ID = ?";
+
+    public static final String DELETE_POLICY_RESULT_FOR_POLICY = "DELETE FROM GOV_POLICY_RESULT " +
+            "WHERE POLICY_ID = ?";
+
+    public static final String DELETE_RULESET_RESULT_FOR_ARTIFACT_AND_POLICY = "DELETE GRR " +
+            "FROM GOV_RULESET_RESULT GRR " +
+            "JOIN GOV_POLICY_RESULT GPR ON GRR.POLICY_RESULT_ID = GPR.POLICY_RESULT_ID " +
+            "JOIN GOV_ARTIFACT GA ON GPR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GPR.POLICY_ID = ? ";
+
+    public static final String DELETE_RULESET_RESULT_FOR_POLICY = "DELETE GRR " +
+            "FROM GOV_RULESET_RESULT GRR " +
+            "JOIN GOV_POLICY_RESULT GPR ON GRR.POLICY_RESULT_ID = GPR.POLICY_RESULT_ID " +
+            "WHERE GPR.POLICY_ID = ?";
+
+    public static final String DELETE_RULESET_RESULT_FOR_RULESET = "DELETE FROM GOV_RULESET_RESULT " +
+            "WHERE RULESET_ID = ?";
+
+    public static final String DELETE_RULE_VIOLATIONS_FOR_ARTIFACT_AND_POLICY = "DELETE GV " +
+            "FROM GOV_RULE_VIOLATION GV " +
+            "JOIN GOV_RULESET_RESULT GRR ON GV.RULESET_RESULT_ID = GRR.RULESET_RESULT_ID " +
+            "JOIN GOV_POLICY_RESULT GPR ON GRR.POLICY_RESULT_ID = GPR.POLICY_RESULT_ID " +
+            "JOIN GOV_ARTIFACT GA ON GPR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GPR.POLICY_ID = ?";
+
+    public static final String DELETE_RULE_VIOLATIONS_FOR_POLICY = "DELETE GV FROM GOV_RULE_VIOLATION GV " +
+            "JOIN GOV_RULESET_RESULT GRR ON GV.RULESET_RESULT_ID = GRR.RULESET_RESULT_ID " +
+            "JOIN GOV_POLICY_RESULT GPR ON GRR.POLICY_RESULT_ID = GPR.POLICY_RESULT_ID " +
+            "WHERE GPR.POLICY_ID = ?";
+
+    public static final String DELETE_RULE_VIOLATIONS_FOR_RULESET = "DELETE FROM GOV_RULE_VIOLATION " +
+            "WHERE RULESET_ID = ?";
+
+    public static final String DELETE_RULE_VIOLATIONS_FOR_ARTIFACT = "DELETE GV " +
+            "FROM GOV_RULE_VIOLATION GV " +
+            "JOIN GOV_RULESET_RESULT GRR ON GV.RULESET_RESULT_ID = GRR.RULESET_RESULT_ID " +
+            "JOIN GOV_POLICY_RESULT GPR ON GRR.POLICY_RESULT_ID = GPR.POLICY_RESULT_ID " +
+            "JOIN GOV_ARTIFACT GA ON GPR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ?";
 
     public static final String GET_GOV_COMPLIANCE_EVALUATION_RESULT = "SELECT * FROM GOV_EVALUATION_RESULT " +
             "WHERE ARTIFACT_ID = ? ARTIFACT_TYPE = ? AND POLICY_ID = ? AND RULESET_ID = ? AND ORGANIZATION = ?";
@@ -269,34 +335,6 @@ public class SQLConstants {
             "GOV_EVALUATION_RESULT.POLICY_ID = GOV_POLICY.POLICY_ID " +
             "WHERE GOV_POLICY.ORGANIZATION = ? AND GOV_EVALUATION_RESULT.EVALUATION_RESULT = 0";
 
-    public static final String DELETE_GOV_COMPLIANCE_EVALUATION_RESULT = "DELETE FROM GOV_EVALUATION_RESULT " +
-            "WHERE ARTIFACT_ID = ? AND ARTIFACT_TYPE = ? AND POLICY_ID = ? AND RULESET_ID = ? AND ORGANIZATION = ?";
-
-    public static final String DELETE_GOV_COMPLIANCE_EVALUATION_RESULT_BY_POLICY = "DELETE FROM " +
-            "GOV_EVALUATION_RESULT " +
-            "WHERE POLICY_ID = ?";
-
-    public static final String DELETE_GOV_COMPLIANCE_EVALUATION_RESULT_BY_RULESET = "DELETE FROM " +
-            "GOV_EVALUATION_RESULT " +
-            "WHERE RULESET_ID = ?";
-
-    public static final String DELETE_RULE_VIOLATIONS =
-            "DELETE FROM GOV_RULE_VIOLATION GV " +
-                    "WHERE EXISTS ( " +
-                    "    SELECT 1 FROM GOV_EVALUATION_RESULT GER " +
-                    "    WHERE GER.RESULT_ID = GV.RESULT_ID " +
-                    "    AND GER.ARTIFACT_ID = ? " +
-                    "    AND GER.ARTIFACT_TYPE = ? " +
-                    "    AND GER.POLICY_ID = ? " +
-                    "    AND GER.RULESET_ID = ? " +
-                    "    AND GER.ORGANIZATION = ? " +
-                    ")";
-
-
-    public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION " +
-            "(VIOLATION_ID, RESULT_ID, RULESET_ID, RULE_NAME, VIOLATED_PATH) " +
-            "VALUES (?, ?, ?, ?, ?)";
-
     public static final String GET_RULE_VIOLATIONS_WITH_POLICY =
             "SELECT GER.ARTIFACT_ID, GER.ARTIFACT_TYPE, GER.POLICY_ID, GER.RULESET_ID, " +
                     "GV.RULE_NAME, GV.VIOLATED_PATH, GRR.SEVERITY " +
@@ -327,25 +365,8 @@ public class SQLConstants {
     public static final String DELETE_EVALUATION_RESULT_FOR_ARTIFACT = "DELETE FROM GOV_EVALUATION_RESULT " +
             "WHERE ARTIFACT_ID = ? AND ARTIFACT_TYPE = ? AND ORGANIZATION = ?";
 
-    public static final String DELETE_RULE_VIOLATIONS_FOR_ARTIFACT =
-            "DELETE FROM GOV_RULE_VIOLATION GV " +
-                    "WHERE EXISTS ( " +
-                    "    SELECT 1 FROM GOV_EVALUATION_RESULT GER " +
-                    "    WHERE GER.RESULT_ID = GV.RESULT_ID " +
-                    "    AND GER.ARTIFACT_ID = ? " +
-                    "    AND GER.ARTIFACT_TYPE = ? " +
-                    "    AND GER.ORGANIZATION = ? " +
-                    ")";
 
-    public static final String DELETE_RULE_VIOLATIONS_BY_RULESET = "DELETE FROM GOV_RULE_VIOLATION " +
-            "WHERE RULESET_ID = ?";
 
-    public static final String DELETE_RULE_VIOLATIONS_BY_POLICY = "DELETE FROM GOV_RULE_VIOLATION " +
-            "WHERE EXISTS ( " +
-            "    SELECT 1 FROM GOV_EVALUATION_RESULT GER " +
-            "    WHERE GER.RESULT_ID = GOV_RULE_VIOLATION.RESULT_ID " +
-            "    AND GER.POLICY_ID = ? " +
-            ")";
 
 
 }

@@ -124,13 +124,12 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 connection.rollback();
                 throw e;
             }
-        } catch (SQLException | IOException e) {
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                if (getRulesetByName(ruleset.getName(), organization) != null) {
-                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
-                            organization);
-                }
+        } catch (SQLIntegrityConstraintViolationException e) {
+            if (getRulesetByName(ruleset.getName(), organization) != null) {
+                throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
+                        organization);
             }
+        } catch (SQLException | IOException e) {
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_CREATION_FAILED, e,
                     ruleset.getName(), organization
             );
@@ -174,9 +173,9 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                             rulesetId);
                 }
                 // Delete existing rules and rule evaluation results related to this ruleset
-                deleteRules(rulesetId, connection);
                 deleteRuleViolationsForRuleset(rulesetId, connection);
-                deleteEvaluationResultsForRuleset(rulesetId, connection);
+                deleteRulesetResultsForRuleset(rulesetId, connection);
+                deleteRules(rulesetId, connection);
 
                 // Insert updated rules to the database
                 ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
@@ -272,55 +271,44 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      *
      * @param rulesetId  Ruleset ID
      * @param connection Database connection
-     * @throws GovernanceException If an error occurs while deleting the rules
+     * @throws SQLException If an error occurs while deleting the rules
      */
-    private void deleteRules(String rulesetId, Connection connection) throws GovernanceException {
+    private void deleteRules(String rulesetId, Connection connection) throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULES)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULES, e, rulesetId);
         }
     }
 
     /**
-     * Check whether a ruleset is associated with policies
+     * Delete rule violations related to a ruleset
      *
      * @param rulesetId  Ruleset ID
      * @param connection Database connection
-     * @throws GovernanceException If an error occurs while checking the association
+     * @throws SQLException If an error occurs while checking the association
      */
     private void deleteRuleViolationsForRuleset(String rulesetId, Connection connection)
-            throws GovernanceException {
+            throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                .DELETE_RULE_VIOLATIONS_BY_RULESET)) {
+                .DELETE_RULE_VIOLATIONS_FOR_RULESET)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes
-                    .ERROR_WHILE_DELETING_RULE_VIOLATIONS_BY_RESULT_ID,
-                    e, rulesetId);
         }
     }
 
     /**
-     * Delete compliance evaluation results related to a ruleset
+     * Delete rulseset results related to a ruleset
      *
      * @param rulesetId  Ruleset ID
      * @param connection Database connection
-     * @throws GovernanceException If an error occurs while deleting the compliance
-     *                             evaluation results
+     * @throws SQLException If an error occurs while deleting
      */
-    private void deleteEvaluationResultsForRuleset(String rulesetId, Connection connection)
-            throws GovernanceException {
+    private void deleteRulesetResultsForRuleset(String rulesetId, Connection connection)
+            throws SQLException {
         try (PreparedStatement prepStmt = connection.
-                prepareStatement(SQLConstants.DELETE_GOV_COMPLIANCE_EVALUATION_RESULT_BY_RULESET)) {
+                prepareStatement(SQLConstants.DELETE_RULESET_RESULT_FOR_RULESET)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes
-                    .ERROR_WHILE_DELETING_EVALUATION_RESULTS_FOR_RULESET,
-                    e, rulesetId);
         }
     }
 

@@ -51,12 +51,12 @@ import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * This class represents the Compliance Manager, which is responsible for managing compliance related operations
@@ -86,7 +86,6 @@ public class ComplianceManagerImpl implements ComplianceManager {
     public void handlePolicyChangeEvent(String policyId, String organization) throws GovernanceException {
 
         // Get the policy and its labels and associated governable states
-
         GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
 
         List<String> labels = policy.getLabels();
@@ -95,11 +94,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
         // Get artifacts that should be governed by the policy
         List<ArtifactInfo> artifacts = new ArrayList<>();
 
-        boolean isGlobalPolicy = labels != null && !labels.isEmpty() && labels.stream()
-                .map(String::toUpperCase)
-                .collect(Collectors.toSet())
-                .contains(GovernanceConstants.GLOBAL_LABEL);
-        if (isGlobalPolicy) {
+        if (policy.isGlobal()) {
             // If the policy is a global policy, get all artifacts
             artifacts.addAll(getArtifactsByGovernableStates(governableStates, organization));
         } else if (labels != null && !labels.isEmpty()) {
@@ -109,8 +104,8 @@ public class ComplianceManagerImpl implements ComplianceManager {
         for (ArtifactInfo artifact : artifacts) {
             String artifactId = artifact.getArtifactId();
             ArtifactType artifactType = artifact.getArtifactType();
-            complianceMgtDAO.addComplianceEvaluationRequest(artifactId, artifactType,
-                    policyId, organization);
+            complianceMgtDAO.addComplianceEvalRequest(artifactId, artifactType,
+                    Collections.singletonList(policyId), organization);
         }
     }
 
@@ -219,14 +214,11 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
     @Override
-    public void handleComplianceEvaluationAsync(String artifactId, ArtifactType artifactType,
-                                                List<String> govPolicies,
-                                                String organization) throws GovernanceException {
+    public void handleComplianceEvalAsync(String artifactId, ArtifactType artifactType,
+                                          List<String> govPolicies,
+                                          String organization) throws GovernanceException {
 
-        for (String policyId : govPolicies) {
-            complianceMgtDAO.addComplianceEvaluationRequest(artifactId, artifactType,
-                    policyId, organization);
-        }
+        complianceMgtDAO.addComplianceEvalRequest(artifactId, artifactType, govPolicies, organization);
 
     }
 
@@ -513,11 +505,11 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
     @Override
-    public ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId,
-                                                                 String revisionNo, ArtifactType artifactType,
-                                                                 List<String> govPolicies,
-                                                                 Map<RuleType, String> artifactProjectContent,
-                                                                 GovernableState state, String organization)
+    public ArtifactComplianceInfo handleComplianceEvalSync(String artifactId,
+                                                           String revisionNo, ArtifactType artifactType,
+                                                           List<String> govPolicies,
+                                                           Map<RuleType, String> artifactProjectContent,
+                                                           GovernableState state, String organization)
             throws GovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
@@ -624,10 +616,10 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
     @Override
-    public ArtifactComplianceDryRunInfo handleComplianceEvaluationDryRun(ExtendedArtifactType artifactType,
-                                                                         List<String> govPolicies, Map<RuleType, String>
-                                                                                 artifactProjectContent,
-                                                                         String organization) throws
+    public ArtifactComplianceDryRunInfo handleComplianceEvalDryRun(ExtendedArtifactType artifactType,
+                                                                   List<String> govPolicies, Map<RuleType, String>
+                                                                           artifactProjectContent,
+                                                                   String organization) throws
             GovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()

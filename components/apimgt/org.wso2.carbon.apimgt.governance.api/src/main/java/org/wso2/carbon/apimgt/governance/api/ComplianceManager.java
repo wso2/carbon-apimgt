@@ -67,8 +67,8 @@ public interface ComplianceManager {
      * @param organization Organization
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    void handleComplianceEvaluationAsync(String artifactId, ArtifactType artifactType,
-                                         List<String> govPolicies, String organization)
+    void handleComplianceEvalAsync(String artifactId, ArtifactType artifactType,
+                                   List<String> govPolicies, String organization)
             throws GovernanceException;
 
 
@@ -85,13 +85,13 @@ public interface ComplianceManager {
      * @return ArtifactComplianceInfo object
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    ArtifactComplianceInfo handleComplianceEvaluationSync(String artifactId,
-                                                          String revisionNo,
-                                                          ArtifactType artifactType,
-                                                          List<String> govPolicies,
-                                                          Map<RuleType, String> artifactProjectContent,
-                                                          GovernableState state,
-                                                          String organization)
+    ArtifactComplianceInfo handleComplianceEvalSync(String artifactId,
+                                                    String revisionNo,
+                                                    ArtifactType artifactType,
+                                                    List<String> govPolicies,
+                                                    Map<RuleType, String> artifactProjectContent,
+                                                    GovernableState state,
+                                                    String organization)
             throws GovernanceException;
 
     /**
@@ -104,10 +104,10 @@ public interface ComplianceManager {
      * @return ArtifactComplianceDryRunInfo object
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    ArtifactComplianceDryRunInfo handleComplianceEvaluationDryRun(ExtendedArtifactType artifactType,
-                                                                  List<String> govPolicies,
-                                                                  Map<RuleType, String> artifactProjectContent,
-                                                                  String organization)
+    ArtifactComplianceDryRunInfo handleComplianceEvalDryRun(ExtendedArtifactType artifactType,
+                                                            List<String> govPolicies,
+                                                            Map<RuleType, String> artifactProjectContent,
+                                                            String organization)
             throws GovernanceException;
 
 

@@ -469,7 +469,7 @@ public class ComplianceAPIUtil {
 
         // IMPORTANT: NOTE THAT THERE CAN BE MULTIPLE VIOLATIONS WITH SAME CODE BUT DIFFERENT PATH
         for (RuleViolation ruleViolation : ruleViolations) {
-            Rule rule = rulesMap.get(ruleViolation.getRuleCode());
+            Rule rule = rulesMap.get(ruleViolation.getRuleName());
             violatedRules.add(ComplianceAPIUtil.getRuleValidationResultDTO(rule, ruleViolation));
             violatedRuleCodes.add(rule.getName());
         }

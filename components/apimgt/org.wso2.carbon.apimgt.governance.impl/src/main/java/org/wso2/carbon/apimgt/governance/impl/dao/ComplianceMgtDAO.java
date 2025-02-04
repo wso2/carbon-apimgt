@@ -22,7 +22,6 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
-import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationStatus;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 
 import java.util.List;
@@ -38,14 +37,14 @@ public interface ComplianceMgtDAO {
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
-     * @param policyId     Policy ID
+     * @param policyIds    List of Policy IDs
      * @param organization Organization
      * @throws GovernanceException If an error occurs while adding the artifact
      *                             compliance evaluation request event
      */
-    void addComplianceEvaluationRequest(String artifactId, ArtifactType artifactType,
-                                        String policyId,
-                                        String organization) throws GovernanceException;
+    void addComplianceEvalRequest(String artifactId, ArtifactType artifactType,
+                                  List<String> policyIds, String organization)
+            throws GovernanceException;
 
     /**
      * Get pending evaluation requests
@@ -53,32 +52,16 @@ public interface ComplianceMgtDAO {
      * @return List of pending evaluation requests
      * @throws GovernanceException If an error occurs while getting the pending evaluation requests
      */
-    List<ComplianceEvaluationRequest> getPendingComplianceEvaluationRequests() throws GovernanceException;
+    List<ComplianceEvaluationRequest> getPendingComplianceEvalRequests() throws GovernanceException;
 
     /**
-     * Get the processing compliance evaluation request by artifact ID, artifact Type, policy ID and Org, if any
+     * Update the evaluation status of a pending request to processing
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param policyId     Policy ID
-     * @param organization Organization
-     * @return ComplianceEvaluationRequest
-     * @throws GovernanceException If an error occurs while getting the processing compliance evaluation request
-     */
-    ComplianceEvaluationRequest getProcessingComplianceEvaluationRequest(String artifactId,
-                                                                         ArtifactType artifactType, String policyId,
-                                                                         String organization)
-            throws GovernanceException;
-
-    /**
-     * Update the evaluation status of a request
-     *
-     * @param requestId Evaluation request ID
-     * @param status    Evaluation status
+     * @param requestId Request ID
+     * @return True if the request is updated successfully
      * @throws GovernanceException If an error occurs while updating the evaluation status
      */
-    void updateComplianceEvaluationStatus(String requestId, ComplianceEvaluationStatus status) throws
-            GovernanceException;
+    boolean updatePendingRequestToProcessing(String requestId) throws GovernanceException;
 
     /**
      * Update the evaluation status of all processing requests to pending
@@ -93,7 +76,7 @@ public interface ComplianceMgtDAO {
      * @param requestId Evaluation request ID
      * @throws GovernanceException If an error occurs while deleting the evaluation request
      */
-    void deleteComplianceEvaluationRequest(String requestId) throws GovernanceException;
+    void deleteComplianceEvalRequest(String requestId) throws GovernanceException;
 
     /**
      * Delete evaluation requests for an artifact
@@ -103,17 +86,24 @@ public interface ComplianceMgtDAO {
      * @param organization Organization
      * @throws GovernanceException If an error occurs while deleting the evaluation request
      */
-    void deleteComplianceEvaluationRequestsForArtifact(String artifactId, ArtifactType artifactType,
-                                                       String organization) throws GovernanceException;
+    void deleteComplianceEvalReqsForArtifact(String artifactId, ArtifactType artifactType,
+                                             String organization) throws GovernanceException;
+
 
     /**
-     * Add a compliance evaluation result to DB
+     * Add compliance evaluation results for an artifact and policy
      *
-     * @param result         Evaluation result
-     * @param ruleViolations List of rule violations from policy evaluation
-     * @throws GovernanceException If an error occurs while adding the compliance evaluation result
+     * @param artifactId          Artifact ID
+     * @param artifactType        Artifact Type
+     * @param policyId            Policy ID
+     * @param ruleViolationsMap   Map of Rule Violations
+     * @param organization        Organization
+     * @param isPolicyEvalSuccess Whether the policy evaluation was successful
+     * @throws GovernanceException If an error occurs while adding the compliance evaluation results
      */
-    void addComplianceEvaluationResult(ComplianceEvaluationResult result, List<RuleViolation> ruleViolations)
+    void addComplianceEvalResults(String artifactId, ArtifactType artifactType, String policyId,
+                                  Map<String, List<RuleViolation>> ruleViolationsMap,
+                                  String organization, boolean isPolicyEvalSuccess)
             throws GovernanceException;
 
     /**

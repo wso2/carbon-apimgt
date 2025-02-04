@@ -60,9 +60,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
 
     }
 
-    /**
-     * Bill Pugh Singleton Implementation
-     */
     private static class SingletonHelper {
 
         private static final GovernancePolicyMgtDAO INSTANCE = new GovernancePolicyMgtDAOImpl();
@@ -88,10 +85,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     @Override
     public GovernancePolicy createGovernancePolicy(GovernancePolicy governancePolicy, String organization)
             throws GovernanceException {
-        List<String> rulesetIds;
-        List<String> labels;
-        List<GovernableState> states;
-        List<GovernanceAction> actions;
         try (Connection connection = GovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -114,13 +107,12 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 connection.rollback();
                 throw e;
             }
-        } catch (SQLException e) {
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                if (getGovernancePolicyByName(governancePolicy.getName(), organization) != null) {
-                    throw new GovernanceException(GovernanceExceptionCodes.POLICY_ALREADY_EXISTS, e,
-                            governancePolicy.getName(), organization);
-                }
+        } catch (SQLIntegrityConstraintViolationException e) {
+            if (getGovernancePolicyByName(governancePolicy.getName(), organization) != null) {
+                throw new GovernanceException(GovernanceExceptionCodes.POLICY_ALREADY_EXISTS, e,
+                        governancePolicy.getName(), organization);
             }
+        } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_CREATING_POLICY, e, organization);
         }
         return getGovernancePolicyByID(governancePolicy.getId()); // to return saved policy
@@ -225,11 +217,13 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 updatePolicyRulesetMappings(policyId, governancePolicy, connection);
                 updatePolicyLabels(policyId, governancePolicy, connection);
                 updateStatesAndPolicyActions(policyId, governancePolicy, connection);
-                deleteComplianceEvaluationResultsForPolicy(policyId, connection);
+                deleteRuleViolationsForPolicy(policyId, connection);
+                deleteRulesetResultsForPolicy(policyId, connection);
+                deletePolicyResultsForPolicy(policyId, connection);
 
                 // return updated GovernancePolicy object
                 connection.commit();
-            } catch (SQLException | GovernanceException e) {
+            } catch (SQLException e) {
                 connection.rollback();
                 throw e;
             }
@@ -826,8 +820,9 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             try {
 
                 deleteRuleViolationsForPolicy(policyId, connection);
-                deleteComplianceEvaluationResultsForPolicy(policyId, connection);
-                deleteComplianceEvaluationRequestsForPolicy(policyId, connection);
+                deleteRulesetResultsForPolicy(policyId, connection);
+                deletePolicyResultsForPolicy(policyId, connection);
+                deleteEvalRequestsForPolicy(policyId, connection);
                 deletePolicyRulesetMappingsForPolicy(policyId, connection);
                 deleteActionsMappingsForPolicy(policyId, connection);
                 deleteStatesMappingsForPolicy(policyId, connection);
@@ -858,56 +853,61 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param policyId   Policy ID
      * @param connection DB Connection
-     * @throws GovernanceException If an error occurs while deleting the violations
+     * @throws SQLException If an error occurs while deleting the violations
      */
-    private void deleteRuleViolationsForPolicy(String policyId, Connection connection) throws GovernanceException {
-        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULE_VIOLATIONS_BY_POLICY)) {
+    private void deleteRuleViolationsForPolicy(String policyId, Connection connection) throws SQLException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                .DELETE_RULE_VIOLATIONS_FOR_POLICY)) {
             prepStmt.setString(1, policyId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULE_VIOLATIONS_FOR_POLICY,
-                    e, policyId);
         }
     }
 
     /**
-     * Delete Compliance Evaluation Results for a Policy
+     * Delete Ruleset Evaluation Results for a Policy
      *
      * @param policyId   Policy ID
      * @param connection DB Connection
-     * @throws GovernanceException If an error occurs while deleting the results
+     * @throws SQLException If an error occurs while deleting the results
      */
-    private void deleteComplianceEvaluationResultsForPolicy(String policyId, Connection connection)
-            throws GovernanceException {
-        try (PreparedStatement prepStmt = connection.prepareStatement
-                (SQLConstants.DELETE_GOV_COMPLIANCE_EVALUATION_RESULT_BY_POLICY)) {
+    private void deleteRulesetResultsForPolicy(String policyId, Connection connection) throws SQLException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                .DELETE_RULESET_RESULT_FOR_POLICY)) {
             prepStmt.setString(1, policyId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes
-                    .ERROR_WHILE_DELETING_COMPLIANCE_EVALUATION_RESULTS_FOR_POLICY,
-                    e, policyId);
         }
     }
 
     /**
-     * Delete Actions Mappings for a Policy
+     * Delete Policy Evaluation Results for a Policy
      *
      * @param policyId   Policy ID
      * @param connection DB Connection
-     * @throws GovernanceException If an error occurs while deleting the actions
+     * @throws SQLException If an error occurs while deleting the results
      */
-    private void deleteComplianceEvaluationRequestsForPolicy(String policyId, Connection connection)
-            throws GovernanceException {
-        try (PreparedStatement prepStmt = connection.prepareStatement
-                (SQLConstants.DELETE_GOV_EVALUATION_REQUEST_FOR_POLICY)) {
+    private void deletePolicyResultsForPolicy(String policyId, Connection connection) throws SQLException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                .DELETE_POLICY_RESULT_FOR_POLICY)) {
             prepStmt.setString(1, policyId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes
-                    .ERROR_WHILE_DELETING_COMPLIANCE_EVALUATION_REQUESTS_FOR_POLICY,
-                    e, policyId);
         }
+
+    }
+
+    /**
+     * Delete Eval Requests for a Policy
+     *
+     * @param policyId   Policy ID
+     * @param connection DB Connection
+     * @throws SQLException, GovernanceException If an error occurs while deleting the requests
+     */
+    private void deleteEvalRequestsForPolicy(String policyId, Connection connection) throws SQLException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                .DELETE_REQ_POLICY_MAPPING_FOR_POLICY)) {
+            prepStmt.setString(1, policyId);
+            prepStmt.executeUpdate();
+        }
+        //TODO: Check for currently processing requests for policy?
     }
 
     /**
@@ -915,17 +915,14 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param policyId   Policy ID
      * @param connection DB Connection
-     * @throws GovernanceException If an error occurs while deleting the mappings
+     * @throws SQLException If an error occurs while deleting the mappings
      */
     private void deletePolicyRulesetMappingsForPolicy(String policyId, Connection connection)
-            throws GovernanceException {
+            throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .DELETE_POLICY_RULESET_MAPPING_BY_POLICY_ID)) {
             prepStmt.setString(1, policyId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_POLICY_RULESET_MAPPINGS,
-                    e, policyId);
         }
     }
 
@@ -934,17 +931,14 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param policyId   Policy ID
      * @param connection DB Connection
-     * @throws GovernanceException If an error occurs while deleting the mappings
+     * @throws SQLException If an error occurs while deleting the mappings
      */
     private void deleteActionsMappingsForPolicy(String policyId, Connection connection)
-            throws GovernanceException {
+            throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .DELETE_GOVERNANCE_POLICY_ACTION_MAPPING_BY_POLICY_ID)) {
             prepStmt.setString(1, policyId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_POLICY_ACTIONS_MAPPINGS,
-                    e, policyId);
         }
     }
 
@@ -953,17 +947,14 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param policyId   Policy ID
      * @param connection DB Connection
-     * @throws GovernanceException If an error occurs while deleting the mappings
+     * @throws SQLException If an error occurs while deleting the mappings
      */
     private void deleteStatesMappingsForPolicy(String policyId, Connection connection)
-            throws GovernanceException {
+            throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .DELETE_GOVERNANCE_POLICY_STATE_MAPPING_BY_POLICY_ID)) {
             prepStmt.setString(1, policyId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_POLICY_STATE_MAPPINGS,
-                    e, policyId);
         }
     }
 
@@ -972,17 +963,14 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param policyId   Policy ID
      * @param connection DB Connection
-     * @throws GovernanceException If an error occurs while deleting the mappings
+     * @throws SQLException If an error occurs while deleting the mappings
      */
     private void deleteLabelsMappingsForPolicy(String policyId, Connection connection)
-            throws GovernanceException {
+            throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .DELETE_GOVERNANCE_POLICY_LABEL_MAPPING_BY_POLICY_ID)) {
             prepStmt.setString(1, policyId);
             prepStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_POLICY_LABELS_MAPPINGS,
-                    e, policyId);
         }
     }
 }

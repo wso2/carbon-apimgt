@@ -162,7 +162,7 @@ public class SpectralValidationEngine implements ValidationEngine {
             // Convert JsonNode to list of Result objects
             for (JsonNode node : jsonNode) {
                 RuleViolation violation = new RuleViolation();
-                violation.setRuleCode(node.get("ruleName").asText());
+                violation.setRuleName(node.get("ruleName").asText());
                 violation.setViolatedPath(node.get("path").asText());
                 violation.setRuleMessage(node.get("message").asText());
                 violation.setSeverity(Severity.fromString(node.get("severity").asText()));
