@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.util.HashMap;
 
-public class MonetizationUsageInfo {
+public class MonetizationDTO {
 
     Long currentTimestamp;
     String apiUuid;
@@ -14,7 +14,7 @@ public class MonetizationUsageInfo {
     HashMap<String, Object> customAttributes;
     Long requestCount;
 
-    public MonetizationUsageInfo(Long currentTimestamp, String apiUuid, String apiName, String apiVersion, String tenantDomain, String applicationName, String applicationOwner, HashMap<String, Object> customAttributes, Long requestCount) {
+    public MonetizationDTO(Long currentTimestamp, String apiUuid, String apiName, String apiVersion, String tenantDomain, String applicationName, String applicationOwner, HashMap<String, Object> customAttributes, Long requestCount) {
         this.currentTimestamp = currentTimestamp;
         this.apiUuid = apiUuid;
         this.apiName = apiName;
