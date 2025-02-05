@@ -11144,10 +11144,9 @@ public final class APIUtil {
             // No organization entry in the db. add entry without parent info.
             OrganizationDetailsDTO info = new OrganizationDetailsDTO();
             info.setExternalOrganizationReference(referenceId);
-            info.setTenantDomain(rootOrganization);
             info.setName(organizationName);
             info.setOrganizationHandle(getOrganizationHandle(organizationName));
-            OrganizationDetailsDTO addedInfo = ApiMgtDAO.getInstance().addOrganization(info);
+            OrganizationDetailsDTO addedInfo = ApiMgtDAO.getInstance().addOrganization(info, null, rootOrganization);
             if (addedInfo != null) {
                 organizationId = addedInfo.getOrganizationId();
             }

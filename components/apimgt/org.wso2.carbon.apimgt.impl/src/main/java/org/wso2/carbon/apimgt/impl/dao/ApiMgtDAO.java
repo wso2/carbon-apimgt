@@ -10330,7 +10330,8 @@ public class ApiMgtDAO {
     }
 
     
-    public OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO organizationDTO) throws APIManagementException {
+    public OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO organizationDTO, String parentOrgId,
+            String tenantDomain) throws APIManagementException {
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement preparedStatement = conn
@@ -10339,16 +10340,16 @@ public class ApiMgtDAO {
                 preparedStatement.setString(1, organizationDTO.getOrganizationId());
                 preparedStatement.setString(2, organizationDTO.getExternalOrganizationReference());
                 preparedStatement.setString(3, organizationDTO.getName());
-                preparedStatement.setString(4, organizationDTO.getParentOrganizationId());
+                preparedStatement.setString(4, parentOrgId);
                 preparedStatement.setString(5, organizationDTO.getDescription());
-                preparedStatement.setString(6, organizationDTO.getTenantDomain());
+                preparedStatement.setString(6, tenantDomain);
                 preparedStatement.setString(7, organizationDTO.getOrganizationHandle());
                 preparedStatement.executeUpdate();
                 conn.commit();
             }
         } catch (SQLException e) {
             String message = "Error while saving organization " + organizationDTO.getName()
-                    + " in tenant " + organizationDTO.getTenantDomain();
+                    + " in tenant " + tenantDomain;
             handleException(message, e);
         }
         return organizationDTO;
@@ -10367,11 +10368,9 @@ public class ApiMgtDAO {
                 while (resultSet.next()) {
                     OrganizationDetailsDTO organization = new OrganizationDetailsDTO();
                     organization.setOrganizationId(resultSet.getString("ORG_UUID"));
-                    organization.setParentOrganizationId(resultSet.getString("PARENT_ORG_UUID"));
                     organization.setExternalOrganizationReference(resultSet.getString("EXT_ORG_ID"));
                     organization.setName(resultSet.getString("DISPLAY_NAME"));
                     organization.setDescription(resultSet.getString("DESCRIPTION"));
-                    organization.setTenantDomain(resultSet.getString("ROOT_ORGANIZATION"));
                     organizationList.add(organization);
                 }
             }
@@ -10394,11 +10393,9 @@ public class ApiMgtDAO {
                 if (resultSet.next()) {
                     organization = new OrganizationDetailsDTO();
                     organization.setOrganizationId(resultSet.getString("ORG_UUID"));
-                    organization.setParentOrganizationId(resultSet.getString("PARENT_ORG_UUID"));
                     organization.setExternalOrganizationReference(resultSet.getString("EXT_ORG_ID"));
                     organization.setName(resultSet.getString("DISPLAY_NAME"));
                     organization.setDescription(resultSet.getString("DESCRIPTION"));
-                    organization.setTenantDomain(resultSet.getString("ROOT_ORGANIZATION"));
                 }
             }
         } catch (SQLException e) {
@@ -10454,11 +10451,9 @@ public class ApiMgtDAO {
                 if (resultSet.next()) {
                     organization = new OrganizationDetailsDTO();
                     organization.setOrganizationId(resultSet.getString("ORG_UUID"));
-                    organization.setParentOrganizationId(resultSet.getString("PARENT_ORG_UUID"));
                     organization.setExternalOrganizationReference(resultSet.getString("EXT_ORG_ID"));
                     organization.setName(resultSet.getString("DISPLAY_NAME"));
                     organization.setDescription(resultSet.getString("DESCRIPTION"));
-                    organization.setTenantDomain(resultSet.getString("ROOT_ORGANIZATION"));
                 }
             }
         } catch (SQLException e) {

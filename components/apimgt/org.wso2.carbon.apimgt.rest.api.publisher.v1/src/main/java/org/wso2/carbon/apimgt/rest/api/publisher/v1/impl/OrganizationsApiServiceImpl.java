@@ -58,7 +58,7 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
             }
             List<OrganizationDetailsDTO> orgList = apiProvider.getOrganizations(orgId, superOrganization);
 
-            OrganizationListDTO organizationsListDTO = OrganizationsMappingUtil.toOrganizationsListDTO(orgList);
+            OrganizationListDTO organizationsListDTO = OrganizationsMappingUtil.toOrganizationsListDTO(orgList, orgId);
             return Response.ok().entity(organizationsListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Organizations";
