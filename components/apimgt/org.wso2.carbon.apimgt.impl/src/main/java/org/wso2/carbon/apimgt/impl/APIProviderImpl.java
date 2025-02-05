@@ -171,7 +171,7 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIPublisherForNewPortal;
+import org.wso2.carbon.apimgt.impl.utils.NewDevPortalHandler;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
 import org.wso2.carbon.apimgt.impl.utils.SimpleContentSearchResultNameComparator;
@@ -1060,7 +1060,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Update API in new Dev Portal
         if (APIUtil.isNewPortalEnabled() && APIConstants.PUBLISHED.equals(api.getStatus())) {
-            APIPublisherForNewPortal.update(organization, new ApiTypeWrapper(api));
+            NewDevPortalHandler.update(organization, new ApiTypeWrapper(api));
         }
 
         return api;
@@ -2668,7 +2668,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 // Delete from new Developer Portal
                 if (APIUtil.isNewPortalEnabled()) {
-                    APIPublisherForNewPortal.unpublish(organization, api);
+                    NewDevPortalHandler.unpublish(organization, api);
                 }
             } catch (APIManagementException e) {
                 log.error("Error while executing API delete operation on external API stores for API "

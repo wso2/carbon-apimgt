@@ -56,7 +56,7 @@ import java.util.Arrays;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class APIPublisherForNewPortal {
+public class NewDevPortalHandler {
 
     private static class HttpResponseData {
         private final int statusCode;
@@ -76,7 +76,7 @@ public class APIPublisherForNewPortal {
         }
     }
 
-    private static final Log log = LogFactory.getLog(APIPublisherForNewPortal.class);
+    private static final Log log = LogFactory.getLog(NewDevPortalHandler.class);
     private static final String baseUrl = APIUtil.getNewPortalURL();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, String> orgIdCache = new HashMap<>();
