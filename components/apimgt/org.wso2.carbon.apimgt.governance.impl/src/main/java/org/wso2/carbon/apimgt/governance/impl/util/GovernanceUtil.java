@@ -219,10 +219,10 @@ public class GovernanceUtil {
     }
 
     /**
-     * Get all artifacts as a map of Artifact Type, List of Artifact IDs
+     * Get all artifacts as a map of Artifact Type, List of Artifact Reference IDs
      *
      * @param organization Organization
-     * @return Map of Artifact Type, List of Artifact IDs
+     * @return Map of Artifact Type, List of Artifact Reference IDs
      * @throws GovernanceException If an error occurs while getting the list of artifacts
      */
     public static Map<ArtifactType, List<String>> getAllArtifacts(String organization) throws GovernanceException {
@@ -230,8 +230,8 @@ public class GovernanceUtil {
 
         for (ArtifactType artifactType : ArtifactType.values()) {
             if (ArtifactType.API.equals(artifactType)) {
-                List<String> artifactIds = APIMUtil.getAllAPIs(organization);
-                artifacts.put(artifactType, artifactIds);
+                List<String> artifactRefIds = APIMUtil.getAllAPIs(organization);
+                artifacts.put(artifactType, artifactRefIds);
             }
         }
 
@@ -239,17 +239,18 @@ public class GovernanceUtil {
     }
 
     /**
-     * Get artifacts for a label as a map of Artifact Type, List of Artifact IDs
+     * Get artifacts for a label as a map of Artifact Type,
+     * List of Artifact Reference IDs
      *
      * @param labelId Label ID
-     * @return Map of Artifact Type, List of Artifact IDs
+     * @return Map of Artifact Type, List of Artifact Reference IDs
      */
     public static Map<ArtifactType, List<String>> getArtifactsForLabel(String labelId) throws GovernanceException {
         Map<ArtifactType, List<String>> artifacts = new HashMap<>();
         for (ArtifactType artifactType : ArtifactType.values()) {
             if (ArtifactType.API.equals(artifactType)) {
-                List<String> artifactIds = APIMUtil.getAPIsByLabel(labelId);
-                artifacts.put(artifactType, artifactIds);
+                List<String> artifactRefIds = APIMUtil.getAPIsByLabel(labelId);
+                artifacts.put(artifactType, artifactRefIds);
             }
         }
         return artifacts;
@@ -258,15 +259,15 @@ public class GovernanceUtil {
     /**
      * Get labels for an artifact
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
      * @return List of label IDs
      */
-    public static List<String> getLabelsForArtifact(String artifactId, ArtifactType artifactType)
+    public static List<String> getLabelsForArtifact(String artifactRefId, ArtifactType artifactType)
             throws GovernanceException {
         List<String> labels = new ArrayList<>();
         if (ArtifactType.API.equals(artifactType)) {
-            labels = APIMUtil.getLabelsForAPI(artifactId);
+            labels = APIMUtil.getLabelsForAPI(artifactRefId);
         }
         return labels;
     }
@@ -274,16 +275,16 @@ public class GovernanceUtil {
     /**
      * Get applicable policies for an artifact
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return Map of Policy IDs, Policy Names
      */
-    public static Map<String, String> getApplicablePoliciesForArtifact(String artifactId,
+    public static Map<String, String> getApplicablePoliciesForArtifact(String artifactRefId,
                                                                        ArtifactType artifactType,
                                                                        String organization) throws GovernanceException {
 
-        List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactId, artifactType);
+        List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
         PolicyManager policyManager = new PolicyManagerImpl();
 
         Map<String, String> policies = new HashMap<>();
@@ -304,20 +305,20 @@ public class GovernanceUtil {
      * Get all applicable policy IDs for an artifact given a specific state at which
      * the artifact should be governed
      *
-     * @param artifactId      Artifact ID
+     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType    Artifact Type
      * @param governableState Governable state (The state at which the artifact should be governed)
      * @param organization    Organization
      * @return List of applicable policy IDs
      * @throws GovernanceException if an error occurs while checking for applicable policies
      */
-    public static List<String> getApplicablePoliciesForArtifactWithState(String artifactId,
+    public static List<String> getApplicablePoliciesForArtifactWithState(String artifactRefId,
                                                                          ArtifactType artifactType,
                                                                          GovernableState governableState,
                                                                          String organization)
             throws GovernanceException {
 
-        List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactId, artifactType);
+        List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
         PolicyManager policyManager = new PolicyManagerImpl();
 
         // Check for policies using labels and the state
@@ -361,17 +362,17 @@ public class GovernanceUtil {
     /**
      * Check if an artifact is available
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
      * @return boolean
      */
-    public static boolean isArtifactAvailable(String artifactId, ArtifactType artifactType) {
+    public static boolean isArtifactAvailable(String artifactRefId, ArtifactType artifactType) {
         artifactType = artifactType != null ? artifactType : ArtifactType.API;
 
         // Check if artifact exists in APIM
         boolean artifactExists = false;
         if (ArtifactType.API.equals(artifactType)) {
-            artifactExists = APIMUtil.isAPIExist(artifactId);
+            artifactExists = APIMUtil.isAPIExist(artifactRefId);
         }
         return artifactExists;
     }
@@ -379,17 +380,17 @@ public class GovernanceUtil {
     /**
      * Get artifact name
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
      * @return String
      * @throws GovernanceException If an error occurs while getting the artifact name
      */
-    public static String getArtifactName(String artifactId, ArtifactType artifactType)
+    public static String getArtifactName(String artifactRefId, ArtifactType artifactType)
             throws GovernanceException {
 
         String artifactName = null;
         if (ArtifactType.API.equals(artifactType)) {
-            artifactName = APIMUtil.getAPIName(artifactId);
+            artifactName = APIMUtil.getAPIName(artifactRefId);
         }
         return artifactName;
     }
@@ -397,17 +398,17 @@ public class GovernanceUtil {
     /**
      * Get artifact version
      *
-     * @param artifactId   Artifact ID
+     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType Artifact Type
      * @return String
      * @throws GovernanceException If an error occurs while getting the artifact version
      */
-    public static String getArtifactVersion(String artifactId, ArtifactType artifactType)
+    public static String getArtifactVersion(String artifactRefId, ArtifactType artifactType)
             throws GovernanceException {
 
         String artifactVersion = null;
         if (ArtifactType.API.equals(artifactType)) {
-            artifactVersion = APIMUtil.getAPIVersion(artifactId);
+            artifactVersion = APIMUtil.getAPIVersion(artifactRefId);
         }
         return artifactVersion;
     }
@@ -419,11 +420,11 @@ public class GovernanceUtil {
      * @param artifactVersion Artifact version
      * @param artifactType    Artifact type
      * @param organization    Organization
-     * @return Artifact ID
+     * @return Artifact Reference ID (ID of the artifact on APIM side)
      * @throws GovernanceException If an error occurs while getting the artifact ID
      */
-    public static String getArtifactId(String artifactName, String artifactVersion, ArtifactType artifactType,
-                                       String organization) throws GovernanceException {
+    public static String getArtifactRefId(String artifactName, String artifactVersion, ArtifactType artifactType,
+                                          String organization) throws GovernanceException {
 
         if (ArtifactType.API.equals(artifactType)) {
             return APIMUtil.getApiUUID(artifactName, artifactVersion, organization);
@@ -434,16 +435,16 @@ public class GovernanceUtil {
     /**
      * Get extended artifact type for an artifact
      *
-     * @param artifactId   Artifact ID
+     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType Artifact Type
      * @return ExtendedArtifactType
      * @throws GovernanceException If an error occurs while getting the extended artifact type
      */
     public static ExtendedArtifactType getExtendedArtifactTypeForArtifact
-    (String artifactId, ArtifactType artifactType)
+    (String artifactRefId, ArtifactType artifactType)
             throws GovernanceException {
         if (ArtifactType.API.equals(artifactType)) {
-            return APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactId));
+            return APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactRefId));
         }
         return null;
     }
@@ -451,14 +452,14 @@ public class GovernanceUtil {
     /**
      * Get artifact project
      *
-     * @param artifactId   Artifact ID
+     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
      * @param revisionNo   Revision Number
      * @param artifactType Artifact Type
      * @param organization Organization
      * @return byte[]
      * @throws GovernanceException If an error occurs while getting the artifact project
      */
-    public static byte[] getArtifactProjectWithRevision(String artifactId, String revisionNo,
+    public static byte[] getArtifactProjectWithRevision(String artifactRefId, String revisionNo,
                                                         ArtifactType artifactType,
                                                         String organization) throws GovernanceException {
 
@@ -466,7 +467,7 @@ public class GovernanceUtil {
         byte[] artifactProject = null;
         if (ArtifactType.API.equals(artifactType)) {
             artifactProject =
-                    APIMUtil.getAPIProject(artifactId, revisionNo, organization);
+                    APIMUtil.getAPIProject(artifactRefId, revisionNo, organization);
         }
         return artifactProject;
     }
@@ -474,16 +475,16 @@ public class GovernanceUtil {
     /**
      * Get artifact project
      *
-     * @param artifactId   Artifact ID
+     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType Artifact Type
      * @param organization Organization
      * @return byte[]
      * @throws GovernanceException If an error occurs while getting the artifact project
      */
-    public static byte[] getArtifactProject(String artifactId, ArtifactType artifactType,
+    public static byte[] getArtifactProject(String artifactRefId, ArtifactType artifactType,
                                             String organization) throws GovernanceException {
 
-        return getArtifactProjectWithRevision(artifactId, null, artifactType, organization);
+        return getArtifactProjectWithRevision(artifactRefId, null, artifactType, organization);
     }
 
 

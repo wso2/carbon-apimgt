@@ -139,11 +139,11 @@ public class ComplianceEvaluationScheduler {
                 future.get();
             } catch (InterruptedException e) {
                 log.error("Task interrupted for request: " + request.getId() + "for artifact ID: " +
-                        request.getArtifactId(), e.getCause());
+                        request.getArtifactRefId(), e.getCause());
                 Thread.currentThread().interrupt();
             } catch (ExecutionException e) {
                 log.error("Execution error for request: " + request.getId() + "for artifact ID: " +
-                        request.getArtifactId(), e.getCause());
+                        request.getArtifactRefId(), e.getCause());
             }
         }
 
@@ -172,41 +172,41 @@ public class ComplianceEvaluationScheduler {
     private static void processRequest(ComplianceEvaluationRequest request) {
 
         String requestId = request.getId();
-        String artifactId = request.getArtifactId();
+        String artifactRefId = request.getArtifactRefId();
         ArtifactType artifactType = request.getArtifactType();
         String organization = request.getOrganization();
 
         try {
             // Check if artifact exists
-            if (!GovernanceUtil.isArtifactAvailable(artifactId, artifactType)) {
-                log.warn("Artifact not found for artifact ID: " + artifactId + " " +
+            if (!GovernanceUtil.isArtifactAvailable(artifactRefId, artifactType)) {
+                log.warn("Artifact not found for artifact ID: " + artifactRefId + " " +
                         ". Skipping governance evaluation");
-                complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactId, artifactType, organization);
+                complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactRefId, artifactType, organization);
                 return;
             }
 
             // Check if artifact is SOAP or GRAPHQL
             if (ArtifactType.API.equals(artifactType)) {
                 ExtendedArtifactType extendedArtifactType =
-                        APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactId));
+                        APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactRefId));
                 if (ExtendedArtifactType.SOAP_API.equals(extendedArtifactType) ||
                         ExtendedArtifactType.GRAPHQL_API.equals(extendedArtifactType)) {
                     log.warn("Artifact type " + extendedArtifactType + " not supported " +
-                            "for artifact ID: " + artifactId + " " +
+                            "for artifact ID: " + artifactRefId + " " +
                             ". Skipping governance evaluation");
-                    complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactId, artifactType, organization);
+                    complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactRefId, artifactType, organization);
                     return;
                 }
             }
 
             // Get artifact project
-            byte[] artifactProject = GovernanceUtil.getArtifactProject(artifactId, artifactType, organization);
+            byte[] artifactProject = GovernanceUtil.getArtifactProject(artifactRefId, artifactType, organization);
 
             // If artifact project does not exist, skip evaluation
             if (artifactProject == null) {
                 log.warn("Artifact project not found for artifact ID: " +
-                        artifactId + " .Skipping governance evaluation");
-                complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactId, artifactType, organization);
+                        artifactRefId + " .Skipping governance evaluation");
+                complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactRefId, artifactType, organization);
                 return;
             }
 
@@ -219,7 +219,7 @@ public class ComplianceEvaluationScheduler {
             boolean isUpdated = complianceMgtDAO.updatePendingRequestToProcessing(requestId);
             if (!isUpdated) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Skipping governance evaluation for artifact ID: " + artifactId
+                    log.debug("Skipping governance evaluation for artifact ID: " + artifactRefId
                             + " of type " + artifactType +
                             " as there are processing requests for same artifact.");
                 }
@@ -229,13 +229,14 @@ public class ComplianceEvaluationScheduler {
 
             // Evaluate the artifact against each policy
             for (String policyId : request.getPolicyIds()) {
-                evaluteArtifactWithPolicy(artifactId, artifactType, policyId, artifactProjectContentMap, organization);
+                evaluteArtifactWithPolicy(artifactRefId, artifactType, policyId, artifactProjectContentMap,
+                        organization);
             }
 
             // Delete the evaluation request after processing completes
             complianceMgtDAO.deleteComplianceEvalRequest(requestId);
         } catch (GovernanceException e) {
-            log.error("Error processing evaluation request for artifact ID: " + artifactId, e);
+            log.error("Error processing evaluation request for artifact ID: " + artifactRefId, e);
         }
 
     }
@@ -243,14 +244,14 @@ public class ComplianceEvaluationScheduler {
     /**
      * Evaluate an artifact against a policy.
      *
-     * @param artifactId                ID of the artifact.
+     * @param artifactRefId             ID of the artifact.
      * @param artifactType              Type of the artifact.
      * @param policyId                  ID of the policy.
      * @param artifactProjectContentMap Content of the artifact project.
      * @param organization              Organization of the artifact.
      * @throws GovernanceException If an error occurs while evaluating the artifact.
      */
-    private static void evaluteArtifactWithPolicy(String artifactId, ArtifactType artifactType, String policyId,
+    private static void evaluteArtifactWithPolicy(String artifactRefId, ArtifactType artifactType, String policyId,
                                                   Map<RuleType, String> artifactProjectContentMap, String organization)
             throws GovernanceException {
 
@@ -268,7 +269,7 @@ public class ComplianceEvaluationScheduler {
             // Check if ruleset's artifact type matches with the artifact's type
             ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
             if (ArtifactType.API.equals(artifactType) && extendedArtifactType.equals(
-                    APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactId)))) {
+                    APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactRefId)))) {
 
                 // Get target file content from artifact project based on ruleType
                 RuleType ruleType = ruleset.getRuleType();
@@ -276,7 +277,7 @@ public class ComplianceEvaluationScheduler {
 
                 if (contentToValidate == null) {
                     log.warn(ruleType + " content not found in artifact project for artifact ID: " +
-                            artifactId + ". Skipping governance evaluation for ruleset ID: " + ruleset.getId());
+                            artifactRefId + ". Skipping governance evaluation for ruleset ID: " + ruleset.getId());
                     continue;
                 }
 
@@ -292,27 +293,27 @@ public class ComplianceEvaluationScheduler {
             }
             rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
         }
-        savePolicyEvaluationResults(artifactId, artifactType, policyId, rulesetViolationsMap,
+        savePolicyEvaluationResults(artifactRefId, artifactType, policyId, rulesetViolationsMap,
                 organization);
     }
 
     /**
      * Save compliance evaluation results of the policy.
      *
-     * @param artifactId           ID of the artifact.
+     * @param artifactRefId        ID of the artifact.
      * @param artifactType         Type of the artifact.
      * @param policyId             ID of the policy.
      * @param rulesetViolationsMap Map of rule violations for each ruleset.
      * @param organization         Organization of the artifact.
      */
-    private static void savePolicyEvaluationResults(String artifactId, ArtifactType artifactType, String policyId,
+    private static void savePolicyEvaluationResults(String artifactRefId, ArtifactType artifactType, String policyId,
                                                     Map<String, List<RuleViolation>> rulesetViolationsMap,
                                                     String organization) {
         try {
-            complianceMgtDAO.addComplianceEvalResults(artifactId, artifactType, policyId, rulesetViolationsMap,
+            complianceMgtDAO.addComplianceEvalResults(artifactRefId, artifactType, policyId, rulesetViolationsMap,
                     organization);
         } catch (GovernanceException e) {
-            log.error("Error saving governance results for artifact ID: " + artifactId, e);
+            log.error("Error saving governance results for artifact ID: " + artifactRefId, e);
         }
     }
 

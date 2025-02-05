@@ -61,13 +61,13 @@ public interface ComplianceManager {
     /**
      * Handle API Compliance Evaluation Request Async
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param govPolicies  List of governance policies to be evaluated
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param govPolicies   List of governance policies to be evaluated
+     * @param organization  Organization
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    void handleComplianceEvalAsync(String artifactId, ArtifactType artifactType,
+    void handleComplianceEvalAsync(String artifactRefId, ArtifactType artifactType,
                                    List<String> govPolicies, String organization)
             throws GovernanceException;
 
@@ -75,7 +75,7 @@ public interface ComplianceManager {
     /**
      * Handle API Compliance Evaluation Request Sync
      *
-     * @param artifactId             Artifact ID
+     * @param artifactRefId          Artifact Reference ID (ID of artifact on APIM side)
      * @param revisionNo             Revision number
      * @param artifactType           Artifact Type
      * @param govPolicies            List of governance policies to be evaluated
@@ -85,7 +85,7 @@ public interface ComplianceManager {
      * @return ArtifactComplianceInfo object
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    ArtifactComplianceInfo handleComplianceEvalSync(String artifactId,
+    ArtifactComplianceInfo handleComplianceEvalSync(String artifactRefId,
                                                     String revisionNo,
                                                     ArtifactType artifactType,
                                                     List<String> govPolicies,
@@ -114,26 +114,26 @@ public interface ComplianceManager {
     /**
      * Get Rule Violations
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param rulesetId    Ruleset ID
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param rulesetId     Ruleset ID
+     * @param organization  Organization
      * @return List of Rule Violations
      * @throws GovernanceException If an error occurs while getting the rule violations
      */
-    List<RuleViolation> getRuleViolations(String artifactId, ArtifactType artifactType,
+    List<RuleViolation> getRuleViolations(String artifactRefId, ArtifactType artifactType,
                                           String rulesetId, String organization) throws GovernanceException;
 
     /**
      * Get the rule violations for the artifact based on severity
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType        Artifact Type
+     * @param organization        Organization
      * @return Map of Rule Violations based on severity
      * @throws GovernanceException If an error occurs while getting the rule violations
      */
-    Map<Severity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactId,
+    Map<Severity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactRefId,
                                                                                  ArtifactType artifactType,
                                                                                  String organization)
             throws GovernanceException;
@@ -141,26 +141,26 @@ public interface ComplianceManager {
     /**
      * Get list of evaluated policies for the artifact using artifact ID and type
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType        Artifact Type
+     * @param organization        Organization
      * @return List of evaluated policies IDs
      * @throws GovernanceException If an error occurs while getting the list of evaluated policies
      */
-    List<String> getEvaluatedPoliciesForArtifact(String artifactId, ArtifactType artifactType,
+    List<String> getEvaluatedPoliciesForArtifact(String artifactRefId, ArtifactType artifactType,
                                                  String organization) throws GovernanceException;
 
     /**
      * Get list of evaluated rulesets for the artifact and policy
      *
-     * @param artifactId     Artifact ID
-     * @param artifactType   Artifact Type
-     * @param policyRulesets List of rulesets for the policy
-     * @param organization   Organization
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType        Artifact Type
+     * @param policyRulesets      List of rulesets for the policy
+     * @param organization        Organization
      * @return List of evaluated rulesets IDs
      * @throws GovernanceException If an error occurs while getting the list of evaluated rulesets
      */
-    List<String> getEvaluatedRulesetsForArtifactAndPolicy(String artifactId, ArtifactType artifactType,
+    List<String> getEvaluatedRulesetsForArtifactAndPolicy(String artifactRefId, ArtifactType artifactType,
                                                           List<Ruleset> policyRulesets, String organization)
             throws GovernanceException;
 
@@ -203,25 +203,26 @@ public interface ComplianceManager {
     /**
      * Is Ruleset Evaluated for Artifact
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param rulesetId    Ruleset ID
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType        Artifact Type
+     * @param rulesetId           Ruleset ID
+     * @param organization        Organization
      * @return Whether the ruleset is evaluated for the artifact
      * @throws GovernanceException If an error occurs while checking whether the ruleset is evaluated for the artifact
      */
-    boolean isRulesetEvaluatedForArtifact(String artifactId, ArtifactType artifactType,
+    boolean isRulesetEvaluatedForArtifact(String artifactRefId, ArtifactType artifactType,
                                           String rulesetId, String organization) throws GovernanceException;
 
     /**
      * Delete all governance data related to the artifact
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType        Artifact Type
+     * @param organization        Organization
      * @throws GovernanceException If an error occurs while deleting the governance data
      */
-    void deleteArtifact(String artifactId, ArtifactType artifactType, String organization) throws GovernanceException;
+    void deleteArtifact(String artifactRefId, ArtifactType artifactType, String organization)
+            throws GovernanceException;
 
 
     /**
@@ -237,12 +238,12 @@ public interface ComplianceManager {
     /**
      * Check whether the evaluation is pending for the artifact
      *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType        Artifact Type
+     * @param organization        Organization
      * @return Whether the evaluation is pending for the artifact
      * @throws GovernanceException If an error occurs while checking whether the evaluation is pending for the artifact
      */
-    boolean isEvaluationPendingForArtifact(String artifactId, ArtifactType artifactType, String organization)
+    boolean isEvaluationPendingForArtifact(String artifactRefId, ArtifactType artifactType, String organization)
             throws GovernanceException;
 }

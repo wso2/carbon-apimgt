@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.governance.api.model;
  * This class represents a rule violation.
  */
 public class RuleViolation {
-    private String artifactId; // Artifact which contains the violation
+    private String artifactRefId; // Artifact which contains the violation
     private ArtifactType artifactType; // Type of the artifact (API)
     private String rulesetId; // Ruleset which contains the violated rule
     private String ruleName;  // Code of the violated rule
@@ -31,12 +31,12 @@ public class RuleViolation {
     private String ruleMessage; // Message of the violated rule
     private String organization; // Organization of the artifact
 
-    public String getArtifactId() {
-        return artifactId;
+    public String getArtifactRefId() {
+        return artifactRefId;
     }
 
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
+    public void setArtifactRefId(String artifactRefId) {
+        this.artifactRefId = artifactRefId;
     }
 
     public ArtifactType getArtifactType() {

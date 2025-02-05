@@ -25,14 +25,14 @@ import java.util.Objects;
  */
 public class ArtifactInfo {
 
-    private String artifactId;
+    private String artifactRefId;
     private ArtifactType artifactType;
     private String organization;
     private String name;
     private String version;
 
     public String toKeyString() {
-        return artifactId + "|" + artifactType + "|" + organization;
+        return artifactRefId + "|" + artifactType + "|" + organization;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class ArtifactInfo {
     @Override
     public String toString() {
         return "ArtifactInfo{" +
-                "artifactId='" + artifactId + '\'' +
+                "artifactRefId='" + artifactRefId + '\'' +
                 ", artifactType=" + artifactType +
                 ", organization='" + organization + '\'' +
                 ", name='" + name + '\'' +
@@ -63,12 +63,12 @@ public class ArtifactInfo {
                 '}';
     }
 
-    public String getArtifactId() {
-        return artifactId;
+    public String getArtifactRefId() {
+        return artifactRefId;
     }
 
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
+    public void setArtifactRefId(String artifactRefId) {
+        this.artifactRefId = artifactRefId;
     }
 
     public ArtifactType getArtifactType() {
