@@ -21,10 +21,8 @@ package org.wso2.carbon.apimgt.api.dto;
 public class OrganizationDetailsDTO {
 
     private String organizationId;
-    private String parentOrganizationId;
     private String externalOrganizationReference;
     private String Name;
-    private String tenantDomain;
     private String description;
     private String organizationHandle;
 
@@ -36,28 +34,12 @@ public class OrganizationDetailsDTO {
         this.organizationId = organizationId;
     }
 
-    public String getParentOrganizationId() {
-        return parentOrganizationId;
-    }
-
-    public void setParentOrganizationId(String parentOrganizationId) {
-        this.parentOrganizationId = parentOrganizationId;
-    }
-
     public String getName() {
         return Name;
     }
 
     public void setName(String name) {
         Name = name;
-    }
-
-    public String getTenantDomain() {
-        return tenantDomain;
-    }
-
-    public void setTenantDomain(String tenantDomain) {
-        this.tenantDomain = tenantDomain;
     }
 
     public String getDescription() {
@@ -86,11 +68,9 @@ public class OrganizationDetailsDTO {
 
     @Override
     public String toString() {
-        return "OrganizationDetailsDTO [organizationId=" + organizationId + ", parentOrganizationId="
-                + parentOrganizationId + ", externalOrganizationReference=" + externalOrganizationReference + ", Name="
-                + Name + ", tenantDomain=" + tenantDomain + ", description=" + description + ", organizationHandle="
-                + organizationHandle + "]";
+        return "OrganizationDetailsDTO [organizationId=" + organizationId + ", externalOrganizationReference="
+                + externalOrganizationReference + ", Name=" + Name + ", description=" + description
+                + ", organizationHandle=" + organizationHandle + "]";
     }
 
-    
 }

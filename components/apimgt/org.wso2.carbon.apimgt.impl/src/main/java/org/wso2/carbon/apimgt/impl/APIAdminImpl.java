@@ -1848,18 +1848,19 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO orgDto) throws APIManagementException {
-        
+    public OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO orgDto, String parentOrgId,
+            String tenantDomain) throws APIManagementException {
+       
         //If there is an organization entry already available for external reference, update it
         OrganizationDetailsDTO savedOrgInfo = apiMgtDAO.getOrganizationDetalsByExternalOrgId(
-                orgDto.getExternalOrganizationReference(), orgDto.getTenantDomain());
+                orgDto.getExternalOrganizationReference(), tenantDomain);
         if (savedOrgInfo != null) {
             orgDto.setOrganizationHandle(APIUtil.getOrganizationHandle(orgDto.getName()));
             orgDto.setOrganizationId(savedOrgInfo.getOrganizationId());
             apiMgtDAO.updateOrganizationDetails(orgDto);
         } else {
             orgDto.setOrganizationHandle(APIUtil.getOrganizationHandle(orgDto.getName()));
-            savedOrgInfo = apiMgtDAO.addOrganization(orgDto);
+            savedOrgInfo = apiMgtDAO.addOrganization(orgDto, parentOrgId, tenantDomain);
             orgDto.setOrganizationId(savedOrgInfo.getOrganizationId());
         }
 
@@ -1873,12 +1874,12 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public OrganizationDetailsDTO updateOrganization(OrganizationDetailsDTO organizationInfoDTO)
-            throws APIManagementException {
+    public OrganizationDetailsDTO updateOrganization(OrganizationDetailsDTO organizationInfoDTO, String parentOrgId,
+            String tenantDomain) throws APIManagementException {
         organizationInfoDTO.setOrganizationHandle(APIUtil.getOrganizationHandle(organizationInfoDTO.getName()));
         apiMgtDAO.updateOrganizationDetails(organizationInfoDTO);
         return apiMgtDAO.getOrganizationDetails(organizationInfoDTO.getOrganizationId(),
-                organizationInfoDTO.getTenantDomain());
+                tenantDomain);
     }
 
     @Override

@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 public class OrganizationsMappingUtil {
 
-    public static OrganizationListDTO toOrganizationsListDTO(List<OrganizationDetailsDTO> orgList) {
+    public static OrganizationListDTO toOrganizationsListDTO(List<OrganizationDetailsDTO> orgList, String parentOrgId) {
         OrganizationListDTO listDto = new OrganizationListDTO();
         listDto.setCount(orgList.size());
         List<OrganizationDTO> list = new ArrayList<OrganizationDTO>();
@@ -34,7 +34,7 @@ public class OrganizationsMappingUtil {
             OrganizationDTO dto = new OrganizationDTO();
             dto.displayName(organizationDTO.getName());
             dto.setOrganizationId(organizationDTO.getOrganizationId());
-            dto.parentOrganizationId(organizationDTO.getParentOrganizationId());
+            dto.parentOrganizationId(parentOrgId);
             dto.externalOrganizationId(organizationDTO.getExternalOrganizationReference());
             dto.setDescription(organizationDTO.getDescription());
             list.add(dto);

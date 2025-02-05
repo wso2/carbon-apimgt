@@ -35,8 +35,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import com.google.gson.Gson;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import java.net.URI;
@@ -48,22 +46,21 @@ import javax.ws.rs.core.Response;
 
 public class OrganizationsApiServiceImpl implements OrganizationsApiService {
 
-    private static final Log log = LogFactory.getLog(OrganizationsApiServiceImpl.class);
-
     public Response organizationsGet(MessageContext messageContext) throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
-            String orgId = null;
+            String parentOrgId = null;
             if (orgInfo != null && orgInfo.getOrganizationId() != null) {
-                orgId = orgInfo.getOrganizationId();
+                parentOrgId = orgInfo.getOrganizationId(); // assign current user org as the parent org.
             }
-            List<OrganizationDetailsDTO> orgList = apiAdmin.getOrganizations(orgId,
+            // retrieve child organizations for the current user.
+            List<OrganizationDetailsDTO> orgList = apiAdmin.getOrganizations(parentOrgId,
                     superOrganization);
 
-            OrganizationListDTO organizationsListDTO = OrganizationsMappingUtil.toOrganizationsListDTO(orgList);
+            OrganizationListDTO organizationsListDTO = OrganizationsMappingUtil.toOrganizationsListDTO(orgList, parentOrgId);
             return Response.ok().entity(organizationsListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Organizations";
@@ -104,14 +101,21 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
                 throw new APIManagementException("Requested Organization not found",
                         ExceptionCodes.INVALID_ORGANINATION);
             }
+            String parentOrgId = null;
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            // Currently we don't support changing parent organization id.
+            if (orgInfo != null && orgInfo.getOrganizationId() != null) {
+                parentOrgId = orgInfo.getOrganizationId(); // assign current user org as the parent org.
+            }
             organizationInfoDTO.setName(organizationDTO.getDisplayName()); // only allow to change the name and desc
             organizationInfoDTO.setDescription(organizationDTO.getDescription());
-            OrganizationDetailsDTO updatedOrganizationInfoDTO = apiAdmin.updateOrganization(organizationInfoDTO);
+            OrganizationDetailsDTO updatedOrganizationInfoDTO = apiAdmin.updateOrganization(organizationInfoDTO,
+                    parentOrgId, superOrganization);
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION,
                     new Gson().toJson(updatedOrganizationInfoDTO), APIConstants.AuditLogConstants.UPDATED,
                     RestApiCommonUtil.getLoggedInUsername());
             OrganizationDTO returnedorganizationDTO = OrganizationsMappingUtil
-                    .toOrganizationsDTO(updatedOrganizationInfoDTO);
+                    .toOrganizationsDTO(updatedOrganizationInfoDTO, parentOrgId);
             return Response.ok().entity(returnedorganizationDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating Organization";
@@ -125,19 +129,17 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
         try {
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
-            String orgId = null;
+            String parentOrgId = null;
             if (orgInfo != null && orgInfo.getOrganizationId() != null) {
-                orgId = orgInfo.getOrganizationId();
-                organizationDTO.setParentOrganizationId(orgId); // set current users organization as parent id if available.
+                parentOrgId = orgInfo.getOrganizationId(); // set current users organization as parent id if available.
             }
             OrganizationDetailsDTO orgDto = OrganizationsMappingUtil.toOrganizationDetailsDTO(organizationDTO);
-            orgDto.setTenantDomain(superOrganization);
-            orgDto = apiAdmin.addOrganization(orgDto);
+            orgDto = apiAdmin.addOrganization(orgDto, parentOrgId, superOrganization);
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION,
                     new Gson().toJson(orgDto),
                     APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
             URI location = new URI(RestApiConstants.ORGANIZATIONS_PATH + "/" + orgInfo.getId());
-            OrganizationDTO returnedorganizationDTO = OrganizationsMappingUtil.toOrganizationsDTO(orgDto);
+            OrganizationDTO returnedorganizationDTO = OrganizationsMappingUtil.toOrganizationsDTO(orgDto, parentOrgId);
             return Response.created(location).entity(returnedorganizationDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
             String errorMessage = "Error while creating Organization";
@@ -151,6 +153,11 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            String parentOrgId = null;
+            if (orgInfo != null && orgInfo.getOrganizationId() != null) {
+                parentOrgId = orgInfo.getOrganizationId(); // set current users organization as parent id if available.
+            }
             OrganizationDetailsDTO organizationInfoDTO = apiAdmin.getOrganizationDetails(organizationId,
                     superOrganization);
             if (organizationInfoDTO == null) {
@@ -158,7 +165,7 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
                         ExceptionCodes.INVALID_ORGANINATION);
             }
             OrganizationDTO returnedorganizationDTO = OrganizationsMappingUtil
-                    .toOrganizationsDTO(organizationInfoDTO);
+                    .toOrganizationsDTO(organizationInfoDTO, parentOrgId);
             return Response.ok().entity(returnedorganizationDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Organizations";

@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.OrganizationListDTO;
 
 public class OrganizationsMappingUtil {
 
-    public static OrganizationListDTO toOrganizationsListDTO(List<OrganizationDetailsDTO> orgList) {
+    public static OrganizationListDTO toOrganizationsListDTO(List<OrganizationDetailsDTO> orgList, String parentOrgId) {
         OrganizationListDTO listDto = new OrganizationListDTO();
         listDto.setCount(orgList.size());
         List<OrganizationDTO> list = new ArrayList<OrganizationDTO>();
@@ -34,7 +34,7 @@ public class OrganizationsMappingUtil {
             OrganizationDTO dto = new OrganizationDTO();
             dto.displayName(organizationDTO.getName());
             dto.setOrganizationId(organizationDTO.getOrganizationId());
-            dto.setParentOrganizationId(organizationDTO.getParentOrganizationId());
+            dto.setParentOrganizationId(parentOrgId);
             dto.setExternalOrganizationId(organizationDTO.getExternalOrganizationReference());
             dto.setDescription(organizationDTO.getDescription());
             list.add(dto);
@@ -47,17 +47,16 @@ public class OrganizationsMappingUtil {
         OrganizationDetailsDTO orgDetailsDto = new OrganizationDetailsDTO();
         orgDetailsDto.setName(organizationDTO.getDisplayName());
         orgDetailsDto.setOrganizationId(organizationDTO.getOrganizationId());
-        orgDetailsDto.setParentOrganizationId(organizationDTO.getParentOrganizationId());
         orgDetailsDto.setExternalOrganizationReference(organizationDTO.getExternalOrganizationId());
         orgDetailsDto.setDescription(organizationDTO.getDescription());
         return orgDetailsDto;
     }
 
-    public static OrganizationDTO toOrganizationsDTO(OrganizationDetailsDTO organizationDetailsDto) {
+    public static OrganizationDTO toOrganizationsDTO(OrganizationDetailsDTO organizationDetailsDto, String parentOrgId) {
         OrganizationDTO orgDto = new OrganizationDTO();
         orgDto.setDisplayName(organizationDetailsDto.getName());
         orgDto.setOrganizationId(organizationDetailsDto.getOrganizationId());
-        orgDto.setParentOrganizationId(organizationDetailsDto.getParentOrganizationId());
+        orgDto.setParentOrganizationId(parentOrgId);
         orgDto.setExternalOrganizationId(organizationDetailsDto.getExternalOrganizationReference());
         orgDto.setDescription(organizationDetailsDto.getDescription());
         return orgDto;

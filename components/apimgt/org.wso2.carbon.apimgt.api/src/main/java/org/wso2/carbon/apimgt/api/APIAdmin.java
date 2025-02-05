@@ -618,9 +618,13 @@ public interface APIAdmin  {
     /**
      * Add new organization 
      * @param orgDto organization details
-     * @return added organization
+     * @param parentOrgId organization id of the parent
+     * @param tenantDomain super organization domain
+     * @return organization details
+     * @throws APIManagementException
      */
-    OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO orgDto) throws APIManagementException;
+    OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO orgDto, String parentOrgId, String tenantDomain)
+            throws APIManagementException;
 
     /**
      * Get organization details 
@@ -634,11 +638,14 @@ public interface APIAdmin  {
 
     /**
      * Update organization details 
-     * @param organizationInfoDTO request object
-     * @return updated organization info
+     * @param organizationInfoDTO organization details
+     * @param parentOrgId organization id of the parent
+     * @param tenantDomain uper organization domain
+     * @return updated organization details
      * @throws APIManagementException
      */
-    OrganizationDetailsDTO updateOrganization(OrganizationDetailsDTO organizationInfoDTO) throws APIManagementException;
+    OrganizationDetailsDTO updateOrganization(OrganizationDetailsDTO organizationInfoDTO, String parentOrgId,
+            String tenantDomain) throws APIManagementException;
 
     /**
      * Delete organization
@@ -646,4 +653,5 @@ public interface APIAdmin  {
      * @param tenantDomain tenantDomain
      */
     void deleteOrganization(String organizationId, String tenantDomain) throws APIManagementException;
+
 }
