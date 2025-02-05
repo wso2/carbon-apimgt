@@ -158,14 +158,14 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
     @Override
-    public ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType, String filePath,
+    public ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType, byte[] zipArchive,
                                                                      String organization) throws GovernanceException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Evaluating compliance for the artifact with the file path: " + filePath);
+            log.debug("Evaluating compliance for the artifact with the file path ");
         }
 
-        byte[] projectContent = GovernanceUtil.readArtifactProjectContent(filePath);
+//        byte[] projectContent = GovernanceUtil.readArtifactProjectContent(filePath);
         Map<String, String> policies = policyManager.getOrganizationWidePolicies(organization);
 
         List<String> applicablePolicyIds = new ArrayList<>(policies.keySet());
@@ -173,7 +173,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         // Only extract content if the artifact type requires it.
         if (ExtendedArtifactType.isArtifactAPI(artifactType)) {
             Map<RuleType, String> contentMap = GovernanceUtil
-                    .extractArtifactProjectContent(projectContent, ArtifactType.API);
+                    .extractArtifactProjectContent(zipArchive, ArtifactType.API);
             return complianceManager.handleComplianceEvaluationDryRun(artifactType, applicablePolicyIds,
                     contentMap, organization);
         } else {

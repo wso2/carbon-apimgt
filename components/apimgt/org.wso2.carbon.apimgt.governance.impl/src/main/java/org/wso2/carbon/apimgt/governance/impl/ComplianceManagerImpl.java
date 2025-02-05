@@ -596,11 +596,6 @@ public class ComplianceManagerImpl implements ComplianceManager {
                             .get(GovernanceActionType.BLOCK));
                     artifactComplianceInfo.addNonBlockingViolations(blockableAndNonBlockableViolations
                             .get(GovernanceActionType.NOTIFY));
-
-                    // If there are blockable violations, set the boolean flag
-                    artifactComplianceInfo.setBlockingNecessary(
-                            !blockableAndNonBlockableViolations.get(GovernanceActionType.BLOCK).isEmpty());
-
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Ruleset artifact type does not match with the artifact's type. Skipping " +
@@ -609,8 +604,11 @@ public class ComplianceManagerImpl implements ComplianceManager {
                 }
             }
         }
-        return artifactComplianceInfo;
 
+        if (!artifactComplianceInfo.getBlockingRuleViolations().isEmpty()) {
+            artifactComplianceInfo.setBlockingNecessary(true);
+        }
+        return artifactComplianceInfo;
     }
 
     /**

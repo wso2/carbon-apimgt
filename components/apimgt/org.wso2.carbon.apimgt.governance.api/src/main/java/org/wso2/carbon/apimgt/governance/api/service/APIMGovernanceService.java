@@ -87,12 +87,12 @@ public interface APIMGovernanceService {
      * against all the global policies configured in the system.
      *
      * @param artifactType Artifact type (ExtendedArtifactType.REST_API, etc)
-     * @param filePath     File path of the artifact content (ZIP path)
+     * @param zipArchive     File path of the artifact content (ZIP path)
      * @param organization Organization
      * @return ArtifactComplianceDryRunInfo object
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
-    ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType, String filePath,
+    ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType, byte[] zipArchive,
                                                               String organization) throws GovernanceException;
 
     /**

@@ -54,6 +54,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -85,8 +86,10 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -97,6 +100,7 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
@@ -117,7 +121,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -143,6 +146,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.wso2.carbon.apimgt.api.ExceptionCodes.COMPLIANCE_VIOLATION_ERROR;
+import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.PUBLISH;
+import static org.wso2.carbon.apimgt.impl.APIConstants.REPUBLISH;
 
 /**
  * This is a publisher rest api utility class.
@@ -215,7 +223,7 @@ public class PublisherCommonUtils {
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
 
         apiProvider.updateAPI(apiToUpdate, originalAPI);
@@ -244,7 +252,7 @@ public class PublisherCommonUtils {
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
@@ -1268,7 +1276,7 @@ public class PublisherCommonUtils {
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;
@@ -1810,7 +1818,7 @@ public class PublisherCommonUtils {
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.updateAPI(existingAPI, oldapi);
         //retrieves the updated AsyncAPI definition
@@ -1864,7 +1872,7 @@ public class PublisherCommonUtils {
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
 
@@ -2075,7 +2083,7 @@ public class PublisherCommonUtils {
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.updateAPI(originalAPI, oldApi);
 
@@ -2726,7 +2734,7 @@ public class PublisherCommonUtils {
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         return apiProvider.updateAPI(updatedAPI, api);
     }
@@ -2749,7 +2757,16 @@ public class PublisherCommonUtils {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiTypeWrapper.getUuid(), organization);
-
+        if (action.equals(PUBLISH) || action.equals(REPUBLISH)) {
+            Map<String, String> complianceResult = checkGovernanceCompliance(apiTypeWrapper.getUuid(),
+                    GovernableState.API_PUBLISH, ArtifactType.API, organization, null, null);
+            if (!complianceResult.isEmpty()
+                    && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                    && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                throw new APIComplianceException(complianceResult
+                        .get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            }
+        }
         String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
         if (!ArrayUtils.contains(nextAllowedStates, action)) {
             String errorMessage = "Action '" + action + "' is not allowed. Allowed actions are "
@@ -2875,7 +2892,7 @@ public class PublisherCommonUtils {
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-            RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.addAPI(apiToAdd);
         return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
@@ -2954,6 +2971,32 @@ public class PublisherCommonUtils {
         }
         return responseMap;
     }
+
+    //mthod to invoke evaluateComplianceDryRunSync
+    public static Map<String, String> checkGovernanceComplianceDryRun(InputStream fileInputStream, String organization) {
+        Map<String, String> responseMap = new HashMap<>(2);
+
+        try {
+//           String filePath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
+            byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
+
+            ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
+                       .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
+               return responseMap;
+        } catch (GovernanceException e) {
+            log.error("Error occurred while executing governance ", e);
+            throw new RuntimeException("Error occurred while executing governance ", e);
+        } finally {
+            return responseMap;
+        }
+    }
+
+    /**
+     * Build the response for the compliance check failure.
+     *
+     * @param artifactComplianceInfo Compliance information of the artifact
+     * @return JSON response with the compliance violations
+     */
 
     public static String buildBadRequestResponse(ArtifactComplianceInfo artifactComplianceInfo) {
         List<RuleViolation> blockingViolations = artifactComplianceInfo.getBlockingRuleViolations();

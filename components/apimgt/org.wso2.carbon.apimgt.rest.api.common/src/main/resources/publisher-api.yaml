@@ -4293,6 +4293,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - name: dryRun
+          in: query
+          description: |
+            Dry Run. This is used to validate the API without importing it
+          required: false
+          schema:
+            type: boolean
+            default: false
         - $ref: '#/components/parameters/Accept'
       requestBody:
         content:
