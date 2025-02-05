@@ -3630,11 +3630,11 @@ public final class APIUtil {
                 String orgID = organizationTiers.getOrganizationID();
                 if (organization.equals(orgID)) {
                     availableTiers = organizationTiers.getTiers();
+                    devPortalAPIInfo.setAvailableTierNames(availableTiers);
                     break;
                 }
             }
         }
-        devPortalAPIInfo.setAvailableTierNames(availableTiers);
     }
 
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {

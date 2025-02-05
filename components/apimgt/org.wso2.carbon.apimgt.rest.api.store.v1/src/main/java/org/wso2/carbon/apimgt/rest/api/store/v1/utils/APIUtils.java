@@ -235,11 +235,11 @@ public class APIUtils {
                 String orgName = organizationTiers.getOrganizationID();
                 if (organization.equals(orgName)) {
                     availableTiers = organizationTiers.getTiers();
+                    api.removeAllTiers();
+                    api.setAvailableTiers(availableTiers);
                     break;
                 }
             }
         }
-        api.removeAllTiers();
-        api.setAvailableTiers(availableTiers);
     }
 }
