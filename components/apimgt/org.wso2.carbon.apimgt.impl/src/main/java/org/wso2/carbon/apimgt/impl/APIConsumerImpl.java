@@ -3878,7 +3878,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             log.debug("Original search query received : " + searchQuery);
         }
         String organizationID = null;
-        if (orgInfo != null) {
+        if (orgInfo != null && !StringUtils.isEmpty(orgInfo.getOrganizationId())) {
             organizationID = APIUtil.getOrganizationIdFromExternalReference(orgInfo.getOrganizationId(),
                     orgInfo.getName(), tenantDomain);
         }
