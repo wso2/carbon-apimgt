@@ -401,13 +401,11 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @param policyId             Policy ID
      * @param rulesetViolationsMap Map of Rulesets to Rule Violations
      * @param organization         Organization
-     * @param isPolicyEvalSuccess  Policy evaluation result
      * @throws GovernanceException If an error occurs while adding the compliance evaluation results
      */
     @Override
     public void addComplianceEvalResults(String artifactId, ArtifactType artifactType, String policyId,
-                                         Map<String, List<RuleViolation>> rulesetViolationsMap,
-                                         String organization, boolean isPolicyEvalSuccess)
+                                         Map<String, List<RuleViolation>> rulesetViolationsMap, String organization)
             throws GovernanceException {
 
         List<String> rulesetIds = new ArrayList<>(rulesetViolationsMap.keySet());
@@ -416,8 +414,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
 
             try {
                 clearOldRuleViolations(artifactId, artifactType, rulesetIds, organization, connection);
-                clearOldRulesetResults(artifactId, artifactType, rulesetIds, organization, connection);
-                clearOldPolicyResult(artifactId, artifactType, policyId, organization, connection);
+                clearOldRulesetRuns(artifactId, artifactType, rulesetIds, organization, connection);
+                clearOldPolicyRun(artifactId, artifactType, policyId, organization, connection);
 
                 String artifactKey = getArtifactKey(artifactId, artifactType, organization, connection);
                 if (artifactKey == null) {
@@ -425,11 +423,12 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                             artifactId);
                 }
 
-                addToPolicyResults(artifactKey, policyId, isPolicyEvalSuccess, connection);
+                addPolicyRun(artifactKey, policyId, connection);
+
                 for (Map.Entry<String, List<RuleViolation>> entry : rulesetViolationsMap.entrySet()) {
                     String rulesetId = entry.getKey();
                     List<RuleViolation> ruleViolations = entry.getValue();
-                    String rulesetResultId = addToRulesetResults(artifactKey, rulesetId, ruleViolations.isEmpty(),
+                    String rulesetResultId = addRulesetRuns(artifactKey, rulesetId, ruleViolations.isEmpty(),
                             connection);
                     addRuleViolations(rulesetResultId, ruleViolations, connection);
                 }
@@ -447,7 +446,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Clear old policy result for the artifact
+     * Clear old policy run results for the artifact
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
@@ -456,11 +455,11 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @param connection   Connection
      * @throws SQLException If an error occurs while clearing the old policy result
      */
-    private void clearOldPolicyResult(String artifactId, ArtifactType artifactType, String policyId,
-                                      String organization, Connection connection)
+    private void clearOldPolicyRun(String artifactId, ArtifactType artifactType, String policyId,
+                                   String organization, Connection connection)
             throws SQLException {
 
-        String sqlQuery = SQLConstants.DELETE_POLICY_RESULT_FOR_ARTIFACT_AND_POLICY;
+        String sqlQuery = SQLConstants.DELETE_POLICY_RUN_FOR_ARTIFACT_AND_POLICY;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, artifactId);
             prepStmnt.setString(2, String.valueOf(artifactType));
@@ -471,7 +470,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Clear old ruleset results for the artifact
+     * Clear old ruleset runs for the artifact
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
@@ -480,11 +479,11 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @param connection   Connection
      * @throws SQLException If an error occurs while clearing the old ruleset results
      */
-    private void clearOldRulesetResults(String artifactId, ArtifactType artifactType, List<String> rulesetIds,
-                                        String organization, Connection connection)
+    private void clearOldRulesetRuns(String artifactId, ArtifactType artifactType, List<String> rulesetIds,
+                                     String organization, Connection connection)
             throws SQLException {
 
-        String sqlQuery = SQLConstants.DELETE_RULESET_RESULT_FOR_ARTIFACT_AND_RULESET;
+        String sqlQuery = SQLConstants.DELETE_RULESET_RUN_FOR_ARTIFACT_AND_RULESET;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             for (String rulesetId : rulesetIds) {
                 prepStmnt.setString(1, artifactId);
@@ -555,20 +554,17 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     /**
      * Add a policy compliance evaluation result
      *
-     * @param artifactKey         Artifact Key
-     * @param policyId            Policy ID
-     * @param isPolicyEvalSuccess Evaluation result
-     * @param connection          Connection
+     * @param artifactKey Artifact Key
+     * @param policyId    Policy ID
+     * @param connection  Connection
      * @throws SQLException If an error occurs while adding the policy compliance evaluation result
      */
-    private void addToPolicyResults(String artifactKey, String policyId, boolean isPolicyEvalSuccess,
-                                    Connection connection) throws SQLException {
+    private void addPolicyRun(String artifactKey, String policyId, Connection connection) throws SQLException {
 
-        String sqlQuery = SQLConstants.ADD_POLICY_RESULT;
+        String sqlQuery = SQLConstants.ADD_POLICY_RUN;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, artifactKey);
             prepStmnt.setString(2, policyId);
-            prepStmnt.setInt(3, isPolicyEvalSuccess ? 1 : 0);
             prepStmnt.executeUpdate();
         }
     }
@@ -583,10 +579,10 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @return Ruleset Result ID
      * @throws SQLException If an error occurs while adding the ruleset compliance evaluation result
      */
-    private String addToRulesetResults(String artifactKey, String rulesetId,
-                                       boolean isRulesetEvalSuccess, Connection connection) throws SQLException {
+    private String addRulesetRuns(String artifactKey, String rulesetId,
+                                  boolean isRulesetEvalSuccess, Connection connection) throws SQLException {
 
-        String sqlQuery = SQLConstants.ADD_RULESET_RESULT;
+        String sqlQuery = SQLConstants.ADD_RULESET_RUN;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             String rulesetResultId = GovernanceUtil.generateUUID();
             prepStmnt.setString(1, rulesetResultId);

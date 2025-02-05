@@ -853,7 +853,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      */
     private void deletePolicyResultsForPolicy(String policyId, Connection connection) throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                .DELETE_POLICY_RESULT_FOR_POLICY)) {
+                .DELETE_POLICY_RUN_FOR_POLICY)) {
             prepStmt.setString(1, policyId);
             prepStmt.executeUpdate();
         }

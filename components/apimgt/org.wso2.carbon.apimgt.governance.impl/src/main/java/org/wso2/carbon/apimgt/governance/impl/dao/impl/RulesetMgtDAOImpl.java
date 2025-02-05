@@ -306,7 +306,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     private void deleteRulesetResultsForRuleset(String rulesetId, Connection connection)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.
-                prepareStatement(SQLConstants.DELETE_RULESET_RESULT_FOR_RULESET)) {
+                prepareStatement(SQLConstants.DELETE_RULESET_RUN_FOR_RULESET)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.executeUpdate();
         }

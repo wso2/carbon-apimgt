@@ -297,7 +297,7 @@ public class ComplianceEvaluationScheduler {
             rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
         }
         savePolicyEvaluationResults(artifactId, artifactType, policyId, rulesetViolationsMap,
-                organization, isEvaluationSuccess);
+                organization);
     }
 
     /**
@@ -308,14 +308,13 @@ public class ComplianceEvaluationScheduler {
      * @param policyId             ID of the policy.
      * @param rulesetViolationsMap Map of rule violations for each ruleset.
      * @param organization         Organization of the artifact.
-     * @param isPolicyEvalSuccess  Whether the evaluation was successful for the policy.
      */
     private static void savePolicyEvaluationResults(String artifactId, ArtifactType artifactType, String policyId,
                                                     Map<String, List<RuleViolation>> rulesetViolationsMap,
-                                                    String organization, boolean isPolicyEvalSuccess) {
+                                                    String organization) {
         try {
-            complianceMgtDAO.addComplianceEvalResults(artifactId, artifactType, policyId,
-                    rulesetViolationsMap, organization, isPolicyEvalSuccess);
+            complianceMgtDAO.addComplianceEvalResults(artifactId, artifactType, policyId, rulesetViolationsMap,
+                    organization);
         } catch (GovernanceException e) {
             log.error("Error saving governance results for artifact ID: " + artifactId, e);
         }
