@@ -11128,8 +11128,8 @@ public final class APIUtil {
                 APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
     }
     
-    public static String getOrganizationIdFromExternalReference(String referenceId, String organizationName,
-            String rootOrganization) throws APIManagementException {
+    public static synchronized String getOrganizationIdFromExternalReference(String referenceId,
+            String organizationName, String rootOrganization) throws APIManagementException {
         String organizationId = null;
         OrganizationDetailsDTO orgDetails = ApiMgtDAO.getInstance().getOrganizationDetalsByExternalOrgId(referenceId,
                 rootOrganization);
